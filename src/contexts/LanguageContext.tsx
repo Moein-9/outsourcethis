@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 type Language = "ar" | "en";
@@ -571,6 +570,52 @@ const translations: Record<string, Record<string, string>> = {
   "no_matching_frames": {
     ar: "لم يتم العثور على إطارات مطابقة للبحث.",
     en: "No matching frames found."
+  },
+  
+  // Client Form - Additional Translations
+  "prescription_glasses": {
+    ar: "نظارات طبية",
+    en: "Prescription Glasses"
+  },
+  "contact_lenses": {
+    ar: "عدسات لاصقة",
+    en: "Contact Lenses"
+  },
+  "glasses_prescription": {
+    ar: "وصفات النظارات",
+    en: "Glasses Prescription"
+  },
+  "prescription_date": {
+    ar: "تاريخ الوصفة الطبية",
+    en: "Prescription Date"
+  },
+  "select_prescription_date": {
+    ar: "اختر تاريخ الوصفة",
+    en: "Select prescription date"
+  },
+  "select": {
+    ar: "اختر...",
+    en: "Select..."
+  },
+  "save_and_continue": {
+    ar: "حفظ ومتابعة",
+    en: "Save and Continue"
+  },
+  "error": {
+    ar: "خطأ",
+    en: "Error"
+  },
+  "name_field_required": {
+    ar: "حقل الاسم مطلوب.",
+    en: "Name field is required."
+  },
+  "saved": {
+    ar: "تم الحفظ",
+    en: "Saved"
+  },
+  "client_data_saved": {
+    ar: "تم حفظ بيانات العميل بنجاح.",
+    en: "Client data saved successfully."
   }
 };
 

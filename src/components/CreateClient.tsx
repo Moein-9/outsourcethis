@@ -13,8 +13,10 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensForm } from "@/components/ContactLensForm";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const CreateClient: React.FC = () => {
+  const { t, language } = useLanguage();
   const addPatient = usePatientStore((state) => state.addPatient);
   
   const [activeTab, setActiveTab] = useState<"glasses" | "contactLenses">("glasses");
@@ -125,18 +127,18 @@ export const CreateClient: React.FC = () => {
   // Generate month options
   const generateMonthOptions = () => {
     const months = [
-      { value: 1, text: "يناير" },
-      { value: 2, text: "فبراير" },
-      { value: 3, text: "مارس" },
-      { value: 4, text: "أبريل" },
-      { value: 5, text: "مايو" },
-      { value: 6, text: "يونيو" },
-      { value: 7, text: "يوليو" },
-      { value: 8, text: "أغسطس" },
-      { value: 9, text: "سبتمبر" },
-      { value: 10, text: "أكتوبر" },
-      { value: 11, text: "نوفمبر" },
-      { value: 12, text: "ديسمبر" }
+      { value: 1, text: language === 'en' ? "January" : "يناير" },
+      { value: 2, text: language === 'en' ? "February" : "فبراير" },
+      { value: 3, text: language === 'en' ? "March" : "مارس" },
+      { value: 4, text: language === 'en' ? "April" : "أبريل" },
+      { value: 5, text: language === 'en' ? "May" : "مايو" },
+      { value: 6, text: language === 'en' ? "June" : "يونيو" },
+      { value: 7, text: language === 'en' ? "July" : "يوليو" },
+      { value: 8, text: language === 'en' ? "August" : "أغسطس" },
+      { value: 9, text: language === 'en' ? "September" : "سبتمبر" },
+      { value: 10, text: language === 'en' ? "October" : "أكتوبر" },
+      { value: 11, text: language === 'en' ? "November" : "نوفمبر" },
+      { value: 12, text: language === 'en' ? "December" : "ديسمبر" }
     ];
     
     return months.map(month => (
@@ -165,8 +167,8 @@ export const CreateClient: React.FC = () => {
     
     if (!name.trim()) {
       toast({
-        title: "خطأ",
-        description: "حقل الاسم مطلوب.",
+        title: language === 'en' ? "Error" : "خطأ",
+        description: language === 'en' ? "Name field is required." : "حقل الاسم مطلوب.",
         variant: "destructive"
       });
       return;
@@ -229,8 +231,8 @@ export const CreateClient: React.FC = () => {
     }
     
     toast({
-      title: "تم الحفظ",
-      description: "تم حفظ بيانات العميل بنجاح."
+      title: language === 'en' ? "Saved" : "تم الحفظ",
+      description: language === 'en' ? "Client data saved successfully." : "تم حفظ بيانات العميل بنجاح."
     });
     
     // Reset form
@@ -260,7 +262,7 @@ export const CreateClient: React.FC = () => {
   
   return (
     <div className="py-4">
-      <h2 className="text-2xl font-bold mb-4">إنشاء عميل</h2>
+      <h2 className="text-2xl font-bold mb-4">{t("create_client")}</h2>
       
       <Tabs defaultValue="glasses" value={activeTab} onValueChange={(value) => setActiveTab(value as "glasses" | "contactLenses")}>
         <TabsList className="mb-6 w-full md:w-auto bg-slate-100 border-slate-200 p-1 shadow-md">
@@ -268,13 +270,13 @@ export const CreateClient: React.FC = () => {
             value="glasses" 
             className="px-8 py-3 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-white"
           >
-            نظارات طبية
+            {language === 'en' ? "Prescription Glasses" : "نظارات طبية"}
           </TabsTrigger>
           <TabsTrigger 
             value="contactLenses" 
             className="px-8 py-3 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-white"
           >
-            عدسات لاصقة
+            {language === 'en' ? "Contact Lenses" : "عدسات لاصقة"}
           </TabsTrigger>
         </TabsList>
       
@@ -282,32 +284,32 @@ export const CreateClient: React.FC = () => {
           {/* Left: Patient Information - Switched from right to left */}
           <div className="order-2 md:order-2 bg-card rounded-md p-4 border">
             <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
-              المعلومات الشخصية
+              {t("personal_information")}
             </div>
             
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">الاسم</Label>
+                <Label htmlFor="name">{t("name")}</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="الاسم الكامل"
+                  placeholder={t("full_name")}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="phone">الهاتف</Label>
+                <Label htmlFor="phone">{t("phone")}</Label>
                 <Input
                   id="phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="رقم الهاتف"
+                  placeholder={t("phone_number")}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="dob">تاريخ الميلاد</Label>
+                <Label htmlFor="dob">{t("birth_date")}</Label>
                 <div className="grid grid-cols-3 gap-2">
                   <select
                     id="dobDay"
@@ -316,7 +318,7 @@ export const CreateClient: React.FC = () => {
                     onChange={(e) => setDobDay(e.target.value)}
                     disabled={noDob}
                   >
-                    <option value="" disabled>اليوم</option>
+                    <option value="" disabled>{t("day")}</option>
                     {generateDayOptions()}
                   </select>
                   <select
@@ -326,7 +328,7 @@ export const CreateClient: React.FC = () => {
                     onChange={(e) => setDobMonth(e.target.value)}
                     disabled={noDob}
                   >
-                    <option value="" disabled>الشهر</option>
+                    <option value="" disabled>{t("month")}</option>
                     {generateMonthOptions()}
                   </select>
                   <select
@@ -336,7 +338,7 @@ export const CreateClient: React.FC = () => {
                     onChange={(e) => setDobYear(e.target.value)}
                     disabled={noDob}
                   >
-                    <option value="" disabled>السنة</option>
+                    <option value="" disabled>{t("year")}</option>
                     {generateYearOptions()}
                   </select>
                 </div>
@@ -351,18 +353,18 @@ export const CreateClient: React.FC = () => {
                     htmlFor="noDobCheck" 
                     className="font-normal text-sm"
                   >
-                    لم يشارك العميل بتاريخ الميلاد
+                    {t("client_didnt_share_birthdate")}
                   </Label>
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="notes">ملاحظات</Label>
+                <Label htmlFor="notes">{t("notes")}</Label>
                 <Textarea
                   id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="ملاحظات أو تفضيلات العميل"
+                  placeholder={t("client_notes")}
                 />
               </div>
             </div>
@@ -373,11 +375,11 @@ export const CreateClient: React.FC = () => {
             <TabsContent value="glasses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
                 <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
-                  وصفات النظارات
+                  {language === 'en' ? "Glasses Prescription" : "وصفات النظارات"}
                 </div>
                 
                 <div className="mb-4">
-                  <Label htmlFor="rxDate">تاريخ الوصفة الطبية</Label>
+                  <Label htmlFor="rxDate">{language === 'en' ? "Prescription Date" : "تاريخ الوصفة الطبية"}</Label>
                   <div className="mt-1">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -386,7 +388,7 @@ export const CreateClient: React.FC = () => {
                           className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
                         >
                           <CalendarIcon className="ml-2 h-4 w-4" />
-                          {rxDate ? format(rxDate, "PPP") : "اختر تاريخ الوصفة"}
+                          {rxDate ? format(rxDate, "PPP") : (language === 'en' ? "Select prescription date" : "اختر تاريخ الوصفة")}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -414,14 +416,16 @@ export const CreateClient: React.FC = () => {
                     </thead>
                     <tbody>
                       <tr>
-                        <th className="text-center border border-border bg-muted p-2">OD (يمين)</th>
+                        <th className="text-center border border-border bg-muted p-2">
+                          {language === 'en' ? "OD (Right)" : "OD (يمين)"}
+                        </th>
                         <td className="border border-border p-1">
                           <select
                             className="w-full p-1 rounded-md border-input bg-background"
                             value={sphOD}
                             onChange={(e) => setSphOD(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{language === 'en' ? "Select..." : "اختر..."}</option>
                             {generateSphOptions()}
                           </select>
                         </td>
@@ -431,7 +435,7 @@ export const CreateClient: React.FC = () => {
                             value={cylOD}
                             onChange={(e) => setCylOD(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{language === 'en' ? "Select..." : "اختر..."}</option>
                             {generateCylOptions()}
                           </select>
                         </td>
@@ -441,7 +445,7 @@ export const CreateClient: React.FC = () => {
                             value={axisOD}
                             onChange={(e) => setAxisOD(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{language === 'en' ? "Select..." : "اختر..."}</option>
                             {generateAxisOptions()}
                           </select>
                         </td>
@@ -451,20 +455,22 @@ export const CreateClient: React.FC = () => {
                             value={addOD}
                             onChange={(e) => setAddOD(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{language === 'en' ? "Select..." : "اختر..."}</option>
                             {generateAddOptions()}
                           </select>
                         </td>
                       </tr>
                       <tr>
-                        <th className="text-center border border-border bg-muted p-2">OS (يسار)</th>
+                        <th className="text-center border border-border bg-muted p-2">
+                          {language === 'en' ? "OS (Left)" : "OS (يسار)"}
+                        </th>
                         <td className="border border-border p-1">
                           <select
                             className="w-full p-1 rounded-md border-input bg-background"
                             value={sphOS}
                             onChange={(e) => setSphOS(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{language === 'en' ? "Select..." : "اختر..."}</option>
                             {generateSphOptions()}
                           </select>
                         </td>
@@ -474,7 +480,7 @@ export const CreateClient: React.FC = () => {
                             value={cylOS}
                             onChange={(e) => setCylOS(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{language === 'en' ? "Select..." : "اختر..."}</option>
                             {generateCylOptions()}
                           </select>
                         </td>
@@ -484,7 +490,7 @@ export const CreateClient: React.FC = () => {
                             value={axisOS}
                             onChange={(e) => setAxisOS(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{language === 'en' ? "Select..." : "اختر..."}</option>
                             {generateAxisOptions()}
                           </select>
                         </td>
@@ -494,7 +500,7 @@ export const CreateClient: React.FC = () => {
                             value={addOS}
                             onChange={(e) => setAddOS(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{language === 'en' ? "Select..." : "اختر..."}</option>
                             {generateAddOptions()}
                           </select>
                         </td>
@@ -507,7 +513,7 @@ export const CreateClient: React.FC = () => {
                             value={pdRight}
                             onChange={(e) => setPdRight(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{language === 'en' ? "Select..." : "اختر..."}</option>
                             {generatePdOptions()}
                           </select>
                         </td>
@@ -517,7 +523,7 @@ export const CreateClient: React.FC = () => {
                             value={pdLeft}
                             onChange={(e) => setPdLeft(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{language === 'en' ? "Select..." : "اختر..."}</option>
                             {generatePdOptions()}
                           </select>
                         </td>
@@ -531,11 +537,11 @@ export const CreateClient: React.FC = () => {
             <TabsContent value="contactLenses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
                 <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
-                  وصفات العدسات اللاصقة
+                  {language === 'en' ? "Contact Lens Prescription" : "وصفات العدسات اللاصقة"}
                 </div>
                 
                 <div className="mb-4">
-                  <Label htmlFor="contactRxDate">تاريخ الوصفة الطبية</Label>
+                  <Label htmlFor="contactRxDate">{language === 'en' ? "Prescription Date" : "تاريخ الوصفة الطبية"}</Label>
                   <div className="mt-1">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -544,7 +550,7 @@ export const CreateClient: React.FC = () => {
                           className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
                         >
                           <CalendarIcon className="ml-2 h-4 w-4" />
-                          {rxDate ? format(rxDate, "PPP") : "اختر تاريخ الوصفة"}
+                          {rxDate ? format(rxDate, "PPP") : (language === 'en' ? "Select prescription date" : "اختر تاريخ الوصفة")}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -573,7 +579,7 @@ export const CreateClient: React.FC = () => {
         className="mt-6" 
         onClick={handleSubmit}
       >
-        حفظ ومتابعة
+        {language === 'en' ? "Save and Continue" : "حفظ ومتابعة"}
       </Button>
     </div>
   );

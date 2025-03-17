@@ -26,7 +26,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   onChange,
   showMissingRxWarning = false
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
     const updatedRx = {
