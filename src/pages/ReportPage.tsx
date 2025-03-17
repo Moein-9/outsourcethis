@@ -133,7 +133,7 @@ const ReportPage: React.FC = () => {
   
   // Default password and security question (in a real app, these would be stored in a database)
   const correctPassword = "admin123";
-  const securityQuestion = "What is the company name?";
+  const securityQuestion = "ما هو اسم الشركة؟";
   const correctAnswer = "optical"; // Example answer
   
   // Master reset code (would be different in production)
@@ -218,7 +218,7 @@ const ReportPage: React.FC = () => {
   return (
     <Layout activeSection="reports" onNavigate={() => {}}>
       <div className="container py-6">
-        <h1 className="text-3xl font-bold mb-6">System Reports</h1>
+        <h1 className="text-3xl font-bold mb-6">تقارير النظام</h1>
         
         {/* Mock Data Controls - Remove this section when using real data */}
         <div className="flex gap-2 mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
@@ -227,17 +227,17 @@ const ReportPage: React.FC = () => {
             className="bg-amber-100 hover:bg-amber-200 border-amber-200" 
             onClick={handleGenerateMockData}
           >
-            Create Mock Data
+            إنشاء بيانات تجريبية
           </Button>
           <Button 
             variant="outline" 
             className="bg-red-100 hover:bg-red-200 border-red-200" 
             onClick={handleClearMockData}
           >
-            Clear Mock Data
+            مسح البيانات التجريبية
           </Button>
           <div className="flex-1 flex items-center text-amber-700 text-sm mr-2">
-            Note: This bar is for demonstration only and can be removed when using real data
+            ملاحظة: هذا الشريط للعرض التوضيحي فقط ويمكن إزالته عند استخدام البيانات الفعلية
           </div>
         </div>
         
@@ -245,10 +245,10 @@ const ReportPage: React.FC = () => {
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="flex justify-between items-center">
               <TabsList className="grid w-full md:w-auto grid-cols-2 md:grid-cols-2">
-                <TabsTrigger value="daily">Daily Report</TabsTrigger>
+                <TabsTrigger value="daily">التقرير اليومي</TabsTrigger>
                 <TabsTrigger value="comparative" className="flex items-center gap-1">
                   {!isAuthenticated && <LockKeyhole size={14} />}
-                  Comparative Analysis
+                  التحليل المقارن
                 </TabsTrigger>
               </TabsList>
               
@@ -260,7 +260,7 @@ const ReportPage: React.FC = () => {
                   onClick={handleSignOut}
                 >
                   <Unlock size={14} />
-                  Sign Out
+                  تسجيل الخروج
                 </Button>
               )}
             </div>
@@ -278,16 +278,16 @@ const ReportPage: React.FC = () => {
                     <div className="py-12 text-center">
                       <LockKeyhole className="h-12 w-12 mx-auto text-gray-400 mb-3" />
                       <h3 className="text-lg font-medium text-gray-700 mb-2">
-                        This section is password protected
+                        هذا القسم محمي بكلمة مرور
                       </h3>
                       <p className="text-gray-500 mb-4">
-                        Please log in to access the comparative analysis
+                        يرجى تسجيل الدخول للوصول إلى التحليل المقارن
                       </p>
                       <Button 
                         onClick={() => setPasswordDialogOpen(true)}
                         className="bg-primary hover:bg-primary/90"
                       >
-                        Log In
+                        تسجيل الدخول
                       </Button>
                     </div>
                   )}
@@ -301,15 +301,15 @@ const ReportPage: React.FC = () => {
         <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Log in to Comparative Analysis</DialogTitle>
+              <DialogTitle>تسجيل الدخول إلى التحليل المقارن</DialogTitle>
               <DialogDescription>
-                Please enter the password to access the comparative analysis reports
+                يرجى إدخال كلمة المرور للوصول إلى تقارير التحليل المقارن
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="relative">
                 <Label htmlFor="password" className="mb-2 block">
-                  Password
+                  كلمة المرور
                 </Label>
                 <div className="flex items-center relative">
                   <Input
@@ -344,14 +344,14 @@ const ReportPage: React.FC = () => {
                   setResetDialogOpen(true);
                 }}
               >
-                Forgot password?
+                نسيت كلمة المرور؟
               </Button>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setPasswordDialogOpen(false)}>
-                  Cancel
+                  إلغاء
                 </Button>
                 <Button onClick={handlePasswordSubmit}>
-                  Log In
+                  تسجيل الدخول
                 </Button>
               </div>
             </DialogFooter>
@@ -362,9 +362,9 @@ const ReportPage: React.FC = () => {
         <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Password Recovery</AlertDialogTitle>
+              <AlertDialogTitle>استعادة كلمة المرور</AlertDialogTitle>
               <AlertDialogDescription>
-                Please answer the security question or enter the recovery code
+                يرجى الإجابة على سؤال الأمان أو إدخال رمز الاسترداد
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="grid gap-4 py-4">
@@ -376,7 +376,7 @@ const ReportPage: React.FC = () => {
                   id="securityAnswer"
                   value={securityAnswer}
                   onChange={(e) => setSecurityAnswer(e.target.value)}
-                  placeholder="Enter your answer here"
+                  placeholder="أدخل إجابتك هنا"
                 />
               </div>
               <div className="relative pt-2">
@@ -384,25 +384,25 @@ const ReportPage: React.FC = () => {
                   <span className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-background px-2 text-muted-foreground">OR</span>
+                  <span className="bg-background px-2 text-muted-foreground">أو</span>
                 </div>
               </div>
               <div>
                 <Label htmlFor="resetCode" className="mb-2 block">
-                  Recovery Code
+                  رمز الاسترداد
                 </Label>
                 <Input
                   id="resetCode"
                   value={resetCode}
                   onChange={(e) => setResetCode(e.target.value)}
-                  placeholder="Enter recovery code"
+                  placeholder="أدخل رمز الاسترداد"
                 />
               </div>
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>إلغاء</AlertDialogCancel>
               <AlertDialogAction onClick={handleResetSubmit}>
-                Recover
+                استعادة
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
