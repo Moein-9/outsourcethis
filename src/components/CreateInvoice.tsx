@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -8,9 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensSelector } from "@/components/ContactLensSelector";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
+import { 
+  User, Glasses, Package, Receipt, CreditCard, Eye, Search, 
+  Banknote, Plus, PackageCheck, EyeOff, ExternalLink 
+} from "lucide-react";
 
 const CreateInvoice: React.FC = () => {
   const searchPatients = usePatientStore((state) => state.searchPatients);
@@ -230,7 +236,7 @@ const CreateInvoice: React.FC = () => {
       return;
     }
     
-    if (!lensType) {
+    if (invoiceType === "glasses" && !lensType) {
       toast({
         title: "خطأ",
         description: "الرجاء اختيار نوع العدسة.",
@@ -239,7 +245,7 @@ const CreateInvoice: React.FC = () => {
       return;
     }
     
-    if (!skipFrame && (!selectedFrame.brand || !selectedFrame.model)) {
+    if (invoiceType === "glasses" && !skipFrame && (!selectedFrame.brand || !selectedFrame.model)) {
       toast({
         title: "خطأ",
         description: "الرجاء اختيار إطار أو تفعيل خيار 'عدسات فقط'.",
@@ -327,32 +333,40 @@ const CreateInvoice: React.FC = () => {
   const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts">("glasses");
   
   return (
-    <div className="py-4">
+    <div className="py-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">إنشاء فاتورة</h2>
-        <div className="flex gap-2">
-          <Button
-            variant={invoiceType === "glasses" ? "default" : "outline"}
-            onClick={() => setInvoiceType("glasses")}
-          >
-            نظارات
-          </Button>
-          <Button
-            variant={invoiceType === "contacts" ? "default" : "outline"}
-            onClick={() => setInvoiceType("contacts")}
-          >
-            عدسات لاصقة
-          </Button>
-        </div>
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <Receipt className="w-6 h-6 text-primary" />
+          إنشاء فاتورة
+        </h2>
+        <Tabs 
+          value={invoiceType} 
+          onValueChange={(v) => setInvoiceType(v as "glasses" | "contacts")}
+          className="w-auto"
+        >
+          <TabsList>
+            <TabsTrigger value="glasses" className="flex items-center gap-1">
+              <Glasses className="w-4 h-4" />
+              نظارات
+            </TabsTrigger>
+            <TabsTrigger value="contacts" className="flex items-center gap-1">
+              <Eye className="w-4 h-4" />
+              عدسات لاصقة
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Section: Main Form */}
         <div className="lg:col-span-2 space-y-6">
           {/* 1) Patient Search or Skip */}
-          <div className="bg-card rounded-md p-4 border">
-            <div className="flex justify-between items-center border-b border-primary pb-2 mb-4">
-              <h3 className="text-lg font-semibold text-primary">١) البحث برقم الهاتف أو تخطي</h3>
+          <div className="bg-white rounded-lg p-6 border shadow-sm">
+            <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
+              <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                <User className="w-5 h-5" />
+                ١) بيانات العميل
+              </h3>
               <div className="flex items-center space-x-2 space-x-reverse">
                 <Checkbox 
                   id="skipPatientCheck" 
@@ -372,27 +386,32 @@ const CreateInvoice: React.FC = () => {
               <>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="patientSearch">رقم الهاتف:</Label>
+                    <Label htmlFor="patientSearch" className="text-muted-foreground">رقم الهاتف:</Label>
                     <div className="flex space-x-2 space-x-reverse">
                       <Input
                         id="patientSearch"
                         value={patientSearch}
                         onChange={(e) => setPatientSearch(e.target.value)}
                         placeholder="اكتب للبحث..."
+                        className="flex-1"
                       />
-                      <Button onClick={handlePatientSearch}>بحث</Button>
+                      <Button onClick={handlePatientSearch} className="gap-1">
+                        <Search className="w-4 h-4" />
+                        بحث
+                      </Button>
                     </div>
                   </div>
                   
                   {patientResults.length > 0 && (
-                    <div className="border rounded-md divide-y">
+                    <div className="border rounded-md divide-y max-h-[200px] overflow-y-auto">
                       {patientResults.map((patient) => (
                         <div 
                           key={patient.patientId}
-                          className="p-2 cursor-pointer hover:bg-muted"
+                          className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
                           onClick={() => selectPatient(patient)}
                         >
-                          {patient.name} - ({patient.phone})
+                          <div className="font-medium">{patient.name}</div>
+                          <div className="text-sm text-muted-foreground">{patient.phone}</div>
                         </div>
                       ))}
                     </div>
@@ -400,49 +419,68 @@ const CreateInvoice: React.FC = () => {
                   
                   {currentPatient && (
                     <div className="mt-4">
-                      <div className="border-2 border-primary rounded-md p-2 bg-primary/5">
-                        <strong>اسم العميل:</strong> {currentPatient.name}<br />
-                        <strong>الهاتف:</strong> {currentPatient.phone}<br />
-                        <strong>Patient ID:</strong> {currentPatient.patientId || "N/A"}
+                      <div className="border-2 border-primary/20 rounded-lg p-4 bg-primary/5">
+                        <div className="flex justify-between mb-2">
+                          <span className="font-semibold">اسم العميل:</span>
+                          <span>{currentPatient.name}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="font-semibold">الهاتف:</span>
+                          <span dir="ltr">{currentPatient.phone}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-semibold">Patient ID:</span>
+                          <span>{currentPatient.patientId || "N/A"}</span>
+                        </div>
                       </div>
                       
                       <Button 
                         variant="outline" 
-                        className="mt-2" 
+                        className="mt-3 w-full" 
                         onClick={() => setRxVisible(!rxVisible)}
                       >
-                        {rxVisible ? "إخفاء الوصفة" : "عرض الوصفة"}
+                        {rxVisible ? (
+                          <>
+                            <EyeOff className="w-4 h-4 mr-1" />
+                            إخفاء الوصفة
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="w-4 h-4 mr-1" />
+                            عرض الوصفة
+                          </>
+                        )}
                       </Button>
                       
                       {rxVisible && currentPatient.rx && (
-                        <div className="p-2 mt-2 bg-white border rounded-md">
+                        <div className="p-3 mt-3 bg-white border rounded-lg">
                           <table className="w-full border-collapse ltr">
                             <thead>
-                              <tr className="bg-muted">
-                                <th className="p-1 border">العين</th>
-                                <th className="p-1 border">Sphere</th>
-                                <th className="p-1 border">Cyl</th>
-                                <th className="p-1 border">Axis</th>
-                                <th className="p-1 border">Add</th>
-                                <th className="p-1 border">PD</th>
+                              <tr className="bg-muted/50">
+                                <th className="p-2 border text-center">العين</th>
+                                <th className="p-2 border text-center">Sphere</th>
+                                <th className="p-2 border text-center">Cyl</th>
+                                <th className="p-2 border text-center">Axis</th>
+                                <th className="p-2 border text-center">Add</th>
+                                <th className="p-2 border text-center">PD</th>
                               </tr>
                             </thead>
                             <tbody>
                               <tr>
-                                <td className="p-1 border font-bold">OD (يمين)</td>
-                                <td className="p-1 border">{currentPatient.rx.sphereOD || "—"}</td>
-                                <td className="p-1 border">{currentPatient.rx.cylOD || "—"}</td>
-                                <td className="p-1 border">{currentPatient.rx.axisOD || "—"}</td>
-                                <td className="p-1 border">{currentPatient.rx.addOD || "—"}</td>
-                                <td className="p-1 border">{currentPatient.rx.pdRight || "—"}</td>
+                                <td className="p-2 border font-bold text-center">OD (يمين)</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.sphereOD || "—"}</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.cylOD || "—"}</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.axisOD || "—"}</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.addOD || "—"}</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.pdRight || "—"}</td>
                               </tr>
                               <tr>
-                                <td className="p-1 border font-bold">OS (يسار)</td>
-                                <td className="p-1 border">{currentPatient.rx.sphereOS || "—"}</td>
-                                <td className="p-1 border">{currentPatient.rx.cylOS || "—"}</td>
-                                <td className="p-1 border">{currentPatient.rx.axisOS || "—"}</td>
-                                <td className="p-1 border">{currentPatient.rx.addOS || "—"}</td>
-                                <td className="p-1 border">{currentPatient.rx.pdLeft || "—"}</td>
+                                <td className="p-2 border font-bold text-center">OS (يسار)</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.sphereOS || "—"}</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.cylOS || "—"}</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.axisOS || "—"}</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.addOS || "—"}</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.pdLeft || "—"}</td>
                               </tr>
                             </tbody>
                           </table>
@@ -455,7 +493,7 @@ const CreateInvoice: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="manualName">اسم العميل (اختياري):</Label>
+                  <Label htmlFor="manualName" className="text-muted-foreground">اسم العميل (اختياري):</Label>
                   <Input
                     id="manualName"
                     value={manualName}
@@ -463,7 +501,7 @@ const CreateInvoice: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="manualPhone">هاتف العميل (اختياري):</Label>
+                  <Label htmlFor="manualPhone" className="text-muted-foreground">هاتف العميل (اختياري):</Label>
                   <Input
                     id="manualPhone"
                     value={manualPhone}
@@ -477,9 +515,12 @@ const CreateInvoice: React.FC = () => {
           {invoiceType === "glasses" ? (
             <>
               {/* 2) Lenses & Coating */}
-              <div className="bg-card rounded-md p-4 border">
-                <div className="flex justify-between items-center border-b border-primary pb-2 mb-4">
-                  <h3 className="text-lg font-semibold text-primary">٢) العدسات</h3>
+              <div className="bg-white rounded-lg p-6 border shadow-sm">
+                <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
+                  <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                    <Eye className="w-5 h-5" />
+                    ٢) العدسات
+                  </h3>
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <Checkbox 
                       id="skipFrameCheck" 
@@ -497,7 +538,7 @@ const CreateInvoice: React.FC = () => {
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="lensType">نوع العدسة:</Label>
+                    <Label htmlFor="lensType" className="text-muted-foreground">نوع العدسة:</Label>
                     <select
                       id="lensType"
                       className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
@@ -517,7 +558,7 @@ const CreateInvoice: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="coatingSelect">الطلاء:</Label>
+                    <Label htmlFor="coatingSelect" className="text-muted-foreground">الطلاء:</Label>
                     <select
                       id="coatingSelect"
                       className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
@@ -538,44 +579,51 @@ const CreateInvoice: React.FC = () => {
 
               {/* 3) Frame Section */}
               {!skipFrame && (
-                <div className="bg-card rounded-md p-4 border">
-                  <div className="border-b border-primary pb-2 mb-4">
-                    <h3 className="text-lg font-semibold text-primary">٣) الإطار</h3>
+                <div className="bg-white rounded-lg p-6 border shadow-sm">
+                  <div className="border-b border-primary/30 pb-3 mb-4">
+                    <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                      <Glasses className="w-5 h-5" />
+                      ٣) الإطار
+                    </h3>
                   </div>
                   
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="frameSearchBox">بحث (Brand/Model/Color/Size):</Label>
+                      <Label htmlFor="frameSearchBox" className="text-muted-foreground">بحث (Brand/Model/Color/Size):</Label>
                       <div className="flex space-x-2 space-x-reverse">
                         <Input
                           id="frameSearchBox"
                           value={frameSearch}
                           onChange={(e) => setFrameSearch(e.target.value)}
                           placeholder="مثال: RayBan..."
+                          className="flex-1"
                         />
-                        <Button onClick={handleFrameSearch}>بحث</Button>
+                        <Button onClick={handleFrameSearch} className="gap-1">
+                          <Search className="w-4 h-4" />
+                          بحث
+                        </Button>
                       </div>
                     </div>
                     
                     {frameResults.length > 0 && (
-                      <div className="overflow-x-auto border rounded-md">
+                      <div className="overflow-x-auto border rounded-lg">
                         <table className="w-full border-collapse">
                           <thead>
-                            <tr className="bg-muted">
+                            <tr className="bg-muted/50">
                               <th className="p-2 border">Brand</th>
                               <th className="p-2 border">Model</th>
                               <th className="p-2 border">Color</th>
                               <th className="p-2 border">Size</th>
                               <th className="p-2 border">Price (KWD)</th>
                               <th className="p-2 border">Qty</th>
+                              <th className="p-2 border"></th>
                             </tr>
                           </thead>
                           <tbody>
                             {frameResults.map((frame, index) => (
                               <tr 
                                 key={index}
-                                className="cursor-pointer hover:bg-muted/50"
-                                onClick={() => selectFrame(frame)}
+                                className="hover:bg-muted/30 transition-colors"
                               >
                                 <td className="p-2 border">{frame.brand}</td>
                                 <td className="p-2 border">{frame.model}</td>
@@ -583,6 +631,17 @@ const CreateInvoice: React.FC = () => {
                                 <td className="p-2 border">{frame.size}</td>
                                 <td className="p-2 border">{frame.price.toFixed(2)}</td>
                                 <td className="p-2 border">{frame.qty}</td>
+                                <td className="p-2 border">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => selectFrame(frame)}
+                                    className="w-full"
+                                  >
+                                    <Plus className="w-4 h-4 mr-1" />
+                                    اختر
+                                  </Button>
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -591,15 +650,19 @@ const CreateInvoice: React.FC = () => {
                     )}
                     
                     {selectedFrame.brand && (
-                      <div className="mt-4 p-2 border rounded-md">
+                      <div className="mt-4 p-3 border rounded-lg bg-primary/5 border-primary/20">
+                        <h4 className="font-medium text-primary mb-2 flex items-center">
+                          <PackageCheck className="w-4 h-4 mr-1" />
+                          الإطار المختار
+                        </h4>
                         <table className="w-full">
                           <thead>
-                            <tr>
-                              <th className="p-1">Brand</th>
-                              <th className="p-1">Model</th>
-                              <th className="p-1">Color</th>
-                              <th className="p-1">Size</th>
-                              <th className="p-1">Price (KWD)</th>
+                            <tr className="border-b">
+                              <th className="p-1 text-right text-muted-foreground text-sm">Brand</th>
+                              <th className="p-1 text-right text-muted-foreground text-sm">Model</th>
+                              <th className="p-1 text-right text-muted-foreground text-sm">Color</th>
+                              <th className="p-1 text-right text-muted-foreground text-sm">Size</th>
+                              <th className="p-1 text-right text-muted-foreground text-sm">Price (KWD)</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -618,68 +681,76 @@ const CreateInvoice: React.FC = () => {
                     <Button 
                       variant="outline" 
                       onClick={() => setShowManualFrame(!showManualFrame)}
+                      className="w-full"
                     >
+                      <Plus className="w-4 h-4 mr-1" />
                       إضافة إطار جديد
                     </Button>
                     
                     {showManualFrame && (
-                      <div className="p-3 border rounded-md mt-2 bg-card">
-                        <h4 className="font-semibold mb-3">بيانات الإطار الجديد</h4>
+                      <div className="p-4 border rounded-lg mt-2 bg-muted/10">
+                        <h4 className="font-semibold mb-3 text-primary">بيانات الإطار الجديد</h4>
                         <div className="space-y-3">
-                          <div className="space-y-1">
-                            <Label htmlFor="newBrand">Brand:</Label>
-                            <Input
-                              id="newBrand"
-                              value={newBrand}
-                              onChange={(e) => setNewBrand(e.target.value)}
-                            />
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <Label htmlFor="newBrand" className="text-muted-foreground">Brand:</Label>
+                              <Input
+                                id="newBrand"
+                                value={newBrand}
+                                onChange={(e) => setNewBrand(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <Label htmlFor="newModel" className="text-muted-foreground">Model:</Label>
+                              <Input
+                                id="newModel"
+                                value={newModel}
+                                onChange={(e) => setNewModel(e.target.value)}
+                              />
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <Label htmlFor="newModel">Model:</Label>
-                            <Input
-                              id="newModel"
-                              value={newModel}
-                              onChange={(e) => setNewModel(e.target.value)}
-                            />
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <Label htmlFor="newColor" className="text-muted-foreground">Color:</Label>
+                              <Input
+                                id="newColor"
+                                value={newColor}
+                                onChange={(e) => setNewColor(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <Label htmlFor="newSize" className="text-muted-foreground">Size:</Label>
+                              <Input
+                                id="newSize"
+                                value={newSize}
+                                onChange={(e) => setNewSize(e.target.value)}
+                                placeholder="مثال: 51-18-145"
+                              />
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <Label htmlFor="newColor">Color:</Label>
-                            <Input
-                              id="newColor"
-                              value={newColor}
-                              onChange={(e) => setNewColor(e.target.value)}
-                            />
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <Label htmlFor="newPrice" className="text-muted-foreground">Price (KWD):</Label>
+                              <Input
+                                id="newPrice"
+                                type="number"
+                                step="0.01"
+                                value={newPrice}
+                                onChange={(e) => setNewPrice(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <Label htmlFor="newQty" className="text-muted-foreground">Qty (عدد القطع):</Label>
+                              <Input
+                                id="newQty"
+                                type="number"
+                                step="1"
+                                value={newQty}
+                                onChange={(e) => setNewQty(e.target.value)}
+                              />
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <Label htmlFor="newSize">Size:</Label>
-                            <Input
-                              id="newSize"
-                              value={newSize}
-                              onChange={(e) => setNewSize(e.target.value)}
-                              placeholder="مثال: 51-18-145"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <Label htmlFor="newPrice">Price (KWD):</Label>
-                            <Input
-                              id="newPrice"
-                              type="number"
-                              step="0.01"
-                              value={newPrice}
-                              onChange={(e) => setNewPrice(e.target.value)}
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <Label htmlFor="newQty">Qty (عدد القطع):</Label>
-                            <Input
-                              id="newQty"
-                              type="number"
-                              step="1"
-                              value={newQty}
-                              onChange={(e) => setNewQty(e.target.value)}
-                            />
-                          </div>
-                          <Button onClick={handleAddNewFrame}>حفظ الإطار</Button>
+                          <Button onClick={handleAddNewFrame} className="w-full">حفظ الإطار</Button>
                         </div>
                       </div>
                     )}
@@ -692,133 +763,195 @@ const CreateInvoice: React.FC = () => {
           )}
 
           {/* 4) Discount & Deposit */}
-          <div className="bg-card rounded-md p-4 border">
-            <div className="border-b border-primary pb-2 mb-4">
-              <h3 className="text-lg font-semibold text-primary">٤) الخصم والدفعة</h3>
+          <div className="bg-white rounded-lg p-6 border shadow-sm">
+            <div className="border-b border-primary/30 pb-3 mb-4">
+              <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                <Banknote className="w-5 h-5" />
+                ٤) الخصم والدفعة
+              </h3>
             </div>
             
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="discount">الخصم (د.ك):</Label>
-                <Input
-                  id="discount"
-                  type="number"
-                  step="0.01"
-                  value={discount || ""}
-                  onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="discount" className="text-muted-foreground">الخصم (د.ك):</Label>
+                  <Input
+                    id="discount"
+                    type="number"
+                    step="0.01"
+                    value={discount || ""}
+                    onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="deposit" className="text-muted-foreground">الدفعة (د.ك):</Label>
+                  <Input
+                    id="deposit"
+                    type="number"
+                    step="0.01"
+                    value={deposit || ""}
+                    onChange={(e) => setDeposit(parseFloat(e.target.value) || 0)}
+                  />
+                </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="deposit">الدفعة (د.ك):</Label>
-                <Input
-                  id="deposit"
-                  type="number"
-                  step="0.01"
-                  value={deposit || ""}
-                  onChange={(e) => setDeposit(parseFloat(e.target.value) || 0)}
-                />
-              </div>
-              
-              <Button variant="outline" onClick={handlePayInFull}>دفع كامل</Button>
+              <Button variant="outline" onClick={handlePayInFull} className="w-full">
+                دفع كامل ({total.toFixed(2)} د.ك)
+              </Button>
             </div>
           </div>
 
           {/* 5) Payment Method */}
-          <div className="bg-card rounded-md p-4 border">
-            <div className="border-b border-primary pb-2 mb-4">
-              <h3 className="text-lg font-semibold text-primary">٥) طريقة الدفع</h3>
+          <div className="bg-white rounded-lg p-6 border shadow-sm">
+            <div className="border-b border-primary/30 pb-3 mb-4">
+              <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                ٥) طريقة الدفع
+              </h3>
             </div>
             
-            <div className="flex flex-wrap gap-3 justify-center items-center">
-              <img 
-                src="https://cdn-icons-png.flaticon.com/512/7083/7083125.png" 
-                alt="Cash" 
-                title="Cash"
-                className={`w-14 h-10 object-contain rounded cursor-pointer border-2 ${paymentMethod === "نقداً" ? "border-primary opacity-100" : "border-transparent opacity-70"} hover:opacity-100 transition-all`}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div 
+                className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
+                  paymentMethod === "نقداً" 
+                    ? "border-primary bg-primary/5 shadow-sm" 
+                    : "hover:border-primary/30 hover:bg-muted/10"
+                }`}
                 onClick={() => setPaymentMethod("نقداً")}
-              />
-              <img 
-                src="https://kabkg.com/staticsite/images/knet.png" 
-                alt="KNET" 
-                title="KNET"
-                className={`w-14 h-10 object-contain rounded cursor-pointer border-2 ${paymentMethod === "كي نت" ? "border-primary opacity-100" : "border-transparent opacity-70"} hover:opacity-100 transition-all`}
+              >
+                <img 
+                  src="https://cdn-icons-png.flaticon.com/512/7083/7083125.png" 
+                  alt="Cash" 
+                  title="Cash"
+                  className="w-12 h-10 object-contain mx-auto mb-2"
+                />
+                <span className="text-sm font-medium">نقداً</span>
+              </div>
+              
+              <div 
+                className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
+                  paymentMethod === "كي نت" 
+                    ? "border-primary bg-primary/5 shadow-sm" 
+                    : "hover:border-primary/30 hover:bg-muted/10"
+                }`}
                 onClick={() => setPaymentMethod("كي نت")}
-              />
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" 
-                alt="Visa" 
-                title="Visa"
-                className={`w-14 h-10 object-contain rounded cursor-pointer border-2 bg-white ${paymentMethod === "Visa" ? "border-primary opacity-100" : "border-transparent opacity-70"} hover:opacity-100 transition-all`}
+              >
+                <img 
+                  src="https://kabkg.com/staticsite/images/knet.png" 
+                  alt="KNET" 
+                  title="KNET"
+                  className="w-12 h-10 object-contain mx-auto mb-2"
+                />
+                <span className="text-sm font-medium">كي نت</span>
+              </div>
+              
+              <div 
+                className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
+                  paymentMethod === "Visa" 
+                    ? "border-primary bg-primary/5 shadow-sm" 
+                    : "hover:border-primary/30 hover:bg-muted/10"
+                }`}
                 onClick={() => setPaymentMethod("Visa")}
-              />
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
-                alt="MasterCard" 
-                title="MasterCard"
-                className={`w-14 h-10 object-contain rounded cursor-pointer border-2 ${paymentMethod === "MasterCard" ? "border-primary opacity-100" : "border-transparent opacity-70"} hover:opacity-100 transition-all`}
+              >
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" 
+                  alt="Visa" 
+                  title="Visa"
+                  className="w-12 h-10 object-contain mx-auto mb-2 bg-white rounded"
+                />
+                <span className="text-sm font-medium">Visa</span>
+              </div>
+              
+              <div 
+                className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
+                  paymentMethod === "MasterCard" 
+                    ? "border-primary bg-primary/5 shadow-sm" 
+                    : "hover:border-primary/30 hover:bg-muted/10"
+                }`}
                 onClick={() => setPaymentMethod("MasterCard")}
-              />
+              >
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
+                  alt="MasterCard" 
+                  title="MasterCard"
+                  className="w-12 h-10 object-contain mx-auto mb-2"
+                />
+                <span className="text-sm font-medium">MasterCard</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right Section: Invoice Summary */}
-        <div className="bg-card rounded-md border p-4 h-fit sticky top-24">
-          <div className="text-center font-semibold text-lg border-b border-primary pb-2 mb-4">
+        <div className="bg-white rounded-lg border p-6 shadow-sm h-fit sticky top-24">
+          <div className="text-center font-semibold text-lg border-b border-primary/30 pb-3 mb-4 text-primary flex justify-center items-center gap-2">
+            <Package className="w-5 h-5" />
             ملخص الفاتورة
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex justify-between">
-              <span>سعر العدسة:</span>
-              <span>{lensPrice.toFixed(2)}</span>
+              <span className="text-muted-foreground">سعر العدسة:</span>
+              <span>{lensPrice.toFixed(2)} د.ك</span>
             </div>
             <div className="flex justify-between">
-              <span>سعر الطلاء:</span>
-              <span>{coatingPrice.toFixed(2)}</span>
+              <span className="text-muted-foreground">سعر الطلاء:</span>
+              <span>{coatingPrice.toFixed(2)} د.ك</span>
             </div>
             <div className="flex justify-between">
-              <span>سعر الإطار:</span>
-              <span>{frameTotal.toFixed(2)}</span>
+              <span className="text-muted-foreground">سعر الإطار:</span>
+              <span>{frameTotal.toFixed(2)} د.ك</span>
             </div>
             <div className="flex justify-between">
-              <span>الخصم:</span>
-              <span>{discount.toFixed(2)}</span>
+              <span className="text-muted-foreground">الخصم:</span>
+              <span className="text-destructive">-{discount.toFixed(2)} د.ك</span>
             </div>
             
-            <div className="flex justify-between mt-2 pt-2 border-t font-semibold">
+            <div className="flex justify-between mt-2 pt-2 border-t font-semibold text-lg">
               <span>المجموع:</span>
-              <span>{total.toFixed(2)}</span>
+              <span>{total.toFixed(2)} د.ك</span>
             </div>
             <div className="flex justify-between">
-              <span>الدفعة:</span>
-              <span>{deposit.toFixed(2)}</span>
+              <span className="text-muted-foreground">الدفعة:</span>
+              <span>{deposit.toFixed(2)} د.ك</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between text-primary font-semibold">
               <span>المتبقي:</span>
-              <span>{remaining.toFixed(2)}</span>
+              <span>{remaining.toFixed(2)} د.ك</span>
             </div>
-            <div className="flex justify-between">
-              <span>طريقة الدفع:</span>
-              <span>{paymentMethod || "غير محدد"}</span>
+            <div className="flex justify-between border-t pt-2 mt-2">
+              <span className="text-muted-foreground">طريقة الدفع:</span>
+              <span className="font-medium">{paymentMethod || "غير محدد"}</span>
             </div>
           </div>
           
-          <div className="flex flex-col space-y-2 mt-6">
-            <Button onClick={handleSaveInvoice}>حفظ</Button>
+          <div className="space-y-3 mt-6">
             <Button 
-              variant="outline" 
-              onClick={() => setInvoicePrintOpen(true)}
+              onClick={handleSaveInvoice} 
+              className="w-full"
+              size="lg"
             >
-              طباعة الفاتورة
+              حفظ الفاتورة
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => setWorkOrderPrintOpen(true)}
-            >
-              طباعة أمر العمل
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button 
+                variant="outline"
+                onClick={() => setInvoicePrintOpen(true)}
+                className="flex items-center gap-1"
+              >
+                <Receipt className="w-4 h-4" />
+                طباعة الفاتورة
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setWorkOrderPrintOpen(true)}
+                className="flex items-center gap-1"
+              >
+                <ClipboardList className="w-4 h-4" />
+                طباعة أمر العمل
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -827,7 +960,10 @@ const CreateInvoice: React.FC = () => {
       <Sheet open={invoicePrintOpen} onOpenChange={setInvoicePrintOpen}>
         <SheetContent className="w-full sm:max-w-[600px]">
           <SheetHeader>
-            <SheetTitle className="text-center">فاتورة بيع</SheetTitle>
+            <SheetTitle className="text-center flex items-center justify-center gap-2">
+              <Receipt className="w-5 h-5" />
+              فاتورة بيع
+            </SheetTitle>
           </SheetHeader>
           
           {/* Use our new ReceiptInvoice component */}
@@ -855,9 +991,20 @@ const CreateInvoice: React.FC = () => {
             isPrintable
           />
           
-          <div className="flex justify-center space-x-2 space-x-reverse mt-6">
-            <Button onClick={() => window.print()}>طباعة</Button>
-            <Button variant="outline" onClick={() => setInvoicePrintOpen(false)}>إغلاق</Button>
+          <div className="flex justify-center gap-3 mt-6">
+            <Button 
+              onClick={() => window.print()}
+              className="flex items-center gap-1"
+            >
+              <ExternalLink className="w-4 h-4" />
+              طباعة
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setInvoicePrintOpen(false)}
+            >
+              إغلاق
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
@@ -866,7 +1013,10 @@ const CreateInvoice: React.FC = () => {
       <Sheet open={workOrderPrintOpen} onOpenChange={setWorkOrderPrintOpen}>
         <SheetContent className="w-full sm:max-w-[800px]">
           <SheetHeader>
-            <SheetTitle className="text-center">أمر العمل</SheetTitle>
+            <SheetTitle className="text-center flex items-center justify-center gap-2">
+              <ClipboardList className="w-5 h-5" />
+              أمر العمل
+            </SheetTitle>
           </SheetHeader>
           
           <WorkOrderPrint 
@@ -893,9 +1043,20 @@ const CreateInvoice: React.FC = () => {
             }}
           />
           
-          <div className="flex justify-center space-x-2 space-x-reverse mt-6">
-            <Button onClick={() => window.print()}>طباعة</Button>
-            <Button variant="outline" onClick={() => setWorkOrderPrintOpen(false)}>إغلاق</Button>
+          <div className="flex justify-center gap-3 mt-6">
+            <Button 
+              onClick={() => window.print()}
+              className="flex items-center gap-1"
+            >
+              <ExternalLink className="w-4 h-4" />
+              طباعة
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setWorkOrderPrintOpen(false)}
+            >
+              إغلاق
+            </Button>
           </div>
         </SheetContent>
       </Sheet>

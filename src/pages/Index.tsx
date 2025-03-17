@@ -7,8 +7,6 @@ import CreateInvoice from "@/components/CreateInvoice";
 import { Inventory } from "@/components/Inventory";
 import { RemainingPayments } from "@/components/RemainingPayments";
 import { PatientSearch } from "@/components/PatientSearch";
-import { usePatientStore } from "@/store/patientStore";
-import { useInventoryStore } from "@/store/inventoryStore";
 import { useLocation } from "react-router-dom";
 
 const Index = () => {
