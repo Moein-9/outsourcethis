@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore, Payment } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -102,9 +101,21 @@ export const RemainingPayments: React.FC = () => {
   // Navigate to patient search with patient details
   const goToPatientProfile = (patientId?: string, patientName?: string, patientPhone?: string) => {
     if (patientId) {
-      navigate('/patientSearch', { state: { patientId, searchMode: 'id' } });
+      navigate('/', { 
+        state: { 
+          section: "patientSearch", 
+          patientId: patientId,
+          searchMode: 'id'
+        } 
+      });
     } else if (patientName || patientPhone) {
-      navigate('/patientSearch', { state: { searchTerm: patientName || patientPhone, searchMode: 'name' } });
+      navigate('/', { 
+        state: { 
+          section: "patientSearch", 
+          searchTerm: patientName || patientPhone,
+          searchMode: 'name'
+        } 
+      });
     }
   };
   

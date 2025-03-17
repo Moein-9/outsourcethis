@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Dashboard } from "@/components/Dashboard";
 import { CreateClient } from "@/components/CreateClient";
@@ -15,7 +15,7 @@ const Index = () => {
   const location = useLocation();
   
   // Check if we have state passed from navigation
-  React.useEffect(() => {
+  useEffect(() => {
     if (location.state?.section) {
       setActiveSection(location.state.section);
     }
