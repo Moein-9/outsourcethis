@@ -3,6 +3,7 @@ import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
 import { CheckCircle2, Receipt } from "lucide-react";
+import { ContactLensItem } from "./ContactLensSelector";
 
 interface ReceiptInvoiceProps {
   invoice: Invoice;
@@ -30,6 +31,7 @@ interface ReceiptInvoiceProps {
   remaining?: number;
   paymentMethod?: string;
   authNumber?: string;
+  contactLenses?: ContactLensItem[];
 }
 
 export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ 
@@ -50,7 +52,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   deposit,
   remaining,
   paymentMethod,
-  authNumber
+  authNumber,
+  contactLenses
 }) => {
   // Use either the passed props or invoice data
   const name = patientName || invoice.patientName;
@@ -69,6 +72,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const payMethod = paymentMethod || invoice.paymentMethod;
   const auth = authNumber || (invoice as any).authNumber; // Use passed or from invoice
   const isPaid = rem <= 0;
+  
+  const isContactLens = invoiceType === "contacts" || !frameBrand;
 
   const containerClass = isPrintable 
     ? "w-[80mm] mx-auto bg-white p-4 text-[12px] border shadow-sm print:shadow-none" 
@@ -111,25 +116,38 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           *** المنتجات ***
         </div>
         
-        {lens && (
-          <div className="flex justify-between mb-1 text-sm">
-            <span>العدسات ({lens})</span>
-            <span>{lensP.toFixed(2)} د.ك</span>
-          </div>
-        )}
-        
-        {coat && (
-          <div className="flex justify-between mb-1 text-sm">
-            <span>الطلاء ({coat})</span>
-            <span>{coatP.toFixed(2)} د.ك</span>
-          </div>
-        )}
-        
-        {frameBrand && (
-          <div className="flex justify-between mb-1 text-sm">
-            <span>الإطار ({frameBrand} {frameModel})</span>
-            <span>{frameP.toFixed(2)} د.ك</span>
-          </div>
+        {isContactLens && contactLenses && contactLenses.length > 0 ? (
+          // Contact lens specific rendering
+          contactLenses.map((lens, idx) => (
+            <div key={idx} className="flex justify-between mb-1 text-sm">
+              <span>{lens.brand} {lens.type} {lens.power}</span>
+              <span>{lens.price.toFixed(2)} د.ك</span>
+            </div>
+          ))
+        ) : (
+          // Normal glasses rendering
+          <>
+            {lens && (
+              <div className="flex justify-between mb-1 text-sm">
+                <span>العدسات ({lens})</span>
+                <span>{lensP.toFixed(2)} د.ك</span>
+              </div>
+            )}
+            
+            {coat && (
+              <div className="flex justify-between mb-1 text-sm">
+                <span>الطلاء ({coat})</span>
+                <span>{coatP.toFixed(2)} د.ك</span>
+              </div>
+            )}
+            
+            {frameBrand && (
+              <div className="flex justify-between mb-1 text-sm">
+                <span>الإطار ({frameBrand} {frameModel})</span>
+                <span>{frameP.toFixed(2)} د.ك</span>
+              </div>
+            )}
+          </>
         )}
       </div>
 

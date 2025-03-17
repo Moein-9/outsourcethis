@@ -2,7 +2,8 @@
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
-import { Eye, Ruler, CircleDot, ClipboardCheck, User, Glasses, BadgeCheck } from "lucide-react";
+import { Eye, Ruler, CircleDot, ClipboardCheck, User, Glasses, BadgeCheck, Contact } from "lucide-react";
+import { ContactLensItem } from "./ContactLensSelector";
 
 interface WorkOrderPrintProps {
   invoice: Invoice;
@@ -18,6 +19,23 @@ interface WorkOrderPrintProps {
     size: string;
     price: number;
   };
+  contactLenses?: ContactLensItem[];
+  contactLensRx?: {
+    rightEye: {
+      sphere: string;
+      cylinder: string;
+      axis: string;
+      bc: string;
+      dia: string;
+    };
+    leftEye: {
+      sphere: string;
+      cylinder: string;
+      axis: string;
+      bc: string;
+      dia: string;
+    };
+  };
 }
 
 export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ 
@@ -27,7 +45,9 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   rx,
   lensType,
   coating,
-  frame
+  frame,
+  contactLenses,
+  contactLensRx
 }) => {
   // Use either passed props or invoice data
   const name = patientName || invoice.patientName;
@@ -41,6 +61,9 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
     size: "",
     price: invoice.framePrice
   } : undefined);
+  
+  // Determine if this is a contact lens or glasses order
+  const isContactLens = contactLenses && contactLenses.length > 0;
 
   return (
     <div className="max-w-2xl mx-auto bg-white p-6 border rounded-lg shadow-sm print:shadow-none">
@@ -79,7 +102,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         </div>
 
-        {frameData && (
+        {!isContactLens && frameData && (
           <div className="bg-muted/10 p-4 rounded-lg border">
             <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
               <Glasses className="w-5 h-5" />
@@ -101,86 +124,166 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             </div>
           </div>
         )}
-      </div>
-
-      <div className="mb-6 bg-muted/10 p-4 rounded-lg border">
-        <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-          <Eye className="w-5 h-5" />
-          تفاصيل الوصفة الطبية
-        </h3>
-        <table className="w-full border-collapse bg-white">
-          <thead className="bg-muted">
-            <tr>
-              <th className="border p-2 text-right">العين</th>
-              <th className="border p-2">SPH</th>
-              <th className="border p-2">CYL</th>
-              <th className="border p-2">AXIS</th>
-              <th className="border p-2">ADD</th>
-              <th className="border p-2">PD</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border p-2 font-medium">اليمنى (OD)</td>
-              <td className="border p-2 text-center">{rx?.sphereOD || "_____"}</td>
-              <td className="border p-2 text-center">{rx?.cylOD || "_____"}</td>
-              <td className="border p-2 text-center">{rx?.axisOD || "_____"}</td>
-              <td className="border p-2 text-center">{rx?.addOD || "_____"}</td>
-              <td className="border p-2 text-center">{rx?.pdRight || "_____"}</td>
-            </tr>
-            <tr>
-              <td className="border p-2 font-medium">اليسرى (OS)</td>
-              <td className="border p-2 text-center">{rx?.sphereOS || "_____"}</td>
-              <td className="border p-2 text-center">{rx?.cylOS || "_____"}</td>
-              <td className="border p-2 text-center">{rx?.axisOS || "_____"}</td>
-              <td className="border p-2 text-center">{rx?.addOS || "_____"}</td>
-              <td className="border p-2 text-center">{rx?.pdLeft || "_____"}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div className="space-y-4">
-        <div className="bg-muted/10 p-4 rounded-lg border">
-          <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-            <Ruler className="w-5 h-5" />
-            تفاصيل العدسات
-          </h3>
-          <div className="grid grid-cols-2 gap-4">
+        
+        {isContactLens && (
+          <div className="bg-muted/10 p-4 rounded-lg border">
+            <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
+              <Contact className="w-5 h-5" />
+              تفاصيل العدسات اللاصقة
+            </h3>
             <div className="space-y-2">
-              <div className="flex">
-                <span className="font-semibold w-20">النوع:</span>
-                <span>{lensTypeValue}</span>
-              </div>
-              {coatingValue && (
-                <div className="flex">
-                  <span className="font-semibold w-20">الطلاء:</span>
-                  <span>{coatingValue}</span>
+              {contactLenses.map((lens, idx) => (
+                <div key={idx} className="space-y-1 border-b pb-2 border-dashed border-gray-200 last:border-0">
+                  <div className="flex">
+                    <span className="font-semibold w-20">العدسة {idx + 1}:</span>
+                    <span>{lens.brand} {lens.type}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-20">القوة:</span>
+                    <span>{lens.power}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-20">BC:</span>
+                    <span>{lens.bc}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-20">Diameter:</span>
+                    <span>{lens.diameter}</span>
+                  </div>
+                  {lens.color && (
+                    <div className="flex">
+                      <span className="font-semibold w-20">اللون:</span>
+                      <span>{lens.color}</span>
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-            <div className="space-y-2">
-              <div className="flex">
-                <span className="font-semibold w-20">السعر:</span>
-                <span>{invoice.lensPrice.toFixed(2)} د.ك</span>
-              </div>
-              {coatingValue && (
+          </div>
+        )}
+      </div>
+
+      {!isContactLens && (
+        <div className="mb-6 bg-muted/10 p-4 rounded-lg border">
+          <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
+            <Eye className="w-5 h-5" />
+            تفاصيل الوصفة الطبية
+          </h3>
+          <table className="w-full border-collapse bg-white">
+            <thead className="bg-muted">
+              <tr>
+                <th className="border p-2 text-right">العين</th>
+                <th className="border p-2">SPH</th>
+                <th className="border p-2">CYL</th>
+                <th className="border p-2">AXIS</th>
+                <th className="border p-2">ADD</th>
+                <th className="border p-2">PD</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border p-2 font-medium">اليمنى (OD)</td>
+                <td className="border p-2 text-center">{rx?.sphereOD || "_____"}</td>
+                <td className="border p-2 text-center">{rx?.cylOD || "_____"}</td>
+                <td className="border p-2 text-center">{rx?.axisOD || "_____"}</td>
+                <td className="border p-2 text-center">{rx?.addOD || "_____"}</td>
+                <td className="border p-2 text-center">{rx?.pdRight || "_____"}</td>
+              </tr>
+              <tr>
+                <td className="border p-2 font-medium">اليسرى (OS)</td>
+                <td className="border p-2 text-center">{rx?.sphereOS || "_____"}</td>
+                <td className="border p-2 text-center">{rx?.cylOS || "_____"}</td>
+                <td className="border p-2 text-center">{rx?.axisOS || "_____"}</td>
+                <td className="border p-2 text-center">{rx?.addOS || "_____"}</td>
+                <td className="border p-2 text-center">{rx?.pdLeft || "_____"}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+      
+      {isContactLens && contactLensRx && (
+        <div className="mb-6 bg-muted/10 p-4 rounded-lg border">
+          <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
+            <Eye className="w-5 h-5" />
+            تفاصيل وصفة العدسات اللاصقة
+          </h3>
+          <table className="w-full border-collapse bg-white">
+            <thead className="bg-muted">
+              <tr>
+                <th className="border p-2 text-right">العين</th>
+                <th className="border p-2">Sphere</th>
+                <th className="border p-2">Cylinder</th>
+                <th className="border p-2">Axis</th>
+                <th className="border p-2">BC</th>
+                <th className="border p-2">Dia</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border p-2 font-medium">اليمنى (OD)</td>
+                <td className="border p-2 text-center">{contactLensRx.rightEye.sphere || "_____"}</td>
+                <td className="border p-2 text-center">{contactLensRx.rightEye.cylinder || "_____"}</td>
+                <td className="border p-2 text-center">{contactLensRx.rightEye.axis || "_____"}</td>
+                <td className="border p-2 text-center">{contactLensRx.rightEye.bc || "_____"}</td>
+                <td className="border p-2 text-center">{contactLensRx.rightEye.dia || "_____"}</td>
+              </tr>
+              <tr>
+                <td className="border p-2 font-medium">اليسرى (OS)</td>
+                <td className="border p-2 text-center">{contactLensRx.leftEye.sphere || "_____"}</td>
+                <td className="border p-2 text-center">{contactLensRx.leftEye.cylinder || "_____"}</td>
+                <td className="border p-2 text-center">{contactLensRx.leftEye.axis || "_____"}</td>
+                <td className="border p-2 text-center">{contactLensRx.leftEye.bc || "_____"}</td>
+                <td className="border p-2 text-center">{contactLensRx.leftEye.dia || "_____"}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {!isContactLens && (
+        <div className="space-y-4">
+          <div className="bg-muted/10 p-4 rounded-lg border">
+            <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
+              <Ruler className="w-5 h-5" />
+              تفاصيل العدسات
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <div className="flex">
-                  <span className="font-semibold w-20">سعر الطلاء:</span>
-                  <span>{invoice.coatingPrice.toFixed(2)} د.ك</span>
+                  <span className="font-semibold w-20">النوع:</span>
+                  <span>{lensTypeValue}</span>
                 </div>
-              )}
+                {coatingValue && (
+                  <div className="flex">
+                    <span className="font-semibold w-20">الطلاء:</span>
+                    <span>{coatingValue}</span>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <div className="flex">
+                  <span className="font-semibold w-20">السعر:</span>
+                  <span>{invoice.lensPrice.toFixed(2)} د.ك</span>
+                </div>
+                {coatingValue && (
+                  <div className="flex">
+                    <span className="font-semibold w-20">سعر الطلاء:</span>
+                    <span>{invoice.coatingPrice.toFixed(2)} د.ك</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
+      )}
 
-        <div className="bg-muted/10 p-4 rounded-lg border">
-          <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-            <CircleDot className="w-5 h-5" />
-            ملاحظات إضافية
-          </h3>
-          <div className="border rounded p-4 min-h-[100px] bg-white"></div>
-        </div>
+      <div className="bg-muted/10 p-4 rounded-lg border mt-6">
+        <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
+          <CircleDot className="w-5 h-5" />
+          ملاحظات إضافية
+        </h3>
+        <div className="border rounded p-4 min-h-[100px] bg-white"></div>
       </div>
 
       <div className="mt-8 pt-4 border-t grid grid-cols-2 gap-6">

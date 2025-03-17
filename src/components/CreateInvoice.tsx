@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
@@ -28,10 +27,8 @@ const CreateInvoice: React.FC = () => {
   const addFrame = useInventoryStore((state) => state.addFrame);
   const addInvoice = useInvoiceStore((state) => state.addInvoice);
   
-  // Invoice type state
   const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts">("glasses");
   
-  // Patient section states
   const [skipPatient, setSkipPatient] = useState(false);
   const [patientSearch, setPatientSearch] = useState("");
   const [patientResults, setPatientResults] = useState<ReturnType<typeof searchPatients>>([]);
@@ -40,12 +37,10 @@ const CreateInvoice: React.FC = () => {
   const [manualPhone, setManualPhone] = useState("");
   const [rxVisible, setRxVisible] = useState(false);
   
-  // Lens & Coating states for glasses
   const [skipFrame, setSkipFrame] = useState(false);
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
   
-  // Frame states
   const [frameSearch, setFrameSearch] = useState("");
   const [frameResults, setFrameResults] = useState<ReturnType<typeof searchFrames>>([]);
   const [selectedFrame, setSelectedFrame] = useState<{
@@ -56,7 +51,6 @@ const CreateInvoice: React.FC = () => {
     price: number;
   }>({ brand: "", model: "", color: "", size: "", price: 0 });
   
-  // Manual Frame states
   const [showManualFrame, setShowManualFrame] = useState(false);
   const [newBrand, setNewBrand] = useState("");
   const [newModel, setNewModel] = useState("");
@@ -65,17 +59,16 @@ const CreateInvoice: React.FC = () => {
   const [newPrice, setNewPrice] = useState("");
   const [newQty, setNewQty] = useState("1");
   
-  // Payment states
   const [discount, setDiscount] = useState(0);
   const [deposit, setDeposit] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [authNumber, setAuthNumber] = useState("");
   
-  // Print states
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   
-  // Contact lens prescription states
+  const [contactLensItems, setContactLensItems] = useState<ContactLensItem[]>([]);
+  
   const [contactLensRx, setContactLensRx] = useState({
     rightEye: {
       sphere: "-",
@@ -93,29 +86,43 @@ const CreateInvoice: React.FC = () => {
     }
   });
   
-  // Calculated totals
   const [frameTotal, setFrameTotal] = useState(0);
   const [total, setTotal] = useState(0);
   const [remaining, setRemaining] = useState(0);
   
-  // State for showing missing RX warning
   const [showMissingRxWarning, setShowMissingRxWarning] = useState(false);
   
-  // Update totals when dependencies change
   useEffect(() => {
-    const lensPrice = selectedLensType?.price || 0;
-    const coatingPrice = selectedCoating?.price || 0;
-    const frameCost = skipFrame ? 0 : selectedFrame.price;
-    const totalCost = lensPrice + coatingPrice + frameCost - discount;
-    const calculatedTotal = totalCost > 0 ? totalCost : 0;
-    const calculatedRemaining = Math.max(0, calculatedTotal - deposit);
-    
-    setFrameTotal(frameCost);
-    setTotal(calculatedTotal);
-    setRemaining(calculatedRemaining);
-  }, [selectedLensType, selectedCoating, selectedFrame.price, skipFrame, discount, deposit]);
+    if (invoiceType === "glasses") {
+      const lensPrice = selectedLensType?.price || 0;
+      const coatingPrice = selectedCoating?.price || 0;
+      const frameCost = skipFrame ? 0 : selectedFrame.price;
+      const totalCost = lensPrice + coatingPrice + frameCost - discount;
+      const calculatedTotal = totalCost > 0 ? totalCost : 0;
+      const calculatedRemaining = Math.max(0, calculatedTotal - deposit);
+      
+      setFrameTotal(frameCost);
+      setTotal(calculatedTotal);
+      setRemaining(calculatedRemaining);
+    } else {
+      const lensesTotal = contactLensItems.reduce((sum, lens) => sum + lens.price, 0);
+      const calculatedTotal = Math.max(0, lensesTotal - discount);
+      const calculatedRemaining = Math.max(0, calculatedTotal - deposit);
+      
+      setTotal(calculatedTotal);
+      setRemaining(calculatedRemaining);
+    }
+  }, [
+    invoiceType,
+    selectedLensType, 
+    selectedCoating, 
+    selectedFrame.price, 
+    skipFrame, 
+    discount, 
+    deposit,
+    contactLensItems
+  ]);
   
-  // Handle patient search
   const handlePatientSearch = () => {
     if (!patientSearch.trim()) {
       toast({
@@ -136,7 +143,6 @@ const CreateInvoice: React.FC = () => {
     }
   };
   
-  // Handle frame search
   const handleFrameSearch = () => {
     if (!frameSearch.trim()) {
       toast({
@@ -157,14 +163,11 @@ const CreateInvoice: React.FC = () => {
     }
   };
   
-  // Select a patient from search results
   const selectPatient = (patient: ReturnType<typeof searchPatients>[0]) => {
     setCurrentPatient(patient);
     setPatientResults([]);
     setRxVisible(true);
     
-    // If the patient has contact lens RX data and the invoice type is contacts,
-    // load that data into the contact lens form
     if (invoiceType === "contacts") {
       if (patient.contactLensRx) {
         setContactLensRx(patient.contactLensRx);
@@ -175,7 +178,6 @@ const CreateInvoice: React.FC = () => {
     }
   };
   
-  // Select a frame from search results
   const selectFrame = (frame: ReturnType<typeof searchFrames>[0]) => {
     setSelectedFrame({
       brand: frame.brand,
@@ -187,22 +189,18 @@ const CreateInvoice: React.FC = () => {
     setFrameResults([]);
   };
   
-  // Handle lens type selection
   const handleLensTypeSelect = (lens: LensType | null) => {
     setSelectedLensType(lens);
   };
   
-  // Handle coating selection
   const handleCoatingSelect = (coating: LensCoating | null) => {
     setSelectedCoating(coating);
   };
   
-  // Handle skip frame change
   const handleSkipFrameChange = (skip: boolean) => {
     setSkipFrame(skip);
   };
   
-  // Add a new frame to inventory
   const handleAddNewFrame = () => {
     if (!newBrand || !newModel || !newColor || !newPrice) {
       toast({
@@ -264,12 +262,10 @@ const CreateInvoice: React.FC = () => {
     });
   };
   
-  // Pay in full handler
   const handlePayInFull = () => {
     setDeposit(total);
   };
   
-  // Print handlers
   const handlePrintWorkOrder = () => {
     setWorkOrderPrintOpen(true);
     setTimeout(() => {
@@ -284,12 +280,28 @@ const CreateInvoice: React.FC = () => {
     }, 500);
   };
   
-  // Contact lens RX handler
   const handleContactLensRxChange = (rxData: typeof contactLensRx) => {
     setContactLensRx(rxData);
   };
   
-  // Save invoice
+  const handleContactLensSelection = (selection: ContactLensSelection) => {
+    if (selection.items) {
+      setContactLensItems(selection.items);
+      
+      if (selection.rxData) {
+        setContactLensRx(selection.rxData);
+      }
+      
+      const lensesTotal = selection.items.reduce((sum, lens) => sum + lens.price, 0);
+      setTotal(lensesTotal - discount);
+      setRemaining(Math.max(0, lensesTotal - discount - deposit));
+      
+      toast({
+        description: `تم تحديث العدسات اللاصقة (${selection.items.length} عدسة)`,
+      });
+    }
+  };
+  
   const handleSaveInvoice = () => {
     let patientName = "";
     let patientPhone = "";
@@ -311,22 +323,33 @@ const CreateInvoice: React.FC = () => {
       return;
     }
     
-    if (invoiceType === "glasses" && !selectedLensType && !skipFrame) {
-      toast({
-        title: "خطأ",
-        description: "الرجاء اختيار نوع العدسة.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (invoiceType === "glasses" && !skipFrame && (!selectedFrame.brand || !selectedFrame.model)) {
-      toast({
-        title: "خطأ",
-        description: "الرجاء اختيار إطار أو تفعيل خيار 'عدسات فقط'.",
-        variant: "destructive"
-      });
-      return;
+    if (invoiceType === "glasses") {
+      if (!selectedLensType && !skipFrame) {
+        toast({
+          title: "خطأ",
+          description: "الرجاء اختيار نوع العدسة.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (!skipFrame && (!selectedFrame.brand || !selectedFrame.model)) {
+        toast({
+          title: "خطأ",
+          description: "الرجاء اختيار إطار أو تفعيل خيار 'عدسات فقط'.",
+          variant: "destructive"
+        });
+        return;
+      }
+    } else {
+      if (contactLensItems.length === 0) {
+        toast({
+          title: "خطأ",
+          description: "الرجاء اختيار عدسة لاصقة واحدة على الأقل.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
     
     if (!paymentMethod) {
@@ -342,29 +365,63 @@ const CreateInvoice: React.FC = () => {
       ? { authNumber } 
       : {};
     
-    const invoiceData = {
-      patientId,
-      patientName,
-      patientPhone,
+    let invoiceData;
+    
+    if (invoiceType === "glasses") {
+      invoiceData = {
+        patientId,
+        patientName,
+        patientPhone,
+        
+        lensType: selectedLensType?.name || "",
+        lensPrice: selectedLensType?.price || 0,
+        
+        coating: selectedCoating?.name || "",
+        coatingPrice: selectedCoating?.price || 0,
+        
+        frameBrand: skipFrame ? "" : selectedFrame.brand,
+        frameModel: skipFrame ? "" : selectedFrame.model,
+        frameColor: skipFrame ? "" : selectedFrame.color,
+        framePrice: skipFrame ? 0 : selectedFrame.price,
+        
+        discount,
+        deposit,
+        total,
+        
+        paymentMethod,
+        ...paymentDetails
+      };
+    } else {
+      const mainLens = contactLensItems[0];
       
-      lensType: selectedLensType?.name || "",
-      lensPrice: selectedLensType?.price || 0,
+      const lensDescription = contactLensItems
+        .map(lens => `${lens.brand} ${lens.type} ${lens.power} ${lens.color || ""}`)
+        .join(", ");
       
-      coating: selectedCoating?.name || "",
-      coatingPrice: selectedCoating?.price || 0,
-      
-      frameBrand: skipFrame ? "" : selectedFrame.brand,
-      frameModel: skipFrame ? "" : selectedFrame.model,
-      frameColor: skipFrame ? "" : selectedFrame.color,
-      framePrice: skipFrame ? 0 : selectedFrame.price,
-      
-      discount,
-      deposit,
-      total,
-      
-      paymentMethod,
-      ...paymentDetails
-    };
+      invoiceData = {
+        patientId,
+        patientName,
+        patientPhone,
+        
+        lensType: lensDescription,
+        lensPrice: contactLensItems.reduce((sum, lens) => sum + lens.price, 0),
+        
+        coating: "",
+        coatingPrice: 0,
+        
+        frameBrand: "",
+        frameModel: "",
+        frameColor: "",
+        framePrice: 0,
+        
+        discount,
+        deposit,
+        total,
+        
+        paymentMethod,
+        ...paymentDetails
+      };
+    }
     
     const invoiceId = addInvoice(invoiceData);
     
@@ -376,7 +433,6 @@ const CreateInvoice: React.FC = () => {
     resetForm();
   };
   
-  // Reset form to initial state
   const resetForm = () => {
     setSkipPatient(false);
     setPatientSearch("");
@@ -427,21 +483,26 @@ const CreateInvoice: React.FC = () => {
     setShowMissingRxWarning(false);
   };
   
-  // Create a mock invoice for previews
   const previewInvoice = {
     invoiceId: "PREVIEW",
     createdAt: new Date().toISOString(),
     patientName: currentPatient?.name || manualName || "Customer Name",
     patientPhone: currentPatient?.phone || manualPhone || "",
     patientId: currentPatient?.patientId,
-    lensType: selectedLensType?.name || "",
-    lensPrice: selectedLensType?.price || 0,
-    coating: selectedCoating?.name || "",
-    coatingPrice: selectedCoating?.price || 0,
-    frameBrand: skipFrame ? "" : selectedFrame.brand,
-    frameModel: skipFrame ? "" : selectedFrame.model,
-    frameColor: skipFrame ? "" : selectedFrame.color,
-    framePrice: skipFrame ? 0 : selectedFrame.price,
+    lensType: invoiceType === "glasses"
+      ? (selectedLensType?.name || "")
+      : (contactLensItems.length > 0 
+          ? contactLensItems.map(lens => `${lens.brand} ${lens.type}`).join(", ")
+          : ""),
+    lensPrice: invoiceType === "glasses"
+      ? (selectedLensType?.price || 0)
+      : contactLensItems.reduce((sum, lens) => sum + lens.price, 0),
+    coating: invoiceType === "glasses" ? (selectedCoating?.name || "") : "",
+    coatingPrice: invoiceType === "glasses" ? (selectedCoating?.price || 0) : 0,
+    frameBrand: invoiceType === "glasses" ? (skipFrame ? "" : selectedFrame.brand) : "",
+    frameModel: invoiceType === "glasses" ? (skipFrame ? "" : selectedFrame.model) : "",
+    frameColor: invoiceType === "glasses" ? (skipFrame ? "" : selectedFrame.color) : "",
+    framePrice: invoiceType === "glasses" ? (skipFrame ? 0 : selectedFrame.price) : 0,
     discount: discount,
     deposit: deposit,
     total: total,
@@ -483,9 +544,7 @@ const CreateInvoice: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Section: Main Form */}
         <div className="lg:col-span-2 space-y-6">
-          {/* 1) Patient Search or Skip */}
           <div className="bg-white rounded-lg p-6 border shadow-sm">
             <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
               <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
@@ -658,7 +717,6 @@ const CreateInvoice: React.FC = () => {
 
           {invoiceType === "glasses" ? (
             <>
-              {/* 2) Lenses & Coating - Updated to use LensSelector */}
               <div className="bg-white rounded-lg p-6 border shadow-sm">
                 <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
                   <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
@@ -675,7 +733,6 @@ const CreateInvoice: React.FC = () => {
                 />
               </div>
 
-              {/* 3) Frame Section */}
               {!skipFrame && (
                 <div className="bg-white rounded-lg p-6 border shadow-sm">
                   <div className="border-b border-primary/30 pb-3 mb-4">
@@ -863,10 +920,9 @@ const CreateInvoice: React.FC = () => {
               )}
             </>
           ) : (
-            <ContactLensSelector onSelect={() => {}} />
+            <ContactLensSelector onSelect={handleContactLensSelection} initialRxData={currentPatient?.contactLensRx} />
           )}
 
-          {/* 4) Discount & Deposit - Redesigned with icons */}
           <div className="bg-white rounded-lg p-6 border shadow-sm">
             <div className="border-b border-primary/30 pb-3 mb-4">
               <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
@@ -919,7 +975,6 @@ const CreateInvoice: React.FC = () => {
             </div>
           </div>
 
-          {/* 5) Payment Method - Updated with authorization number field */}
           <div className="bg-white rounded-lg p-6 border shadow-sm">
             <div className="border-b border-primary/30 pb-3 mb-4">
               <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
@@ -998,7 +1053,6 @@ const CreateInvoice: React.FC = () => {
               </div>
             </div>
             
-            {/* Authorization Number field for card payments */}
             {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") && (
               <div className="mt-4 space-y-2">
                 <Label htmlFor="authNumber" className="text-muted-foreground block text-right">رقم الموافقة (Authorization No.):</Label>
@@ -1049,7 +1103,6 @@ const CreateInvoice: React.FC = () => {
           </div>
         </div>
         
-        {/* Right Section: Summary - Made sticky */}
         <div className="space-y-5">
           <div className="bg-white rounded-lg p-6 border shadow-sm sticky top-5">
             <h3 className="text-lg font-semibold mb-4 text-primary flex items-center gap-2">
@@ -1058,87 +1111,115 @@ const CreateInvoice: React.FC = () => {
             </h3>
             
             <div className="space-y-3">
-              {selectedLensType && (
-                <div className="flex justify-between text-right">
-                  <span className="text-muted-foreground">العدسة:</span>
-                  <span className="font-medium">{selectedLensType.name}</span>
-                </div>
-              )}
-              
-              {selectedLensType?.price > 0 && (
-                <div className="flex justify-between text-right">
-                  <span className="text-muted-foreground">سعر العدسة:</span>
-                  <span>{selectedLensType.price.toFixed(2)} د.ك</span>
-                </div>
-              )}
-              
-              {selectedCoating && (
-                <div className="flex justify-between text-right">
-                  <span className="text-muted-foreground">الطلاء:</span>
-                  <span className="font-medium">{selectedCoating.name}</span>
-                </div>
-              )}
-              
-              {selectedCoating?.price > 0 && (
-                <div className="flex justify-between text-right">
-                  <span className="text-muted-foreground">سعر الطلاء:</span>
-                  <span>{selectedCoating.price.toFixed(2)} د.ك</span>
-                </div>
-              )}
-              
-              {!skipFrame && selectedFrame.brand && (
+              {invoiceType === "glasses" ? (
                 <>
-                  <div className="flex justify-between text-right">
-                    <span className="text-muted-foreground">الإطار:</span>
-                    <span className="font-medium">{selectedFrame.brand} {selectedFrame.model}</span>
-                  </div>
-                  <div className="flex justify-between text-right">
-                    <span className="text-muted-foreground">سعر الإطار:</span>
-                    <span>{selectedFrame.price.toFixed(2)} د.ك</span>
-                  </div>
-                </>
-              )}
-              
-              {discount > 0 && (
-                <div className="flex justify-between text-rose-500 text-right">
-                  <span>الخصم:</span>
-                  <span>- {discount.toFixed(2)} د.ك</span>
-                </div>
-              )}
-              
-              {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") && authNumber && (
-                <div className="flex justify-between text-right">
-                  <span className="text-muted-foreground">رقم الموافقة:</span>
-                  <span>{authNumber}</span>
-                </div>
-              )}
-              
-              <div className="pt-2 border-t">
-                <div className="flex justify-between font-bold text-lg text-right">
-                  <span>المجموع:</span>
-                  <span>{total.toFixed(2)} د.ك</span>
-                </div>
-                
-                {deposit > 0 && (
-                  <>
-                    <div className="flex justify-between text-green-600 mt-1 text-right">
-                      <span>المدفوع:</span>
-                      <span>{deposit.toFixed(2)} د.ك</span>
+                  {selectedLensType && (
+                    <div className="flex justify-between text-right">
+                      <span className="text-muted-foreground">العدسة:</span>
+                      <span className="font-medium">{selectedLensType.name}</span>
+                    </div>
+                  )}
+                  
+                  {selectedLensType?.price > 0 && (
+                    <div className="flex justify-between text-right">
+                      <span className="text-muted-foreground">سعر العدسة:</span>
+                      <span>{selectedLensType.price.toFixed(2)} د.ك</span>
+                    </div>
+                  )}
+                  
+                  {selectedCoating && (
+                    <div className="flex justify-between text-right">
+                      <span className="text-muted-foreground">الطلاء:</span>
+                      <span className="font-medium">{selectedCoating.name}</span>
+                    </div>
+                  )}
+                  
+                  {selectedCoating?.price > 0 && (
+                    <div className="flex justify-between text-right">
+                      <span className="text-muted-foreground">سعر الطلاء:</span>
+                      <span>{selectedCoating.price.toFixed(2)} د.ك</span>
+                    </div>
+                  )}
+                  
+                  {!skipFrame && selectedFrame.brand && (
+                    <>
+                      <div className="flex justify-between text-right">
+                        <span className="text-muted-foreground">الإطار:</span>
+                        <span className="font-medium">{selectedFrame.brand} {selectedFrame.model}</span>
+                      </div>
+                      <div className="flex justify-between text-right">
+                        <span className="text-muted-foreground">سعر الإطار:</span>
+                        <span>{selectedFrame.price.toFixed(2)} د.ك</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {discount > 0 && (
+                    <div className="flex justify-between text-rose-500 text-right">
+                      <span>الخصم:</span>
+                      <span>- {discount.toFixed(2)} د.ك</span>
+                    </div>
+                  )}
+                  
+                  {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") && authNumber && (
+                    <div className="flex justify-between text-right">
+                      <span className="text-muted-foreground">رقم الموافقة:</span>
+                      <span>{authNumber}</span>
+                    </div>
+                  )}
+                  
+                  <div className="pt-2 border-t">
+                    <div className="flex justify-between font-bold text-lg text-right">
+                      <span>المجموع:</span>
+                      <span>{total.toFixed(2)} د.ك</span>
                     </div>
                     
-                    <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t text-right">
-                      <span>المتبقي:</span>
-                      <span>{remaining.toFixed(2)} د.ك</span>
+                    {deposit > 0 && (
+                      <>
+                        <div className="flex justify-between text-green-600 mt-1 text-right">
+                          <span>المدفوع:</span>
+                          <span>{deposit.toFixed(2)} د.ك</span>
+                        </div>
+                        
+                        <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t text-right">
+                          <span>المتبقي:</span>
+                          <span>{remaining.toFixed(2)} د.ك</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {contactLensItems.length > 0 && (
+                    <div className="space-y-2 mb-2">
+                      <div className="flex justify-between text-right">
+                        <span className="text-muted-foreground">العدسات اللاصقة:</span>
+                        <span className="font-medium">{contactLensItems.length} عدسة</span>
+                      </div>
+                      
+                      {contactLensItems.map((lens, idx) => (
+                        <div key={idx} className="flex justify-between text-right text-sm">
+                          <span className="text-muted-foreground pl-2">{lens.brand} {lens.type}:</span>
+                          <span>{lens.price.toFixed(2)} د.ك</span>
+                        </div>
+                      ))}
+                      
+                      {contactLensItems.length > 0 && (
+                        <div className="flex justify-between text-right pt-1 border-t border-dashed border-gray-200">
+                          <span className="text-muted-foreground">إجمالي العدسات:</span>
+                          <span className="font-medium">{contactLensItems.reduce((sum, lens) => sum + lens.price, 0).toFixed(2)} د.ك</span>
+                        </div>
+                      )}
                     </div>
-                  </>
-                )}
-              </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
       </div>
       
-      {/* Work Order Print Sheet */}
       <Sheet open={workOrderPrintOpen} onOpenChange={setWorkOrderPrintOpen}>
         <SheetContent className="w-full sm:max-w-3xl overflow-y-auto print:w-full print:max-w-none">
           <SheetHeader>
@@ -1170,7 +1251,6 @@ const CreateInvoice: React.FC = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Invoice Print Sheet */}
       <Sheet open={invoicePrintOpen} onOpenChange={setInvoicePrintOpen}>
         <SheetContent className="w-full sm:max-w-md overflow-y-auto print:w-full print:max-w-none">
           <SheetHeader>
