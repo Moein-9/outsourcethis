@@ -56,6 +56,15 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
       }
     }
   };
+
+  // Group lens types by category
+  const groupedLensTypes = lensTypes.reduce((groups, lens) => {
+    if (!groups[lens.type]) {
+      groups[lens.type] = [];
+    }
+    groups[lens.type].push(lens);
+    return groups;
+  }, {} as Record<string, LensType[]>);
   
   return (
     <div className="space-y-5">
@@ -79,85 +88,87 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
         <>
           <div className="space-y-2">
             <Label className="text-muted-foreground block text-right">١) نوع العدسة:</Label>
-            <Select
-              value={selectedLensId}
-              onValueChange={handleLensTypeChange}
-            >
-              <SelectTrigger className="text-right">
-                <SelectValue placeholder="اختر نوع العدسة" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {lensTypes.map((lens) => (
-                  <SelectItem key={lens.id} value={lens.id} className="text-right">
-                    <div className="flex items-center justify-between w-full">
-                      <span>{lens.price.toFixed(2)} KWD</span>
-                      <span>{lens.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {selectedLensId && (
-              <div className="mt-2 p-2 bg-primary/5 border border-primary/20 rounded-md text-right">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-primary">
-                    {lensTypes.find(l => l.id === selectedLensId)?.price.toFixed(2)} KWD
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <span>{lensTypes.find(l => l.id === selectedLensId)?.name}</span>
-                    <Eye className="w-4 h-4 text-primary" />
+            <div className="grid grid-cols-1 gap-3">
+              {Object.entries(groupedLensTypes).map(([type, lenses]) => (
+                <div key={type} className="space-y-2">
+                  <h4 className="text-sm font-medium text-right text-primary">
+                    {type === "distance" && "عدسات البعد"}
+                    {type === "reading" && "عدسات القراءة"}
+                    {type === "progressive" && "عدسات متعددة البؤر"}
+                    {type === "bifocal" && "عدسات ثنائية البؤرة"}
+                    {type === "sunglasses" && "عدسات شمسية"}
+                  </h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    {lenses.map(lens => (
+                      <div
+                        key={lens.id}
+                        className={`p-3 border rounded-md cursor-pointer transition-all ${
+                          selectedLensId === lens.id
+                            ? "border-primary bg-primary/5 shadow-sm"
+                            : "hover:border-primary/30 hover:bg-muted/10"
+                        }`}
+                        onClick={() => handleLensTypeChange(lens.id)}
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{lens.price.toFixed(2)} KWD</span>
+                          <div className="flex items-center gap-1.5">
+                            <span>{lens.name}</span>
+                            <Eye className={`w-4 h-4 ${selectedLensId === lens.id ? "text-primary" : ""}`} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
           
           <div className="space-y-2">
             <Label className="text-muted-foreground block text-right">٢) الطلاء (اختياري):</Label>
-            <Select
-              value={selectedCoatingId}
-              onValueChange={handleCoatingChange}
-            >
-              <SelectTrigger className="text-right">
-                <SelectValue placeholder="اختر الطلاء" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                <SelectItem value="no-coating" className="text-right">
-                  <div className="flex items-center justify-between w-full">
-                    <span>0.00 KWD</span>
-                    <span>بدون طلاء</span>
-                  </div>
-                </SelectItem>
-                {lensCoatings.map((coating) => (
-                  <SelectItem key={coating.id} value={coating.id} className="text-right">
-                    <div className="flex items-center justify-between w-full">
-                      <span>{coating.price.toFixed(2)} KWD</span>
-                      <span>{coating.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {selectedCoatingId && selectedCoatingId !== "no-coating" && (
-              <div className="mt-2 p-2 bg-primary/5 border border-primary/20 rounded-md text-right">
+            <div className="grid grid-cols-1 gap-2">
+              <div
+                className={`p-3 border rounded-md cursor-pointer transition-all ${
+                  selectedCoatingId === "no-coating"
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "hover:border-primary/30 hover:bg-muted/10"
+                }`}
+                onClick={() => handleCoatingChange("no-coating")}
+              >
                 <div className="flex justify-between items-center">
-                  <span className="font-medium text-primary">
-                    {lensCoatings.find(c => c.id === selectedCoatingId)?.price.toFixed(2)} KWD
-                  </span>
+                  <span className="font-medium">0.00 KWD</span>
                   <div className="flex items-center gap-1.5">
-                    <span>{lensCoatings.find(c => c.id === selectedCoatingId)?.name}</span>
-                    <Shield className="w-4 h-4 text-primary" />
+                    <span>بدون طلاء</span>
+                    <Shield className={`w-4 h-4 ${selectedCoatingId === "no-coating" ? "text-primary" : ""}`} />
                   </div>
                 </div>
-                {lensCoatings.find(c => c.id === selectedCoatingId)?.description && (
-                  <div className="text-sm text-muted-foreground mt-1">
-                    {lensCoatings.find(c => c.id === selectedCoatingId)?.description}
-                  </div>
-                )}
               </div>
-            )}
+              
+              {lensCoatings.map(coating => (
+                <div
+                  key={coating.id}
+                  className={`p-3 border rounded-md cursor-pointer transition-all ${
+                    selectedCoatingId === coating.id
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "hover:border-primary/30 hover:bg-muted/10"
+                  }`}
+                  onClick={() => handleCoatingChange(coating.id)}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{coating.price.toFixed(2)} KWD</span>
+                    <div className="flex items-center gap-1.5">
+                      <span>{coating.name}</span>
+                      <Shield className={`w-4 h-4 ${selectedCoatingId === coating.id ? "text-primary" : ""}`} />
+                    </div>
+                  </div>
+                  {coating.description && (
+                    <div className="text-sm text-muted-foreground mt-1 text-right">
+                      {coating.description}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </>
       )}
