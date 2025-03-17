@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -88,9 +89,9 @@ export const PatientSearch: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
   // Filters
-  const [ageFilter, setAgeFilter] = useState<string>("");
-  const [genderFilter, setGenderFilter] = useState<string>("");
-  const [visitDateFilter, setVisitDateFilter] = useState<string>("");
+  const [ageFilter, setAgeFilter] = useState<string>("all_ages");
+  const [genderFilter, setGenderFilter] = useState<string>("all_genders");
+  const [visitDateFilter, setVisitDateFilter] = useState<string>("all_visits");
   
   // Patient profile data
   const [patientInvoices, setPatientInvoices] = useState<Invoice[]>([]);
@@ -100,7 +101,7 @@ export const PatientSearch: React.FC = () => {
   const [activeTransactionTab, setActiveTransactionTab] = useState<"active" | "completed">("active");
   
   const filterByAge = (patients: PatientWithMeta[], ageRange: string) => {
-    if (!ageRange) return patients;
+    if (ageRange === "all_ages") return patients;
     
     const today = new Date();
     
@@ -129,13 +130,14 @@ export const PatientSearch: React.FC = () => {
   };
   
   const filterByGender = (patients: PatientWithMeta[], gender: string) => {
-    if (!gender) return patients;
+    if (gender === "all_genders") return patients;
     return patients.filter(patient => patient.gender === gender);
   };
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
-    if (!dateFilter) return patients;
+    if (dateFilter === "all_visits") return patients;
     
+    // We'll implement date filtering in a future update
     return patients;
   };
   
@@ -177,9 +179,9 @@ export const PatientSearch: React.FC = () => {
     setSearchTerm("");
     setSearchResults([]);
     setShowResults(false);
-    setAgeFilter("");
-    setGenderFilter("");
-    setVisitDateFilter("");
+    setAgeFilter("all_ages");
+    setGenderFilter("all_genders");
+    setVisitDateFilter("all_visits");
   };
   
   const handlePatientSelect = (patient: PatientWithMeta) => {
@@ -260,7 +262,7 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="جميع الأعمار" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الأعمار</SelectItem>
+                    <SelectItem value="all_ages">جميع الأعمار</SelectItem>
                     <SelectItem value="child">أطفال (&lt; 18)</SelectItem>
                     <SelectItem value="adult">بالغين (18-60)</SelectItem>
                     <SelectItem value="senior">كبار السن (60+)</SelectItem>
@@ -275,7 +277,7 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="الجميع" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">الجميع</SelectItem>
+                    <SelectItem value="all_genders">الجميع</SelectItem>
                     <SelectItem value="male">ذكر</SelectItem>
                     <SelectItem value="female">أنثى</SelectItem>
                   </SelectContent>
@@ -289,7 +291,7 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="جميع الزيارات" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الزيارات</SelectItem>
+                    <SelectItem value="all_visits">جميع الزيارات</SelectItem>
                     <SelectItem value="last_week">الأسبوع الماضي</SelectItem>
                     <SelectItem value="last_month">الشهر الماضي</SelectItem>
                     <SelectItem value="last_year">السنة الماضية</SelectItem>
