@@ -37,7 +37,7 @@ export const Dashboard: React.FC = () => {
           <Clock className="h-5 w-5 text-primary" />
           <div>
             <p className="text-xs text-gray-500">الوقت الحالي</p>
-            <p className="text-lg font-semibold">{currentTime.toLocaleTimeString('ar-EG')}</p>
+            <p className="text-lg font-semibold">{currentTime.toLocaleTimeString('en-US')}</p>
           </div>
         </div>
       </div>

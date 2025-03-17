@@ -50,7 +50,7 @@ export const RemainingPayments: React.FC = () => {
                   <td className="p-3 border">{invoice.total.toFixed(2)}</td>
                   <td className="p-3 border">{invoice.deposit.toFixed(2)}</td>
                   <td className="p-3 border text-destructive font-bold">{invoice.remaining.toFixed(2)}</td>
-                  <td className="p-3 border">{new Date(invoice.createdAt).toLocaleDateString("ar-EG")}</td>
+                  <td className="p-3 border">{new Date(invoice.createdAt).toLocaleDateString("en-US")}</td>
                   <td className="p-3 border">
                     <Button 
                       size="sm" 

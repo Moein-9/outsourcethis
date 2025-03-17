@@ -85,7 +85,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
           ))}
         </Pie>
         <Tooltip 
-          formatter={(value: number) => `${value.toFixed(2)} د.ك`}
+          formatter={(value: number) => `${value.toFixed(2)} KWD`}
         />
         <Legend 
           align="center" 
