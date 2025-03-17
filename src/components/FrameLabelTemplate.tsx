@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Printer, Tag, Info, Glasses, Banknote, Hash, Ruler } from "lucide-react";
+import { Printer, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { MoenLogoBlack } from "@/assets/logo";
 import QRCode from "qrcode.react";
@@ -33,7 +33,7 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
   
   return (
     <div 
-      className="flex border border-gray-300 bg-white relative print:border-0 frame-label"
+      className="flex bg-white relative print:border-0 frame-label"
       style={{ 
         width: LABEL_WIDTH, 
         height: LABEL_HEIGHT,
@@ -41,57 +41,35 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
       }}
     >
       {/* Left side - QR Code */}
-      <div className="w-1/4 flex items-center justify-center p-1">
+      <div className="w-1/4 flex items-center justify-center">
         <QRCode 
           value={qrData} 
-          size={48} 
+          size={42} 
           level="M"
           renderAs="svg"
           includeMargin={false}
-          className="h-14 w-14"
+          className="h-12 w-12"
         />
       </div>
       
       {/* Right side - All information */}
-      <div className="w-3/4 p-1 flex flex-col justify-between">
-        {/* Top row - Logo and ID */}
-        <div className="flex justify-between items-center mb-0.5">
-          <div className="flex items-center">
-            <MoenLogoBlack className="w-auto h-3.5" />
-            <div className="text-[9px] font-bold text-primary ml-2">نظارات الفتتين</div>
-          </div>
-          <div className="flex items-center text-[7px] font-bold text-black">
-            <Hash className="h-2.5 w-2.5 mr-0.5 text-primary" />
-            {frame.frameId}
-          </div>
+      <div className="w-3/4 flex flex-col justify-between py-1 pr-2">
+        <div className="flex justify-between items-center">
+          <div className="text-xs font-bold rtl">نظارات الفتتين</div>
+          <div className="text-[10px] font-semibold tracking-wide">#{frame.frameId}</div>
         </div>
         
-        {/* Middle row - Brand and Model */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Glasses className="h-3 w-3 mr-0.5 text-primary" />
-            <span className="text-[10px] font-bold uppercase text-primary mr-1">{frame.brand}</span>
-          </div>
-          <div className="text-[8px] font-medium">{frame.model}</div>
+        <div className="flex justify-between items-center">
+          <div className="text-sm font-bold uppercase tracking-wider">{frame.brand}</div>
+          <div className="text-[9px] tracking-wide">{frame.model}</div>
         </div>
         
-        {/* Size and Color row */}
-        <div className="flex items-center justify-between mt-0.5">
-          <div className="flex items-center">
-            <Ruler className="h-2.5 w-2.5 mr-0.5 text-primary" />
-            <span className="text-[7px]">{frame.size || "N/A"}</span>
+        <div className="flex justify-between items-end">
+          <div className="text-[8px] text-gray-700">
+            {frame.size || "N/A"} | {frame.color}
           </div>
-          <div className="flex items-center">
-            <Info className="h-2.5 w-2.5 mr-0.5 text-primary" />
-            <span className="text-[7px]">{frame.color}</span>
-          </div>
-        </div>
-        
-        {/* Bottom row - Price */}
-        <div className="flex justify-end items-center mt-1">
-          <div className="flex items-center">
-            <Banknote className="h-3.5 w-3.5 mr-1 text-primary" />
-            <span className="text-[12px] font-bold">K.D. {frame.price.toFixed(3)}</span>
+          <div className="text-base font-bold">
+            K.D. {frame.price.toFixed(3)}
           </div>
         </div>
       </div>
@@ -766,16 +744,12 @@ export const usePrintLabel = () => {
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: 1px;
-              }
-              .separator {
-                width: 1px;
-                height: 100%;
-                background-color: #e0e0e0;
               }
               .info-side {
                 width: 75%;
-                padding: 1px;
+                padding-right: 8px;
+                padding-top: 2px;
+                padding-bottom: 2px;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
@@ -784,80 +758,45 @@ export const usePrintLabel = () => {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 0.5px;
+              }
+              .store-name {
+                font-size: 10px;
+                font-weight: bold;
+                direction: rtl;
+              }
+              .frame-id {
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
               }
               .middle-row {
                 display: flex;
-                flex-wrap: wrap;
                 justify-content: space-between;
                 align-items: center;
-                gap: 1px;
+                margin: 1px 0;
+              }
+              .brand {
+                font-size: 14px;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+              }
+              .model {
+                font-size: 9px;
+                letter-spacing: 0.5px;
               }
               .bottom-row {
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
-                margin-top: 1px;
+                align-items: flex-end;
               }
-              .logo {
-                height: 14px;
-                width: auto;
-                object-fit: contain;
-              }
-              .frame-id {
-                display: flex;
-                align-items: center;
-                font-size: 7px;
-                font-weight: bold;
-                color: black;
-              }
-              .id-icon {
-                height: 10px;
-                width: 10px;
-                margin-right: 2px;
-                color: #f0b429;
-              }
-              .model-container {
-                display: flex;
-                align-items: center;
-                font-size: 7px;
-                font-weight: 500;
-              }
-              .model-icon {
-                height: 10px;
-                width: 10px;
-                margin-right: 2px;
-                color: #f0b429;
-              }
-              .size-color {
-                display: flex;
-                align-items: center;
-                font-size: 6px;
+              .details {
+                font-size: 8px;
                 color: #444;
               }
-              .info-icon {
-                height: 8px;
-                width: 8px;
-                margin-right: 2px;
-                color: #666;
-              }
-              .brand {
-                font-size: 9px;
-                font-weight: bold;
-                text-transform: uppercase;
-                color: #f0b429;
-              }
               .price {
-                display: flex;
-                align-items: center;
-                font-size: 10px;
+                font-size: 16px;
                 font-weight: bold;
-              }
-              .price-icon {
-                height: 12px;
-                width: 12px;
-                margin-right: 2px;
-                color: #f0b429;
               }
             </style>
             <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
@@ -867,31 +806,18 @@ export const usePrintLabel = () => {
               <div class="qr-side">
                 <div id="qr-single"></div>
               </div>
-              <div class="separator"></div>
               <div class="info-side">
                 <div class="top-row">
-                  <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
-                  <div class="frame-id">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="id-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M4 18h16"/><path d="M4 6h16"/><path d="M16 6l-4 12-4-12"/></svg>
-                    ${frame.frameId}
-                  </div>
+                  <div class="store-name">نظارات الفتتين</div>
+                  <div class="frame-id">#${frame.frameId}</div>
                 </div>
                 <div class="middle-row">
-                  <div class="model-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="model-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 7-8 10a1 1 0 0 1-1.6 0L4 10l2-7Z"/><path d="M21 10H3"/></svg>
-                    ${frame.model}
-                  </div>
-                  <div class="size-color">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                    ${frame.size || 'N/A'} | ${frame.color}
-                  </div>
+                  <div class="brand">${frame.brand}</div>
+                  <div class="model">${frame.model}</div>
                 </div>
                 <div class="bottom-row">
-                  <div class="brand">${frame.brand}</div>
-                  <div class="price">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="price-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
-                    K.D. ${frame.price.toFixed(3)}
-                  </div>
+                  <div class="details">${frame.size || 'N/A'} | ${frame.color}</div>
+                  <div class="price">K.D. ${frame.price.toFixed(3)}</div>
                 </div>
               </div>
             </div>
@@ -950,3 +876,4 @@ export const usePrintLabel = () => {
   
   return { printSingleLabel };
 };
+

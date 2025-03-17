@@ -1,4 +1,3 @@
-
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -76,8 +75,7 @@
   
   /* Fix for QR code rendering in print */
   #qr-single img, [id^="qr-"] img {
-    width: 48px !important;
-    height: 48px !important;
+    width: 42px !important;
+    height: 42px !important;
   }
 }
-
