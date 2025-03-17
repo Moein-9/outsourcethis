@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from "react";
-import { useInvoiceStore } from "@/store/invoiceStore";
+import { useInvoiceStore, Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -32,8 +33,10 @@ import {
 import { SalesChart } from "./SalesChart";
 
 export const DailySalesReport: React.FC = () => {
-  const { invoices } = useInvoiceStore() || { invoices: [] };
-  const [todaySales, setTodaySales] = useState<ReturnType<typeof useInvoiceStore>["invoices"]>([]);
+  const invoiceStore = useInvoiceStore();
+  const invoices: Invoice[] = invoiceStore?.invoices || [];
+  
+  const [todaySales, setTodaySales] = useState<Invoice[]>([]);
   const [paymentBreakdown, setPaymentBreakdown] = useState<{
     method: string;
     amount: number;
