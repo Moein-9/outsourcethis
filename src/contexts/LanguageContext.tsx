@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 type Language = "ar" | "en";
@@ -351,10 +352,7 @@ const translations: Record<string, Record<string, string>> = {
     ar: "الهاتف",
     en: "Phone"
   },
-  "phone_number": {
-    ar: "رقم الهاتف",
-    en: "Phone Number"
-  },
+  // phone_number is already defined above
   "birth_date": {
     ar: "تاريخ الميلاد",
     en: "Birth Date"
@@ -389,10 +387,7 @@ const translations: Record<string, Record<string, string>> = {
     ar: "الإطار",
     en: "Frame"
   },
-  "search": {
-    ar: "بحث",
-    en: "Search"
-  },
+  // search is already defined above
   "search_example": {
     ar: "مثال: RayBan...",
     en: "Example: RayBan..."
@@ -401,7 +396,7 @@ const translations: Record<string, Record<string, string>> = {
     ar: "إضافة إطار جديد",
     en: "Add New Frame"
   },
-  "search_brand_model": {
+  "search_brand_model_color_size": {
     ar: "بحث (Brand/Model/Color/Size):",
     en: "Search (Brand/Model/Color/Size):"
   },
@@ -627,10 +622,7 @@ const translations: Record<string, Record<string, string>> = {
     ar: "نظارات",
     en: "Glasses"
   },
-  "contact_lenses": {
-    ar: "عدسات لاصقة",
-    en: "Contact Lenses"
-  },
+  // contact_lenses is already defined above
   "client_info": {
     ar: "بيانات العميل",
     en: "Client Information"
@@ -639,14 +631,8 @@ const translations: Record<string, Record<string, string>> = {
     ar: "لا يوجد ملف عميل",
     en: "No client file"
   },
-  "phone_number": {
-    ar: "رقم الهاتف",
-    en: "Phone Number"
-  },
-  "search": {
-    ar: "بحث",
-    en: "Search"
-  },
+  // phone_number is already defined above
+  // search is already defined above
   "write_to_search": {
     ar: "اكتب للبحث...",
     en: "Type to search..."
@@ -667,10 +653,7 @@ const translations: Record<string, Record<string, string>> = {
     ar: "المجموع",
     en: "Total"
   },
-  "search_brand_model_color_size": {
-    ar: "بحث (Brand/Model/Color/Size):",
-    en: "Search (Brand/Model/Color/Size):"
-  }
+  // search_brand_model_color_size is already defined above
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);

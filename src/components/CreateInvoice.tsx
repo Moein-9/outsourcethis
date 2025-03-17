@@ -11,6 +11,7 @@ import { ContactLensForm } from "@/components/ContactLensForm";
 import { usePatientStore, ContactLensRx } from "@/store/patientStore";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
 
 const CreateInvoice: React.FC = () => {
   const { t, language } = useLanguage();
@@ -19,6 +20,8 @@ const CreateInvoice: React.FC = () => {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [frameOnly, setFrameOnly] = useState<boolean>(false);
   const [total, setTotal] = useState<number>(0);
+  const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
+  const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
   const [contactLensRx, setContactLensRx] = useState<ContactLensRx>({
     rightEye: {
       sphere: "-",
@@ -124,7 +127,14 @@ const CreateInvoice: React.FC = () => {
                     </div>
                   </div>
                   
-                  {!frameOnly && <LensSelector />}
+                  {!frameOnly && (
+                    <LensSelector 
+                      onSelectLensType={setSelectedLensType}
+                      onSelectCoating={setSelectedCoating}
+                      skipLens={frameOnly}
+                      onSkipLensChange={setFrameOnly}
+                    />
+                  )}
                 </CardContent>
               </Card>
               
