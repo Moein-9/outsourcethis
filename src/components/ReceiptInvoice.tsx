@@ -83,11 +83,15 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
     <div className={containerClass} style={{ fontFamily: 'Courier New, monospace' }}>
       <div className="text-center border-b pb-3 mb-3">
         <div className="flex justify-center mb-2">
-          <Receipt className="w-10 h-10 text-primary" />
+          <img 
+            src="/lovable-uploads/fdd57e66-99f5-4953-a172-c48e0af3c3b8.png" 
+            alt="Moen Optician" 
+            className="h-14 mb-1"
+          />
         </div>
-        <h2 className="font-bold text-xl mb-1">متجر النظارات</h2>
-        <p className="text-sm text-muted-foreground">مدينة الكويت، بلوك 5</p>
-        <p className="text-sm text-muted-foreground">هاتف: 6789-2345 965+</p>
+        <h2 className="font-bold text-xl mb-1">Moen Optician</h2>
+        <p className="text-sm text-muted-foreground">al-somait plaza, Habeeb Munawer St, Al Farwaniyah</p>
+        <p className="text-sm text-muted-foreground">هاتف: 2475 9016</p>
       </div>
 
       <div className="mb-4 text-sm">
