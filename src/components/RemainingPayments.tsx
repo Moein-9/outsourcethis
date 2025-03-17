@@ -73,6 +73,7 @@ const RemainingPayments = () => {
     addPartialPayment(selectedInvoice, {
       amount,
       method: "cash", // Default payment method
+      date: paymentDate,
     });
 
     toast.success(`تم تسجيل دفعة بقيمة ${amount} KWD`);
@@ -119,7 +120,7 @@ const RemainingPayments = () => {
                     variant={!invoice.isPaid ? "outline" : "secondary"}
                     className={!invoice.isPaid ? "bg-orange-100 text-orange-800 border-orange-200" : ""}
                   >
-                    {invoice.isPaid ? "مدفوعة" : (invoice.remaining > 0 ? "مدفوعة جزئياً" : "غير مدفوعة")}
+                    {invoice.isPaid ? "مدفوعة" : (invoice.payments?.length > 0 ? "مدفوعة جزئياً" : "غير مدفوعة")}
                   </Badge>
                 </CardTitle>
                 <CardDescription className="text-orange-600 flex justify-between">
