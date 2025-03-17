@@ -70,8 +70,8 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ContactLensItem[]>(contactLenses);
   const [selectedLenses, setSelectedLenses] = useState<ContactLensItem[]>([]);
-  const [hasExistingPatient, setHasExistingPatient] = useState(!!initialRxData);
-  const [showRxForm, setShowRxForm] = useState(!initialRxData);
+  // Removing hasExistingPatient state as we're not showing the toggle anymore
+  const [showRxForm, setShowRxForm] = useState(true);
   const [rxData, setRxData] = useState<ContactLensRx>(initialRxData || emptyContactLensRx);
   
   const [filterBrand, setFilterBrand] = useState<string>("all");
@@ -143,11 +143,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     });
   };
   
-  const togglePatientStatus = () => {
-    setHasExistingPatient(!hasExistingPatient);
-    setShowRxForm(!hasExistingPatient);
-  };
-  
   const handleConfirmSelection = () => {
     onSelect({
       items: selectedLenses,
@@ -168,14 +163,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
         </div>
         
         <div className="flex items-center gap-3">
-          <Badge 
-            variant={hasExistingPatient ? "outline" : "secondary"} 
-            className={`cursor-pointer ${hasExistingPatient ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}
-            onClick={togglePatientStatus}
-          >
-            {hasExistingPatient ? "يوجد ملف عميل" : "لا يوجد ملف عميل"}
-          </Badge>
-          
           {selectedLenses.length > 0 && (
             <Badge variant="outline" className="px-3 py-1.5 bg-blue-50 text-blue-700 border-blue-200">
               {selectedLenses.length} عدسة مختارة
@@ -206,7 +193,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
             <ContactLensForm
               rxData={rxData}
               onChange={handleRxChange}
-              showMissingRxWarning={!hasExistingPatient}
+              showMissingRxWarning={false}
             />
           </CardContent>
         </Card>
@@ -440,3 +427,4 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     </div>
   );
 };
+
