@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -270,7 +271,7 @@ const ContactLensForm = () => {
 const CreateInvoice = () => {
   const { addInvoice } = useInvoiceStore();
   const { patients } = usePatientStore();
-  const { inventory } = useInventoryStore();
+  const { frames } = useInventoryStore(); // Fixed: use frames instead of inventory
 
   const [open, setOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -282,12 +283,13 @@ const CreateInvoice = () => {
   const [frameBrand, setFrameBrand] = useState("");
   const [frameModel, setFrameModel] = useState("");
   const [framePrice, setFramePrice] = useState(0);
+  const [frameColor, setFrameColor] = useState(""); // Added frameColor state
   const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(0);
   const [deposit, setDeposit] = useState(0);
   const [remaining, setRemaining] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("cash");
-	const [authNumber, setAuthNumber] = useState("");
+  const [authNumber, setAuthNumber] = useState("");
   const [payments, setPayments] = useState([]);
 
   useEffect(() => {
@@ -319,19 +321,14 @@ const CreateInvoice = () => {
       coatingPrice,
       frameBrand,
       frameModel,
+      frameColor, // Added frameColor to match the Invoice type
       framePrice,
       discount,
       total,
       deposit,
       remaining,
       paymentMethod,
-			authNumber,
-      payments: [{
-        method: paymentMethod,
-        amount: deposit,
-        date: new Date(),
-				authNumber
-      }],
+      authNumber,
       createdAt: new Date(),
     };
 
@@ -374,13 +371,13 @@ const CreateInvoice = () => {
                       id="patient"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       onChange={(e) => {
-                        const patient = patients.find((p) => p.id === e.target.value);
+                        const patient = patients.find((p) => p.patientId === e.target.value);
                         setSelectedPatient(patient);
                       }}
                     >
                       <option value="">اختر عميل</option>
                       {patients.map((patient) => (
-                        <option key={patient.id} value={patient.id}>
+                        <option key={patient.patientId} value={patient.patientId}>
                           {patient.name} - {patient.phone}
                         </option>
                       ))}
@@ -466,6 +463,16 @@ const CreateInvoice = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div>
+                    <Label htmlFor="frameColor">لون الإطار</Label>
+                    <Input
+                      type="text"
+                      id="frameColor"
+                      value={frameColor}
+                      onChange={(e) => setFrameColor(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
                     <Label htmlFor="discount">الخصم</Label>
                     <Input
                       type="number"
@@ -474,7 +481,9 @@ const CreateInvoice = () => {
                       onChange={(e) => setDiscount(parseFloat(e.target.value))}
                     />
                   </div>
+                </div>
 
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="total">المجموع</Label>
                     <Input
@@ -484,9 +493,7 @@ const CreateInvoice = () => {
                       readOnly
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="deposit">المقدم</Label>
                     <Input
@@ -496,7 +503,9 @@ const CreateInvoice = () => {
                       onChange={(e) => setDeposit(parseFloat(e.target.value))}
                     />
                   </div>
+                </div>
 
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="remaining">المتبقي</Label>
                     <Input
@@ -506,9 +515,7 @@ const CreateInvoice = () => {
                       readOnly
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="paymentMethod">طريقة الدفع</Label>
                     <select
@@ -521,18 +528,19 @@ const CreateInvoice = () => {
                       <option value="knet">KNET</option>
                     </select>
                   </div>
-									{paymentMethod !== 'cash' && (
-										<div>
-											<Label htmlFor="authNumber">رقم التفويض</Label>
-											<Input
-												type="text"
-												id="authNumber"
-												value={authNumber}
-												onChange={(e) => setAuthNumber(e.target.value)}
-											/>
-										</div>
-									)}
                 </div>
+
+                {paymentMethod !== 'cash' && (
+                  <div>
+                    <Label htmlFor="authNumber">رقم التفويض</Label>
+                    <Input
+                      type="text"
+                      id="authNumber"
+                      value={authNumber}
+                      onChange={(e) => setAuthNumber(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
             </TabsContent>
 
