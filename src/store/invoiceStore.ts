@@ -35,6 +35,9 @@ interface InvoiceState {
   markAsPaid: (invoiceId: string) => void;
   getInvoiceById: (id: string) => Invoice | undefined;
   getUnpaidInvoices: () => Invoice[];
+  // Added for mock data functionality
+  clearInvoices?: () => void;
+  addExistingInvoice?: (invoice: Invoice) => void;
 }
 
 export const useInvoiceStore = create<InvoiceState>()(
@@ -80,6 +83,17 @@ export const useInvoiceStore = create<InvoiceState>()(
       
       getUnpaidInvoices: () => {
         return get().invoices.filter(invoice => !invoice.isPaid);
+      },
+      
+      // Add methods to support mock data
+      clearInvoices: () => {
+        set({ invoices: [] });
+      },
+      
+      addExistingInvoice: (invoice) => {
+        set((state) => ({
+          invoices: [...state.invoices, invoice]
+        }));
       }
     }),
     {
