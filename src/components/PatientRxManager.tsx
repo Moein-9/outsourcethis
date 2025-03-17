@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { 
   Table, 
   TableBody, 
-  TableCaption, 
   TableCell, 
   TableHead, 
   TableHeader, 
@@ -31,11 +30,11 @@ import {
   Eye,
   Plus,
   Calendar,
-  CheckCircle2
+  CheckCircle2,
+  ArrowRight
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
-import { Input } from "./ui/input";
 import { toast } from "@/components/ui/use-toast";
 
 interface PatientRxManagerProps {
@@ -72,6 +71,8 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     pdLeft: "",
     createdAt: new Date().toISOString()
   });
+  const [viewRxDetails, setViewRxDetails] = useState<RxData | null>(null);
+  const [isViewRxOpen, setIsViewRxOpen] = useState(false);
 
   const handleRxInputChange = (eye: "OD" | "OS", field: "sphere" | "cyl" | "axis" | "add", value: string) => {
     if (eye === "OD") {
@@ -123,6 +124,11 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     });
 
     setIsNewRxOpen(false);
+  };
+
+  const handleViewRx = (rx: RxData) => {
+    setViewRxDetails(rx);
+    setIsViewRxOpen(true);
   };
 
   const formatDate = (dateString?: string) => {
@@ -277,10 +283,9 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                   <TableHeader className="bg-amber-50">
                     <TableRow>
                       <TableHead className="text-amber-800">التاريخ</TableHead>
-                      <TableHead className="text-amber-800">ODسفير</TableHead>
-                      <TableHead className="text-amber-800">ODسلندر</TableHead>
-                      <TableHead className="text-amber-800">OSسفير</TableHead>
-                      <TableHead className="text-amber-800">OSسلندر</TableHead>
+                      <TableHead className="text-amber-800">العين اليمنى (OD)</TableHead>
+                      <TableHead className="text-amber-800">العين اليسرى (OS)</TableHead>
+                      <TableHead className="text-amber-800">PD</TableHead>
                       <TableHead className="text-right text-amber-800">الإجراءات</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -288,12 +293,40 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     {rxHistory.map((rx, index) => (
                       <TableRow key={index} className={index % 2 === 0 ? "bg-amber-50/30" : "bg-white"}>
                         <TableCell className="font-medium">{formatDate(rx.createdAt)}</TableCell>
-                        <TableCell>{rx.sphereOD}</TableCell>
-                        <TableCell>{rx.cylOD} / {rx.axisOD}</TableCell>
-                        <TableCell>{rx.sphereOS}</TableCell>
-                        <TableCell>{rx.cylOS} / {rx.axisOS}</TableCell>
+                        <TableCell className="text-sm">
+                          <div className="space-y-1">
+                            <div className="flex items-center">
+                              <span className="font-medium ml-1">SPH:</span> {rx.sphereOD || "-"}
+                            </div>
+                            <div className="flex items-center">
+                              <span className="font-medium ml-1">CYL:</span> {rx.cylOD || "-"}
+                            </div>
+                            <div className="flex items-center">
+                              <span className="font-medium ml-1">AXIS:</span> {rx.axisOD || "-"}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          <div className="space-y-1">
+                            <div className="flex items-center">
+                              <span className="font-medium ml-1">SPH:</span> {rx.sphereOS || "-"}
+                            </div>
+                            <div className="flex items-center">
+                              <span className="font-medium ml-1">CYL:</span> {rx.cylOS || "-"}
+                            </div>
+                            <div className="flex items-center">
+                              <span className="font-medium ml-1">AXIS:</span> {rx.axisOS || "-"}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{rx.pdRight} - {rx.pdLeft}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" className="text-amber-600 hover:text-amber-700 hover:bg-amber-50">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                            onClick={() => handleViewRx(rx)}
+                          >
                             <Eye className="h-3.5 w-3.5 ml-1" />
                             عرض
                           </Button>
@@ -506,6 +539,73 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
             </Button>
             <Button onClick={handleSaveNewRx} className="bg-blue-600 hover:bg-blue-700">
               حفظ الوصفة الجديدة
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View RX Details Dialog */}
+      <Dialog open={isViewRxOpen} onOpenChange={setIsViewRxOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl">تفاصيل الوصفة الطبية</DialogTitle>
+            <DialogDescription>
+              {viewRxDetails?.createdAt && formatDate(viewRxDetails.createdAt)}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {viewRxDetails && (
+            <div className="py-4">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-lg border border-amber-200 mb-4">
+                <div className="overflow-x-auto bg-white rounded-md shadow-sm">
+                  <Table>
+                    <TableHeader className="bg-amber-100">
+                      <TableRow>
+                        <TableHead className="text-amber-800"></TableHead>
+                        <TableHead className="text-amber-800">Sphere</TableHead>
+                        <TableHead className="text-amber-800">Cylinder</TableHead>
+                        <TableHead className="text-amber-800">Axis</TableHead>
+                        <TableHead className="text-amber-800">Add</TableHead>
+                        <TableHead className="text-amber-800">PD</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium bg-amber-50/50">العين اليمنى (OD)</TableCell>
+                        <TableCell>{viewRxDetails.sphereOD || "-"}</TableCell>
+                        <TableCell>{viewRxDetails.cylOD || "-"}</TableCell>
+                        <TableCell>{viewRxDetails.axisOD || "-"}</TableCell>
+                        <TableCell>{viewRxDetails.addOD || "-"}</TableCell>
+                        <TableCell rowSpan={2}>{viewRxDetails.pdRight || "-"}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium bg-rose-50/50">العين اليسرى (OS)</TableCell>
+                        <TableCell>{viewRxDetails.sphereOS || "-"}</TableCell>
+                        <TableCell>{viewRxDetails.cylOS || "-"}</TableCell>
+                        <TableCell>{viewRxDetails.axisOS || "-"}</TableCell>
+                        <TableCell>{viewRxDetails.addOS || "-"}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsViewRxOpen(false)}>
+              إغلاق
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-blue-300 hover:bg-blue-50"
+              onClick={() => {
+                setIsViewRxOpen(false);
+                onRxPrintRequest();
+              }}
+            >
+              <Printer className="h-4 w-4 ml-2 text-blue-600" />
+              طباعة الوصفة
             </Button>
           </DialogFooter>
         </DialogContent>

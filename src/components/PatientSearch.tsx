@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -74,7 +75,6 @@ interface PatientWithMeta extends Patient {
   patientId: string;
   dateOfBirth: string;
   lastVisit?: string;
-  vip?: boolean;
   avatar?: string;
   createdAt: string;
 }
@@ -114,7 +114,6 @@ export const PatientSearch: React.FC = () => {
         ...patient,
         dateOfBirth: patient.dob,
         lastVisit: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
-        vip: Math.random() > 0.8,
         createdAt: patient.createdAt
       } as PatientWithMeta;
     });
@@ -164,9 +163,20 @@ export const PatientSearch: React.FC = () => {
     }
   };
   
-  const getActiveWorkOrders = (workOrders: WorkOrder[], invoices: Invoice[]) => {
-    const invoicedOrderIds = invoices.map(inv => inv.workOrderId);
-    return workOrders.filter(wo => !invoicedOrderIds.includes(wo.id));
+  const getActiveWorkOrders = (workOrders: WorkOrder[]) => {
+    // Filter work orders that are not fully paid
+    return workOrders.filter(wo => {
+      const invoice = invoices.find(inv => inv.workOrderId === wo.id);
+      return !invoice || !invoice.isPaid;
+    });
+  };
+  
+  const getCompletedWorkOrders = (workOrders: WorkOrder[]) => {
+    // Get work orders that are fully paid
+    return workOrders.filter(wo => {
+      const invoice = invoices.find(inv => inv.workOrderId === wo.id);
+      return invoice && invoice.isPaid;
+    });
   };
   
   return (
@@ -318,9 +328,6 @@ export const PatientSearch: React.FC = () => {
                           </AvatarFallback>
                         </Avatar>
                         <h3 className="text-xl font-semibold">{selectedPatient.name}</h3>
-                        <Badge variant={selectedPatient.vip ? "default" : "outline"} className="mt-1">
-                          {selectedPatient.vip ? "عميل VIP" : "عميل عادي"}
-                        </Badge>
                       </div>
                       
                       <div className="space-y-4">
@@ -410,7 +417,7 @@ export const PatientSearch: React.FC = () => {
                               أوامر العمل قيد التنفيذ
                             </h3>
                             
-                            {getActiveWorkOrders(patientWorkOrders, patientInvoices).length > 0 ? (
+                            {getActiveWorkOrders(patientWorkOrders).length > 0 ? (
                               <div className="rounded-md border overflow-hidden shadow-sm">
                                 <Table>
                                   <TableHeader className="bg-amber-50">
@@ -424,29 +431,40 @@ export const PatientSearch: React.FC = () => {
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
-                                    {getActiveWorkOrders(patientWorkOrders, patientInvoices).map((workOrder, index) => (
-                                      <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-amber-50/30' : ''}>
-                                        <TableCell className="font-medium">{index + 1}</TableCell>
-                                        <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
-                                        <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
-                                        <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
-                                        <TableCell>
-                                          <Badge className="bg-amber-500">قيد التنفيذ</Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                          <div className="flex justify-end gap-2">
-                                            <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
-                                              <Eye className="h-3.5 w-3.5 ml-1 text-amber-600" />
-                                              عرض
-                                            </Button>
-                                            <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
-                                              <Printer className="h-3.5 w-3.5 ml-1 text-amber-600" />
-                                              طباعة
-                                            </Button>
-                                          </div>
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
+                                    {getActiveWorkOrders(patientWorkOrders).map((workOrder, index) => {
+                                      const invoice = invoices.find(inv => inv.workOrderId === workOrder.id);
+                                      const status = !invoice ? "قيد التنفيذ" : 
+                                        invoice.isPaid ? "مدفوعة" : 
+                                        invoice.deposit > 0 ? "مدفوعة جزئيًا" : "غير مدفوعة";
+                                      
+                                      const statusColor = !invoice ? "bg-amber-500" : 
+                                        invoice.isPaid ? "bg-green-500" : 
+                                        invoice.deposit > 0 ? "bg-amber-500" : "bg-red-500";
+                                      
+                                      return (
+                                        <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-amber-50/30' : ''}>
+                                          <TableCell className="font-medium">{index + 1}</TableCell>
+                                          <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
+                                          <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
+                                          <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
+                                          <TableCell>
+                                            <Badge className={statusColor}>{status}</Badge>
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            <div className="flex justify-end gap-2">
+                                              <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
+                                                <Eye className="h-3.5 w-3.5 ml-1 text-amber-600" />
+                                                عرض
+                                              </Button>
+                                              <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
+                                                <Printer className="h-3.5 w-3.5 ml-1 text-amber-600" />
+                                                طباعة
+                                              </Button>
+                                            </div>
+                                          </TableCell>
+                                        </TableRow>
+                                      );
+                                    })}
                                   </TableBody>
                                 </Table>
                               </div>
@@ -469,7 +487,7 @@ export const PatientSearch: React.FC = () => {
                               الفواتير المكتملة
                             </h3>
                             
-                            {patientInvoices.length > 0 ? (
+                            {patientInvoices.filter(inv => inv.isPaid).length > 0 ? (
                               <div className="rounded-md border overflow-hidden shadow-sm">
                                 <Table>
                                   <TableHeader className="bg-green-50">
@@ -483,27 +501,14 @@ export const PatientSearch: React.FC = () => {
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
-                                    {patientInvoices.map((invoice, index) => (
+                                    {patientInvoices.filter(inv => inv.isPaid).map((invoice, index) => (
                                       <TableRow key={invoice.invoiceId} className={index % 2 === 0 ? 'bg-green-50/30' : ''}>
                                         <TableCell className="font-medium">{index + 1}</TableCell>
                                         <TableCell>INV-{invoice.invoiceId.substring(0, 8)}</TableCell>
                                         <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
                                         <TableCell>{formatDate(invoice.createdAt)}</TableCell>
                                         <TableCell>
-                                          <Badge className={
-                                            invoice.isPaid
-                                              ? 'bg-green-500' 
-                                              : invoice.deposit > 0
-                                                ? 'bg-amber-500' 
-                                                : 'bg-red-500'
-                                          }>
-                                            {invoice.isPaid
-                                              ? 'مدفوعة' 
-                                              : invoice.deposit > 0
-                                                ? 'مدفوعة جزئيًا' 
-                                                : 'غير مدفوعة'
-                                            }
-                                          </Badge>
+                                          <Badge className="bg-green-500">مدفوعة</Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
                                           <div className="flex justify-end gap-2">
@@ -525,7 +530,7 @@ export const PatientSearch: React.FC = () => {
                             ) : (
                               <div className="text-center py-6 border rounded-md bg-green-50/20">
                                 <FileText className="h-10 w-10 mx-auto text-green-300 mb-3" />
-                                <h3 className="text-lg font-medium mb-1 text-green-700">لا توجد فواتير</h3>
+                                <h3 className="text-lg font-medium mb-1 text-green-700">لا توجد فواتير مكتملة</h3>
                                 <p className="text-muted-foreground max-w-md mx-auto">
                                   لا يوجد فواتير مكتملة لهذا العميل حالياً.
                                 </p>
@@ -539,10 +544,7 @@ export const PatientSearch: React.FC = () => {
                               أوامر العمل المكتملة
                             </h3>
                             
-                            {patientWorkOrders.filter(wo => {
-                              const invoicedOrderIds = patientInvoices.map(inv => inv.workOrderId);
-                              return invoicedOrderIds.includes(wo.id);
-                            }).length > 0 ? (
+                            {getCompletedWorkOrders(patientWorkOrders).length > 0 ? (
                               <div className="rounded-md border overflow-hidden shadow-sm">
                                 <Table>
                                   <TableHeader className="bg-blue-50">
@@ -556,10 +558,7 @@ export const PatientSearch: React.FC = () => {
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
-                                    {patientWorkOrders.filter(wo => {
-                                      const invoicedOrderIds = patientInvoices.map(inv => inv.workOrderId);
-                                      return invoicedOrderIds.includes(wo.id);
-                                    }).map((workOrder, index) => (
+                                    {getCompletedWorkOrders(patientWorkOrders).map((workOrder, index) => (
                                       <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30' : ''}>
                                         <TableCell className="font-medium">{index + 1}</TableCell>
                                         <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
