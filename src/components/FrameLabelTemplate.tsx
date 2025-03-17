@@ -10,8 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Printer, Tag } from "lucide-react";
+import { Printer, Tag, QrCode, Info } from "lucide-react";
 import { toast } from "sonner";
+import { MoenLogoGreen } from "@/assets/logo";
 
 // Dimensions: 100mm x 16mm (standard Zebra label size)
 const LABEL_WIDTH = "100mm";
@@ -32,16 +33,24 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
         pageBreakInside: "avoid",
       }}
     >
-      {/* Left side - Frame ID and Barcode */}
-      <div className="w-1/2 p-1 flex flex-col items-start justify-center">
-        <div className="text-[10px] font-bold mb-0.5 text-black">{frame.frameId}</div>
-        <div className="w-full h-8 bg-[url('/public/lovable-uploads/733e0754-fe7b-478e-a0f0-9ff7e5c7867c.png')] bg-no-repeat bg-contain bg-left"></div>
+      {/* Left side - Store logo, Frame ID, Model and QR Code */}
+      <div className="w-3/5 p-1 flex flex-col items-start justify-center relative">
+        <div className="absolute top-0 left-1 w-4 h-4">
+          <MoenLogoGreen className="w-4 h-4" />
+        </div>
+        <div className="text-[8px] font-bold mb-0.5 text-black mt-1 ml-6">ID: {frame.frameId}</div>
+        <div className="text-[8px] font-bold mb-0.5 text-black ml-6">Model: {frame.model}</div>
+        <div className="text-[8px] mb-0.5 text-gray-700 ml-6">Size: {frame.size || "N/A"}</div>
+        <div className="text-[8px] mb-0.5 text-gray-700 ml-6">Color: {frame.color}</div>
+        <div className="absolute right-2 top-1 bottom-1 flex items-center">
+          <QrCode className="h-10 w-10 text-black" />
+        </div>
       </div>
       
       {/* Right side - Brand and Price */}
-      <div className="w-1/2 p-1 flex flex-col justify-center items-end pr-3">
-        <div className="text-[12px] font-bold uppercase mb-1">{frame.brand}</div>
-        <div className="text-[14px] font-bold">K.D. {frame.price.toFixed(3)}</div>
+      <div className="w-2/5 p-1 flex flex-col justify-center items-end pr-2">
+        <div className="text-[10px] font-bold uppercase mb-1">{frame.brand}</div>
+        <div className="text-[12px] font-bold">K.D. {frame.price.toFixed(3)}</div>
       </div>
     </div>
   );
@@ -94,6 +103,7 @@ export const FrameLabelTemplate: React.FC = () => {
               body {
                 margin: 0;
                 padding: 0;
+                font-family: Arial, sans-serif;
               }
               .label-container {
                 width: ${LABEL_WIDTH};
@@ -104,39 +114,66 @@ export const FrameLabelTemplate: React.FC = () => {
                 overflow: hidden;
               }
               .left-side {
-                width: 50%;
+                width: 60%;
                 padding: 4px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: flex-start;
+                position: relative;
               }
               .right-side {
-                width: 50%;
+                width: 40%;
                 padding: 4px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: flex-end;
-                padding-right: 12px;
+                padding-right: 8px;
+              }
+              .logo {
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 16px;
+                height: 16px;
               }
               .frame-id {
-                font-size: 10px;
+                font-size: 8px;
                 font-weight: bold;
-                margin-bottom: 2px;
+                margin-bottom: 1px;
+                margin-left: 20px;
+                margin-top: 4px;
               }
-              .barcode {
-                width: 100%;
-                height: 32px;
+              .frame-model {
+                font-size: 8px;
+                font-weight: bold;
+                margin-bottom: 1px;
+                margin-left: 20px;
+              }
+              .frame-size, .frame-color {
+                font-size: 8px;
+                margin-bottom: 1px;
+                color: #555;
+                margin-left: 20px;
+              }
+              .qr-code {
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 30px;
+                height: 30px;
+                background-color: #000;
               }
               .brand {
-                font-size: 12px;
+                font-size: 10px;
                 font-weight: bold;
                 text-transform: uppercase;
-                margin-bottom: 4px;
+                margin-bottom: 2px;
               }
               .price {
-                font-size: 14px;
+                font-size: 12px;
                 font-weight: bold;
               }
             </style>
@@ -150,8 +187,12 @@ export const FrameLabelTemplate: React.FC = () => {
           printWindow.document.write(`
             <div class="label-container">
               <div class="left-side">
-                <div class="frame-id">${frame.frameId}</div>
-                <div class="barcode"></div>
+                <img src="/lovable-uploads/268d32e7-5d4a-4f77-bda8-2566232a44ab.png" class="logo" alt="Moen Logo">
+                <div class="frame-id">ID: ${frame.frameId}</div>
+                <div class="frame-model">Model: ${frame.model}</div>
+                <div class="frame-size">Size: ${frame.size || 'N/A'}</div>
+                <div class="frame-color">Color: ${frame.color}</div>
+                <div class="qr-code"></div>
               </div>
               <div class="right-side">
                 <div class="brand">${frame.brand}</div>

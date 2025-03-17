@@ -89,3 +89,19 @@
     display: none !important;
   }
 }
+
+/* Updated label printing styles */
+@media print {
+  @page {
+    size: 100mm 16mm;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .frame-label {
+    width: 100mm;
+    height: 16mm;
+    page-break-inside: avoid;
+    overflow: hidden;
+  }
+}
