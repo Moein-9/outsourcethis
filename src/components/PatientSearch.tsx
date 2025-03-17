@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { usePatientStore } from "@/store/patientStore";
+import { usePatientStore, PatientNote, RxHistoryItem } from "@/store/patientStore";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,15 +11,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Patient, RxData } from "@/store/patientStore";
 import { Invoice } from "@/store/invoiceStore";
-
-interface PatientNote {
-  text: string;
-  createdAt: string;
-}
-
-interface RxHistoryItem extends RxData {
-  createdAt: string;
-}
+import { CalendarIcon, Save, Eye, Plus, FileText, History } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { toast } from "@/components/ui/use-toast";
 
 export const PatientSearch: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,6 +24,7 @@ export const PatientSearch: React.FC = () => {
   const [showResults, setShowResults] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [activeRxTab, setActiveRxTab] = useState("current");
+  const [rxDate, setRxDate] = useState<Date | undefined>(new Date());
   
   // New RX form state
   const [newRx, setNewRx] = useState<Partial<RxData>>({
@@ -43,7 +40,7 @@ export const PatientSearch: React.FC = () => {
     pdLeft: ""
   });
   
-  const { patients, searchPatients, updatePatient } = usePatientStore();
+  const { patients, searchPatients, updatePatient, updatePatientRx, addPatientNote } = usePatientStore();
   const { invoices } = useInvoiceStore();
 
   const handleSearch = () => {
@@ -86,26 +83,31 @@ export const PatientSearch: React.FC = () => {
 
   const submitNewRx = () => {
     if (!selectedPatient) return;
-
-    // Create a copy of the current patient
-    const updatedPatient = { ...selectedPatient };
     
-    // If there's an existing RX, move it to history
-    if (updatedPatient.rx && Object.values(updatedPatient.rx).some(v => v)) {
-      // Initialize rxHistory if it doesn't exist
-      if (!updatedPatient.rxHistory) {
-        updatedPatient.rxHistory = [];
-      }
-      
-      // Add current RX to history with timestamp
-      updatedPatient.rxHistory.push({
-        ...updatedPatient.rx,
-        createdAt: new Date().toISOString()
+    // Validate that essential fields are filled
+    const requiredFields = ["sphereOD", "cylOD", "axisOD", "sphereOS", "cylOS", "axisOS"];
+    const missingFields = requiredFields.filter(field => !newRx[field as keyof RxData]);
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: "تحذير",
+        description: "يرجى ملء جميع الحقول المطلوبة للوصفة الطبية",
+        variant: "destructive"
       });
+      return;
     }
     
-    // Set the new RX as current
-    updatedPatient.rx = {
+    if (!rxDate) {
+      toast({
+        title: "تحذير",
+        description: "يرجى تحديد تاريخ الوصفة الطبية",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create the new RX with timestamp
+    const newRxWithDate: RxData = {
       sphereOD: newRx.sphereOD || "",
       cylOD: newRx.cylOD || "",
       axisOD: newRx.axisOD || "",
@@ -115,13 +117,22 @@ export const PatientSearch: React.FC = () => {
       axisOS: newRx.axisOS || "",
       addOS: newRx.addOS || "",
       pdRight: newRx.pdRight || "",
-      pdLeft: newRx.pdLeft || ""
+      pdLeft: newRx.pdLeft || "",
+      createdAt: rxDate.toISOString()
     };
     
-    // Update patient in store
-    updatePatient(updatedPatient);
+    // Update patient RX in the store
+    updatePatientRx(selectedPatient.patientId, newRxWithDate);
     
     // Update local state
+    const updatedPatient = {
+      ...selectedPatient,
+      rx: newRxWithDate,
+      rxHistory: selectedPatient.rx && Object.values(selectedPatient.rx).some(v => v)
+        ? [{ ...selectedPatient.rx, createdAt: selectedPatient.rx.createdAt || new Date().toISOString() }, ...(selectedPatient.rxHistory || [])]
+        : selectedPatient.rxHistory
+    };
+    
     setSelectedPatient(updatedPatient);
     
     // Reset form
@@ -137,17 +148,70 @@ export const PatientSearch: React.FC = () => {
       pdRight: "",
       pdLeft: ""
     });
+    setRxDate(new Date());
     
     // Switch to current tab to show the new RX
     setActiveRxTab("current");
+    
+    toast({
+      title: "تم الحفظ",
+      description: "تم حفظ الوصفة الطبية الجديدة بنجاح",
+    });
+  };
+  
+  const saveNote = () => {
+    if (!selectedPatient || !noteText.trim()) {
+      toast({
+        title: "تحذير",
+        description: "يرجى كتابة ملاحظة قبل الحفظ",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Add the note to the patient's record
+    addPatientNote(selectedPatient.patientId, noteText);
+    
+    // Update local state
+    if (selectedPatient.patientNotes) {
+      const newNote: PatientNote = {
+        id: `note-${Date.now()}`,
+        text: noteText,
+        createdAt: new Date().toISOString()
+      };
+      
+      setSelectedPatient({
+        ...selectedPatient,
+        patientNotes: [...selectedPatient.patientNotes, newNote]
+      });
+    } else {
+      const newNote: PatientNote = {
+        id: `note-${Date.now()}`,
+        text: noteText,
+        createdAt: new Date().toISOString()
+      };
+      
+      setSelectedPatient({
+        ...selectedPatient,
+        patientNotes: [newNote]
+      });
+    }
+    
+    // Clear the input
+    setNoteText("");
+    
+    toast({
+      title: "تم الحفظ",
+      description: "تم حفظ الملاحظة بنجاح",
+    });
   };
 
-  const renderRxTable = (rx: RxData, date?: string) => {
+  const renderRxTable = (rx: RxData) => {
     return (
       <div className="overflow-x-auto">
-        {date && (
+        {rx.createdAt && (
           <div className="text-center mb-2 p-2 bg-amber-100 rounded">
-            <span className="font-bold">تاريخ الوصفة:</span> {formatDate(date)}
+            <span className="font-bold">تاريخ الوصفة:</span> {formatDate(rx.createdAt)}
           </div>
         )}
         <table className="w-full border-collapse mb-2 ltr">
@@ -222,7 +286,34 @@ export const PatientSearch: React.FC = () => {
 
     return (
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h3 className="text-lg font-bold text-primary mb-4">إضافة وصفة جديدة</h3>
+        <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+          <Plus size={18} /> إضافة وصفة جديدة
+        </h3>
+        
+        <div className="mb-4">
+          <div className="flex items-center space-x-4 space-x-reverse">
+            <Label htmlFor="rxDate" className="font-bold">تاريخ الوصفة:</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={`w-[240px] justify-start text-right font-normal ${!rxDate ? "text-muted-foreground" : ""}`}
+                >
+                  <CalendarIcon className="ml-2 h-4 w-4" />
+                  {rxDate ? format(rxDate, "PPP") : "اختر تاريخ"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={rxDate}
+                  onSelect={setRxDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
         
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div>
@@ -395,7 +486,9 @@ export const PatientSearch: React.FC = () => {
         </div>
         
         <div className="text-center mt-6">
-          <Button onClick={submitNewRx}>حفظ الوصفة الجديدة</Button>
+          <Button onClick={submitNewRx} className="bg-green-600 hover:bg-green-700">
+            <Save className="mr-2 h-4 w-4" /> حفظ الوصفة الجديدة
+          </Button>
         </div>
       </div>
     );
@@ -447,7 +540,9 @@ export const PatientSearch: React.FC = () => {
         <div className="space-y-6">
           <Card className="border-blue-200 shadow-md">
             <CardHeader className="bg-blue-50">
-              <CardTitle>معلومات المريض</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Eye size={20} /> معلومات المريض
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -462,14 +557,22 @@ export const PatientSearch: React.FC = () => {
           {/* RX Data */}
           <Card className="border-green-200 shadow-md">
             <CardHeader className="bg-green-50">
-              <CardTitle>الوصفة الطبية</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FileText size={20} /> الوصفة الطبية
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="current" value={activeRxTab} onValueChange={setActiveRxTab}>
                 <TabsList className="mb-4 bg-green-100">
-                  <TabsTrigger value="current">الوصفة الحالية</TabsTrigger>
-                  <TabsTrigger value="history">سجل الوصفات</TabsTrigger>
-                  <TabsTrigger value="new">إضافة وصفة جديدة</TabsTrigger>
+                  <TabsTrigger value="current" className="flex items-center gap-1">
+                    <Eye size={14} /> الوصفة الحالية
+                  </TabsTrigger>
+                  <TabsTrigger value="history" className="flex items-center gap-1">
+                    <History size={14} /> سجل الوصفات
+                  </TabsTrigger>
+                  <TabsTrigger value="new" className="flex items-center gap-1">
+                    <Plus size={14} /> إضافة وصفة جديدة
+                  </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="current">
@@ -487,7 +590,7 @@ export const PatientSearch: React.FC = () => {
                     <div className="space-y-6">
                       {selectedPatient.rxHistory.map((rx, index) => (
                         <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                          {renderRxTable(rx, rx.createdAt)}
+                          {renderRxTable(rx)}
                         </div>
                       ))}
                     </div>
@@ -552,15 +655,28 @@ export const PatientSearch: React.FC = () => {
                   onChange={(e) => setNoteText(e.target.value)}
                   className="mb-2"
                 />
-                <Button>حفظ الملاحظة</Button>
+                <Button onClick={saveNote} className="flex items-center gap-2">
+                  <Save size={16} /> حفظ الملاحظة
+                </Button>
                 
                 <div className="border-t pt-4 mt-4">
-                  {selectedPatient.notes ? (
-                    <div className="p-4 border rounded bg-orange-50">{selectedPatient.notes}</div>
+                  {selectedPatient.patientNotes && selectedPatient.patientNotes.length > 0 ? (
+                    <div className="space-y-3">
+                      {selectedPatient.patientNotes.map((note) => (
+                        <div key={note.id} className="p-3 border rounded bg-orange-50">
+                          <div className="text-sm text-gray-500 mb-1">{formatDate(note.createdAt)}</div>
+                          <p>{note.text}</p>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
-                    <p className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
-                      لا يوجد ملاحظات
-                    </p>
+                    selectedPatient.notes ? (
+                      <div className="p-4 border rounded bg-orange-50">{selectedPatient.notes}</div>
+                    ) : (
+                      <p className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
+                        لا يوجد ملاحظات
+                      </p>
+                    )
                   )}
                 </div>
               </div>

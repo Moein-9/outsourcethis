@@ -13,9 +13,16 @@ export interface RxData {
   addOS: string;
   pdRight: string;
   pdLeft: string;
+  createdAt?: string; // Date when the RX was created
 }
 
 export interface RxHistoryItem extends RxData {
+  createdAt: string;
+}
+
+export interface PatientNote {
+  id: string;
+  text: string;
   createdAt: string;
 }
 
@@ -25,6 +32,7 @@ export interface Patient {
   phone: string;
   dob: string;
   notes: string;
+  patientNotes?: PatientNote[]; // Array of timestamped notes
   rx: RxData;
   rxHistory?: RxHistoryItem[];
   createdAt: string;
@@ -36,6 +44,8 @@ interface PatientState {
   getPatientById: (id: string) => Patient | undefined;
   searchPatients: (query: string) => Patient[];
   updatePatient: (patient: Patient) => void;
+  updatePatientRx: (patientId: string, newRx: RxData) => void;
+  addPatientNote: (patientId: string, noteText: string) => void;
 }
 
 export const usePatientStore = create<PatientState>()(
@@ -50,7 +60,16 @@ export const usePatientStore = create<PatientState>()(
         set((state) => ({
           patients: [
             ...state.patients,
-            { ...patient, patientId, createdAt }
+            { 
+              ...patient, 
+              patientId, 
+              createdAt,
+              patientNotes: [],
+              rx: {
+                ...patient.rx,
+                createdAt: new Date().toISOString() // Add creation date to initial RX
+              }
+            }
           ]
         }));
         
@@ -75,6 +94,62 @@ export const usePatientStore = create<PatientState>()(
             p.patientId === patient.patientId ? patient : p
           )
         }));
+      },
+      
+      updatePatientRx: (patientId, newRx) => {
+        set((state) => {
+          const patient = state.patients.find(p => p.patientId === patientId);
+          
+          if (!patient) return state;
+          
+          // Add timestamp to the new RX if not present
+          const timestampedRx = {
+            ...newRx,
+            createdAt: newRx.createdAt || new Date().toISOString()
+          };
+          
+          // Move current RX to history if it exists
+          const rxHistory = [...(patient.rxHistory || [])];
+          if (Object.values(patient.rx).some(v => v)) {
+            rxHistory.unshift({
+              ...patient.rx,
+              createdAt: patient.rx.createdAt || new Date().toISOString()
+            });
+          }
+          
+          return {
+            patients: state.patients.map(p => 
+              p.patientId === patientId 
+                ? { ...p, rx: timestampedRx, rxHistory } 
+                : p
+            )
+          };
+        });
+      },
+      
+      addPatientNote: (patientId, noteText) => {
+        set((state) => {
+          const patient = state.patients.find(p => p.patientId === patientId);
+          
+          if (!patient) return state;
+          
+          const newNote = {
+            id: `note-${Date.now()}`,
+            text: noteText,
+            createdAt: new Date().toISOString()
+          };
+          
+          return {
+            patients: state.patients.map(p => 
+              p.patientId === patientId 
+                ? { 
+                    ...p, 
+                    patientNotes: [...(p.patientNotes || []), newNote] 
+                  } 
+                : p
+            )
+          };
+        });
       }
     }),
     {

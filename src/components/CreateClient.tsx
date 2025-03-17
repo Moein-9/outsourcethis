@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { toast } from "@/components/ui/use-toast";
@@ -7,6 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 
 export const CreateClient: React.FC = () => {
   const addPatient = usePatientStore((state) => state.addPatient);
@@ -18,6 +21,7 @@ export const CreateClient: React.FC = () => {
   const [dobMonth, setDobMonth] = useState("");
   const [dobYear, setDobYear] = useState("");
   const [notes, setNotes] = useState("");
+  const [rxDate, setRxDate] = useState<Date | undefined>(new Date());
   
   // Rx states
   const [sphOD, setSphOD] = useState("");
@@ -179,7 +183,8 @@ export const CreateClient: React.FC = () => {
         axisOS,
         addOS,
         pdRight,
-        pdLeft
+        pdLeft,
+        createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
       }
     };
     
@@ -208,6 +213,7 @@ export const CreateClient: React.FC = () => {
     setAddOS("");
     setPdRight("");
     setPdLeft("");
+    setRxDate(new Date());
   };
   
   return (
@@ -308,6 +314,31 @@ export const CreateClient: React.FC = () => {
         <div className="bg-card rounded-md p-4 border">
           <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
             وصفات النظارات
+          </div>
+          
+          <div className="mb-4">
+            <Label htmlFor="rxDate">تاريخ الوصفة الطبية</Label>
+            <div className="mt-1">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
+                  >
+                    <CalendarIcon className="ml-2 h-4 w-4" />
+                    {rxDate ? format(rxDate, "PPP") : "اختر تاريخ الوصفة"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={rxDate}
+                    onSelect={setRxDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
           
           <div className="overflow-x-auto">
