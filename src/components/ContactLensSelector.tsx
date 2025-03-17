@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Contact, Eye, Search, ShoppingCart, Plus, Trash2, Check, ArrowDown, ArrowUp } from "lucide-react";
+import { Contact, Eye, Search, ShoppingCart, Plus, Trash2, Check } from "lucide-react";
 import { 
   Card, 
   CardContent, 
@@ -163,8 +163,8 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header with Invoice Summary */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-2">
           <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-2 rounded-full">
             <Contact className="w-5 h-5 text-blue-600" />
@@ -172,10 +172,25 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
           <h3 className="text-xl font-bold text-blue-800">العدسات اللاصقة</h3>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Invoice Summary Card - Positioned at top */}
+          {selectedLenses.length > 0 && (
+            <Card className="w-full md:w-auto border-blue-200 shadow-sm overflow-hidden bg-gradient-to-r from-blue-50 to-white">
+              <CardHeader className="py-2 px-4 flex flex-row items-center justify-between gap-3 border-b border-blue-100">
+                <CardTitle className="text-blue-800 flex items-center gap-2 text-base">
+                  <ShoppingCart className="h-4 w-4 text-blue-600" />
+                  ملخص الفاتورة
+                </CardTitle>
+                <Badge className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 font-bold">
+                  {totalPrice.toFixed(2)} KWD
+                </Badge>
+              </CardHeader>
+            </Card>
+          )}
+          
           <Badge 
             variant={hasExistingPatient ? "outline" : "secondary"} 
-            className={`cursor-pointer ${hasExistingPatient ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}
+            className={`cursor-pointer ${hasExistingPatient ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}
             onClick={togglePatientStatus}
           >
             {hasExistingPatient ? "يوجد ملف عميل" : "لا يوجد ملف عميل"}
@@ -294,7 +309,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                       <tr className="border-b border-blue-100">
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">البراند</th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">النوع</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">القوة</th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">اللون</th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">السعر</th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">الكمية</th>
@@ -306,7 +320,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         <tr key={lens.id} className="hover:bg-blue-50/50 transition-colors">
                           <td className="py-2.5 px-3 text-sm">{lens.brand}</td>
                           <td className="py-2.5 px-3 text-sm">{lens.type}</td>
-                          <td className="py-2.5 px-3 text-sm">{lens.power}</td>
                           <td className="py-2.5 px-3 text-sm">{lens.color || "-"}</td>
                           <td className="py-2.5 px-3 text-sm font-medium">{lens.price} KWD</td>
                           <td className="py-2.5 px-3 text-sm">
@@ -363,11 +376,8 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               <CardHeader className="py-3 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-white">
                 <CardTitle className="text-blue-800 flex items-center justify-between text-base">
                   <span className="flex items-center gap-2">
-                    <ShoppingCart className="h-4 w-4 text-blue-600" />
-                    ملخص الفاتورة
-                  </span>
-                  <span className="text-lg font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-                    {totalPrice.toFixed(2)} KWD
+                    <Eye className="h-4 w-4 text-blue-600" />
+                    العدسات المختارة
                   </span>
                 </CardTitle>
               </CardHeader>
