@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -73,10 +74,10 @@
     page-break-after: always;
   }
   
-  /* Make QR code smaller but still scannable */
+  /* QR code size control */
   [id^="qr-code-"] svg {
-    width: 32px !important;
-    height: 32px !important;
+    width: 28px !important;
+    height: 28px !important;
   }
   
   /* Ensure all content is visible and fits in the red safe zone */
@@ -91,7 +92,7 @@
   
   /* Logo sizing */
   .frame-label img {
-    max-height: 3.5mm;
+    max-height: 2.5mm;
     width: auto;
   }
 }

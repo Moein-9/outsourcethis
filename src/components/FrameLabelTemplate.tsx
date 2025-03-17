@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { Button } from "@/components/ui/button";
@@ -33,49 +32,45 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
   
   return (
     <div 
-      className="flex bg-white relative print:border-0 frame-label"
+      className="flex items-center bg-white print:border-0 frame-label"
       style={{ 
         width: LABEL_WIDTH, 
         height: LABEL_HEIGHT,
         pageBreakInside: "avoid",
       }}
     >
-      {/* Left side - QR Code */}
-      <div className="w-1/4 flex items-center justify-center">
+      {/* Left side - Mini QR Code */}
+      <div className="w-[22%] flex items-center justify-center pl-1">
         <QRCode 
           value={qrData} 
-          size={32} 
+          size={28} 
           level="M"
           renderAs="svg"
           includeMargin={false}
-          className="h-10 w-10"
+          className="h-8 w-8"
           id={`qr-code-${frame.frameId}`}
         />
       </div>
       
-      {/* Right side - All information */}
-      <div className="w-3/4 flex flex-col justify-between py-1 pr-2">
-        <div className="flex justify-between items-center">
+      {/* Right side - Compact information layout */}
+      <div className="w-[78%] flex flex-col justify-center h-full pr-2 py-0.5">
+        <div className="flex justify-between items-center mb-0.5">
           <img 
             src="/lovable-uploads/51989331-75fe-4ab7-8a52-c85e9e842039.png" 
             alt="Moen Optician" 
-            className="h-3.5 w-auto"
+            className="h-2.5 w-auto"
           />
-          <div className="text-[8px] font-semibold">#{frame.frameId}</div>
+          <span className="text-xs font-bold">#{frame.frameId}</span>
         </div>
         
         <div className="flex justify-between items-center">
-          <div className="text-sm font-bold uppercase tracking-wide">{frame.brand}</div>
-          <div className="text-[9px] tracking-wide">{frame.model}</div>
+          <span className="text-sm font-bold">{frame.brand}</span>
+          <span className="text-xs">{frame.model}</span>
         </div>
         
-        <div className="flex justify-between items-end">
-          <div className="text-[8px] text-gray-700">
-            {frame.size || "N/A"} | {frame.color}
-          </div>
-          <div className="text-base font-bold">
-            KWD {frame.price.toFixed(3)}
-          </div>
+        <div className="flex justify-between items-center mt-0.5">
+          <span className="text-xs text-gray-700">{frame.size || "N/A"} | {frame.color}</span>
+          <span className="text-lg font-bold">KWD {frame.price.toFixed(3)}</span>
         </div>
       </div>
     </div>
@@ -881,4 +876,3 @@ export const usePrintLabel = () => {
   
   return { printSingleLabel };
 };
-
