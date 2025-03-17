@@ -71,7 +71,11 @@ export const PatientSearch: React.FC = () => {
       const month = months[date.getMonth()];
       const year = date.getFullYear();
       
-      return `${month}(${date.getMonth() + 1})-${day}-${year}`;
+      // Include time in the formatted date
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      
+      return `${month}(${date.getMonth() + 1})-${day}-${year} ${hours}:${minutes}`;
     } catch (error) {
       return dateString;
     }
@@ -85,13 +89,13 @@ export const PatientSearch: React.FC = () => {
     if (!selectedPatient) return;
     
     // Validate that essential fields are filled
-    const requiredFields = ["sphereOD", "cylOD", "axisOD", "sphereOS", "cylOS", "axisOS"];
+    const requiredFields = ["sphereOD", "sphereOS"];
     const missingFields = requiredFields.filter(field => !newRx[field as keyof RxData]);
     
     if (missingFields.length > 0) {
       toast({
         title: "تحذير",
-        description: "يرجى ملء جميع الحقول المطلوبة للوصفة الطبية",
+        description: "يرجى ملء حقول Sphere على الأقل للوصفة الطبية",
         variant: "destructive"
       });
       return;
@@ -257,31 +261,56 @@ export const PatientSearch: React.FC = () => {
     // Generate options for sphere values (-10.00 to +10.00 in 0.25 steps)
     const sphereOptions = [];
     for (let i = -10; i <= 10; i += 0.25) {
-      sphereOptions.push(i.toFixed(2));
+      const formatted = i.toFixed(2);
+      sphereOptions.push(
+        <SelectItem key={`sph-opt-${formatted}`} value={formatted}>
+          {Number(formatted) >= 0 ? `+${formatted}` : formatted}
+        </SelectItem>
+      );
     }
     
     // Generate options for cylinder values (-6.00 to 0 in 0.25 steps)
     const cylOptions = [];
     for (let i = -6; i <= 0; i += 0.25) {
-      cylOptions.push(i.toFixed(2));
+      const formatted = i.toFixed(2);
+      cylOptions.push(
+        <SelectItem key={`cyl-opt-${formatted}`} value={formatted}>
+          {formatted}
+        </SelectItem>
+      );
     }
     
     // Generate options for axis values (0 to 180 in steps of 5)
     const axisOptions = [];
     for (let i = 0; i <= 180; i += 5) {
-      axisOptions.push(i.toString());
+      const value = i.toString();
+      axisOptions.push(
+        <SelectItem key={`axis-opt-${value}`} value={value}>
+          {value}
+        </SelectItem>
+      );
     }
     
     // Generate options for add values (0.00 to 3.00 in 0.25 steps)
     const addOptions = [];
     for (let i = 0; i <= 3; i += 0.25) {
-      addOptions.push(i.toFixed(2));
+      const formatted = i.toFixed(2);
+      addOptions.push(
+        <SelectItem key={`add-opt-${formatted}`} value={formatted}>
+          {Number(formatted) === 0 ? "0.00" : `+${formatted}`}
+        </SelectItem>
+      );
     }
     
     // Generate options for PD values (50 to 70 in 0.5 steps)
     const pdOptions = [];
     for (let i = 50; i <= 70; i += 0.5) {
-      pdOptions.push(i.toFixed(1));
+      const formatted = i.toFixed(1);
+      pdOptions.push(
+        <SelectItem key={`pd-opt-${formatted}`} value={formatted}>
+          {formatted}
+        </SelectItem>
+      );
     }
 
     return (
@@ -303,12 +332,13 @@ export const PatientSearch: React.FC = () => {
                   {rxDate ? format(rxDate, "PPP") : "اختر تاريخ"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
                 <Calendar
                   mode="single"
                   selected={rxDate}
                   onSelect={setRxDate}
                   initialFocus
+                  className="p-3 pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
@@ -326,12 +356,8 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="اختر قيمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
-                    <SelectItem value="">-- اختر --</SelectItem>
-                    {sphereOptions.map(opt => (
-                      <SelectItem key={`sph-od-${opt}`} value={opt}>
-                        {Number(opt) >= 0 ? `+${opt}` : opt}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="placeholder">-- اختر --</SelectItem>
+                    {sphereOptions}
                   </SelectContent>
                 </Select>
               </div>
@@ -343,10 +369,8 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="اختر قيمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
-                    <SelectItem value="">-- اختر --</SelectItem>
-                    {cylOptions.map(opt => (
-                      <SelectItem key={`cyl-od-${opt}`} value={opt}>{opt}</SelectItem>
-                    ))}
+                    <SelectItem value="placeholder">-- اختر --</SelectItem>
+                    {cylOptions}
                   </SelectContent>
                 </Select>
               </div>
@@ -358,10 +382,8 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="اختر قيمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
-                    <SelectItem value="">-- اختر --</SelectItem>
-                    {axisOptions.map(opt => (
-                      <SelectItem key={`axis-od-${opt}`} value={opt}>{opt}</SelectItem>
-                    ))}
+                    <SelectItem value="placeholder">-- اختر --</SelectItem>
+                    {axisOptions}
                   </SelectContent>
                 </Select>
               </div>
@@ -373,12 +395,8 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="اختر قيمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
-                    <SelectItem value="">-- اختر --</SelectItem>
-                    {addOptions.map(opt => (
-                      <SelectItem key={`add-od-${opt}`} value={opt}>
-                        {Number(opt) === 0 ? "0.00" : `+${opt}`}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="placeholder">-- اختر --</SelectItem>
+                    {addOptions}
                   </SelectContent>
                 </Select>
               </div>
@@ -390,10 +408,8 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="اختر قيمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
-                    <SelectItem value="">-- اختر --</SelectItem>
-                    {pdOptions.map(opt => (
-                      <SelectItem key={`pd-right-${opt}`} value={opt}>{opt}</SelectItem>
-                    ))}
+                    <SelectItem value="placeholder">-- اختر --</SelectItem>
+                    {pdOptions}
                   </SelectContent>
                 </Select>
               </div>
@@ -410,12 +426,8 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="اختر قيمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
-                    <SelectItem value="">-- اختر --</SelectItem>
-                    {sphereOptions.map(opt => (
-                      <SelectItem key={`sph-os-${opt}`} value={opt}>
-                        {Number(opt) >= 0 ? `+${opt}` : opt}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="placeholder">-- اختر --</SelectItem>
+                    {sphereOptions}
                   </SelectContent>
                 </Select>
               </div>
@@ -427,10 +439,8 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="اختر قيمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
-                    <SelectItem value="">-- اختر --</SelectItem>
-                    {cylOptions.map(opt => (
-                      <SelectItem key={`cyl-os-${opt}`} value={opt}>{opt}</SelectItem>
-                    ))}
+                    <SelectItem value="placeholder">-- اختر --</SelectItem>
+                    {cylOptions}
                   </SelectContent>
                 </Select>
               </div>
@@ -442,10 +452,8 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="اختر قيمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
-                    <SelectItem value="">-- اختر --</SelectItem>
-                    {axisOptions.map(opt => (
-                      <SelectItem key={`axis-os-${opt}`} value={opt}>{opt}</SelectItem>
-                    ))}
+                    <SelectItem value="placeholder">-- اختر --</SelectItem>
+                    {axisOptions}
                   </SelectContent>
                 </Select>
               </div>
@@ -457,12 +465,8 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="اختر قيمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
-                    <SelectItem value="">-- اختر --</SelectItem>
-                    {addOptions.map(opt => (
-                      <SelectItem key={`add-os-${opt}`} value={opt}>
-                        {Number(opt) === 0 ? "0.00" : `+${opt}`}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="placeholder">-- اختر --</SelectItem>
+                    {addOptions}
                   </SelectContent>
                 </Select>
               </div>
@@ -474,10 +478,8 @@ export const PatientSearch: React.FC = () => {
                     <SelectValue placeholder="اختر قيمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-96">
-                    <SelectItem value="">-- اختر --</SelectItem>
-                    {pdOptions.map(opt => (
-                      <SelectItem key={`pd-left-${opt}`} value={opt}>{opt}</SelectItem>
-                    ))}
+                    <SelectItem value="placeholder">-- اختر --</SelectItem>
+                    {pdOptions}
                   </SelectContent>
                 </Select>
               </div>
@@ -659,7 +661,16 @@ export const PatientSearch: React.FC = () => {
                   <Save size={16} /> حفظ الملاحظة
                 </Button>
                 
+                {/* Original notes from patient creation */}
+                {selectedPatient.notes && (
+                  <div className="mt-4 p-3 border rounded bg-yellow-50">
+                    <div className="font-bold text-sm mb-1">ملاحظات عند الإنشاء:</div>
+                    <p>{selectedPatient.notes}</p>
+                  </div>
+                )}
+                
                 <div className="border-t pt-4 mt-4">
+                  <div className="font-bold mb-2">ملاحظات إضافية:</div>
                   {selectedPatient.patientNotes && selectedPatient.patientNotes.length > 0 ? (
                     <div className="space-y-3">
                       {selectedPatient.patientNotes.map((note) => (
@@ -670,13 +681,9 @@ export const PatientSearch: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    selectedPatient.notes ? (
-                      <div className="p-4 border rounded bg-orange-50">{selectedPatient.notes}</div>
-                    ) : (
-                      <p className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
-                        لا يوجد ملاحظات
-                      </p>
-                    )
+                    <p className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
+                      لا يوجد ملاحظات إضافية
+                    </p>
                   )}
                 </div>
               </div>

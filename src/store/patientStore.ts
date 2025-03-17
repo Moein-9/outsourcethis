@@ -67,7 +67,7 @@ export const usePatientStore = create<PatientState>()(
               patientNotes: [],
               rx: {
                 ...patient.rx,
-                createdAt: new Date().toISOString() // Add creation date to initial RX
+                createdAt: patient.rx.createdAt || new Date().toISOString() // Add creation date to initial RX
               }
             }
           ]
