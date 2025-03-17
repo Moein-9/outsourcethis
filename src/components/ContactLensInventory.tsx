@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useInventoryStore, ContactLensItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,13 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Contact, Edit, ShoppingCart, Save } from "lucide-react";
+
+// Common values for dropdowns
+const COMMON_BC_VALUES = ["8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "9.0"];
+const COMMON_DIAMETER_VALUES = ["13.8", "14.0", "14.2", "14.5", "14.8"];
+const COMMON_BRANDS = ["Acuvue", "Air Optix", "Biofinty", "FreshLook", "PureVision", "SofLens"];
+const COMMON_TYPES = ["Daily", "Monthly", "Biweekly", "Yearly", "Color"];
+const COMMON_COLORS = ["", "Clear", "Blue", "Green", "Brown", "Hazel", "Gray", "Honey"];
 
 // Contact Lens Item Component
 const ContactLensItemCard = ({ lens, onEdit, onSell }: { 
@@ -66,10 +73,6 @@ const ContactLensItemCard = ({ lens, onEdit, onSell }: {
           <span className="text-muted-foreground">القطر:</span>
           <span className="font-medium">{lens.diameter}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">القوة:</span>
-          <span className="font-medium">{lens.power}</span>
-        </div>
       </CardContent>
       <CardFooter className="p-0 border-t">
         <div className="grid grid-cols-2 w-full divide-x divide-x-reverse">
@@ -86,7 +89,7 @@ const ContactLensItemCard = ({ lens, onEdit, onSell }: {
 };
 
 export const ContactLensInventory: React.FC = () => {
-  const { contactLenses, addContactLens, searchContactLenses } = useInventoryStore();
+  const { contactLenses, addContactLens, updateContactLens, searchContactLenses } = useInventoryStore();
   
   // State variables
   const [contactLensSearchTerm, setContactLensSearchTerm] = useState("");
@@ -99,7 +102,7 @@ export const ContactLensInventory: React.FC = () => {
   const [contactLensType, setContactLensType] = useState("");
   const [contactLensBC, setContactLensBC] = useState("");
   const [contactLensDiameter, setContactLensDiameter] = useState("");
-  const [contactLensPower, setContactLensPower] = useState("");
+  const [contactLensPower, setContactLensPower] = useState("-0.00"); // Default value, hidden in UI
   const [contactLensColor, setContactLensColor] = useState("");
   const [contactLensPrice, setContactLensPrice] = useState("");
   const [contactLensQty, setContactLensQty] = useState("1");
@@ -145,7 +148,7 @@ export const ContactLensInventory: React.FC = () => {
   
   // Handle adding a new contact lens
   const handleAddContactLens = () => {
-    if (!contactLensBrand || !contactLensType || !contactLensBC || !contactLensDiameter || !contactLensPower || !contactLensPrice) {
+    if (!contactLensBrand || !contactLensType || !contactLensBC || !contactLensDiameter || !contactLensPrice) {
       toast.error("الرجاء إدخال تفاصيل العدسة اللاصقة كاملة");
       return;
     }
@@ -168,7 +171,7 @@ export const ContactLensInventory: React.FC = () => {
       type: contactLensType,
       bc: contactLensBC,
       diameter: contactLensDiameter,
-      power: contactLensPower,
+      power: contactLensPower, // We'll keep this in the data structure
       price,
       qty
     };
@@ -178,9 +181,15 @@ export const ContactLensInventory: React.FC = () => {
       Object.assign(newContactLens, { color: contactLensColor });
     }
     
-    const id = addContactLens(newContactLens);
-    
-    toast.success(`تم إضافة العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`);
+    if (editingLens) {
+      // Update existing lens
+      updateContactLens(editingLens.id, newContactLens);
+      toast.success(`تم تحديث العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`);
+    } else {
+      // Add new lens
+      const id = addContactLens(newContactLens);
+      toast.success(`تم إضافة العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`);
+    }
     
     // Reset form and close dialog
     resetContactLensForm();
@@ -196,7 +205,7 @@ export const ContactLensInventory: React.FC = () => {
     setContactLensType("");
     setContactLensBC("");
     setContactLensDiameter("");
-    setContactLensPower("");
+    setContactLensPower("-0.00");
     setContactLensColor("");
     setContactLensPrice("");
     setContactLensQty("1");
@@ -224,12 +233,12 @@ export const ContactLensInventory: React.FC = () => {
   };
   
   // Initialize search results
-  React.useEffect(() => {
+  useEffect(() => {
     setContactLensResults(contactLenses);
   }, [contactLenses]);
   
   // Apply filters when they change
-  React.useEffect(() => {
+  useEffect(() => {
     handleContactLensSearch();
   }, [filterBrand, filterType]);
   
@@ -242,7 +251,7 @@ export const ContactLensInventory: React.FC = () => {
             <Input
               value={contactLensSearchTerm}
               onChange={(e) => setContactLensSearchTerm(e.target.value)}
-              placeholder="البحث عن عدسة لاصقة (ماركة، نوع، قوة...)"
+              placeholder="البحث عن عدسة لاصقة (ماركة، نوع، قطر...)"
               className="pl-9 w-full"
               onKeyDown={(e) => e.key === 'Enter' && handleContactLensSearch()}
             />
@@ -302,65 +311,120 @@ export const ContactLensInventory: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="contactLensBrand">الماركة</Label>
-                    <Input
-                      id="contactLensBrand"
-                      value={contactLensBrand}
-                      onChange={(e) => setContactLensBrand(e.target.value)}
-                      placeholder="مثال: Acuvue"
-                    />
+                    <Select value={contactLensBrand} onValueChange={setContactLensBrand}>
+                      <SelectTrigger id="contactLensBrand" className="w-full">
+                        <SelectValue placeholder="اختر الماركة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COMMON_BRANDS.map(brand => (
+                          <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                        ))}
+                        <SelectItem value="other">أخرى</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {contactLensBrand === "other" && (
+                      <Input
+                        className="mt-2"
+                        placeholder="أدخل اسم الماركة"
+                        onChange={(e) => setContactLensBrand(e.target.value)}
+                        value=""
+                      />
+                    )}
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="contactLensType">النوع</Label>
-                    <Input
-                      id="contactLensType"
-                      value={contactLensType}
-                      onChange={(e) => setContactLensType(e.target.value)}
-                      placeholder="مثال: Daily"
-                    />
+                    <Select value={contactLensType} onValueChange={setContactLensType}>
+                      <SelectTrigger id="contactLensType" className="w-full">
+                        <SelectValue placeholder="اختر النوع" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COMMON_TYPES.map(type => (
+                          <SelectItem key={type} value={type}>{type}</SelectItem>
+                        ))}
+                        <SelectItem value="other">أخرى</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {contactLensType === "other" && (
+                      <Input
+                        className="mt-2"
+                        placeholder="أدخل النوع"
+                        onChange={(e) => setContactLensType(e.target.value)}
+                        value=""
+                      />
+                    )}
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="contactLensBC">BC</Label>
-                    <Input
-                      id="contactLensBC"
-                      value={contactLensBC}
-                      onChange={(e) => setContactLensBC(e.target.value)}
-                      placeholder="مثال: 8.5"
-                    />
+                    <Select value={contactLensBC} onValueChange={setContactLensBC}>
+                      <SelectTrigger id="contactLensBC" className="w-full">
+                        <SelectValue placeholder="اختر BC" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COMMON_BC_VALUES.map(bc => (
+                          <SelectItem key={bc} value={bc}>{bc}</SelectItem>
+                        ))}
+                        <SelectItem value="other">أخرى</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {contactLensBC === "other" && (
+                      <Input
+                        className="mt-2"
+                        placeholder="أدخل BC"
+                        onChange={(e) => setContactLensBC(e.target.value)}
+                        value=""
+                      />
+                    )}
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="contactLensDiameter">القطر</Label>
-                    <Input
-                      id="contactLensDiameter"
-                      value={contactLensDiameter}
-                      onChange={(e) => setContactLensDiameter(e.target.value)}
-                      placeholder="مثال: 14.2"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="contactLensPower">القوة</Label>
-                    <Input
-                      id="contactLensPower"
-                      value={contactLensPower}
-                      onChange={(e) => setContactLensPower(e.target.value)}
-                      placeholder="مثال: -2.00"
-                    />
+                    <Select value={contactLensDiameter} onValueChange={setContactLensDiameter}>
+                      <SelectTrigger id="contactLensDiameter" className="w-full">
+                        <SelectValue placeholder="اختر القطر" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COMMON_DIAMETER_VALUES.map(dia => (
+                          <SelectItem key={dia} value={dia}>{dia}</SelectItem>
+                        ))}
+                        <SelectItem value="other">أخرى</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {contactLensDiameter === "other" && (
+                      <Input
+                        className="mt-2"
+                        placeholder="أدخل القطر"
+                        onChange={(e) => setContactLensDiameter(e.target.value)}
+                        value=""
+                      />
+                    )}
                   </div>
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="contactLensColor">اللون (اختياري)</Label>
-                  <Input
-                    id="contactLensColor"
-                    value={contactLensColor}
-                    onChange={(e) => setContactLensColor(e.target.value)}
-                    placeholder="مثال: Blue"
-                  />
+                  <Select value={contactLensColor} onValueChange={setContactLensColor}>
+                    <SelectTrigger id="contactLensColor" className="w-full">
+                      <SelectValue placeholder="اختر اللون" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COMMON_COLORS.map(color => (
+                        <SelectItem key={color || "none"} value={color}>{color || "بدون لون"}</SelectItem>
+                      ))}
+                      <SelectItem value="other">أخرى</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {contactLensColor === "other" && (
+                    <Input
+                      className="mt-2"
+                      placeholder="أدخل اللون"
+                      onChange={(e) => setContactLensColor(e.target.value)}
+                      value=""
+                    />
+                  )}
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">

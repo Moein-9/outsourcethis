@@ -30,15 +30,16 @@ export interface ContactLensItem {
   type: string;
   bc: string; // Base curve
   diameter: string;
-  power: string;
+  power: string; // Keeping this for data structure, will hide in UI
   price: number;
   qty: number;
-  color?: string; // Added color field
+  color?: string;
 }
 
 export interface ContactLensSelection {
   items: ContactLensItem[];
   rxData?: ContactLensRx;
+  quantities?: Record<string, number>; // Track quantities for each lens ID
 }
 
 interface ContactLensSelectorProps {
@@ -53,6 +54,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   const [results, setResults] = useState<ContactLensItem[]>(contactLenses);
   const [selectedLenses, setSelectedLenses] = useState<ContactLensItem[]>([]);
   const [rxData, setRxData] = useState<ContactLensRx | undefined>(initialRxData);
+  const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   
   const [filterBrand, setFilterBrand] = useState<string>("all");
   const [filtersVisible, setFiltersVisible] = useState(false);
@@ -65,7 +67,10 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     handleFilterApply();
   }, [filterBrand, filterType, search]);
 
-  const totalPrice = selectedLenses.reduce((sum, lens) => sum + lens.price, 0);
+  const totalPrice = selectedLenses.reduce((sum, lens) => {
+    const quantity = itemQuantities[lens.id] || 1;
+    return sum + (lens.price * quantity);
+  }, 0);
 
   const handleFilterApply = () => {
     let filtered = search ? searchContactLenses(search) : contactLenses;
@@ -86,19 +91,47 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   };
 
   const handleSelectLens = (lens: ContactLensItem) => {
-    const alreadySelected = selectedLenses.some(item => item.id === lens.id);
+    const existingIndex = selectedLenses.findIndex(item => item.id === lens.id);
     
-    if (alreadySelected) {
-      toast("هذه العدسة مضافة بالفعل");
+    // If the lens is already selected, increment its quantity instead of showing error
+    if (existingIndex >= 0) {
+      const currentQty = itemQuantities[lens.id] || 1;
+      setItemQuantities({
+        ...itemQuantities,
+        [lens.id]: currentQty + 1
+      });
+      
+      // No need to update selectedLenses array since the item is already there
+      // But we need to trigger the onSelect with updated quantities
+      onSelect({
+        items: selectedLenses,
+        rxData,
+        quantities: {
+          ...itemQuantities,
+          [lens.id]: currentQty + 1
+        }
+      });
+      
+      toast(`تمت زيادة كمية ${lens.brand} ${lens.type} بنجاح`);
       return;
     }
     
     const updatedSelection = [...selectedLenses, lens];
     setSelectedLenses(updatedSelection);
     
+    // Initialize quantity to 1 for newly added items
+    setItemQuantities({
+      ...itemQuantities,
+      [lens.id]: 1
+    });
+    
     onSelect({
       items: updatedSelection,
-      rxData
+      rxData,
+      quantities: {
+        ...itemQuantities,
+        [lens.id]: 1
+      }
     });
     
     toast(`تمت إضافة ${lens.brand} ${lens.type} بنجاح`);
@@ -108,16 +141,41 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     const updatedSelection = selectedLenses.filter(lens => lens.id !== lensId);
     setSelectedLenses(updatedSelection);
     
+    // Remove the item from quantities
+    const updatedQuantities = { ...itemQuantities };
+    delete updatedQuantities[lensId];
+    setItemQuantities(updatedQuantities);
+    
     onSelect({
       items: updatedSelection,
-      rxData
+      rxData,
+      quantities: updatedQuantities
+    });
+  };
+  
+  const handleUpdateQuantity = (lensId: string, newQuantity: number) => {
+    if (newQuantity < 1) return; // Don't allow less than 1
+    
+    setItemQuantities({
+      ...itemQuantities,
+      [lensId]: newQuantity
+    });
+    
+    onSelect({
+      items: selectedLenses,
+      rxData,
+      quantities: {
+        ...itemQuantities,
+        [lensId]: newQuantity
+      }
     });
   };
   
   const handleConfirmSelection = () => {
     onSelect({
       items: selectedLenses,
-      rxData
+      rxData,
+      quantities: itemQuantities
     });
     
     toast(`تمت إضافة ${selectedLenses.length} عدسة للفاتورة`);
@@ -254,17 +312,40 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         {lens.brand} {lens.type}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {lens.power} | {lens.color || "Clear"} | {lens.price.toFixed(2)} KWD
+                        {lens.color || "Clear"} | {lens.price.toFixed(2)} KWD
                       </div>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleRemoveLens(lens.id)}
-                      className="h-8 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center border rounded overflow-hidden">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 px-2 text-blue-700 hover:bg-blue-50 rounded-r-none border-r"
+                          onClick={() => handleUpdateQuantity(lens.id, (itemQuantities[lens.id] || 1) - 1)}
+                        >
+                          -
+                        </Button>
+                        <div className="px-3 py-1 min-w-[40px] text-center">
+                          {itemQuantities[lens.id] || 1}
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 px-2 text-blue-700 hover:bg-blue-50 rounded-l-none border-l"
+                          onClick={() => handleUpdateQuantity(lens.id, (itemQuantities[lens.id] || 1) + 1)}
+                        >
+                          +
+                        </Button>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleRemoveLens(lens.id)}
+                        className="h-8 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </CardContent>
