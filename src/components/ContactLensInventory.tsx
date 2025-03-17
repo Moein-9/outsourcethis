@@ -37,7 +37,8 @@ const COMMON_BC_VALUES = ["8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "9.0"
 const COMMON_DIAMETER_VALUES = ["13.8", "14.0", "14.2", "14.5", "14.8"];
 const COMMON_BRANDS = ["Acuvue", "Air Optix", "Biofinty", "FreshLook", "PureVision", "SofLens"];
 const COMMON_TYPES = ["Daily", "Monthly", "Biweekly", "Yearly", "Color"];
-const COMMON_COLORS = ["", "Clear", "Blue", "Green", "Brown", "Hazel", "Gray", "Honey"];
+// Fix: Changed empty string to "none" with a proper value
+const COMMON_COLORS = ["none", "Clear", "Blue", "Green", "Brown", "Hazel", "Gray", "Honey"];
 
 // Contact Lens Item Component
 const ContactLensItemCard = ({ lens, onEdit, onSell }: { 
@@ -103,7 +104,7 @@ export const ContactLensInventory: React.FC = () => {
   const [contactLensBC, setContactLensBC] = useState("");
   const [contactLensDiameter, setContactLensDiameter] = useState("");
   const [contactLensPower, setContactLensPower] = useState("-0.00"); // Default value, hidden in UI
-  const [contactLensColor, setContactLensColor] = useState("");
+  const [contactLensColor, setContactLensColor] = useState("none");  // Changed default to "none"
   const [contactLensPrice, setContactLensPrice] = useState("");
   const [contactLensQty, setContactLensQty] = useState("1");
   
@@ -176,8 +177,8 @@ export const ContactLensInventory: React.FC = () => {
       qty
     };
     
-    // Only add color if it's provided
-    if (contactLensColor) {
+    // Only add color if it's provided and not "none"
+    if (contactLensColor && contactLensColor !== "none") {
       Object.assign(newContactLens, { color: contactLensColor });
     }
     
@@ -206,7 +207,7 @@ export const ContactLensInventory: React.FC = () => {
     setContactLensBC("");
     setContactLensDiameter("");
     setContactLensPower("-0.00");
-    setContactLensColor("");
+    setContactLensColor("none");  // Changed default to "none"
     setContactLensPrice("");
     setContactLensQty("1");
     setEditingLens(null);
@@ -411,8 +412,10 @@ export const ContactLensInventory: React.FC = () => {
                       <SelectValue placeholder="اختر اللون" />
                     </SelectTrigger>
                     <SelectContent>
-                      {COMMON_COLORS.map(color => (
-                        <SelectItem key={color || "none"} value={color}>{color || "بدون لون"}</SelectItem>
+                      {/* Fixed: Changed to use "none" instead of empty string */}
+                      <SelectItem value="none">بدون لون</SelectItem>
+                      {COMMON_COLORS.filter(color => color !== "none").map(color => (
+                        <SelectItem key={color} value={color}>{color}</SelectItem>
                       ))}
                       <SelectItem value="other">أخرى</SelectItem>
                     </SelectContent>
