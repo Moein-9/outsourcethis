@@ -3,6 +3,8 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LensTypeManager } from "@/components/LensTypeManager";
 import { LensCoatingManager } from "@/components/LensCoatingManager";
+import { FrameInventory } from "@/components/FrameInventory";
+import { ContactLensInventory } from "@/components/ContactLensInventory";
 
 export const InventoryTabs: React.FC = () => {
   return (
@@ -15,18 +17,16 @@ export const InventoryTabs: React.FC = () => {
       </TabsList>
       
       <TabsContent value="frames" className="mt-0">
-        {/* Current frame inventory content will be here */}
         <div className="bg-muted/50 p-4 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-bold mb-2 text-blue-800">إدارة الإطارات</h3>
-          <p>محتوى إدارة الإطارات الحالي</p>
+          <h3 className="text-lg font-bold mb-4 text-blue-800">إدارة الإطارات</h3>
+          <FrameInventory />
         </div>
       </TabsContent>
       
       <TabsContent value="contactLenses" className="mt-0">
-        {/* Current contact lens inventory content will be here */}
         <div className="bg-muted/50 p-4 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-bold mb-2 text-green-800">إدارة العدسات اللاصقة</h3>
-          <p>محتوى إدارة العدسات اللاصقة الحالي</p>
+          <h3 className="text-lg font-bold mb-4 text-green-800">إدارة العدسات اللاصقة</h3>
+          <ContactLensInventory />
         </div>
       </TabsContent>
       
