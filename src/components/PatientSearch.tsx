@@ -10,13 +10,15 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Patient, RxData } from "@/store/patientStore";
 import { Invoice } from "@/store/invoiceStore";
-import { CalendarIcon, Save, Eye, Plus, FileText, History, Printer, Download, Share2 } from "lucide-react";
+import { CalendarIcon, Save, Eye, Plus, FileText, History, Printer, Download, Share2, Receipt, ClipboardList } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { toast } from "@/components/ui/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 export const PatientSearch: React.FC = () => {
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -56,9 +58,19 @@ export const PatientSearch: React.FC = () => {
     setShowResults(false);
   };
 
+  // Modified to get both invoices and work orders
   const getPatientInvoices = (): Invoice[] => {
     if (!selectedPatient) return [];
     return invoices.filter(invoice => invoice.patientId === selectedPatient.patientId);
+  };
+
+  // Added function to separate active and completed transactions
+  const getPatientTransactions = () => {
+    const allTransactions = getPatientInvoices();
+    return {
+      active: allTransactions.filter(inv => !inv.isPaid),
+      completed: allTransactions.filter(inv => inv.isPaid)
+    };
   };
 
   const formatDate = (dateString: string): string => {
@@ -279,7 +291,7 @@ export const PatientSearch: React.FC = () => {
   };
 
   const renderRxInputForm = () => {
-    // Generate options for select elements (same as in CreateClient.tsx)
+    
     const generateSphOptions = () => {
       const options = [];
       for (let i = 10; i >= -10; i -= 0.25) {
@@ -509,6 +521,133 @@ export const PatientSearch: React.FC = () => {
     );
   };
 
+  // New function to render transactions with a tabbed interface
+  const renderTransactions = () => {
+    const { active, completed } = getPatientTransactions();
+    
+    return (
+      <Tabs defaultValue="active" className="w-full">
+        <TabsList className="w-full mb-4 bg-purple-100">
+          <TabsTrigger value="active" className="flex items-center gap-1 w-1/2">
+            <ClipboardList size={14} /> طلبات نشطة ({active.length})
+          </TabsTrigger>
+          <TabsTrigger value="completed" className="flex items-center gap-1 w-1/2">
+            <Receipt size={14} /> معاملات مكتملة ({completed.length})
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="active">
+          {active.length === 0 ? (
+            <p className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
+              لا يوجد طلبات نشطة لهذا المريض
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {active.map((invoice) => (
+                <div key={invoice.invoiceId} className="border rounded p-4 bg-blue-50 transition-colors">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <ClipboardList className="h-5 w-5 text-blue-600" />
+                        <span className="font-bold">طلب عمل: {invoice.invoiceId}</span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <Badge variant="outline" className="bg-yellow-100 border-yellow-300">
+                          جاري العمل
+                        </Badge>
+                        <span className="text-sm text-gray-500">{formatDate(invoice.createdAt)}</span>
+                      </div>
+                    </div>
+                    <div className="text-left">
+                      <span className="font-bold text-xl text-primary">{invoice.total} د.ك</span>
+                      <div className="text-sm text-gray-500">متبقي: <strong className="text-red-500">{invoice.remaining} د.ك</strong></div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                    <div className="bg-white p-2 rounded border">
+                      <span className="font-semibold">إطار:</span> {invoice.frameBrand} {invoice.frameModel} ({invoice.frameColor})
+                    </div>
+                    <div className="bg-white p-2 rounded border">
+                      <span className="font-semibold">عدسة:</span> {invoice.lensType} - {invoice.coating}
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    <Button variant="outline" size="sm" className="flex items-center gap-1 bg-white">
+                      <Printer size={14} className="text-gray-600" />
+                      طباعة الطلب
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex items-center gap-1 bg-white">
+                      <FileText size={14} className="text-gray-600" />
+                      طباعة الفاتورة
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="completed">
+          {completed.length === 0 ? (
+            <p className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
+              لا يوجد معاملات مكتملة لهذا المريض
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {completed.map((invoice) => (
+                <div key={invoice.invoiceId} className="border rounded p-4 bg-green-50 transition-colors">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Receipt className="h-5 w-5 text-green-600" />
+                        <span className="font-bold">فاتورة: {invoice.invoiceId}</span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <Badge variant="outline" className="bg-green-100 border-green-300">
+                          مكتمل
+                        </Badge>
+                        <span className="text-sm text-gray-500">{formatDate(invoice.createdAt)}</span>
+                      </div>
+                    </div>
+                    <div className="text-left">
+                      <span className="font-bold text-xl text-green-600">{invoice.total} د.ك</span>
+                      <div className="text-sm text-gray-500">مدفوع بالكامل</div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                    <div className="bg-white p-2 rounded border">
+                      <span className="font-semibold">إطار:</span> {invoice.frameBrand} {invoice.frameModel} ({invoice.frameColor})
+                    </div>
+                    <div className="bg-white p-2 rounded border">
+                      <span className="font-semibold">عدسة:</span> {invoice.lensType} - {invoice.coating}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 bg-white p-2 rounded border">
+                    <span className="font-semibold">طريقة الدفع:</span> {invoice.paymentMethod}
+                    {invoice.payments && invoice.payments.length > 1 && (
+                      <span className="text-sm text-gray-500"> (دفعات متعددة)</span>
+                    )}
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    <Button variant="outline" size="sm" className="flex items-center gap-1 bg-white">
+                      <FileText size={14} className="text-gray-600" />
+                      طباعة الفاتورة
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    );
+  };
+
   const PrintableRx = ({ rx, patient }: { rx: RxData, patient: Patient }) => {
     return (
       <div className="hidden">
@@ -631,189 +770,4 @@ export const PatientSearch: React.FC = () => {
       {/* Search Results */}
       {showResults && (
         <Card className="mb-6 border-amber-200 shadow-md">
-          <CardHeader className="bg-amber-50">
-            <CardTitle>نتائج البحث</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {searchResults.length === 0 ? (
-              <p>لم يتم العثور على نتائج</p>
-            ) : (
-              <div className="space-y-2">
-                {searchResults.map((patient) => (
-                  <div 
-                    key={patient.patientId}
-                    className="p-3 border rounded hover:bg-amber-50 cursor-pointer transition-colors"
-                    onClick={() => selectPatient(patient)}
-                  >
-                    {patient.name} - {patient.phone}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Patient Details */}
-      {selectedPatient && (
-        <div className="space-y-6">
-          <Card className="border-blue-200 shadow-md">
-            <CardHeader className="bg-blue-50">
-              <CardTitle className="flex items-center gap-2">
-                <Eye size={20} /> معلومات المريض
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><strong>الاسم:</strong> {selectedPatient.name}</div>
-                <div><strong>الهاتف:</strong> {selectedPatient.phone}</div>
-                <div><strong>تاريخ الميلاد:</strong> {selectedPatient.dob || "غير متوفر"}</div>
-                <div><strong>رقم المريض:</strong> {selectedPatient.patientId}</div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* RX Data */}
-          <Card className="border-green-200 shadow-md">
-            <CardHeader className="bg-green-50">
-              <CardTitle className="flex items-center gap-2">
-                <FileText size={20} /> الوصفة الطبية
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="current" value={activeRxTab} onValueChange={setActiveRxTab}>
-                <TabsList className="mb-4 bg-green-100">
-                  <TabsTrigger value="current" className="flex items-center gap-1">
-                    <Eye size={14} /> الوصفة الحالية
-                  </TabsTrigger>
-                  <TabsTrigger value="history" className="flex items-center gap-1">
-                    <History size={14} /> سجل الوصفات
-                  </TabsTrigger>
-                  <TabsTrigger value="new" className="flex items-center gap-1">
-                    <Plus size={14} /> إضافة وصفة جديدة
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="current">
-                  {selectedPatient.rx && Object.values(selectedPatient.rx).some(v => v) ? (
-                    <>
-                      {renderRxTable(selectedPatient.rx)}
-                      {/* Add PrintableRx component */}
-                      <PrintableRx rx={selectedPatient.rx} patient={selectedPatient} />
-                    </>
-                  ) : (
-                    <p className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
-                      لا يوجد وصفة طبية حالية لهذا المريض
-                    </p>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="history">
-                  {selectedPatient.rxHistory && selectedPatient.rxHistory.length > 0 ? (
-                    <div className="space-y-6">
-                      {selectedPatient.rxHistory.map((rx, index) => (
-                        <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                          {renderRxTable(rx)}
-                          {/* Add PrintableRx component for each historical RX */}
-                          <PrintableRx rx={rx} patient={selectedPatient} />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
-                      لا يوجد سجل وصفات سابقة لهذا المريض
-                    </p>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="new">
-                  {renderRxInputForm()}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-          
-          {/* Transactions */}
-          <Card className="border-purple-200 shadow-md">
-            <CardHeader className="bg-purple-50">
-              <CardTitle>سجل المعاملات</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {getPatientInvoices().length === 0 ? (
-                <p className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
-                  لا يوجد معاملات لهذا المريض
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {getPatientInvoices().map((invoice) => (
-                    <div key={invoice.invoiceId} className="border rounded p-4 hover:bg-purple-50 transition-colors">
-                      <div className="font-bold mb-1">فاتورة: {invoice.invoiceId}</div>
-                      <div className="mb-2 bg-purple-100 inline-block px-2 py-1 rounded">{formatDate(invoice.createdAt)}</div>
-                      <div className="mb-2">
-                        <div><strong>إطار:</strong> {invoice.frameBrand} {invoice.frameModel && `(${invoice.frameModel}, ${invoice.frameColor})`}</div>
-                        <div><strong>عدسة:</strong> {invoice.lensType} ({invoice.lensPrice} د.ك)</div>
-                        <div><strong>طلاء:</strong> {invoice.coating} ({invoice.coatingPrice} د.ك)</div>
-                      </div>
-                      <div className="text-xl font-bold text-primary mb-1">المجموع: {invoice.total} د.ك</div>
-                      <div className="mb-2">
-                        <span><strong>الخصم:</strong> {invoice.discount} د.ك</span>
-                        <span className="mr-4"><strong>الدفعة:</strong> {invoice.deposit} د.ك</span>
-                      </div>
-                      <Button variant="outline">طباعة الفاتورة</Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          {/* Notes */}
-          <Card className="border-orange-200 shadow-md">
-            <CardHeader className="bg-orange-50">
-              <CardTitle>الملاحظات</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Textarea 
-                  placeholder="أضف ملاحظة جديدة..."
-                  value={noteText}
-                  onChange={(e) => setNoteText(e.target.value)}
-                  className="mb-2"
-                />
-                <Button onClick={saveNote} className="flex items-center gap-2">
-                  <Save size={16} /> حفظ الملاحظة
-                </Button>
-                
-                {/* Original notes from patient creation */}
-                {selectedPatient.notes && (
-                  <div className="mt-4 p-3 border rounded bg-yellow-50">
-                    <div className="font-bold text-sm mb-1">ملاحظات عند الإنشاء:</div>
-                    <p>{selectedPatient.notes}</p>
-                  </div>
-                )}
-                
-                <div className="border-t pt-4 mt-4">
-                  <div className="font-bold mb-2">ملاحظات إضافية:</div>
-                  {selectedPatient.patientNotes && selectedPatient.patientNotes.length > 0 ? (
-                    <div className="space-y-3">
-                      {selectedPatient.patientNotes.map((note) => (
-                        <div key={note.id} className="p-3 border rounded bg-orange-50">
-                          <div className="text-sm text-gray-500 mb-1">{formatDate(note.createdAt)}</div>
-                          <p>{note.text}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
-                      لا يوجد ملاحظات إضافية
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
-  );
-};
+          <CardHeader
