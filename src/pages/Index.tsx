@@ -5,6 +5,7 @@ import { Dashboard } from "@/components/Dashboard";
 import { CreateClient } from "@/components/CreateClient";
 import CreateInvoice from "@/components/CreateInvoice";
 import { Inventory } from "@/components/Inventory";
+import { InventoryTabs } from "@/components/InventoryTabs";
 import { RemainingPayments } from "@/components/RemainingPayments";
 import { PatientSearch } from "@/components/PatientSearch";
 import { useLocation } from "react-router-dom";
@@ -28,7 +29,7 @@ const Index = () => {
       {activeSection === "dashboard" && <Dashboard />}
       {activeSection === "createClient" && <CreateClient />}
       {activeSection === "createInvoice" && <CreateInvoice />}
-      {activeSection === "inventory" && <Inventory />}
+      {activeSection === "inventory" && <InventoryTabs />}
       {activeSection === "remainingPayments" && <RemainingPayments />}
       {activeSection === "patientSearch" && <PatientSearch />}
     </Layout>
