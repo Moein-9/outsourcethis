@@ -226,7 +226,7 @@ export const PatientSearch: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">جميع الأعمار</SelectItem>
-                    <SelectItem value="child">أطفال (< 18)</SelectItem>
+                    <SelectItem value="child">أطفال (&lt; 18)</SelectItem>
                     <SelectItem value="adult">بالغين (18-60)</SelectItem>
                     <SelectItem value="senior">كبار السن (60+)</SelectItem>
                   </SelectContent>
