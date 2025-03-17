@@ -123,7 +123,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                 <SelectValue placeholder="اختر الطلاء" />
               </SelectTrigger>
               <SelectContent position="popper">
-                <SelectItem value="" className="text-right">
+                <SelectItem value="no-coating" className="text-right">
                   <div className="flex items-center justify-between w-full">
                     <span>0.00 KWD</span>
                     <span>بدون طلاء</span>
@@ -140,7 +140,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               </SelectContent>
             </Select>
             
-            {selectedCoatingId && (
+            {selectedCoatingId && selectedCoatingId !== "no-coating" && (
               <div className="mt-2 p-2 bg-primary/5 border border-primary/20 rounded-md text-right">
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-primary">
