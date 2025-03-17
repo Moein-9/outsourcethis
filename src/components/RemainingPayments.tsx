@@ -1,9 +1,9 @@
 
 import React, { useState } from "react";
-import { useInvoiceStore } from "@/store/invoiceStore";
+import { useInvoiceStore, Payment } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { 
   Receipt, 
   Wallet, 
@@ -19,7 +19,11 @@ import {
   ArrowRight,
   Tag,
   Search,
-  Filter
+  Filter,
+  Plus,
+  Trash2,
+  Eye as EyeIcon,
+  FileText
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -40,13 +44,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export const RemainingPayments: React.FC = () => {
-  const { invoices, markAsPaid, getInvoiceById } = useInvoiceStore();
+  const { invoices, getInvoiceById, addPartialPayment } = useInvoiceStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState("نقداً");
+  const [invoiceForPrint, setInvoiceForPrint] = useState<string | null>(null);
+  
+  // Payment form state
+  const [paymentEntries, setPaymentEntries] = useState<{method: string; amount: number; authNumber?: string}[]>([
+    { method: "نقداً", amount: 0 }
+  ]);
   
   // Get unpaid invoices
   let unpaidInvoices = invoices.filter(invoice => !invoice.isPaid);
@@ -67,12 +78,71 @@ export const RemainingPayments: React.FC = () => {
     return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
   });
   
-  // Handle pay full action
-  const handlePayFull = (invoiceId: string, method: string) => {
-    markAsPaid(invoiceId);
-    toast.success("تم تسجيل السداد بنجاح.", {
-      description: "تم تحديث حالة الفاتورة إلى مدفوعة بالكامل"
-    });
+  // Add payment entry
+  const addPaymentEntry = () => {
+    setPaymentEntries([...paymentEntries, { method: "نقداً", amount: 0 }]);
+  };
+  
+  // Remove payment entry
+  const removePaymentEntry = (index: number) => {
+    if (paymentEntries.length > 1) {
+      const newEntries = [...paymentEntries];
+      newEntries.splice(index, 1);
+      setPaymentEntries(newEntries);
+    }
+  };
+  
+  // Update payment entry
+  const updatePaymentEntry = (index: number, field: string, value: string | number) => {
+    const newEntries = [...paymentEntries];
+    newEntries[index] = { ...newEntries[index], [field]: value };
+    setPaymentEntries(newEntries);
+  };
+  
+  // Calculate total payment amount
+  const calculateTotalPayment = () => {
+    return paymentEntries.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+  };
+  
+  // Handle payment submission
+  const handleSubmitPayment = (invoiceId: string) => {
+    const invoice = getInvoiceById(invoiceId);
+    if (!invoice) return;
+    
+    // Validate payment entries
+    const totalPayment = calculateTotalPayment();
+    if (totalPayment <= 0) {
+      toast.error("يرجى إدخال مبلغ الدفع");
+      return;
+    }
+    
+    if (totalPayment > invoice.remaining) {
+      toast.error("المبلغ المدخل أكبر من المبلغ المتبقي");
+      return;
+    }
+    
+    // Process each payment entry
+    for (const entry of paymentEntries) {
+      if (entry.amount > 0) {
+        addPartialPayment(invoiceId, {
+          amount: entry.amount,
+          method: entry.method,
+          authNumber: entry.authNumber
+        });
+      }
+    }
+    
+    toast.success("تم تسجيل الدفع بنجاح");
+    
+    // Check if payment is complete
+    const updatedInvoice = getInvoiceById(invoiceId);
+    if (updatedInvoice?.isPaid) {
+      // Set the invoice for printing
+      setInvoiceForPrint(invoiceId);
+    }
+    
+    // Reset form and close dialog
+    setPaymentEntries([{ method: "نقداً", amount: 0 }]);
     setSelectedInvoice(null);
   };
   
@@ -254,6 +324,31 @@ export const RemainingPayments: React.FC = () => {
             font-weight: bold;
             pointer-events: none;
           }
+          .payments-history {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f9ff;
+            border-radius: 8px;
+          }
+          .payment-history-title {
+            font-weight: bold;
+            color: #0369a1;
+            margin-bottom: 8px;
+          }
+          .payment-history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #ccc;
+            font-size: 14px;
+          }
+          .payment-history-item:last-child {
+            border-bottom: none;
+          }
+          .payment-date {
+            color: #666;
+            font-size: 12px;
+          }
           .footer {
             margin-top: 30px;
             text-align: center;
@@ -413,18 +508,26 @@ export const RemainingPayments: React.FC = () => {
             <span>- ${invoice.discount.toFixed(2)} KWD</span>
           </div>
           ` : ''}
-          <div class="payment-row">
-            <span class="payment-label">المدفوع:</span>
-            <span>${invoice.deposit.toFixed(2)} KWD</span>
-          </div>
-          <div class="payment-row">
-            <span class="payment-label">طريقة الدفع:</span>
-            <span>${invoice.paymentMethod}</span>
-          </div>
           <div class="payment-row total-row">
             <span>المجموع النهائي:</span>
             <span>${invoice.total.toFixed(2)} KWD</span>
           </div>
+          
+          ${invoice.payments && invoice.payments.length > 0 ? `
+          <div class="payments-history">
+            <div class="payment-history-title">سجل الدفعات:</div>
+            ${invoice.payments.map(payment => `
+              <div class="payment-history-item">
+                <div>
+                  <span>${payment.amount.toFixed(2)} KWD</span>
+                  <span> (${payment.method})</span>
+                  ${payment.authNumber ? `<span> - رقم التفويض: ${payment.authNumber}</span>` : ''}
+                </div>
+                <div class="payment-date">${new Date(payment.date).toLocaleDateString('en-US')}</div>
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
         </div>
         
         <div class="thank-you">
@@ -512,7 +615,7 @@ export const RemainingPayments: React.FC = () => {
                   </div>
                   <Badge 
                     variant="outline" 
-                    className="bg-amber-100 text-amber-800 border-amber-300"
+                    className="bg-amber-100 text-amber-800 border-amber-300 text-lg font-bold px-3 py-1"
                   >
                     متبقي {invoice.remaining.toFixed(2)} KWD
                   </Badge>
@@ -531,6 +634,45 @@ export const RemainingPayments: React.FC = () => {
                   </div>
                 </div>
                 
+                <Accordion type="single" collapsible className="w-full border rounded-md">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger className="px-3 text-sm font-medium">
+                      تفاصيل النظارة
+                    </AccordionTrigger>
+                    <AccordionContent className="px-3 pb-3 text-sm">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <EyeIcon className="h-3.5 w-3.5 text-blue-500" />
+                          <span>نوع العدسة:</span>
+                          <span className="font-medium">{invoice.lensType}</span>
+                        </div>
+                        
+                        {invoice.frameBrand && (
+                          <div className="flex items-center gap-1.5">
+                            <Frame className="h-3.5 w-3.5 text-gray-500" />
+                            <span>الإطار:</span>
+                            <span className="font-medium">{invoice.frameBrand} / {invoice.frameModel}</span>
+                          </div>
+                        )}
+                        
+                        {invoice.coating && (
+                          <div className="flex items-center gap-1.5">
+                            <Droplets className="h-3.5 w-3.5 text-cyan-500" />
+                            <span>الطلاء:</span>
+                            <span className="font-medium">{invoice.coating}</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center gap-1.5 text-emerald-600">
+                          <Tag className="h-3.5 w-3.5" />
+                          <span>السعر الإجمالي:</span>
+                          <span className="font-medium">{invoice.total.toFixed(2)} KWD</span>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+                
                 <div className="border-t border-dashed pt-3">
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     <div>
@@ -543,42 +685,45 @@ export const RemainingPayments: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
-                    <Wallet size={14} />
-                    <span>طريقة الدفع: {invoice.paymentMethod}</span>
-                  </div>
+                  {invoice.payments && invoice.payments.length > 0 && (
+                    <div className="mt-2 bg-slate-50 p-2 rounded-md text-xs">
+                      <p className="font-medium mb-1">سجل الدفعات:</p>
+                      {invoice.payments.map((payment, idx) => (
+                        <div key={idx} className="flex justify-between items-center">
+                          <span>{new Date(payment.date).toLocaleDateString('en-US')}</span>
+                          <span className="font-medium">{payment.amount.toFixed(2)} KWD ({payment.method})</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex justify-between gap-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        className="flex-1 text-xs border-blue-200 hover:bg-blue-50 text-blue-700"
-                        onClick={() => handlePrintReceipt(invoice.invoiceId)}
-                      >
-                        <Printer className="h-4 w-4 mr-1" />
-                        طباعة الفاتورة
-                      </Button>
-                    </DialogTrigger>
-                  </Dialog>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 text-xs border-blue-200 hover:bg-blue-50 text-blue-700"
+                    onClick={() => handlePrintReceipt(invoice.invoiceId)}
+                  >
+                    <Printer className="h-4 w-4 mr-1" />
+                    طباعة الفاتورة
+                  </Button>
                   
-                  <Dialog>
+                  <Dialog open={selectedInvoice === invoice.invoiceId} onOpenChange={(open) => !open && setSelectedInvoice(null)}>
                     <DialogTrigger asChild>
                       <Button 
                         className="flex-1 text-xs bg-amber-500 hover:bg-amber-600"
                         onClick={() => setSelectedInvoice(invoice.invoiceId)}
                       >
                         <CheckCircle2 className="h-4 w-4 mr-1" />
-                        سداد المتبقي
+                        تسديد الدفعة
                       </Button>
                     </DialogTrigger>
                     
                     <DialogContent className="max-w-md">
                       <DialogHeader>
-                        <DialogTitle>تأكيد السداد الكامل</DialogTitle>
+                        <DialogTitle>تسجيل دفعة جديدة</DialogTitle>
                         <DialogDescription>
-                          تسجيل سداد المبلغ المتبقي للفاتورة {invoice.invoiceId}
+                          تسجيل دفعة للفاتورة {invoice.invoiceId}
                         </DialogDescription>
                       </DialogHeader>
                       
@@ -594,26 +739,91 @@ export const RemainingPayments: React.FC = () => {
                           </div>
                           <div className="flex justify-between font-bold border-t pt-2 mt-2">
                             <span>المبلغ المتبقي:</span>
-                            <span className="text-amber-600">{invoice.remaining.toFixed(2)} KWD</span>
+                            <span className="text-amber-600 text-lg">{invoice.remaining.toFixed(2)} KWD</span>
                           </div>
                         </div>
                         
-                        <div className="space-y-2">
-                          <Label htmlFor="paymentMethod">طريقة الدفع</Label>
-                          <Select 
-                            value={paymentMethod} 
-                            onValueChange={setPaymentMethod}
-                          >
-                            <SelectTrigger id="paymentMethod">
-                              <SelectValue placeholder="اختر طريقة الدفع" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="نقداً">نقداً</SelectItem>
-                              <SelectItem value="كي نت">كي نت</SelectItem>
-                              <SelectItem value="Visa">Visa</SelectItem>
-                              <SelectItem value="MasterCard">MasterCard</SelectItem>
-                            </SelectContent>
-                          </Select>
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <h4 className="font-medium">طرق الدفع</h4>
+                            <Button 
+                              type="button" 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={addPaymentEntry}
+                              className="h-8"
+                            >
+                              <Plus className="h-3.5 w-3.5 mr-1" /> إضافة طريقة دفع
+                            </Button>
+                          </div>
+                          
+                          {paymentEntries.map((entry, index) => (
+                            <div key={index} className="space-y-3 bg-slate-50 p-3 rounded-md">
+                              <div className="flex justify-between items-center">
+                                <Label className="font-medium">طريقة الدفع #{index + 1}</Label>
+                                {paymentEntries.length > 1 && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-7 w-7 p-0 text-red-500 hover:text-red-600" 
+                                    onClick={() => removePaymentEntry(index)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                  <Label htmlFor={`payment-method-${index}`}>طريقة الدفع</Label>
+                                  <Select 
+                                    value={entry.method} 
+                                    onValueChange={(value) => updatePaymentEntry(index, 'method', value)}
+                                  >
+                                    <SelectTrigger id={`payment-method-${index}`}>
+                                      <SelectValue placeholder="اختر طريقة الدفع" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="نقداً">نقداً</SelectItem>
+                                      <SelectItem value="كي نت">كي نت</SelectItem>
+                                      <SelectItem value="Visa">Visa</SelectItem>
+                                      <SelectItem value="MasterCard">MasterCard</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                
+                                <div className="space-y-1.5">
+                                  <Label htmlFor={`payment-amount-${index}`}>المبلغ (KWD)</Label>
+                                  <Input
+                                    id={`payment-amount-${index}`}
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max={invoice.remaining}
+                                    value={entry.amount || ""}
+                                    onChange={(e) => updatePaymentEntry(index, 'amount', parseFloat(e.target.value) || 0)}
+                                  />
+                                </div>
+                              </div>
+                              
+                              {(entry.method === "كي نت" || entry.method === "Visa" || entry.method === "MasterCard") && (
+                                <div className="space-y-1.5">
+                                  <Label htmlFor={`auth-number-${index}`}>رقم التفويض</Label>
+                                  <Input
+                                    id={`auth-number-${index}`}
+                                    placeholder="رقم التفويض"
+                                    value={entry.authNumber || ""}
+                                    onChange={(e) => updatePaymentEntry(index, 'authNumber', e.target.value)}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          
+                          <div className="flex justify-between font-medium p-2 border-t">
+                            <span>إجمالي المدفوع:</span>
+                            <span>{calculateTotalPayment().toFixed(2)} KWD</span>
+                          </div>
                         </div>
                       </div>
                       
@@ -622,10 +832,10 @@ export const RemainingPayments: React.FC = () => {
                           إلغاء
                         </Button>
                         <Button 
-                          onClick={() => handlePayFull(invoice.invoiceId, paymentMethod)}
+                          onClick={() => handleSubmitPayment(invoice.invoiceId)}
                           className="bg-amber-500 hover:bg-amber-600"
                         >
-                          تأكيد السداد
+                          تأكيد الدفع
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -635,6 +845,46 @@ export const RemainingPayments: React.FC = () => {
             </Card>
           ))}
         </div>
+      )}
+      
+      {/* After payment success - Print invoice dialog */}
+      {invoiceForPrint && (
+        <Dialog
+          open={Boolean(invoiceForPrint)}
+          onOpenChange={(open) => !open && setInvoiceForPrint(null)}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-green-600">
+                <CheckCircle2 className="h-8 w-8 mx-auto mb-2" />
+                تم تسجيل الدفع بنجاح
+              </DialogTitle>
+              <DialogDescription className="text-center">
+                تم إكمال الدفع بنجاح! هل ترغب في طباعة الفاتورة النهائية؟
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center space-x-4 space-x-reverse pt-4">
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => setInvoiceForPrint(null)}
+              >
+                <span>إغلاق</span>
+              </Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 gap-2"
+                onClick={() => {
+                  const invoiceId = invoiceForPrint;
+                  setInvoiceForPrint(null);
+                  handlePrintReceipt(invoiceId);
+                }}
+              >
+                <Printer className="h-4 w-4" />
+                <span>طباعة الفاتورة</span>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

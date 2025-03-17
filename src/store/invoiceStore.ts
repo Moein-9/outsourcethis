@@ -6,6 +6,7 @@ export interface Payment {
   amount: number;
   method: string;
   date: string;
+  authNumber?: string; // Added for card payment authorization numbers
 }
 
 export interface Invoice {
@@ -40,6 +41,7 @@ interface InvoiceState {
   invoices: Invoice[];
   addInvoice: (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments">) => string;
   markAsPaid: (invoiceId: string, paymentMethod?: string) => void;
+  addPartialPayment: (invoiceId: string, payment: Omit<Payment, "date">) => void; // New method for partial payments
   getInvoiceById: (id: string) => Invoice | undefined;
   getUnpaidInvoices: () => Invoice[];
   // Added for mock data functionality
@@ -106,6 +108,38 @@ export const useInvoiceStore = create<InvoiceState>()(
                 remaining: 0, 
                 deposit: invoice.total,
                 paymentMethod: method,
+                payments: [...existingPayments, newPayment]
+              };
+            }
+            return invoice;
+          })
+        }));
+      },
+      
+      // Add new method for partial payments
+      addPartialPayment: (invoiceId, payment) => {
+        set((state) => ({
+          invoices: state.invoices.map(invoice => {
+            if (invoice.invoiceId === invoiceId) {
+              // Get existing payments or create empty array if none exist
+              const existingPayments = invoice.payments || [];
+              
+              // Create a new payment record
+              const newPayment: Payment = {
+                ...payment,
+                date: new Date().toISOString()
+              };
+              
+              // Calculate new remaining amount
+              const newDeposit = existingPayments.reduce((sum, p) => sum + p.amount, 0) + payment.amount;
+              const newRemaining = Math.max(0, invoice.total - newDeposit);
+              const isPaid = newRemaining === 0;
+              
+              return { 
+                ...invoice, 
+                isPaid,
+                remaining: newRemaining,
+                deposit: newDeposit,
                 payments: [...existingPayments, newPayment]
               };
             }
