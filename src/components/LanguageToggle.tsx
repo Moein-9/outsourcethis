@@ -1,9 +1,7 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export const LanguageToggle: React.FC = () => {

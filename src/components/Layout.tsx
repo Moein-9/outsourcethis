@@ -83,7 +83,7 @@ export const Layout: React.FC<LayoutProps> = ({
           <LanguageToggle />
           <div className="flex items-center gap-2 font-medium text-foreground/80">
             <Clock className="h-4 w-4" />
-            <span>{currentTime.toLocaleTimeString('en-US')}</span>
+            <span>{currentTime.toLocaleTimeString(language === 'ar' ? 'ar-SA' : 'en-US')}</span>
           </div>
         </div>
       </header>

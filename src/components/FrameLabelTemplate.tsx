@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { QrCode, Printer, Tag } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Dimensions: 100mm x 16mm
 const LABEL_WIDTH = "100mm";
@@ -63,6 +64,7 @@ export const FrameLabelTemplate: React.FC = () => {
   const { frames } = useInventoryStore();
   const [selectedFrames, setSelectedFrames] = React.useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const { t, language } = useLanguage();
   
   const toggleFrameSelection = (frameId: string) => {
     setSelectedFrames(prev => 
@@ -82,7 +84,7 @@ export const FrameLabelTemplate: React.FC = () => {
   
   const handlePrint = () => {
     if (selectedFrames.length === 0) {
-      toast.error("يرجى تحديد إطار واحد على الأقل للطباعة");
+      toast.error(t("please_select"));
       return;
     }
     
@@ -94,28 +96,28 @@ export const FrameLabelTemplate: React.FC = () => {
       window.print();
       setIsDialogOpen(false);
       
-      toast.success(`تم إرسال ${selectedFrames.length} بطاقة للطباعة`);
+      toast.success(`${t("labels_sent")} (${selectedFrames.length})`);
     }, 300);
   };
   
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">طباعة بطاقات الإطارات</h2>
+        <h2 className="text-xl font-bold">{t("frame_labels")}</h2>
         <div className="flex gap-2">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={handleSelectAll}
           >
-            {selectedFrames.length === frames.length ? "إلغاء تحديد الكل" : "تحديد الكل"}
+            {selectedFrames.length === frames.length ? t("deselect_all") : t("select_all")}
           </Button>
           <Button 
             size="sm" 
             onClick={handlePrint}
             disabled={selectedFrames.length === 0}
           >
-            <Printer className="h-4 w-4 mr-1" /> طباعة البطاقات ({selectedFrames.length})
+            <Printer className="h-4 w-4 mr-1" /> {t("print_labels")} ({selectedFrames.length})
           </Button>
         </div>
       </div>
@@ -144,9 +146,9 @@ export const FrameLabelTemplate: React.FC = () => {
       {frames.length === 0 && (
         <div className="bg-muted/30 rounded-lg p-12 text-center">
           <Tag className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-          <h3 className="text-lg font-medium mb-1">لا توجد إطارات</h3>
+          <h3 className="text-lg font-medium mb-1">{t("no_frames")}</h3>
           <p className="text-muted-foreground mb-4">
-            لا توجد إطارات في المخزون حاليًا.
+            {t("no_frames_inventory")}
           </p>
         </div>
       )}
@@ -154,9 +156,9 @@ export const FrameLabelTemplate: React.FC = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>معاينة بطاقات الإطارات</DialogTitle>
+            <DialogTitle>{t("preview_labels")}</DialogTitle>
             <DialogDescription>
-              ستتم طباعة البطاقات التالية. تأكد من إعداد طابعة Zebra وتحديد الحجم الصحيح (100مم × 16مم).
+              {t("zebra_printer_setup")}
             </DialogDescription>
           </DialogHeader>
           
@@ -169,10 +171,10 @@ export const FrameLabelTemplate: React.FC = () => {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              إلغاء
+              {t("cancel")}
             </Button>
             <Button onClick={printLabels}>
-              <Printer className="h-4 w-4 mr-1" /> طباعة البطاقات
+              <Printer className="h-4 w-4 mr-1" /> {t("print_labels")}
             </Button>
           </DialogFooter>
         </DialogContent>

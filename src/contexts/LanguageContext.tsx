@@ -147,6 +147,192 @@ const translations: Record<string, Record<string, string>> = {
   "remaining_balance": {
     ar: "المبلغ المتبقي",
     en: "Remaining Balance"
+  },
+  
+  // Lens Type Manager
+  "lens_types": {
+    ar: "أنواع العدسات",
+    en: "Lens Types"
+  },
+  "add_lens_type": {
+    ar: "إضافة نوع عدسة",
+    en: "Add Lens Type"
+  },
+  "add_new_lens_type": {
+    ar: "إضافة نوع عدسة جديد",
+    en: "Add New Lens Type"
+  },
+  "enter_lens_details": {
+    ar: "أدخل تفاصيل نوع العدسة الجديد أدناه",
+    en: "Enter new lens type details below"
+  },
+  "lens_name": {
+    ar: "اسم العدسة",
+    en: "Lens Name"
+  },
+  "price": {
+    ar: "السعر (د.ك)",
+    en: "Price (KD)"
+  },
+  "type": {
+    ar: "النوع",
+    en: "Type"
+  },
+  "select_lens_type": {
+    ar: "اختر نوع العدسة",
+    en: "Select lens type"
+  },
+  "add": {
+    ar: "إضافة",
+    en: "Add"
+  },
+  "distance": {
+    ar: "النظر البعيد",
+    en: "Distance"
+  },
+  "reading": {
+    ar: "القراءة",
+    en: "Reading"
+  },
+  "progressive": {
+    ar: "التقدمية",
+    en: "Progressive"
+  },
+  "bifocal": {
+    ar: "ثنائية البؤرة",
+    en: "Bifocal"
+  },
+  "sunglasses": {
+    ar: "النظارات الشمسية",
+    en: "Sunglasses"
+  },
+  "no_lenses": {
+    ar: "لا توجد عدسات في هذه الفئة",
+    en: "No lenses in this category"
+  },
+  "edit_lens_type": {
+    ar: "تعديل نوع العدسة",
+    en: "Edit Lens Type"
+  },
+  "update_lens_details": {
+    ar: "قم بتحديث تفاصيل نوع العدسة أدناه",
+    en: "Update lens type details below"
+  },
+  "save_changes": {
+    ar: "حفظ التغييرات",
+    en: "Save Changes"
+  },
+  
+  // Frame Label Template
+  "frame_labels": {
+    ar: "طباعة بطاقات الإطارات",
+    en: "Print Frame Labels"
+  },
+  "select_all": {
+    ar: "تحديد الكل",
+    en: "Select All"
+  },
+  "deselect_all": {
+    ar: "إلغاء تحديد الكل",
+    en: "Deselect All"
+  },
+  "print_labels": {
+    ar: "طباعة البطاقات",
+    en: "Print Labels"
+  },
+  "no_frames": {
+    ar: "لا توجد إطارات",
+    en: "No Frames"
+  },
+  "no_frames_inventory": {
+    ar: "لا توجد إطارات في المخزون حاليًا",
+    en: "No frames in inventory currently"
+  },
+  "preview_labels": {
+    ar: "معاينة بطاقات الإطارات",
+    en: "Preview Frame Labels"
+  },
+  "zebra_printer_setup": {
+    ar: "ستتم طباعة البطاقات التالية. تأكد من إعداد طابعة Zebra وتحديد الحجم الصحيح (100مم × 16مم)",
+    en: "The following labels will be printed. Make sure to set up the Zebra printer and select the correct size (100mm × 16mm)"
+  },
+  "print": {
+    ar: "طباعة",
+    en: "Print"
+  },
+  "labels_sent": {
+    ar: "تم إرسال بطاقة للطباعة",
+    en: "Labels sent to printer"
+  },
+  "please_select": {
+    ar: "يرجى تحديد إطار واحد على الأقل للطباعة",
+    en: "Please select at least one frame to print"
+  },
+  
+  // Contact Lens Form
+  "contact_lens_prescription": {
+    ar: "وصفة العدسات اللاصقة",
+    en: "Contact Lens Prescription"
+  },
+  "no_prescription_warning": {
+    ar: "لا توجد وصفة عدسات لاصقة لهذا العميل. يرجى إدخال وصفة العدسات",
+    en: "No contact lens prescription for this client. Please enter lens prescription"
+  },
+  "sphere": {
+    ar: "SPHERE (SPH)",
+    en: "SPHERE (SPH)"
+  },
+  "cylinder": {
+    ar: "CYLINDER (CYL)",
+    en: "CYLINDER (CYL)"
+  },
+  "axis": {
+    ar: "AXIS",
+    en: "AXIS"
+  },
+  "base_curve": {
+    ar: "BASE CURVE (BC)",
+    en: "BASE CURVE (BC)"
+  },
+  "diameter": {
+    ar: "DIAMETER (DIA)",
+    en: "DIAMETER (DIA)"
+  },
+  "right_eye": {
+    ar: "العين اليمنى (OD)",
+    en: "Right Eye (OD)"
+  },
+  "left_eye": {
+    ar: "العين اليسرى (OS)",
+    en: "Left Eye (OS)"
+  },
+  
+  // Lens Selector
+  "select_lens_type_title": {
+    ar: "اختر نوع العدسة",
+    en: "Select Lens Type"
+  },
+  "select_coatings": {
+    ar: "اختر الطلاءات",
+    en: "Select Coatings"
+  },
+  "coatings_selected": {
+    ar: "طلاء محدد",
+    en: "coating selected"
+  },
+  "current_selections": {
+    ar: "الاختيارات الحالية",
+    en: "Current Selections"
+  },
+  "no_coatings": {
+    ar: "لا توجد طلاءات متاحة",
+    en: "No coatings available"
+  },
+  
+  // Sales Chart
+  "no_data": {
+    ar: "لا توجد بيانات للعرض",
+    en: "No data to display"
   }
 };
 
