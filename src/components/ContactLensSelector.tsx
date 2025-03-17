@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
-import { Contact, Eye, Search, ShoppingCart, Plus, Trash2, Check } from "lucide-react";
+import { toast } from "sonner";
+import { Contact, Eye, Search, ShoppingCart, Plus, Trash2, Check, ArrowDown, ArrowUp } from "lucide-react";
 import { 
   Card, 
   CardContent, 
@@ -22,6 +22,8 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { ContactLensForm } from "./ContactLensForm";
+import { ContactLensRx } from "@/store/patientStore";
 
 interface ContactLensItem {
   id: string;
@@ -32,15 +34,35 @@ interface ContactLensItem {
   power: string;
   price: number;
   qty: number;
+  color?: string; // Added color field
 }
 
 interface ContactLensSelection {
   items: ContactLensItem[];
+  rxData?: ContactLensRx;
 }
 
 interface ContactLensSelectorProps {
   onSelect: (selection: ContactLensSelection) => void;
+  initialRxData?: ContactLensRx;
 }
+
+const emptyContactLensRx: ContactLensRx = {
+  rightEye: {
+    sphere: "-",
+    cylinder: "-",
+    axis: "-",
+    bc: "-",
+    dia: "-"
+  },
+  leftEye: {
+    sphere: "-",
+    cylinder: "-",
+    axis: "-",
+    bc: "-",
+    dia: "-"
+  }
+};
 
 const mockContactLenses: ContactLensItem[] = [
   {
@@ -51,7 +73,8 @@ const mockContactLenses: ContactLensItem[] = [
     diameter: "14.2",
     power: "-2.00",
     price: 25,
-    qty: 30
+    qty: 30,
+    color: "Clear"
   },
   {
     id: "cl2",
@@ -61,7 +84,8 @@ const mockContactLenses: ContactLensItem[] = [
     diameter: "14.2",
     power: "-1.50",
     price: 25,
-    qty: 15
+    qty: 15,
+    color: "Clear"
   },
   {
     id: "cl3",
@@ -71,7 +95,8 @@ const mockContactLenses: ContactLensItem[] = [
     diameter: "14.0",
     power: "-3.00",
     price: 20,
-    qty: 12
+    qty: 12,
+    color: "Blue"
   },
   {
     id: "cl4",
@@ -81,28 +106,32 @@ const mockContactLenses: ContactLensItem[] = [
     diameter: "14.2",
     power: "+1.50",
     price: 22,
-    qty: 8
+    qty: 8,
+    color: "Green"
   }
 ];
 
-export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSelect }) => {
+export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSelect, initialRxData }) => {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ContactLensItem[]>(mockContactLenses);
   const [selectedLenses, setSelectedLenses] = useState<ContactLensItem[]>([]);
+  const [hasExistingPatient, setHasExistingPatient] = useState(!!initialRxData);
+  const [showRxForm, setShowRxForm] = useState(!initialRxData);
+  const [rxData, setRxData] = useState<ContactLensRx>(initialRxData || emptyContactLensRx);
   
-  const [filterBrand, setFilterBrand] = useState<string>("");
-  const [filterPower, setFilterPower] = useState<string>("");
-  const [filterBC, setFilterBC] = useState<string>("");
+  const [filterBrand, setFilterBrand] = useState<string>("all");
+  const [filterPower, setFilterPower] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("all");
 
   // Extract unique values for filters
   const brands = [...new Set(mockContactLenses.map(lens => lens.brand))];
   const powers = [...new Set(mockContactLenses.map(lens => lens.power))];
-  const baseCurves = [...new Set(mockContactLenses.map(lens => lens.bc))];
+  const types = [...new Set(mockContactLenses.map(lens => lens.type))];
 
   // Apply filters when they change
   useEffect(() => {
     handleFilterApply();
-  }, [filterBrand, filterPower, filterBC]);
+  }, [filterBrand, filterPower, filterType, search]);
 
   const handleFilterApply = () => {
     let filtered = mockContactLenses;
@@ -111,29 +140,27 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
       filtered = filtered.filter(lens => 
         lens.brand.toLowerCase().includes(search.toLowerCase()) ||
         lens.type.toLowerCase().includes(search.toLowerCase()) ||
-        lens.power.includes(search)
+        lens.power.includes(search) ||
+        (lens.color && lens.color.toLowerCase().includes(search.toLowerCase()))
       );
     }
     
-    if (filterBrand) {
+    if (filterBrand && filterBrand !== "all") {
       filtered = filtered.filter(lens => lens.brand === filterBrand);
     }
     
-    if (filterPower) {
+    if (filterPower && filterPower !== "all") {
       filtered = filtered.filter(lens => lens.power === filterPower);
     }
     
-    if (filterBC) {
-      filtered = filtered.filter(lens => lens.bc === filterBC);
+    if (filterType && filterType !== "all") {
+      filtered = filtered.filter(lens => lens.type === filterType);
     }
     
     setResults(filtered);
     
-    if (filtered.length === 0) {
-      toast({
-        description: "لم يتم العثور على عدسات مطابقة للبحث",
-        variant: "destructive"
-      });
+    if (filtered.length === 0 && (search || filterBrand !== "all" || filterPower !== "all" || filterType !== "all")) {
+      toast("لم يتم العثور على عدسات مطابقة للبحث");
     }
   };
 
@@ -142,9 +169,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     const alreadySelected = selectedLenses.some(item => item.id === lens.id);
     
     if (alreadySelected) {
-      toast({
-        description: "هذه العدسة مضافة بالفعل",
-      });
+      toast("هذه العدسة مضافة بالفعل");
       return;
     }
     
@@ -152,12 +177,11 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     setSelectedLenses(updatedSelection);
     
     onSelect({
-      items: updatedSelection
+      items: updatedSelection,
+      rxData: rxData
     });
     
-    toast({
-      description: `تمت إضافة ${lens.brand} ${lens.type} بنجاح`,
-    });
+    toast(`تمت إضافة ${lens.brand} ${lens.type} بنجاح`);
   };
 
   const handleRemoveLens = (lensId: string) => {
@@ -165,8 +189,24 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     setSelectedLenses(updatedSelection);
     
     onSelect({
-      items: updatedSelection
+      items: updatedSelection,
+      rxData: rxData
     });
+  };
+  
+  const handleRxChange = (newRxData: ContactLensRx) => {
+    setRxData(newRxData);
+    
+    // Also update the selection with the new RX data
+    onSelect({
+      items: selectedLenses,
+      rxData: newRxData
+    });
+  };
+  
+  const togglePatientStatus = () => {
+    setHasExistingPatient(!hasExistingPatient);
+    setShowRxForm(!hasExistingPatient);
   };
   
   // Calculate total price of selected lenses
@@ -177,34 +217,63 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="bg-amber-100 p-2 rounded-full">
-            <Contact className="w-5 h-5 text-amber-600" />
+          <div className="bg-blue-100 p-2 rounded-full">
+            <Contact className="w-5 h-5 text-blue-600" />
           </div>
           <h3 className="text-xl font-bold">العدسات اللاصقة</h3>
         </div>
         
-        {selectedLenses.length > 0 && (
-          <Badge variant="outline" className="px-3 py-1.5 bg-amber-50 text-amber-700 border-amber-200">
-            {selectedLenses.length} عدسة مختارة
+        <div className="flex items-center gap-2">
+          <Badge variant={hasExistingPatient ? "outline" : "secondary"} className="cursor-pointer" onClick={togglePatientStatus}>
+            {hasExistingPatient ? "يوجد ملف عميل" : "لا يوجد ملف عميل"}
           </Badge>
-        )}
+          
+          {selectedLenses.length > 0 && (
+            <Badge variant="outline" className="px-3 py-1.5 bg-blue-50 text-blue-700 border-blue-200">
+              {selectedLenses.length} عدسة مختارة
+            </Badge>
+          )}
+        </div>
       </div>
 
+      {/* RX Form for manual input when no patient file */}
+      {showRxForm && (
+        <ContactLensForm
+          rxData={rxData}
+          onChange={handleRxChange}
+        />
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: RX Card */}
+        {/* Left Column: Filters */}
         <div className="lg:col-span-1">
-          <Card className="border-amber-200 overflow-hidden h-full shadow-sm">
-            <CardHeader className="bg-gradient-to-r from-amber-50 to-amber-100 border-b border-amber-200 pb-3">
-              <CardTitle className="text-amber-800 flex items-center gap-2 text-base">
-                <Eye className="h-4 w-4 text-amber-600" />
-                معلومات العدسة اللاصقة
+          <Card className="border-blue-200 shadow-sm">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 pb-3">
+              <CardTitle className="text-blue-800 flex items-center gap-2 text-base">
+                <Search className="h-4 w-4 text-blue-600" />
+                بحث في المخزون
               </CardTitle>
-              <CardDescription className="text-amber-700/80">
-                حدد قوة العدسة و BC للبحث
+              <CardDescription className="text-blue-700/80">
+                حدد معايير البحث لإيجاد العدسات المناسبة
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">البراند:</Label>
+                  <Select value={filterBrand} onValueChange={setFilterBrand}>
+                    <SelectTrigger className="w-full bg-white">
+                      <SelectValue placeholder="اختر البراند" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">الكل</SelectItem>
+                      {brands.map(brand => (
+                        <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">القوة (Power):</Label>
                   <Select value={filterPower} onValueChange={setFilterPower}>
@@ -221,30 +290,15 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                 </div>
                 
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Base Curve (BC):</Label>
-                  <Select value={filterBC} onValueChange={setFilterBC}>
+                  <Label className="text-sm font-medium">النوع:</Label>
+                  <Select value={filterType} onValueChange={setFilterType}>
                     <SelectTrigger className="w-full bg-white">
-                      <SelectValue placeholder="اختر BC" />
+                      <SelectValue placeholder="اختر النوع" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">الكل</SelectItem>
-                      {baseCurves.map(bc => (
-                        <SelectItem key={bc} value={bc}>{bc}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">البراند:</Label>
-                  <Select value={filterBrand} onValueChange={setFilterBrand}>
-                    <SelectTrigger className="w-full bg-white">
-                      <SelectValue placeholder="اختر البراند" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">الكل</SelectItem>
-                      {brands.map(brand => (
-                        <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                      {types.map(type => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -258,7 +312,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                     placeholder="ابحث عن عدسة لاصقة..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleFilterApply()}
                     className="pl-9 pr-3"
                   />
                 </div>
@@ -270,11 +323,11 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
         {/* Right Column: Results and Selected Items */}
         <div className="lg:col-span-2 space-y-5">
           {/* Results Card */}
-          <Card className="border-amber-200 shadow-sm">
-            <CardHeader className="bg-gradient-to-r from-amber-50 to-amber-100 border-b border-amber-200 py-3">
-              <CardTitle className="text-amber-800 flex items-center justify-between text-base">
+          <Card className="border-blue-200 shadow-sm">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 py-3">
+              <CardTitle className="text-blue-800 flex items-center justify-between text-base">
                 <span className="flex items-center gap-2">
-                  <Search className="h-4 w-4 text-amber-600" />
+                  <Search className="h-4 w-4 text-blue-600" />
                   نتائج البحث ({results.length})
                 </span>
               </CardTitle>
@@ -283,24 +336,24 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               {results.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-amber-50/50">
-                      <tr className="border-b border-amber-100">
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-amber-800">البراند</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-amber-800">النوع</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-amber-800">القوة</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-amber-800">BC</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-amber-800">السعر</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-amber-800">الكمية</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-amber-800"></th>
+                    <thead className="bg-blue-50/50">
+                      <tr className="border-b border-blue-100">
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">البراند</th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">النوع</th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">القوة</th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">اللون</th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">السعر</th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">الكمية</th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-amber-100">
+                    <tbody className="divide-y divide-blue-100">
                       {results.map((lens) => (
-                        <tr key={lens.id} className="hover:bg-amber-50/50 transition-colors">
+                        <tr key={lens.id} className="hover:bg-blue-50/50 transition-colors">
                           <td className="py-2.5 px-3 text-sm">{lens.brand}</td>
                           <td className="py-2.5 px-3 text-sm">{lens.type}</td>
                           <td className="py-2.5 px-3 text-sm">{lens.power}</td>
-                          <td className="py-2.5 px-3 text-sm">{lens.bc}</td>
+                          <td className="py-2.5 px-3 text-sm">{lens.color || "-"}</td>
                           <td className="py-2.5 px-3 text-sm font-medium">{lens.price} KWD</td>
                           <td className="py-2.5 px-3 text-sm">
                             <Badge variant={lens.qty > 5 ? "outline" : "destructive"} className="text-xs">
@@ -312,7 +365,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                               variant="ghost" 
                               size="sm"
                               onClick={() => handleSelectLens(lens)}
-                              className="h-7 gap-1 text-xs hover:bg-amber-100 text-amber-700"
+                              className="h-7 gap-1 text-xs hover:bg-blue-100 text-blue-700"
                             >
                               <Plus className="w-3.5 h-3.5" />
                               اختر
@@ -325,9 +378,9 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center text-center p-8">
-                  <Contact className="h-12 w-12 text-amber-200 mb-2" />
-                  <h4 className="text-base font-medium text-amber-800 mb-1">لا توجد نتائج</h4>
-                  <p className="text-sm text-amber-600/80 mb-4">
+                  <Contact className="h-12 w-12 text-blue-200 mb-2" />
+                  <h4 className="text-base font-medium text-blue-800 mb-1">لا توجد نتائج</h4>
+                  <p className="text-sm text-blue-600/80 mb-4">
                     لم يتم العثور على عدسات لاصقة مطابقة للبحث
                   </p>
                   <Button 
@@ -337,10 +390,10 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                       setSearch("");
                       setFilterBrand("all");
                       setFilterPower("all");
-                      setFilterBC("all");
+                      setFilterType("all");
                       setResults(mockContactLenses);
                     }}
-                    className="border-amber-200 hover:bg-amber-50 text-amber-700"
+                    className="border-blue-200 hover:bg-blue-50 text-blue-700"
                   >
                     عرض جميع العدسات
                   </Button>
@@ -351,14 +404,14 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
           
           {/* Selected Items Card */}
           {selectedLenses.length > 0 && (
-            <Card className="border-amber-200 shadow-sm bg-gradient-to-r from-amber-50/50 to-white">
-              <CardHeader className="py-3 border-b border-amber-100">
-                <CardTitle className="text-amber-800 flex items-center justify-between text-base">
+            <Card className="border-blue-200 shadow-sm bg-gradient-to-r from-blue-50/50 to-white">
+              <CardHeader className="py-3 border-b border-blue-100">
+                <CardTitle className="text-blue-800 flex items-center justify-between text-base">
                   <span className="flex items-center gap-2">
-                    <ShoppingCart className="h-4 w-4 text-amber-600" />
-                    العدسات المختارة
+                    <ShoppingCart className="h-4 w-4 text-blue-600" />
+                    ملخص الفاتورة
                   </span>
-                  <span className="text-base font-bold text-amber-600">
+                  <span className="text-base font-bold text-blue-600">
                     {totalPrice.toFixed(2)} KWD
                   </span>
                 </CardTitle>
@@ -367,17 +420,17 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                 {selectedLenses.map((lens) => (
                   <div 
                     key={lens.id} 
-                    className="flex justify-between items-center p-2.5 rounded-md bg-white border border-amber-100 shadow-sm"
+                    className="flex justify-between items-center p-2.5 rounded-md bg-white border border-blue-100 shadow-sm"
                   >
                     <div>
                       <div className="font-medium flex items-center gap-1.5">
-                        <Badge variant="outline" className="bg-amber-50 text-xs border-amber-200 text-amber-700">
+                        <Badge variant="outline" className="bg-blue-50 text-xs border-blue-200 text-blue-700">
                           {lens.power}
                         </Badge>
                         <span>{lens.brand} {lens.type}</span>
                       </div>
                       <div className="text-sm text-muted-foreground mt-0.5">
-                        BC: {lens.bc} | {lens.price.toFixed(2)} KWD
+                        {lens.color && `${lens.color} | `}BC: {lens.bc} | {lens.price.toFixed(2)} KWD
                       </div>
                     </div>
                     <Button 
@@ -392,7 +445,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                 ))}
               </CardContent>
               <CardFooter className="pt-0 px-3 pb-3">
-                <Button className="w-full bg-amber-600 hover:bg-amber-700 h-9">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 h-9">
                   <Check className="w-4 h-4 mr-1" />
                   إضافة للفاتورة
                 </Button>

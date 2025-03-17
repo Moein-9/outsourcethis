@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -40,6 +41,11 @@ export interface ContactLensRx {
     bc: string;
     dia: string;
   };
+  createdAt?: string; // Date when the contact lens RX was created
+}
+
+export interface ContactLensRxHistoryItem extends ContactLensRx {
+  createdAt: string;
 }
 
 export interface Patient {
@@ -51,7 +57,8 @@ export interface Patient {
   patientNotes?: PatientNote[]; // Array of timestamped notes
   rx: RxData;
   rxHistory?: RxHistoryItem[];
-  contactLensRx?: ContactLensRx; // Added contactLensRx property
+  contactLensRx?: ContactLensRx; // Contact lens prescription
+  contactLensRxHistory?: ContactLensRxHistoryItem[]; // History of contact lens prescriptions
   createdAt: string;
 }
 
@@ -62,6 +69,7 @@ interface PatientState {
   searchPatients: (query: string) => Patient[];
   updatePatient: (patient: Patient) => void;
   updatePatientRx: (patientId: string, newRx: RxData) => void;
+  updateContactLensRx: (patientId: string, newRx: ContactLensRx) => void; // New method for contact lens RX
   addPatientNote: (patientId: string, noteText: string) => void;
 }
 
@@ -85,7 +93,12 @@ export const usePatientStore = create<PatientState>()(
               rx: {
                 ...patient.rx,
                 createdAt: patient.rx.createdAt || new Date().toISOString() // Add creation date to initial RX
-              }
+              },
+              // Initialize contact lens RX if provided
+              contactLensRx: patient.contactLensRx ? {
+                ...patient.contactLensRx,
+                createdAt: patient.contactLensRx.createdAt || new Date().toISOString()
+              } : undefined,
             }
           ]
         }));
@@ -138,6 +151,38 @@ export const usePatientStore = create<PatientState>()(
             patients: state.patients.map(p => 
               p.patientId === patientId 
                 ? { ...p, rx: timestampedRx, rxHistory } 
+                : p
+            )
+          };
+        });
+      },
+      
+      // New method for updating contact lens RX
+      updateContactLensRx: (patientId, newContactLensRx) => {
+        set((state) => {
+          const patient = state.patients.find(p => p.patientId === patientId);
+          
+          if (!patient) return state;
+          
+          // Add timestamp to the new contact lens RX if not present
+          const timestampedContactLensRx = {
+            ...newContactLensRx,
+            createdAt: newContactLensRx.createdAt || new Date().toISOString()
+          };
+          
+          // Move current contact lens RX to history if it exists
+          const contactLensRxHistory = [...(patient.contactLensRxHistory || [])];
+          if (patient.contactLensRx) {
+            contactLensRxHistory.unshift({
+              ...patient.contactLensRx,
+              createdAt: patient.contactLensRx.createdAt || new Date().toISOString()
+            });
+          }
+          
+          return {
+            patients: state.patients.map(p => 
+              p.patientId === patientId 
+                ? { ...p, contactLensRx: timestampedContactLensRx, contactLensRxHistory } 
                 : p
             )
           };
