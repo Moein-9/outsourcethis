@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { Button } from "@/components/ui/button";
@@ -11,9 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { Printer, Tag } from "lucide-react";
 import { toast } from "sonner";
-import { MoenLogoBlack } from "@/assets/logo";
-import QRCode from "qrcode.react";
 import { Separator } from "@/components/ui/separator";
+import QRCode from "qrcode.react";
 
 // Dimensions: 100mm x 16mm (standard Zebra label size)
 const LABEL_WIDTH = "100mm";
@@ -44,23 +44,28 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
       <div className="w-1/4 flex items-center justify-center">
         <QRCode 
           value={qrData} 
-          size={42} 
+          size={32} 
           level="M"
           renderAs="svg"
           includeMargin={false}
-          className="h-12 w-12"
+          className="h-10 w-10"
+          id={`qr-code-${frame.frameId}`}
         />
       </div>
       
       {/* Right side - All information */}
       <div className="w-3/4 flex flex-col justify-between py-1 pr-2">
         <div className="flex justify-between items-center">
-          <div className="text-xs font-bold rtl">نظارات الفتتين</div>
-          <div className="text-[10px] font-semibold tracking-wide">#{frame.frameId}</div>
+          <img 
+            src="/lovable-uploads/51989331-75fe-4ab7-8a52-c85e9e842039.png" 
+            alt="Moen Optician" 
+            className="h-3.5 w-auto"
+          />
+          <div className="text-[8px] font-semibold">#{frame.frameId}</div>
         </div>
         
         <div className="flex justify-between items-center">
-          <div className="text-sm font-bold uppercase tracking-wider">{frame.brand}</div>
+          <div className="text-sm font-bold uppercase tracking-wide">{frame.brand}</div>
           <div className="text-[9px] tracking-wide">{frame.model}</div>
         </div>
         
@@ -69,7 +74,7 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
             {frame.size || "N/A"} | {frame.color}
           </div>
           <div className="text-base font-bold">
-            K.D. {frame.price.toFixed(3)}
+            KWD {frame.price.toFixed(3)}
           </div>
         </div>
       </div>

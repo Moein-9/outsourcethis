@@ -44,7 +44,7 @@
 /* Frame label print styling */
 @media print {
   @page {
-    size: 100mm 16mm landscape;
+    size: 100mm 16mm;
     margin: 0;
     padding: 0;
   }
@@ -73,9 +73,25 @@
     page-break-after: always;
   }
   
-  /* Fix for QR code rendering in print */
-  #qr-single img, [id^="qr-"] img {
-    width: 42px !important;
-    height: 42px !important;
+  /* Make QR code smaller but still scannable */
+  [id^="qr-code-"] svg {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  
+  /* Ensure all content is visible and fits in the red safe zone */
+  .frame-label {
+    width: 100mm;
+    height: 16mm;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Logo sizing */
+  .frame-label img {
+    max-height: 3.5mm;
+    width: auto;
   }
 }
