@@ -112,7 +112,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
 
       <div className="text-center mt-3 pt-3 border-t">
         <p className="font-semibold text-sm">شكراً لتعاملكم معنا!</p>
-        <p className="text-xs mt-1 text-muted-foreground">هذه الوصفة صالحة لمدة 6 أشهر من تاريخ الإصدار</p>
         <div className="mt-3 text-[10px] flex gap-1 justify-center">
           <span>{'•'.repeat(15)}</span>
         </div>

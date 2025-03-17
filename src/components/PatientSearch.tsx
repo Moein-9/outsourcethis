@@ -43,7 +43,10 @@ import {
   Calendar,
   Clock,
   AlertCircle,
-  Plus
+  Plus,
+  Receipt,
+  FileBarChart,
+  BadgeDollarSign
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "./ui/badge";
@@ -64,6 +67,8 @@ import {
 } from "date-fns";
 import { ar } from "date-fns/locale";
 import { ReceiptInvoice } from "./ReceiptInvoice";
+import { RxReceiptPrint } from "./RxReceiptPrint";
+import { PatientRxManager } from "./PatientRxManager";
 
 interface PatientWithMeta extends Patient {
   patientId: string;
@@ -300,15 +305,15 @@ export const PatientSearch: React.FC = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
                 <div className="md:col-span-1">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">البيانات الشخصية</CardTitle>
+                  <Card className="border-primary/20 shadow-md">
+                    <CardHeader className="pb-2 bg-gradient-to-r from-primary/10 to-primary/5 rounded-t-lg">
+                      <CardTitle className="text-lg text-primary">البيانات الشخصية</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-col items-center mb-4">
                         <Avatar className="h-24 w-24 mb-3">
                           <AvatarImage src={selectedPatient.avatar} alt={selectedPatient.name} />
-                          <AvatarFallback className="text-2xl bg-primary/10">
+                          <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
                             {selectedPatient.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
@@ -320,7 +325,7 @@ export const PatientSearch: React.FC = () => {
                       
                       <div className="space-y-4">
                         <div className="flex items-start">
-                          <Phone className="h-5 w-5 text-muted-foreground mt-0.5 ml-3" />
+                          <Phone className="h-5 w-5 text-primary mt-0.5 ml-3" />
                           <div>
                             <div className="text-sm text-muted-foreground">رقم الهاتف</div>
                             <div dir="ltr" className="text-right">{selectedPatient.phone}</div>
@@ -328,7 +333,7 @@ export const PatientSearch: React.FC = () => {
                         </div>
                         
                         <div className="flex items-start">
-                          <Calendar className="h-5 w-5 text-muted-foreground mt-0.5 ml-3" />
+                          <Calendar className="h-5 w-5 text-primary mt-0.5 ml-3" />
                           <div>
                             <div className="text-sm text-muted-foreground">تاريخ الميلاد</div>
                             <div>{formatDate(selectedPatient.dateOfBirth)}</div>
@@ -339,21 +344,45 @@ export const PatientSearch: React.FC = () => {
                         </div>
                         
                         <div className="flex items-start">
-                          <Clock className="h-5 w-5 text-muted-foreground mt-0.5 ml-3" />
+                          <Clock className="h-5 w-5 text-primary mt-0.5 ml-3" />
                           <div>
                             <div className="text-sm text-muted-foreground">تاريخ التسجيل</div>
                             <div>{formatDate(selectedPatient.createdAt)}</div>
                           </div>
                         </div>
+
+                        <div className="flex items-start">
+                          <BadgeDollarSign className="h-5 w-5 text-green-500 mt-0.5 ml-3" />
+                          <div>
+                            <div className="text-sm text-muted-foreground">إجمالي المعاملات</div>
+                            <div className="font-semibold text-green-600">
+                              {patientInvoices.reduce((sum, inv) => sum + inv.total, 0).toFixed(3)} KWD
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 pt-4 border-t border-dashed space-y-2">
+                        <Button variant="outline" className="w-full justify-start">
+                          <FileBarChart className="h-4 w-4 ml-2 text-amber-500" />
+                          تقرير العميل
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => setShowRxPrintPreview(true)}>
+                          <Receipt className="h-4 w-4 ml-2 text-blue-500" />
+                          طباعة الوصفة الطبية
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
                 
                 <div className="md:col-span-2">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">سجل المعاملات</CardTitle>
+                  <Card className="border-amber-200 shadow-md">
+                    <CardHeader className="pb-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-t-lg">
+                      <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
+                        <Receipt className="h-5 w-5" />
+                        سجل المعاملات
+                      </CardTitle>
                       <CardDescription>
                         أوامر العمل والفواتير الخاصة بالعميل
                       </CardDescription>
@@ -365,22 +394,26 @@ export const PatientSearch: React.FC = () => {
                         onValueChange={(v) => setActiveTransactionTab(v as "active" | "completed")}
                         className="w-full"
                       >
-                        <TabsList className="w-full mb-4 grid grid-cols-2">
-                          <TabsTrigger value="active">أوامر عمل نشطة</TabsTrigger>
-                          <TabsTrigger value="completed">المعاملات المكتملة</TabsTrigger>
+                        <TabsList className="w-full mb-4 grid grid-cols-2 bg-amber-100/50">
+                          <TabsTrigger value="active" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white">
+                            أوامر عمل نشطة
+                          </TabsTrigger>
+                          <TabsTrigger value="completed" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
+                            المعاملات المكتملة
+                          </TabsTrigger>
                         </TabsList>
                         
-                        <TabsContent value="active" className="mt-0">
-                          <div className="mb-4">
-                            <h3 className="text-md font-medium mb-2 flex items-center gap-1.5">
-                              <AlertCircle className="h-4 w-4 text-yellow-500" />
+                        <TabsContent value="active" className="mt-0 space-y-4">
+                          <div>
+                            <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-amber-700">
+                              <AlertCircle className="h-4 w-4 text-amber-500" />
                               أوامر العمل قيد التنفيذ
                             </h3>
                             
                             {getActiveWorkOrders(patientWorkOrders, patientInvoices).length > 0 ? (
-                              <div className="rounded-md border overflow-hidden">
+                              <div className="rounded-md border overflow-hidden shadow-sm">
                                 <Table>
-                                  <TableHeader>
+                                  <TableHeader className="bg-amber-50">
                                     <TableRow>
                                       <TableHead className="w-12">#</TableHead>
                                       <TableHead>رقم الطلب</TableHead>
@@ -392,22 +425,22 @@ export const PatientSearch: React.FC = () => {
                                   </TableHeader>
                                   <TableBody>
                                     {getActiveWorkOrders(patientWorkOrders, patientInvoices).map((workOrder, index) => (
-                                      <TableRow key={workOrder.id}>
+                                      <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-amber-50/30' : ''}>
                                         <TableCell className="font-medium">{index + 1}</TableCell>
                                         <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
                                         <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
                                         <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
                                         <TableCell>
-                                          <Badge className="bg-yellow-500">قيد التنفيذ</Badge>
+                                          <Badge className="bg-amber-500">قيد التنفيذ</Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
                                           <div className="flex justify-end gap-2">
-                                            <Button variant="outline" size="sm">
-                                              <Eye className="h-3.5 w-3.5 ml-1" />
+                                            <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
+                                              <Eye className="h-3.5 w-3.5 ml-1 text-amber-600" />
                                               عرض
                                             </Button>
-                                            <Button variant="outline" size="sm">
-                                              <Printer className="h-3.5 w-3.5 ml-1" />
+                                            <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
+                                              <Printer className="h-3.5 w-3.5 ml-1 text-amber-600" />
                                               طباعة
                                             </Button>
                                           </div>
@@ -418,9 +451,9 @@ export const PatientSearch: React.FC = () => {
                                 </Table>
                               </div>
                             ) : (
-                              <div className="text-center py-8 border rounded-md bg-muted/20">
-                                <FileText className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                                <h3 className="text-lg font-medium mb-1">لا توجد أوامر عمل نشطة</h3>
+                              <div className="text-center py-6 border rounded-md bg-amber-50/20">
+                                <FileText className="h-10 w-10 mx-auto text-amber-300 mb-3" />
+                                <h3 className="text-lg font-medium mb-1 text-amber-700">لا توجد أوامر عمل نشطة</h3>
                                 <p className="text-muted-foreground max-w-md mx-auto">
                                   لا يوجد أوامر عمل نشطة لهذا العميل حالياً.
                                 </p>
@@ -429,17 +462,17 @@ export const PatientSearch: React.FC = () => {
                           </div>
                         </TabsContent>
                         
-                        <TabsContent value="completed" className="mt-0">
-                          <div className="mb-4">
-                            <h3 className="text-md font-medium mb-2 flex items-center gap-1.5">
+                        <TabsContent value="completed" className="mt-0 space-y-8">
+                          <div>
+                            <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-green-700">
                               <AlertCircle className="h-4 w-4 text-green-500" />
                               الفواتير المكتملة
                             </h3>
                             
                             {patientInvoices.length > 0 ? (
-                              <div className="rounded-md border overflow-hidden">
+                              <div className="rounded-md border overflow-hidden shadow-sm">
                                 <Table>
-                                  <TableHeader>
+                                  <TableHeader className="bg-green-50">
                                     <TableRow>
                                       <TableHead className="w-12">#</TableHead>
                                       <TableHead>رقم الفاتورة</TableHead>
@@ -451,7 +484,7 @@ export const PatientSearch: React.FC = () => {
                                   </TableHeader>
                                   <TableBody>
                                     {patientInvoices.map((invoice, index) => (
-                                      <TableRow key={invoice.invoiceId}>
+                                      <TableRow key={invoice.invoiceId} className={index % 2 === 0 ? 'bg-green-50/30' : ''}>
                                         <TableCell className="font-medium">{index + 1}</TableCell>
                                         <TableCell>INV-{invoice.invoiceId.substring(0, 8)}</TableCell>
                                         <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
@@ -474,12 +507,12 @@ export const PatientSearch: React.FC = () => {
                                         </TableCell>
                                         <TableCell className="text-right">
                                           <div className="flex justify-end gap-2">
-                                            <Button variant="outline" size="sm">
-                                              <Eye className="h-3.5 w-3.5 ml-1" />
+                                            <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
+                                              <Eye className="h-3.5 w-3.5 ml-1 text-green-600" />
                                               عرض
                                             </Button>
-                                            <Button variant="outline" size="sm">
-                                              <Printer className="h-3.5 w-3.5 ml-1" />
+                                            <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
+                                              <Printer className="h-3.5 w-3.5 ml-1 text-green-600" />
                                               طباعة
                                             </Button>
                                           </div>
@@ -490,9 +523,9 @@ export const PatientSearch: React.FC = () => {
                                 </Table>
                               </div>
                             ) : (
-                              <div className="text-center py-8 border rounded-md bg-muted/20">
-                                <FileText className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                                <h3 className="text-lg font-medium mb-1">لا توجد فواتير</h3>
+                              <div className="text-center py-6 border rounded-md bg-green-50/20">
+                                <FileText className="h-10 w-10 mx-auto text-green-300 mb-3" />
+                                <h3 className="text-lg font-medium mb-1 text-green-700">لا توجد فواتير</h3>
                                 <p className="text-muted-foreground max-w-md mx-auto">
                                   لا يوجد فواتير مكتملة لهذا العميل حالياً.
                                 </p>
@@ -501,7 +534,7 @@ export const PatientSearch: React.FC = () => {
                           </div>
                           
                           <div>
-                            <h3 className="text-md font-medium mb-2 flex items-center gap-1.5">
+                            <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-blue-700">
                               <AlertCircle className="h-4 w-4 text-blue-500" />
                               أوامر العمل المكتملة
                             </h3>
@@ -510,9 +543,9 @@ export const PatientSearch: React.FC = () => {
                               const invoicedOrderIds = patientInvoices.map(inv => inv.workOrderId);
                               return invoicedOrderIds.includes(wo.id);
                             }).length > 0 ? (
-                              <div className="rounded-md border overflow-hidden">
+                              <div className="rounded-md border overflow-hidden shadow-sm">
                                 <Table>
-                                  <TableHeader>
+                                  <TableHeader className="bg-blue-50">
                                     <TableRow>
                                       <TableHead className="w-12">#</TableHead>
                                       <TableHead>رقم الطلب</TableHead>
@@ -527,7 +560,7 @@ export const PatientSearch: React.FC = () => {
                                       const invoicedOrderIds = patientInvoices.map(inv => inv.workOrderId);
                                       return invoicedOrderIds.includes(wo.id);
                                     }).map((workOrder, index) => (
-                                      <TableRow key={workOrder.id}>
+                                      <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30' : ''}>
                                         <TableCell className="font-medium">{index + 1}</TableCell>
                                         <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
                                         <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
@@ -537,12 +570,12 @@ export const PatientSearch: React.FC = () => {
                                         </TableCell>
                                         <TableCell className="text-right">
                                           <div className="flex justify-end gap-2">
-                                            <Button variant="outline" size="sm">
-                                              <Eye className="h-3.5 w-3.5 ml-1" />
+                                            <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
+                                              <Eye className="h-3.5 w-3.5 ml-1 text-blue-600" />
                                               عرض
                                             </Button>
-                                            <Button variant="outline" size="sm">
-                                              <Printer className="h-3.5 w-3.5 ml-1" />
+                                            <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
+                                              <Printer className="h-3.5 w-3.5 ml-1 text-blue-600" />
                                               طباعة
                                             </Button>
                                           </div>
@@ -553,9 +586,9 @@ export const PatientSearch: React.FC = () => {
                                 </Table>
                               </div>
                             ) : (
-                              <div className="text-center py-8 border rounded-md bg-muted/20">
-                                <FileText className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                                <h3 className="text-lg font-medium mb-1">لا توجد أوامر عمل مكتملة</h3>
+                              <div className="text-center py-6 border rounded-md bg-blue-50/20">
+                                <FileText className="h-10 w-10 mx-auto text-blue-300 mb-3" />
+                                <h3 className="text-lg font-medium mb-1 text-blue-700">لا توجد أوامر عمل مكتملة</h3>
                                 <p className="text-muted-foreground max-w-md mx-auto">
                                   لا يوجد أوامر عمل مكتملة لهذا العميل حالياً.
                                 </p>
@@ -567,113 +600,17 @@ export const PatientSearch: React.FC = () => {
                     </CardContent>
                   </Card>
                   
-                  <Card className="mt-6">
-                    <CardHeader className="pb-2 flex flex-row justify-between items-center">
-                      <div>
-                        <CardTitle className="text-lg">الوصفة الطبية وتعليمات العناية</CardTitle>
-                        <CardDescription>الوصفات السابقة والنظارات أو العدسات اللاصقة</CardDescription>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setShowRxPrintPreview(true)}>
-                          <Printer className="h-4 w-4 ml-2" />
-                          طباعة الوصفة
-                        </Button>
-                        <Button size="sm">
-                          <Plus className="h-4 w-4 ml-2" />
-                          وصفة جديدة
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="font-medium mb-2">الوصفة الطبية الحالية</h4>
-                          <div className="overflow-x-auto">
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead></TableHead>
-                                  <TableHead>Sphere</TableHead>
-                                  <TableHead>Cylinder</TableHead>
-                                  <TableHead>Axis</TableHead>
-                                  <TableHead>Add</TableHead>
-                                  <TableHead>PD</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                <TableRow>
-                                  <TableCell className="font-medium">العين اليمنى (OD)</TableCell>
-                                  <TableCell>{selectedPatient.rx?.sphereOD || "+2.00"}</TableCell>
-                                  <TableCell>{selectedPatient.rx?.cylOD || "-0.50"}</TableCell>
-                                  <TableCell>{selectedPatient.rx?.axisOD || "180"}</TableCell>
-                                  <TableCell>{selectedPatient.rx?.addOD || "+1.00"}</TableCell>
-                                  <TableCell rowSpan={2}>{selectedPatient.rx?.pdRight || "62"}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell className="font-medium">العين اليسرى (OS)</TableCell>
-                                  <TableCell>{selectedPatient.rx?.sphereOS || "+2.25"}</TableCell>
-                                  <TableCell>{selectedPatient.rx?.cylOS || "-0.75"}</TableCell>
-                                  <TableCell>{selectedPatient.rx?.axisOS || "175"}</TableCell>
-                                  <TableCell>{selectedPatient.rx?.addOS || "+1.00"}</TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-medium mb-2">تاريخ الوصفات الطبية</h4>
-                          {selectedPatient.rxHistory && selectedPatient.rxHistory.length > 0 ? (
-                            <div className="rounded-md border">
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>التاريخ</TableHead>
-                                    <TableHead>ODسفير</TableHead>
-                                    <TableHead>ODسلندر</TableHead>
-                                    <TableHead>OSسفير</TableHead>
-                                    <TableHead>OSسلندر</TableHead>
-                                    <TableHead>الإجراءات</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {selectedPatient.rxHistory.map((rx, index) => (
-                                    <TableRow key={index}>
-                                      <TableCell>{formatDate(rx.createdAt)}</TableCell>
-                                      <TableCell>{rx.sphereOD}</TableCell>
-                                      <TableCell>{rx.cylOD} / {rx.axisOD}</TableCell>
-                                      <TableCell>{rx.sphereOS}</TableCell>
-                                      <TableCell>{rx.cylOS} / {rx.axisOS}</TableCell>
-                                      <TableCell>
-                                        <Button variant="ghost" size="sm">
-                                          <Eye className="h-3.5 w-3.5 ml-1" />
-                                          عرض
-                                        </Button>
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">
-                              لا يوجد سجل وصفات طبية سابقة
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <h4 className="font-medium mb-2">تعليمات العناية بالنظارة</h4>
-                          <ul className="text-gray-700 list-disc list-inside space-y-1">
-                            <li>يجب تنظيف العدسات بانتظام بمنظف خاص</li>
-                            <li>تجنب ملامسة العدسات للماء الساخن</li>
-                            <li>استخدم حافظة نظارات عند عدم الاستخدام</li>
-                            <li>راجع الطبيب كل 6-12 شهر</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {selectedPatient && (
+                    <PatientRxManager
+                      patientId={selectedPatient.patientId}
+                      patientName={selectedPatient.name}
+                      patientPhone={selectedPatient.phone}
+                      currentRx={selectedPatient.rx}
+                      rxHistory={selectedPatient.rxHistory}
+                      notes={selectedPatient.notes}
+                      onRxPrintRequest={() => setShowRxPrintPreview(true)}
+                    />
+                  )}
                 </div>
               </div>
               
@@ -703,80 +640,14 @@ export const PatientSearch: React.FC = () => {
               </DialogHeader>
               
               <div className="py-4">
-                <div className="w-full bg-white p-6 rounded-lg border shadow print:shadow-none">
-                  <div id="rx-receipt" className="print:w-[80mm]">
-                    <ReceiptInvoice 
-                      invoice={{
-                        invoiceId: `RX-${Date.now().toString().substring(6)}`,
-                        patientId: selectedPatient.patientId,
-                        patientName: selectedPatient.name,
-                        patientPhone: selectedPatient.phone,
-                        lensType: 'وصفة طبية',
-                        lensPrice: 0,
-                        framePrice: 0,
-                        coatingPrice: 0,
-                        frameBrand: '',
-                        frameModel: '',
-                        frameColor: '',
-                        coating: '',
-                        discount: 0,
-                        total: 0,
-                        deposit: 0,
-                        remaining: 0,
-                        isPaid: true,
-                        paymentMethod: '',
-                        createdAt: new Date().toISOString(),
-                        payments: []
-                      }}
-                      isPrintable={true}
-                    />
-                    
-                    <div className="mt-4 p-4 border-t border-dashed">
-                      <h3 className="text-center font-bold mb-3">وصفة النظارات الطبية</h3>
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr>
-                            <th className="border border-gray-300 p-1 text-sm"></th>
-                            <th className="border border-gray-300 p-1 text-sm">SPH</th>
-                            <th className="border border-gray-300 p-1 text-sm">CYL</th>
-                            <th className="border border-gray-300 p-1 text-sm">AXIS</th>
-                            <th className="border border-gray-300 p-1 text-sm">ADD</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td className="border border-gray-300 p-1 text-sm font-medium">OD (اليمنى)</td>
-                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.sphereOD}</td>
-                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.cylOD}</td>
-                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.axisOD}</td>
-                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.addOD}</td>
-                          </tr>
-                          <tr>
-                            <td className="border border-gray-300 p-1 text-sm font-medium">OS (اليسرى)</td>
-                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.sphereOS}</td>
-                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.cylOS}</td>
-                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.axisOS}</td>
-                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.addOS}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                      
-                      <div className="mt-2 flex justify-between text-sm">
-                        <span className="font-medium">PD: </span>
-                        <span>{selectedPatient.rx?.pdRight} - {selectedPatient.rx?.pdLeft}</span>
-                      </div>
-                      
-                      <div className="mt-4 text-sm text-center">
-                        <p className="font-medium">ملاحظات:</p>
-                        <p>{selectedPatient.notes || 'لا توجد ملاحظات'}</p>
-                      </div>
-                      
-                      <div className="mt-6 pt-4 border-t text-center text-xs text-gray-500">
-                        <p>هذه الوصفة صالحة لمدة 6 أشهر من تاريخ الإصدار</p>
-                        <p>تاريخ الإصدار: {format(new Date(), 'yyyy/MM/dd')}</p>
-                      </div>
-                    </div>
-                  </div>
+                <div className="print:w-[80mm]">
+                  <RxReceiptPrint
+                    patientName={selectedPatient.name}
+                    patientPhone={selectedPatient.phone}
+                    rx={selectedPatient.rx}
+                    notes={selectedPatient.notes}
+                    isPrintable={true}
+                  />
                 </div>
               </div>
               
