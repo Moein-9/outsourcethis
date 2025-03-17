@@ -40,7 +40,7 @@ export const ComparativeAnalysis: React.FC = () => {
         const date = new Date();
         date.setDate(today.getDate() - i);
         const value = date.toISOString().split('T')[0];
-        const label = date.toLocaleDateString('en-US', { 
+        const label = date.toLocaleDateString('ar-EG', { 
           weekday: 'long', 
           year: 'numeric', 
           month: 'long', 
@@ -53,7 +53,7 @@ export const ComparativeAnalysis: React.FC = () => {
       for (let i = 0; i < 12; i++) {
         const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
         const value = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-        const label = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+        const label = date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' });
         options.push({ value, label });
       }
     } else if (comparisonType === "year") {
@@ -151,11 +151,11 @@ export const ComparativeAnalysis: React.FC = () => {
       let xLabel = date;
       
       if (comparisonType === "month") {
-        xLabel = `Day ${date}`;
+        xLabel = `اليوم ${date}`;
       } else if (comparisonType === "year") {
         const monthNames = [
-          "January", "February", "March", "April", "May", "June", 
-          "July", "August", "September", "October", "November", "December"
+          "يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", 
+          "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
         ];
         xLabel = monthNames[parseInt(date) - 1];
       }
@@ -168,16 +168,16 @@ export const ComparativeAnalysis: React.FC = () => {
     }).sort((a, b) => {
       // Sort by date for proper display
       if (comparisonType === "month") {
-        return parseInt(a.date.replace("Day ", "")) - parseInt(b.date.replace("Day ", ""));
+        return parseInt(a.date.replace("اليوم ", "")) - parseInt(b.date.replace("اليوم ", ""));
       }
       return 0;
     });
     
     // Product type breakdown (lenses, frames, coatings)
     const productTypes = [
-      { id: "lens", name: "Lenses" },
-      { id: "frame", name: "Frames" },
-      { id: "coating", name: "Coatings" }
+      { id: "lens", name: "العدسات" },
+      { id: "frame", name: "الإطارات" },
+      { id: "coating", name: "الطلاءات" }
     ];
     
     const productData = productTypes.map(product => {
@@ -228,7 +228,7 @@ export const ComparativeAnalysis: React.FC = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
     
-    const pageTitle = `Comparison Report - ${comparisonData.period1.label} and ${comparisonData.period2.label}`;
+    const pageTitle = `تقرير مقارنة - ${comparisonData.period1.label} و ${comparisonData.period2.label}`;
     
     // Format labels based on comparison type
     let period1Label = comparisonData.period1.label;
@@ -236,11 +236,11 @@ export const ComparativeAnalysis: React.FC = () => {
     let comparisonTitle = "";
     
     if (comparisonType === "day") {
-      comparisonTitle = "Comparison Between Two Days";
+      comparisonTitle = "مقارنة بين يومين";
     } else if (comparisonType === "month") {
-      comparisonTitle = "Comparison Between Two Months";
+      comparisonTitle = "مقارنة بين شهرين";
     } else {
-      comparisonTitle = "Comparison Between Two Years";
+      comparisonTitle = "مقارنة بين سنتين";
     }
     
     let productRows = '';
@@ -253,10 +253,10 @@ export const ComparativeAnalysis: React.FC = () => {
       productRows += `
         <tr>
           <td>${item.name}</td>
-          <td>${item.period1.toFixed(2)} KWD</td>
-          <td>${item.period2.toFixed(2)} KWD</td>
+          <td>${item.period1.toFixed(2)} د.ك</td>
+          <td>${item.period2.toFixed(2)} د.ك</td>
           <td>
-            ${diff > 0 ? '+' : ''}${diff.toFixed(2)} KWD
+            ${diff > 0 ? '+' : ''}${diff.toFixed(2)} د.ك
             (${diff > 0 ? '+' : ''}${percentChange}%)
           </td>
         </tr>
@@ -270,11 +270,11 @@ export const ComparativeAnalysis: React.FC = () => {
     
     productRows += `
       <tr class="summary-row">
-        <td>Total</td>
-        <td>${comparisonData.period1.total.toFixed(2)} KWD</td>
-        <td>${comparisonData.period2.total.toFixed(2)} KWD</td>
+        <td>الإجمالي</td>
+        <td>${comparisonData.period1.total.toFixed(2)} د.ك</td>
+        <td>${comparisonData.period2.total.toFixed(2)} د.ك</td>
         <td>
-          ${totalDiff > 0 ? '+' : ''}${totalDiff.toFixed(2)} KWD
+          ${totalDiff > 0 ? '+' : ''}${totalDiff.toFixed(2)} د.ك
           (${totalDiff > 0 ? '+' : ''}${totalPercentChange}%)
         </td>
       </tr>
@@ -282,14 +282,14 @@ export const ComparativeAnalysis: React.FC = () => {
     
     const printContent = `
       <!DOCTYPE html>
-      <html dir="ltr">
+      <html dir="rtl">
       <head>
         <title>${pageTitle}</title>
         <style>
           body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            direction: ltr;
+            direction: rtl;
           }
           .report-header {
             text-align: center;
@@ -363,7 +363,7 @@ export const ComparativeAnalysis: React.FC = () => {
           th, td {
             border: 1px solid #ddd;
             padding: 10px;
-            text-align: left;
+            text-align: right;
           }
           th {
             background-color: #f2f2f2;
@@ -396,23 +396,23 @@ export const ComparativeAnalysis: React.FC = () => {
       <body>
         <div class="report-header">
           <h1 class="report-title">${comparisonTitle}</h1>
-          <p class="report-subtitle">${period1Label} and ${period2Label}</p>
+          <p class="report-subtitle">${period1Label} و ${period2Label}</p>
         </div>
         
         <div class="summary-section">
-          <h2 class="section-title">Comparison Summary</h2>
+          <h2 class="section-title">ملخص المقارنة</h2>
           <div class="comparison-grid">
             <div class="comparison-item">
               <div class="period-label">${period1Label}</div>
-              <div class="comparison-value">${comparisonData.period1.total.toFixed(2)} KWD</div>
-              <div class="comparison-count">${comparisonData.period1.count} invoices</div>
+              <div class="comparison-value">${comparisonData.period1.total.toFixed(2)} د.ك</div>
+              <div class="comparison-count">${comparisonData.period1.count} فاتورة</div>
             </div>
             <div class="comparison-item">
               <div class="period-label">${period2Label}</div>
-              <div class="comparison-value">${comparisonData.period2.total.toFixed(2)} KWD</div>
-              <div class="comparison-count">${comparisonData.period2.count} invoices</div>
+              <div class="comparison-value">${comparisonData.period2.total.toFixed(2)} د.ك</div>
+              <div class="comparison-count">${comparisonData.period2.count} فاتورة</div>
               <div class="${totalDiff > 0 ? 'change positive' : 'change negative'}">
-                ${totalDiff > 0 ? '+' : ''}${totalDiff.toFixed(2)} KWD
+                ${totalDiff > 0 ? '+' : ''}${totalDiff.toFixed(2)} د.ك
                 (${totalDiff > 0 ? '+' : ''}${totalPercentChange}%)
               </div>
             </div>
@@ -420,14 +420,14 @@ export const ComparativeAnalysis: React.FC = () => {
         </div>
         
         <div class="summary-section">
-          <h2 class="section-title">Detailed Product Comparison</h2>
+          <h2 class="section-title">مقارنة تفصيلية للمنتجات</h2>
           <table>
             <thead>
               <tr>
-                <th>Product Type</th>
+                <th>نوع المنتج</th>
                 <th>${period1Label}</th>
                 <th>${period2Label}</th>
-                <th>Change</th>
+                <th>التغيير</th>
               </tr>
             </thead>
             <tbody>
@@ -437,12 +437,12 @@ export const ComparativeAnalysis: React.FC = () => {
         </div>
         
         <div class="footer">
-          <p>Generated by Optical Shop System - All Rights Reserved © ${new Date().getFullYear()}</p>
+          <p>تم إنشاء هذا التقرير بواسطة نظام النظارات - جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
         </div>
         
         <div class="no-print">
           <button onclick="window.print()" style="padding: 10px 20px; margin: 20px auto; display: block; background: #0066cc; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Print Report
+            طباعة التقرير
           </button>
         </div>
       </body>
@@ -462,45 +462,45 @@ export const ComparativeAnalysis: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Comparative Analysis</h2>
+        <h2 className="text-2xl font-bold">التحليل المقارن</h2>
         <Button onClick={handlePrintComparison} className="gap-2">
           <Printer size={16} />
-          Print Report
+          طباعة التقرير
         </Button>
       </div>
       
       {/* Comparison Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Comparison Settings</CardTitle>
+          <CardTitle>إعدادات المقارنة</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="comparisonType">Comparison Type</Label>
+              <Label htmlFor="comparisonType">نوع المقارنة</Label>
               <Select 
                 value={comparisonType}
                 onValueChange={(value) => setComparisonType(value as "day" | "month" | "year")}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select comparison type" />
+                  <SelectValue placeholder="اختر نوع المقارنة" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="day">Daily Comparison</SelectItem>
-                  <SelectItem value="month">Monthly Comparison</SelectItem>
-                  <SelectItem value="year">Yearly Comparison</SelectItem>
+                  <SelectItem value="day">مقارنة يومية</SelectItem>
+                  <SelectItem value="month">مقارنة شهرية</SelectItem>
+                  <SelectItem value="year">مقارنة سنوية</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="period1">First Period</Label>
+              <Label htmlFor="period1">الفترة الأولى</Label>
               <Select 
                 value={period1}
                 onValueChange={setPeriod1}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select first period" />
+                  <SelectValue placeholder="اختر الفترة الأولى" />
                 </SelectTrigger>
                 <SelectContent>
                   {periodOptions.map((option) => (
@@ -513,13 +513,13 @@ export const ComparativeAnalysis: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="period2">Second Period</Label>
+              <Label htmlFor="period2">الفترة الثانية</Label>
               <Select 
                 value={period2}
                 onValueChange={setPeriod2}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select second period" />
+                  <SelectValue placeholder="اختر الفترة الثانية" />
                 </SelectTrigger>
                 <SelectContent>
                   {periodOptions.map((option) => (
@@ -548,10 +548,10 @@ export const ComparativeAnalysis: React.FC = () => {
               <CardContent>
                 <div className="flex flex-col">
                   <div className="text-3xl font-bold">
-                    {comparisonData.period1.total.toFixed(2)} KWD
+                    {comparisonData.period1.total.toFixed(2)} د.ك
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">
-                    {comparisonData.period1.count} invoices
+                    {comparisonData.period1.count} فاتورة
                   </div>
                 </div>
               </CardContent>
@@ -566,10 +566,10 @@ export const ComparativeAnalysis: React.FC = () => {
               <CardContent>
                 <div className="flex flex-col">
                   <div className="text-3xl font-bold">
-                    {comparisonData.period2.total.toFixed(2)} KWD
+                    {comparisonData.period2.total.toFixed(2)} د.ك
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">
-                    {comparisonData.period2.count} invoices
+                    {comparisonData.period2.count} فاتورة
                   </div>
                   
                   {comparisonData.period1.total > 0 && (
@@ -585,7 +585,7 @@ export const ComparativeAnalysis: React.FC = () => {
                       )}
                       <span>
                         {comparisonData.period2.total >= comparisonData.period1.total ? "+" : ""}
-                        {(comparisonData.period2.total - comparisonData.period1.total).toFixed(2)} KWD
+                        {(comparisonData.period2.total - comparisonData.period1.total).toFixed(2)} د.ك
                         {" "}
                         ({comparisonData.period1.total !== 0 ? (
                           <>
@@ -604,14 +604,14 @@ export const ComparativeAnalysis: React.FC = () => {
           {/* Chart Tabs */}
           <Tabs defaultValue="bar">
             <TabsList className="w-full md:w-auto grid grid-cols-2 md:flex">
-              <TabsTrigger value="bar">Bar Chart</TabsTrigger>
-              <TabsTrigger value="line">Line Chart</TabsTrigger>
+              <TabsTrigger value="bar">رسم شريطي</TabsTrigger>
+              <TabsTrigger value="line">رسم خطي</TabsTrigger>
             </TabsList>
             
             <Card className="mt-4">
               <CardContent className="pt-6">
                 <TabsContent value="bar" className="mt-0">
-                  <h3 className="text-lg font-semibold mb-4">Sales Comparison</h3>
+                  <h3 className="text-lg font-semibold mb-4">مقارنة المبيعات</h3>
                   <div className="h-[400px]">
                     {comparisonData.dailyData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
@@ -623,7 +623,7 @@ export const ComparativeAnalysis: React.FC = () => {
                           <XAxis dataKey="date" />
                           <YAxis />
                           <ChartTooltip 
-                            formatter={(value: number) => `${value.toFixed(2)} KWD`}
+                            formatter={(value: number) => `${value.toFixed(2)} د.ك`}
                           />
                           <Legend 
                             payload={[
@@ -646,7 +646,7 @@ export const ComparativeAnalysis: React.FC = () => {
                     ) : (
                       <div className="flex items-center justify-center h-full">
                         <p className="text-center text-muted-foreground">
-                          Not enough data for comparison
+                          لا توجد بيانات كافية للمقارنة
                         </p>
                       </div>
                     )}
@@ -654,7 +654,7 @@ export const ComparativeAnalysis: React.FC = () => {
                 </TabsContent>
                 
                 <TabsContent value="line" className="mt-0">
-                  <h3 className="text-lg font-semibold mb-4">Sales Trends</h3>
+                  <h3 className="text-lg font-semibold mb-4">اتجاهات المبيعات</h3>
                   <div className="h-[400px]">
                     {comparisonData.dailyData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
@@ -666,7 +666,7 @@ export const ComparativeAnalysis: React.FC = () => {
                           <XAxis dataKey="date" />
                           <YAxis />
                           <ChartTooltip 
-                            formatter={(value: number) => `${value.toFixed(2)} KWD`}
+                            formatter={(value: number) => `${value.toFixed(2)} د.ك`}
                           />
                           <Legend 
                             payload={[
@@ -693,7 +693,7 @@ export const ComparativeAnalysis: React.FC = () => {
                     ) : (
                       <div className="flex items-center justify-center h-full">
                         <p className="text-center text-muted-foreground">
-                          Not enough data for comparison
+                          لا توجد بيانات كافية للمقارنة
                         </p>
                       </div>
                     )}
@@ -706,7 +706,7 @@ export const ComparativeAnalysis: React.FC = () => {
           {/* Product Type Comparison */}
           <Card>
             <CardHeader>
-              <CardTitle>Product Type Comparison</CardTitle>
+              <CardTitle>مقارنة أنواع المنتجات</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -722,15 +722,15 @@ export const ComparativeAnalysis: React.FC = () => {
                         <span className="font-medium">{item.name}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-muted-foreground">
-                            {item.period1.toFixed(2)} KWD
+                            {item.period1.toFixed(2)} د.ك
                           </span>
                           <ArrowRight className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm text-muted-foreground">
-                            {item.period2.toFixed(2)} KWD
+                            {item.period2.toFixed(2)} د.ك
                           </span>
                           <span className={`text-sm ${diff >= 0 ? "text-green-500" : "text-red-500"}`}>
                             {diff > 0 ? "+" : ""}
-                            {diff.toFixed(2)} KWD
+                            {diff.toFixed(2)} د.ك
                             {" "}
                             ({percentChange.toFixed(1)}%)
                           </span>
@@ -752,7 +752,7 @@ export const ComparativeAnalysis: React.FC = () => {
                 
                 {comparisonData.productData.length === 0 && (
                   <div className="py-4 text-center text-muted-foreground">
-                    Not enough data for comparison
+                    لا توجد بيانات كافية للمقارنة
                   </div>
                 )}
               </div>

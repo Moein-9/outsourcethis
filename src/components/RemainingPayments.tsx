@@ -14,13 +14,13 @@ export const RemainingPayments: React.FC = () => {
   const handlePayFull = (invoiceId: string) => {
     markAsPaid(invoiceId);
     toast({
-      description: "Payment recorded successfully.",
+      description: "تم تسجيل السداد بنجاح.",
     });
   };
   
   return (
     <div className="py-4">
-      <h2 className="text-2xl font-bold mb-4">قائمة الفواتير المتبقية</h2>
+      <h2 className="text-2xl font-bold mb-4">المتبقي للدفع</h2>
       
       <div className="overflow-x-auto rounded-md border">
         <table className="w-full border-collapse">
@@ -28,9 +28,9 @@ export const RemainingPayments: React.FC = () => {
             <tr className="bg-muted">
               <th className="p-3 border">رقم الفاتورة</th>
               <th className="p-3 border">اسم العميل</th>
-              <th className="p-3 border">رقم الهاتف</th>
-              <th className="p-3 border">المبلغ الكلي (KWD)</th>
-              <th className="p-3 border">المدفوع (KWD)</th>
+              <th className="p-3 border">الهاتف</th>
+              <th className="p-3 border">الإجمالي (KWD)</th>
+              <th className="p-3 border">الدفعة (KWD)</th>
               <th className="p-3 border text-destructive font-bold">المتبقي (KWD)</th>
               <th className="p-3 border">التاريخ</th>
               <th className="p-3 border">إجراء</th>
@@ -39,7 +39,7 @@ export const RemainingPayments: React.FC = () => {
           <tbody>
             {unpaidInvoices.length === 0 ? (
               <tr>
-                <td colSpan={8} className="p-3 text-center">لا توجد دفعات متبقية</td>
+                <td colSpan={8} className="p-3 text-center">لا توجد مدفوعات متبقية</td>
               </tr>
             ) : (
               unpaidInvoices.map((invoice) => (
@@ -50,13 +50,13 @@ export const RemainingPayments: React.FC = () => {
                   <td className="p-3 border">{invoice.total.toFixed(2)}</td>
                   <td className="p-3 border">{invoice.deposit.toFixed(2)}</td>
                   <td className="p-3 border text-destructive font-bold">{invoice.remaining.toFixed(2)}</td>
-                  <td className="p-3 border">{new Date(invoice.createdAt).toLocaleDateString()}</td>
+                  <td className="p-3 border">{new Date(invoice.createdAt).toLocaleDateString("ar-EG")}</td>
                   <td className="p-3 border">
                     <Button 
                       size="sm" 
                       onClick={() => handlePayFull(invoice.invoiceId)}
                     >
-                      دفع بالكامل
+                      سداد كامل
                     </Button>
                   </td>
                 </tr>
