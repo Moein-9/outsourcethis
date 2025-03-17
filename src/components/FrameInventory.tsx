@@ -23,7 +23,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Glasses, Package, Edit, Copy, Save } from "lucide-react";
+import { Search, Plus, Glasses, Package, Edit, Copy, Save, Tag } from "lucide-react";
+import { FrameLabelTemplate } from "./FrameLabelTemplate";
 
 // Frame Item Component
 const FrameItemCard = ({ frame, index }: { frame: FrameItem; index: number }) => {
@@ -76,6 +77,7 @@ export const FrameInventory: React.FC = () => {
   const [frameSearchTerm, setFrameSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchFrames>>([]);
   const [isAddFrameDialogOpen, setIsAddFrameDialogOpen] = useState(false);
+  const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
   
   // New frame states
   const [frameBrand, setFrameBrand] = useState("");
@@ -168,103 +170,113 @@ export const FrameInventory: React.FC = () => {
           </Button>
         </div>
         
-        <Dialog open={isAddFrameDialogOpen} onOpenChange={setIsAddFrameDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="shrink-0">
-              <Plus className="h-4 w-4 mr-1" /> إضافة إطار جديد
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>إضافة إطار جديد</DialogTitle>
-              <DialogDescription>
-                أدخل تفاصيل الإطار الجديد لإضافته إلى المخزون
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="frameBrand">الماركة</Label>
-                  <Input
-                    id="frameBrand"
-                    value={frameBrand}
-                    onChange={(e) => setFrameBrand(e.target.value)}
-                    placeholder="مثال: RayBan"
-                  />
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsLabelDialogOpen(true)}
+            className="shrink-0"
+          >
+            <Tag className="h-4 w-4 mr-1" /> طباعة البطاقات
+          </Button>
+          
+          <Dialog open={isAddFrameDialogOpen} onOpenChange={setIsAddFrameDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="shrink-0">
+                <Plus className="h-4 w-4 mr-1" /> إضافة إطار جديد
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>إضافة إطار جديد</DialogTitle>
+                <DialogDescription>
+                  أدخل تفاصيل الإطار الجديد لإضافته إلى المخزون
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="frameBrand">الماركة</Label>
+                    <Input
+                      id="frameBrand"
+                      value={frameBrand}
+                      onChange={(e) => setFrameBrand(e.target.value)}
+                      placeholder="مثال: RayBan"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="frameModel">الموديل</Label>
+                    <Input
+                      id="frameModel"
+                      value={frameModel}
+                      onChange={(e) => setFrameModel(e.target.value)}
+                      placeholder="مثال: RB3025"
+                    />
+                  </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="frameModel">الموديل</Label>
-                  <Input
-                    id="frameModel"
-                    value={frameModel}
-                    onChange={(e) => setFrameModel(e.target.value)}
-                    placeholder="مثال: RB3025"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="frameColor">اللون</Label>
+                    <Input
+                      id="frameColor"
+                      value={frameColor}
+                      onChange={(e) => setFrameColor(e.target.value)}
+                      placeholder="مثال: أسود"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="frameSize">المقاس</Label>
+                    <Input
+                      id="frameSize"
+                      value={frameSize}
+                      onChange={(e) => setFrameSize(e.target.value)}
+                      placeholder="مثال: 52-18-145"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="framePrice">السعر (KWD)</Label>
+                    <Input
+                      id="framePrice"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={framePrice}
+                      onChange={(e) => setFramePrice(e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="frameQty">الكمية</Label>
+                    <Input
+                      id="frameQty"
+                      type="number"
+                      step="1"
+                      min="1"
+                      value={frameQty}
+                      onChange={(e) => setFrameQty(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="frameColor">اللون</Label>
-                  <Input
-                    id="frameColor"
-                    value={frameColor}
-                    onChange={(e) => setFrameColor(e.target.value)}
-                    placeholder="مثال: أسود"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="frameSize">المقاس</Label>
-                  <Input
-                    id="frameSize"
-                    value={frameSize}
-                    onChange={(e) => setFrameSize(e.target.value)}
-                    placeholder="مثال: 52-18-145"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="framePrice">السعر (KWD)</Label>
-                  <Input
-                    id="framePrice"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={framePrice}
-                    onChange={(e) => setFramePrice(e.target.value)}
-                    placeholder="0.00"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="frameQty">الكمية</Label>
-                  <Input
-                    id="frameQty"
-                    type="number"
-                    step="1"
-                    min="1"
-                    value={frameQty}
-                    onChange={(e) => setFrameQty(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddFrameDialogOpen(false)}>
-                إلغاء
-              </Button>
-              <Button onClick={handleAddFrame}>
-                <Save className="h-4 w-4 mr-1" /> حفظ الإطار
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddFrameDialogOpen(false)}>
+                  إلغاء
+                </Button>
+                <Button onClick={handleAddFrame}>
+                  <Save className="h-4 w-4 mr-1" /> حفظ الإطار
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
       
       {searchResults.length > 0 ? (
@@ -288,6 +300,28 @@ export const FrameInventory: React.FC = () => {
           </Button>
         </div>
       )}
+      
+      {/* Label Print Dialog */}
+      <Dialog open={isLabelDialogOpen} onOpenChange={setIsLabelDialogOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>طباعة بطاقات الإطارات</DialogTitle>
+            <DialogDescription>
+              حدد الإطارات التي تريد طباعة بطاقات لها
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="overflow-y-auto">
+            <FrameLabelTemplate />
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsLabelDialogOpen(false)}>
+              إغلاق
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, ContactLensItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
@@ -30,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Contact, Edit, ShoppingCart, Save } from "lucide-react";
+import { Search, Plus, Contact, Edit, Save } from "lucide-react";
 
 // Common values for dropdowns
 const COMMON_BC_VALUES = ["8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "9.0"];
@@ -41,10 +40,9 @@ const COMMON_TYPES = ["Daily", "Monthly", "Biweekly", "Yearly", "Color"];
 const COMMON_COLORS = ["none", "Clear", "Blue", "Green", "Brown", "Hazel", "Gray", "Honey"];
 
 // Contact Lens Item Component
-const ContactLensItemCard = ({ lens, onEdit, onSell }: { 
+const ContactLensItemCard = ({ lens, onEdit }: { 
   lens: ContactLensItem; 
   onEdit: (lens: ContactLensItem) => void;
-  onSell: (lens: ContactLensItem) => void;
 }) => {
   return (
     <Card className="overflow-hidden hover:shadow-md transition-all duration-200 border-blue-200">
@@ -76,14 +74,9 @@ const ContactLensItemCard = ({ lens, onEdit, onSell }: {
         </div>
       </CardContent>
       <CardFooter className="p-0 border-t">
-        <div className="grid grid-cols-2 w-full divide-x divide-x-reverse">
-          <Button variant="ghost" className="rounded-none h-10 text-blue-600" onClick={() => onEdit(lens)}>
-            <Edit className="h-4 w-4 mr-1" /> تعديل
-          </Button>
-          <Button variant="ghost" className="rounded-none h-10 text-blue-600" onClick={() => onSell(lens)}>
-            <ShoppingCart className="h-4 w-4 mr-1" /> بيع
-          </Button>
-        </div>
+        <Button variant="ghost" className="rounded-none h-10 text-blue-600 w-full" onClick={() => onEdit(lens)}>
+          <Edit className="h-4 w-4 mr-1" /> تعديل
+        </Button>
       </CardFooter>
     </Card>
   );
@@ -97,16 +90,6 @@ export const ContactLensInventory: React.FC = () => {
   const [contactLensResults, setContactLensResults] = useState<ReturnType<typeof searchContactLenses>>(contactLenses);
   const [isAddContactLensDialogOpen, setIsAddContactLensDialogOpen] = useState(false);
   const [editingLens, setEditingLens] = useState<ContactLensItem | null>(null);
-  
-  // New contact lens states
-  const [contactLensBrand, setContactLensBrand] = useState("");
-  const [contactLensType, setContactLensType] = useState("");
-  const [contactLensBC, setContactLensBC] = useState("");
-  const [contactLensDiameter, setContactLensDiameter] = useState("");
-  const [contactLensPower, setContactLensPower] = useState("-0.00"); // Default value, hidden in UI
-  const [contactLensColor, setContactLensColor] = useState("none");  // Changed default to "none"
-  const [contactLensPrice, setContactLensPrice] = useState("");
-  const [contactLensQty, setContactLensQty] = useState("1");
   
   // Filters
   const [filterBrand, setFilterBrand] = useState<string>("all");
@@ -172,31 +155,22 @@ export const ContactLensInventory: React.FC = () => {
       type: contactLensType,
       bc: contactLensBC,
       diameter: contactLensDiameter,
-      power: contactLensPower, // We'll keep this in the data structure
+      power: contactLensPower,
       price,
       qty
     };
     
-    // Only add color if it's provided and not "none"
-    if (contactLensColor && contactLensColor !== "none") {
-      Object.assign(newContactLens, { color: contactLensColor });
-    }
-    
     if (editingLens) {
-      // Update existing lens
       updateContactLens(editingLens.id, newContactLens);
       toast.success(`تم تحديث العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`);
     } else {
-      // Add new lens
       const id = addContactLens(newContactLens);
       toast.success(`تم إضافة العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`);
     }
     
-    // Reset form and close dialog
     resetContactLensForm();
     setIsAddContactLensDialogOpen(false);
     
-    // Refresh search results
     setContactLensResults(contactLenses);
   };
   
@@ -207,7 +181,7 @@ export const ContactLensInventory: React.FC = () => {
     setContactLensBC("");
     setContactLensDiameter("");
     setContactLensPower("-0.00");
-    setContactLensColor("none");  // Changed default to "none"
+    setContactLensColor("none");
     setContactLensPrice("");
     setContactLensQty("1");
     setEditingLens(null);
@@ -229,7 +203,6 @@ export const ContactLensInventory: React.FC = () => {
   
   // Handle sell lens
   const handleSellLens = (lens: ContactLensItem) => {
-    // Implementation for selling lens
     toast.info(`سيتم إضافة ${lens.brand} ${lens.type} للفاتورة`);
   };
   
@@ -412,7 +385,6 @@ export const ContactLensInventory: React.FC = () => {
                       <SelectValue placeholder="اختر اللون" />
                     </SelectTrigger>
                     <SelectContent>
-                      {/* Fixed: Changed to use "none" instead of empty string */}
                       <SelectItem value="none">بدون لون</SelectItem>
                       {COMMON_COLORS.filter(color => color !== "none").map(color => (
                         <SelectItem key={color} value={color}>{color}</SelectItem>
@@ -481,7 +453,6 @@ export const ContactLensInventory: React.FC = () => {
               key={lens.id} 
               lens={lens} 
               onEdit={handleEditLens}
-              onSell={handleSellLens}
             />
           ))}
         </div>
