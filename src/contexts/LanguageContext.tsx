@@ -616,6 +616,60 @@ const translations: Record<string, Record<string, string>> = {
   "client_data_saved": {
     ar: "تم حفظ بيانات العميل بنجاح.",
     en: "Client data saved successfully."
+  },
+  
+  // Create Invoice Page
+  "create_invoice_title": {
+    ar: "إنشاء فاتورة",
+    en: "Create Invoice"
+  },
+  "glasses": {
+    ar: "نظارات",
+    en: "Glasses"
+  },
+  "contact_lenses": {
+    ar: "عدسات لاصقة",
+    en: "Contact Lenses"
+  },
+  "client_info": {
+    ar: "بيانات العميل",
+    en: "Client Information"
+  },
+  "no_client_file": {
+    ar: "لا يوجد ملف عميل",
+    en: "No client file"
+  },
+  "phone_number": {
+    ar: "رقم الهاتف",
+    en: "Phone Number"
+  },
+  "search": {
+    ar: "بحث",
+    en: "Search"
+  },
+  "write_to_search": {
+    ar: "اكتب للبحث...",
+    en: "Type to search..."
+  },
+  "medical_glasses": {
+    ar: "النظارات الطبية",
+    en: "Medical Glasses"
+  },
+  "frame_only": {
+    ar: "إطار فقط (بدون عدسات)",
+    en: "Frame only (no lenses)"
+  },
+  "invoice_summary": {
+    ar: "ملخص الفاتورة",
+    en: "Invoice Summary"
+  },
+  "total": {
+    ar: "المجموع",
+    en: "Total"
+  },
+  "search_brand_model_color_size": {
+    ar: "بحث (Brand/Model/Color/Size):",
+    en: "Search (Brand/Model/Color/Size):"
   }
 };
 
