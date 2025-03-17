@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { usePatientStore, PatientNote, RxHistoryItem } from "@/store/patientStore";
 import { useInvoiceStore } from "@/store/invoiceStore";
@@ -257,61 +256,71 @@ export const PatientSearch: React.FC = () => {
     );
   };
 
+  // Updated RX input form to match the style from CreateClient.tsx
   const renderRxInputForm = () => {
-    // Generate options for sphere values (-10.00 to +10.00 in 0.25 steps)
-    const sphereOptions = [];
-    for (let i = -10; i <= 10; i += 0.25) {
-      const formatted = i.toFixed(2);
-      sphereOptions.push(
-        <SelectItem key={`sph-opt-${formatted}`} value={formatted}>
-          {Number(formatted) >= 0 ? `+${formatted}` : formatted}
-        </SelectItem>
-      );
-    }
+    // Generate options for select elements (same as in CreateClient.tsx)
+    const generateSphOptions = () => {
+      const options = [];
+      for (let i = 10; i >= -10; i -= 0.25) {
+        const formatted = i >= 0 ? `+${i.toFixed(2)}` : i.toFixed(2);
+        options.push(
+          <option key={`sph-${i}`} value={formatted}>
+            {formatted}
+          </option>
+        );
+      }
+      return options;
+    };
     
-    // Generate options for cylinder values (-6.00 to 0 in 0.25 steps)
-    const cylOptions = [];
-    for (let i = -6; i <= 0; i += 0.25) {
-      const formatted = i.toFixed(2);
-      cylOptions.push(
-        <SelectItem key={`cyl-opt-${formatted}`} value={formatted}>
-          {formatted}
-        </SelectItem>
-      );
-    }
+    const generateCylOptions = () => {
+      const options = [];
+      for (let i = 0; i >= -6; i -= 0.25) {
+        const formatted = i.toFixed(2);
+        options.push(
+          <option key={`cyl-${i}`} value={formatted}>
+            {formatted}
+          </option>
+        );
+      }
+      return options;
+    };
     
-    // Generate options for axis values (0 to 180 in steps of 5)
-    const axisOptions = [];
-    for (let i = 0; i <= 180; i += 5) {
-      const value = i.toString();
-      axisOptions.push(
-        <SelectItem key={`axis-opt-${value}`} value={value}>
-          {value}
-        </SelectItem>
-      );
-    }
+    const generateAxisOptions = () => {
+      const options = [];
+      for (let i = 0; i <= 180; i += 1) {
+        options.push(
+          <option key={`axis-${i}`} value={i}>
+            {i}
+          </option>
+        );
+      }
+      return options;
+    };
     
-    // Generate options for add values (0.00 to 3.00 in 0.25 steps)
-    const addOptions = [];
-    for (let i = 0; i <= 3; i += 0.25) {
-      const formatted = i.toFixed(2);
-      addOptions.push(
-        <SelectItem key={`add-opt-${formatted}`} value={formatted}>
-          {Number(formatted) === 0 ? "0.00" : `+${formatted}`}
-        </SelectItem>
-      );
-    }
+    const generateAddOptions = () => {
+      const options = [];
+      for (let i = 0; i <= 3; i += 0.25) {
+        const formatted = i === 0 ? "0.00" : `+${i.toFixed(2)}`;
+        options.push(
+          <option key={`add-${i}`} value={formatted}>
+            {formatted}
+          </option>
+        );
+      }
+      return options;
+    };
     
-    // Generate options for PD values (50 to 70 in 0.5 steps)
-    const pdOptions = [];
-    for (let i = 50; i <= 70; i += 0.5) {
-      const formatted = i.toFixed(1);
-      pdOptions.push(
-        <SelectItem key={`pd-opt-${formatted}`} value={formatted}>
-          {formatted}
-        </SelectItem>
-      );
-    }
+    const generatePdOptions = () => {
+      const options = [];
+      for (let i = 40; i <= 80; i += 1) {
+        options.push(
+          <option key={`pd-${i}`} value={i}>
+            {i}
+          </option>
+        );
+      }
+      return options;
+    };
 
     return (
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -345,146 +354,129 @@ export const PatientSearch: React.FC = () => {
           </div>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <h4 className="font-bold mb-2 bg-amber-100 p-2 rounded">العين اليمنى (OD)</h4>
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="sphereOD">Sphere</Label>
-                <Select value={newRx.sphereOD} onValueChange={(value) => handleRxInputChange('sphereOD', value)}>
-                  <SelectTrigger id="sphereOD">
-                    <SelectValue placeholder="اختر قيمة" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    <SelectItem value="placeholder">-- اختر --</SelectItem>
-                    {sphereOptions}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="cylOD">Cylinder</Label>
-                <Select value={newRx.cylOD} onValueChange={(value) => handleRxInputChange('cylOD', value)}>
-                  <SelectTrigger id="cylOD">
-                    <SelectValue placeholder="اختر قيمة" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    <SelectItem value="placeholder">-- اختر --</SelectItem>
-                    {cylOptions}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="axisOD">Axis</Label>
-                <Select value={newRx.axisOD} onValueChange={(value) => handleRxInputChange('axisOD', value)}>
-                  <SelectTrigger id="axisOD">
-                    <SelectValue placeholder="اختر قيمة" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    <SelectItem value="placeholder">-- اختر --</SelectItem>
-                    {axisOptions}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="addOD">Add</Label>
-                <Select value={newRx.addOD} onValueChange={(value) => handleRxInputChange('addOD', value)}>
-                  <SelectTrigger id="addOD">
-                    <SelectValue placeholder="اختر قيمة" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    <SelectItem value="placeholder">-- اختر --</SelectItem>
-                    {addOptions}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="pdRight">PD</Label>
-                <Select value={newRx.pdRight} onValueChange={(value) => handleRxInputChange('pdRight', value)}>
-                  <SelectTrigger id="pdRight">
-                    <SelectValue placeholder="اختر قيمة" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    <SelectItem value="placeholder">-- اختر --</SelectItem>
-                    {pdOptions}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-          
-          <div>
-            <h4 className="font-bold mb-2 bg-amber-100 p-2 rounded">العين اليسرى (OS)</h4>
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="sphereOS">Sphere</Label>
-                <Select value={newRx.sphereOS} onValueChange={(value) => handleRxInputChange('sphereOS', value)}>
-                  <SelectTrigger id="sphereOS">
-                    <SelectValue placeholder="اختر قيمة" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    <SelectItem value="placeholder">-- اختر --</SelectItem>
-                    {sphereOptions}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="cylOS">Cylinder</Label>
-                <Select value={newRx.cylOS} onValueChange={(value) => handleRxInputChange('cylOS', value)}>
-                  <SelectTrigger id="cylOS">
-                    <SelectValue placeholder="اختر قيمة" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    <SelectItem value="placeholder">-- اختر --</SelectItem>
-                    {cylOptions}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="axisOS">Axis</Label>
-                <Select value={newRx.axisOS} onValueChange={(value) => handleRxInputChange('axisOS', value)}>
-                  <SelectTrigger id="axisOS">
-                    <SelectValue placeholder="اختر قيمة" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    <SelectItem value="placeholder">-- اختر --</SelectItem>
-                    {axisOptions}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="addOS">Add</Label>
-                <Select value={newRx.addOS} onValueChange={(value) => handleRxInputChange('addOS', value)}>
-                  <SelectTrigger id="addOS">
-                    <SelectValue placeholder="اختر قيمة" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    <SelectItem value="placeholder">-- اختر --</SelectItem>
-                    {addOptions}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="pdLeft">PD</Label>
-                <Select value={newRx.pdLeft} onValueChange={(value) => handleRxInputChange('pdLeft', value)}>
-                  <SelectTrigger id="pdLeft">
-                    <SelectValue placeholder="اختر قيمة" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    <SelectItem value="placeholder">-- اختر --</SelectItem>
-                    {pdOptions}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse ltr">
+            <thead>
+              <tr>
+                <th className="text-center border border-border bg-muted p-2"></th>
+                <th className="text-center border border-border bg-muted p-2">SPH</th>
+                <th className="text-center border border-border bg-muted p-2">CYL</th>
+                <th className="text-center border border-border bg-muted p-2">AXIS</th>
+                <th className="text-center border border-border bg-muted p-2">ADD</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th className="text-center border border-border bg-muted p-2">OD (يمين)</th>
+                <td className="border border-border p-1">
+                  <select
+                    className="w-full p-1 rounded-md border-input bg-background"
+                    value={newRx.sphereOD}
+                    onChange={(e) => handleRxInputChange('sphereOD', e.target.value)}
+                  >
+                    <option value="" disabled>اختر...</option>
+                    {generateSphOptions()}
+                  </select>
+                </td>
+                <td className="border border-border p-1">
+                  <select
+                    className="w-full p-1 rounded-md border-input bg-background"
+                    value={newRx.cylOD}
+                    onChange={(e) => handleRxInputChange('cylOD', e.target.value)}
+                  >
+                    <option value="" disabled>اختر...</option>
+                    {generateCylOptions()}
+                  </select>
+                </td>
+                <td className="border border-border p-1">
+                  <select
+                    className="w-full p-1 rounded-md border-input bg-background"
+                    value={newRx.axisOD}
+                    onChange={(e) => handleRxInputChange('axisOD', e.target.value)}
+                  >
+                    <option value="" disabled>اختر...</option>
+                    {generateAxisOptions()}
+                  </select>
+                </td>
+                <td className="border border-border p-1">
+                  <select
+                    className="w-full p-1 rounded-md border-input bg-background"
+                    value={newRx.addOD}
+                    onChange={(e) => handleRxInputChange('addOD', e.target.value)}
+                  >
+                    <option value="" disabled>اختر...</option>
+                    {generateAddOptions()}
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <th className="text-center border border-border bg-muted p-2">OS (يسار)</th>
+                <td className="border border-border p-1">
+                  <select
+                    className="w-full p-1 rounded-md border-input bg-background"
+                    value={newRx.sphereOS}
+                    onChange={(e) => handleRxInputChange('sphereOS', e.target.value)}
+                  >
+                    <option value="" disabled>اختر...</option>
+                    {generateSphOptions()}
+                  </select>
+                </td>
+                <td className="border border-border p-1">
+                  <select
+                    className="w-full p-1 rounded-md border-input bg-background"
+                    value={newRx.cylOS}
+                    onChange={(e) => handleRxInputChange('cylOS', e.target.value)}
+                  >
+                    <option value="" disabled>اختر...</option>
+                    {generateCylOptions()}
+                  </select>
+                </td>
+                <td className="border border-border p-1">
+                  <select
+                    className="w-full p-1 rounded-md border-input bg-background"
+                    value={newRx.axisOS}
+                    onChange={(e) => handleRxInputChange('axisOS', e.target.value)}
+                  >
+                    <option value="" disabled>اختر...</option>
+                    {generateAxisOptions()}
+                  </select>
+                </td>
+                <td className="border border-border p-1">
+                  <select
+                    className="w-full p-1 rounded-md border-input bg-background"
+                    value={newRx.addOS}
+                    onChange={(e) => handleRxInputChange('addOS', e.target.value)}
+                  >
+                    <option value="" disabled>اختر...</option>
+                    {generateAddOptions()}
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <th className="text-center border border-border bg-muted p-2">PD</th>
+                <td className="border border-border p-1" colSpan={2}>
+                  <select
+                    className="w-full p-1 rounded-md border-input bg-background"
+                    value={newRx.pdRight}
+                    onChange={(e) => handleRxInputChange('pdRight', e.target.value)}
+                  >
+                    <option value="" disabled>اختر...</option>
+                    {generatePdOptions()}
+                  </select>
+                </td>
+                <td className="border border-border p-1" colSpan={2}>
+                  <select
+                    className="w-full p-1 rounded-md border-input bg-background"
+                    value={newRx.pdLeft}
+                    onChange={(e) => handleRxInputChange('pdLeft', e.target.value)}
+                  >
+                    <option value="" disabled>اختر...</option>
+                    {generatePdOptions()}
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         
         <div className="text-center mt-6">
