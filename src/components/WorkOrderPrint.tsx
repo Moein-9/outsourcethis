@@ -1,9 +1,9 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
 import { Eye, Ruler, CircleDot, ClipboardCheck, User, Glasses, BadgeCheck, Contact } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
+import { MoenLogo, storeInfo } from "@/assets/logo";
 
 interface WorkOrderPrintProps {
   invoice: Invoice;
@@ -49,7 +49,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   contactLenses,
   contactLensRx
 }) => {
-  // Use either passed props or invoice data
   const name = patientName || invoice.patientName;
   const phone = patientPhone || invoice.patientPhone;
   const lensTypeValue = lensType || invoice.lensType;
@@ -62,7 +61,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
     price: invoice.framePrice
   } : undefined);
   
-  // Determine if this is a contact lens or glasses order
   const isContactLens = contactLenses && contactLenses.length > 0;
 
   return (
@@ -71,11 +69,16 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         <div className="absolute right-0 top-0">
           <ClipboardCheck className="w-10 h-10 text-primary" />
         </div>
+        <MoenLogo className="mx-auto w-auto h-20 mb-2" />
         <h1 className="text-2xl font-bold mb-1">أمر العمل</h1>
         <p className="text-lg text-primary font-medium">رقم الطلب: {invoice.invoiceId}</p>
         <p className="text-muted-foreground">
           {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
         </p>
+        <div className="text-sm text-center mt-2">
+          <p>{storeInfo.address}</p>
+          <p>هاتف: {storeInfo.phone}</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-6">

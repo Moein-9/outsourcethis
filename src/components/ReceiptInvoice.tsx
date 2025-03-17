@@ -1,9 +1,9 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
 import { CheckCircle2, Receipt } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
+import { MoenLogo, storeInfo } from "@/assets/logo";
 
 interface ReceiptInvoiceProps {
   invoice: Invoice;
@@ -83,11 +83,11 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
     <div className={containerClass} style={{ fontFamily: 'Courier New, monospace' }}>
       <div className="text-center border-b pb-3 mb-3">
         <div className="flex justify-center mb-2">
-          <Receipt className="w-10 h-10 text-primary" />
+          <MoenLogo className="w-auto h-16 mb-2" />
         </div>
-        <h2 className="font-bold text-xl mb-1">متجر النظارات</h2>
-        <p className="text-sm text-muted-foreground">مدينة الكويت، بلوك 5</p>
-        <p className="text-sm text-muted-foreground">هاتف: 6789-2345 965+</p>
+        <h2 className="font-bold text-xl mb-1">{storeInfo.name}</h2>
+        <p className="text-sm text-muted-foreground">{storeInfo.address}</p>
+        <p className="text-sm text-muted-foreground">هاتف: {storeInfo.phone}</p>
       </div>
 
       <div className="mb-4 text-sm">

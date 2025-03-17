@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Clock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { MoenLogo } from "@/assets/logo";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -37,7 +38,10 @@ export const Layout: React.FC<LayoutProps> = ({
   return (
     <div className="rtl min-h-screen bg-background font-cairo">
       <header className="fixed top-0 left-0 right-0 bg-white border-b border-border shadow-sm z-10 px-4 py-2 flex justify-between items-center">
-        <div className="font-bold text-xl">النظام البصري</div>
+        <MoenLogo 
+          className="h-10 w-auto" 
+          onClick={() => handleNavigate("dashboard")}
+        />
         <div className="flex space-x-2 space-x-reverse">
           <Button 
             variant={activeSection === "dashboard" ? "default" : "outline"} 

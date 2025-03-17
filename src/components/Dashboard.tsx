@@ -5,6 +5,7 @@ import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { MoenLogoGreen } from "@/assets/logo";
 
 export const Dashboard: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -23,7 +24,7 @@ export const Dashboard: React.FC = () => {
     <div className="py-4 space-y-6">
       <div className="flex justify-between items-center bg-gradient-to-r from-primary/15 to-primary/5 rounded-lg p-6">
         <div>
-          <h2 className="text-3xl font-bold text-primary">مرحباً بك في النظام البصري</h2>
+          <h2 className="text-3xl font-bold text-primary">مرحباً بك في نظام معين للبصريات</h2>
           <p className="mt-2 text-gray-600">
             نظام إدارة متكامل للعيادات والمستشفيات
           </p>
@@ -33,11 +34,14 @@ export const Dashboard: React.FC = () => {
             </Link>
           </div>
         </div>
-        <div className="flex items-center gap-3 bg-white/80 px-4 py-2 rounded-md shadow-sm">
-          <Clock className="h-5 w-5 text-primary" />
-          <div>
-            <p className="text-xs text-gray-500">الوقت الحالي</p>
-            <p className="text-lg font-semibold">{currentTime.toLocaleTimeString('en-US')}</p>
+        <div className="flex flex-col items-center">
+          <MoenLogoGreen className="w-auto h-32 mb-4" />
+          <div className="flex items-center gap-3 bg-white/80 px-4 py-2 rounded-md shadow-sm">
+            <Clock className="h-5 w-5 text-primary" />
+            <div>
+              <p className="text-xs text-gray-500">الوقت الحالي</p>
+              <p className="text-lg font-semibold">{currentTime.toLocaleTimeString('en-US')}</p>
+            </div>
           </div>
         </div>
       </div>
