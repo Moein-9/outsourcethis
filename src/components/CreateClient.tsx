@@ -279,8 +279,8 @@ export const CreateClient: React.FC = () => {
         </TabsList>
       
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Right: Patient Information - Shared between both tabs */}
-          <div className="order-1 md:order-1 bg-card rounded-md p-4 border">
+          {/* Left: Patient Information - Switched from right to left */}
+          <div className="order-2 md:order-2 bg-card rounded-md p-4 border">
             <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
               المعلومات الشخصية
             </div>
@@ -368,8 +368,8 @@ export const CreateClient: React.FC = () => {
             </div>
           </div>
           
-          {/* Left: Prescription Content - Different for each tab */}
-          <div className="order-2 md:order-2">
+          {/* Right: Prescription Content - Switched from left to right */}
+          <div className="order-1 md:order-1">
             <TabsContent value="glasses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
                 <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
