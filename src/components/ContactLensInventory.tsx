@@ -160,19 +160,17 @@ export const ContactLensInventory: React.FC = () => {
       return;
     }
     
-    const newContactLens = {
+    // Create the base object with required properties
+    const newContactLens: Omit<ContactLensItem, "id"> = {
       brand: contactLensBrand,
       type: contactLensType,
       bc: contactLensBC,
       diameter: contactLensDiameter,
       power: contactLensPower,
       price,
-      qty
+      qty,
+      color: contactLensColor !== "none" ? contactLensColor : undefined
     };
-    
-    if (contactLensColor && contactLensColor !== "none") {
-      newContactLens.color = contactLensColor;
-    }
     
     if (editingLens) {
       updateContactLens(editingLens.id, newContactLens);
