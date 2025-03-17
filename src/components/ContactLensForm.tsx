@@ -1,21 +1,8 @@
-
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Eye } from "lucide-react";
-
-interface EyePrescription {
-  sphere: string;
-  cylinder: string;
-  axis: string;
-  bc: string;
-  dia: string;
-}
-
-interface ContactLensRx {
-  rightEye: EyePrescription;
-  leftEye: EyePrescription;
-}
+import { ContactLensRx } from "@/store/patientStore";
 
 interface ContactLensFormProps {
   rxData: ContactLensRx;
@@ -23,7 +10,7 @@ interface ContactLensFormProps {
 }
 
 export const ContactLensForm: React.FC<ContactLensFormProps> = ({ rxData, onChange }) => {
-  const handleRightEyeChange = (field: keyof EyePrescription, value: string) => {
+  const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
     const updatedRx = {
       ...rxData,
       rightEye: {
@@ -34,7 +21,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({ rxData, onChan
     onChange(updatedRx);
   };
 
-  const handleLeftEyeChange = (field: keyof EyePrescription, value: string) => {
+  const handleLeftEyeChange = (field: keyof ContactLensRx["leftEye"], value: string) => {
     const updatedRx = {
       ...rxData,
       leftEye: {

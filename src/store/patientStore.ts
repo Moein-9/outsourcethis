@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -26,6 +25,23 @@ export interface PatientNote {
   createdAt: string;
 }
 
+export interface ContactLensRx {
+  rightEye: {
+    sphere: string;
+    cylinder: string;
+    axis: string;
+    bc: string;
+    dia: string;
+  };
+  leftEye: {
+    sphere: string;
+    cylinder: string;
+    axis: string;
+    bc: string;
+    dia: string;
+  };
+}
+
 export interface Patient {
   patientId: string;
   name: string;
@@ -35,6 +51,7 @@ export interface Patient {
   patientNotes?: PatientNote[]; // Array of timestamped notes
   rx: RxData;
   rxHistory?: RxHistoryItem[];
+  contactLensRx?: ContactLensRx; // Added contactLensRx property
   createdAt: string;
 }
 

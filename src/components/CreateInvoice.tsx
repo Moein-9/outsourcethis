@@ -17,7 +17,8 @@ import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { 
   User, Glasses, Package, FileText, CreditCard, Eye, Search, 
   Banknote, Plus, PackageCheck, EyeOff, ExternalLink,
-  ClipboardCheck, BadgePercent, DollarSign, Printer, CreditCard as CardIcon
+  ClipboardCheck, BadgePercent, DollarSign, Printer, CreditCard as CardIcon,
+  Receipt
 } from "lucide-react";
 
 const CreateInvoice: React.FC = () => {
