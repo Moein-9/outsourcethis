@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -41,10 +41,10 @@ import {
   Filter,
   User,
   Phone,
-  Mail,
   Calendar,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "./ui/badge";
@@ -64,17 +64,15 @@ import {
   differenceInYears 
 } from "date-fns";
 import { ar } from "date-fns/locale";
+import { ReceiptInvoice } from "./ReceiptInvoice";
 
 // Create an extended Patient type that includes all the properties we need
 interface PatientWithMeta extends Patient {
   patientId: string; // This will map to the 'id' property we're using
   dateOfBirth: string;
-  gender: string;
   lastVisit?: string;
-  civilId?: string;
   vip?: boolean;
   avatar?: string;
-  email?: string;
   createdAt: string;
 }
 
@@ -87,10 +85,9 @@ export const PatientSearch: React.FC = () => {
   const [showResults, setShowResults] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<PatientWithMeta | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [showRxPrintPreview, setShowRxPrintPreview] = useState(false);
   
-  // Filters
-  const [ageFilter, setAgeFilter] = useState<string>("all_ages");
-  const [genderFilter, setGenderFilter] = useState<string>("all_genders");
+  // Filter
   const [visitDateFilter, setVisitDateFilter] = useState<string>("all_visits");
   
   // Patient profile data
@@ -99,40 +96,6 @@ export const PatientSearch: React.FC = () => {
   
   // For transaction history tabs
   const [activeTransactionTab, setActiveTransactionTab] = useState<"active" | "completed">("active");
-  
-  const filterByAge = (patients: PatientWithMeta[], ageRange: string) => {
-    if (ageRange === "all_ages") return patients;
-    
-    const today = new Date();
-    
-    switch (ageRange) {
-      case "child":
-        return patients.filter(patient => {
-          if (!patient.dateOfBirth) return false;
-          const age = differenceInYears(today, new Date(patient.dateOfBirth));
-          return age < 18;
-        });
-      case "adult":
-        return patients.filter(patient => {
-          if (!patient.dateOfBirth) return false;
-          const age = differenceInYears(today, new Date(patient.dateOfBirth));
-          return age >= 18 && age < 60;
-        });
-      case "senior":
-        return patients.filter(patient => {
-          if (!patient.dateOfBirth) return false;
-          const age = differenceInYears(today, new Date(patient.dateOfBirth));
-          return age >= 60;
-        });
-      default:
-        return patients;
-    }
-  };
-  
-  const filterByGender = (patients: PatientWithMeta[], gender: string) => {
-    if (gender === "all_genders") return patients;
-    return patients.filter(patient => patient.gender === gender);
-  };
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
@@ -153,18 +116,13 @@ export const PatientSearch: React.FC = () => {
       return {
         ...patient,
         dateOfBirth: patient.dob, // Map dob to dateOfBirth 
-        gender: Math.random() > 0.5 ? 'male' : 'female', // Mock gender
         lastVisit: new Date(Date.now() - Math.random() * 10000000000).toISOString(), // Mock last visit
         vip: Math.random() > 0.8, // 20% chance of being VIP
-        civilId: Math.floor(Math.random() * 10000000000).toString(), // Mock civil ID
-        email: `${patient.name.toLowerCase().replace(/\s/g, '.')}@example.com`, // Mock email
         createdAt: patient.createdAt // Map createdAt to createdAt
       } as PatientWithMeta;
     });
     
     let filteredResults = results;
-    filteredResults = filterByAge(filteredResults, ageFilter);
-    filteredResults = filterByGender(filteredResults, genderFilter);
     filteredResults = filterByVisitDate(filteredResults, visitDateFilter);
     
     setSearchResults(filteredResults);
@@ -179,8 +137,6 @@ export const PatientSearch: React.FC = () => {
     setSearchTerm("");
     setSearchResults([]);
     setShowResults(false);
-    setAgeFilter("all_ages");
-    setGenderFilter("all_genders");
     setVisitDateFilter("all_visits");
   };
   
@@ -256,35 +212,6 @@ export const PatientSearch: React.FC = () => {
             
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <div className="flex items-center gap-2">
-                <Label htmlFor="ageFilter" className="whitespace-nowrap">الفئة العمرية:</Label>
-                <Select value={ageFilter} onValueChange={setAgeFilter}>
-                  <SelectTrigger id="ageFilter" className="w-[140px]">
-                    <SelectValue placeholder="جميع الأعمار" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all_ages">جميع الأعمار</SelectItem>
-                    <SelectItem value="child">أطفال (&lt; 18)</SelectItem>
-                    <SelectItem value="adult">بالغين (18-60)</SelectItem>
-                    <SelectItem value="senior">كبار السن (60+)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Label htmlFor="genderFilter" className="whitespace-nowrap">الجنس:</Label>
-                <Select value={genderFilter} onValueChange={setGenderFilter}>
-                  <SelectTrigger id="genderFilter" className="w-[140px]">
-                    <SelectValue placeholder="الجميع" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all_genders">الجميع</SelectItem>
-                    <SelectItem value="male">ذكر</SelectItem>
-                    <SelectItem value="female">أنثى</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex items-center gap-2">
                 <Label htmlFor="visitDateFilter" className="whitespace-nowrap">تاريخ الزيارة:</Label>
                 <Select value={visitDateFilter} onValueChange={setVisitDateFilter}>
                   <SelectTrigger id="visitDateFilter" className="w-[140px]">
@@ -326,7 +253,6 @@ export const PatientSearch: React.FC = () => {
                       <TableHead>رقم الهاتف</TableHead>
                       <TableHead>تاريخ الميلاد</TableHead>
                       <TableHead>العمر</TableHead>
-                      <TableHead>الجنس</TableHead>
                       <TableHead>آخر زيارة</TableHead>
                       <TableHead className="text-right">الإجراءات</TableHead>
                     </TableRow>
@@ -339,7 +265,6 @@ export const PatientSearch: React.FC = () => {
                         <TableCell dir="ltr" className="text-right">{patient.phone}</TableCell>
                         <TableCell>{formatDate(patient.dateOfBirth)}</TableCell>
                         <TableCell>{getPatientAge(patient.dateOfBirth)}</TableCell>
-                        <TableCell>{patient.gender === 'male' ? 'ذكر' : 'أنثى'}</TableCell>
                         <TableCell>
                           {patient.lastVisit ? formatDate(patient.lastVisit) : 'لا توجد زيارات'}
                         </TableCell>
@@ -404,26 +329,10 @@ export const PatientSearch: React.FC = () => {
                       
                       <div className="space-y-4">
                         <div className="flex items-start">
-                          <User className="h-5 w-5 text-muted-foreground mt-0.5 ml-3" />
-                          <div>
-                            <div className="text-sm text-muted-foreground">الرقم المدني</div>
-                            <div>{selectedPatient.civilId || "غير متوفر"}</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start">
                           <Phone className="h-5 w-5 text-muted-foreground mt-0.5 ml-3" />
                           <div>
                             <div className="text-sm text-muted-foreground">رقم الهاتف</div>
                             <div dir="ltr" className="text-right">{selectedPatient.phone}</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start">
-                          <Mail className="h-5 w-5 text-muted-foreground mt-0.5 ml-3" />
-                          <div>
-                            <div className="text-sm text-muted-foreground">البريد الإلكتروني</div>
-                            <div dir="ltr" className="text-right">{selectedPatient.email || "غير متوفر"}</div>
                           </div>
                         </div>
                         
@@ -668,8 +577,21 @@ export const PatientSearch: React.FC = () => {
                   </Card>
                   
                   <Card className="mt-6">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">الوصفة الطبية وتعليمات العناية</CardTitle>
+                    <CardHeader className="pb-2 flex flex-row justify-between items-center">
+                      <div>
+                        <CardTitle className="text-lg">الوصفة الطبية وتعليمات العناية</CardTitle>
+                        <CardDescription>الوصفات السابقة والنظارات أو العدسات اللاصقة</CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setShowRxPrintPreview(true)}>
+                          <Printer className="h-4 w-4 ml-2" />
+                          طباعة الوصفة
+                        </Button>
+                        <Button size="sm">
+                          <Plus className="h-4 w-4 ml-2" />
+                          وصفة جديدة
+                        </Button>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -709,6 +631,47 @@ export const PatientSearch: React.FC = () => {
                         </div>
                         
                         <div>
+                          <h4 className="font-medium mb-2">تاريخ الوصفات الطبية</h4>
+                          {selectedPatient.rxHistory && selectedPatient.rxHistory.length > 0 ? (
+                            <div className="rounded-md border">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>التاريخ</TableHead>
+                                    <TableHead>ODسفير</TableHead>
+                                    <TableHead>ODسلندر</TableHead>
+                                    <TableHead>OSسفير</TableHead>
+                                    <TableHead>OSسلندر</TableHead>
+                                    <TableHead>الإجراءات</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {selectedPatient.rxHistory.map((rx, index) => (
+                                    <TableRow key={index}>
+                                      <TableCell>{formatDate(rx.createdAt)}</TableCell>
+                                      <TableCell>{rx.sphereOD}</TableCell>
+                                      <TableCell>{rx.cylOD} / {rx.axisOD}</TableCell>
+                                      <TableCell>{rx.sphereOS}</TableCell>
+                                      <TableCell>{rx.cylOS} / {rx.axisOS}</TableCell>
+                                      <TableCell>
+                                        <Button variant="ghost" size="sm">
+                                          <Eye className="h-3.5 w-3.5 ml-1" />
+                                          عرض
+                                        </Button>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              لا يوجد سجل وصفات طبية سابقة
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
                           <h4 className="font-medium mb-2">تعليمات العناية بالنظارة</h4>
                           <ul className="text-gray-700 list-disc list-inside space-y-1">
                             <li>يجب تنظيف العدسات بانتظام بمنظف خاص</li>
@@ -730,6 +693,109 @@ export const PatientSearch: React.FC = () => {
                 <Button>
                   <Printer className="h-4 w-4 ml-2" />
                   طباعة ملف العميل
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={showRxPrintPreview} onOpenChange={setShowRxPrintPreview}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          {selectedPatient && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-lg">معاينة الوصفة الطبية</DialogTitle>
+                <DialogDescription>
+                  معاينة قبل الطباعة
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="py-4">
+                <div className="w-full bg-white p-6 rounded-lg border shadow print:shadow-none">
+                  <div id="rx-receipt" className="print:w-[80mm]">
+                    <ReceiptInvoice 
+                      invoice={{
+                        invoiceId: `RX-${Date.now().toString().substring(6)}`,
+                        patientId: selectedPatient.patientId,
+                        patientName: selectedPatient.name,
+                        patientPhone: selectedPatient.phone,
+                        lensType: 'وصفة طبية',
+                        lensPrice: 0,
+                        framePrice: 0,
+                        coatingPrice: 0,
+                        frameBrand: '',
+                        frameModel: '',
+                        discount: 0,
+                        total: 0,
+                        deposit: 0,
+                        remaining: 0,
+                        isPaid: true,
+                        paymentMethod: '',
+                        createdAt: new Date().toISOString(),
+                        payments: []
+                      }}
+                      isPrintable={true}
+                    />
+                    
+                    <div className="mt-4 p-4 border-t border-dashed">
+                      <h3 className="text-center font-bold mb-3">وصفة النظارات الطبية</h3>
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr>
+                            <th className="border border-gray-300 p-1 text-sm"></th>
+                            <th className="border border-gray-300 p-1 text-sm">SPH</th>
+                            <th className="border border-gray-300 p-1 text-sm">CYL</th>
+                            <th className="border border-gray-300 p-1 text-sm">AXIS</th>
+                            <th className="border border-gray-300 p-1 text-sm">ADD</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="border border-gray-300 p-1 text-sm font-medium">OD (اليمنى)</td>
+                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.sphereOD}</td>
+                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.cylOD}</td>
+                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.axisOD}</td>
+                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.addOD}</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-gray-300 p-1 text-sm font-medium">OS (اليسرى)</td>
+                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.sphereOS}</td>
+                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.cylOS}</td>
+                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.axisOS}</td>
+                            <td className="border border-gray-300 p-1 text-sm">{selectedPatient.rx?.addOS}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      
+                      <div className="mt-2 flex justify-between text-sm">
+                        <span className="font-medium">PD: </span>
+                        <span>{selectedPatient.rx?.pdRight} - {selectedPatient.rx?.pdLeft}</span>
+                      </div>
+                      
+                      <div className="mt-4 text-sm text-center">
+                        <p className="font-medium">ملاحظات:</p>
+                        <p>{selectedPatient.notes || 'لا توجد ملاحظات'}</p>
+                      </div>
+                      
+                      <div className="mt-6 pt-4 border-t text-center text-xs text-gray-500">
+                        <p>هذه الوصفة صالحة لمدة 6 أشهر من تاريخ الإصدار</p>
+                        <p>تاريخ الإصدار: {format(new Date(), 'yyyy/MM/dd')}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowRxPrintPreview(false)}>
+                  إغلاق
+                </Button>
+                <Button onClick={() => {
+                  window.print();
+                }}>
+                  <Printer className="h-4 w-4 ml-2" />
+                  طباعة الوصفة
                 </Button>
               </DialogFooter>
             </>
