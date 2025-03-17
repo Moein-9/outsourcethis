@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,8 @@ interface FrameLabelProps {
   frame: FrameItem;
 }
 
-const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
+// Export the FrameLabel component so it can be used in other components
+export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
   return (
     <div 
       className="flex border border-gray-300 bg-white relative print:border-0"

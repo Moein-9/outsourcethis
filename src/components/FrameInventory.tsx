@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
@@ -23,46 +22,64 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Glasses, Package, Edit, Copy, Save, Tag } from "lucide-react";
+import { 
+  Search, 
+  Plus, 
+  Glasses, 
+  Package, 
+  Edit, 
+  Copy, 
+  Save, 
+  Tag, 
+  QrCode,
+  Printer 
+} from "lucide-react";
 import { FrameLabelTemplate } from "./FrameLabelTemplate";
 
 // Frame Item Component
-const FrameItemCard = ({ frame, index }: { frame: FrameItem; index: number }) => {
+const FrameItemCard = ({ frame, index, onPrintLabel }: { 
+  frame: FrameItem; 
+  index: number;
+  onPrintLabel: (frameId: string) => void;
+}) => {
   return (
-    <Card key={index} className="overflow-hidden hover:shadow-md transition-all duration-200">
-      <CardHeader className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
-        <div className="flex justify-between items-start">
+    <Card key={index} className="overflow-hidden hover:shadow-md transition-all duration-200 border-gray-200">
+      <CardHeader className="p-3 bg-gray-50 border-b flex flex-row justify-between items-start">
+        <div className="flex items-start gap-2">
+          <Glasses className="h-5 w-5 text-indigo-600 mt-0.5" />
           <div>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Glasses className="h-4 w-4 text-indigo-600" />
-              {frame.brand} - {frame.model}
-            </CardTitle>
-            <CardDescription className="mt-1 flex items-center gap-1">
-              {frame.price.toFixed(2)} KWD
-            </CardDescription>
+            <div className="font-bold text-base">{frame.brand} - {frame.model}</div>
+            <div className="text-sm font-medium mt-0.5">{frame.price.toFixed(2)} KWD</div>
           </div>
-          <Badge variant={frame.qty > 5 ? "outline" : "destructive"} className="text-xs">
-            {frame.qty} في المخزون
-          </Badge>
         </div>
+        <Badge variant="destructive" className="text-xs rounded-full">
+          في المخزون:{frame.qty}
+        </Badge>
       </CardHeader>
-      <CardContent className="p-4 pt-3 text-sm space-y-2">
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">اللون:</span>
-          <span className="font-medium">{frame.color}</span>
+      <CardContent className="p-3 pt-2 text-sm">
+        <div className="flex justify-between py-1 border-b border-gray-100">
+          <span className="text-blue-500">اللون:</span>
+          <span>{frame.color || "-"}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">المقاس:</span>
-          <span className="font-medium">{frame.size || "غير محدد"}</span>
+        <div className="flex justify-between py-1">
+          <span className="text-blue-500">المقاس:</span>
+          <span>{frame.size || "-"}</span>
         </div>
       </CardContent>
       <CardFooter className="p-0 border-t">
-        <div className="grid grid-cols-2 w-full divide-x divide-x-reverse">
+        <div className="grid grid-cols-3 w-full divide-x divide-x-reverse">
           <Button variant="ghost" className="rounded-none h-10 text-blue-600">
             <Edit className="h-4 w-4 mr-1" /> تعديل
           </Button>
           <Button variant="ghost" className="rounded-none h-10 text-amber-600">
             <Copy className="h-4 w-4 mr-1" /> نسخ
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="rounded-none h-10 text-green-600"
+            onClick={() => onPrintLabel(frame.frameId)}
+          >
+            <QrCode className="h-4 w-4 mr-1" /> طباعة
           </Button>
         </div>
       </CardFooter>
@@ -73,13 +90,13 @@ const FrameItemCard = ({ frame, index }: { frame: FrameItem; index: number }) =>
 export const FrameInventory: React.FC = () => {
   const { frames, addFrame, searchFrames } = useInventoryStore();
   
-  // State variables
   const [frameSearchTerm, setFrameSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchFrames>>([]);
   const [isAddFrameDialogOpen, setIsAddFrameDialogOpen] = useState(false);
   const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
+  const [selectedFrameForPrint, setSelectedFrameForPrint] = useState<string | null>(null);
+  const [isQuickPrintDialogOpen, setIsQuickPrintDialogOpen] = useState(false);
   
-  // New frame states
   const [frameBrand, setFrameBrand] = useState("");
   const [frameModel, setFrameModel] = useState("");
   const [frameColor, setFrameColor] = useState("");
@@ -87,7 +104,6 @@ export const FrameInventory: React.FC = () => {
   const [framePrice, setFramePrice] = useState("");
   const [frameQty, setFrameQty] = useState("1");
   
-  // Handle frame search
   const handleFrameSearch = () => {
     if (!frameSearchTerm.trim()) {
       setSearchResults(frames);
@@ -102,7 +118,6 @@ export const FrameInventory: React.FC = () => {
     }
   };
   
-  // Handle adding a new frame
   const handleAddFrame = () => {
     if (!frameBrand || !frameModel || !frameColor || !framePrice) {
       toast.error("الرجاء إدخال تفاصيل الإطار كاملة");
@@ -133,7 +148,6 @@ export const FrameInventory: React.FC = () => {
     
     toast.success(`تم إضافة الإطار بنجاح: ${frameBrand} ${frameModel}`);
     
-    // Reset form and close dialog
     setFrameBrand("");
     setFrameModel("");
     setFrameColor("");
@@ -142,14 +156,25 @@ export const FrameInventory: React.FC = () => {
     setFrameQty("1");
     setIsAddFrameDialogOpen(false);
     
-    // Refresh search results
     setSearchResults(frames);
   };
   
-  // Initialize search results
   useEffect(() => {
     setSearchResults(frames);
   }, [frames]);
+  
+  const handleQuickPrintLabel = (frameId: string) => {
+    setSelectedFrameForPrint(frameId);
+    setIsQuickPrintDialogOpen(true);
+  };
+  
+  const printSingleLabel = () => {
+    setTimeout(() => {
+      window.print();
+      setIsQuickPrintDialogOpen(false);
+      toast.success("تم إرسال البطاقة للطباعة");
+    }, 300);
+  };
   
   return (
     <div className="space-y-6">
@@ -282,7 +307,12 @@ export const FrameInventory: React.FC = () => {
       {searchResults.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {searchResults.map((frame, index) => (
-            <FrameItemCard key={frame.frameId} frame={frame} index={index} />
+            <FrameItemCard 
+              key={frame.frameId} 
+              frame={frame} 
+              index={index} 
+              onPrintLabel={handleQuickPrintLabel}
+            />
           ))}
         </div>
       ) : (
@@ -301,7 +331,6 @@ export const FrameInventory: React.FC = () => {
         </div>
       )}
       
-      {/* Label Print Dialog */}
       <Dialog open={isLabelDialogOpen} onOpenChange={setIsLabelDialogOpen}>
         <DialogContent className="max-w-5xl max-h-[90vh]">
           <DialogHeader>
@@ -322,6 +351,49 @@ export const FrameInventory: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      <Dialog open={isQuickPrintDialogOpen} onOpenChange={setIsQuickPrintDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>طباعة بطاقة سريعة</DialogTitle>
+            <DialogDescription>
+              طباعة بطاقة للإطار المحدد
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="p-2">
+            {selectedFrameForPrint && (
+              <div className="flex flex-col items-center">
+                <FrameLabel 
+                  frame={frames.find(f => f.frameId === selectedFrameForPrint)!} 
+                />
+                <p className="text-sm text-muted-foreground mt-4">
+                  تأكد من إعداد طابعة الملصقات وتحديد الحجم الصحيح (100مم × 16مم).
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsQuickPrintDialogOpen(false)}>
+              إلغاء
+            </Button>
+            <Button onClick={printSingleLabel}>
+              <Printer className="h-4 w-4 mr-1" /> طباعة البطاقة
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      <div className="hidden print:block">
+        {selectedFrameForPrint && (
+          <FrameLabel 
+            frame={frames.find(f => f.frameId === selectedFrameForPrint)!} 
+          />
+        )}
+      </div>
     </div>
   );
 };
+
+import { FrameLabel } from "./FrameLabelTemplate";
