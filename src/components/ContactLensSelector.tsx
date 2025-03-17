@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,23 +77,18 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filterType, setFilterType] = useState<string>("all");
 
-  // Extract unique values for filters
   const brands = [...new Set(contactLenses.map(lens => lens.brand))];
   const types = [...new Set(contactLenses.map(lens => lens.type))];
 
-  // Apply filters when they change
   useEffect(() => {
     handleFilterApply();
   }, [filterBrand, filterType, search]);
 
-  // Calculate total price of selected lenses
   const totalPrice = selectedLenses.reduce((sum, lens) => sum + lens.price, 0);
 
   const handleFilterApply = () => {
-    // First search by query
     let filtered = search ? searchContactLenses(search) : contactLenses;
     
-    // Then apply additional filters
     if (filterBrand && filterBrand !== "all") {
       filtered = filtered.filter(lens => lens.brand === filterBrand);
     }
@@ -111,7 +105,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   };
 
   const handleSelectLens = (lens: ContactLensItem) => {
-    // Check if this lens is already selected
     const alreadySelected = selectedLenses.some(item => item.id === lens.id);
     
     if (alreadySelected) {
@@ -122,7 +115,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     const updatedSelection = [...selectedLenses, lens];
     setSelectedLenses(updatedSelection);
     
-    // Send updated selection to parent component
     onSelect({
       items: updatedSelection,
       rxData: rxData
@@ -135,7 +127,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     const updatedSelection = selectedLenses.filter(lens => lens.id !== lensId);
     setSelectedLenses(updatedSelection);
     
-    // Send updated selection to parent component
     onSelect({
       items: updatedSelection,
       rxData: rxData
@@ -145,7 +136,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   const handleRxChange = (newRxData: ContactLensRx) => {
     setRxData(newRxData);
     
-    // Also update the selection with the new RX data
     onSelect({
       items: selectedLenses,
       rxData: newRxData
@@ -158,20 +148,16 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   };
   
   const handleConfirmSelection = () => {
-    // Final submission of selected lenses
     onSelect({
       items: selectedLenses,
       rxData: rxData
     });
     
-    toast({
-      description: `تمت إضافة ${selectedLenses.length} عدسة للفاتورة`,
-    });
+    toast(`تمت إضافة ${selectedLenses.length} عدسة للفاتورة`);
   };
   
   return (
     <div className="space-y-5">
-      {/* Header with Patient Info */}
       <div className="flex justify-between items-center bg-white p-4 rounded-lg border shadow-sm">
         <div className="flex items-center gap-2">
           <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-2 rounded-full">
@@ -195,7 +181,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
             </Badge>
           )}
           
-          {/* Single Invoice Summary Badge */}
           {selectedLenses.length > 0 && (
             <Badge className="bg-primary text-white px-3 py-1.5 flex items-center gap-1">
               <ShoppingCart className="h-3.5 w-3.5" />
@@ -205,7 +190,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
         </div>
       </div>
 
-      {/* RX Form - Only show when needed */}
       {showRxForm && (
         <Card className="border-blue-200 shadow-sm overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 py-3">
@@ -228,7 +212,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Search & Filters */}
         <div className="lg:col-span-1">
           <Card className="border-blue-200 shadow-sm">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 py-3">
@@ -249,7 +232,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4 bg-white">
-              {/* Main Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -260,7 +242,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                 />
               </div>
               
-              {/* Filters (Collapsible) */}
               {filtersVisible && (
                 <div className="space-y-3 border-t pt-3 mt-2 border-blue-100">
                   <div className="space-y-2">
@@ -311,7 +292,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
             </CardContent>
           </Card>
           
-          {/* Selected Lenses Card */}
           {selectedLenses.length > 0 && (
             <Card className="border-blue-200 shadow-sm overflow-hidden mt-5">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 py-3">
@@ -362,7 +342,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
           )}
         </div>
 
-        {/* Right Column: Results */}
         <div className="lg:col-span-2">
           <Card className="border-blue-200 shadow-sm">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 py-3">
@@ -446,7 +425,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
             </CardContent>
           </Card>
           
-          {/* Confirmation Button - Only show when lenses are selected */}
           {selectedLenses.length > 0 && (
             <Button 
               className="w-full mt-4 bg-primary hover:bg-primary/90 h-12 gap-2 text-lg"
