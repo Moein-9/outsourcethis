@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -65,15 +64,17 @@ import {
 } from "date-fns";
 import { ar } from "date-fns/locale";
 
-// Define a PatientWithMeta type for the UI needs
+// Create an extended Patient type that includes all the properties we need
 interface PatientWithMeta extends Patient {
-  dateOfBirth?: string;
-  gender?: 'male' | 'female';
+  patientId: string; // This will map to the 'id' property we're using
+  dateOfBirth: string;
+  gender: string;
   lastVisit?: string;
-  vip?: boolean;
   civilId?: string;
-  email?: string;
+  vip?: boolean;
   avatar?: string;
+  email?: string;
+  createdAt: string;
 }
 
 export const PatientSearch: React.FC = () => {
@@ -86,13 +87,16 @@ export const PatientSearch: React.FC = () => {
   const [selectedPatient, setSelectedPatient] = useState<PatientWithMeta | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
+  // Filters
   const [ageFilter, setAgeFilter] = useState<string>("");
   const [genderFilter, setGenderFilter] = useState<string>("");
   const [visitDateFilter, setVisitDateFilter] = useState<string>("");
   
+  // Patient profile data
   const [patientInvoices, setPatientInvoices] = useState<Invoice[]>([]);
   const [patientWorkOrders, setPatientWorkOrders] = useState<WorkOrder[]>([]);
   
+  // For transaction history tabs
   const [activeTransactionTab, setActiveTransactionTab] = useState<"active" | "completed">("active");
   
   const filterByAge = (patients: PatientWithMeta[], ageRange: string) => {
@@ -152,6 +156,7 @@ export const PatientSearch: React.FC = () => {
         vip: Math.random() > 0.8, // 20% chance of being VIP
         civilId: Math.floor(Math.random() * 10000000000).toString(), // Mock civil ID
         email: `${patient.name.toLowerCase().replace(/\s/g, '.')}@example.com`, // Mock email
+        createdAt: patient.createdAt // Map createdAt to createdAt
       } as PatientWithMeta;
     });
     
@@ -180,6 +185,7 @@ export const PatientSearch: React.FC = () => {
   const handlePatientSelect = (patient: PatientWithMeta) => {
     setSelectedPatient(patient);
     
+    // Get patient's invoices and work orders
     const patientInvoices = getInvoicesByPatientId(patient.patientId);
     const patientWorkOrders = getWorkOrdersByPatientId(patient.patientId);
     
