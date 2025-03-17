@@ -2,6 +2,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface Payment {
+  amount: number;
+  method: string;
+  date: string;
+}
+
 export interface Invoice {
   invoiceId: string;
   patientId?: string;
@@ -25,14 +31,15 @@ export interface Invoice {
   remaining: number;
   
   paymentMethod: string;
+  payments?: Payment[];
   createdAt: string;
   isPaid: boolean;
 }
 
 interface InvoiceState {
   invoices: Invoice[];
-  addInvoice: (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid">) => string;
-  markAsPaid: (invoiceId: string) => void;
+  addInvoice: (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments">) => string;
+  markAsPaid: (invoiceId: string, paymentMethod?: string) => void;
   getInvoiceById: (id: string) => Invoice | undefined;
   getUnpaidInvoices: () => Invoice[];
   // Added for mock data functionality
@@ -51,6 +58,14 @@ export const useInvoiceStore = create<InvoiceState>()(
         const remaining = Math.max(0, invoice.total - invoice.deposit);
         const isPaid = remaining === 0;
         
+        const initialPayment: Payment = {
+          amount: invoice.deposit,
+          method: invoice.paymentMethod,
+          date: createdAt
+        };
+        
+        const payments = invoice.deposit > 0 ? [initialPayment] : [];
+        
         set((state) => ({
           invoices: [
             ...state.invoices,
@@ -59,7 +74,8 @@ export const useInvoiceStore = create<InvoiceState>()(
               invoiceId, 
               createdAt, 
               remaining,
-              isPaid
+              isPaid,
+              payments
             }
           ]
         }));
@@ -67,13 +83,34 @@ export const useInvoiceStore = create<InvoiceState>()(
         return invoiceId;
       },
       
-      markAsPaid: (invoiceId) => {
+      markAsPaid: (invoiceId, paymentMethod) => {
         set((state) => ({
-          invoices: state.invoices.map(invoice => 
-            invoice.invoiceId === invoiceId 
-              ? { ...invoice, isPaid: true, remaining: 0, deposit: invoice.total } 
-              : invoice
-          )
+          invoices: state.invoices.map(invoice => {
+            if (invoice.invoiceId === invoiceId) {
+              const remainingAmount = invoice.remaining;
+              const method = paymentMethod || invoice.paymentMethod;
+              
+              // Create a new payment record for the remaining amount
+              const newPayment: Payment = {
+                amount: remainingAmount,
+                method: method,
+                date: new Date().toISOString()
+              };
+              
+              // Get existing payments or create empty array if none exist
+              const existingPayments = invoice.payments || [];
+              
+              return { 
+                ...invoice, 
+                isPaid: true, 
+                remaining: 0, 
+                deposit: invoice.total,
+                paymentMethod: method,
+                payments: [...existingPayments, newPayment]
+              };
+            }
+            return invoice;
+          })
         }));
       },
       
@@ -91,8 +128,24 @@ export const useInvoiceStore = create<InvoiceState>()(
       },
       
       addExistingInvoice: (invoice) => {
+        // If it's an old invoice without payments, add the payments array with initial payment
+        let invoiceToAdd = invoice;
+        
+        if (!invoice.payments) {
+          const initialPayment: Payment = {
+            amount: invoice.deposit,
+            method: invoice.paymentMethod,
+            date: invoice.createdAt
+          };
+          
+          invoiceToAdd = {
+            ...invoice,
+            payments: invoice.deposit > 0 ? [initialPayment] : []
+          };
+        }
+        
         set((state) => ({
-          invoices: [...state.invoices, invoice]
+          invoices: [...state.invoices, invoiceToAdd]
         }));
       }
     }),

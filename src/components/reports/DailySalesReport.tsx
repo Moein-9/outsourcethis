@@ -59,10 +59,8 @@ export const DailySalesReport: React.FC = () => {
   const [totalCoatingRevenue, setTotalCoatingRevenue] = useState(0);
   const [totalDeposit, setTotalDeposit] = useState(0);
   
-  // Track expanded invoice IDs
   const [expandedInvoices, setExpandedInvoices] = useState<Record<string, boolean>>({});
   
-  // Toggle invoice expansion
   const toggleInvoiceExpansion = (invoiceId: string) => {
     setExpandedInvoices(prev => ({
       ...prev,
@@ -484,7 +482,7 @@ export const DailySalesReport: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="font-medium">{invoice.total.toFixed(2)} د.ك</p>
+                        <p className="font-medium">{invoice.total.toFixed(2)} KWD</p>
                         <p className="text-sm text-gray-500">{invoice.paymentMethod}</p>
                       </div>
                       <Button 
@@ -512,31 +510,45 @@ export const DailySalesReport: React.FC = () => {
                         
                         <div className="bg-white p-3 rounded-md border">
                           <h4 className="text-sm font-medium text-gray-500 mb-1">معلومات الدفع</h4>
-                          <div className="flex justify-between">
-                            <span>المجموع:</span>
-                            <span className="font-medium">{invoice.total.toFixed(2)} KWD</span>
+                          <div className="flex justify-between items-center mt-1">
+                            <span className="font-medium">المجموع:</span>
+                            <span className="font-bold text-lg">{invoice.total.toFixed(2)} KWD</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span>المدفوع:</span>
-                            <span className="font-medium">{invoice.deposit.toFixed(2)} KWD</span>
+                          <div className="flex justify-between items-center mt-2">
+                            <span className="text-blue-600 font-medium">المدفوع:</span>
+                            <span className="font-medium text-blue-600">{invoice.deposit.toFixed(2)} KWD</span>
                           </div>
                           {invoice.remaining > 0 && (
-                            <div className="flex justify-between text-amber-600">
-                              <span>المتبقي:</span>
-                              <span className="font-medium">{invoice.remaining.toFixed(2)} KWD</span>
+                            <div className="flex justify-between items-center mt-1 bg-amber-50 p-1.5 rounded">
+                              <span className="text-amber-700 font-medium">المتبقي:</span>
+                              <span className="font-medium text-amber-700">{invoice.remaining.toFixed(2)} KWD</span>
                             </div>
                           )}
                           {invoice.discount > 0 && (
-                            <div className="flex justify-between text-green-600 mt-1">
-                              <span className="flex items-center gap-1">
+                            <div className="flex justify-between text-green-600 mt-2 bg-green-50 p-1.5 rounded">
+                              <span className="flex items-center gap-1 font-medium">
                                 <Tag size={14} />
                                 الخصم:
                               </span>
                               <span className="font-medium">{invoice.discount.toFixed(2)} KWD</span>
                             </div>
                           )}
-                          <div className="mt-1 pt-1 border-t">
-                            <span className="text-sm text-gray-500">طريقة الدفع: {invoice.paymentMethod}</span>
+                          <div className="mt-3 pt-2 border-t">
+                            <span className="text-sm font-medium text-gray-600">طريقة الدفع:</span>
+                            <div className="flex items-center gap-1 mt-1">
+                              {invoice.paymentMethod === 'نقداً' ? (
+                                <Wallet className="h-4 w-4 text-green-500" />
+                              ) : invoice.paymentMethod === 'كي نت' ? (
+                                <CreditCard className="h-4 w-4 text-blue-500" />
+                              ) : invoice.paymentMethod === 'Visa' ? (
+                                <CreditCard className="h-4 w-4 text-indigo-500" />
+                              ) : invoice.paymentMethod === 'MasterCard' ? (
+                                <CreditCard className="h-4 w-4 text-orange-500" />
+                              ) : (
+                                <Receipt className="h-4 w-4 text-gray-500" />
+                              )}
+                              <span className="text-sm">{invoice.paymentMethod}</span>
+                            </div>
                           </div>
                         </div>
                         
@@ -548,7 +560,7 @@ export const DailySalesReport: React.FC = () => {
                             {invoice.isPaid ? 'مدفوعة بالكامل' : 'مدفوعة جزئياً'}
                           </div>
                           <p className="text-xs text-gray-500 mt-1">
-                            تاريخ الإنشاء: {new Date(invoice.createdAt).toLocaleDateString('ar-EG')}
+                            تاريخ الإنشاء: {new Date(invoice.createdAt).toLocaleDateString('en-US')}
                           </p>
                         </div>
                       </div>
@@ -582,8 +594,6 @@ export const DailySalesReport: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      
-                      {/* Remove the standalone discount section since we integrated it into payment info */}
                     </div>
                   )}
                 </div>
