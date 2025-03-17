@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useInvoiceStore, Payment } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -23,7 +23,10 @@ import {
   Plus,
   Trash2,
   Eye as EyeIcon,
-  FileText
+  FileText,
+  UserCircle,
+  History,
+  GlassesIcon
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -46,18 +49,35 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useNavigate } from "react-router-dom";
 
 export const RemainingPayments: React.FC = () => {
-  const { invoices, getInvoiceById, addPartialPayment } = useInvoiceStore();
+  const { invoices, getInvoiceById, addPartialPayment, markAsPaid } = useInvoiceStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
   const [invoiceForPrint, setInvoiceForPrint] = useState<string | null>(null);
+  const navigate = useNavigate();
   
   // Payment form state
   const [paymentEntries, setPaymentEntries] = useState<{method: string; amount: number; authNumber?: string}[]>([
     { method: "نقداً", amount: 0 }
   ]);
+  
+  // Calculate remaining amount after current payment entries
+  const [remainingAfterPayment, setRemainingAfterPayment] = useState<number | null>(null);
+  
+  // Update remaining amount when payment entries change
+  useEffect(() => {
+    if (selectedInvoice) {
+      const invoice = getInvoiceById(selectedInvoice);
+      if (invoice) {
+        const totalPayment = calculateTotalPayment();
+        const newRemaining = Math.max(0, invoice.remaining - totalPayment);
+        setRemainingAfterPayment(newRemaining);
+      }
+    }
+  }, [paymentEntries, selectedInvoice, getInvoiceById]);
   
   // Get unpaid invoices
   let unpaidInvoices = invoices.filter(invoice => !invoice.isPaid);
@@ -77,6 +97,15 @@ export const RemainingPayments: React.FC = () => {
     const dateB = new Date(b.createdAt).getTime();
     return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
   });
+  
+  // Navigate to patient search with patient details
+  const goToPatientProfile = (patientId?: string, patientName?: string, patientPhone?: string) => {
+    if (patientId) {
+      navigate('/patientSearch', { state: { patientId, searchMode: 'id' } });
+    } else if (patientName || patientPhone) {
+      navigate('/patientSearch', { state: { searchTerm: patientName || patientPhone, searchMode: 'name' } });
+    }
+  };
   
   // Add payment entry
   const addPaymentEntry = () => {
@@ -289,7 +318,7 @@ export const RemainingPayments: React.FC = () => {
             margin-top: 10px;
             padding-top: 10px;
             border-top: 2px solid #8B5CF6;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
           }
           .discount {
@@ -323,6 +352,13 @@ export const RemainingPayments: React.FC = () => {
             text-transform: uppercase;
             font-weight: bold;
             pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+          .paid-stamp svg {
+            width: 40px;
+            height: 40px;
           }
           .payments-history {
             margin-top: 20px;
@@ -384,7 +420,7 @@ export const RemainingPayments: React.FC = () => {
           <div class="invoice-details">
             <h2 class="invoice-id">فاتورة #${invoice.invoiceId}</h2>
             <p class="invoice-date">
-              التاريخ: ${new Date(invoice.createdAt).toLocaleDateString('en-US')}
+              التاريخ: ${new Date(invoice.createdAt).toLocaleDateString('ar-EG')}
             </p>
           </div>
         </div>
@@ -428,17 +464,8 @@ export const RemainingPayments: React.FC = () => {
             <div class="item-card">
               <div class="item-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 8a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1"/>
-                  <path d="M2 15a4 4 0 0 0 4 4h12a4 4 0 0 0 4-4v-1"/>
-                  <path d="M18 16h.01"/>
-                  <path d="M6 16h.01"/>
-                  <path d="M12 16v.01"/>
-                  <path d="M12 12v.01"/>
-                  <path d="M12 8v.01"/>
-                  <path d="M18 12v.01"/>
-                  <path d="M18 8v.01"/>
-                  <path d="M6 12v.01"/>
-                  <path d="M6 8v.01"/>
+                  <path d="M12 3L3 11h18L12 3z"/>
+                  <path d="M5 11v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>
                 </svg>
                 الإطار
               </div>
@@ -463,10 +490,10 @@ export const RemainingPayments: React.FC = () => {
             <div class="item-card">
               <div class="item-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 12A10 10 0 0 0 12 2v10z"/>
-                  <path d="M2 12a10 10 0 0 0 10 10v-10z"/>
-                  <path d="M2 12a10 10 0 0 1 10-10v10z"/>
-                  <path d="M12 2a10 10 0 0 1 10 10h-10z"/>
+                  <path d="M21.4 17.4c-1.2 1.2-2.8 2-4.7 2-3.4 0-6.3-2.3-7.1-5.4"/>
+                  <path d="M21.4 6.6c-1.2-1.2-2.8-2-4.7-2-3.4 0-6.3 2.3-7.1 5.4"/>
+                  <path d="M10.3 17.7c-.5-1.3-1.5-2.7-2.9-3.7-2.1-1.7-4.8-2.1-6.3-1.1-.7.5-1.1 1.2-1.1 2.1 0 2 2.1 4.6 5.3 6.6.7.4 1.6.8 2.4 1.1 2.3.7 4.6.4 5.8-.8.5-.5.8-1.1.8-1.8 0-1-.5-1.9-1.5-2.8"/>
+                  <path d="M10.3 6.3c-.5 1.3-1.5 2.7-2.9 3.7-2.1 1.7-4.8 2.1-6.3 1.1-.7-.5-1.1-1.2-1.1-2.1 0-2 2.1-4.6 5.3-6.6.7-.4 1.6-.8 2.4-1.1 2.3-.7 4.6-.4 5.8.8.5.5.8 1.1.8 1.8 0 1-.5 1.9-1.5 2.8"/>
                 </svg>
                 الطلاء
               </div>
@@ -504,7 +531,13 @@ export const RemainingPayments: React.FC = () => {
           </div>
           ${invoice.discount > 0 ? `
           <div class="payment-row discount">
-            <span class="payment-label">الخصم:</span>
+            <span class="payment-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; margin-left: 4px;">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+              </svg>
+              الخصم:
+            </span>
             <span>- ${invoice.discount.toFixed(2)} KWD</span>
           </div>
           ` : ''}
@@ -523,7 +556,7 @@ export const RemainingPayments: React.FC = () => {
                   <span> (${payment.method})</span>
                   ${payment.authNumber ? `<span> - رقم التفويض: ${payment.authNumber}</span>` : ''}
                 </div>
-                <div class="payment-date">${new Date(payment.date).toLocaleDateString('en-US')}</div>
+                <div class="payment-date">${new Date(payment.date).toLocaleDateString('ar-EG')}</div>
               </div>
             `).join('')}
           </div>
@@ -535,7 +568,13 @@ export const RemainingPayments: React.FC = () => {
           <p class="come-again">نتطلع لزيارتكم مرة أخرى</p>
         </div>
         
-        ${invoice.isPaid ? `<div class="paid-stamp">مدفوع</div>` : ''}
+        ${invoice.isPaid ? `<div class="paid-stamp">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(16, 185, 129, 0.4)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          مدفوع
+        </div>` : ''}
         
         <div class="footer">
           <p>النظارات الطبية - جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
@@ -615,7 +654,7 @@ export const RemainingPayments: React.FC = () => {
                   </div>
                   <Badge 
                     variant="outline" 
-                    className="bg-amber-100 text-amber-800 border-amber-300 text-lg font-bold px-3 py-1"
+                    className="bg-amber-100 text-amber-800 border-amber-300 text-xl font-bold px-4 py-1.5"
                   >
                     متبقي {invoice.remaining.toFixed(2)} KWD
                   </Badge>
@@ -630,7 +669,7 @@ export const RemainingPayments: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>{new Date(invoice.createdAt).toLocaleDateString('en-US')}</span>
+                    <span>{new Date(invoice.createdAt).toLocaleDateString('ar-EG')}</span>
                   </div>
                 </div>
                 
@@ -690,7 +729,7 @@ export const RemainingPayments: React.FC = () => {
                       <p className="font-medium mb-1">سجل الدفعات:</p>
                       {invoice.payments.map((payment, idx) => (
                         <div key={idx} className="flex justify-between items-center">
-                          <span>{new Date(payment.date).toLocaleDateString('en-US')}</span>
+                          <span>{new Date(payment.date).toLocaleDateString('ar-EG')}</span>
                           <span className="font-medium">{payment.amount.toFixed(2)} KWD ({payment.method})</span>
                         </div>
                       ))}
@@ -698,7 +737,7 @@ export const RemainingPayments: React.FC = () => {
                   )}
                 </div>
                 
-                <div className="flex justify-between gap-2">
+                <div className="flex gap-2">
                   <Button 
                     variant="outline" 
                     className="flex-1 text-xs border-blue-200 hover:bg-blue-50 text-blue-700"
@@ -708,11 +747,25 @@ export const RemainingPayments: React.FC = () => {
                     طباعة الفاتورة
                   </Button>
                   
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 text-xs border-purple-200 hover:bg-purple-50 text-purple-700"
+                    onClick={() => goToPatientProfile(invoice.patientId, invoice.patientName, invoice.patientPhone)}
+                  >
+                    <UserCircle className="h-4 w-4 mr-1" />
+                    ملف العميل
+                  </Button>
+                  
                   <Dialog open={selectedInvoice === invoice.invoiceId} onOpenChange={(open) => !open && setSelectedInvoice(null)}>
                     <DialogTrigger asChild>
                       <Button 
                         className="flex-1 text-xs bg-amber-500 hover:bg-amber-600"
-                        onClick={() => setSelectedInvoice(invoice.invoiceId)}
+                        onClick={() => {
+                          setSelectedInvoice(invoice.invoiceId);
+                          // Reset payment entries with calculated remaining amount
+                          setPaymentEntries([{ method: "نقداً", amount: invoice.remaining }]);
+                          setRemainingAfterPayment(0);
+                        }}
                       >
                         <CheckCircle2 className="h-4 w-4 mr-1" />
                         تسديد الدفعة
@@ -735,12 +788,19 @@ export const RemainingPayments: React.FC = () => {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">المدفوع سابقاً:</span>
-                            <span className="font-medium">{invoice.deposit.toFixed(2)} KWD</span>
+                            <span className="font-medium text-blue-600">{invoice.deposit.toFixed(2)} KWD</span>
                           </div>
                           <div className="flex justify-between font-bold border-t pt-2 mt-2">
                             <span>المبلغ المتبقي:</span>
                             <span className="text-amber-600 text-lg">{invoice.remaining.toFixed(2)} KWD</span>
                           </div>
+                          
+                          {remainingAfterPayment !== null && (
+                            <div className="flex justify-between font-bold mt-3 bg-blue-50 p-2 rounded-md">
+                              <span className="text-blue-700">المتبقي بعد الدفع:</span>
+                              <span className="text-blue-700 text-lg">{remainingAfterPayment.toFixed(2)} KWD</span>
+                            </div>
+                          )}
                         </div>
                         
                         <div className="space-y-4">

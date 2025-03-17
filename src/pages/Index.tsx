@@ -9,9 +9,18 @@ import { RemainingPayments } from "@/components/RemainingPayments";
 import { PatientSearch } from "@/components/PatientSearch";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
+import { useLocation } from "react-router-dom";
 
 const Index = () => {
   const [activeSection, setActiveSection] = React.useState("dashboard");
+  const location = useLocation();
+  
+  // Check if we have state passed from navigation
+  React.useEffect(() => {
+    if (location.state?.section) {
+      setActiveSection(location.state.section);
+    }
+  }, [location.state]);
 
   return (
     <Layout
