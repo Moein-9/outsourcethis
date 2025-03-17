@@ -726,7 +726,7 @@ export const PatientSearch: React.FC = () => {
               <ul className="text-gray-700 list-disc list-inside space-y-1">
                 <li>يجب تنظيف العدسات بانتظام بمنظف خاص</li>
                 <li>تجنب ملامسة العدسات للماء الساخن</li>
-                <li>استخدم حافظة نظارات عند ع��م الاستخدام</li>
+                <li>استخدم حافظة نظارات عند عدم الاستخدام</li>
                 <li>راجع الطبيب كل 6-12 شهر</li>
               </ul>
             </div>
@@ -770,4 +770,4 @@ export const PatientSearch: React.FC = () => {
       {/* Search Results */}
       {showResults && (
         <Card className="mb-6 border-amber-200 shadow-md">
-          <CardHeader
+          <CardHeader className="
