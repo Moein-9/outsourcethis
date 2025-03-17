@@ -165,7 +165,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     });
     
     toast({
-      title: "تم التأكيد",
       description: `تمت إضافة ${selectedLenses.length} عدسة للفاتورة`,
     });
   };
