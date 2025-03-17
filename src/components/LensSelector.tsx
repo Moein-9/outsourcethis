@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
 import { CompactLensSelector } from "@/components/CompactLensSelector";
 
 interface LensSelectorProps {
@@ -53,17 +52,22 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   };
 
   return (
-    <div className="space-y-3 bg-white rounded-lg shadow-sm">
+    <div className="space-y-3 bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-lg py-2 px-3">
+        <h3 className="text-white font-medium text-sm">العدسات الطبية</h3>
+      </div>
+      
       {onSkipLensChange && (
-        <div className="flex items-center space-x-2 space-x-reverse justify-end bg-muted/20 p-3 rounded-t-lg">
+        <div className="flex items-center space-x-2 space-x-reverse justify-end px-3 py-2 border-b border-gray-100">
           <Checkbox 
             id="skipLensCheck" 
-            checked={skipLens} 
+            checked={skipLens}
+            className="border-blue-400 text-blue-600"
             onCheckedChange={(checked) => handleSkipLensChange(checked === true)} 
           />
           <Label 
             htmlFor="skipLensCheck" 
-            className="font-medium text-sm mr-2 cursor-pointer"
+            className="font-medium text-sm mr-2 cursor-pointer text-gray-700"
           >
             إطار فقط (بدون عدسات)
           </Label>
