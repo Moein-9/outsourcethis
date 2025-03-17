@@ -9,12 +9,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { QrCode, Printer, Tag } from "lucide-react";
+import { Printer, Tag } from "lucide-react";
 import { toast } from "sonner";
 
-// Dimensions: 100mm x 16mm
+// Dimensions: 100mm x 16mm (standard Zebra label size)
 const LABEL_WIDTH = "100mm";
 const LABEL_HEIGHT = "16mm";
 
@@ -33,27 +32,16 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
         pageBreakInside: "avoid",
       }}
     >
-      {/* Left side - Frame ID and QR Code */}
-      <div className="w-1/4 p-1 flex flex-col items-start justify-center">
-        <div className="text-[8px] font-bold mb-0.5 text-gray-800">{frame.frameId}</div>
-        <div className="flex justify-center items-center">
-          <QrCode className="h-8 w-8" />
-        </div>
+      {/* Left side - Frame ID and Barcode */}
+      <div className="w-1/2 p-1 flex flex-col items-start justify-center">
+        <div className="text-[10px] font-bold mb-0.5 text-black">{frame.frameId}</div>
+        <div className="w-full h-8 bg-[url('/public/lovable-uploads/733e0754-fe7b-478e-a0f0-9ff7e5c7867c.png')] bg-no-repeat bg-contain bg-left"></div>
       </div>
       
-      {/* Middle - Brand and Price */}
-      <div className="w-2/4 p-1 flex flex-col justify-center items-center">
-        <div className="text-[10px] font-bold leading-tight text-center uppercase">{frame.brand}</div>
-        <div className="text-[8px] leading-tight text-center">{frame.model}</div>
-        <div className="text-[8px] text-gray-600 leading-tight">{frame.color}</div>
-        <div className="text-[11px] font-bold mt-0.5">K.D. {frame.price.toFixed(3)}</div>
-      </div>
-      
-      {/* Right side - Tag section (as seen in example) */}
-      <div className="w-1/4 flex items-center justify-center relative">
-        <div className="absolute right-0 top-0 bottom-0 w-4 border-l border-dashed border-gray-300" 
-          style={{ borderTopRightRadius: "0.5rem", borderBottomRightRadius: "0.5rem" }}>
-        </div>
+      {/* Right side - Brand and Price */}
+      <div className="w-1/2 p-1 flex flex-col justify-center items-end pr-3">
+        <div className="text-[12px] font-bold uppercase mb-1">{frame.brand}</div>
+        <div className="text-[14px] font-bold">K.D. {frame.price.toFixed(3)}</div>
       </div>
     </div>
   );
@@ -90,12 +78,109 @@ export const FrameLabelTemplate: React.FC = () => {
   };
   
   const printLabels = () => {
-    setTimeout(() => {
-      window.print();
-      setIsDialogOpen(false);
+    // Create a new window for printing to avoid printing the entire page
+    const printWindow = window.open('', '_blank');
+    
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Frame Labels</title>
+            <style>
+              @page {
+                size: ${LABEL_WIDTH} ${LABEL_HEIGHT};
+                margin: 0;
+              }
+              body {
+                margin: 0;
+                padding: 0;
+              }
+              .label-container {
+                width: ${LABEL_WIDTH};
+                height: ${LABEL_HEIGHT};
+                display: flex;
+                page-break-after: always;
+                border: none;
+                overflow: hidden;
+              }
+              .left-side {
+                width: 50%;
+                padding: 4px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
+              }
+              .right-side {
+                width: 50%;
+                padding: 4px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-end;
+                padding-right: 12px;
+              }
+              .frame-id {
+                font-size: 10px;
+                font-weight: bold;
+                margin-bottom: 2px;
+              }
+              .barcode {
+                width: 100%;
+                height: 32px;
+              }
+              .brand {
+                font-size: 12px;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin-bottom: 4px;
+              }
+              .price {
+                font-size: 14px;
+                font-weight: bold;
+              }
+            </style>
+          </head>
+          <body>
+      `);
+
+      selectedFrames.forEach(frameId => {
+        const frame = frames.find(f => f.frameId === frameId);
+        if (frame) {
+          printWindow.document.write(`
+            <div class="label-container">
+              <div class="left-side">
+                <div class="frame-id">${frame.frameId}</div>
+                <div class="barcode"></div>
+              </div>
+              <div class="right-side">
+                <div class="brand">${frame.brand}</div>
+                <div class="price">K.D. ${frame.price.toFixed(3)}</div>
+              </div>
+            </div>
+          `);
+        }
+      });
+
+      printWindow.document.write(`
+          </body>
+        </html>
+      `);
       
-      toast.success(`تم إرسال ${selectedFrames.length} بطاقة للطباعة`);
-    }, 300);
+      printWindow.document.close();
+      printWindow.focus();
+      
+      // Print after a short delay to ensure content is loaded
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+        
+        setIsDialogOpen(false);
+        toast.success(`تم إرسال ${selectedFrames.length} بطاقة للطباعة`);
+      }, 500);
+    } else {
+      toast.error("فشل في فتح نافذة الطباعة");
+    }
   };
   
   return (
@@ -134,7 +219,7 @@ export const FrameLabelTemplate: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{frame.brand} - {frame.model}</p>
                 <p className="text-xs text-muted-foreground truncate">{frame.color}, {frame.size || "No size"}</p>
-                <p className="text-sm font-bold mt-1">{frame.price.toFixed(2)} KWD</p>
+                <p className="text-sm font-bold mt-1">{frame.price.toFixed(3)} KWD</p>
               </div>
             </div>
           </div>
@@ -152,7 +237,7 @@ export const FrameLabelTemplate: React.FC = () => {
       )}
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>معاينة بطاقات الإطارات</DialogTitle>
             <DialogDescription>
@@ -160,11 +245,16 @@ export const FrameLabelTemplate: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-2 max-h-96 overflow-y-auto p-2">
-            {selectedFrames.map(frameId => {
+          <div className="space-y-2 max-h-60 overflow-y-auto p-2">
+            {selectedFrames.slice(0, 3).map(frameId => {
               const frame = frames.find(f => f.frameId === frameId);
               return frame ? <FrameLabel key={frameId} frame={frame} /> : null;
             })}
+            {selectedFrames.length > 3 && (
+              <p className="text-center text-sm text-muted-foreground pt-2">
+                و {selectedFrames.length - 3} بطاقات أخرى...
+              </p>
+            )}
           </div>
           
           <DialogFooter>
@@ -177,16 +267,6 @@ export const FrameLabelTemplate: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      {/* Print-only section that will be hidden on screen but visible when printing */}
-      <div className="hidden print:block">
-        <div className="flex flex-col gap-0">
-          {selectedFrames.map(frameId => {
-            const frame = frames.find(f => f.frameId === frameId);
-            return frame ? <FrameLabel key={frameId} frame={frame} /> : null;
-          })}
-        </div>
-      </div>
     </div>
   );
 };

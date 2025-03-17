@@ -60,3 +60,32 @@
 .ltr {
   direction: ltr;
 }
+
+/* Custom print styling for frame labels */
+@media print {
+  @page {
+    size: 100mm 16mm;
+    margin: 0;
+  }
+  
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-container, .print-container * {
+    visibility: visible;
+  }
+  
+  .print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100mm;
+    height: 16mm;
+  }
+  
+  /* Hide all UI elements when printing */
+  header, nav, button, .dialog, .dialog-overlay {
+    display: none !important;
+  }
+}
