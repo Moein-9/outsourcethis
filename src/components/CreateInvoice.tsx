@@ -17,7 +17,7 @@ import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { 
   User, Glasses, Package, FileText, CreditCard, Eye, Search, 
   Banknote, Plus, PackageCheck, EyeOff, ExternalLink,
-  ClipboardCheck, BadgePercent, DollarSign, Printer, CreditCard as CardIcon,
+  ClipboardCheck, BadgePercent, Printer, CreditCard as CardIcon,
   Receipt
 } from "lucide-react";
 
@@ -430,7 +430,7 @@ const CreateInvoice: React.FC = () => {
   return (
     <div className="py-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-right">
           <FileText className="w-6 h-6 text-primary" />
           إنشاء فاتورة
         </h2>
@@ -476,7 +476,7 @@ const CreateInvoice: React.FC = () => {
                 />
                 <Label 
                   htmlFor="skipPatientCheck" 
-                  className="font-normal text-sm"
+                  className="font-normal text-sm mr-2"
                 >
                   لا يوجد ملف عميل
                 </Label>
@@ -487,7 +487,7 @@ const CreateInvoice: React.FC = () => {
               <>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="patientSearch" className="text-muted-foreground">رقم الهاتف:</Label>
+                    <Label htmlFor="patientSearch" className="text-muted-foreground block text-right">رقم الهاتف:</Label>
                     <div className="flex space-x-2 space-x-reverse">
                       <Input
                         id="patientSearch"
@@ -521,15 +521,15 @@ const CreateInvoice: React.FC = () => {
                   {currentPatient && (
                     <div className="mt-4">
                       <div className="border-2 border-primary/20 rounded-lg p-4 bg-primary/5">
-                        <div className="flex justify-between mb-2">
+                        <div className="flex justify-between mb-2 text-right">
                           <span className="font-semibold">اسم العميل:</span>
                           <span>{currentPatient.name}</span>
                         </div>
-                        <div className="flex justify-between mb-2">
+                        <div className="flex justify-between mb-2 text-right">
                           <span className="font-semibold">الهاتف:</span>
                           <span dir="ltr">{currentPatient.phone}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between text-right">
                           <span className="font-semibold">Patient ID:</span>
                           <span>{currentPatient.patientId || "N/A"}</span>
                         </div>
@@ -542,18 +542,18 @@ const CreateInvoice: React.FC = () => {
                       >
                         {rxVisible ? (
                           <>
-                            <EyeOff className="w-4 h-4 mr-1" />
+                            <EyeOff className="w-4 h-4 ml-1" />
                             إخفاء الوصفة
                           </>
                         ) : (
                           <>
-                            <Eye className="w-4 h-4 mr-1" />
+                            <Eye className="w-4 h-4 ml-1" />
                             عرض الوصفة
                           </>
                         )}
                       </Button>
                       
-                      {rxVisible && currentPatient.rx && (
+                      {rxVisible && invoiceType === "glasses" && currentPatient.rx && (
                         <div className="p-3 mt-3 bg-white border rounded-lg">
                           <table className="w-full border-collapse ltr">
                             <thead>
@@ -587,6 +587,27 @@ const CreateInvoice: React.FC = () => {
                           </table>
                         </div>
                       )}
+                      
+                      {rxVisible && invoiceType === "contacts" && currentPatient.contactLensRx && (
+                        <div className="mt-3">
+                          <ContactLensForm 
+                            rxData={contactLensRx}
+                            onChange={handleContactLensRxChange}
+                          />
+                        </div>
+                      )}
+                      
+                      {rxVisible && invoiceType === "contacts" && !currentPatient.contactLensRx && (
+                        <div className="p-3 mt-3 bg-yellow-50 border border-yellow-200 rounded-lg text-right">
+                          <p className="text-yellow-700">
+                            لا توجد وصفة عدسات لاصقة لهذا العميل. يرجى إضافة وصفة عدسات لاصقة في ملف العميل.
+                          </p>
+                          <ContactLensForm 
+                            rxData={contactLensRx}
+                            onChange={handleContactLensRxChange}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -594,7 +615,7 @@ const CreateInvoice: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="manualName" className="text-muted-foreground">اسم العميل (اختياري):</Label>
+                  <Label htmlFor="manualName" className="text-muted-foreground block text-right">اسم العميل (اختياري):</Label>
                   <Input
                     id="manualName"
                     value={manualName}
@@ -603,7 +624,7 @@ const CreateInvoice: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="manualPhone" className="text-muted-foreground">هاتف العميل (اختياري):</Label>
+                  <Label htmlFor="manualPhone" className="text-muted-foreground block text-right">هاتف العميل (اختياري):</Label>
                   <Input
                     id="manualPhone"
                     value={manualPhone}
@@ -639,7 +660,7 @@ const CreateInvoice: React.FC = () => {
                     />
                     <Label 
                       htmlFor="skipFrameCheck" 
-                      className="font-normal text-sm"
+                      className="font-normal text-sm mr-2"
                     >
                       عدسات فقط (بدون إطار)
                     </Label>
@@ -648,7 +669,7 @@ const CreateInvoice: React.FC = () => {
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="lensType" className="text-muted-foreground">نوع العدسة:</Label>
+                    <Label htmlFor="lensType" className="text-muted-foreground block text-right">نوع العدسة:</Label>
                     <select
                       id="lensType"
                       className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-right"
@@ -668,7 +689,7 @@ const CreateInvoice: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="coatingSelect" className="text-muted-foreground">الطلاء:</Label>
+                    <Label htmlFor="coatingSelect" className="text-muted-foreground block text-right">الطلاء:</Label>
                     <select
                       id="coatingSelect"
                       className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-right"
@@ -699,7 +720,7 @@ const CreateInvoice: React.FC = () => {
                   
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="frameSearchBox" className="text-muted-foreground">بحث (Brand/Model/Color/Size):</Label>
+                      <Label htmlFor="frameSearchBox" className="text-muted-foreground block text-right">بحث (Brand/Model/Color/Size):</Label>
                       <div className="flex space-x-2 space-x-reverse">
                         <Input
                           id="frameSearchBox"
@@ -793,7 +814,7 @@ const CreateInvoice: React.FC = () => {
                       onClick={() => setShowManualFrame(!showManualFrame)}
                       className="w-full"
                     >
-                      <Plus className="w-4 h-4 mr-1" />
+                      <Plus className="w-4 h-4 ml-1" />
                       إضافة إطار جديد
                     </Button>
                     
@@ -893,7 +914,7 @@ const CreateInvoice: React.FC = () => {
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <BadgePercent className="w-5 h-5 text-primary" />
                   </div>
-                  <Label htmlFor="discount" className="text-muted-foreground mb-1.5 block">الخصم (د.ك):</Label>
+                  <Label htmlFor="discount" className="text-muted-foreground mb-1.5 block text-right">الخصم (د.ك):</Label>
                   <Input
                     id="discount"
                     type="number"
@@ -906,9 +927,9 @@ const CreateInvoice: React.FC = () => {
                 
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <DollarSign className="w-5 h-5 text-green-500" />
+                    <Banknote className="w-5 h-5 text-green-500" />
                   </div>
-                  <Label htmlFor="deposit" className="text-muted-foreground mb-1.5 block">الدفعة (د.ك):</Label>
+                  <Label htmlFor="deposit" className="text-muted-foreground mb-1.5 block text-right">الدفعة (د.ك):</Label>
                   <Input
                     id="deposit"
                     type="number"
@@ -925,7 +946,7 @@ const CreateInvoice: React.FC = () => {
                 onClick={handlePayInFull} 
                 className="w-full border-primary/20 hover:bg-primary/5 text-primary hover:text-primary/80"
               >
-                <DollarSign className="w-5 h-5 mr-2 text-green-500" />
+                <Banknote className="w-5 h-5 ml-2 text-green-500" />
                 دفع كامل ({total.toFixed(2)} د.ك)
               </Button>
             </div>
@@ -1013,7 +1034,7 @@ const CreateInvoice: React.FC = () => {
             {/* Authorization Number field for card payments */}
             {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") && (
               <div className="mt-4 space-y-2">
-                <Label htmlFor="authNumber" className="text-muted-foreground">رقم الموافقة (Authorization No.):</Label>
+                <Label htmlFor="authNumber" className="text-muted-foreground block text-right">رقم الموافقة (Authorization No.):</Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <CardIcon className="w-5 h-5 text-primary" />
@@ -1071,28 +1092,28 @@ const CreateInvoice: React.FC = () => {
             
             <div className="space-y-3">
               {lensType && (
-                <div className="flex justify-between">
+                <div className="flex justify-between text-right">
                   <span className="text-muted-foreground">العدسة:</span>
                   <span className="font-medium">{lensType}</span>
                 </div>
               )}
               
               {lensPrice > 0 && (
-                <div className="flex justify-between">
+                <div className="flex justify-between text-right">
                   <span className="text-muted-foreground">سعر العدسة:</span>
                   <span>{lensPrice.toFixed(2)} د.ك</span>
                 </div>
               )}
               
               {coating && (
-                <div className="flex justify-between">
+                <div className="flex justify-between text-right">
                   <span className="text-muted-foreground">الطلاء:</span>
                   <span className="font-medium">{coating}</span>
                 </div>
               )}
               
               {coatingPrice > 0 && (
-                <div className="flex justify-between">
+                <div className="flex justify-between text-right">
                   <span className="text-muted-foreground">سعر الطلاء:</span>
                   <span>{coatingPrice.toFixed(2)} د.ك</span>
                 </div>
@@ -1100,11 +1121,11 @@ const CreateInvoice: React.FC = () => {
               
               {!skipFrame && selectedFrame.brand && (
                 <>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-right">
                     <span className="text-muted-foreground">الإطار:</span>
                     <span className="font-medium">{selectedFrame.brand} {selectedFrame.model}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-right">
                     <span className="text-muted-foreground">سعر الإطار:</span>
                     <span>{selectedFrame.price.toFixed(2)} د.ك</span>
                   </div>
@@ -1112,33 +1133,33 @@ const CreateInvoice: React.FC = () => {
               )}
               
               {discount > 0 && (
-                <div className="flex justify-between text-rose-500">
+                <div className="flex justify-between text-rose-500 text-right">
                   <span>الخصم:</span>
                   <span>- {discount.toFixed(2)} د.ك</span>
                 </div>
               )}
               
               {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") && authNumber && (
-                <div className="flex justify-between">
+                <div className="flex justify-between text-right">
                   <span className="text-muted-foreground">رقم الموافقة:</span>
                   <span>{authNumber}</span>
                 </div>
               )}
               
               <div className="pt-2 border-t">
-                <div className="flex justify-between font-bold text-lg">
+                <div className="flex justify-between font-bold text-lg text-right">
                   <span>المجموع:</span>
                   <span>{total.toFixed(2)} د.ك</span>
                 </div>
                 
                 {deposit > 0 && (
                   <>
-                    <div className="flex justify-between text-green-600 mt-1">
+                    <div className="flex justify-between text-green-600 mt-1 text-right">
                       <span>المدفوع:</span>
                       <span>{deposit.toFixed(2)} د.ك</span>
                     </div>
                     
-                    <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t">
+                    <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t text-right">
                       <span>المتبقي:</span>
                       <span>{remaining.toFixed(2)} د.ك</span>
                     </div>

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -35,7 +36,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({ rxData, onChan
   return (
     <div className="mt-5 border rounded-lg p-4 bg-muted/5">
       <div className="mb-4 pb-2 border-b">
-        <h4 className="font-medium text-primary flex items-center gap-2">
+        <h4 className="font-medium text-primary flex items-center gap-2 text-right">
           <Eye className="w-4 h-4" />
           وصفة العدسات اللاصقة
         </h4>
