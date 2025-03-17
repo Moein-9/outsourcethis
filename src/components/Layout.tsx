@@ -27,12 +27,16 @@ export const Layout: React.FC<LayoutProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  const handleNavigate = (section: string) => {
-    if (section === "dashboard") {
-      navigate("/");
-    } else {
-      onNavigate(section);
-    }
+  // Simplified navigation handler that ensures we always go to the home page
+  // when clicking the dashboard button
+  const handleHomeNavigation = () => {
+    navigate("/");
+    onNavigate("dashboard");
+  };
+
+  // Handler for other navigation items
+  const handleSectionNavigation = (section: string) => {
+    onNavigate(section);
   };
 
   return (
@@ -40,42 +44,42 @@ export const Layout: React.FC<LayoutProps> = ({
       <header className="fixed top-0 left-0 right-0 bg-white border-b border-border shadow-sm z-10 px-4 py-2 flex justify-between items-center">
         <MoenLogo 
           className="h-10 w-auto cursor-pointer" 
-          onClick={() => navigate("/")}
+          onClick={handleHomeNavigation}
         />
         <div className="flex space-x-2 space-x-reverse">
           <Button 
             variant={activeSection === "dashboard" ? "default" : "outline"} 
-            onClick={() => navigate("/")}
+            onClick={handleHomeNavigation}
           >
             الرئيسية
           </Button>
           <Button 
             variant={activeSection === "createClient" ? "default" : "outline"} 
-            onClick={() => handleNavigate("createClient")}
+            onClick={() => handleSectionNavigation("createClient")}
           >
             إنشاء عميل
           </Button>
           <Button 
             variant={activeSection === "createInvoice" ? "default" : "outline"} 
-            onClick={() => handleNavigate("createInvoice")}
+            onClick={() => handleSectionNavigation("createInvoice")}
           >
             إنشاء فاتورة
           </Button>
           <Button 
             variant={activeSection === "inventory" ? "default" : "outline"} 
-            onClick={() => handleNavigate("inventory")}
+            onClick={() => handleSectionNavigation("inventory")}
           >
             إدارة المخزون
           </Button>
           <Button 
             variant={activeSection === "remainingPayments" ? "default" : "outline"} 
-            onClick={() => handleNavigate("remainingPayments")}
+            onClick={() => handleSectionNavigation("remainingPayments")}
           >
             المتبقي
           </Button>
           <Button 
             variant={activeSection === "patientSearch" ? "default" : "outline"} 
-            onClick={() => handleNavigate("patientSearch")}
+            onClick={() => handleSectionNavigation("patientSearch")}
           >
             بحث عن عميل
           </Button>
