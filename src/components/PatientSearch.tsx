@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -66,9 +65,8 @@ import {
 import { ar } from "date-fns/locale";
 import { ReceiptInvoice } from "./ReceiptInvoice";
 
-// Create an extended Patient type that includes all the properties we need
 interface PatientWithMeta extends Patient {
-  patientId: string; // This will map to the 'id' property we're using
+  patientId: string;
   dateOfBirth: string;
   lastVisit?: string;
   vip?: boolean;
@@ -87,20 +85,16 @@ export const PatientSearch: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showRxPrintPreview, setShowRxPrintPreview] = useState(false);
   
-  // Filter
   const [visitDateFilter, setVisitDateFilter] = useState<string>("all_visits");
   
-  // Patient profile data
   const [patientInvoices, setPatientInvoices] = useState<Invoice[]>([]);
   const [patientWorkOrders, setPatientWorkOrders] = useState<WorkOrder[]>([]);
   
-  // For transaction history tabs
   const [activeTransactionTab, setActiveTransactionTab] = useState<"active" | "completed">("active");
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
     
-    // We'll implement date filtering in a future update
     return patients;
   };
   
@@ -110,15 +104,13 @@ export const PatientSearch: React.FC = () => {
       return;
     }
     
-    // For demonstration, we'll convert Patient[] to PatientWithMeta[]
-    // In a real app, this data would come from the backend
     const results = searchPatients(searchTerm).map(patient => {
       return {
         ...patient,
-        dateOfBirth: patient.dob, // Map dob to dateOfBirth 
-        lastVisit: new Date(Date.now() - Math.random() * 10000000000).toISOString(), // Mock last visit
-        vip: Math.random() > 0.8, // 20% chance of being VIP
-        createdAt: patient.createdAt // Map createdAt to createdAt
+        dateOfBirth: patient.dob,
+        lastVisit: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
+        vip: Math.random() > 0.8,
+        createdAt: patient.createdAt
       } as PatientWithMeta;
     });
     
@@ -143,7 +135,6 @@ export const PatientSearch: React.FC = () => {
   const handlePatientSelect = (patient: PatientWithMeta) => {
     setSelectedPatient(patient);
     
-    // Get patient's invoices and work orders
     const patientInvoices = getInvoicesByPatientId(patient.patientId);
     const patientWorkOrders = getWorkOrdersByPatientId(patient.patientId);
     
@@ -726,6 +717,8 @@ export const PatientSearch: React.FC = () => {
                         coatingPrice: 0,
                         frameBrand: '',
                         frameModel: '',
+                        frameColor: '',
+                        coating: '',
                         discount: 0,
                         total: 0,
                         deposit: 0,
