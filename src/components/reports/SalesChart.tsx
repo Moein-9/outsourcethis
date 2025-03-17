@@ -8,6 +8,7 @@ import {
   Legend, 
   Tooltip 
 } from "recharts";
+import { Eye, Frame, Droplets } from "lucide-react";
 
 interface SalesChartProps {
   lensRevenue: number;
@@ -23,9 +24,9 @@ export const SalesChart: React.FC<SalesChartProps> = ({
   const hasData = lensRevenue > 0 || frameRevenue > 0 || coatingRevenue > 0;
   
   const data = [
-    { name: "العدسات", value: lensRevenue },
-    { name: "الإطارات", value: frameRevenue },
-    { name: "الطلاءات", value: coatingRevenue },
+    { name: "العدسات", value: lensRevenue, icon: <Eye size={16} /> },
+    { name: "الإطارات", value: frameRevenue, icon: <Frame size={16} /> },
+    { name: "الطلاءات", value: coatingRevenue, icon: <Droplets size={16} /> },
   ].filter(item => item.value > 0);
   
   const COLORS = ["#8B5CF6", "#F97316", "#0EA5E9"];
@@ -67,6 +68,23 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   }
   
+  const renderCustomLegend = (props: any) => {
+    const { payload } = props;
+    
+    return (
+      <ul className="flex justify-center gap-6 mt-2">
+        {payload.map((entry: any, index: number) => (
+          <li key={`item-${index}`} className="flex items-center gap-1">
+            <div style={{ color: entry.color }} className="mr-1">
+              {data[index].icon}
+            </div>
+            <span className="text-sm">{entry.value}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+  
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
@@ -88,6 +106,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
           formatter={(value: number) => `${value.toFixed(2)} KWD`}
         />
         <Legend 
+          content={renderCustomLegend}
           align="center" 
           verticalAlign="bottom"
           layout="horizontal"

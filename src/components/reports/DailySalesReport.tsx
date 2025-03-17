@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore, Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,8 @@ import {
   ArrowRight,
   ChevronDown,
   ChevronUp,
-  Eye
+  Eye,
+  Tag
 } from "lucide-react";
 import { 
   Table,
@@ -514,16 +514,25 @@ export const DailySalesReport: React.FC = () => {
                           <h4 className="text-sm font-medium text-gray-500 mb-1">معلومات الدفع</h4>
                           <div className="flex justify-between">
                             <span>المجموع:</span>
-                            <span className="font-medium">{invoice.total.toFixed(2)} د.ك</span>
+                            <span className="font-medium">{invoice.total.toFixed(2)} KWD</span>
                           </div>
                           <div className="flex justify-between">
                             <span>المدفوع:</span>
-                            <span className="font-medium">{invoice.deposit.toFixed(2)} د.ك</span>
+                            <span className="font-medium">{invoice.deposit.toFixed(2)} KWD</span>
                           </div>
                           {invoice.remaining > 0 && (
                             <div className="flex justify-between text-amber-600">
                               <span>المتبقي:</span>
-                              <span className="font-medium">{invoice.remaining.toFixed(2)} د.ك</span>
+                              <span className="font-medium">{invoice.remaining.toFixed(2)} KWD</span>
+                            </div>
+                          )}
+                          {invoice.discount > 0 && (
+                            <div className="flex justify-between text-green-600 mt-1">
+                              <span className="flex items-center gap-1">
+                                <Tag size={14} />
+                                الخصم:
+                              </span>
+                              <span className="font-medium">{invoice.discount.toFixed(2)} KWD</span>
                             </div>
                           )}
                           <div className="mt-1 pt-1 border-t">
@@ -574,14 +583,7 @@ export const DailySalesReport: React.FC = () => {
                         </div>
                       </div>
                       
-                      {invoice.discount > 0 && (
-                        <div className="bg-amber-50 p-3 rounded-md border border-amber-100">
-                          <div className="flex justify-between">
-                            <span className="text-amber-700 font-medium">الخصم:</span>
-                            <span className="font-medium text-amber-700">{invoice.discount.toFixed(2)} د.ك</span>
-                          </div>
-                        </div>
-                      )}
+                      {/* Remove the standalone discount section since we integrated it into payment info */}
                     </div>
                   )}
                 </div>
