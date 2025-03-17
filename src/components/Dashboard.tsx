@@ -11,7 +11,7 @@ import { useInventoryStore } from "@/store/inventoryStore";
 export const Dashboard: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const { patients } = usePatientStore();
-  const { inventory } = useInventoryStore();
+  const { frames } = useInventoryStore();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -23,7 +23,7 @@ export const Dashboard: React.FC = () => {
 
   // Stats calculation
   const totalPatients = patients.length;
-  const totalProducts = inventory.length;
+  const totalProducts = frames.length;
   const totalIncome = 25000; // Placeholder data
   const pendingAppointments = 7; // Placeholder data
 
