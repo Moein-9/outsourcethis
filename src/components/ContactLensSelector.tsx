@@ -1,10 +1,10 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
-import { Contact as ContactIcon, Eye, ShoppingCart, Plus, Filter } from "lucide-react";
+import { Contact as ContactIcon, Eye, ShoppingCart, Plus, Filter, Check, Glasses } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 interface ContactLensItem {
   id: string;
@@ -153,16 +153,17 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
         <h3 className="text-xl font-bold">العدسات اللاصقة</h3>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         {/* Left Eye Section */}
-        <div className="border rounded-lg p-4 bg-muted/10 transition-all hover:shadow-md">
-          <div className="flex items-center gap-2 mb-4 text-indigo-600">
+        <div className="border rounded-lg p-4 bg-muted/5 transition-all hover:shadow-md">
+          <div className="flex items-center gap-2 mb-4 text-primary">
             <Eye className="w-5 h-5" />
-            <h4 className="font-medium">العين اليسرى (OS)</h4>
+            <h4 className="font-semibold">العين اليسرى (OS)</h4>
           </div>
-          <div className="space-y-3">
+          <Separator className="my-3" />
+          <div className="space-y-4">
             <div>
-              <Label className="mb-1 block">Power:</Label>
+              <Label className="mb-2 block">Power:</Label>
               <select 
                 className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
                 value={leftEyePower}
@@ -175,7 +176,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               </select>
             </div>
             <div>
-              <Label className="mb-1 block">Base Curve:</Label>
+              <Label className="mb-2 block">Base Curve:</Label>
               <select 
                 className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
                 value={leftEyeBC}
@@ -198,14 +199,15 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
         </div>
 
         {/* Right Eye Section */}
-        <div className="border rounded-lg p-4 bg-muted/10 transition-all hover:shadow-md">
-          <div className="flex items-center gap-2 mb-4 text-indigo-600">
+        <div className="border rounded-lg p-4 bg-muted/5 transition-all hover:shadow-md">
+          <div className="flex items-center gap-2 mb-4 text-primary">
             <Eye className="w-5 h-5" />
-            <h4 className="font-medium">العين اليمنى (OD)</h4>
+            <h4 className="font-semibold">العين اليمنى (OD)</h4>
           </div>
-          <div className="space-y-3">
+          <Separator className="my-3" />
+          <div className="space-y-4">
             <div>
-              <Label className="mb-1 block">Power:</Label>
+              <Label className="mb-2 block">Power:</Label>
               <select 
                 className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
                 value={rightEyePower}
@@ -218,7 +220,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               </select>
             </div>
             <div>
-              <Label className="mb-1 block">Base Curve:</Label>
+              <Label className="mb-2 block">Base Curve:</Label>
               <select 
                 className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
                 value={rightEyeBC}
@@ -241,7 +243,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mt-3">
+      <div className="flex items-center gap-2 mt-4 p-2 bg-muted/10 rounded-md">
         <input
           type="checkbox"
           id="sameForBoth"
@@ -249,13 +251,13 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
           onChange={(e) => handleSameForBoth(e.target.checked)}
           className="rounded border-gray-300"
         />
-        <Label htmlFor="sameForBoth">استخدام نفس العدسات للعينين</Label>
+        <Label htmlFor="sameForBoth" className="cursor-pointer">استخدام نفس العدسات للعينين</Label>
       </div>
       
-      <div className="py-3 border-t border-b">
+      <div className="py-4 border-t border-b my-4">
         <div className="flex flex-wrap gap-3 mb-3">
           <div className="flex-1">
-            <Label className="mb-1 block">البراند:</Label>
+            <Label className="mb-2 block">البراند:</Label>
             <select
               className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
               value={selectedBrand}
@@ -268,7 +270,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
             </select>
           </div>
           <div className="flex-[2]">
-            <Label className="mb-1 block">بحث:</Label>
+            <Label className="mb-2 block">بحث:</Label>
             <div className="flex gap-2">
               <Input
                 placeholder="ابحث عن العدسات اللاصقة..."
@@ -316,8 +318,9 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         variant="outline" 
                         size="sm"
                         onClick={() => handleSelectLens(lens, "left")}
+                        className="gap-1"
                       >
-                        <Plus className="w-4 h-4 mr-1" />
+                        <Plus className="w-4 h-4" />
                         اختر
                       </Button>
                     </td>
@@ -326,8 +329,9 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         variant="outline" 
                         size="sm"
                         onClick={() => handleSelectLens(lens, "right")}
+                        className="gap-1"
                       >
-                        <Plus className="w-4 h-4 mr-1" />
+                        <Plus className="w-4 h-4" />
                         اختر
                       </Button>
                     </td>

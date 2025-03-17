@@ -27,10 +27,22 @@ export interface LensCoating {
   description?: string;
 }
 
+export interface ContactLensItem {
+  id: string;
+  brand: string;
+  type: string;
+  bc: string;
+  diameter: string;
+  power: string;
+  price: number;
+  qty: number;
+}
+
 interface InventoryState {
   frames: FrameItem[];
   lensTypes: LensType[];
   lensCoatings: LensCoating[];
+  contactLenses: ContactLensItem[];
   
   // Frame methods
   addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => string;
@@ -47,6 +59,12 @@ interface InventoryState {
   addLensCoating: (coating: Omit<LensCoating, "id">) => string;
   updateLensCoating: (id: string, coating: Partial<Omit<LensCoating, "id">>) => void;
   deleteLensCoating: (id: string) => void;
+  
+  // Contact lens methods
+  addContactLens: (lens: Omit<ContactLensItem, "id">) => string;
+  updateContactLens: (id: string, lens: Partial<Omit<ContactLensItem, "id">>) => void;
+  deleteContactLens: (id: string) => void;
+  searchContactLenses: (query: string) => ContactLensItem[];
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -54,16 +72,21 @@ export const useInventoryStore = create<InventoryState>()(
     (set, get) => ({
       frames: [],
       lensTypes: [
-        { id: "lens1", name: "Single Vision Distance", price: 20, type: "distance" },
-        { id: "lens2", name: "Single Vision Reading", price: 15, type: "reading" },
-        { id: "lens3", name: "Progressive", price: 40, type: "progressive" },
-        { id: "lens4", name: "Bifocal", price: 25, type: "bifocal" },
-        { id: "lens5", name: "Sunglasses", price: 30, type: "sunglasses" }
+        { id: "lens1", name: "نظارات طبية للقراءة", price: 15, type: "reading" },
+        { id: "lens2", name: "نظارات للنظر البعيد", price: 20, type: "distance" },
+        { id: "lens3", name: "عدسات تقدمية", price: 40, type: "progressive" },
+        { id: "lens4", name: "عدسات ثنائية", price: 25, type: "bifocal" },
+        { id: "lens5", name: "عدسات شمسية", price: 30, type: "sunglasses" }
       ],
       lensCoatings: [
         { id: "coat1", name: "مضاد للانعكاس", price: 5, description: "Anti-Reflective Coating" },
         { id: "coat2", name: "حماية شاشة", price: 7, description: "Blue Light Protection" },
         { id: "coat3", name: "ضد الخدش", price: 8, description: "Scratch Resistant" }
+      ],
+      contactLenses: [
+        { id: "cl1", brand: "Acuvue", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 25, qty: 30 },
+        { id: "cl2", brand: "Biofinty", type: "Monthly", bc: "8.6", diameter: "14.0", power: "-3.00", price: 20, qty: 12 },
+        { id: "cl3", brand: "Air Optix", type: "Monthly", bc: "8.4", diameter: "14.2", power: "+1.50", price: 22, qty: 8 }
       ],
       
       // Frame methods
@@ -155,6 +178,43 @@ export const useInventoryStore = create<InventoryState>()(
         set((state) => ({
           lensCoatings: state.lensCoatings.filter(item => item.id !== id)
         }));
+      },
+      
+      // Contact lens methods
+      addContactLens: (lens) => {
+        const id = `cl${Date.now()}`;
+        
+        set((state) => ({
+          contactLenses: [...state.contactLenses, { ...lens, id }]
+        }));
+        
+        return id;
+      },
+      
+      updateContactLens: (id, lens) => {
+        set((state) => ({
+          contactLenses: state.contactLenses.map(item => 
+            item.id === id ? { ...item, ...lens } : item
+          )
+        }));
+      },
+      
+      deleteContactLens: (id) => {
+        set((state) => ({
+          contactLenses: state.contactLenses.filter(item => item.id !== id)
+        }));
+      },
+      
+      searchContactLenses: (query) => {
+        if (!query) return get().contactLenses;
+        
+        const q = query.toLowerCase();
+        return get().contactLenses.filter(lens => 
+          lens.brand.toLowerCase().includes(q) || 
+          lens.type.toLowerCase().includes(q) || 
+          lens.power.includes(q) || 
+          lens.bc.includes(q)
+        );
       }
     }),
     {
