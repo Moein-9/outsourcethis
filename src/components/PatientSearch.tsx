@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInvoiceStore } from "@/store/invoiceStore";
@@ -75,16 +74,13 @@ export const PatientSearch: React.FC = () => {
   const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
-  // Filters
   const [ageFilter, setAgeFilter] = useState<string>("");
   const [genderFilter, setGenderFilter] = useState<string>("");
   const [visitDateFilter, setVisitDateFilter] = useState<string>("");
   
-  // Patient profile data
   const [patientInvoices, setPatientInvoices] = useState<any[]>([]);
   const [patientWorkOrders, setPatientWorkOrders] = useState<any[]>([]);
   
-  // For transaction history tabs
   const [activeTransactionTab, setActiveTransactionTab] = useState<"active" | "completed">("active");
   
   const filterByAge = (patients: any[], ageRange: string) => {
@@ -121,8 +117,6 @@ export const PatientSearch: React.FC = () => {
   const filterByVisitDate = (patients: any[], dateFilter: string) => {
     if (!dateFilter) return patients;
     
-    // We would need to join with invoice/visit data here
-    // For now, just returning all patients as a placeholder
     return patients;
   };
   
@@ -134,7 +128,6 @@ export const PatientSearch: React.FC = () => {
     
     const results = searchPatients(searchTerm);
     
-    // Apply filters
     let filteredResults = results;
     filteredResults = filterByAge(filteredResults, ageFilter);
     filteredResults = filterByGender(filteredResults, genderFilter);
@@ -160,7 +153,6 @@ export const PatientSearch: React.FC = () => {
   const handlePatientSelect = (patient: any) => {
     setSelectedPatient(patient);
     
-    // Get patient's invoices and work orders
     const invoices = getInvoicesByPatientId(patient.id);
     const workOrders = getWorkOrdersByPatientId(patient.id);
     
@@ -183,7 +175,6 @@ export const PatientSearch: React.FC = () => {
     }
   };
   
-  // Get active work orders (not in invoices yet)
   const getActiveWorkOrders = (workOrders: any[], invoices: any[]) => {
     const invoicedOrderIds = invoices.map(inv => inv.workOrderId);
     return workOrders.filter(wo => !invoicedOrderIds.includes(wo.id));
@@ -226,7 +217,6 @@ export const PatientSearch: React.FC = () => {
               </div>
             </div>
             
-            {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <div className="flex items-center gap-2">
                 <Label htmlFor="ageFilter" className="whitespace-nowrap">الفئة العمرية:</Label>
@@ -280,7 +270,6 @@ export const PatientSearch: React.FC = () => {
         </CardContent>
       </Card>
       
-      {/* Search Results */}
       {showResults && (
         <Card className="mb-6 border-amber-200 shadow-md">
           <CardHeader className="pb-3">
@@ -345,7 +334,6 @@ export const PatientSearch: React.FC = () => {
         </Card>
       )}
       
-      {/* Patient Profile Dialog */}
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedPatient && (
@@ -358,7 +346,6 @@ export const PatientSearch: React.FC = () => {
               </DialogHeader>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
-                {/* Patient Info Card */}
                 <div className="md:col-span-1">
                   <Card>
                     <CardHeader className="pb-2">
@@ -426,7 +413,6 @@ export const PatientSearch: React.FC = () => {
                   </Card>
                 </div>
                 
-                {/* Medical History / Transactions */}
                 <div className="md:col-span-2">
                   <Card>
                     <CardHeader className="pb-2">
@@ -448,7 +434,6 @@ export const PatientSearch: React.FC = () => {
                         </TabsList>
                         
                         <TabsContent value="active" className="mt-0">
-                          {/* Active Work Orders */}
                           <div className="mb-4">
                             <h3 className="text-md font-medium mb-2 flex items-center gap-1.5">
                               <AlertCircle className="h-4 w-4 text-yellow-500" />
@@ -508,7 +493,6 @@ export const PatientSearch: React.FC = () => {
                         </TabsContent>
                         
                         <TabsContent value="completed" className="mt-0">
-                          {/* Completed Invoices */}
                           <div className="mb-4">
                             <h3 className="text-md font-medium mb-2 flex items-center gap-1.5">
                               <AlertCircle className="h-4 w-4 text-green-500" />
@@ -579,7 +563,6 @@ export const PatientSearch: React.FC = () => {
                             )}
                           </div>
                           
-                          {/* Completed Work Orders */}
                           <div>
                             <h3 className="text-md font-medium mb-2 flex items-center gap-1.5">
                               <AlertCircle className="h-4 w-4 text-blue-500" />
@@ -647,7 +630,6 @@ export const PatientSearch: React.FC = () => {
                     </CardContent>
                   </Card>
                   
-                  {/* Prescription and Care Instructions */}
                   <Card className="mt-6">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-lg">الوصفة الطبية وتعليمات العناية</CardTitle>
