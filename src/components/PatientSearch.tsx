@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
-import { usePatientStore } from "@/store/patientStore";
-import { useInvoiceStore } from "@/store/invoiceStore";
+import { usePatientStore, Patient } from "@/store/patientStore";
+import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -64,26 +65,37 @@ import {
 } from "date-fns";
 import { ar } from "date-fns/locale";
 
+// Define a PatientWithMeta type for the UI needs
+interface PatientWithMeta extends Patient {
+  dateOfBirth?: string;
+  gender?: 'male' | 'female';
+  lastVisit?: string;
+  vip?: boolean;
+  civilId?: string;
+  email?: string;
+  avatar?: string;
+}
+
 export const PatientSearch: React.FC = () => {
   const { patients, searchPatients } = usePatientStore();
   const { invoices, workOrders, getInvoicesByPatientId, getWorkOrdersByPatientId } = useInvoiceStore();
   
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<ReturnType<typeof searchPatients>>([]);
+  const [searchResults, setSearchResults] = useState<PatientWithMeta[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<PatientWithMeta | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
   const [ageFilter, setAgeFilter] = useState<string>("");
   const [genderFilter, setGenderFilter] = useState<string>("");
   const [visitDateFilter, setVisitDateFilter] = useState<string>("");
   
-  const [patientInvoices, setPatientInvoices] = useState<any[]>([]);
-  const [patientWorkOrders, setPatientWorkOrders] = useState<any[]>([]);
+  const [patientInvoices, setPatientInvoices] = useState<Invoice[]>([]);
+  const [patientWorkOrders, setPatientWorkOrders] = useState<WorkOrder[]>([]);
   
   const [activeTransactionTab, setActiveTransactionTab] = useState<"active" | "completed">("active");
   
-  const filterByAge = (patients: any[], ageRange: string) => {
+  const filterByAge = (patients: PatientWithMeta[], ageRange: string) => {
     if (!ageRange) return patients;
     
     const today = new Date();
@@ -91,16 +103,19 @@ export const PatientSearch: React.FC = () => {
     switch (ageRange) {
       case "child":
         return patients.filter(patient => {
+          if (!patient.dateOfBirth) return false;
           const age = differenceInYears(today, new Date(patient.dateOfBirth));
           return age < 18;
         });
       case "adult":
         return patients.filter(patient => {
+          if (!patient.dateOfBirth) return false;
           const age = differenceInYears(today, new Date(patient.dateOfBirth));
           return age >= 18 && age < 60;
         });
       case "senior":
         return patients.filter(patient => {
+          if (!patient.dateOfBirth) return false;
           const age = differenceInYears(today, new Date(patient.dateOfBirth));
           return age >= 60;
         });
@@ -109,12 +124,12 @@ export const PatientSearch: React.FC = () => {
     }
   };
   
-  const filterByGender = (patients: any[], gender: string) => {
+  const filterByGender = (patients: PatientWithMeta[], gender: string) => {
     if (!gender) return patients;
     return patients.filter(patient => patient.gender === gender);
   };
   
-  const filterByVisitDate = (patients: any[], dateFilter: string) => {
+  const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (!dateFilter) return patients;
     
     return patients;
@@ -126,7 +141,19 @@ export const PatientSearch: React.FC = () => {
       return;
     }
     
-    const results = searchPatients(searchTerm);
+    // For demonstration, we'll convert Patient[] to PatientWithMeta[]
+    // In a real app, this data would come from the backend
+    const results = searchPatients(searchTerm).map(patient => {
+      return {
+        ...patient,
+        dateOfBirth: patient.dob, // Map dob to dateOfBirth 
+        gender: Math.random() > 0.5 ? 'male' : 'female', // Mock gender
+        lastVisit: new Date(Date.now() - Math.random() * 10000000000).toISOString(), // Mock last visit
+        vip: Math.random() > 0.8, // 20% chance of being VIP
+        civilId: Math.floor(Math.random() * 10000000000).toString(), // Mock civil ID
+        email: `${patient.name.toLowerCase().replace(/\s/g, '.')}@example.com`, // Mock email
+      } as PatientWithMeta;
+    });
     
     let filteredResults = results;
     filteredResults = filterByAge(filteredResults, ageFilter);
@@ -150,24 +177,26 @@ export const PatientSearch: React.FC = () => {
     setVisitDateFilter("");
   };
   
-  const handlePatientSelect = (patient: any) => {
+  const handlePatientSelect = (patient: PatientWithMeta) => {
     setSelectedPatient(patient);
     
-    const invoices = getInvoicesByPatientId(patient.id);
-    const workOrders = getWorkOrdersByPatientId(patient.id);
+    const patientInvoices = getInvoicesByPatientId(patient.patientId);
+    const patientWorkOrders = getWorkOrdersByPatientId(patient.patientId);
     
-    setPatientInvoices(invoices);
-    setPatientWorkOrders(workOrders);
+    setPatientInvoices(patientInvoices);
+    setPatientWorkOrders(patientWorkOrders);
     
     setIsProfileOpen(true);
   };
   
-  const getPatientAge = (dateOfBirth: string) => {
+  const getPatientAge = (dateOfBirth?: string) => {
+    if (!dateOfBirth) return "غير معروف";
     const age = differenceInYears(new Date(), new Date(dateOfBirth));
     return age;
   };
   
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "تاريخ غير متوفر";
     try {
       return format(parseISO(dateString), "PPP", { locale: ar });
     } catch (error) {
@@ -175,7 +204,7 @@ export const PatientSearch: React.FC = () => {
     }
   };
   
-  const getActiveWorkOrders = (workOrders: any[], invoices: any[]) => {
+  const getActiveWorkOrders = (workOrders: WorkOrder[], invoices: Invoice[]) => {
     const invoicedOrderIds = invoices.map(inv => inv.workOrderId);
     return workOrders.filter(wo => !invoicedOrderIds.includes(wo.id));
   };
@@ -296,7 +325,7 @@ export const PatientSearch: React.FC = () => {
                   </TableHeader>
                   <TableBody>
                     {searchResults.map((patient, index) => (
-                      <TableRow key={patient.id}>
+                      <TableRow key={patient.patientId}>
                         <TableCell className="font-medium">{index + 1}</TableCell>
                         <TableCell>{patient.name}</TableCell>
                         <TableCell dir="ltr" className="text-right">{patient.phone}</TableCell>
@@ -514,22 +543,22 @@ export const PatientSearch: React.FC = () => {
                                   </TableHeader>
                                   <TableBody>
                                     {patientInvoices.map((invoice, index) => (
-                                      <TableRow key={invoice.id}>
+                                      <TableRow key={invoice.invoiceId}>
                                         <TableCell className="font-medium">{index + 1}</TableCell>
-                                        <TableCell>INV-{invoice.id.substring(0, 8)}</TableCell>
+                                        <TableCell>INV-{invoice.invoiceId.substring(0, 8)}</TableCell>
                                         <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
                                         <TableCell>{formatDate(invoice.createdAt)}</TableCell>
                                         <TableCell>
                                           <Badge className={
-                                            invoice.paymentStatus === 'paid' 
+                                            invoice.isPaid
                                               ? 'bg-green-500' 
-                                              : invoice.paymentStatus === 'partial' 
+                                              : invoice.deposit > 0
                                                 ? 'bg-amber-500' 
                                                 : 'bg-red-500'
                                           }>
-                                            {invoice.paymentStatus === 'paid' 
+                                            {invoice.isPaid
                                               ? 'مدفوعة' 
-                                              : invoice.paymentStatus === 'partial' 
+                                              : invoice.deposit > 0
                                                 ? 'مدفوعة جزئيًا' 
                                                 : 'غير مدفوعة'
                                             }
@@ -653,18 +682,18 @@ export const PatientSearch: React.FC = () => {
                               <TableBody>
                                 <TableRow>
                                   <TableCell className="font-medium">العين اليمنى (OD)</TableCell>
-                                  <TableCell>+2.00</TableCell>
-                                  <TableCell>-0.50</TableCell>
-                                  <TableCell>180</TableCell>
-                                  <TableCell>+1.00</TableCell>
-                                  <TableCell rowSpan={2}>62</TableCell>
+                                  <TableCell>{selectedPatient.rx?.sphereOD || "+2.00"}</TableCell>
+                                  <TableCell>{selectedPatient.rx?.cylOD || "-0.50"}</TableCell>
+                                  <TableCell>{selectedPatient.rx?.axisOD || "180"}</TableCell>
+                                  <TableCell>{selectedPatient.rx?.addOD || "+1.00"}</TableCell>
+                                  <TableCell rowSpan={2}>{selectedPatient.rx?.pdRight || "62"}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                   <TableCell className="font-medium">العين اليسرى (OS)</TableCell>
-                                  <TableCell>+2.25</TableCell>
-                                  <TableCell>-0.75</TableCell>
-                                  <TableCell>175</TableCell>
-                                  <TableCell>+1.00</TableCell>
+                                  <TableCell>{selectedPatient.rx?.sphereOS || "+2.25"}</TableCell>
+                                  <TableCell>{selectedPatient.rx?.cylOS || "-0.75"}</TableCell>
+                                  <TableCell>{selectedPatient.rx?.axisOS || "175"}</TableCell>
+                                  <TableCell>{selectedPatient.rx?.addOS || "+1.00"}</TableCell>
                                 </TableRow>
                               </TableBody>
                             </Table>

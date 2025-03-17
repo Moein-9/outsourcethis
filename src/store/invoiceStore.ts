@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -36,24 +35,41 @@ export interface Invoice {
   createdAt: string;
   isPaid: boolean;
   authNumber?: string; // Added for authorization numbers
+  workOrderId?: string; // Reference to the work order
+}
+
+// Define WorkOrder interface
+export interface WorkOrder {
+  id: string;
+  patientId: string;
+  createdAt: string;
+  lensType?: {
+    name: string;
+    price: number;
+  };
+  // Add other work order fields as needed
 }
 
 interface InvoiceState {
   invoices: Invoice[];
+  workOrders: WorkOrder[];
   addInvoice: (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments">) => string;
   markAsPaid: (invoiceId: string, paymentMethod?: string, authNumber?: string) => void;
-  addPartialPayment: (invoiceId: string, payment: Omit<Payment, "date">) => void; // New method for partial payments
+  addPartialPayment: (invoiceId: string, payment: Omit<Payment, "date">) => void;
   getInvoiceById: (id: string) => Invoice | undefined;
   getUnpaidInvoices: () => Invoice[];
-  // Added for mock data functionality
+  getInvoicesByPatientId: (patientId: string) => Invoice[];
+  getWorkOrdersByPatientId: (patientId: string) => WorkOrder[];
   clearInvoices?: () => void;
   addExistingInvoice?: (invoice: Invoice) => void;
+  addWorkOrder?: (workOrder: Omit<WorkOrder, "id" | "createdAt">) => string;
 }
 
 export const useInvoiceStore = create<InvoiceState>()(
   persist(
     (set, get) => ({
       invoices: [],
+      workOrders: [], // Initialize workOrders array
       
       addInvoice: (invoice) => {
         const invoiceId = `INV${Date.now()}`;
@@ -124,7 +140,6 @@ export const useInvoiceStore = create<InvoiceState>()(
         }));
       },
       
-      // Add new method for partial payments
       addPartialPayment: (invoiceId, payment) => {
         set((state) => ({
           invoices: state.invoices.map(invoice => {
@@ -165,13 +180,19 @@ export const useInvoiceStore = create<InvoiceState>()(
         return get().invoices.filter(invoice => !invoice.isPaid);
       },
       
-      // Add methods to support mock data
+      getInvoicesByPatientId: (patientId) => {
+        return get().invoices.filter(invoice => invoice.patientId === patientId);
+      },
+      
+      getWorkOrdersByPatientId: (patientId) => {
+        return get().workOrders.filter(workOrder => workOrder.patientId === patientId);
+      },
+      
       clearInvoices: () => {
-        set({ invoices: [] });
+        set({ invoices: [], workOrders: [] });
       },
       
       addExistingInvoice: (invoice) => {
-        // If it's an old invoice without payments, add the payments array with initial payment
         let invoiceToAdd = invoice;
         
         if (!invoice.payments) {
@@ -191,6 +212,24 @@ export const useInvoiceStore = create<InvoiceState>()(
         set((state) => ({
           invoices: [...state.invoices, invoiceToAdd]
         }));
+      },
+      
+      addWorkOrder: (workOrder) => {
+        const id = `WO${Date.now()}`;
+        const createdAt = new Date().toISOString();
+        
+        set((state) => ({
+          workOrders: [
+            ...state.workOrders,
+            { 
+              ...workOrder, 
+              id, 
+              createdAt
+            }
+          ]
+        }));
+        
+        return id;
       }
     }),
     {
