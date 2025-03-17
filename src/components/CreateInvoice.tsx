@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -15,7 +16,7 @@ import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { 
   User, Glasses, Package, Receipt, CreditCard, Eye, Search, 
   Banknote, Plus, PackageCheck, EyeOff, ExternalLink,
-  ClipboardCheck // Changed from ClipboardList to ClipboardCheck
+  ClipboardCheck
 } from "lucide-react";
 
 const CreateInvoice: React.FC = () => {
@@ -73,6 +74,9 @@ const CreateInvoice: React.FC = () => {
   const [frameTotal, setFrameTotal] = useState(0);
   const [total, setTotal] = useState(0);
   const [remaining, setRemaining] = useState(0);
+  
+  // Invoice type state
+  const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts">("glasses");
   
   // Update totals when dependencies change
   useEffect(() => {
@@ -330,8 +334,6 @@ const CreateInvoice: React.FC = () => {
     setPaymentMethod("");
   };
   
-  const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts">("glasses");
-  
   return (
     <div className="py-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -437,7 +439,7 @@ const CreateInvoice: React.FC = () => {
                       <Button 
                         variant="outline" 
                         className="mt-3 w-full" 
-                        onClick={()={() => setRxVisible(!rxVisible)}
+                        onClick={() => setRxVisible(!rxVisible)}
                       >
                         {rxVisible ? (
                           <>
@@ -861,3 +863,199 @@ const CreateInvoice: React.FC = () => {
                   className="w-12 h-10 object-contain mx-auto mb-2 bg-white rounded"
                 />
                 <span className="text-sm font-medium">Visa</span>
+              </div>
+              
+              <div 
+                className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
+                  paymentMethod === "MasterCard" 
+                    ? "border-primary bg-primary/5 shadow-sm" 
+                    : "hover:border-primary/30 hover:bg-muted/10"
+                }`}
+                onClick={() => setPaymentMethod("MasterCard")}
+              >
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
+                  alt="MasterCard" 
+                  title="MasterCard"
+                  className="w-12 h-10 object-contain mx-auto mb-2 bg-white rounded"
+                />
+                <span className="text-sm font-medium">MasterCard</span>
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-between">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={() => setWorkOrderPrintOpen(true)}
+              >
+                <ClipboardCheck className="w-4 h-4" />
+                طباعة أمر العمل
+              </Button>
+              
+              <div className="space-x-2 space-x-reverse">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={() => setInvoicePrintOpen(true)}
+                >
+                  <Receipt className="w-4 h-4" />
+                  معاينة الفاتورة
+                </Button>
+                
+                <Button 
+                  className="flex items-center gap-2"
+                  onClick={handleSaveInvoice}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  حفظ وطباعة
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Right Section: Summary */}
+        <div className="space-y-5">
+          <div className="bg-white rounded-lg p-6 border shadow-sm sticky top-5">
+            <h3 className="text-lg font-semibold mb-4 text-primary flex items-center gap-2">
+              <Receipt className="w-5 h-5" />
+              ملخص الفاتورة
+            </h3>
+            
+            <div className="space-y-3">
+              {lensType && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">العدسة:</span>
+                  <span className="font-medium">{lensType}</span>
+                </div>
+              )}
+              
+              {lensPrice > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">سعر العدسة:</span>
+                  <span>{lensPrice.toFixed(2)} د.ك</span>
+                </div>
+              )}
+              
+              {coating && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">الطلاء:</span>
+                  <span className="font-medium">{coating}</span>
+                </div>
+              )}
+              
+              {coatingPrice > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">سعر الطلاء:</span>
+                  <span>{coatingPrice.toFixed(2)} د.ك</span>
+                </div>
+              )}
+              
+              {!skipFrame && selectedFrame.brand && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">الإطار:</span>
+                    <span className="font-medium">{selectedFrame.brand} {selectedFrame.model}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">سعر الإطار:</span>
+                    <span>{selectedFrame.price.toFixed(2)} د.ك</span>
+                  </div>
+                </>
+              )}
+              
+              {discount > 0 && (
+                <div className="flex justify-between text-rose-500">
+                  <span>الخصم:</span>
+                  <span>- {discount.toFixed(2)} د.ك</span>
+                </div>
+              )}
+              
+              <div className="pt-2 border-t">
+                <div className="flex justify-between font-bold text-lg">
+                  <span>المجموع:</span>
+                  <span>{total.toFixed(2)} د.ك</span>
+                </div>
+                
+                {deposit > 0 && (
+                  <>
+                    <div className="flex justify-between text-green-600 mt-1">
+                      <span>المدفوع:</span>
+                      <span>{deposit.toFixed(2)} د.ك</span>
+                    </div>
+                    
+                    <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t">
+                      <span>المتبقي:</span>
+                      <span>{remaining.toFixed(2)} د.ك</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Work Order Print Sheet */}
+      <Sheet open={workOrderPrintOpen} onOpenChange={setWorkOrderPrintOpen}>
+        <SheetContent className="w-full sm:max-w-3xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <ClipboardCheck className="w-5 h-5" />
+              أمر العمل
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            <WorkOrderPrint 
+              patientName={currentPatient?.name || manualName}
+              patientPhone={currentPatient?.phone || manualPhone}
+              rx={currentPatient?.rx}
+              lensType={lensType}
+              coating={coating}
+              frame={!skipFrame ? selectedFrame : undefined}
+            />
+          </div>
+          <div className="mt-4 flex justify-end">
+            <Button onClick={() => setWorkOrderPrintOpen(false)}>إغلاق</Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+      
+      {/* Invoice Print Sheet */}
+      <Sheet open={invoicePrintOpen} onOpenChange={setInvoicePrintOpen}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <Receipt className="w-5 h-5" />
+              الفاتورة
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            <ReceiptInvoice 
+              patientName={currentPatient?.name || manualName}
+              patientPhone={currentPatient?.phone || manualPhone}
+              invoiceType={invoiceType}
+              lensType={lensType}
+              lensPrice={lensPrice}
+              coating={coating}
+              coatingPrice={coatingPrice}
+              frame={!skipFrame && invoiceType === "glasses" ? selectedFrame : undefined}
+              framePrice={frameTotal}
+              discount={discount}
+              total={total}
+              deposit={deposit}
+              remaining={remaining}
+              paymentMethod={paymentMethod}
+            />
+          </div>
+          <div className="mt-4 flex justify-end">
+            <Button onClick={() => setInvoicePrintOpen(false)}>إغلاق</Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+};
+
+export default CreateInvoice;
