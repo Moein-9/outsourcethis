@@ -2,7 +2,7 @@
 import React from "react";
 import { Layout } from "@/components/Layout";
 import { Dashboard } from "@/components/Dashboard";
-import CreateClient from "@/components/CreateClient";
+import { CreateClient } from "@/components/CreateClient";
 import CreateInvoice from "@/components/CreateInvoice";
 import { Inventory } from "@/components/Inventory";
 import { RemainingPayments } from "@/components/RemainingPayments";
