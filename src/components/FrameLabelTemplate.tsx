@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Printer, Tag, QrCode, Info, Glasses, Banknote, Hash } from "lucide-react";
+import { Printer, Tag, Info, Glasses, Banknote, Hash, Ruler } from "lucide-react";
 import { toast } from "sonner";
 import { MoenLogoBlack } from "@/assets/logo";
 import QRCode from "qrcode.react";
@@ -44,46 +44,54 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
       <div className="w-1/4 flex items-center justify-center p-1">
         <QRCode 
           value={qrData} 
-          size={44} 
+          size={48} 
           level="M"
           renderAs="svg"
           includeMargin={false}
-          className="h-12 w-12"
+          className="h-14 w-14"
         />
       </div>
-      
-      {/* Center separator */}
-      <Separator orientation="vertical" className="h-full" />
       
       {/* Right side - All information */}
       <div className="w-3/4 p-1 flex flex-col justify-between">
         {/* Top row - Logo and ID */}
         <div className="flex justify-between items-center mb-0.5">
-          <MoenLogoBlack className="w-auto h-3.5" />
+          <div className="flex items-center">
+            <MoenLogoBlack className="w-auto h-3.5" />
+            <div className="text-[9px] font-bold text-primary ml-2">نظارات الفتتين</div>
+          </div>
           <div className="flex items-center text-[7px] font-bold text-black">
             <Hash className="h-2.5 w-2.5 mr-0.5 text-primary" />
             {frame.frameId}
           </div>
         </div>
         
-        {/* Middle row - Model, Size, Color */}
-        <div className="flex flex-wrap justify-between items-center gap-x-1">
-          <div className="flex items-center text-[7px] font-medium">
-            <Glasses className="h-2.5 w-2.5 mr-0.5 text-primary" />
-            <span>{frame.model}</span>
+        {/* Middle row - Brand and Model */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Glasses className="h-3 w-3 mr-0.5 text-primary" />
+            <span className="text-[10px] font-bold uppercase text-primary mr-1">{frame.brand}</span>
           </div>
-          <div className="flex items-center text-[6px] text-gray-700">
-            <Info className="h-2 w-2 mr-0.5 text-gray-600" />
-            <span>{frame.size || "N/A"} | {frame.color}</span>
+          <div className="text-[8px] font-medium">{frame.model}</div>
+        </div>
+        
+        {/* Size and Color row */}
+        <div className="flex items-center justify-between mt-0.5">
+          <div className="flex items-center">
+            <Ruler className="h-2.5 w-2.5 mr-0.5 text-primary" />
+            <span className="text-[7px]">{frame.size || "N/A"}</span>
+          </div>
+          <div className="flex items-center">
+            <Info className="h-2.5 w-2.5 mr-0.5 text-primary" />
+            <span className="text-[7px]">{frame.color}</span>
           </div>
         </div>
         
-        {/* Bottom row - Brand and Price */}
-        <div className="flex justify-between items-center mt-1">
-          <div className="text-[9px] font-bold uppercase text-primary">{frame.brand}</div>
-          <div className="flex items-center text-[10px] font-bold">
-            <Banknote className="h-3 w-3 mr-0.5 text-primary" />
-            K.D. {frame.price.toFixed(3)}
+        {/* Bottom row - Price */}
+        <div className="flex justify-end items-center mt-1">
+          <div className="flex items-center">
+            <Banknote className="h-3.5 w-3.5 mr-1 text-primary" />
+            <span className="text-[12px] font-bold">K.D. {frame.price.toFixed(3)}</span>
           </div>
         </div>
       </div>
@@ -694,7 +702,6 @@ export const FrameLabelTemplate: React.FC = () => {
   );
 };
 
-// Export the singleFramePrint function to be used by FrameInventory
 export const usePrintLabel = () => {
   const { frames } = useInventoryStore();
   const printWindowRef = useRef<Window | null>(null);

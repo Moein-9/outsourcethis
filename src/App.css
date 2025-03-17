@@ -76,7 +76,8 @@
   
   /* Fix for QR code rendering in print */
   #qr-single img, [id^="qr-"] img {
-    width: 42px !important;
-    height: 42px !important;
+    width: 48px !important;
+    height: 48px !important;
   }
 }
+
