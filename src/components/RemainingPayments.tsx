@@ -25,8 +25,7 @@ import {
   Eye as EyeIcon,
   FileText,
   UserCircle,
-  History,
-  GlassesIcon
+  History
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -50,6 +49,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useNavigate } from "react-router-dom";
+import { ReceiptInvoice } from "./ReceiptInvoice";
 
 export const RemainingPayments: React.FC = () => {
   const { invoices, getInvoiceById, addPartialPayment, markAsPaid } = useInvoiceStore();
@@ -57,6 +57,7 @@ export const RemainingPayments: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
   const [invoiceForPrint, setInvoiceForPrint] = useState<string | null>(null);
+  const [showReceipt, setShowReceipt] = useState<string | null>(null);
   const navigate = useNavigate();
   
   // Payment form state
@@ -183,408 +184,53 @@ export const RemainingPayments: React.FC = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
     
-    const pageTitle = `فاتورة ${invoice.invoiceId}`;
-    
     const printContent = `
       <!DOCTYPE html>
       <html dir="rtl">
       <head>
-        <title>${pageTitle}</title>
+        <title>فاتورة ${invoice.invoiceId}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+          @media print {
+            body { 
+              width: 80mm;
+              margin: 0;
+              padding: 0;
+            }
+          }
           body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            padding: 30px;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
+            font-family: 'Arial', sans-serif;
             direction: rtl;
+            padding: 10px;
+            max-width: 80mm;
+            margin: 0 auto;
           }
-          .invoice-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #8B5CF6;
+          .receipt-container {
+            border: 1px solid #ddd;
+            padding: 10px;
           }
-          .company-details {
-            text-align: right;
-          }
-          .company-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #8B5CF6;
-            margin: 0;
-          }
-          .company-info {
-            font-size: 14px;
-            color: #666;
-            margin-top: 5px;
-          }
-          .invoice-details {
-            text-align: left;
-          }
-          .invoice-id {
-            font-size: 18px;
-            font-weight: bold;
-            color: #8B5CF6;
-            margin: 0;
-          }
-          .invoice-date {
-            font-size: 14px;
-            color: #666;
-            margin-top: 5px;
-          }
-          .customer-details {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-          }
-          .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #8B5CF6;
-            display: flex;
-            align-items: center;
-          }
-          .section-title svg {
-            margin-left: 6px;
-          }
-          .customer-name {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0;
-          }
-          .customer-contact {
-            font-size: 14px;
-            color: #555;
-            margin-top: 5px;
-          }
-          .items-section {
-            margin-bottom: 30px;
-          }
-          .item-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-          }
-          .item-card {
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-          }
-          .item-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-          }
-          .item-title svg {
-            color: #8B5CF6;
-          }
-          .item-detail {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 14px;
-          }
-          .item-value {
-            font-weight: bold;
-          }
-          .payment-details {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-          }
-          .payment-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dashed #ddd;
-          }
-          .payment-row:last-child {
-            border-bottom: none;
-          }
-          .payment-label {
-            font-weight: bold;
-          }
-          .total-row {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 2px solid #8B5CF6;
-            font-size: 20px;
-            font-weight: bold;
-          }
-          .discount {
-            color: #10B981;
-          }
-          .thank-you {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-          }
-          .thank-message {
-            font-size: 18px;
-            color: #8B5CF6;
-            margin-bottom: 5px;
-          }
-          .come-again {
-            font-size: 14px;
-            color: #666;
-          }
-          .paid-stamp {
-            position: absolute;
-            top: 200px;
-            right: 200px;
-            transform: rotate(20deg);
-            font-size: 40px;
-            color: rgba(16, 185, 129, 0.4);
-            border: 10px solid rgba(16, 185, 129, 0.4);
-            border-radius: 10px;
-            padding: 10px 20px;
-            text-transform: uppercase;
-            font-weight: bold;
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-          }
-          .paid-stamp svg {
-            width: 40px;
-            height: 40px;
-          }
-          .payments-history {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f0f9ff;
-            border-radius: 8px;
-          }
-          .payment-history-title {
-            font-weight: bold;
-            color: #0369a1;
-            margin-bottom: 8px;
-          }
-          .payment-history-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px dashed #ccc;
-            font-size: 14px;
-          }
-          .payment-history-item:last-child {
-            border-bottom: none;
-          }
-          .payment-date {
-            color: #666;
-            font-size: 12px;
-          }
-          .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-          }
-          .icon {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            margin-right: 4px;
+          .hidden-print {
+            display: block;
           }
           @media print {
-            body {
-              print-color-adjust: exact;
-              -webkit-print-color-adjust: exact;
-            }
-            .no-print {
+            .hidden-print {
               display: none;
             }
           }
         </style>
       </head>
       <body>
-        <div class="invoice-header">
-          <div class="company-details">
-            <h1 class="company-name">النظارات الطبية</h1>
-            <p class="company-info">
-              العنوان: شارع الاستقلال، الكويت<br>
-              هاتف: 1234 567 965+
-            </p>
-          </div>
-          <div class="invoice-details">
-            <h2 class="invoice-id">فاتورة #${invoice.invoiceId}</h2>
-            <p class="invoice-date">
-              التاريخ: ${new Date(invoice.createdAt).toLocaleDateString('ar-EG')}
-            </p>
-          </div>
-        </div>
-        
-        <div class="customer-details">
-          <h3 class="section-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            معلومات العميل
-          </h3>
-          <p class="customer-name">${invoice.patientName}</p>
-          <p class="customer-contact">
-            هاتف: ${invoice.patientPhone}<br>
-            ${invoice.patientId ? `رقم الملف: ${invoice.patientId}` : ''}
-          </p>
-        </div>
-        
-        <div class="items-section">
-          <h3 class="section-title">تفاصيل المنتجات</h3>
-          <div class="item-grid">
-            <div class="item-card">
-              <div class="item-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                العدسات
-              </div>
-              <div class="item-detail">
-                <span>نوع العدسة:</span>
-                <span class="item-value">${invoice.lensType}</span>
-              </div>
-              <div class="item-detail">
-                <span>السعر:</span>
-                <span class="item-value">${invoice.lensPrice.toFixed(2)} KWD</span>
-              </div>
+        <div id="receipt-container"></div>
+        <button class="hidden-print" onclick="window.print()">طباعة</button>
+        <script>
+          // This script will render the receipt
+          document.getElementById('receipt-container').innerHTML = \`
+            <div id="receipt-content">
+              ${document.getElementById('print-receipt-' + invoice.invoiceId)?.innerHTML || ''}
             </div>
-            
-            <div class="item-card">
-              <div class="item-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 3L3 11h18L12 3z"/>
-                  <path d="M5 11v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>
-                </svg>
-                الإطار
-              </div>
-              <div class="item-detail">
-                <span>الماركة:</span>
-                <span class="item-value">${invoice.frameBrand}</span>
-              </div>
-              <div class="item-detail">
-                <span>الموديل:</span>
-                <span class="item-value">${invoice.frameModel}</span>
-              </div>
-              <div class="item-detail">
-                <span>اللون:</span>
-                <span class="item-value">${invoice.frameColor}</span>
-              </div>
-              <div class="item-detail">
-                <span>السعر:</span>
-                <span class="item-value">${invoice.framePrice.toFixed(2)} KWD</span>
-              </div>
-            </div>
-            
-            <div class="item-card">
-              <div class="item-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21.4 17.4c-1.2 1.2-2.8 2-4.7 2-3.4 0-6.3-2.3-7.1-5.4"/>
-                  <path d="M21.4 6.6c-1.2-1.2-2.8-2-4.7-2-3.4 0-6.3 2.3-7.1 5.4"/>
-                  <path d="M10.3 17.7c-.5-1.3-1.5-2.7-2.9-3.7-2.1-1.7-4.8-2.1-6.3-1.1-.7.5-1.1 1.2-1.1 2.1 0 2 2.1 4.6 5.3 6.6.7.4 1.6.8 2.4 1.1 2.3.7 4.6.4 5.8-.8.5-.5.8-1.1.8-1.8 0-1-.5-1.9-1.5-2.8"/>
-                  <path d="M10.3 6.3c-.5 1.3-1.5 2.7-2.9 3.7-2.1 1.7-4.8 2.1-6.3 1.1-.7-.5-1.1-1.2-1.1-2.1 0-2 2.1-4.6 5.3-6.6.7-.4 1.6-.8 2.4-1.1 2.3-.7 4.6-.4 5.8.8.5.5.8 1.1.8 1.8 0 1-.5 1.9-1.5 2.8"/>
-                </svg>
-                الطلاء
-              </div>
-              <div class="item-detail">
-                <span>نوع الطلاء:</span>
-                <span class="item-value">${invoice.coating}</span>
-              </div>
-              <div class="item-detail">
-                <span>السعر:</span>
-                <span class="item-value">${invoice.coatingPrice.toFixed(2)} KWD</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="payment-details">
-          <h3 class="section-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="20" height="14" x="2" y="5" rx="2"/>
-              <line x1="2" x2="22" y1="10" y2="10"/>
-            </svg>
-            تفاصيل الدفع
-          </h3>
-          <div class="payment-row">
-            <span class="payment-label">إجمالي العدسات:</span>
-            <span>${invoice.lensPrice.toFixed(2)} KWD</span>
-          </div>
-          <div class="payment-row">
-            <span class="payment-label">إجمالي الإطار:</span>
-            <span>${invoice.framePrice.toFixed(2)} KWD</span>
-          </div>
-          <div class="payment-row">
-            <span class="payment-label">إجمالي الطلاء:</span>
-            <span>${invoice.coatingPrice.toFixed(2)} KWD</span>
-          </div>
-          ${invoice.discount > 0 ? `
-          <div class="payment-row discount">
-            <span class="payment-label">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; margin-left: 4px;">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-                <line x1="7" y1="7" x2="7.01" y2="7"/>
-              </svg>
-              الخصم:
-            </span>
-            <span>- ${invoice.discount.toFixed(2)} KWD</span>
-          </div>
-          ` : ''}
-          <div class="payment-row total-row">
-            <span>المجموع النهائي:</span>
-            <span>${invoice.total.toFixed(2)} KWD</span>
-          </div>
-          
-          ${invoice.payments && invoice.payments.length > 0 ? `
-          <div class="payments-history">
-            <div class="payment-history-title">سجل الدفعات:</div>
-            ${invoice.payments.map(payment => `
-              <div class="payment-history-item">
-                <div>
-                  <span>${payment.amount.toFixed(2)} KWD</span>
-                  <span> (${payment.method})</span>
-                  ${payment.authNumber ? `<span> - رقم التفويض: ${payment.authNumber}</span>` : ''}
-                </div>
-                <div class="payment-date">${new Date(payment.date).toLocaleDateString('ar-EG')}</div>
-              </div>
-            `).join('')}
-          </div>
-          ` : ''}
-        </div>
-        
-        <div class="thank-you">
-          <p class="thank-message">شكراً لثقتكم</p>
-          <p class="come-again">نتطلع لزيارتكم مرة أخرى</p>
-        </div>
-        
-        ${invoice.isPaid ? `<div class="paid-stamp">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(16, 185, 129, 0.4)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-          مدفوع
-        </div>` : ''}
-        
-        <div class="footer">
-          <p>النظارات الطبية - جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
-        </div>
-        
-        <div class="no-print">
-          <button onclick="window.print()" style="padding: 10px 20px; margin: 20px auto; display: block; background: #8B5CF6; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            طباعة الفاتورة
-          </button>
-        </div>
+          \`;
+        </script>
       </body>
       </html>
     `;
@@ -592,10 +238,6 @@ export const RemainingPayments: React.FC = () => {
     printWindow.document.open();
     printWindow.document.write(printContent);
     printWindow.document.close();
-    
-    printWindow.onload = function() {
-      printWindow.focus();
-    };
   };
   
   return (
@@ -738,14 +380,47 @@ export const RemainingPayments: React.FC = () => {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1 text-xs border-blue-200 hover:bg-blue-50 text-blue-700"
-                    onClick={() => handlePrintReceipt(invoice.invoiceId)}
-                  >
-                    <Printer className="h-4 w-4 mr-1" />
-                    طباعة الفاتورة
-                  </Button>
+                  <Dialog open={showReceipt === invoice.invoiceId} onOpenChange={(open) => !open && setShowReceipt(null)}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 text-xs border-blue-200 hover:bg-blue-50 text-blue-700"
+                        onClick={() => setShowReceipt(invoice.invoiceId)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        عرض الفاتورة
+                      </Button>
+                    </DialogTrigger>
+                    
+                    <DialogContent className="max-w-sm">
+                      <DialogHeader>
+                        <DialogTitle>فاتورة {invoice.invoiceId}</DialogTitle>
+                      </DialogHeader>
+                      
+                      <div className="max-h-[70vh] overflow-y-auto py-4" id={`print-receipt-${invoice.invoiceId}`}>
+                        <ReceiptInvoice invoice={invoice} isPrintable={false} />
+                      </div>
+                      
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowReceipt(null)}
+                        >
+                          إغلاق
+                        </Button>
+                        <Button 
+                          onClick={() => {
+                            setShowReceipt(null);
+                            handlePrintReceipt(invoice.invoiceId);
+                          }}
+                          className="gap-2"
+                        >
+                          <Printer className="h-4 w-4" />
+                          طباعة
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                   
                   <Button 
                     variant="outline" 
