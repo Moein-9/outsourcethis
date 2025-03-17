@@ -35,12 +35,13 @@ export interface Invoice {
   payments?: Payment[];
   createdAt: string;
   isPaid: boolean;
+  authNumber?: string; // Added for authorization numbers
 }
 
 interface InvoiceState {
   invoices: Invoice[];
   addInvoice: (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments">) => string;
-  markAsPaid: (invoiceId: string, paymentMethod?: string) => void;
+  markAsPaid: (invoiceId: string, paymentMethod?: string, authNumber?: string) => void;
   addPartialPayment: (invoiceId: string, payment: Omit<Payment, "date">) => void; // New method for partial payments
   getInvoiceById: (id: string) => Invoice | undefined;
   getUnpaidInvoices: () => Invoice[];
@@ -60,10 +61,14 @@ export const useInvoiceStore = create<InvoiceState>()(
         const remaining = Math.max(0, invoice.total - invoice.deposit);
         const isPaid = remaining === 0;
         
+        // Extract auth number if it exists
+        const { authNumber, ...restInvoice } = invoice as (typeof invoice & { authNumber?: string });
+        
         const initialPayment: Payment = {
           amount: invoice.deposit,
           method: invoice.paymentMethod,
-          date: createdAt
+          date: createdAt,
+          authNumber: authNumber // Add auth number to payment
         };
         
         const payments = invoice.deposit > 0 ? [initialPayment] : [];
@@ -72,12 +77,13 @@ export const useInvoiceStore = create<InvoiceState>()(
           invoices: [
             ...state.invoices,
             { 
-              ...invoice, 
+              ...restInvoice, 
               invoiceId, 
               createdAt, 
               remaining,
               isPaid,
-              payments
+              payments,
+              authNumber // Store auth number at invoice level too
             }
           ]
         }));
@@ -85,7 +91,7 @@ export const useInvoiceStore = create<InvoiceState>()(
         return invoiceId;
       },
       
-      markAsPaid: (invoiceId, paymentMethod) => {
+      markAsPaid: (invoiceId, paymentMethod, authNumber) => {
         set((state) => ({
           invoices: state.invoices.map(invoice => {
             if (invoice.invoiceId === invoiceId) {
@@ -96,7 +102,8 @@ export const useInvoiceStore = create<InvoiceState>()(
               const newPayment: Payment = {
                 amount: remainingAmount,
                 method: method,
-                date: new Date().toISOString()
+                date: new Date().toISOString(),
+                authNumber: authNumber // Add auth number to payment
               };
               
               // Get existing payments or create empty array if none exist
@@ -108,7 +115,8 @@ export const useInvoiceStore = create<InvoiceState>()(
                 remaining: 0, 
                 deposit: invoice.total,
                 paymentMethod: method,
-                payments: [...existingPayments, newPayment]
+                payments: [...existingPayments, newPayment],
+                authNumber: authNumber || invoice.authNumber // Update or retain auth number
               };
             }
             return invoice;
@@ -140,7 +148,8 @@ export const useInvoiceStore = create<InvoiceState>()(
                 isPaid,
                 remaining: newRemaining,
                 deposit: newDeposit,
-                payments: [...existingPayments, newPayment]
+                payments: [...existingPayments, newPayment],
+                authNumber: payment.authNumber || invoice.authNumber // Update auth number if provided
               };
             }
             return invoice;
@@ -169,7 +178,8 @@ export const useInvoiceStore = create<InvoiceState>()(
           const initialPayment: Payment = {
             amount: invoice.deposit,
             method: invoice.paymentMethod,
-            date: invoice.createdAt
+            date: invoice.createdAt,
+            authNumber: (invoice as any).authNumber // Add auth number if exists
           };
           
           invoiceToAdd = {

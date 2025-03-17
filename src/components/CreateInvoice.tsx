@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensSelector } from "@/components/ContactLensSelector";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
@@ -15,7 +15,7 @@ import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { 
   User, Glasses, Package, Receipt, CreditCard, Eye, Search, 
   Banknote, Plus, PackageCheck, EyeOff, ExternalLink,
-  ClipboardCheck
+  ClipboardCheck, BadgePercent, DollarSign, Printer, CreditCard as CardIcon
 } from "lucide-react";
 
 const CreateInvoice: React.FC = () => {
@@ -67,6 +67,7 @@ const CreateInvoice: React.FC = () => {
   const [discount, setDiscount] = useState(0);
   const [deposit, setDeposit] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [authNumber, setAuthNumber] = useState("");
   
   // Print states
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
@@ -217,6 +218,21 @@ const CreateInvoice: React.FC = () => {
     setDeposit(total);
   };
   
+  // Print handlers
+  const handlePrintWorkOrder = () => {
+    setWorkOrderPrintOpen(true);
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
+  
+  const handlePrintInvoice = () => {
+    setInvoicePrintOpen(true);
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
+  
   // Save invoice
   const handleSaveInvoice = () => {
     let patientName = "";
@@ -266,6 +282,10 @@ const CreateInvoice: React.FC = () => {
       return;
     }
     
+    const paymentDetails = (paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") 
+      ? { authNumber } 
+      : {};
+    
     const invoiceData = {
       patientId,
       patientName,
@@ -286,7 +306,8 @@ const CreateInvoice: React.FC = () => {
       deposit,
       total,
       
-      paymentMethod
+      paymentMethod,
+      ...paymentDetails
     };
     
     const invoiceId = addInvoice(invoiceData);
@@ -330,6 +351,7 @@ const CreateInvoice: React.FC = () => {
     setDiscount(0);
     setDeposit(0);
     setPaymentMethod("");
+    setAuthNumber("");
   };
   
   // Create a mock invoice for previews
@@ -352,7 +374,8 @@ const CreateInvoice: React.FC = () => {
     total: total,
     remaining: remaining,
     paymentMethod: paymentMethod || "Cash",
-    isPaid: remaining <= 0
+    isPaid: remaining <= 0,
+    authNumber: authNumber
   };
   
   return (
@@ -367,13 +390,19 @@ const CreateInvoice: React.FC = () => {
           onValueChange={(v) => setInvoiceType(v as "glasses" | "contacts")}
           className="w-auto"
         >
-          <TabsList>
-            <TabsTrigger value="glasses" className="flex items-center gap-1">
-              <Glasses className="w-4 h-4" />
+          <TabsList className="p-1 bg-primary/10 border border-primary/20 rounded-lg shadow-sm text-base">
+            <TabsTrigger 
+              value="glasses" 
+              className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+            >
+              <Glasses className="w-5 h-5" />
               نظارات
             </TabsTrigger>
-            <TabsTrigger value="contacts" className="flex items-center gap-1">
-              <Eye className="w-4 h-4" />
+            <TabsTrigger 
+              value="contacts" 
+              className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+            >
+              <Eye className="w-5 h-5" />
               عدسات لاصقة
             </TabsTrigger>
           </TabsList>
@@ -448,7 +477,7 @@ const CreateInvoice: React.FC = () => {
                           <span>{currentPatient.name}</span>
                         </div>
                         <div className="flex justify-between mb-2">
-                          <span className="font-semibold">الهاتف:</span>
+                          <span className="font-semibold">الهات��:</span>
                           <span dir="ltr">{currentPatient.phone}</span>
                         </div>
                         <div className="flex justify-between">
@@ -785,7 +814,7 @@ const CreateInvoice: React.FC = () => {
             <ContactLensSelector onSelect={() => {}} />
           )}
 
-          {/* 4) Discount & Deposit */}
+          {/* 4) Discount & Deposit - Redesigned with icons */}
           <div className="bg-white rounded-lg p-6 border shadow-sm">
             <div className="border-b border-primary/30 pb-3 mb-4">
               <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
@@ -794,38 +823,51 @@ const CreateInvoice: React.FC = () => {
               </h3>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="discount" className="text-muted-foreground">الخصم (د.ك):</Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <BadgePercent className="w-5 h-5 text-primary" />
+                  </div>
+                  <Label htmlFor="discount" className="text-muted-foreground mb-1.5 block">الخصم (د.ك):</Label>
                   <Input
                     id="discount"
                     type="number"
                     step="0.01"
                     value={discount || ""}
                     onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                    className="pl-10 border-primary/20 focus:border-primary"
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="deposit" className="text-muted-foreground">الدفعة (د.ك):</Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <DollarSign className="w-5 h-5 text-green-500" />
+                  </div>
+                  <Label htmlFor="deposit" className="text-muted-foreground mb-1.5 block">الدفعة (د.ك):</Label>
                   <Input
                     id="deposit"
                     type="number"
                     step="0.01"
                     value={deposit || ""}
                     onChange={(e) => setDeposit(parseFloat(e.target.value) || 0)}
+                    className="pl-10 border-primary/20 focus:border-primary"
                   />
                 </div>
               </div>
               
-              <Button variant="outline" onClick={handlePayInFull} className="w-full">
+              <Button 
+                variant="outline" 
+                onClick={handlePayInFull} 
+                className="w-full border-primary/20 hover:bg-primary/5 text-primary hover:text-primary/80"
+              >
+                <DollarSign className="w-5 h-5 mr-2 text-green-500" />
                 دفع كامل ({total.toFixed(2)} د.ك)
               </Button>
             </div>
           </div>
 
-          {/* 5) Payment Method */}
+          {/* 5) Payment Method - Updated with authorization number field */}
           <div className="bg-white rounded-lg p-6 border shadow-sm">
             <div className="border-b border-primary/30 pb-3 mb-4">
               <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
@@ -904,13 +946,32 @@ const CreateInvoice: React.FC = () => {
               </div>
             </div>
             
+            {/* Authorization Number field for card payments */}
+            {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") && (
+              <div className="mt-4 space-y-2">
+                <Label htmlFor="authNumber" className="text-muted-foreground">رقم الموافقة (Authorization No.):</Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <CardIcon className="w-5 h-5 text-primary" />
+                  </div>
+                  <Input
+                    id="authNumber"
+                    value={authNumber}
+                    onChange={(e) => setAuthNumber(e.target.value)}
+                    placeholder="xxxxxx"
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+            )}
+            
             <div className="mt-8 flex justify-between">
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2"
-                onClick={() => setWorkOrderPrintOpen(true)}
+                onClick={handlePrintWorkOrder}
               >
-                <ClipboardCheck className="w-4 h-4" />
+                <Printer className="w-4 h-4" />
                 طباعة أمر العمل
               </Button>
               
@@ -936,7 +997,7 @@ const CreateInvoice: React.FC = () => {
           </div>
         </div>
         
-        {/* Right Section: Summary */}
+        {/* Right Section: Summary - Made sticky */}
         <div className="space-y-5">
           <div className="bg-white rounded-lg p-6 border shadow-sm sticky top-5">
             <h3 className="text-lg font-semibold mb-4 text-primary flex items-center gap-2">
@@ -993,6 +1054,13 @@ const CreateInvoice: React.FC = () => {
                 </div>
               )}
               
+              {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") && authNumber && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">رقم الموافقة:</span>
+                  <span>{authNumber}</span>
+                </div>
+              )}
+              
               <div className="pt-2 border-t">
                 <div className="flex justify-between font-bold text-lg">
                   <span>المجموع:</span>
@@ -1020,14 +1088,20 @@ const CreateInvoice: React.FC = () => {
       
       {/* Work Order Print Sheet */}
       <Sheet open={workOrderPrintOpen} onOpenChange={setWorkOrderPrintOpen}>
-        <SheetContent className="w-full sm:max-w-3xl overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-3xl overflow-y-auto print:w-full print:max-w-none">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <ClipboardCheck className="w-5 h-5" />
               أمر العمل
             </SheetTitle>
+            <SheetDescription>
+              <Button onClick={handlePrintWorkOrder} className="mt-2">
+                <Printer className="w-4 h-4 mr-2" />
+                طباعة
+              </Button>
+            </SheetDescription>
           </SheetHeader>
-          <div className="mt-6">
+          <div className="mt-6 print:mt-0">
             <WorkOrderPrint 
               invoice={previewInvoice}
               patientName={currentPatient?.name || manualName}
@@ -1038,30 +1112,36 @@ const CreateInvoice: React.FC = () => {
               frame={!skipFrame ? selectedFrame : undefined}
             />
           </div>
-          <div className="mt-4 flex justify-end">
+          <SheetFooter className="print:hidden mt-4">
             <Button onClick={() => setWorkOrderPrintOpen(false)}>إغلاق</Button>
-          </div>
+          </SheetFooter>
         </SheetContent>
       </Sheet>
       
       {/* Invoice Print Sheet */}
       <Sheet open={invoicePrintOpen} onOpenChange={setInvoicePrintOpen}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto print:w-full print:max-w-none">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Receipt className="w-5 h-5" />
               الفاتورة
             </SheetTitle>
+            <SheetDescription>
+              <Button onClick={handlePrintInvoice} className="mt-2">
+                <Printer className="w-4 h-4 mr-2" />
+                طباعة
+              </Button>
+            </SheetDescription>
           </SheetHeader>
-          <div className="mt-6">
+          <div className="mt-6 print:mt-0">
             <ReceiptInvoice 
               invoice={previewInvoice}
               isPrintable={true}
             />
           </div>
-          <div className="mt-4 flex justify-end">
+          <SheetFooter className="print:hidden mt-4">
             <Button onClick={() => setInvoicePrintOpen(false)}>إغلاق</Button>
-          </div>
+          </SheetFooter>
         </SheetContent>
       </Sheet>
     </div>
