@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, ContactLensItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
@@ -36,7 +37,6 @@ const COMMON_BC_VALUES = ["8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "9.0"
 const COMMON_DIAMETER_VALUES = ["13.8", "14.0", "14.2", "14.5", "14.8"];
 const COMMON_BRANDS = ["Acuvue", "Air Optix", "Biofinty", "FreshLook", "PureVision", "SofLens"];
 const COMMON_TYPES = ["Daily", "Monthly", "Biweekly", "Yearly", "Color"];
-// Fix: Changed empty string to "none" with a proper value
 const COMMON_COLORS = ["none", "Clear", "Blue", "Green", "Brown", "Hazel", "Gray", "Honey"];
 
 // Contact Lens Item Component
@@ -90,6 +90,16 @@ export const ContactLensInventory: React.FC = () => {
   const [contactLensResults, setContactLensResults] = useState<ReturnType<typeof searchContactLenses>>(contactLenses);
   const [isAddContactLensDialogOpen, setIsAddContactLensDialogOpen] = useState(false);
   const [editingLens, setEditingLens] = useState<ContactLensItem | null>(null);
+  
+  // Add the missing state variables
+  const [contactLensBrand, setContactLensBrand] = useState("");
+  const [contactLensType, setContactLensType] = useState("");
+  const [contactLensBC, setContactLensBC] = useState("");
+  const [contactLensDiameter, setContactLensDiameter] = useState("");
+  const [contactLensPower, setContactLensPower] = useState("-0.00");
+  const [contactLensColor, setContactLensColor] = useState("none");
+  const [contactLensPrice, setContactLensPrice] = useState("");
+  const [contactLensQty, setContactLensQty] = useState("1");
   
   // Filters
   const [filterBrand, setFilterBrand] = useState<string>("all");
@@ -160,6 +170,10 @@ export const ContactLensInventory: React.FC = () => {
       qty
     };
     
+    if (contactLensColor && contactLensColor !== "none") {
+      newContactLens.color = contactLensColor;
+    }
+    
     if (editingLens) {
       updateContactLens(editingLens.id, newContactLens);
       toast.success(`تم تحديث العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`);
@@ -195,15 +209,10 @@ export const ContactLensInventory: React.FC = () => {
     setContactLensBC(lens.bc);
     setContactLensDiameter(lens.diameter);
     setContactLensPower(lens.power);
-    setContactLensColor(lens.color || "");
+    setContactLensColor(lens.color || "none");
     setContactLensPrice(lens.price.toString());
     setContactLensQty(lens.qty.toString());
     setIsAddContactLensDialogOpen(true);
-  };
-  
-  // Handle sell lens
-  const handleSellLens = (lens: ContactLensItem) => {
-    toast.info(`سيتم إضافة ${lens.brand} ${lens.type} للفاتورة`);
   };
   
   // Initialize search results
