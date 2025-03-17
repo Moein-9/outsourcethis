@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { Printer, Tag, QrCode, Info } from "lucide-react";
 import { toast } from "sonner";
-import { MoenLogoGreen } from "@/assets/logo";
+import { MoenLogoBlack } from "@/assets/logo";
+import QRCode from "qrcode.react";
 
 // Dimensions: 100mm x 16mm (standard Zebra label size)
 const LABEL_WIDTH = "100mm";
@@ -24,9 +25,17 @@ interface FrameLabelProps {
 
 // Export the FrameLabel component so it can be used in other components
 export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
+  // Generate QR data
+  const qrData = JSON.stringify({
+    id: frame.frameId,
+    brand: frame.brand,
+    model: frame.model,
+    price: frame.price
+  });
+  
   return (
     <div 
-      className="flex border border-gray-300 bg-white relative print:border-0"
+      className="flex border border-gray-300 bg-white relative print:border-0 frame-label"
       style={{ 
         width: LABEL_WIDTH, 
         height: LABEL_HEIGHT,
@@ -35,15 +44,22 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
     >
       {/* Left side - Store logo, Frame ID, Model and QR Code */}
       <div className="w-3/5 p-1 flex flex-col items-start justify-center relative">
-        <div className="absolute top-0 left-1 w-4 h-4">
-          <MoenLogoGreen className="w-4 h-4" />
+        <div className="absolute top-0 left-1 w-8 h-6">
+          <MoenLogoBlack className="w-8 h-6" />
         </div>
-        <div className="text-[8px] font-bold mb-0.5 text-black mt-1 ml-6">ID: {frame.frameId}</div>
-        <div className="text-[8px] font-bold mb-0.5 text-black ml-6">Model: {frame.model}</div>
-        <div className="text-[8px] mb-0.5 text-gray-700 ml-6">Size: {frame.size || "N/A"}</div>
-        <div className="text-[8px] mb-0.5 text-gray-700 ml-6">Color: {frame.color}</div>
+        <div className="text-[8px] font-bold mb-0.5 text-black mt-1 ml-10">ID: {frame.frameId}</div>
+        <div className="text-[8px] font-bold mb-0.5 text-black ml-10">Model: {frame.model}</div>
+        <div className="text-[8px] mb-0.5 text-gray-700 ml-10">Size: {frame.size || "N/A"}</div>
+        <div className="text-[8px] mb-0.5 text-gray-700 ml-10">Color: {frame.color}</div>
         <div className="absolute right-2 top-1 bottom-1 flex items-center">
-          <QrCode className="h-10 w-10 text-black" />
+          <QRCode 
+            value={qrData} 
+            size={40} 
+            renderAs="svg"
+            level="L"
+            includeMargin={false}
+            className="h-10 w-10"
+          />
         </div>
       </div>
       
@@ -60,6 +76,16 @@ export const FrameLabelTemplate: React.FC = () => {
   const { frames } = useInventoryStore();
   const [selectedFrames, setSelectedFrames] = React.useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const printWindowRef = useRef<Window | null>(null);
+  
+  // Clean up print window when component unmounts
+  useEffect(() => {
+    return () => {
+      if (printWindowRef.current) {
+        printWindowRef.current.close();
+      }
+    };
+  }, []);
   
   const toggleFrameSelection = (frameId: string) => {
     setSelectedFrames(prev => 
@@ -87,8 +113,14 @@ export const FrameLabelTemplate: React.FC = () => {
   };
   
   const printLabels = () => {
+    // Close any previously opened print windows
+    if (printWindowRef.current) {
+      printWindowRef.current.close();
+    }
+    
     // Create a new window for printing to avoid printing the entire page
     const printWindow = window.open('', '_blank');
+    printWindowRef.current = printWindow;
     
     if (printWindow) {
       printWindow.document.write(`
@@ -104,6 +136,7 @@ export const FrameLabelTemplate: React.FC = () => {
                 margin: 0;
                 padding: 0;
                 font-family: Arial, sans-serif;
+                background: white;
               }
               .label-container {
                 width: ${LABEL_WIDTH};
@@ -112,10 +145,12 @@ export const FrameLabelTemplate: React.FC = () => {
                 page-break-after: always;
                 border: none;
                 overflow: hidden;
+                position: relative;
+                box-sizing: border-box;
               }
               .left-side {
                 width: 60%;
-                padding: 4px;
+                padding: 2px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
@@ -124,53 +159,52 @@ export const FrameLabelTemplate: React.FC = () => {
               }
               .right-side {
                 width: 40%;
-                padding: 4px;
+                padding: 2px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: flex-end;
-                padding-right: 8px;
+                padding-right: 4px;
               }
               .logo {
                 position: absolute;
-                top: 2px;
-                left: 2px;
-                width: 16px;
-                height: 16px;
+                top: 0;
+                left: 1px;
+                width: 32px;
+                height: 24px;
               }
               .frame-id {
                 font-size: 8px;
                 font-weight: bold;
-                margin-bottom: 1px;
-                margin-left: 20px;
-                margin-top: 4px;
+                margin-bottom: 0.5px;
+                margin-left: 40px;
+                margin-top: 1px;
               }
               .frame-model {
                 font-size: 8px;
                 font-weight: bold;
-                margin-bottom: 1px;
-                margin-left: 20px;
+                margin-bottom: 0.5px;
+                margin-left: 40px;
               }
               .frame-size, .frame-color {
                 font-size: 8px;
-                margin-bottom: 1px;
-                color: #555;
-                margin-left: 20px;
+                margin-bottom: 0.5px;
+                color: #444;
+                margin-left: 40px;
               }
               .qr-code {
                 position: absolute;
                 right: 8px;
                 top: 50%;
                 transform: translateY(-50%);
-                width: 30px;
-                height: 30px;
-                background-color: #000;
+                width: 40px;
+                height: 40px;
               }
               .brand {
                 font-size: 10px;
                 font-weight: bold;
                 text-transform: uppercase;
-                margin-bottom: 2px;
+                margin-bottom: 1px;
               }
               .price {
                 font-size: 12px;
@@ -181,18 +215,30 @@ export const FrameLabelTemplate: React.FC = () => {
           <body>
       `);
 
+      // Add the QR code library
+      printWindow.document.write(`
+        <script src="https://cdn.jsdelivr.net/npm/qrcode.react@3.1.0/lib/index.min.js"></script>
+      `);
+
       selectedFrames.forEach(frameId => {
         const frame = frames.find(f => f.frameId === frameId);
         if (frame) {
+          const qrData = JSON.stringify({
+            id: frame.frameId,
+            brand: frame.brand,
+            model: frame.model,
+            price: frame.price
+          });
+          
           printWindow.document.write(`
             <div class="label-container">
               <div class="left-side">
-                <img src="/lovable-uploads/268d32e7-5d4a-4f77-bda8-2566232a44ab.png" class="logo" alt="Moen Logo">
+                <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
                 <div class="frame-id">ID: ${frame.frameId}</div>
                 <div class="frame-model">Model: ${frame.model}</div>
                 <div class="frame-size">Size: ${frame.size || 'N/A'}</div>
                 <div class="frame-color">Color: ${frame.color}</div>
-                <div class="qr-code"></div>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=40x40&data=${encodeURIComponent(qrData)}" class="qr-code" alt="QR Code">
               </div>
               <div class="right-side">
                 <div class="brand">${frame.brand}</div>
@@ -209,16 +255,188 @@ export const FrameLabelTemplate: React.FC = () => {
       `);
       
       printWindow.document.close();
-      printWindow.focus();
       
       // Print after a short delay to ensure content is loaded
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
+      printWindow.addEventListener('load', () => {
+        printWindow.focus();
         
-        setIsDialogOpen(false);
-        toast.success(`تم إرسال ${selectedFrames.length} بطاقة للطباعة`);
-      }, 500);
+        try {
+          printWindow.print();
+          // Handle print dialog close or cancel
+          setTimeout(() => {
+            // Check if the print window is still open
+            if (!printWindow.closed) {
+              printWindow.close();
+            }
+            
+            setIsDialogOpen(false);
+            toast.success(`تم إرسال ${selectedFrames.length} بطاقة للطباعة`);
+          }, 1000);
+        } catch (error) {
+          console.error("Print error:", error);
+          toast.error("حدث خطأ أثناء محاولة الطباعة");
+          printWindow.close();
+        }
+      });
+    } else {
+      toast.error("فشل في فتح نافذة الطباعة");
+    }
+  };
+  
+  // Function to handle quick print from frame inventory
+  const singleFramePrint = (frameId: string) => {
+    // Close any previously opened print windows
+    if (printWindowRef.current) {
+      printWindowRef.current.close();
+    }
+    
+    const frame = frames.find(f => f.frameId === frameId);
+    if (!frame) {
+      toast.error("لم يتم العثور على الإطار");
+      return;
+    }
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    printWindowRef.current = printWindow;
+    
+    if (printWindow) {
+      const qrData = JSON.stringify({
+        id: frame.frameId,
+        brand: frame.brand,
+        model: frame.model,
+        price: frame.price
+      });
+      
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Frame Label</title>
+            <style>
+              @page {
+                size: ${LABEL_WIDTH} ${LABEL_HEIGHT};
+                margin: 0;
+              }
+              body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                background: white;
+              }
+              .label-container {
+                width: ${LABEL_WIDTH};
+                height: ${LABEL_HEIGHT};
+                display: flex;
+                border: none;
+                overflow: hidden;
+                position: relative;
+                box-sizing: border-box;
+              }
+              .left-side {
+                width: 60%;
+                padding: 2px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
+                position: relative;
+              }
+              .right-side {
+                width: 40%;
+                padding: 2px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-end;
+                padding-right: 4px;
+              }
+              .logo {
+                position: absolute;
+                top: 0;
+                left: 1px;
+                width: 32px;
+                height: 24px;
+              }
+              .frame-id {
+                font-size: 8px;
+                font-weight: bold;
+                margin-bottom: 0.5px;
+                margin-left: 40px;
+                margin-top: 1px;
+              }
+              .frame-model {
+                font-size: 8px;
+                font-weight: bold;
+                margin-bottom: 0.5px;
+                margin-left: 40px;
+              }
+              .frame-size, .frame-color {
+                font-size: 8px;
+                margin-bottom: 0.5px;
+                color: #444;
+                margin-left: 40px;
+              }
+              .qr-code {
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 40px;
+                height: 40px;
+              }
+              .brand {
+                font-size: 10px;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin-bottom: 1px;
+              }
+              .price {
+                font-size: 12px;
+                font-weight: bold;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="label-container">
+              <div class="left-side">
+                <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
+                <div class="frame-id">ID: ${frame.frameId}</div>
+                <div class="frame-model">Model: ${frame.model}</div>
+                <div class="frame-size">Size: ${frame.size || 'N/A'}</div>
+                <div class="frame-color">Color: ${frame.color}</div>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=40x40&data=${encodeURIComponent(qrData)}" class="qr-code" alt="QR Code">
+              </div>
+              <div class="right-side">
+                <div class="brand">${frame.brand}</div>
+                <div class="price">K.D. ${frame.price.toFixed(3)}</div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      
+      // Print after a short delay to ensure content is loaded
+      printWindow.addEventListener('load', () => {
+        printWindow.focus();
+        
+        try {
+          printWindow.print();
+          // Handle print dialog close or cancel
+          setTimeout(() => {
+            // Check if the print window is still open
+            if (!printWindow.closed) {
+              printWindow.close();
+            }
+            toast.success("تم إرسال البطاقة للطباعة");
+          }, 1000);
+        } catch (error) {
+          console.error("Print error:", error);
+          toast.error("حدث خطأ أثناء محاولة الطباعة");
+          printWindow.close();
+        }
+      });
     } else {
       toast.error("فشل في فتح نافذة الطباعة");
     }
@@ -310,4 +528,179 @@ export const FrameLabelTemplate: React.FC = () => {
       </Dialog>
     </div>
   );
+};
+
+// Export the singleFramePrint function to be used by FrameInventory
+export const usePrintLabel = () => {
+  const { frames } = useInventoryStore();
+  const printWindowRef = useRef<Window | null>(null);
+  
+  // Clean up print window when component unmounts
+  useEffect(() => {
+    return () => {
+      if (printWindowRef.current) {
+        printWindowRef.current.close();
+      }
+    };
+  }, []);
+  
+  const printSingleLabel = (frameId: string) => {
+    // Close any previously opened print windows
+    if (printWindowRef.current) {
+      printWindowRef.current.close();
+    }
+    
+    const frame = frames.find(f => f.frameId === frameId);
+    if (!frame) {
+      toast.error("لم يتم العثور على الإطار");
+      return;
+    }
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    printWindowRef.current = printWindow;
+    
+    if (printWindow) {
+      const qrData = JSON.stringify({
+        id: frame.frameId,
+        brand: frame.brand,
+        model: frame.model,
+        price: frame.price
+      });
+      
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Frame Label</title>
+            <style>
+              @page {
+                size: ${LABEL_WIDTH} ${LABEL_HEIGHT};
+                margin: 0;
+              }
+              body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                background: white;
+              }
+              .label-container {
+                width: ${LABEL_WIDTH};
+                height: ${LABEL_HEIGHT};
+                display: flex;
+                border: none;
+                overflow: hidden;
+                position: relative;
+                box-sizing: border-box;
+              }
+              .left-side {
+                width: 60%;
+                padding: 2px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
+                position: relative;
+              }
+              .right-side {
+                width: 40%;
+                padding: 2px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-end;
+                padding-right: 4px;
+              }
+              .logo {
+                position: absolute;
+                top: 0;
+                left: 1px;
+                width: 32px;
+                height: 24px;
+              }
+              .frame-id {
+                font-size: 8px;
+                font-weight: bold;
+                margin-bottom: 0.5px;
+                margin-left: 40px;
+                margin-top: 1px;
+              }
+              .frame-model {
+                font-size: 8px;
+                font-weight: bold;
+                margin-bottom: 0.5px;
+                margin-left: 40px;
+              }
+              .frame-size, .frame-color {
+                font-size: 8px;
+                margin-bottom: 0.5px;
+                color: #444;
+                margin-left: 40px;
+              }
+              .qr-code {
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 40px;
+                height: 40px;
+              }
+              .brand {
+                font-size: 10px;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin-bottom: 1px;
+              }
+              .price {
+                font-size: 12px;
+                font-weight: bold;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="label-container">
+              <div class="left-side">
+                <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
+                <div class="frame-id">ID: ${frame.frameId}</div>
+                <div class="frame-model">Model: ${frame.model}</div>
+                <div class="frame-size">Size: ${frame.size || 'N/A'}</div>
+                <div class="frame-color">Color: ${frame.color}</div>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=40x40&data=${encodeURIComponent(qrData)}" class="qr-code" alt="QR Code">
+              </div>
+              <div class="right-side">
+                <div class="brand">${frame.brand}</div>
+                <div class="price">K.D. ${frame.price.toFixed(3)}</div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      
+      // Print after a short delay to ensure content is loaded
+      printWindow.addEventListener('load', () => {
+        printWindow.focus();
+        
+        try {
+          printWindow.print();
+          // Handle print dialog close or cancel
+          setTimeout(() => {
+            // Check if the print window is still open
+            if (!printWindow.closed) {
+              printWindow.close();
+            }
+            toast.success("تم إرسال البطاقة للطباعة");
+          }, 1000);
+        } catch (error) {
+          console.error("Print error:", error);
+          toast.error("حدث خطأ أثناء محاولة الطباعة");
+          printWindow.close();
+        }
+      });
+    } else {
+      toast.error("فشل في فتح نافذة الطباعة");
+    }
+  };
+  
+  return { printSingleLabel };
 };

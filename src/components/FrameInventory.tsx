@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
@@ -34,7 +35,7 @@ import {
   QrCode,
   Printer 
 } from "lucide-react";
-import { FrameLabelTemplate } from "./FrameLabelTemplate";
+import { FrameLabelTemplate, usePrintLabel } from "./FrameLabelTemplate";
 
 // Frame Item Component
 const FrameItemCard = ({ frame, index, onPrintLabel }: { 
@@ -77,7 +78,10 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
           <Button 
             variant="ghost" 
             className="rounded-none h-10 text-green-600"
-            onClick={() => onPrintLabel(frame.frameId)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrintLabel(frame.frameId);
+            }}
           >
             <QrCode className="h-4 w-4 mr-1" /> طباعة
           </Button>
@@ -89,13 +93,12 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
 
 export const FrameInventory: React.FC = () => {
   const { frames, addFrame, searchFrames } = useInventoryStore();
+  const { printSingleLabel } = usePrintLabel();
   
   const [frameSearchTerm, setFrameSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchFrames>>([]);
   const [isAddFrameDialogOpen, setIsAddFrameDialogOpen] = useState(false);
   const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
-  const [selectedFrameForPrint, setSelectedFrameForPrint] = useState<string | null>(null);
-  const [isQuickPrintDialogOpen, setIsQuickPrintDialogOpen] = useState(false);
   
   const [frameBrand, setFrameBrand] = useState("");
   const [frameModel, setFrameModel] = useState("");
@@ -162,19 +165,6 @@ export const FrameInventory: React.FC = () => {
   useEffect(() => {
     setSearchResults(frames);
   }, [frames]);
-  
-  const handleQuickPrintLabel = (frameId: string) => {
-    setSelectedFrameForPrint(frameId);
-    setIsQuickPrintDialogOpen(true);
-  };
-  
-  const printSingleLabel = () => {
-    setTimeout(() => {
-      window.print();
-      setIsQuickPrintDialogOpen(false);
-      toast.success("تم إرسال البطاقة للطباعة");
-    }, 300);
-  };
   
   return (
     <div className="space-y-6">
@@ -311,7 +301,7 @@ export const FrameInventory: React.FC = () => {
               key={frame.frameId} 
               frame={frame} 
               index={index} 
-              onPrintLabel={handleQuickPrintLabel}
+              onPrintLabel={printSingleLabel}
             />
           ))}
         </div>
@@ -351,49 +341,6 @@ export const FrameInventory: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <Dialog open={isQuickPrintDialogOpen} onOpenChange={setIsQuickPrintDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>طباعة بطاقة سريعة</DialogTitle>
-            <DialogDescription>
-              طباعة بطاقة للإطار المحدد
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="p-2">
-            {selectedFrameForPrint && (
-              <div className="flex flex-col items-center">
-                <FrameLabel 
-                  frame={frames.find(f => f.frameId === selectedFrameForPrint)!} 
-                />
-                <p className="text-sm text-muted-foreground mt-4">
-                  تأكد من إعداد طابعة الملصقات وتحديد الحجم الصحيح (100مم × 16مم).
-                </p>
-              </div>
-            )}
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsQuickPrintDialogOpen(false)}>
-              إلغاء
-            </Button>
-            <Button onClick={printSingleLabel}>
-              <Printer className="h-4 w-4 mr-1" /> طباعة البطاقة
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      <div className="hidden print:block">
-        {selectedFrameForPrint && (
-          <FrameLabel 
-            frame={frames.find(f => f.frameId === selectedFrameForPrint)!} 
-          />
-        )}
-      </div>
     </div>
   );
 };
-
-import { FrameLabel } from "./FrameLabelTemplate";
