@@ -66,6 +66,7 @@
   @page {
     size: 100mm 16mm;
     margin: 0;
+    padding: 0;
   }
   
   body * {
@@ -111,4 +112,11 @@
     margin: 0;
     padding: 0;
   }
+  
+  /* Make sure each label gets its own page */
+  .label-container {
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
 }
+

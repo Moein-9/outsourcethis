@@ -47,11 +47,14 @@
   @page {
     size: 100mm 16mm landscape;
     margin: 0;
+    padding: 0;
   }
   
   body {
     margin: 0;
     padding: 0;
+    width: 100mm;
+    height: 16mm;
   }
   
   #root {
@@ -59,4 +62,16 @@
     margin: 0;
     max-width: none;
   }
+  
+  /* Hide all UI elements when printing */
+  header, nav, button, .dialog, .dialog-overlay {
+    display: none !important;
+  }
+  
+  /* Ensure page break behavior */
+  .label-container {
+    page-break-inside: avoid;
+    page-break-after: always;
+  }
 }
+

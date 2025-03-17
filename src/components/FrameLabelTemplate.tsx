@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { Button } from "@/components/ui/button";
@@ -42,25 +41,26 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
         pageBreakInside: "avoid",
       }}
     >
-      {/* Left side - Store logo, Frame ID, Model and QR Code */}
-      <div className="w-3/5 p-1 flex flex-col items-start justify-center relative">
-        <div className="absolute top-0 left-1 w-8 h-6">
-          <MoenLogoBlack className="w-8 h-6" />
+      {/* Left side - Store logo and Frame details */}
+      <div className="w-2/5 p-1 flex flex-col items-start justify-between relative">
+        <div className="mb-0.5 w-full flex items-center">
+          <MoenLogoBlack className="w-6 h-5 mr-1" />
+          <div className="text-[7px] font-bold text-black">ID: {frame.frameId}</div>
         </div>
-        <div className="text-[8px] font-bold mb-0.5 text-black mt-1 ml-10">ID: {frame.frameId}</div>
-        <div className="text-[8px] font-bold mb-0.5 text-black ml-10">Model: {frame.model}</div>
-        <div className="text-[8px] mb-0.5 text-gray-700 ml-10">Size: {frame.size || "N/A"}</div>
-        <div className="text-[8px] mb-0.5 text-gray-700 ml-10">Color: {frame.color}</div>
-        <div className="absolute right-2 top-1 bottom-1 flex items-center">
-          <QRCode 
-            value={qrData} 
-            size={40} 
-            renderAs="svg"
-            level="L"
-            includeMargin={false}
-            className="h-10 w-10"
-          />
-        </div>
+        <div className="text-[7px] font-bold mb-0.5 text-black">Model: {frame.model}</div>
+        <div className="text-[7px] mb-0.5 text-gray-700">Size: {frame.size || "N/A"}</div>
+        <div className="text-[7px] mb-0.5 text-gray-700">Color: {frame.color}</div>
+      </div>
+      
+      {/* Middle - QR Code */}
+      <div className="w-1/5 flex items-center justify-center">
+        <QRCode 
+          value={qrData} 
+          size={40} 
+          level="M"
+          includeMargin={true}
+          className="h-12 w-12"
+        />
       </div>
       
       {/* Right side - Brand and Price */}
@@ -149,56 +149,54 @@ export const FrameLabelTemplate: React.FC = () => {
                 box-sizing: border-box;
               }
               .left-side {
-                width: 60%;
-                padding: 2px;
+                width: 40%;
+                padding: 1px;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: space-between;
                 align-items: flex-start;
                 position: relative;
               }
+              .middle {
+                width: 20%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              }
               .right-side {
                 width: 40%;
-                padding: 2px;
+                padding: 1px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: flex-end;
                 padding-right: 4px;
               }
+              .logo-container {
+                margin-bottom: 0.5px;
+                width: 100%;
+                display: flex;
+                align-items: center;
+              }
               .logo {
-                position: absolute;
-                top: 0;
-                left: 1px;
-                width: 32px;
-                height: 24px;
+                width: 24px;
+                height: 20px;
+                margin-right: 4px;
+                object-fit: contain;
               }
               .frame-id {
-                font-size: 8px;
+                font-size: 7px;
                 font-weight: bold;
-                margin-bottom: 0.5px;
-                margin-left: 40px;
-                margin-top: 1px;
               }
               .frame-model {
-                font-size: 8px;
+                font-size: 7px;
                 font-weight: bold;
                 margin-bottom: 0.5px;
-                margin-left: 40px;
               }
               .frame-size, .frame-color {
-                font-size: 8px;
+                font-size: 7px;
                 margin-bottom: 0.5px;
                 color: #444;
-                margin-left: 40px;
-              }
-              .qr-code {
-                position: absolute;
-                right: 8px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 40px;
-                height: 40px;
               }
               .brand {
                 font-size: 10px;
@@ -211,13 +209,9 @@ export const FrameLabelTemplate: React.FC = () => {
                 font-weight: bold;
               }
             </style>
+            <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
           </head>
           <body>
-      `);
-
-      // Add the QR code library
-      printWindow.document.write(`
-        <script src="https://cdn.jsdelivr.net/npm/qrcode.react@3.1.0/lib/index.min.js"></script>
       `);
 
       selectedFrames.forEach(frameId => {
@@ -233,18 +227,30 @@ export const FrameLabelTemplate: React.FC = () => {
           printWindow.document.write(`
             <div class="label-container">
               <div class="left-side">
-                <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
-                <div class="frame-id">ID: ${frame.frameId}</div>
+                <div class="logo-container">
+                  <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
+                  <div class="frame-id">ID: ${frame.frameId}</div>
+                </div>
                 <div class="frame-model">Model: ${frame.model}</div>
                 <div class="frame-size">Size: ${frame.size || 'N/A'}</div>
                 <div class="frame-color">Color: ${frame.color}</div>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=40x40&data=${encodeURIComponent(qrData)}" class="qr-code" alt="QR Code">
+              </div>
+              <div class="middle">
+                <div id="qr-${frameId}"></div>
               </div>
               <div class="right-side">
                 <div class="brand">${frame.brand}</div>
                 <div class="price">K.D. ${frame.price.toFixed(3)}</div>
               </div>
             </div>
+            <script>
+              (function() {
+                const qr = qrcode(0, 'M');
+                qr.addData(${JSON.stringify(qrData)});
+                qr.make();
+                document.getElementById('qr-${frameId}').innerHTML = qr.createImgTag(3, 0);
+              })();
+            </script>
           `);
         }
       });
@@ -256,21 +262,35 @@ export const FrameLabelTemplate: React.FC = () => {
       
       printWindow.document.close();
       
-      // Print after a short delay to ensure content is loaded
       printWindow.addEventListener('load', () => {
         printWindow.focus();
         
         try {
-          printWindow.print();
-          // Handle print dialog close or cancel
-          setTimeout(() => {
-            // Check if the print window is still open
-            if (!printWindow.closed) {
-              printWindow.close();
+          // Create a MediaQueryList object
+          const mediaQueryList = printWindow.matchMedia('print');
+          
+          // Add event listener for print dialog close
+          const handlePrintChange = (mql) => {
+            if (!mql.matches && !printWindow.closed) {
+              // Print dialog was closed/canceled
+              setTimeout(() => {
+                printWindow.close();
+                setIsDialogOpen(false);
+              }, 100);
             }
-            
-            setIsDialogOpen(false);
-            toast.success(`تم إرسال ${selectedFrames.length} بطاقة للطباعة`);
+          };
+          
+          mediaQueryList.addEventListener('change', handlePrintChange);
+          
+          printWindow.print();
+          
+          // Successful print (user clicked Print)
+          setTimeout(() => {
+            // Only handle if window hasn't been closed yet by the mediaQueryList listener
+            if (!printWindow.closed) {
+              setIsDialogOpen(false);
+              toast.success(`تم إرسال ${selectedFrames.length} بطاقة للطباعة`);
+            }
           }, 1000);
         } catch (error) {
           console.error("Print error:", error);
@@ -333,56 +353,54 @@ export const FrameLabelTemplate: React.FC = () => {
                 box-sizing: border-box;
               }
               .left-side {
-                width: 60%;
-                padding: 2px;
+                width: 40%;
+                padding: 1px;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: space-between;
                 align-items: flex-start;
                 position: relative;
               }
+              .middle {
+                width: 20%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              }
               .right-side {
                 width: 40%;
-                padding: 2px;
+                padding: 1px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: flex-end;
                 padding-right: 4px;
               }
+              .logo-container {
+                margin-bottom: 0.5px;
+                width: 100%;
+                display: flex;
+                align-items: center;
+              }
               .logo {
-                position: absolute;
-                top: 0;
-                left: 1px;
-                width: 32px;
-                height: 24px;
+                width: 24px;
+                height: 20px;
+                margin-right: 4px;
+                object-fit: contain;
               }
               .frame-id {
-                font-size: 8px;
+                font-size: 7px;
                 font-weight: bold;
-                margin-bottom: 0.5px;
-                margin-left: 40px;
-                margin-top: 1px;
               }
               .frame-model {
-                font-size: 8px;
+                font-size: 7px;
                 font-weight: bold;
                 margin-bottom: 0.5px;
-                margin-left: 40px;
               }
               .frame-size, .frame-color {
-                font-size: 8px;
+                font-size: 7px;
                 margin-bottom: 0.5px;
                 color: #444;
-                margin-left: 40px;
-              }
-              .qr-code {
-                position: absolute;
-                right: 8px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 40px;
-                height: 40px;
               }
               .brand {
                 font-size: 10px;
@@ -395,41 +413,68 @@ export const FrameLabelTemplate: React.FC = () => {
                 font-weight: bold;
               }
             </style>
+            <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
           </head>
           <body>
             <div class="label-container">
               <div class="left-side">
-                <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
-                <div class="frame-id">ID: ${frame.frameId}</div>
+                <div class="logo-container">
+                  <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
+                  <div class="frame-id">ID: ${frame.frameId}</div>
+                </div>
                 <div class="frame-model">Model: ${frame.model}</div>
                 <div class="frame-size">Size: ${frame.size || 'N/A'}</div>
                 <div class="frame-color">Color: ${frame.color}</div>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=40x40&data=${encodeURIComponent(qrData)}" class="qr-code" alt="QR Code">
+              </div>
+              <div class="middle">
+                <div id="qr-single"></div>
               </div>
               <div class="right-side">
                 <div class="brand">${frame.brand}</div>
                 <div class="price">K.D. ${frame.price.toFixed(3)}</div>
               </div>
             </div>
+            <script>
+              (function() {
+                const qr = qrcode(0, 'M');
+                qr.addData(${JSON.stringify(qrData)});
+                qr.make();
+                document.getElementById('qr-single').innerHTML = qr.createImgTag(3, 0);
+              })();
+            </script>
           </body>
         </html>
       `);
       
       printWindow.document.close();
       
-      // Print after a short delay to ensure content is loaded
       printWindow.addEventListener('load', () => {
         printWindow.focus();
         
         try {
-          printWindow.print();
-          // Handle print dialog close or cancel
-          setTimeout(() => {
-            // Check if the print window is still open
-            if (!printWindow.closed) {
-              printWindow.close();
+          // Create a MediaQueryList object
+          const mediaQueryList = printWindow.matchMedia('print');
+          
+          // Add event listener for print dialog close
+          const handlePrintChange = (mql) => {
+            if (!mql.matches && !printWindow.closed) {
+              // Print dialog was closed/canceled
+              setTimeout(() => {
+                printWindow.close();
+              }, 100);
             }
-            toast.success("تم إرسال البطاقة للطباعة");
+          };
+          
+          mediaQueryList.addEventListener('change', handlePrintChange);
+          
+          printWindow.print();
+          
+          // Successful print (user clicked Print)
+          setTimeout(() => {
+            // Only handle if window hasn't been closed yet by the mediaQueryList listener
+            if (!printWindow.closed) {
+              toast.success("تم إرسال البطاقة للطباعة");
+            }
           }, 1000);
         } catch (error) {
           console.error("Print error:", error);
@@ -593,56 +638,54 @@ export const usePrintLabel = () => {
                 box-sizing: border-box;
               }
               .left-side {
-                width: 60%;
-                padding: 2px;
+                width: 40%;
+                padding: 1px;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: space-between;
                 align-items: flex-start;
                 position: relative;
               }
+              .middle {
+                width: 20%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              }
               .right-side {
                 width: 40%;
-                padding: 2px;
+                padding: 1px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: flex-end;
                 padding-right: 4px;
               }
+              .logo-container {
+                margin-bottom: 0.5px;
+                width: 100%;
+                display: flex;
+                align-items: center;
+              }
               .logo {
-                position: absolute;
-                top: 0;
-                left: 1px;
-                width: 32px;
-                height: 24px;
+                width: 24px;
+                height: 20px;
+                margin-right: 4px;
+                object-fit: contain;
               }
               .frame-id {
-                font-size: 8px;
+                font-size: 7px;
                 font-weight: bold;
-                margin-bottom: 0.5px;
-                margin-left: 40px;
-                margin-top: 1px;
               }
               .frame-model {
-                font-size: 8px;
+                font-size: 7px;
                 font-weight: bold;
                 margin-bottom: 0.5px;
-                margin-left: 40px;
               }
               .frame-size, .frame-color {
-                font-size: 8px;
+                font-size: 7px;
                 margin-bottom: 0.5px;
                 color: #444;
-                margin-left: 40px;
-              }
-              .qr-code {
-                position: absolute;
-                right: 8px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 40px;
-                height: 40px;
               }
               .brand {
                 font-size: 10px;
@@ -655,41 +698,68 @@ export const usePrintLabel = () => {
                 font-weight: bold;
               }
             </style>
+            <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
           </head>
           <body>
             <div class="label-container">
               <div class="left-side">
-                <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
-                <div class="frame-id">ID: ${frame.frameId}</div>
+                <div class="logo-container">
+                  <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
+                  <div class="frame-id">ID: ${frame.frameId}</div>
+                </div>
                 <div class="frame-model">Model: ${frame.model}</div>
                 <div class="frame-size">Size: ${frame.size || 'N/A'}</div>
                 <div class="frame-color">Color: ${frame.color}</div>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=40x40&data=${encodeURIComponent(qrData)}" class="qr-code" alt="QR Code">
+              </div>
+              <div class="middle">
+                <div id="qr-single"></div>
               </div>
               <div class="right-side">
                 <div class="brand">${frame.brand}</div>
                 <div class="price">K.D. ${frame.price.toFixed(3)}</div>
               </div>
             </div>
+            <script>
+              (function() {
+                const qr = qrcode(0, 'M');
+                qr.addData(${JSON.stringify(qrData)});
+                qr.make();
+                document.getElementById('qr-single').innerHTML = qr.createImgTag(3, 0);
+              })();
+            </script>
           </body>
         </html>
       `);
       
       printWindow.document.close();
       
-      // Print after a short delay to ensure content is loaded
       printWindow.addEventListener('load', () => {
         printWindow.focus();
         
         try {
-          printWindow.print();
-          // Handle print dialog close or cancel
-          setTimeout(() => {
-            // Check if the print window is still open
-            if (!printWindow.closed) {
-              printWindow.close();
+          // Create a MediaQueryList object
+          const mediaQueryList = printWindow.matchMedia('print');
+          
+          // Add event listener for print dialog close
+          const handlePrintChange = (mql) => {
+            if (!mql.matches && !printWindow.closed) {
+              // Print dialog was closed/canceled
+              setTimeout(() => {
+                printWindow.close();
+              }, 100);
             }
-            toast.success("تم إرسال البطاقة للطباعة");
+          };
+          
+          mediaQueryList.addEventListener('change', handlePrintChange);
+          
+          printWindow.print();
+          
+          // Successful print (user clicked Print)
+          setTimeout(() => {
+            // Only handle if window hasn't been closed yet by the mediaQueryList listener
+            if (!printWindow.closed) {
+              toast.success("تم إرسال البطاقة للطباعة");
+            }
           }, 1000);
         } catch (error) {
           console.error("Print error:", error);
