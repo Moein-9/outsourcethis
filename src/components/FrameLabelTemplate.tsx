@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Barcode, Printer, Tag } from "lucide-react";
+import { QrCode, Printer, Tag } from "lucide-react";
 import { toast } from "sonner";
 
 // Dimensions: 100mm x 16mm
@@ -32,31 +31,27 @@ const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
         pageBreakInside: "avoid",
       }}
     >
-      {/* Left side - Barcode */}
-      <div className="w-1/3 border-r border-dashed border-gray-300 p-1 flex flex-col items-center justify-center print:border-gray-400">
-        <div className="text-[6px] text-center font-bold mb-0.5 text-gray-600">{frame.brand}</div>
-        <div className="flex justify-center items-center flex-grow">
-          <Barcode className="h-7 w-7" />
+      {/* Left side - Frame ID and QR Code */}
+      <div className="w-1/4 p-1 flex flex-col items-start justify-center">
+        <div className="text-[8px] font-bold mb-0.5 text-gray-800">{frame.frameId}</div>
+        <div className="flex justify-center items-center">
+          <QrCode className="h-8 w-8" />
         </div>
-        <div className="text-[6px] text-gray-700">{frame.frameId}</div>
       </div>
       
-      {/* Middle - Main Info */}
-      <div className="w-1/3 p-1 flex flex-col justify-center items-center">
-        <div className="text-[8px] font-bold leading-tight text-center">{frame.brand}</div>
-        <div className="text-[7px] leading-tight text-center">{frame.model}</div>
-        <div className="text-[7px] text-gray-600 leading-tight">{frame.color}</div>
-        <div className="text-[7px] text-gray-600 leading-tight">{frame.size || "N/A"}</div>
-        <div className="text-[10px] font-bold mt-0.5">{frame.price.toFixed(2)} KWD</div>
+      {/* Middle - Brand and Price */}
+      <div className="w-2/4 p-1 flex flex-col justify-center items-center">
+        <div className="text-[10px] font-bold leading-tight text-center uppercase">{frame.brand}</div>
+        <div className="text-[8px] leading-tight text-center">{frame.model}</div>
+        <div className="text-[8px] text-gray-600 leading-tight">{frame.color}</div>
+        <div className="text-[11px] font-bold mt-0.5">K.D. {frame.price.toFixed(3)}</div>
       </div>
       
-      {/* Right side - Barcode (mirror of left) */}
-      <div className="w-1/3 border-l border-dashed border-gray-300 p-1 flex flex-col items-center justify-center print:border-gray-400">
-        <div className="text-[6px] text-center font-bold mb-0.5 text-gray-600">{frame.brand}</div>
-        <div className="flex justify-center items-center flex-grow">
-          <Barcode className="h-7 w-7" />
+      {/* Right side - Tag section (as seen in example) */}
+      <div className="w-1/4 flex items-center justify-center relative">
+        <div className="absolute right-0 top-0 bottom-0 w-4 border-l border-dashed border-gray-300" 
+          style={{ borderTopRightRadius: "0.5rem", borderBottomRightRadius: "0.5rem" }}>
         </div>
-        <div className="text-[6px] text-gray-700">{frame.frameId}</div>
       </div>
     </div>
   );
