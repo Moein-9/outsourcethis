@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export const Dashboard: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -25,6 +27,11 @@ export const Dashboard: React.FC = () => {
           <p className="mt-2 text-gray-600">
             نظام إدارة متكامل للعيادات والمستشفيات
           </p>
+          <div className="mt-4">
+            <Link to="/reports">
+              <Button>صفحة التقارير</Button>
+            </Link>
+          </div>
         </div>
         <div className="flex items-center gap-3 bg-white/80 px-4 py-2 rounded-md shadow-sm">
           <Clock className="h-5 w-5 text-primary" />
