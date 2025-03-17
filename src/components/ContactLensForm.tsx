@@ -2,15 +2,20 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Eye } from "lucide-react";
+import { Eye, AlertTriangle } from "lucide-react";
 import { ContactLensRx } from "@/store/patientStore";
 
 interface ContactLensFormProps {
   rxData: ContactLensRx;
   onChange: (data: ContactLensRx) => void;
+  showMissingRxWarning?: boolean;
 }
 
-export const ContactLensForm: React.FC<ContactLensFormProps> = ({ rxData, onChange }) => {
+export const ContactLensForm: React.FC<ContactLensFormProps> = ({ 
+  rxData, 
+  onChange,
+  showMissingRxWarning = false
+}) => {
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
     const updatedRx = {
       ...rxData,
@@ -41,6 +46,15 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({ rxData, onChan
           وصفة العدسات اللاصقة
         </h4>
       </div>
+
+      {showMissingRxWarning && (
+        <div className="p-3 mb-4 bg-yellow-50 border border-yellow-200 rounded-lg text-right flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 text-yellow-600" />
+          <p className="text-yellow-700">
+            لا توجد وصفة عدسات لاصقة لهذا العميل. يرجى إضافة وصفة عدسات لاصقة في ملف العميل.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-8 mb-4">
         <div className="space-y-5">

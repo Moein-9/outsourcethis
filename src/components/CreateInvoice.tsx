@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
-import { useInventoryStore } from "@/store/inventoryStore";
+import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFo
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensSelector } from "@/components/ContactLensSelector";
 import { ContactLensForm } from "@/components/ContactLensForm";
+import { LensSelector } from "@/components/LensSelector";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { 
@@ -39,12 +40,10 @@ const CreateInvoice: React.FC = () => {
   const [manualPhone, setManualPhone] = useState("");
   const [rxVisible, setRxVisible] = useState(false);
   
-  // Lens & Coating states
+  // Lens & Coating states for glasses
   const [skipFrame, setSkipFrame] = useState(false);
-  const [lensType, setLensType] = useState("");
-  const [lensPrice, setLensPrice] = useState(0);
-  const [coating, setCoating] = useState("");
-  const [coatingPrice, setCoatingPrice] = useState(0);
+  const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
+  const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
   
   // Frame states
   const [frameSearch, setFrameSearch] = useState("");
@@ -99,8 +98,13 @@ const CreateInvoice: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [remaining, setRemaining] = useState(0);
   
+  // State for showing missing RX warning
+  const [showMissingRxWarning, setShowMissingRxWarning] = useState(false);
+  
   // Update totals when dependencies change
   useEffect(() => {
+    const lensPrice = selectedLensType?.price || 0;
+    const coatingPrice = selectedCoating?.price || 0;
     const frameCost = skipFrame ? 0 : selectedFrame.price;
     const totalCost = lensPrice + coatingPrice + frameCost - discount;
     const calculatedTotal = totalCost > 0 ? totalCost : 0;
@@ -109,7 +113,7 @@ const CreateInvoice: React.FC = () => {
     setFrameTotal(frameCost);
     setTotal(calculatedTotal);
     setRemaining(calculatedRemaining);
-  }, [lensPrice, coatingPrice, selectedFrame.price, skipFrame, discount, deposit]);
+  }, [selectedLensType, selectedCoating, selectedFrame.price, skipFrame, discount, deposit]);
   
   // Handle patient search
   const handlePatientSearch = () => {
@@ -161,8 +165,13 @@ const CreateInvoice: React.FC = () => {
     
     // If the patient has contact lens RX data and the invoice type is contacts,
     // load that data into the contact lens form
-    if (invoiceType === "contacts" && patient.contactLensRx) {
-      setContactLensRx(patient.contactLensRx);
+    if (invoiceType === "contacts") {
+      if (patient.contactLensRx) {
+        setContactLensRx(patient.contactLensRx);
+        setShowMissingRxWarning(false);
+      } else {
+        setShowMissingRxWarning(true);
+      }
     }
   };
   
@@ -176,6 +185,21 @@ const CreateInvoice: React.FC = () => {
       price: frame.price
     });
     setFrameResults([]);
+  };
+  
+  // Handle lens type selection
+  const handleLensTypeSelect = (lens: LensType | null) => {
+    setSelectedLensType(lens);
+  };
+  
+  // Handle coating selection
+  const handleCoatingSelect = (coating: LensCoating | null) => {
+    setSelectedCoating(coating);
+  };
+  
+  // Handle skip frame change
+  const handleSkipFrameChange = (skip: boolean) => {
+    setSkipFrame(skip);
   };
   
   // Add a new frame to inventory
@@ -287,7 +311,7 @@ const CreateInvoice: React.FC = () => {
       return;
     }
     
-    if (invoiceType === "glasses" && !lensType) {
+    if (invoiceType === "glasses" && !selectedLensType && !skipFrame) {
       toast({
         title: "خطأ",
         description: "الرجاء اختيار نوع العدسة.",
@@ -323,11 +347,11 @@ const CreateInvoice: React.FC = () => {
       patientName,
       patientPhone,
       
-      lensType,
-      lensPrice,
+      lensType: selectedLensType?.name || "",
+      lensPrice: selectedLensType?.price || 0,
       
-      coating,
-      coatingPrice,
+      coating: selectedCoating?.name || "",
+      coatingPrice: selectedCoating?.price || 0,
       
       frameBrand: skipFrame ? "" : selectedFrame.brand,
       frameModel: skipFrame ? "" : selectedFrame.model,
@@ -363,10 +387,8 @@ const CreateInvoice: React.FC = () => {
     setRxVisible(false);
     
     setSkipFrame(false);
-    setLensType("");
-    setLensPrice(0);
-    setCoating("");
-    setCoatingPrice(0);
+    setSelectedLensType(null);
+    setSelectedCoating(null);
     
     setFrameSearch("");
     setFrameResults([]);
@@ -401,6 +423,8 @@ const CreateInvoice: React.FC = () => {
         dia: "14.2"
       }
     });
+    
+    setShowMissingRxWarning(false);
   };
   
   // Create a mock invoice for previews
@@ -410,10 +434,10 @@ const CreateInvoice: React.FC = () => {
     patientName: currentPatient?.name || manualName || "Customer Name",
     patientPhone: currentPatient?.phone || manualPhone || "",
     patientId: currentPatient?.patientId,
-    lensType: lensType,
-    lensPrice: lensPrice,
-    coating: coating,
-    coatingPrice: coatingPrice,
+    lensType: selectedLensType?.name || "",
+    lensPrice: selectedLensType?.price || 0,
+    coating: selectedCoating?.name || "",
+    coatingPrice: selectedCoating?.price || 0,
     frameBrand: skipFrame ? "" : selectedFrame.brand,
     frameModel: skipFrame ? "" : selectedFrame.model,
     frameColor: skipFrame ? "" : selectedFrame.color,
@@ -588,23 +612,12 @@ const CreateInvoice: React.FC = () => {
                         </div>
                       )}
                       
-                      {rxVisible && invoiceType === "contacts" && currentPatient.contactLensRx && (
+                      {rxVisible && invoiceType === "contacts" && (
                         <div className="mt-3">
                           <ContactLensForm 
                             rxData={contactLensRx}
                             onChange={handleContactLensRxChange}
-                          />
-                        </div>
-                      )}
-                      
-                      {rxVisible && invoiceType === "contacts" && !currentPatient.contactLensRx && (
-                        <div className="p-3 mt-3 bg-yellow-50 border border-yellow-200 rounded-lg text-right">
-                          <p className="text-yellow-700">
-                            لا توجد وصفة عدسات لاصقة لهذا العميل. يرجى إضافة وصفة عدسات لاصقة في ملف العميل.
-                          </p>
-                          <ContactLensForm 
-                            rxData={contactLensRx}
-                            onChange={handleContactLensRxChange}
+                            showMissingRxWarning={showMissingRxWarning}
                           />
                         </div>
                       )}
@@ -645,67 +658,21 @@ const CreateInvoice: React.FC = () => {
 
           {invoiceType === "glasses" ? (
             <>
-              {/* 2) Lenses & Coating */}
+              {/* 2) Lenses & Coating - Updated to use LensSelector */}
               <div className="bg-white rounded-lg p-6 border shadow-sm">
                 <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
                   <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
                     <Eye className="w-5 h-5" />
-                    ٢) العدسات
+                    ٢) العدسات الطبية
                   </h3>
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    <Checkbox 
-                      id="skipFrameCheck" 
-                      checked={skipFrame} 
-                      onCheckedChange={(checked) => setSkipFrame(checked === true)} 
-                    />
-                    <Label 
-                      htmlFor="skipFrameCheck" 
-                      className="font-normal text-sm mr-2"
-                    >
-                      عدسات فقط (بدون إطار)
-                    </Label>
-                  </div>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="lensType" className="text-muted-foreground block text-right">نوع العدسة:</Label>
-                    <select
-                      id="lensType"
-                      className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-right"
-                      value={lensType}
-                      onChange={(e) => {
-                        setLensType(e.target.value);
-                        const option = e.target.options[e.target.selectedIndex];
-                        setLensPrice(parseFloat(option.getAttribute("data-price") || "0"));
-                      }}
-                    >
-                      <option value="" data-price="0">-- اختر --</option>
-                      <option value="Single Vision Distance" data-price="20">Single Vision Distance (20 KWD)</option>
-                      <option value="Single Vision Reading" data-price="15">Single Vision Reading (15 KWD)</option>
-                      <option value="Progressive" data-price="40">Progressive (40 KWD)</option>
-                      <option value="Bifocal" data-price="25">Bifocal (25 KWD)</option>
-                    </select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="coatingSelect" className="text-muted-foreground block text-right">الطلاء:</Label>
-                    <select
-                      id="coatingSelect"
-                      className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-right"
-                      value={coating}
-                      onChange={(e) => {
-                        setCoating(e.target.value);
-                        const option = e.target.options[e.target.selectedIndex];
-                        setCoatingPrice(parseFloat(option.getAttribute("data-price") || "0"));
-                      }}
-                    >
-                      <option value="" data-price="0">بدون (0 KWD)</option>
-                      <option value="مضاد للانعكاس" data-price="5">مضاد للانعكاس (5 KWD)</option>
-                      <option value="حماية شاشة" data-price="7">حماية شاشة (7 KWD)</option>
-                    </select>
-                  </div>
-                </div>
+                <LensSelector 
+                  onSelectLensType={handleLensTypeSelect}
+                  onSelectCoating={handleCoatingSelect}
+                  skipLens={skipFrame}
+                  onSkipLensChange={handleSkipFrameChange}
+                />
               </div>
 
               {/* 3) Frame Section */}
@@ -1091,31 +1058,31 @@ const CreateInvoice: React.FC = () => {
             </h3>
             
             <div className="space-y-3">
-              {lensType && (
+              {selectedLensType && (
                 <div className="flex justify-between text-right">
                   <span className="text-muted-foreground">العدسة:</span>
-                  <span className="font-medium">{lensType}</span>
+                  <span className="font-medium">{selectedLensType.name}</span>
                 </div>
               )}
               
-              {lensPrice > 0 && (
+              {selectedLensType?.price > 0 && (
                 <div className="flex justify-between text-right">
                   <span className="text-muted-foreground">سعر العدسة:</span>
-                  <span>{lensPrice.toFixed(2)} د.ك</span>
+                  <span>{selectedLensType.price.toFixed(2)} د.ك</span>
                 </div>
               )}
               
-              {coating && (
+              {selectedCoating && (
                 <div className="flex justify-between text-right">
                   <span className="text-muted-foreground">الطلاء:</span>
-                  <span className="font-medium">{coating}</span>
+                  <span className="font-medium">{selectedCoating.name}</span>
                 </div>
               )}
               
-              {coatingPrice > 0 && (
+              {selectedCoating?.price > 0 && (
                 <div className="flex justify-between text-right">
                   <span className="text-muted-foreground">سعر الطلاء:</span>
-                  <span>{coatingPrice.toFixed(2)} د.ك</span>
+                  <span>{selectedCoating.price.toFixed(2)} د.ك</span>
                 </div>
               )}
               
@@ -1192,8 +1159,8 @@ const CreateInvoice: React.FC = () => {
               patientName={currentPatient?.name || manualName}
               patientPhone={currentPatient?.phone || manualPhone}
               rx={currentPatient?.rx}
-              lensType={lensType}
-              coating={coating}
+              lensType={selectedLensType?.name || ""}
+              coating={selectedCoating?.name || ""}
               frame={!skipFrame ? selectedFrame : undefined}
             />
           </div>
