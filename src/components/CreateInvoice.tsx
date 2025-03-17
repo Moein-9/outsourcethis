@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -10,10 +11,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensSelector } from "@/components/ContactLensSelector";
+import { ContactLensForm } from "@/components/ContactLensForm";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { 
-  User, Glasses, Package, Receipt, CreditCard, Eye, Search, 
+  User, Glasses, Package, FileText, CreditCard, Eye, Search, 
   Banknote, Plus, PackageCheck, EyeOff, ExternalLink,
   ClipboardCheck, BadgePercent, DollarSign, Printer, CreditCard as CardIcon
 } from "lucide-react";
@@ -72,6 +74,24 @@ const CreateInvoice: React.FC = () => {
   // Print states
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
+  
+  // Contact lens prescription states
+  const [contactLensRx, setContactLensRx] = useState({
+    rightEye: {
+      sphere: "-",
+      cylinder: "-",
+      axis: "-",
+      bc: "-",
+      dia: "14.2"
+    },
+    leftEye: {
+      sphere: "-",
+      cylinder: "-",
+      axis: "-",
+      bc: "-",
+      dia: "14.2"
+    }
+  });
   
   // Calculated totals
   const [frameTotal, setFrameTotal] = useState(0);
@@ -137,6 +157,12 @@ const CreateInvoice: React.FC = () => {
     setCurrentPatient(patient);
     setPatientResults([]);
     setRxVisible(true);
+    
+    // If the patient has contact lens RX data and the invoice type is contacts,
+    // load that data into the contact lens form
+    if (invoiceType === "contacts" && patient.contactLensRx) {
+      setContactLensRx(patient.contactLensRx);
+    }
   };
   
   // Select a frame from search results
@@ -231,6 +257,11 @@ const CreateInvoice: React.FC = () => {
     setTimeout(() => {
       window.print();
     }, 500);
+  };
+  
+  // Contact lens RX handler
+  const handleContactLensRxChange = (rxData: typeof contactLensRx) => {
+    setContactLensRx(rxData);
   };
   
   // Save invoice
@@ -352,6 +383,23 @@ const CreateInvoice: React.FC = () => {
     setDeposit(0);
     setPaymentMethod("");
     setAuthNumber("");
+    
+    setContactLensRx({
+      rightEye: {
+        sphere: "-",
+        cylinder: "-",
+        axis: "-",
+        bc: "-",
+        dia: "14.2"
+      },
+      leftEye: {
+        sphere: "-",
+        cylinder: "-",
+        axis: "-",
+        bc: "-",
+        dia: "14.2"
+      }
+    });
   };
   
   // Create a mock invoice for previews
@@ -382,7 +430,7 @@ const CreateInvoice: React.FC = () => {
     <div className="py-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Receipt className="w-6 h-6 text-primary" />
+          <FileText className="w-6 h-6 text-primary" />
           إنشاء فاتورة
         </h2>
         <Tabs 
@@ -445,7 +493,7 @@ const CreateInvoice: React.FC = () => {
                         value={patientSearch}
                         onChange={(e) => setPatientSearch(e.target.value)}
                         placeholder="اكتب للبحث..."
-                        className="flex-1"
+                        className="flex-1 text-right"
                       />
                       <Button onClick={handlePatientSearch} className="gap-1">
                         <Search className="w-4 h-4" />
@@ -462,8 +510,8 @@ const CreateInvoice: React.FC = () => {
                           className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
                           onClick={() => selectPatient(patient)}
                         >
-                          <div className="font-medium">{patient.name}</div>
-                          <div className="text-sm text-muted-foreground">{patient.phone}</div>
+                          <div className="font-medium text-right">{patient.name}</div>
+                          <div className="text-sm text-muted-foreground text-right">{patient.phone}</div>
                         </div>
                       ))}
                     </div>
@@ -477,7 +525,7 @@ const CreateInvoice: React.FC = () => {
                           <span>{currentPatient.name}</span>
                         </div>
                         <div className="flex justify-between mb-2">
-                          <span className="font-semibold">الهات��:</span>
+                          <span className="font-semibold">الهاتف:</span>
                           <span dir="ltr">{currentPatient.phone}</span>
                         </div>
                         <div className="flex justify-between">
@@ -550,6 +598,7 @@ const CreateInvoice: React.FC = () => {
                     id="manualName"
                     value={manualName}
                     onChange={(e) => setManualName(e.target.value)}
+                    className="text-right"
                   />
                 </div>
                 <div className="space-y-2">
@@ -558,8 +607,16 @@ const CreateInvoice: React.FC = () => {
                     id="manualPhone"
                     value={manualPhone}
                     onChange={(e) => setManualPhone(e.target.value)}
+                    className="text-right"
                   />
                 </div>
+                
+                {invoiceType === "contacts" && (
+                  <ContactLensForm 
+                    rxData={contactLensRx}
+                    onChange={handleContactLensRxChange}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -593,7 +650,7 @@ const CreateInvoice: React.FC = () => {
                     <Label htmlFor="lensType" className="text-muted-foreground">نوع العدسة:</Label>
                     <select
                       id="lensType"
-                      className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
+                      className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-right"
                       value={lensType}
                       onChange={(e) => {
                         setLensType(e.target.value);
@@ -613,7 +670,7 @@ const CreateInvoice: React.FC = () => {
                     <Label htmlFor="coatingSelect" className="text-muted-foreground">الطلاء:</Label>
                     <select
                       id="coatingSelect"
-                      className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
+                      className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-right"
                       value={coating}
                       onChange={(e) => {
                         setCoating(e.target.value);
@@ -648,7 +705,7 @@ const CreateInvoice: React.FC = () => {
                           value={frameSearch}
                           onChange={(e) => setFrameSearch(e.target.value)}
                           placeholder="مثال: RayBan..."
-                          className="flex-1"
+                          className="flex-1 text-right"
                         />
                         <Button onClick={handleFrameSearch} className="gap-1">
                           <Search className="w-4 h-4" />
@@ -719,11 +776,11 @@ const CreateInvoice: React.FC = () => {
                           </thead>
                           <tbody>
                             <tr>
-                              <td className="p-1">{selectedFrame.brand}</td>
-                              <td className="p-1">{selectedFrame.model}</td>
-                              <td className="p-1">{selectedFrame.color}</td>
-                              <td className="p-1">{selectedFrame.size}</td>
-                              <td className="p-1">{selectedFrame.price.toFixed(2)}</td>
+                              <td className="p-1 text-right">{selectedFrame.brand}</td>
+                              <td className="p-1 text-right">{selectedFrame.model}</td>
+                              <td className="p-1 text-right">{selectedFrame.color}</td>
+                              <td className="p-1 text-right">{selectedFrame.size}</td>
+                              <td className="p-1 text-right">{selectedFrame.price.toFixed(2)}</td>
                             </tr>
                           </tbody>
                         </table>
@@ -750,6 +807,7 @@ const CreateInvoice: React.FC = () => {
                                 id="newBrand"
                                 value={newBrand}
                                 onChange={(e) => setNewBrand(e.target.value)}
+                                className="text-right"
                               />
                             </div>
                             <div className="space-y-1">
@@ -758,6 +816,7 @@ const CreateInvoice: React.FC = () => {
                                 id="newModel"
                                 value={newModel}
                                 onChange={(e) => setNewModel(e.target.value)}
+                                className="text-right"
                               />
                             </div>
                           </div>
@@ -768,6 +827,7 @@ const CreateInvoice: React.FC = () => {
                                 id="newColor"
                                 value={newColor}
                                 onChange={(e) => setNewColor(e.target.value)}
+                                className="text-right"
                               />
                             </div>
                             <div className="space-y-1">
@@ -777,6 +837,7 @@ const CreateInvoice: React.FC = () => {
                                 value={newSize}
                                 onChange={(e) => setNewSize(e.target.value)}
                                 placeholder="مثال: 51-18-145"
+                                className="text-right"
                               />
                             </div>
                           </div>
@@ -789,6 +850,7 @@ const CreateInvoice: React.FC = () => {
                                 step="0.01"
                                 value={newPrice}
                                 onChange={(e) => setNewPrice(e.target.value)}
+                                className="text-right"
                               />
                             </div>
                             <div className="space-y-1">
@@ -799,6 +861,7 @@ const CreateInvoice: React.FC = () => {
                                 step="1"
                                 value={newQty}
                                 onChange={(e) => setNewQty(e.target.value)}
+                                className="text-right"
                               />
                             </div>
                           </div>
@@ -836,7 +899,7 @@ const CreateInvoice: React.FC = () => {
                     step="0.01"
                     value={discount || ""}
                     onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                    className="pl-10 border-primary/20 focus:border-primary"
+                    className="pl-10 border-primary/20 focus:border-primary text-right"
                   />
                 </div>
                 
@@ -851,7 +914,7 @@ const CreateInvoice: React.FC = () => {
                     step="0.01"
                     value={deposit || ""}
                     onChange={(e) => setDeposit(parseFloat(e.target.value) || 0)}
-                    className="pl-10 border-primary/20 focus:border-primary"
+                    className="pl-10 border-primary/20 focus:border-primary text-right"
                   />
                 </div>
               </div>
@@ -959,7 +1022,7 @@ const CreateInvoice: React.FC = () => {
                     value={authNumber}
                     onChange={(e) => setAuthNumber(e.target.value)}
                     placeholder="xxxxxx"
-                    className="pl-10"
+                    className="pl-10 text-right"
                   />
                 </div>
               </div>
@@ -1001,7 +1064,7 @@ const CreateInvoice: React.FC = () => {
         <div className="space-y-5">
           <div className="bg-white rounded-lg p-6 border shadow-sm sticky top-5">
             <h3 className="text-lg font-semibold mb-4 text-primary flex items-center gap-2">
-              <Receipt className="w-5 h-5" />
+              <FileText className="w-5 h-5" />
               ملخص الفاتورة
             </h3>
             
@@ -1149,4 +1212,3 @@ const CreateInvoice: React.FC = () => {
 };
 
 export default CreateInvoice;
-
