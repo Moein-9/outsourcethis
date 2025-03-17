@@ -23,6 +23,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Calendar } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const RemainingPayments = () => {
   const { invoices, addPartialPayment } = useInvoiceStore();
@@ -32,6 +33,7 @@ const RemainingPayments = () => {
     format(new Date(), "yyyy-MM-dd")
   );
   const [invoicesWithBalance, setInvoicesWithBalance] = useState<any[]>([]);
+  const { t, language } = useLanguage();
 
   // Filter invoices with remaining balance
   useEffect(() => {
@@ -49,13 +51,13 @@ const RemainingPayments = () => {
 
   const handlePayment = () => {
     if (!selectedInvoice || !paymentAmount.trim()) {
-      toast.error("الرجاء إدخال مبلغ الدفع");
+      toast.error(t("enter_amount"));
       return;
     }
 
     const amount = parseFloat(paymentAmount);
     if (isNaN(amount) || amount <= 0) {
-      toast.error("الرجاء إدخال مبلغ صحيح");
+      toast.error(t("valid_amount"));
       return;
     }
 
@@ -66,7 +68,7 @@ const RemainingPayments = () => {
       (invoice.payments?.reduce((sum, p) => sum + p.amount, 0) || 0) + amount;
     
     if (totalPaid > invoice.total) {
-      toast.error("مبلغ الدفع يتجاوز المبلغ المتبقي");
+      toast.error(t("exceeds_amount"));
       return;
     }
 
@@ -77,7 +79,7 @@ const RemainingPayments = () => {
       method: "cash", // Default payment method
     });
 
-    toast.success(`تم تسجيل دفعة بقيمة ${amount} KWD`);
+    toast.success(`${t("payment_registered")} ${amount} KWD`);
     setSelectedInvoice(null);
     setPaymentAmount("");
   };
@@ -102,11 +104,11 @@ const RemainingPayments = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold">الدفعات المتبقية</h2>
-          <p className="text-muted-foreground">الفواتير مع دفعات متبقية</p>
+          <h2 className="text-3xl font-bold">{t("remaining_payments")}</h2>
+          <p className="text-muted-foreground">{t("invoices_with_balance")}</p>
         </div>
         <Badge variant="outline" className="text-base py-1.5">
-          {invoicesWithBalance.length} فاتورة
+          {invoicesWithBalance.length} {t("invoice")}
         </Badge>
       </div>
 
@@ -116,17 +118,17 @@ const RemainingPayments = () => {
             <Card key={invoice.invoiceId} className="border-orange-200 shadow-sm">
               <CardHeader className="bg-orange-50 border-b border-orange-100">
                 <CardTitle className="text-orange-800 flex justify-between items-center">
-                  <span>فاتورة #{invoice.invoiceNumber || invoice.invoiceId.slice(0, 8)}</span>
+                  <span>{t("invoice")} #{invoice.invoiceNumber || invoice.invoiceId.slice(0, 8)}</span>
                   <Badge 
                     variant={!invoice.isPaid ? "outline" : "secondary"}
                     className={!invoice.isPaid ? "bg-orange-100 text-orange-800 border-orange-200" : ""}
                   >
-                    {invoice.isPaid ? "مدفوعة" : (invoice.payments?.length > 0 ? "مدفوعة جزئياً" : "غير مدفوعة")}
+                    {invoice.isPaid ? t("paid") : (invoice.payments?.length > 0 ? t("partially_paid") : t("unpaid"))}
                   </Badge>
                 </CardTitle>
                 <CardDescription className="text-orange-600 flex justify-between">
                   <span>
-                    اسم العميل: {invoice.patientName}
+                    {t("client_name")}: {invoice.patientName}
                   </span>
                   <span className="text-orange-700 font-medium">
                     {formatDate(invoice.createdAt)}
@@ -136,19 +138,19 @@ const RemainingPayments = () => {
               <CardContent className="pt-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">إجمالي الفاتورة:</span>
+                    <span className="text-muted-foreground">{t("invoice_total")}:</span>
                     <span className="font-semibold">{invoice.total.toFixed(2)} KWD</span>
                   </div>
                   
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">المدفوع:</span>
+                    <span className="text-muted-foreground">{t("paid_amount")}:</span>
                     <span className="font-semibold">
                       {(invoice.payments?.reduce((sum, p) => sum + p.amount, 0) || 0).toFixed(2)} KWD
                     </span>
                   </div>
                   
                   <div className="flex justify-between pt-2 border-t">
-                    <span className="font-medium text-orange-700">المبلغ المتبقي:</span>
+                    <span className="font-medium text-orange-700">{t("remaining_amount")}:</span>
                     <span className="font-bold text-orange-700">
                       {calculateRemainingAmount(invoice).toFixed(2)} KWD
                     </span>
@@ -159,7 +161,7 @@ const RemainingPayments = () => {
                   className="w-full mt-4 bg-orange-600 hover:bg-orange-700"
                   onClick={() => setSelectedInvoice(invoice.invoiceId)}
                 >
-                  إضافة دفعة
+                  {t("add_payment")}
                 </Button>
               </CardContent>
             </Card>
@@ -168,7 +170,7 @@ const RemainingPayments = () => {
       ) : (
         <Card className="border-orange-200 shadow-sm">
           <CardContent className="pt-6 pb-6 text-center">
-            <p className="text-orange-600 text-lg">لا توجد فواتير بدفعات متبقية</p>
+            <p className="text-orange-600 text-lg">{t("no_invoices")}</p>
           </CardContent>
         </Card>
       )}
@@ -176,17 +178,17 @@ const RemainingPayments = () => {
       <Dialog open={!!selectedInvoice} onOpenChange={(open) => !open && setSelectedInvoice(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>إضافة دفعة</DialogTitle>
+            <DialogTitle>{t("add_payment_title")}</DialogTitle>
             <DialogDescription>
               {selectedInvoice &&
-                `المبلغ المتبقي: ${calculateRemainingAmount(
+                `${t("remaining_balance")}: ${calculateRemainingAmount(
                   invoices.find((i) => i.invoiceId === selectedInvoice)
                 ).toFixed(2)} KWD`}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="paymentAmount">مبلغ الدفعة</Label>
+              <Label htmlFor="paymentAmount">{t("payment_amount")}</Label>
               <Input
                 id="paymentAmount"
                 placeholder="0.00"
@@ -201,7 +203,7 @@ const RemainingPayments = () => {
             <div className="space-y-2">
               <Label htmlFor="paymentDate" className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                تاريخ الدفعة
+                {t("payment_date")}
               </Label>
               <Input
                 id="paymentDate"
@@ -214,13 +216,13 @@ const RemainingPayments = () => {
           </div>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setSelectedInvoice(null)}>
-              إلغاء
+              {t("cancel")}
             </Button>
             <Button 
               className="bg-orange-600 hover:bg-orange-700"
               onClick={handlePayment}
             >
-              تأكيد الدفعة
+              {t("confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
