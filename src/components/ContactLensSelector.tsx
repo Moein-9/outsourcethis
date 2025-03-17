@@ -21,7 +21,6 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { ContactLensForm } from "./ContactLensForm";
 import { ContactLensRx } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
 
@@ -47,32 +46,13 @@ interface ContactLensSelectorProps {
   initialRxData?: ContactLensRx;
 }
 
-const emptyContactLensRx: ContactLensRx = {
-  rightEye: {
-    sphere: "-",
-    cylinder: "-",
-    axis: "-",
-    bc: "-",
-    dia: "-"
-  },
-  leftEye: {
-    sphere: "-",
-    cylinder: "-",
-    axis: "-",
-    bc: "-",
-    dia: "-"
-  }
-};
-
 export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSelect, initialRxData }) => {
   const { contactLenses, searchContactLenses } = useInventoryStore();
   
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ContactLensItem[]>(contactLenses);
   const [selectedLenses, setSelectedLenses] = useState<ContactLensItem[]>([]);
-  // Removing hasExistingPatient state as we're not showing the toggle anymore
-  const [showRxForm, setShowRxForm] = useState(true);
-  const [rxData, setRxData] = useState<ContactLensRx>(initialRxData || emptyContactLensRx);
+  const [rxData, setRxData] = useState<ContactLensRx | undefined>(initialRxData);
   
   const [filterBrand, setFilterBrand] = useState<string>("all");
   const [filtersVisible, setFiltersVisible] = useState(false);
@@ -118,7 +98,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     
     onSelect({
       items: updatedSelection,
-      rxData: rxData
+      rxData
     });
     
     toast(`تمت إضافة ${lens.brand} ${lens.type} بنجاح`);
@@ -130,23 +110,14 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     
     onSelect({
       items: updatedSelection,
-      rxData: rxData
-    });
-  };
-  
-  const handleRxChange = (newRxData: ContactLensRx) => {
-    setRxData(newRxData);
-    
-    onSelect({
-      items: selectedLenses,
-      rxData: newRxData
+      rxData
     });
   };
   
   const handleConfirmSelection = () => {
     onSelect({
       items: selectedLenses,
-      rxData: rxData
+      rxData
     });
     
     toast(`تمت إضافة ${selectedLenses.length} عدسة للفاتورة`);
@@ -177,27 +148,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
           )}
         </div>
       </div>
-
-      {showRxForm && (
-        <Card className="border-blue-200 shadow-sm overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 py-3">
-            <CardTitle className="text-blue-800 flex items-center gap-2 text-base">
-              <Eye className="h-4 w-4 text-blue-600" />
-              وصفة العدسات اللاصقة
-            </CardTitle>
-            <CardDescription className="text-blue-600">
-              أدخل بيانات الوصفة الطبية للعدسات اللاصقة
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4">
-            <ContactLensForm
-              rxData={rxData}
-              onChange={handleRxChange}
-              showMissingRxWarning={false}
-            />
-          </CardContent>
-        </Card>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
@@ -427,4 +377,3 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     </div>
   );
 };
-
