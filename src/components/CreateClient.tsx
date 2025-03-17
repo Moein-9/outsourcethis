@@ -263,16 +263,16 @@ export const CreateClient: React.FC = () => {
       <h2 className="text-2xl font-bold mb-4">إنشاء عميل</h2>
       
       <Tabs defaultValue="glasses" value={activeTab} onValueChange={(value) => setActiveTab(value as "glasses" | "contactLenses")}>
-        <TabsList className="mb-6 w-full md:w-auto bg-slate-100 border-slate-200 p-1">
+        <TabsList className="mb-6 w-full md:w-auto bg-slate-100 border-slate-200 p-1 shadow-md">
           <TabsTrigger 
             value="glasses" 
-            className="px-6 py-3 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-white"
+            className="px-8 py-3 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             نظارات طبية
           </TabsTrigger>
           <TabsTrigger 
             value="contactLenses" 
-            className="px-6 py-3 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-white"
+            className="px-8 py-3 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             عدسات لاصقة
           </TabsTrigger>
@@ -280,7 +280,7 @@ export const CreateClient: React.FC = () => {
       
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Right: Patient Information - Shared between both tabs */}
-          <div className="order-2 md:order-1 bg-card rounded-md p-4 border">
+          <div className="order-1 md:order-1 bg-card rounded-md p-4 border">
             <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
               المعلومات الشخصية
             </div>
@@ -369,7 +369,7 @@ export const CreateClient: React.FC = () => {
           </div>
           
           {/* Left: Prescription Content - Different for each tab */}
-          <div className="order-1 md:order-2">
+          <div className="order-2 md:order-2">
             <TabsContent value="glasses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
                 <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
