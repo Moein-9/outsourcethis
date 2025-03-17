@@ -24,7 +24,7 @@ interface ContactLensSelection {
 }
 
 interface ContactLensSelectorProps {
-  onSelect: (selection: Contact) => void;
+  onSelect: (selection: ContactLensSelection) => void;
 }
 
 const mockContactLenses: ContactLensItem[] = [
