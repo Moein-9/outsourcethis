@@ -6,6 +6,7 @@ import { CreateClient } from "@/components/CreateClient";
 import { CreateInvoice } from "@/components/CreateInvoice";
 import { Inventory } from "@/components/Inventory";
 import { RemainingPayments } from "@/components/RemainingPayments";
+import { PatientSearch } from "@/components/PatientSearch";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
 
@@ -22,6 +23,7 @@ const Index = () => {
       {activeSection === "createInvoice" && <CreateInvoice />}
       {activeSection === "inventory" && <Inventory />}
       {activeSection === "remainingPayments" && <RemainingPayments />}
+      {activeSection === "patientSearch" && <PatientSearch />}
     </Layout>
   );
 };
