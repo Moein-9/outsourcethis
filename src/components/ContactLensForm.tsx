@@ -39,18 +39,18 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   };
 
   return (
-    <div className="rounded-lg border p-4 bg-white shadow-sm">
-      <div className="flex items-center justify-between mb-4 pb-2 border-b">
-        <h4 className="font-medium text-primary flex items-center gap-2">
-          <Eye className="w-4 h-4" />
+    <div className="rounded-lg border p-4 bg-gradient-to-r from-blue-50 to-white shadow-sm">
+      <div className="flex items-center justify-between mb-4 pb-2 border-b border-blue-100">
+        <h4 className="font-medium text-blue-700 flex items-center gap-2">
+          <Eye className="w-4 h-4 text-blue-600" />
           وصفة العدسات اللاصقة
         </h4>
       </div>
 
       {showMissingRxWarning && (
-        <div className="p-3 mb-4 bg-yellow-50 border border-yellow-200 rounded-md flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-          <p className="text-yellow-700 text-sm">
+        <div className="p-3 mb-4 bg-amber-50 border border-amber-200 rounded-md flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+          <p className="text-amber-700 text-sm">
             لا توجد وصفة عدسات لاصقة لهذا العميل. يرجى إدخال وصفة العدسات.
           </p>
         </div>
@@ -58,15 +58,18 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Right Eye Column */}
-        <div className="space-y-4">
-          <h5 className="font-medium text-primary border-b pb-2 text-sm">العين اليمنى (OD)</h5>
+        <div className="space-y-4 bg-gradient-to-br from-blue-50/80 to-white p-4 rounded-lg border border-blue-100 shadow-sm">
+          <h5 className="font-medium text-blue-800 border-b border-blue-100 pb-2 text-sm flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+            العين اليمنى (OD)
+          </h5>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sphereOD" className="text-muted-foreground text-xs">SPHERE</Label>
+              <Label htmlFor="sphereOD" className="text-blue-700 text-xs font-medium">SPHERE (SPH)</Label>
               <select 
                 id="sphereOD"
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                className="w-full h-9 rounded-md border border-blue-200 bg-white px-3 py-1 text-sm shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                 value={rxData.rightEye.sphere}
                 onChange={(e) => handleRightEyeChange("sphere", e.target.value)}
               >
@@ -89,10 +92,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cylOD" className="text-muted-foreground text-xs">CYLINDER</Label>
+              <Label htmlFor="cylOD" className="text-blue-700 text-xs font-medium">CYLINDER (CYL)</Label>
               <select 
                 id="cylOD"
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                className="w-full h-9 rounded-md border border-blue-200 bg-white px-3 py-1 text-sm shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                 value={rxData.rightEye.cylinder}
                 onChange={(e) => handleRightEyeChange("cylinder", e.target.value)}
               >
@@ -107,10 +110,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="axisOD" className="text-muted-foreground text-xs">AXIS</Label>
+              <Label htmlFor="axisOD" className="text-blue-700 text-xs font-medium">AXIS</Label>
               <select 
                 id="axisOD"
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                className="w-full h-9 rounded-md border border-blue-200 bg-white px-3 py-1 text-sm shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                 value={rxData.rightEye.axis}
                 onChange={(e) => handleRightEyeChange("axis", e.target.value)}
               >
@@ -137,10 +140,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bcOD" className="text-muted-foreground text-xs">BASE CURVE (BC)</Label>
+              <Label htmlFor="bcOD" className="text-blue-700 text-xs font-medium">BASE CURVE (BC)</Label>
               <select 
                 id="bcOD"
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                className="w-full h-9 rounded-md border border-blue-200 bg-white px-3 py-1 text-sm shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                 value={rxData.rightEye.bc}
                 onChange={(e) => handleRightEyeChange("bc", e.target.value)}
               >
@@ -155,10 +158,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="diaOD" className="text-muted-foreground text-xs">DIAMETER (DIA)</Label>
+            <Label htmlFor="diaOD" className="text-blue-700 text-xs font-medium">DIAMETER (DIA)</Label>
             <select
               id="diaOD"
-              className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+              className="w-full h-9 rounded-md border border-blue-200 bg-white px-3 py-1 text-sm shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
               value={rxData.rightEye.dia}
               onChange={(e) => handleRightEyeChange("dia", e.target.value)}
             >
@@ -172,15 +175,18 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
         </div>
 
         {/* Left Eye Column */}
-        <div className="space-y-4">
-          <h5 className="font-medium text-primary border-b pb-2 text-sm">العين اليسرى (OS)</h5>
+        <div className="space-y-4 bg-gradient-to-br from-rose-50/80 to-white p-4 rounded-lg border border-rose-100 shadow-sm">
+          <h5 className="font-medium text-rose-800 border-b border-rose-100 pb-2 text-sm flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-rose-500"></div>
+            العين اليسرى (OS)
+          </h5>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sphereOS" className="text-muted-foreground text-xs">SPHERE</Label>
+              <Label htmlFor="sphereOS" className="text-rose-700 text-xs font-medium">SPHERE (SPH)</Label>
               <select 
                 id="sphereOS"
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                className="w-full h-9 rounded-md border border-rose-200 bg-white px-3 py-1 text-sm shadow-sm focus:border-rose-300 focus:ring focus:ring-rose-200 focus:ring-opacity-50"
                 value={rxData.leftEye.sphere}
                 onChange={(e) => handleLeftEyeChange("sphere", e.target.value)}
               >
@@ -203,10 +209,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cylOS" className="text-muted-foreground text-xs">CYLINDER</Label>
+              <Label htmlFor="cylOS" className="text-rose-700 text-xs font-medium">CYLINDER (CYL)</Label>
               <select 
                 id="cylOS"
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                className="w-full h-9 rounded-md border border-rose-200 bg-white px-3 py-1 text-sm shadow-sm focus:border-rose-300 focus:ring focus:ring-rose-200 focus:ring-opacity-50"
                 value={rxData.leftEye.cylinder}
                 onChange={(e) => handleLeftEyeChange("cylinder", e.target.value)}
               >
@@ -221,10 +227,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="axisOS" className="text-muted-foreground text-xs">AXIS</Label>
+              <Label htmlFor="axisOS" className="text-rose-700 text-xs font-medium">AXIS</Label>
               <select 
                 id="axisOS"
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                className="w-full h-9 rounded-md border border-rose-200 bg-white px-3 py-1 text-sm shadow-sm focus:border-rose-300 focus:ring focus:ring-rose-200 focus:ring-opacity-50"
                 value={rxData.leftEye.axis}
                 onChange={(e) => handleLeftEyeChange("axis", e.target.value)}
               >
@@ -251,10 +257,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bcOS" className="text-muted-foreground text-xs">BASE CURVE (BC)</Label>
+              <Label htmlFor="bcOS" className="text-rose-700 text-xs font-medium">BASE CURVE (BC)</Label>
               <select 
                 id="bcOS"
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                className="w-full h-9 rounded-md border border-rose-200 bg-white px-3 py-1 text-sm shadow-sm focus:border-rose-300 focus:ring focus:ring-rose-200 focus:ring-opacity-50"
                 value={rxData.leftEye.bc}
                 onChange={(e) => handleLeftEyeChange("bc", e.target.value)}
               >
@@ -269,10 +275,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="diaOS" className="text-muted-foreground text-xs">DIAMETER (DIA)</Label>
+            <Label htmlFor="diaOS" className="text-rose-700 text-xs font-medium">DIAMETER (DIA)</Label>
             <select
               id="diaOS"
-              className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+              className="w-full h-9 rounded-md border border-rose-200 bg-white px-3 py-1 text-sm shadow-sm focus:border-rose-300 focus:ring focus:ring-rose-200 focus:ring-opacity-50"
               value={rxData.leftEye.dia}
               onChange={(e) => handleLeftEyeChange("dia", e.target.value)}
             >
