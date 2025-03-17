@@ -34,9 +34,9 @@ import { LockKeyhole, Unlock, Eye, EyeOff } from "lucide-react";
 const generateMockData = () => {
   const mockData = [];
   const today = new Date();
-  const paymentMethods = ["نقداً", "كي نت", "Visa", "MasterCard"];
-  const lensTypes = ["متعددة البؤر", "أحادية البؤر", "قراءة", "بعيدة المدى"];
-  const coatings = ["مضاد للانعكاس", "مضاد للماء", "مضاد للخدش", "حماية من الأشعة الزرقاء"];
+  const paymentMethods = ["Cash", "KNET", "Visa", "MasterCard"];
+  const lensTypes = ["Multifocal", "Single Vision", "Reading", "Distance"];
+  const coatings = ["Anti-Reflective", "Water Resistant", "Scratch Resistant", "Blue Light Protection"];
   const frameBrands = ["Ray-Ban", "Gucci", "Prada", "Oakley", "Dior", "Chanel"];
   
   // Generate invoices for today
@@ -50,15 +50,15 @@ const generateMockData = () => {
     const deposit = Math.random() > 0.3 ? finalTotal : Math.floor(finalTotal * 0.7);
     
     mockData.push({
-      patientName: `عميل ${i + 1}`,
+      patientName: `Customer ${i + 1}`,
       patientPhone: `9665${Math.floor(Math.random() * 10000000)}`,
       lensType: lensTypes[Math.floor(Math.random() * lensTypes.length)],
       lensPrice,
       coating: coatings[Math.floor(Math.random() * coatings.length)],
       coatingPrice,
       frameBrand: frameBrands[Math.floor(Math.random() * frameBrands.length)],
-      frameModel: `موديل ${String.fromCharCode(65 + i)}`,
-      frameColor: ["أسود", "بني", "أزرق", "ذهبي"][Math.floor(Math.random() * 4)],
+      frameModel: `Model ${String.fromCharCode(65 + i)}`,
+      frameColor: ["Black", "Brown", "Blue", "Gold"][Math.floor(Math.random() * 4)],
       framePrice,
       discount,
       total: finalTotal,
@@ -85,15 +85,15 @@ const generateMockData = () => {
       
       // Create invoice with past date
       const invoice = {
-        patientName: `عميل ${d}${i}`,
+        patientName: `Customer ${d}${i}`,
         patientPhone: `9665${Math.floor(Math.random() * 10000000)}`,
         lensType: lensTypes[Math.floor(Math.random() * lensTypes.length)],
         lensPrice,
         coating: coatings[Math.floor(Math.random() * coatings.length)],
         coatingPrice,
         frameBrand: frameBrands[Math.floor(Math.random() * frameBrands.length)],
-        frameModel: `موديل ${String.fromCharCode(65 + i)}`,
-        frameColor: ["أسود", "بني", "أزرق", "ذهبي"][Math.floor(Math.random() * 4)],
+        frameModel: `Model ${String.fromCharCode(65 + i)}`,
+        frameColor: ["Black", "Brown", "Blue", "Gold"][Math.floor(Math.random() * 4)],
         framePrice,
         discount,
         total: finalTotal,
@@ -133,8 +133,8 @@ const ReportPage: React.FC = () => {
   
   // Default password and security question (in a real app, these would be stored in a database)
   const correctPassword = "admin123";
-  const securityQuestion = "ما هو اسم الشركة؟";
-  const correctAnswer = "نظارات"; // Example answer
+  const securityQuestion = "What is the company name?";
+  const correctAnswer = "optical"; // Example answer
   
   // Master reset code (would be different in production)
   const masterResetCode = "RESET987654";
@@ -153,9 +153,9 @@ const ReportPage: React.FC = () => {
       setPasswordDialogOpen(false);
       // Save authentication status
       localStorage.setItem("reportAuth", "true");
-      toast.success("تم تسجيل الدخول بنجاح");
+      toast.success("Successfully logged in");
     } else {
-      toast.error("كلمة المرور غير صحيحة");
+      toast.error("Incorrect password");
     }
     setPassword("");
     setShowPassword(false);
@@ -167,10 +167,10 @@ const ReportPage: React.FC = () => {
       (resetCode === masterResetCode)
     ) {
       // Reset the password (in a real app, this would generate a new password)
-      toast.success(`كلمة المرور هي: ${correctPassword}`);
+      toast.success(`The password is: ${correctPassword}`);
       setResetDialogOpen(false);
     } else {
-      toast.error("الإجابة غير صحيحة");
+      toast.error("Incorrect answer");
     }
     setSecurityAnswer("");
     setResetCode("");
@@ -188,7 +188,7 @@ const ReportPage: React.FC = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("reportAuth");
     setActiveTab("daily");
-    toast.success("تم تسجيل الخروج بنجاح");
+    toast.success("Successfully logged out");
   };
   
   const handleGenerateMockData = () => {
@@ -207,18 +207,18 @@ const ReportPage: React.FC = () => {
       }
     });
     
-    toast.success("تم إنشاء بيانات تجريبية بنجاح");
+    toast.success("Mock data successfully created");
   };
   
   const handleClearMockData = () => {
     invoiceStore.clearInvoices && invoiceStore.clearInvoices();
-    toast.success("تم مسح البيانات التجريبية");
+    toast.success("Mock data cleared");
   };
   
   return (
     <Layout activeSection="reports" onNavigate={() => {}}>
       <div className="container py-6">
-        <h1 className="text-3xl font-bold mb-6">تقارير النظام</h1>
+        <h1 className="text-3xl font-bold mb-6">System Reports</h1>
         
         {/* Mock Data Controls - Remove this section when using real data */}
         <div className="flex gap-2 mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
@@ -227,17 +227,17 @@ const ReportPage: React.FC = () => {
             className="bg-amber-100 hover:bg-amber-200 border-amber-200" 
             onClick={handleGenerateMockData}
           >
-            إنشاء بيانات تجريبية
+            Create Mock Data
           </Button>
           <Button 
             variant="outline" 
             className="bg-red-100 hover:bg-red-200 border-red-200" 
             onClick={handleClearMockData}
           >
-            مسح البيانات التجريبية
+            Clear Mock Data
           </Button>
           <div className="flex-1 flex items-center text-amber-700 text-sm mr-2">
-            ملاحظة: هذا الشريط للعرض فقط ويمكن إزالته عند استخدام بيانات حقيقية
+            Note: This bar is for demonstration only and can be removed when using real data
           </div>
         </div>
         
@@ -245,10 +245,10 @@ const ReportPage: React.FC = () => {
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="flex justify-between items-center">
               <TabsList className="grid w-full md:w-auto grid-cols-2 md:grid-cols-2">
-                <TabsTrigger value="daily">التقرير اليومي</TabsTrigger>
+                <TabsTrigger value="daily">Daily Report</TabsTrigger>
                 <TabsTrigger value="comparative" className="flex items-center gap-1">
                   {!isAuthenticated && <LockKeyhole size={14} />}
-                  التحليل المقارن
+                  Comparative Analysis
                 </TabsTrigger>
               </TabsList>
               
@@ -260,7 +260,7 @@ const ReportPage: React.FC = () => {
                   onClick={handleSignOut}
                 >
                   <Unlock size={14} />
-                  تسجيل الخروج
+                  Sign Out
                 </Button>
               )}
             </div>
@@ -278,16 +278,16 @@ const ReportPage: React.FC = () => {
                     <div className="py-12 text-center">
                       <LockKeyhole className="h-12 w-12 mx-auto text-gray-400 mb-3" />
                       <h3 className="text-lg font-medium text-gray-700 mb-2">
-                        هذا القسم محمي بكلمة مرور
+                        This section is password protected
                       </h3>
                       <p className="text-gray-500 mb-4">
-                        يرجى تسجيل الدخول للوصول إلى التحليل المقارن
+                        Please log in to access the comparative analysis
                       </p>
                       <Button 
                         onClick={() => setPasswordDialogOpen(true)}
                         className="bg-primary hover:bg-primary/90"
                       >
-                        تسجيل الدخول
+                        Log In
                       </Button>
                     </div>
                   )}
@@ -301,15 +301,15 @@ const ReportPage: React.FC = () => {
         <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>تسجيل الدخول للتحليل المقارن</DialogTitle>
+              <DialogTitle>Log in to Comparative Analysis</DialogTitle>
               <DialogDescription>
-                يرجى إدخال كلمة المرور للوصول إلى تقارير التحليل المقارن
+                Please enter the password to access the comparative analysis reports
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="relative">
                 <Label htmlFor="password" className="mb-2 block">
-                  كلمة المرور
+                  Password
                 </Label>
                 <div className="flex items-center relative">
                   <Input
@@ -344,14 +344,14 @@ const ReportPage: React.FC = () => {
                   setResetDialogOpen(true);
                 }}
               >
-                نسيت كلمة المرور؟
+                Forgot password?
               </Button>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setPasswordDialogOpen(false)}>
-                  إلغاء
+                  Cancel
                 </Button>
                 <Button onClick={handlePasswordSubmit}>
-                  تسجيل الدخول
+                  Log In
                 </Button>
               </div>
             </DialogFooter>
@@ -362,9 +362,9 @@ const ReportPage: React.FC = () => {
         <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>استعادة كلمة المرور</AlertDialogTitle>
+              <AlertDialogTitle>Password Recovery</AlertDialogTitle>
               <AlertDialogDescription>
-                يرجى الإجابة على سؤال الأمان أو إدخال رمز الاستعادة
+                Please answer the security question or enter the recovery code
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="grid gap-4 py-4">
@@ -376,7 +376,7 @@ const ReportPage: React.FC = () => {
                   id="securityAnswer"
                   value={securityAnswer}
                   onChange={(e) => setSecurityAnswer(e.target.value)}
-                  placeholder="أدخل الإجابة هنا"
+                  placeholder="Enter your answer here"
                 />
               </div>
               <div className="relative pt-2">
@@ -384,25 +384,25 @@ const ReportPage: React.FC = () => {
                   <span className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-background px-2 text-muted-foreground">أو</span>
+                  <span className="bg-background px-2 text-muted-foreground">OR</span>
                 </div>
               </div>
               <div>
                 <Label htmlFor="resetCode" className="mb-2 block">
-                  رمز الاستعادة
+                  Recovery Code
                 </Label>
                 <Input
                   id="resetCode"
                   value={resetCode}
                   onChange={(e) => setResetCode(e.target.value)}
-                  placeholder="أدخل رمز الاستعادة"
+                  placeholder="Enter recovery code"
                 />
               </div>
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleResetSubmit}>
-                استعادة
+                Recover
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

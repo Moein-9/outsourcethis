@@ -97,7 +97,7 @@ export const DailySalesReport: React.FC = () => {
     const paymentMethods: Record<string, { amount: number; count: number }> = {};
     
     todaySalesData.forEach(invoice => {
-      const method = invoice.paymentMethod || 'غير محدد';
+      const method = invoice.paymentMethod || 'Unspecified';
       if (!paymentMethods[method]) {
         paymentMethods[method] = { amount: 0, count: 0 };
       }
@@ -118,8 +118,8 @@ export const DailySalesReport: React.FC = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
     
-    const today = new Date().toLocaleDateString('ar-EG');
-    const pageTitle = `تقرير المبيعات اليومي - ${today}`;
+    const today = new Date().toLocaleDateString('en-US');
+    const pageTitle = `Daily Sales Report - ${today}`;
     
     let paymentBreakdownHTML = '';
     paymentBreakdown.forEach(payment => {
@@ -127,7 +127,7 @@ export const DailySalesReport: React.FC = () => {
         <tr>
           <td>${payment.method}</td>
           <td>${payment.count}</td>
-          <td>${payment.amount.toFixed(2)} د.ك</td>
+          <td>${payment.amount.toFixed(2)} KWD</td>
         </tr>
       `;
     });
@@ -140,8 +140,8 @@ export const DailySalesReport: React.FC = () => {
           <td>${invoice.patientName}</td>
           <td>${invoice.lensType}</td>
           <td>${invoice.frameBrand} ${invoice.frameModel}</td>
-          <td>${invoice.total.toFixed(2)} د.ك</td>
-          <td>${invoice.deposit.toFixed(2)} د.ك</td>
+          <td>${invoice.total.toFixed(2)} KWD</td>
+          <td>${invoice.deposit.toFixed(2)} KWD</td>
           <td>${invoice.paymentMethod}</td>
         </tr>
       `;
@@ -149,14 +149,14 @@ export const DailySalesReport: React.FC = () => {
     
     const printContent = `
       <!DOCTYPE html>
-      <html dir="rtl">
+      <html dir="ltr">
       <head>
         <title>${pageTitle}</title>
         <style>
           body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            direction: rtl;
+            direction: ltr;
           }
           .report-header {
             text-align: center;
@@ -212,7 +212,7 @@ export const DailySalesReport: React.FC = () => {
           th, td {
             border: 1px solid #ddd;
             padding: 8px;
-            text-align: right;
+            text-align: left;
           }
           th {
             background-color: #f2f2f2;
@@ -240,54 +240,54 @@ export const DailySalesReport: React.FC = () => {
       </head>
       <body>
         <div class="report-header">
-          <h1 class="report-title">تقرير المبيعات اليومي</h1>
-          <p class="report-date">التاريخ: ${today}</p>
+          <h1 class="report-title">Daily Sales Report</h1>
+          <p class="report-date">Date: ${today}</p>
         </div>
         
         <div class="summary-section">
-          <h2 class="section-title">ملخص المبيعات</h2>
+          <h2 class="section-title">Sales Summary</h2>
           <div class="summary-grid">
             <div class="summary-item">
-              <div class="summary-item-title">إجمالي المبيعات</div>
-              <div class="summary-item-value">${totalRevenue.toFixed(2)} د.ك</div>
+              <div class="summary-item-title">Total Sales</div>
+              <div class="summary-item-value">${totalRevenue.toFixed(2)} KWD</div>
             </div>
             <div class="summary-item">
-              <div class="summary-item-title">إجمالي المدفوعات</div>
-              <div class="summary-item-value">${totalDeposit.toFixed(2)} د.ك</div>
+              <div class="summary-item-title">Total Payments</div>
+              <div class="summary-item-value">${totalDeposit.toFixed(2)} KWD</div>
             </div>
             <div class="summary-item">
-              <div class="summary-item-title">عدد الفواتير</div>
+              <div class="summary-item-title">Number of Invoices</div>
               <div class="summary-item-value">${todaySales.length}</div>
             </div>
           </div>
         </div>
         
         <div class="summary-section">
-          <h2 class="section-title">تفاصيل المبيعات</h2>
+          <h2 class="section-title">Sales Details</h2>
           <div class="summary-grid">
             <div class="summary-item">
-              <div class="summary-item-title">مبيعات العدسات</div>
-              <div class="summary-item-value">${totalLensRevenue.toFixed(2)} د.ك</div>
+              <div class="summary-item-title">Lens Sales</div>
+              <div class="summary-item-value">${totalLensRevenue.toFixed(2)} KWD</div>
             </div>
             <div class="summary-item">
-              <div class="summary-item-title">مبيعات الإطارات</div>
-              <div class="summary-item-value">${totalFrameRevenue.toFixed(2)} د.ك</div>
+              <div class="summary-item-title">Frame Sales</div>
+              <div class="summary-item-value">${totalFrameRevenue.toFixed(2)} KWD</div>
             </div>
             <div class="summary-item">
-              <div class="summary-item-title">مبيعات الطلاءات</div>
-              <div class="summary-item-value">${totalCoatingRevenue.toFixed(2)} د.ك</div>
+              <div class="summary-item-title">Coating Sales</div>
+              <div class="summary-item-value">${totalCoatingRevenue.toFixed(2)} KWD</div>
             </div>
           </div>
         </div>
         
         <div class="summary-section">
-          <h2 class="section-title">طرق الدفع</h2>
+          <h2 class="section-title">Payment Methods</h2>
           <table>
             <thead>
               <tr>
-                <th>طريقة الدفع</th>
-                <th>عدد المعاملات</th>
-                <th>المبلغ</th>
+                <th>Payment Method</th>
+                <th>Number of Transactions</th>
+                <th>Amount</th>
               </tr>
             </thead>
             <tbody>
@@ -297,17 +297,17 @@ export const DailySalesReport: React.FC = () => {
         </div>
         
         <div class="summary-section">
-          <h2 class="section-title">قائمة الفواتير</h2>
+          <h2 class="section-title">Invoice List</h2>
           <table>
             <thead>
               <tr>
-                <th>رقم الفاتورة</th>
-                <th>اسم العميل</th>
-                <th>نوع العدسة</th>
-                <th>الإطار</th>
-                <th>المجموع</th>
-                <th>المدفوع</th>
-                <th>طريقة الدفع</th>
+                <th>Invoice ID</th>
+                <th>Customer Name</th>
+                <th>Lens Type</th>
+                <th>Frame</th>
+                <th>Total</th>
+                <th>Paid</th>
+                <th>Payment Method</th>
               </tr>
             </thead>
             <tbody>
@@ -317,12 +317,12 @@ export const DailySalesReport: React.FC = () => {
         </div>
         
         <div class="footer">
-          <p>تم إنشاء هذا التقرير بواسطة نظام النظارات - جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
+          <p>Generated by Optical Shop System - All Rights Reserved © ${new Date().getFullYear()}</p>
         </div>
         
         <div class="no-print">
           <button onclick="window.print()" style="padding: 10px 20px; margin: 20px auto; display: block; background: #0066cc; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            طباعة التقرير
+            Print Report
           </button>
         </div>
       </body>
@@ -341,10 +341,10 @@ export const DailySalesReport: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">تقرير المبيعات اليومي</h2>
+        <h2 className="text-2xl font-bold">Daily Sales Report</h2>
         <Button onClick={handlePrintReport} className="gap-2 bg-primary hover:bg-primary/90">
           <Printer size={16} />
-          طباعة التقرير
+          Print Report
         </Button>
       </div>
       
@@ -352,13 +352,13 @@ export const DailySalesReport: React.FC = () => {
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-blue-700">
-              إجمالي المبيعات
+              Total Sales
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-900">{totalRevenue.toFixed(2)} د.ك</div>
+            <div className="text-2xl font-bold text-blue-900">{totalRevenue.toFixed(2)} KWD</div>
             <p className="text-xs text-blue-600 mt-1">
-              لليوم: {new Date().toLocaleDateString('ar-EG')}
+              For Today: {new Date().toLocaleDateString('en-US')}
             </p>
           </CardContent>
         </Card>
@@ -366,13 +366,13 @@ export const DailySalesReport: React.FC = () => {
         <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-purple-700">
-              عدد الفواتير
+              Number of Invoices
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-900">{todaySales.length}</div>
             <p className="text-xs text-purple-600 mt-1">
-              في معاملات اليوم
+              In Today's Transactions
             </p>
           </CardContent>
         </Card>
@@ -380,13 +380,13 @@ export const DailySalesReport: React.FC = () => {
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-green-700">
-              إجمالي المدفوعات
+              Total Payments
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-900">{totalDeposit.toFixed(2)} د.ك</div>
+            <div className="text-2xl font-bold text-green-900">{totalDeposit.toFixed(2)} KWD</div>
             <p className="text-xs text-green-600 mt-1">
-              المستلم فعلياً
+              Actually Received
             </p>
           </CardContent>
         </Card>
@@ -394,13 +394,13 @@ export const DailySalesReport: React.FC = () => {
         <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-amber-700">
-              المبالغ المتبقية
+              Remaining Payments
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-900">{(totalRevenue - totalDeposit).toFixed(2)} د.ك</div>
+            <div className="text-2xl font-bold text-amber-900">{(totalRevenue - totalDeposit).toFixed(2)} KWD</div>
             <p className="text-xs text-amber-600 mt-1">
-              المبالغ المؤجلة
+              Deferred Amounts
             </p>
           </CardContent>
         </Card>
@@ -409,7 +409,7 @@ export const DailySalesReport: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <Card className="border-indigo-200">
           <CardHeader className="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-t-lg">
-            <CardTitle className="text-indigo-700">توزيع المبيعات</CardTitle>
+            <CardTitle className="text-indigo-700">Sales Distribution</CardTitle>
           </CardHeader>
           <CardContent>
             <SalesChart 
@@ -422,15 +422,15 @@ export const DailySalesReport: React.FC = () => {
         
         <Card className="border-teal-200">
           <CardHeader className="bg-gradient-to-r from-teal-50 to-teal-100 rounded-t-lg">
-            <CardTitle className="text-teal-700">طرق الدفع</CardTitle>
+            <CardTitle className="text-teal-700">Payment Methods</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col space-y-4">
             {paymentBreakdown.map((payment, index) => (
               <div key={index} className="flex items-center justify-between p-3 rounded-md bg-white shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-2">
-                  {payment.method === 'نقداً' ? (
+                  {payment.method === 'Cash' ? (
                     <Wallet className="h-5 w-5 text-green-500" />
-                  ) : payment.method === 'كي نت' ? (
+                  ) : payment.method === 'KNET' ? (
                     <CreditCard className="h-5 w-5 text-blue-500" />
                   ) : payment.method === 'Visa' ? (
                     <CreditCard className="h-5 w-5 text-indigo-500" />
@@ -442,15 +442,15 @@ export const DailySalesReport: React.FC = () => {
                   <span className="font-medium">{payment.method}</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">{payment.count} معاملات</span>
-                  <span className="font-medium text-gray-900">{payment.amount.toFixed(2)} د.ك</span>
+                  <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">{payment.count} transactions</span>
+                  <span className="font-medium text-gray-900">{payment.amount.toFixed(2)} KWD</span>
                 </div>
               </div>
             ))}
             
             {paymentBreakdown.length === 0 && (
               <p className="text-center text-muted-foreground py-4">
-                لا توجد مبيعات لليوم الحالي
+                No sales for today
               </p>
             )}
           </CardContent>
@@ -459,7 +459,7 @@ export const DailySalesReport: React.FC = () => {
       
       <Card className="border-gray-200">
         <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
-          <CardTitle className="text-gray-700">قائمة الفواتير اليوم</CardTitle>
+          <CardTitle className="text-gray-700">Today's Invoices</CardTitle>
         </CardHeader>
         <CardContent>
           {todaySales.length > 0 ? (
@@ -484,7 +484,7 @@ export const DailySalesReport: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="font-medium">{invoice.total.toFixed(2)} د.ك</p>
+                        <p className="font-medium">{invoice.total.toFixed(2)} KWD</p>
                         <p className="text-sm text-gray-500">{invoice.paymentMethod}</p>
                       </div>
                       <Button 
@@ -504,72 +504,72 @@ export const DailySalesReport: React.FC = () => {
                     <div className="p-4 bg-gray-50 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="bg-white p-3 rounded-md border">
-                          <h4 className="text-sm font-medium text-gray-500 mb-1">معلومات العميل</h4>
+                          <h4 className="text-sm font-medium text-gray-500 mb-1">Customer Information</h4>
                           <p className="font-medium">{invoice.patientName}</p>
                           <p className="text-sm">{invoice.patientPhone}</p>
-                          {invoice.patientId && <p className="text-xs text-gray-500">رقم الملف: {invoice.patientId}</p>}
+                          {invoice.patientId && <p className="text-xs text-gray-500">File Number: {invoice.patientId}</p>}
                         </div>
                         
                         <div className="bg-white p-3 rounded-md border">
-                          <h4 className="text-sm font-medium text-gray-500 mb-1">معلومات الدفع</h4>
+                          <h4 className="text-sm font-medium text-gray-500 mb-1">Payment Information</h4>
                           <div className="flex justify-between">
-                            <span>المجموع:</span>
-                            <span className="font-medium">{invoice.total.toFixed(2)} د.ك</span>
+                            <span>Total:</span>
+                            <span className="font-medium">{invoice.total.toFixed(2)} KWD</span>
                           </div>
                           <div className="flex justify-between">
-                            <span>المدفوع:</span>
-                            <span className="font-medium">{invoice.deposit.toFixed(2)} د.ك</span>
+                            <span>Paid:</span>
+                            <span className="font-medium">{invoice.deposit.toFixed(2)} KWD</span>
                           </div>
                           {invoice.remaining > 0 && (
                             <div className="flex justify-between text-amber-600">
-                              <span>المتبقي:</span>
-                              <span className="font-medium">{invoice.remaining.toFixed(2)} د.ك</span>
+                              <span>Remaining:</span>
+                              <span className="font-medium">{invoice.remaining.toFixed(2)} KWD</span>
                             </div>
                           )}
                           <div className="mt-1 pt-1 border-t">
-                            <span className="text-sm text-gray-500">طريقة الدفع: {invoice.paymentMethod}</span>
+                            <span className="text-sm text-gray-500">Payment Method: {invoice.paymentMethod}</span>
                           </div>
                         </div>
                         
                         <div className="bg-white p-3 rounded-md border">
-                          <h4 className="text-sm font-medium text-gray-500 mb-1">حالة الفاتورة</h4>
+                          <h4 className="text-sm font-medium text-gray-500 mb-1">Invoice Status</h4>
                           <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             invoice.isPaid ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
                           }`}>
-                            {invoice.isPaid ? 'مدفوعة بالكامل' : 'مدفوعة جزئياً'}
+                            {invoice.isPaid ? 'Fully Paid' : 'Partially Paid'}
                           </div>
                           <p className="text-xs text-gray-500 mt-1">
-                            تاريخ الإنشاء: {new Date(invoice.createdAt).toLocaleDateString('ar-EG')}
+                            Created On: {new Date(invoice.createdAt).toLocaleDateString('en-US')}
                           </p>
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
-                          <h4 className="text-sm font-medium text-blue-700 mb-1">العدسات</h4>
+                          <h4 className="text-sm font-medium text-blue-700 mb-1">Lenses</h4>
                           <p className="font-medium">{invoice.lensType}</p>
                           <div className="flex justify-between mt-1">
-                            <span className="text-sm text-blue-600">السعر:</span>
-                            <span className="font-medium">{invoice.lensPrice.toFixed(2)} د.ك</span>
+                            <span className="text-sm text-blue-600">Price:</span>
+                            <span className="font-medium">{invoice.lensPrice.toFixed(2)} KWD</span>
                           </div>
                         </div>
                         
                         <div className="bg-purple-50 p-3 rounded-md border border-purple-100">
-                          <h4 className="text-sm font-medium text-purple-700 mb-1">الإطار</h4>
+                          <h4 className="text-sm font-medium text-purple-700 mb-1">Frame</h4>
                           <p className="font-medium">{invoice.frameBrand} {invoice.frameModel}</p>
-                          <p className="text-sm text-purple-600">اللون: {invoice.frameColor}</p>
+                          <p className="text-sm text-purple-600">Color: {invoice.frameColor}</p>
                           <div className="flex justify-between mt-1">
-                            <span className="text-sm text-purple-600">السعر:</span>
-                            <span className="font-medium">{invoice.framePrice.toFixed(2)} د.ك</span>
+                            <span className="text-sm text-purple-600">Price:</span>
+                            <span className="font-medium">{invoice.framePrice.toFixed(2)} KWD</span>
                           </div>
                         </div>
                         
                         <div className="bg-green-50 p-3 rounded-md border border-green-100">
-                          <h4 className="text-sm font-medium text-green-700 mb-1">الطلاء</h4>
+                          <h4 className="text-sm font-medium text-green-700 mb-1">Coating</h4>
                           <p className="font-medium">{invoice.coating}</p>
                           <div className="flex justify-between mt-1">
-                            <span className="text-sm text-green-600">السعر:</span>
-                            <span className="font-medium">{invoice.coatingPrice.toFixed(2)} د.ك</span>
+                            <span className="text-sm text-green-600">Price:</span>
+                            <span className="font-medium">{invoice.coatingPrice.toFixed(2)} KWD</span>
                           </div>
                         </div>
                       </div>
@@ -577,8 +577,8 @@ export const DailySalesReport: React.FC = () => {
                       {invoice.discount > 0 && (
                         <div className="bg-amber-50 p-3 rounded-md border border-amber-100">
                           <div className="flex justify-between">
-                            <span className="text-amber-700 font-medium">الخصم:</span>
-                            <span className="font-medium text-amber-700">{invoice.discount.toFixed(2)} د.ك</span>
+                            <span className="text-amber-700 font-medium">Discount:</span>
+                            <span className="font-medium text-amber-700">{invoice.discount.toFixed(2)} KWD</span>
                           </div>
                         </div>
                       )}
@@ -590,8 +590,8 @@ export const DailySalesReport: React.FC = () => {
           ) : (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
               <Receipt className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-              <h3 className="text-lg font-medium text-gray-700 mb-1">لا توجد فواتير</h3>
-              <p className="text-gray-500">لم يتم إنشاء أي فواتير لليوم الحالي</p>
+              <h3 className="text-lg font-medium text-gray-700 mb-1">No Invoices</h3>
+              <p className="text-gray-500">No invoices have been created today</p>
             </div>
           )}
         </CardContent>

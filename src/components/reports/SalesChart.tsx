@@ -23,9 +23,9 @@ export const SalesChart: React.FC<SalesChartProps> = ({
   const hasData = lensRevenue > 0 || frameRevenue > 0 || coatingRevenue > 0;
   
   const data = [
-    { name: "العدسات", value: lensRevenue },
-    { name: "الإطارات", value: frameRevenue },
-    { name: "الطلاءات", value: coatingRevenue },
+    { name: "Lenses", value: lensRevenue },
+    { name: "Frames", value: frameRevenue },
+    { name: "Coatings", value: coatingRevenue },
   ].filter(item => item.value > 0);
   
   const COLORS = ["#8B5CF6", "#F97316", "#0EA5E9"];
@@ -61,7 +61,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     return (
       <div className="flex items-center justify-center h-[300px]">
         <p className="text-center text-muted-foreground">
-          لا توجد بيانات للعرض
+          No data to display
         </p>
       </div>
     );
@@ -85,7 +85,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
           ))}
         </Pie>
         <Tooltip 
-          formatter={(value: number) => `${value.toFixed(2)} د.ك`}
+          formatter={(value: number) => `${value.toFixed(2)} KWD`}
         />
         <Legend 
           align="center" 

@@ -14,32 +14,32 @@ export const RemainingPayments: React.FC = () => {
   const handlePayFull = (invoiceId: string) => {
     markAsPaid(invoiceId);
     toast({
-      description: "تم تسجيل السداد بنجاح.",
+      description: "Payment recorded successfully.",
     });
   };
   
   return (
     <div className="py-4">
-      <h2 className="text-2xl font-bold mb-4">المتبقي للدفع</h2>
+      <h2 className="text-2xl font-bold mb-4">Remaining Payments</h2>
       
       <div className="overflow-x-auto rounded-md border">
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-muted">
-              <th className="p-3 border">رقم الفاتورة</th>
-              <th className="p-3 border">اسم العميل</th>
-              <th className="p-3 border">الهاتف</th>
-              <th className="p-3 border">الإجمالي (KWD)</th>
-              <th className="p-3 border">الدفعة (KWD)</th>
-              <th className="p-3 border text-destructive font-bold">المتبقي (KWD)</th>
-              <th className="p-3 border">التاريخ</th>
-              <th className="p-3 border">إجراء</th>
+              <th className="p-3 border">Invoice ID</th>
+              <th className="p-3 border">Customer Name</th>
+              <th className="p-3 border">Phone</th>
+              <th className="p-3 border">Total (KWD)</th>
+              <th className="p-3 border">Paid (KWD)</th>
+              <th className="p-3 border text-destructive font-bold">Remaining (KWD)</th>
+              <th className="p-3 border">Date</th>
+              <th className="p-3 border">Action</th>
             </tr>
           </thead>
           <tbody>
             {unpaidInvoices.length === 0 ? (
               <tr>
-                <td colSpan={8} className="p-3 text-center">لا توجد مدفوعات متبقية</td>
+                <td colSpan={8} className="p-3 text-center">No remaining payments</td>
               </tr>
             ) : (
               unpaidInvoices.map((invoice) => (
@@ -50,13 +50,13 @@ export const RemainingPayments: React.FC = () => {
                   <td className="p-3 border">{invoice.total.toFixed(2)}</td>
                   <td className="p-3 border">{invoice.deposit.toFixed(2)}</td>
                   <td className="p-3 border text-destructive font-bold">{invoice.remaining.toFixed(2)}</td>
-                  <td className="p-3 border">{new Date(invoice.createdAt).toLocaleDateString("ar-EG")}</td>
+                  <td className="p-3 border">{new Date(invoice.createdAt).toLocaleDateString("en-US")}</td>
                   <td className="p-3 border">
                     <Button 
                       size="sm" 
                       onClick={() => handlePayFull(invoice.invoiceId)}
                     >
-                      سداد كامل
+                      Pay in Full
                     </Button>
                   </td>
                 </tr>
