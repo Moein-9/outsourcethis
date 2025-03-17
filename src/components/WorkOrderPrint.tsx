@@ -2,18 +2,51 @@
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
-import { Eye, Ruler, CircleDot, ClipboardList, User, Glasses, BadgeCheck } from "lucide-react";
+import { Eye, Ruler, CircleDot, ClipboardCheck, User, Glasses, BadgeCheck } from "lucide-react";
 
 interface WorkOrderPrintProps {
   invoice: Invoice;
+  patientName?: string;
+  patientPhone?: string;
+  rx?: any;
+  lensType?: string;
+  coating?: string;
+  frame?: {
+    brand: string;
+    model: string;
+    color: string;
+    size: string;
+    price: number;
+  };
 }
 
-export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ invoice }) => {
+export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ 
+  invoice,
+  patientName,
+  patientPhone,
+  rx,
+  lensType,
+  coating,
+  frame
+}) => {
+  // Use either passed props or invoice data
+  const name = patientName || invoice.patientName;
+  const phone = patientPhone || invoice.patientPhone;
+  const lensTypeValue = lensType || invoice.lensType;
+  const coatingValue = coating || invoice.coating;
+  const frameData = frame || (invoice.frameBrand ? {
+    brand: invoice.frameBrand,
+    model: invoice.frameModel,
+    color: invoice.frameColor,
+    size: "",
+    price: invoice.framePrice
+  } : undefined);
+
   return (
     <div className="max-w-2xl mx-auto bg-white p-6 border rounded-lg shadow-sm print:shadow-none">
       <div className="text-center border-b pb-4 mb-6 relative">
         <div className="absolute left-0 top-0">
-          <ClipboardList className="w-10 h-10 text-primary" />
+          <ClipboardCheck className="w-10 h-10 text-primary" />
         </div>
         <h1 className="text-2xl font-bold mb-1">Work Order</h1>
         <p className="text-lg text-primary font-medium">Order #: {invoice.invoiceId}</p>
@@ -31,11 +64,11 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ invoice }) => {
           <div className="space-y-2">
             <div className="flex">
               <span className="font-semibold w-20">Name:</span>
-              <span>{invoice.patientName}</span>
+              <span>{name}</span>
             </div>
             <div className="flex">
               <span className="font-semibold w-20">Phone:</span>
-              <span>{invoice.patientPhone}</span>
+              <span>{phone}</span>
             </div>
             {invoice.patientId && (
               <div className="flex">
@@ -46,7 +79,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ invoice }) => {
           </div>
         </div>
 
-        {invoice.frameBrand && (
+        {frameData && (
           <div className="bg-muted/10 p-4 rounded-lg border">
             <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
               <Glasses className="w-5 h-5" />
@@ -55,15 +88,15 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ invoice }) => {
             <div className="space-y-2">
               <div className="flex">
                 <span className="font-semibold w-20">Brand:</span>
-                <span>{invoice.frameBrand}</span>
+                <span>{frameData.brand}</span>
               </div>
               <div className="flex">
                 <span className="font-semibold w-20">Model:</span>
-                <span>{invoice.frameModel}</span>
+                <span>{frameData.model}</span>
               </div>
               <div className="flex">
                 <span className="font-semibold w-20">Color:</span>
-                <span>{invoice.frameColor}</span>
+                <span>{frameData.color}</span>
               </div>
             </div>
           </div>
@@ -89,19 +122,19 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ invoice }) => {
           <tbody>
             <tr>
               <td className="border p-2 font-medium">Right (OD)</td>
-              <td className="border p-2 text-center">_____</td>
-              <td className="border p-2 text-center">_____</td>
-              <td className="border p-2 text-center">_____</td>
-              <td className="border p-2 text-center">_____</td>
-              <td className="border p-2 text-center">_____</td>
+              <td className="border p-2 text-center">{rx?.sphereOD || "_____"}</td>
+              <td className="border p-2 text-center">{rx?.cylOD || "_____"}</td>
+              <td className="border p-2 text-center">{rx?.axisOD || "_____"}</td>
+              <td className="border p-2 text-center">{rx?.addOD || "_____"}</td>
+              <td className="border p-2 text-center">{rx?.pdRight || "_____"}</td>
             </tr>
             <tr>
               <td className="border p-2 font-medium">Left (OS)</td>
-              <td className="border p-2 text-center">_____</td>
-              <td className="border p-2 text-center">_____</td>
-              <td className="border p-2 text-center">_____</td>
-              <td className="border p-2 text-center">_____</td>
-              <td className="border p-2 text-center">_____</td>
+              <td className="border p-2 text-center">{rx?.sphereOS || "_____"}</td>
+              <td className="border p-2 text-center">{rx?.cylOS || "_____"}</td>
+              <td className="border p-2 text-center">{rx?.axisOS || "_____"}</td>
+              <td className="border p-2 text-center">{rx?.addOS || "_____"}</td>
+              <td className="border p-2 text-center">{rx?.pdLeft || "_____"}</td>
             </tr>
           </tbody>
         </table>
@@ -117,12 +150,12 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ invoice }) => {
             <div className="space-y-2">
               <div className="flex">
                 <span className="font-semibold w-20">Type:</span>
-                <span>{invoice.lensType}</span>
+                <span>{lensTypeValue}</span>
               </div>
-              {invoice.coating && (
+              {coatingValue && (
                 <div className="flex">
                   <span className="font-semibold w-20">Coating:</span>
-                  <span>{invoice.coating}</span>
+                  <span>{coatingValue}</span>
                 </div>
               )}
             </div>
@@ -131,7 +164,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ invoice }) => {
                 <span className="font-semibold w-20">Price:</span>
                 <span>{invoice.lensPrice.toFixed(2)} KWD</span>
               </div>
-              {invoice.coating && (
+              {coatingValue && (
                 <div className="flex">
                   <span className="font-semibold w-20">Coating:</span>
                   <span>{invoice.coatingPrice.toFixed(2)} KWD</span>

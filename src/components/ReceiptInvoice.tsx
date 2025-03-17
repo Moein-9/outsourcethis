@@ -7,9 +7,66 @@ import { CheckCircle2, Receipt } from "lucide-react";
 interface ReceiptInvoiceProps {
   invoice: Invoice;
   isPrintable?: boolean;
+  
+  // Additional props for direct usage without an Invoice object
+  patientName?: string;
+  patientPhone?: string;
+  invoiceType?: "glasses" | "contacts";
+  lensType?: string;
+  lensPrice?: number;
+  coating?: string;
+  coatingPrice?: number;
+  frame?: {
+    brand: string;
+    model: string;
+    color: string;
+    size: string;
+    price: number;
+  };
+  framePrice?: number;
+  discount?: number;
+  total?: number;
+  deposit?: number;
+  remaining?: number;
+  paymentMethod?: string;
 }
 
-export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ invoice, isPrintable = false }) => {
+export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ 
+  invoice,
+  isPrintable = false,
+  // Optional direct props
+  patientName,
+  patientPhone,
+  invoiceType,
+  lensType,
+  lensPrice,
+  coating,
+  coatingPrice,
+  frame,
+  framePrice,
+  discount,
+  total,
+  deposit,
+  remaining,
+  paymentMethod
+}) => {
+  // Use either the passed props or invoice data
+  const name = patientName || invoice.patientName;
+  const phone = patientPhone || invoice.patientPhone;
+  const lens = lensType || invoice.lensType;
+  const lensP = lensPrice !== undefined ? lensPrice : invoice.lensPrice;
+  const coat = coating || invoice.coating;
+  const coatP = coatingPrice !== undefined ? coatingPrice : invoice.coatingPrice;
+  const frameBrand = frame?.brand || invoice.frameBrand;
+  const frameModel = frame?.model || invoice.frameModel;
+  const frameP = framePrice !== undefined ? framePrice : invoice.framePrice;
+  const disc = discount !== undefined ? discount : invoice.discount;
+  const tot = total !== undefined ? total : invoice.total;
+  const dep = deposit !== undefined ? deposit : invoice.deposit;
+  const rem = remaining !== undefined ? remaining : invoice.remaining;
+  const payMethod = paymentMethod || invoice.paymentMethod;
+  const isPaid = rem <= 0;
+
   const containerClass = isPrintable 
     ? "w-[80mm] mx-auto bg-white p-4 text-[12px] border shadow-sm print:shadow-none" 
     : "w-full bg-white p-4 border rounded-lg shadow-sm";
@@ -36,12 +93,12 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ invoice, isPrint
         </div>
         <div className="flex justify-between border-b pb-1 mb-1">
           <span className="font-semibold">Customer:</span>
-          <span>{invoice.patientName}</span>
+          <span>{name}</span>
         </div>
-        {invoice.patientPhone && (
+        {phone && (
           <div className="flex justify-between border-b pb-1 mb-1">
             <span className="font-semibold">Phone:</span>
-            <span>{invoice.patientPhone}</span>
+            <span>{phone}</span>
           </div>
         )}
       </div>
@@ -51,24 +108,24 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ invoice, isPrint
           *** ITEMS ***
         </div>
         
-        {invoice.lensType && (
+        {lens && (
           <div className="flex justify-between mb-1 text-sm">
-            <span>Lenses ({invoice.lensType})</span>
-            <span>{invoice.lensPrice.toFixed(2)} KWD</span>
+            <span>Lenses ({lens})</span>
+            <span>{lensP.toFixed(2)} KWD</span>
           </div>
         )}
         
-        {invoice.coating && (
+        {coat && (
           <div className="flex justify-between mb-1 text-sm">
-            <span>Coating ({invoice.coating})</span>
-            <span>{invoice.coatingPrice.toFixed(2)} KWD</span>
+            <span>Coating ({coat})</span>
+            <span>{coatP.toFixed(2)} KWD</span>
           </div>
         )}
         
-        {invoice.frameBrand && (
+        {frameBrand && (
           <div className="flex justify-between mb-1 text-sm">
-            <span>Frame ({invoice.frameBrand} {invoice.frameModel})</span>
-            <span>{invoice.framePrice.toFixed(2)} KWD</span>
+            <span>Frame ({frameBrand} {frameModel})</span>
+            <span>{frameP.toFixed(2)} KWD</span>
           </div>
         )}
       </div>
@@ -76,17 +133,17 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ invoice, isPrint
       <div className="text-sm mb-4">
         <div className="flex justify-between">
           <span>Subtotal:</span>
-          <span>{(invoice.total + invoice.discount).toFixed(2)} KWD</span>
+          <span>{(tot + disc).toFixed(2)} KWD</span>
         </div>
-        {invoice.discount > 0 && (
+        {disc > 0 && (
           <div className="flex justify-between text-destructive">
             <span>Discount:</span>
-            <span>-{invoice.discount.toFixed(2)} KWD</span>
+            <span>-{disc.toFixed(2)} KWD</span>
           </div>
         )}
         <div className="flex justify-between font-bold mt-1 pt-1 border-t">
           <span>Total:</span>
-          <span>{invoice.total.toFixed(2)} KWD</span>
+          <span>{tot.toFixed(2)} KWD</span>
         </div>
       </div>
 
@@ -105,20 +162,20 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ invoice, isPrint
           </div>
         )) || (
           <div className="flex justify-between text-sm">
-            <span>{format(new Date(invoice.createdAt), 'dd/MM/yyyy')} ({invoice.paymentMethod})</span>
-            <span>{invoice.deposit.toFixed(2)} KWD</span>
+            <span>{format(new Date(invoice.createdAt), 'dd/MM/yyyy')} ({payMethod})</span>
+            <span>{dep.toFixed(2)} KWD</span>
           </div>
         )}
         
-        {invoice.remaining > 0 && (
+        {rem > 0 && (
           <div className="flex justify-between font-bold mt-1 pt-1 border-t">
             <span>Balance Due:</span>
-            <span>{invoice.remaining.toFixed(2)} KWD</span>
+            <span>{rem.toFixed(2)} KWD</span>
           </div>
         )}
       </div>
 
-      {invoice.isPaid && (
+      {isPaid && (
         <div className="flex items-center justify-center gap-2 my-3 text-primary font-bold p-1 border border-primary rounded">
           <CheckCircle2 className="w-4 h-4" />
           <span>PAID IN FULL</span>

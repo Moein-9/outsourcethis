@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -24,6 +23,9 @@ const CreateInvoice: React.FC = () => {
   const searchFrames = useInventoryStore((state) => state.searchFrames);
   const addFrame = useInventoryStore((state) => state.addFrame);
   const addInvoice = useInvoiceStore((state) => state.addInvoice);
+  
+  // Invoice type state
+  const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts">("glasses");
   
   // Patient section states
   const [skipPatient, setSkipPatient] = useState(false);
@@ -74,9 +76,6 @@ const CreateInvoice: React.FC = () => {
   const [frameTotal, setFrameTotal] = useState(0);
   const [total, setTotal] = useState(0);
   const [remaining, setRemaining] = useState(0);
-  
-  // Invoice type state
-  const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts">("glasses");
   
   // Update totals when dependencies change
   useEffect(() => {
@@ -297,7 +296,6 @@ const CreateInvoice: React.FC = () => {
       description: `تم حفظ الفاتورة برقم ${invoiceId} بنجاح.`,
     });
     
-    // Reset form
     resetForm();
   };
   
@@ -332,6 +330,29 @@ const CreateInvoice: React.FC = () => {
     setDiscount(0);
     setDeposit(0);
     setPaymentMethod("");
+  };
+  
+  // Create a mock invoice for previews
+  const previewInvoice = {
+    invoiceId: "PREVIEW",
+    createdAt: new Date().toISOString(),
+    patientName: currentPatient?.name || manualName || "Customer Name",
+    patientPhone: currentPatient?.phone || manualPhone || "",
+    patientId: currentPatient?.patientId,
+    lensType: lensType,
+    lensPrice: lensPrice,
+    coating: coating,
+    coatingPrice: coatingPrice,
+    frameBrand: skipFrame ? "" : selectedFrame.brand,
+    frameModel: skipFrame ? "" : selectedFrame.model,
+    frameColor: skipFrame ? "" : selectedFrame.color,
+    framePrice: skipFrame ? 0 : selectedFrame.price,
+    discount: discount,
+    deposit: deposit,
+    total: total,
+    remaining: remaining,
+    paymentMethod: paymentMethod || "Cash",
+    isPaid: remaining <= 0
   };
   
   return (
@@ -1008,6 +1029,7 @@ const CreateInvoice: React.FC = () => {
           </SheetHeader>
           <div className="mt-6">
             <WorkOrderPrint 
+              invoice={previewInvoice}
               patientName={currentPatient?.name || manualName}
               patientPhone={currentPatient?.phone || manualPhone}
               rx={currentPatient?.rx}
@@ -1033,20 +1055,8 @@ const CreateInvoice: React.FC = () => {
           </SheetHeader>
           <div className="mt-6">
             <ReceiptInvoice 
-              patientName={currentPatient?.name || manualName}
-              patientPhone={currentPatient?.phone || manualPhone}
-              invoiceType={invoiceType}
-              lensType={lensType}
-              lensPrice={lensPrice}
-              coating={coating}
-              coatingPrice={coatingPrice}
-              frame={!skipFrame && invoiceType === "glasses" ? selectedFrame : undefined}
-              framePrice={frameTotal}
-              discount={discount}
-              total={total}
-              deposit={deposit}
-              remaining={remaining}
-              paymentMethod={paymentMethod}
+              invoice={previewInvoice}
+              isPrintable={true}
             />
           </div>
           <div className="mt-4 flex justify-end">
@@ -1059,3 +1069,4 @@ const CreateInvoice: React.FC = () => {
 };
 
 export default CreateInvoice;
+
