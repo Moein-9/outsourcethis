@@ -1,10 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { Check, X } from "lucide-react";
 
 interface CompactLensSelectorProps {
   onSelectLens: (lens: LensType | null) => void;
@@ -22,7 +23,6 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
   const { lensTypes, lensCoatings } = useInventoryStore();
   const [activeTab, setActiveTab] = useState<string>("distance");
   const [expandedSection, setExpandedSection] = useState<"lens" | "coating" | null>(null);
-  const { t, language } = useLanguage();
   
   // Group lenses by type
   const lensTypesByCategory = {
@@ -80,11 +80,11 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
         >
           <span className="flex items-center gap-2 font-semibold text-blue-900">
             <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-            {t("select_lens_type_title")}
+            اختر نوع العدسة
           </span>
           {selectedLens && (
             <span className="text-sm font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
-              {selectedLens.name} - {selectedLens.price.toFixed(2)} {language === "ar" ? "د.ك" : "KD"}
+              {selectedLens.name} - {selectedLens.price.toFixed(2)} د.ك
             </span>
           )}
         </div>
@@ -94,14 +94,14 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
             <div className="p-3 bg-gradient-to-b from-blue-50/50 to-white">
               <Select value={activeTab} onValueChange={setActiveTab}>
                 <SelectTrigger className="w-full bg-white shadow-sm border-blue-200">
-                  <SelectValue placeholder={t("select_lens_type")} />
+                  <SelectValue placeholder="اختر نوع العدسة" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="distance" className="focus:bg-blue-50">{t("distance")}</SelectItem>
-                  <SelectItem value="reading" className="focus:bg-green-50">{t("reading")}</SelectItem>
-                  <SelectItem value="progressive" className="focus:bg-purple-50">{t("progressive")}</SelectItem>
-                  <SelectItem value="bifocal" className="focus:bg-amber-50">{t("bifocal")}</SelectItem>
-                  <SelectItem value="sunglasses" className="focus:bg-gray-50">{t("sunglasses")}</SelectItem>
+                  <SelectItem value="distance" className="focus:bg-blue-50">النظر البعيد</SelectItem>
+                  <SelectItem value="reading" className="focus:bg-green-50">القراءة</SelectItem>
+                  <SelectItem value="progressive" className="focus:bg-purple-50">التقدمية</SelectItem>
+                  <SelectItem value="bifocal" className="focus:bg-amber-50">ثنائية البؤرة</SelectItem>
+                  <SelectItem value="sunglasses" className="focus:bg-gray-50">الشمسية</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -121,14 +121,14 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
                     <CardContent className="p-2 flex items-center justify-between">
                       <div className="font-medium truncate text-sm">{lens.name}</div>
                       <div className="whitespace-nowrap text-xs font-semibold rounded-full px-1.5 py-0.5 bg-white/80">
-                        {lens.price.toFixed(2)} {language === "ar" ? "د.ك" : "KD"}
+                        {lens.price.toFixed(2)} د.ك
                       </div>
                     </CardContent>
                   </Card>
                 ))}
                 {lensTypesByCategory[activeTab as keyof typeof lensTypesByCategory].length === 0 && (
                   <p className="col-span-3 text-center p-2 text-muted-foreground text-sm">
-                    {t("no_lenses")}
+                    لا توجد عدسات في هذه الفئة
                   </p>
                 )}
               </div>
@@ -145,11 +145,11 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
         >
           <span className="flex items-center gap-2 font-semibold text-amber-900">
             <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-            {t("select_coatings")}
+            اختر الطلاءات
           </span>
           {selectedCoatings.length > 0 && (
             <span className="text-sm font-medium px-2 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
-              {selectedCoatings.length} {t("coatings_selected")}
+              {selectedCoatings.length} طلاء محدد
             </span>
           )}
         </div>
@@ -170,14 +170,14 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
                   <CardContent className="p-2 flex items-center justify-between">
                     <div className="font-medium truncate text-sm">{coating.name}</div>
                     <div className="whitespace-nowrap text-xs font-semibold rounded-full px-1.5 py-0.5 bg-white/80">
-                      {coating.price.toFixed(2)} {language === "ar" ? "د.ك" : "KD"}
+                      {coating.price.toFixed(2)} د.ك
                     </div>
                   </CardContent>
                 </Card>
               ))}
               {lensCoatings.length === 0 && (
                 <p className="col-span-3 text-center p-2 text-muted-foreground text-sm">
-                  {t("no_coatings")}
+                  لا توجد طلاءات متاحة
                 </p>
               )}
             </div>
@@ -188,22 +188,22 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
       {/* Selected Items Summary */}
       {(selectedLens || selectedCoatings.length > 0) && (
         <div className="rounded-md border p-3 bg-gradient-to-b from-gray-50 to-white shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">{t("current_selections")}</h3>
+          <h3 className="text-sm font-medium text-gray-500 mb-2">الاختيارات الحالية</h3>
           {selectedLens && (
             <div className="flex justify-between items-center text-sm mb-2 bg-blue-50 p-2 rounded-md border border-blue-100">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                 <span className="font-medium">{selectedLens.name}</span>
-                <span className="text-xs font-semibold bg-white px-1.5 py-0.5 rounded-full">
-                  {selectedLens.price.toFixed(2)} {language === "ar" ? "د.ك" : "KD"}
-                </span>
+                <span className="text-xs font-semibold bg-white px-1.5 py-0.5 rounded-full">{selectedLens.price.toFixed(2)} د.ك</span>
               </div>
-              <button 
-                className="h-6 w-6 rounded-full hover:bg-blue-100 p-0 flex items-center justify-center"
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 w-6 rounded-full hover:bg-blue-100 p-0"
                 onClick={() => onSelectLens(null)}
               >
-                ✕
-              </button>
+                <X size={12} />
+              </Button>
             </div>
           )}
           
@@ -214,16 +214,16 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                     <span className="font-medium">{coating.name}</span>
-                    <span className="text-xs font-semibold bg-white px-1.5 py-0.5 rounded-full">
-                      {coating.price.toFixed(2)} {language === "ar" ? "د.ك" : "KD"}
-                    </span>
+                    <span className="text-xs font-semibold bg-white px-1.5 py-0.5 rounded-full">{coating.price.toFixed(2)} د.ك</span>
                   </div>
-                  <button 
-                    className="h-6 w-6 rounded-full hover:bg-amber-100 p-0 flex items-center justify-center"
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 w-6 rounded-full hover:bg-amber-100 p-0"
                     onClick={() => toggleCoating(coating)}
                   >
-                    ✕
-                  </button>
+                    <X size={12} />
+                  </Button>
                 </div>
               ))}
             </div>

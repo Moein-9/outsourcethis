@@ -71,22 +71,10 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         <div className="absolute right-0 top-0">
           <ClipboardCheck className="w-10 h-10 text-primary" />
         </div>
-        
-        <div className="flex justify-center mb-3">
-          <img 
-            src="/lovable-uploads/fdd57e66-99f5-4953-a172-c48e0af3c3b8.png" 
-            alt="Moen Optician" 
-            className="h-16"
-          />
-        </div>
-        
-        <h1 className="text-2xl font-bold mb-1">أمر العمل - Moen Optician</h1>
+        <h1 className="text-2xl font-bold mb-1">أمر العمل</h1>
         <p className="text-lg text-primary font-medium">رقم الطلب: {invoice.invoiceId}</p>
         <p className="text-muted-foreground">
           {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
-        </p>
-        <p className="text-sm text-muted-foreground mt-1">
-          al-somait plaza, Habeeb Munawer St, Al Farwaniyah | هاتف: 2475 9016
         </p>
       </div>
 
@@ -312,10 +300,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
           <div className="mt-2 text-sm text-muted-foreground">التاريخ: ___ / ___ / _____</div>
         </div>
-      </div>
-      
-      <div className="mt-8 text-center text-sm text-muted-foreground border-t pt-4">
-        <p>Moen Optician | al-somait plaza, Habeeb Munawer St, Al Farwaniyah | Tel: 2475 9016</p>
       </div>
     </div>
   );

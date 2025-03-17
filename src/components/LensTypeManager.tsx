@@ -10,12 +10,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Edit, Plus, Trash } from "lucide-react";
 import { toast } from "sonner";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 export const LensTypeManager: React.FC = () => {
   const { lensTypes, addLensType, updateLensType, deleteLensType } = useInventoryStore();
   const [activeTab, setActiveTab] = useState<string>("distance");
-  const { t, language } = useLanguage();
   
   // New lens form state
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -32,7 +30,7 @@ export const LensTypeManager: React.FC = () => {
   
   const handleAddLens = () => {
     if (!newLensName || newLensPrice === "") {
-      toast.error(language === "ar" ? "يرجى ملء جميع الحقول المطلوبة" : "Please fill in all required fields");
+      toast.error("يرجى ملء جميع الحقول المطلوبة");
       return;
     }
     
@@ -42,7 +40,7 @@ export const LensTypeManager: React.FC = () => {
       type: newLensType
     });
     
-    toast.success(language === "ar" ? "تمت إضافة نوع العدسة بنجاح" : "Lens type added successfully");
+    toast.success("تمت إضافة نوع العدسة بنجاح");
     
     // Reset form
     setNewLensName("");
@@ -52,7 +50,7 @@ export const LensTypeManager: React.FC = () => {
   
   const handleEditLens = () => {
     if (!editLensName || editLensPrice === "") {
-      toast.error(language === "ar" ? "يرجى ملء جميع الحقول المطلوبة" : "Please fill in all required fields");
+      toast.error("يرجى ملء جميع الحقول المطلوبة");
       return;
     }
     
@@ -62,7 +60,7 @@ export const LensTypeManager: React.FC = () => {
       type: editLensType
     });
     
-    toast.success(language === "ar" ? "تم تحديث نوع العدسة بنجاح" : "Lens type updated successfully");
+    toast.success("تم تحديث نوع العدسة بنجاح");
     
     // Reset form
     setIsEditDialogOpen(false);
@@ -70,7 +68,7 @@ export const LensTypeManager: React.FC = () => {
   
   const handleDeleteLens = (id: string) => {
     deleteLensType(id);
-    toast.success(language === "ar" ? "تم حذف نوع العدسة بنجاح" : "Lens type deleted successfully");
+    toast.success("تم حذف نوع العدسة بنجاح");
   };
   
   const startEditLens = (lens: LensType) => {
@@ -82,11 +80,11 @@ export const LensTypeManager: React.FC = () => {
   };
   
   const lensTypeCategories = [
-    { value: "distance", label: t("distance") },
-    { value: "reading", label: t("reading") },
-    { value: "progressive", label: t("progressive") },
-    { value: "bifocal", label: t("bifocal") },
-    { value: "sunglasses", label: t("sunglasses") }
+    { value: "distance", label: "النظر البعيد" },
+    { value: "reading", label: "القراءة" },
+    { value: "progressive", label: "التقدمية" },
+    { value: "bifocal", label: "ثنائية البؤرة" },
+    { value: "sunglasses", label: "النظارات الشمسية" }
   ];
   
   const filteredLenses = lensTypes.filter(lens => lens.type === activeTab);
@@ -94,33 +92,33 @@ export const LensTypeManager: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">{t("lens_types")}</h2>
+        <h2 className="text-xl font-bold">أنواع العدسات</h2>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-1">
               <Plus size={16} />
-              {t("add_lens_type")}
+              إضافة نوع عدسة
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t("add_new_lens_type")}</DialogTitle>
+              <DialogTitle>إضافة نوع عدسة جديد</DialogTitle>
               <DialogDescription>
-                {t("enter_lens_details")}
+                أدخل تفاصيل نوع العدسة الجديد أدناه
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">{t("lens_name")}</Label>
+                <Label htmlFor="name">اسم العدسة</Label>
                 <Input
                   id="name"
                   value={newLensName}
                   onChange={(e) => setNewLensName(e.target.value)}
-                  placeholder={language === "ar" ? "مثال: عدسات القراءة الممتازة" : "Example: Premium Reading Lenses"}
+                  placeholder="مثال: عدسات القراءة الممتازة"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="price">{t("price")}</Label>
+                <Label htmlFor="price">السعر (د.ك)</Label>
                 <Input
                   id="price"
                   type="number"
@@ -130,10 +128,10 @@ export const LensTypeManager: React.FC = () => {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="type">{t("type")}</Label>
+                <Label htmlFor="type">النوع</Label>
                 <Select value={newLensType} onValueChange={(value) => setNewLensType(value as any)}>
                   <SelectTrigger id="type">
-                    <SelectValue placeholder={t("select_lens_type")} />
+                    <SelectValue placeholder="اختر نوع العدسة" />
                   </SelectTrigger>
                   <SelectContent>
                     {lensTypeCategories.map((category) => (
@@ -146,8 +144,8 @@ export const LensTypeManager: React.FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t("cancel")}</Button>
-              <Button onClick={handleAddLens}>{t("add")}</Button>
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>إلغاء</Button>
+              <Button onClick={handleAddLens}>إضافة</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -155,11 +153,11 @@ export const LensTypeManager: React.FC = () => {
       
       <Tabs defaultValue="distance" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-3 md:grid-cols-5 mb-4">
-          <TabsTrigger value="distance">{t("distance")}</TabsTrigger>
-          <TabsTrigger value="reading">{t("reading")}</TabsTrigger>
-          <TabsTrigger value="progressive">{t("progressive")}</TabsTrigger>
-          <TabsTrigger value="bifocal">{t("bifocal")}</TabsTrigger>
-          <TabsTrigger value="sunglasses">{t("sunglasses")}</TabsTrigger>
+          <TabsTrigger value="distance">النظر البعيد</TabsTrigger>
+          <TabsTrigger value="reading">القراءة</TabsTrigger>
+          <TabsTrigger value="progressive">التقدمية</TabsTrigger>
+          <TabsTrigger value="bifocal">ثنائية البؤرة</TabsTrigger>
+          <TabsTrigger value="sunglasses">الشمسية</TabsTrigger>
         </TabsList>
         
         <TabsContent value={activeTab} className="mt-0">
@@ -171,7 +169,7 @@ export const LensTypeManager: React.FC = () => {
                     <CardTitle className="text-base">{lens.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 pb-2">
-                    <p className="text-lg font-bold">{lens.price.toFixed(2)} {language === "ar" ? "د.ك" : "KD"}</p>
+                    <p className="text-lg font-bold">{lens.price.toFixed(2)} د.ك</p>
                   </CardContent>
                   <CardFooter className="p-2 flex justify-end gap-2 bg-muted/50">
                     <Button variant="ghost" size="icon" onClick={() => startEditLens(lens)}>
@@ -186,9 +184,9 @@ export const LensTypeManager: React.FC = () => {
             </div>
           ) : (
             <div className="text-center p-8 bg-muted/50 rounded-lg">
-              <p>{t("no_lenses")}</p>
+              <p>لا توجد عدسات في هذه الفئة</p>
               <Button variant="outline" size="sm" className="mt-2" onClick={() => setIsAddDialogOpen(true)}>
-                {t("add_lens_type")}
+                إضافة نوع عدسة
               </Button>
             </div>
           )}
@@ -199,14 +197,14 @@ export const LensTypeManager: React.FC = () => {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("edit_lens_type")}</DialogTitle>
+            <DialogTitle>تعديل نوع العدسة</DialogTitle>
             <DialogDescription>
-              {t("update_lens_details")}
+              قم بتحديث تفاصيل نوع العدسة أدناه
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="edit-name">{t("lens_name")}</Label>
+              <Label htmlFor="edit-name">اسم العدسة</Label>
               <Input
                 id="edit-name"
                 value={editLensName}
@@ -214,7 +212,7 @@ export const LensTypeManager: React.FC = () => {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-price">{t("price")}</Label>
+              <Label htmlFor="edit-price">السعر (د.ك)</Label>
               <Input
                 id="edit-price"
                 type="number"
@@ -223,10 +221,10 @@ export const LensTypeManager: React.FC = () => {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-type">{t("type")}</Label>
+              <Label htmlFor="edit-type">النوع</Label>
               <Select value={editLensType} onValueChange={(value) => setEditLensType(value as any)}>
                 <SelectTrigger id="edit-type">
-                  <SelectValue placeholder={t("select_lens_type")} />
+                  <SelectValue placeholder="اختر نوع العدسة" />
                 </SelectTrigger>
                 <SelectContent>
                   {lensTypeCategories.map((category) => (
@@ -239,8 +237,8 @@ export const LensTypeManager: React.FC = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>{t("cancel")}</Button>
-            <Button onClick={handleEditLens}>{t("save_changes")}</Button>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>إلغاء</Button>
+            <Button onClick={handleEditLens}>حفظ التغييرات</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

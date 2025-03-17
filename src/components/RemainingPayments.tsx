@@ -1,234 +1,951 @@
 
 import React, { useState, useEffect } from "react";
-import { useInvoiceStore } from "@/store/invoiceStore";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { useInvoiceStore, Payment } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { 
+  Receipt, 
+  Wallet, 
+  CreditCard, 
+  Printer, 
+  CheckCircle2,
+  User,
+  Phone,
+  Calendar,
+  Eye,
+  Frame,
+  Droplets,
+  ArrowRight,
+  Tag,
+  Search,
+  Filter,
+  Plus,
+  Trash2,
+  Eye as EyeIcon,
+  FileText,
+  UserCircle,
+  History,
+  GlassesIcon
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Calendar } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useNavigate } from "react-router-dom";
 
-const RemainingPayments = () => {
-  const { invoices, addPartialPayment } = useInvoiceStore();
+export const RemainingPayments: React.FC = () => {
+  const { invoices, getInvoiceById, addPartialPayment, markAsPaid } = useInvoiceStore();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
-  const [paymentAmount, setPaymentAmount] = useState<string>("");
-  const [paymentDate, setPaymentDate] = useState<string>(
-    format(new Date(), "yyyy-MM-dd")
-  );
-  const [invoicesWithBalance, setInvoicesWithBalance] = useState<any[]>([]);
-  const { t, language } = useLanguage();
-
-  // Filter invoices with remaining balance
+  const [invoiceForPrint, setInvoiceForPrint] = useState<string | null>(null);
+  const navigate = useNavigate();
+  
+  // Payment form state
+  const [paymentEntries, setPaymentEntries] = useState<{method: string; amount: number; authNumber?: string}[]>([
+    { method: "نقداً", amount: 0 }
+  ]);
+  
+  // Calculate remaining amount after current payment entries
+  const [remainingAfterPayment, setRemainingAfterPayment] = useState<number | null>(null);
+  
+  // Update remaining amount when payment entries change
   useEffect(() => {
-    if (invoices) {
-      const filteredInvoices = invoices.filter((invoice) => {
-        const totalPaid = invoice.payments?.reduce(
-          (sum, payment) => sum + payment.amount,
-          0
-        ) || 0;
-        return totalPaid < invoice.total;
-      });
-      setInvoicesWithBalance(filteredInvoices);
+    if (selectedInvoice) {
+      const invoice = getInvoiceById(selectedInvoice);
+      if (invoice) {
+        const totalPayment = calculateTotalPayment();
+        const newRemaining = Math.max(0, invoice.remaining - totalPayment);
+        setRemainingAfterPayment(newRemaining);
+      }
     }
-  }, [invoices]);
-
-  const handlePayment = () => {
-    if (!selectedInvoice || !paymentAmount.trim()) {
-      toast.error(t("enter_amount"));
-      return;
+  }, [paymentEntries, selectedInvoice, getInvoiceById]);
+  
+  // Get unpaid invoices
+  let unpaidInvoices = invoices.filter(invoice => !invoice.isPaid);
+  
+  // Apply search filter
+  if (searchTerm) {
+    unpaidInvoices = unpaidInvoices.filter(inv => 
+      inv.patientName.includes(searchTerm) || 
+      inv.patientPhone.includes(searchTerm) ||
+      inv.invoiceId.includes(searchTerm)
+    );
+  }
+  
+  // Apply sorting
+  unpaidInvoices = [...unpaidInvoices].sort((a, b) => {
+    const dateA = new Date(a.createdAt).getTime();
+    const dateB = new Date(b.createdAt).getTime();
+    return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+  });
+  
+  // Navigate to patient search with patient details
+  const goToPatientProfile = (patientId?: string, patientName?: string, patientPhone?: string) => {
+    if (patientId) {
+      navigate('/patientSearch', { state: { patientId, searchMode: 'id' } });
+    } else if (patientName || patientPhone) {
+      navigate('/patientSearch', { state: { searchTerm: patientName || patientPhone, searchMode: 'name' } });
     }
-
-    const amount = parseFloat(paymentAmount);
-    if (isNaN(amount) || amount <= 0) {
-      toast.error(t("valid_amount"));
-      return;
+  };
+  
+  // Add payment entry
+  const addPaymentEntry = () => {
+    setPaymentEntries([...paymentEntries, { method: "نقداً", amount: 0 }]);
+  };
+  
+  // Remove payment entry
+  const removePaymentEntry = (index: number) => {
+    if (paymentEntries.length > 1) {
+      const newEntries = [...paymentEntries];
+      newEntries.splice(index, 1);
+      setPaymentEntries(newEntries);
     }
-
-    const invoice = invoices.find((inv) => inv.invoiceId === selectedInvoice);
+  };
+  
+  // Update payment entry
+  const updatePaymentEntry = (index: number, field: string, value: string | number) => {
+    const newEntries = [...paymentEntries];
+    newEntries[index] = { ...newEntries[index], [field]: value };
+    setPaymentEntries(newEntries);
+  };
+  
+  // Calculate total payment amount
+  const calculateTotalPayment = () => {
+    return paymentEntries.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+  };
+  
+  // Handle payment submission
+  const handleSubmitPayment = (invoiceId: string) => {
+    const invoice = getInvoiceById(invoiceId);
     if (!invoice) return;
-
-    const totalPaid =
-      (invoice.payments?.reduce((sum, p) => sum + p.amount, 0) || 0) + amount;
     
-    if (totalPaid > invoice.total) {
-      toast.error(t("exceeds_amount"));
+    // Validate payment entries
+    const totalPayment = calculateTotalPayment();
+    if (totalPayment <= 0) {
+      toast.error("يرجى إدخال مبلغ الدفع");
       return;
     }
-
-    // Note: We're removing the date property here as it appears
-    // the store expects to handle the date internally
-    addPartialPayment(selectedInvoice, {
-      amount,
-      method: "cash", // Default payment method
-    });
-
-    toast.success(`${t("payment_registered")} ${amount} KWD`);
-    setSelectedInvoice(null);
-    setPaymentAmount("");
-  };
-
-  const calculateRemainingAmount = (invoice: any) => {
-    const totalPaid = invoice.payments?.reduce(
-      (sum, payment) => sum + payment.amount,
-      0
-    ) || 0;
-    return invoice.total - totalPaid;
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), "dd/MM/yyyy");
-    } catch (e) {
-      return dateString;
+    
+    if (totalPayment > invoice.remaining) {
+      toast.error("المبلغ المدخل أكبر من المبلغ المتبقي");
+      return;
     }
+    
+    // Process each payment entry
+    for (const entry of paymentEntries) {
+      if (entry.amount > 0) {
+        addPartialPayment(invoiceId, {
+          amount: entry.amount,
+          method: entry.method,
+          authNumber: entry.authNumber
+        });
+      }
+    }
+    
+    toast.success("تم تسجيل الدفع بنجاح");
+    
+    // Check if payment is complete
+    const updatedInvoice = getInvoiceById(invoiceId);
+    if (updatedInvoice?.isPaid) {
+      // Set the invoice for printing
+      setInvoiceForPrint(invoiceId);
+    }
+    
+    // Reset form and close dialog
+    setPaymentEntries([{ method: "نقداً", amount: 0 }]);
+    setSelectedInvoice(null);
   };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold">{t("remaining_payments")}</h2>
-          <p className="text-muted-foreground">{t("invoices_with_balance")}</p>
+  
+  // Handle print receipt
+  const handlePrintReceipt = (invoiceId: string) => {
+    const invoice = getInvoiceById(invoiceId);
+    if (!invoice) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const pageTitle = `فاتورة ${invoice.invoiceId}`;
+    
+    const printContent = `
+      <!DOCTYPE html>
+      <html dir="rtl">
+      <head>
+        <title>${pageTitle}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 30px;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            direction: rtl;
+          }
+          .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #8B5CF6;
+          }
+          .company-details {
+            text-align: right;
+          }
+          .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8B5CF6;
+            margin: 0;
+          }
+          .company-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+          }
+          .invoice-details {
+            text-align: left;
+          }
+          .invoice-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: #8B5CF6;
+            margin: 0;
+          }
+          .invoice-date {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+          }
+          .customer-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+          }
+          .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #8B5CF6;
+            display: flex;
+            align-items: center;
+          }
+          .section-title svg {
+            margin-left: 6px;
+          }
+          .customer-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+          }
+          .customer-contact {
+            font-size: 14px;
+            color: #555;
+            margin-top: 5px;
+          }
+          .items-section {
+            margin-bottom: 30px;
+          }
+          .item-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+          }
+          .item-card {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
+          .item-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+          }
+          .item-title svg {
+            color: #8B5CF6;
+          }
+          .item-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+          }
+          .item-value {
+            font-weight: bold;
+          }
+          .payment-details {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+          }
+          .payment-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+          }
+          .payment-row:last-child {
+            border-bottom: none;
+          }
+          .payment-label {
+            font-weight: bold;
+          }
+          .total-row {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #8B5CF6;
+            font-size: 20px;
+            font-weight: bold;
+          }
+          .discount {
+            color: #10B981;
+          }
+          .thank-you {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+          }
+          .thank-message {
+            font-size: 18px;
+            color: #8B5CF6;
+            margin-bottom: 5px;
+          }
+          .come-again {
+            font-size: 14px;
+            color: #666;
+          }
+          .paid-stamp {
+            position: absolute;
+            top: 200px;
+            right: 200px;
+            transform: rotate(20deg);
+            font-size: 40px;
+            color: rgba(16, 185, 129, 0.4);
+            border: 10px solid rgba(16, 185, 129, 0.4);
+            border-radius: 10px;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            font-weight: bold;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+          .paid-stamp svg {
+            width: 40px;
+            height: 40px;
+          }
+          .payments-history {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f9ff;
+            border-radius: 8px;
+          }
+          .payment-history-title {
+            font-weight: bold;
+            color: #0369a1;
+            margin-bottom: 8px;
+          }
+          .payment-history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #ccc;
+            font-size: 14px;
+          }
+          .payment-history-item:last-child {
+            border-bottom: none;
+          }
+          .payment-date {
+            color: #666;
+            font-size: 12px;
+          }
+          .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+          }
+          .icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 4px;
+          }
+          @media print {
+            body {
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+            .no-print {
+              display: none;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-header">
+          <div class="company-details">
+            <h1 class="company-name">النظارات الطبية</h1>
+            <p class="company-info">
+              العنوان: شارع الاستقلال، الكويت<br>
+              هاتف: 1234 567 965+
+            </p>
+          </div>
+          <div class="invoice-details">
+            <h2 class="invoice-id">فاتورة #${invoice.invoiceId}</h2>
+            <p class="invoice-date">
+              التاريخ: ${new Date(invoice.createdAt).toLocaleDateString('ar-EG')}
+            </p>
+          </div>
         </div>
-        <Badge variant="outline" className="text-base py-1.5">
-          {invoicesWithBalance.length} {t("invoice")}
-        </Badge>
+        
+        <div class="customer-details">
+          <h3 class="section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            معلومات العميل
+          </h3>
+          <p class="customer-name">${invoice.patientName}</p>
+          <p class="customer-contact">
+            هاتف: ${invoice.patientPhone}<br>
+            ${invoice.patientId ? `رقم الملف: ${invoice.patientId}` : ''}
+          </p>
+        </div>
+        
+        <div class="items-section">
+          <h3 class="section-title">تفاصيل المنتجات</h3>
+          <div class="item-grid">
+            <div class="item-card">
+              <div class="item-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                العدسات
+              </div>
+              <div class="item-detail">
+                <span>نوع العدسة:</span>
+                <span class="item-value">${invoice.lensType}</span>
+              </div>
+              <div class="item-detail">
+                <span>السعر:</span>
+                <span class="item-value">${invoice.lensPrice.toFixed(2)} KWD</span>
+              </div>
+            </div>
+            
+            <div class="item-card">
+              <div class="item-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3L3 11h18L12 3z"/>
+                  <path d="M5 11v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>
+                </svg>
+                الإطار
+              </div>
+              <div class="item-detail">
+                <span>الماركة:</span>
+                <span class="item-value">${invoice.frameBrand}</span>
+              </div>
+              <div class="item-detail">
+                <span>الموديل:</span>
+                <span class="item-value">${invoice.frameModel}</span>
+              </div>
+              <div class="item-detail">
+                <span>اللون:</span>
+                <span class="item-value">${invoice.frameColor}</span>
+              </div>
+              <div class="item-detail">
+                <span>السعر:</span>
+                <span class="item-value">${invoice.framePrice.toFixed(2)} KWD</span>
+              </div>
+            </div>
+            
+            <div class="item-card">
+              <div class="item-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.4 17.4c-1.2 1.2-2.8 2-4.7 2-3.4 0-6.3-2.3-7.1-5.4"/>
+                  <path d="M21.4 6.6c-1.2-1.2-2.8-2-4.7-2-3.4 0-6.3 2.3-7.1 5.4"/>
+                  <path d="M10.3 17.7c-.5-1.3-1.5-2.7-2.9-3.7-2.1-1.7-4.8-2.1-6.3-1.1-.7.5-1.1 1.2-1.1 2.1 0 2 2.1 4.6 5.3 6.6.7.4 1.6.8 2.4 1.1 2.3.7 4.6.4 5.8-.8.5-.5.8-1.1.8-1.8 0-1-.5-1.9-1.5-2.8"/>
+                  <path d="M10.3 6.3c-.5 1.3-1.5 2.7-2.9 3.7-2.1 1.7-4.8 2.1-6.3 1.1-.7-.5-1.1-1.2-1.1-2.1 0-2 2.1-4.6 5.3-6.6.7-.4 1.6-.8 2.4-1.1 2.3-.7 4.6-.4 5.8.8.5.5.8 1.1.8 1.8 0 1-.5 1.9-1.5 2.8"/>
+                </svg>
+                الطلاء
+              </div>
+              <div class="item-detail">
+                <span>نوع الطلاء:</span>
+                <span class="item-value">${invoice.coating}</span>
+              </div>
+              <div class="item-detail">
+                <span>السعر:</span>
+                <span class="item-value">${invoice.coatingPrice.toFixed(2)} KWD</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="payment-details">
+          <h3 class="section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="20" height="14" x="2" y="5" rx="2"/>
+              <line x1="2" x2="22" y1="10" y2="10"/>
+            </svg>
+            تفاصيل الدفع
+          </h3>
+          <div class="payment-row">
+            <span class="payment-label">إجمالي العدسات:</span>
+            <span>${invoice.lensPrice.toFixed(2)} KWD</span>
+          </div>
+          <div class="payment-row">
+            <span class="payment-label">إجمالي الإطار:</span>
+            <span>${invoice.framePrice.toFixed(2)} KWD</span>
+          </div>
+          <div class="payment-row">
+            <span class="payment-label">إجمالي الطلاء:</span>
+            <span>${invoice.coatingPrice.toFixed(2)} KWD</span>
+          </div>
+          ${invoice.discount > 0 ? `
+          <div class="payment-row discount">
+            <span class="payment-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; margin-left: 4px;">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+              </svg>
+              الخصم:
+            </span>
+            <span>- ${invoice.discount.toFixed(2)} KWD</span>
+          </div>
+          ` : ''}
+          <div class="payment-row total-row">
+            <span>المجموع النهائي:</span>
+            <span>${invoice.total.toFixed(2)} KWD</span>
+          </div>
+          
+          ${invoice.payments && invoice.payments.length > 0 ? `
+          <div class="payments-history">
+            <div class="payment-history-title">سجل الدفعات:</div>
+            ${invoice.payments.map(payment => `
+              <div class="payment-history-item">
+                <div>
+                  <span>${payment.amount.toFixed(2)} KWD</span>
+                  <span> (${payment.method})</span>
+                  ${payment.authNumber ? `<span> - رقم التفويض: ${payment.authNumber}</span>` : ''}
+                </div>
+                <div class="payment-date">${new Date(payment.date).toLocaleDateString('ar-EG')}</div>
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
+        </div>
+        
+        <div class="thank-you">
+          <p class="thank-message">شكراً لثقتكم</p>
+          <p class="come-again">نتطلع لزيارتكم مرة أخرى</p>
+        </div>
+        
+        ${invoice.isPaid ? `<div class="paid-stamp">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(16, 185, 129, 0.4)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          مدفوع
+        </div>` : ''}
+        
+        <div class="footer">
+          <p>النظارات الطبية - جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
+        </div>
+        
+        <div class="no-print">
+          <button onclick="window.print()" style="padding: 10px 20px; margin: 20px auto; display: block; background: #8B5CF6; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            طباعة الفاتورة
+          </button>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    printWindow.onload = function() {
+      printWindow.focus();
+    };
+  };
+  
+  return (
+    <div className="space-y-6 py-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">المتبقي للدفع</h2>
+          <p className="text-muted-foreground">إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية</p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="البحث عن عميل أو رقم فاتورة..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 w-full"
+            />
+          </div>
+          
+          <Select 
+            value={sortOrder} 
+            onValueChange={(value) => setSortOrder(value as "asc" | "desc")}
+          >
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="ترتيب حسب" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">الأحدث أولاً</SelectItem>
+              <SelectItem value="asc">الأقدم أولاً</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-
-      {invoicesWithBalance.length > 0 ? (
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {invoicesWithBalance.map((invoice) => (
-            <Card key={invoice.invoiceId} className="border-orange-200 shadow-sm">
-              <CardHeader className="bg-orange-50 border-b border-orange-100">
-                <CardTitle className="text-orange-800 flex justify-between items-center">
-                  <span>{t("invoice")} #{invoice.invoiceNumber || invoice.invoiceId.slice(0, 8)}</span>
+      
+      {unpaidInvoices.length === 0 ? (
+        <Card className="border-dashed border-2 border-muted">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <CheckCircle2 className="h-12 w-12 text-muted mb-4" />
+            <h3 className="text-xl font-medium mb-2">جميع الفواتير مدفوعة بالكامل</h3>
+            <p className="text-muted-foreground text-center max-w-md">
+              لا توجد فواتير تحتاج إلى دفعات متبقية. جميع المعاملات مكتملة.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {unpaidInvoices.map((invoice) => (
+            <Card key={invoice.invoiceId} className="overflow-hidden border border-amber-200 hover:border-amber-300 transition-all duration-200">
+              <CardHeader className="bg-gradient-to-r from-amber-50 to-amber-100 py-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-lg font-bold">{invoice.patientName}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{invoice.invoiceId}</p>
+                  </div>
                   <Badge 
-                    variant={!invoice.isPaid ? "outline" : "secondary"}
-                    className={!invoice.isPaid ? "bg-orange-100 text-orange-800 border-orange-200" : ""}
+                    variant="outline" 
+                    className="bg-amber-100 text-amber-800 border-amber-300 text-xl font-bold px-4 py-1.5"
                   >
-                    {invoice.isPaid ? t("paid") : (invoice.payments?.length > 0 ? t("partially_paid") : t("unpaid"))}
+                    متبقي {invoice.remaining.toFixed(2)} KWD
                   </Badge>
-                </CardTitle>
-                <CardDescription className="text-orange-600 flex justify-between">
-                  <span>
-                    {t("client_name")}: {invoice.patientName}
-                  </span>
-                  <span className="text-orange-700 font-medium">
-                    {formatDate(invoice.createdAt)}
-                  </span>
-                </CardDescription>
+                </div>
               </CardHeader>
-              <CardContent className="pt-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t("invoice_total")}:</span>
-                    <span className="font-semibold">{invoice.total.toFixed(2)} KWD</span>
+              
+              <CardContent className="pt-4 space-y-4">
+                <div className="flex justify-between text-sm">
+                  <div className="flex items-center gap-1">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{invoice.patientPhone}</span>
                   </div>
-                  
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t("paid_amount")}:</span>
-                    <span className="font-semibold">
-                      {(invoice.payments?.reduce((sum, p) => sum + p.amount, 0) || 0).toFixed(2)} KWD
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between pt-2 border-t">
-                    <span className="font-medium text-orange-700">{t("remaining_amount")}:</span>
-                    <span className="font-bold text-orange-700">
-                      {calculateRemainingAmount(invoice).toFixed(2)} KWD
-                    </span>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>{new Date(invoice.createdAt).toLocaleDateString('ar-EG')}</span>
                   </div>
                 </div>
                 
-                <Button 
-                  className="w-full mt-4 bg-orange-600 hover:bg-orange-700"
-                  onClick={() => setSelectedInvoice(invoice.invoiceId)}
-                >
-                  {t("add_payment")}
-                </Button>
+                <Accordion type="single" collapsible className="w-full border rounded-md">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger className="px-3 text-sm font-medium">
+                      تفاصيل النظارة
+                    </AccordionTrigger>
+                    <AccordionContent className="px-3 pb-3 text-sm">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <EyeIcon className="h-3.5 w-3.5 text-blue-500" />
+                          <span>نوع العدسة:</span>
+                          <span className="font-medium">{invoice.lensType}</span>
+                        </div>
+                        
+                        {invoice.frameBrand && (
+                          <div className="flex items-center gap-1.5">
+                            <Frame className="h-3.5 w-3.5 text-gray-500" />
+                            <span>الإطار:</span>
+                            <span className="font-medium">{invoice.frameBrand} / {invoice.frameModel}</span>
+                          </div>
+                        )}
+                        
+                        {invoice.coating && (
+                          <div className="flex items-center gap-1.5">
+                            <Droplets className="h-3.5 w-3.5 text-cyan-500" />
+                            <span>الطلاء:</span>
+                            <span className="font-medium">{invoice.coating}</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center gap-1.5 text-emerald-600">
+                          <Tag className="h-3.5 w-3.5" />
+                          <span>السعر الإجمالي:</span>
+                          <span className="font-medium">{invoice.total.toFixed(2)} KWD</span>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+                
+                <div className="border-t border-dashed pt-3">
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground">إجمالي الفاتورة</p>
+                      <p className="font-bold text-lg">{invoice.total.toFixed(2)} KWD</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">المدفوع</p>
+                      <p className="text-blue-600 font-medium">{invoice.deposit.toFixed(2)} KWD</p>
+                    </div>
+                  </div>
+                  
+                  {invoice.payments && invoice.payments.length > 0 && (
+                    <div className="mt-2 bg-slate-50 p-2 rounded-md text-xs">
+                      <p className="font-medium mb-1">سجل الدفعات:</p>
+                      {invoice.payments.map((payment, idx) => (
+                        <div key={idx} className="flex justify-between items-center">
+                          <span>{new Date(payment.date).toLocaleDateString('ar-EG')}</span>
+                          <span className="font-medium">{payment.amount.toFixed(2)} KWD ({payment.method})</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 text-xs border-blue-200 hover:bg-blue-50 text-blue-700"
+                    onClick={() => handlePrintReceipt(invoice.invoiceId)}
+                  >
+                    <Printer className="h-4 w-4 mr-1" />
+                    طباعة الفاتورة
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 text-xs border-purple-200 hover:bg-purple-50 text-purple-700"
+                    onClick={() => goToPatientProfile(invoice.patientId, invoice.patientName, invoice.patientPhone)}
+                  >
+                    <UserCircle className="h-4 w-4 mr-1" />
+                    ملف العميل
+                  </Button>
+                  
+                  <Dialog open={selectedInvoice === invoice.invoiceId} onOpenChange={(open) => !open && setSelectedInvoice(null)}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        className="flex-1 text-xs bg-amber-500 hover:bg-amber-600"
+                        onClick={() => {
+                          setSelectedInvoice(invoice.invoiceId);
+                          // Reset payment entries with calculated remaining amount
+                          setPaymentEntries([{ method: "نقداً", amount: invoice.remaining }]);
+                          setRemainingAfterPayment(0);
+                        }}
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-1" />
+                        تسديد الدفعة
+                      </Button>
+                    </DialogTrigger>
+                    
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>تسجيل دفعة جديدة</DialogTitle>
+                        <DialogDescription>
+                          تسجيل دفعة للفاتورة {invoice.invoiceId}
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <div className="py-4 space-y-4">
+                        <div className="bg-muted p-4 rounded-md space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">المبلغ الإجمالي:</span>
+                            <span className="font-medium">{invoice.total.toFixed(2)} KWD</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">المدفوع سابقاً:</span>
+                            <span className="font-medium text-blue-600">{invoice.deposit.toFixed(2)} KWD</span>
+                          </div>
+                          <div className="flex justify-between font-bold border-t pt-2 mt-2">
+                            <span>المبلغ المتبقي:</span>
+                            <span className="text-amber-600 text-lg">{invoice.remaining.toFixed(2)} KWD</span>
+                          </div>
+                          
+                          {remainingAfterPayment !== null && (
+                            <div className="flex justify-between font-bold mt-3 bg-blue-50 p-2 rounded-md">
+                              <span className="text-blue-700">المتبقي بعد الدفع:</span>
+                              <span className="text-blue-700 text-lg">{remainingAfterPayment.toFixed(2)} KWD</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <h4 className="font-medium">طرق الدفع</h4>
+                            <Button 
+                              type="button" 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={addPaymentEntry}
+                              className="h-8"
+                            >
+                              <Plus className="h-3.5 w-3.5 mr-1" /> إضافة طريقة دفع
+                            </Button>
+                          </div>
+                          
+                          {paymentEntries.map((entry, index) => (
+                            <div key={index} className="space-y-3 bg-slate-50 p-3 rounded-md">
+                              <div className="flex justify-between items-center">
+                                <Label className="font-medium">طريقة الدفع #{index + 1}</Label>
+                                {paymentEntries.length > 1 && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-7 w-7 p-0 text-red-500 hover:text-red-600" 
+                                    onClick={() => removePaymentEntry(index)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                  <Label htmlFor={`payment-method-${index}`}>طريقة الدفع</Label>
+                                  <Select 
+                                    value={entry.method} 
+                                    onValueChange={(value) => updatePaymentEntry(index, 'method', value)}
+                                  >
+                                    <SelectTrigger id={`payment-method-${index}`}>
+                                      <SelectValue placeholder="اختر طريقة الدفع" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="نقداً">نقداً</SelectItem>
+                                      <SelectItem value="كي نت">كي نت</SelectItem>
+                                      <SelectItem value="Visa">Visa</SelectItem>
+                                      <SelectItem value="MasterCard">MasterCard</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                
+                                <div className="space-y-1.5">
+                                  <Label htmlFor={`payment-amount-${index}`}>المبلغ (KWD)</Label>
+                                  <Input
+                                    id={`payment-amount-${index}`}
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max={invoice.remaining}
+                                    value={entry.amount || ""}
+                                    onChange={(e) => updatePaymentEntry(index, 'amount', parseFloat(e.target.value) || 0)}
+                                  />
+                                </div>
+                              </div>
+                              
+                              {(entry.method === "كي نت" || entry.method === "Visa" || entry.method === "MasterCard") && (
+                                <div className="space-y-1.5">
+                                  <Label htmlFor={`auth-number-${index}`}>رقم التفويض</Label>
+                                  <Input
+                                    id={`auth-number-${index}`}
+                                    placeholder="رقم التفويض"
+                                    value={entry.authNumber || ""}
+                                    onChange={(e) => updatePaymentEntry(index, 'authNumber', e.target.value)}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          
+                          <div className="flex justify-between font-medium p-2 border-t">
+                            <span>إجمالي المدفوع:</span>
+                            <span>{calculateTotalPayment().toFixed(2)} KWD</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setSelectedInvoice(null)}>
+                          إلغاء
+                        </Button>
+                        <Button 
+                          onClick={() => handleSubmitPayment(invoice.invoiceId)}
+                          className="bg-amber-500 hover:bg-amber-600"
+                        >
+                          تأكيد الدفع
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
-      ) : (
-        <Card className="border-orange-200 shadow-sm">
-          <CardContent className="pt-6 pb-6 text-center">
-            <p className="text-orange-600 text-lg">{t("no_invoices")}</p>
-          </CardContent>
-        </Card>
       )}
-
-      <Dialog open={!!selectedInvoice} onOpenChange={(open) => !open && setSelectedInvoice(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("add_payment_title")}</DialogTitle>
-            <DialogDescription>
-              {selectedInvoice &&
-                `${t("remaining_balance")}: ${calculateRemainingAmount(
-                  invoices.find((i) => i.invoiceId === selectedInvoice)
-                ).toFixed(2)} KWD`}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="paymentAmount">{t("payment_amount")}</Label>
-              <Input
-                id="paymentAmount"
-                placeholder="0.00"
-                type="number"
-                step="0.01"
-                min="0"
-                value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
-              />
+      
+      {/* After payment success - Print invoice dialog */}
+      {invoiceForPrint && (
+        <Dialog
+          open={Boolean(invoiceForPrint)}
+          onOpenChange={(open) => !open && setInvoiceForPrint(null)}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-green-600">
+                <CheckCircle2 className="h-8 w-8 mx-auto mb-2" />
+                تم تسجيل الدفع بنجاح
+              </DialogTitle>
+              <DialogDescription className="text-center">
+                تم إكمال الدفع بنجاح! هل ترغب في طباعة الفاتورة النهائية؟
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center space-x-4 space-x-reverse pt-4">
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => setInvoiceForPrint(null)}
+              >
+                <span>إغلاق</span>
+              </Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 gap-2"
+                onClick={() => {
+                  const invoiceId = invoiceForPrint;
+                  setInvoiceForPrint(null);
+                  handlePrintReceipt(invoiceId);
+                }}
+              >
+                <Printer className="h-4 w-4" />
+                <span>طباعة الفاتورة</span>
+              </Button>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="paymentDate" className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                {t("payment_date")}
-              </Label>
-              <Input
-                id="paymentDate"
-                type="date"
-                value={paymentDate}
-                onChange={(e) => setPaymentDate(e.target.value)}
-              />
-            </div>
-            
-          </div>
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setSelectedInvoice(null)}>
-              {t("cancel")}
-            </Button>
-            <Button 
-              className="bg-orange-600 hover:bg-orange-700"
-              onClick={handlePayment}
-            >
-              {t("confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
-
-export default RemainingPayments;

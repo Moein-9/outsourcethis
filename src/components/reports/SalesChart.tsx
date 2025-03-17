@@ -9,7 +9,6 @@ import {
   Tooltip 
 } from "recharts";
 import { Eye, Frame, Droplets } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SalesChartProps {
   lensRevenue: number;
@@ -22,13 +21,12 @@ export const SalesChart: React.FC<SalesChartProps> = ({
   frameRevenue, 
   coatingRevenue 
 }) => {
-  const { t, language } = useLanguage();
   const hasData = lensRevenue > 0 || frameRevenue > 0 || coatingRevenue > 0;
   
   const data = [
-    { name: language === "ar" ? "العدسات" : "Lenses", value: lensRevenue, icon: <Eye size={16} /> },
-    { name: language === "ar" ? "الإطارات" : "Frames", value: frameRevenue, icon: <Frame size={16} /> },
-    { name: language === "ar" ? "الطلاءات" : "Coatings", value: coatingRevenue, icon: <Droplets size={16} /> },
+    { name: "العدسات", value: lensRevenue, icon: <Eye size={16} /> },
+    { name: "الإطارات", value: frameRevenue, icon: <Frame size={16} /> },
+    { name: "الطلاءات", value: coatingRevenue, icon: <Droplets size={16} /> },
   ].filter(item => item.value > 0);
   
   const COLORS = ["#8B5CF6", "#F97316", "#0EA5E9"];
@@ -64,7 +62,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     return (
       <div className="flex items-center justify-center h-[300px]">
         <p className="text-center text-muted-foreground">
-          {t("no_data")}
+          لا توجد بيانات للعرض
         </p>
       </div>
     );
@@ -105,7 +103,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
           ))}
         </Pie>
         <Tooltip 
-          formatter={(value: number) => `${value.toFixed(2)} ${language === "ar" ? "د.ك" : "KWD"}`}
+          formatter={(value: number) => `${value.toFixed(2)} KWD`}
         />
         <Legend 
           content={renderCustomLegend}
