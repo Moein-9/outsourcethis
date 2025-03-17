@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -36,6 +35,7 @@ export interface ContactLensItem {
   power: string;
   price: number;
   qty: number;
+  color?: string;
 }
 
 interface InventoryState {

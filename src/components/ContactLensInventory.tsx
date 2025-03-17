@@ -163,16 +163,22 @@ export const ContactLensInventory: React.FC = () => {
       return;
     }
     
-    const id = addContactLens({
+    const newContactLens = {
       brand: contactLensBrand,
       type: contactLensType,
       bc: contactLensBC,
       diameter: contactLensDiameter,
       power: contactLensPower,
-      color: contactLensColor || undefined,
       price,
       qty
-    });
+    };
+    
+    // Only add color if it's provided
+    if (contactLensColor) {
+      Object.assign(newContactLens, { color: contactLensColor });
+    }
+    
+    const id = addContactLens(newContactLens);
     
     toast.success(`تم إضافة العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`);
     
