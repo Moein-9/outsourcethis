@@ -263,14 +263,24 @@ export const CreateClient: React.FC = () => {
       <h2 className="text-2xl font-bold mb-4">إنشاء عميل</h2>
       
       <Tabs defaultValue="glasses" value={activeTab} onValueChange={(value) => setActiveTab(value as "glasses" | "contactLenses")}>
-        <TabsList className="mb-4 w-full md:w-auto">
-          <TabsTrigger value="glasses" className="px-6">نظارات طبية</TabsTrigger>
-          <TabsTrigger value="contactLenses" className="px-6">عدسات لاصقة</TabsTrigger>
+        <TabsList className="mb-6 w-full md:w-auto bg-slate-100 border-slate-200 p-1">
+          <TabsTrigger 
+            value="glasses" 
+            className="px-6 py-3 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-white"
+          >
+            نظارات طبية
+          </TabsTrigger>
+          <TabsTrigger 
+            value="contactLenses" 
+            className="px-6 py-3 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-white"
+          >
+            عدسات لاصقة
+          </TabsTrigger>
         </TabsList>
       
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Right: Patient Information - Shared between both tabs */}
-          <div className="bg-card rounded-md p-4 border">
+          <div className="order-2 md:order-1 bg-card rounded-md p-4 border">
             <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
               المعلومات الشخصية
             </div>
@@ -359,201 +369,203 @@ export const CreateClient: React.FC = () => {
           </div>
           
           {/* Left: Prescription Content - Different for each tab */}
-          <TabsContent value="glasses" className="mt-0 p-0">
-            <div className="bg-card rounded-md p-4 border">
-              <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
-                وصفات النظارات
-              </div>
-              
-              <div className="mb-4">
-                <Label htmlFor="rxDate">تاريخ الوصفة الطبية</Label>
-                <div className="mt-1">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
-                      >
-                        <CalendarIcon className="ml-2 h-4 w-4" />
-                        {rxDate ? format(rxDate, "PPP") : "اختر تاريخ الوصفة"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={rxDate}
-                        onSelect={setRxDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+          <div className="order-1 md:order-2">
+            <TabsContent value="glasses" className="mt-0 p-0">
+              <div className="bg-card rounded-md p-4 border">
+                <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
+                  وصفات النظارات
+                </div>
+                
+                <div className="mb-4">
+                  <Label htmlFor="rxDate">تاريخ الوصفة الطبية</Label>
+                  <div className="mt-1">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
+                        >
+                          <CalendarIcon className="ml-2 h-4 w-4" />
+                          {rxDate ? format(rxDate, "PPP") : "اختر تاريخ الوصفة"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={rxDate}
+                          onSelect={setRxDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse ltr">
+                    <thead>
+                      <tr>
+                        <th className="text-center border border-border bg-muted p-2"></th>
+                        <th className="text-center border border-border bg-muted p-2">SPH</th>
+                        <th className="text-center border border-border bg-muted p-2">CYL</th>
+                        <th className="text-center border border-border bg-muted p-2">AXIS</th>
+                        <th className="text-center border border-border bg-muted p-2">ADD</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th className="text-center border border-border bg-muted p-2">OD (يمين)</th>
+                        <td className="border border-border p-1">
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={sphOD}
+                            onChange={(e) => setSphOD(e.target.value)}
+                          >
+                            <option value="" disabled>اختر...</option>
+                            {generateSphOptions()}
+                          </select>
+                        </td>
+                        <td className="border border-border p-1">
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={cylOD}
+                            onChange={(e) => setCylOD(e.target.value)}
+                          >
+                            <option value="" disabled>اختر...</option>
+                            {generateCylOptions()}
+                          </select>
+                        </td>
+                        <td className="border border-border p-1">
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={axisOD}
+                            onChange={(e) => setAxisOD(e.target.value)}
+                          >
+                            <option value="" disabled>اختر...</option>
+                            {generateAxisOptions()}
+                          </select>
+                        </td>
+                        <td className="border border-border p-1">
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={addOD}
+                            onChange={(e) => setAddOD(e.target.value)}
+                          >
+                            <option value="" disabled>اختر...</option>
+                            {generateAddOptions()}
+                          </select>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th className="text-center border border-border bg-muted p-2">OS (يسار)</th>
+                        <td className="border border-border p-1">
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={sphOS}
+                            onChange={(e) => setSphOS(e.target.value)}
+                          >
+                            <option value="" disabled>اختر...</option>
+                            {generateSphOptions()}
+                          </select>
+                        </td>
+                        <td className="border border-border p-1">
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={cylOS}
+                            onChange={(e) => setCylOS(e.target.value)}
+                          >
+                            <option value="" disabled>اختر...</option>
+                            {generateCylOptions()}
+                          </select>
+                        </td>
+                        <td className="border border-border p-1">
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={axisOS}
+                            onChange={(e) => setAxisOS(e.target.value)}
+                          >
+                            <option value="" disabled>اختر...</option>
+                            {generateAxisOptions()}
+                          </select>
+                        </td>
+                        <td className="border border-border p-1">
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={addOS}
+                            onChange={(e) => setAddOS(e.target.value)}
+                          >
+                            <option value="" disabled>اختر...</option>
+                            {generateAddOptions()}
+                          </select>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th className="text-center border border-border bg-muted p-2">PD</th>
+                        <td className="border border-border p-1" colSpan={2}>
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={pdRight}
+                            onChange={(e) => setPdRight(e.target.value)}
+                          >
+                            <option value="" disabled>اختر...</option>
+                            {generatePdOptions()}
+                          </select>
+                        </td>
+                        <td className="border border-border p-1" colSpan={2}>
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={pdLeft}
+                            onChange={(e) => setPdLeft(e.target.value)}
+                          >
+                            <option value="" disabled>اختر...</option>
+                            {generatePdOptions()}
+                          </select>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse ltr">
-                  <thead>
-                    <tr>
-                      <th className="text-center border border-border bg-muted p-2"></th>
-                      <th className="text-center border border-border bg-muted p-2">SPH</th>
-                      <th className="text-center border border-border bg-muted p-2">CYL</th>
-                      <th className="text-center border border-border bg-muted p-2">AXIS</th>
-                      <th className="text-center border border-border bg-muted p-2">ADD</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th className="text-center border border-border bg-muted p-2">OD (يمين)</th>
-                      <td className="border border-border p-1">
-                        <select
-                          className="w-full p-1 rounded-md border-input bg-background"
-                          value={sphOD}
-                          onChange={(e) => setSphOD(e.target.value)}
-                        >
-                          <option value="" disabled>اختر...</option>
-                          {generateSphOptions()}
-                        </select>
-                      </td>
-                      <td className="border border-border p-1">
-                        <select
-                          className="w-full p-1 rounded-md border-input bg-background"
-                          value={cylOD}
-                          onChange={(e) => setCylOD(e.target.value)}
-                        >
-                          <option value="" disabled>اختر...</option>
-                          {generateCylOptions()}
-                        </select>
-                      </td>
-                      <td className="border border-border p-1">
-                        <select
-                          className="w-full p-1 rounded-md border-input bg-background"
-                          value={axisOD}
-                          onChange={(e) => setAxisOD(e.target.value)}
-                        >
-                          <option value="" disabled>اختر...</option>
-                          {generateAxisOptions()}
-                        </select>
-                      </td>
-                      <td className="border border-border p-1">
-                        <select
-                          className="w-full p-1 rounded-md border-input bg-background"
-                          value={addOD}
-                          onChange={(e) => setAddOD(e.target.value)}
-                        >
-                          <option value="" disabled>اختر...</option>
-                          {generateAddOptions()}
-                        </select>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th className="text-center border border-border bg-muted p-2">OS (يسار)</th>
-                      <td className="border border-border p-1">
-                        <select
-                          className="w-full p-1 rounded-md border-input bg-background"
-                          value={sphOS}
-                          onChange={(e) => setSphOS(e.target.value)}
-                        >
-                          <option value="" disabled>اختر...</option>
-                          {generateSphOptions()}
-                        </select>
-                      </td>
-                      <td className="border border-border p-1">
-                        <select
-                          className="w-full p-1 rounded-md border-input bg-background"
-                          value={cylOS}
-                          onChange={(e) => setCylOS(e.target.value)}
-                        >
-                          <option value="" disabled>اختر...</option>
-                          {generateCylOptions()}
-                        </select>
-                      </td>
-                      <td className="border border-border p-1">
-                        <select
-                          className="w-full p-1 rounded-md border-input bg-background"
-                          value={axisOS}
-                          onChange={(e) => setAxisOS(e.target.value)}
-                        >
-                          <option value="" disabled>اختر...</option>
-                          {generateAxisOptions()}
-                        </select>
-                      </td>
-                      <td className="border border-border p-1">
-                        <select
-                          className="w-full p-1 rounded-md border-input bg-background"
-                          value={addOS}
-                          onChange={(e) => setAddOS(e.target.value)}
-                        >
-                          <option value="" disabled>اختر...</option>
-                          {generateAddOptions()}
-                        </select>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th className="text-center border border-border bg-muted p-2">PD</th>
-                      <td className="border border-border p-1" colSpan={2}>
-                        <select
-                          className="w-full p-1 rounded-md border-input bg-background"
-                          value={pdRight}
-                          onChange={(e) => setPdRight(e.target.value)}
-                        >
-                          <option value="" disabled>اختر...</option>
-                          {generatePdOptions()}
-                        </select>
-                      </td>
-                      <td className="border border-border p-1" colSpan={2}>
-                        <select
-                          className="w-full p-1 rounded-md border-input bg-background"
-                          value={pdLeft}
-                          onChange={(e) => setPdLeft(e.target.value)}
-                        >
-                          <option value="" disabled>اختر...</option>
-                          {generatePdOptions()}
-                        </select>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="contactLenses" className="mt-0 p-0">
-            <div className="bg-card rounded-md p-4 border">
-              <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
-                وصفات العدسات اللاصقة
-              </div>
-              
-              <div className="mb-4">
-                <Label htmlFor="contactRxDate">تاريخ الوصفة الطبية</Label>
-                <div className="mt-1">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
-                      >
-                        <CalendarIcon className="ml-2 h-4 w-4" />
-                        {rxDate ? format(rxDate, "PPP") : "اختر تاريخ الوصفة"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={rxDate}
-                        onSelect={setRxDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+            </TabsContent>
+            
+            <TabsContent value="contactLenses" className="mt-0 p-0">
+              <div className="bg-card rounded-md p-4 border">
+                <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
+                  وصفات العدسات اللاصقة
                 </div>
+                
+                <div className="mb-4">
+                  <Label htmlFor="contactRxDate">تاريخ الوصفة الطبية</Label>
+                  <div className="mt-1">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
+                        >
+                          <CalendarIcon className="ml-2 h-4 w-4" />
+                          {rxDate ? format(rxDate, "PPP") : "اختر تاريخ الوصفة"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={rxDate}
+                          onSelect={setRxDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+                
+                <ContactLensForm 
+                  rxData={contactLensRx} 
+                  onChange={setContactLensRx}
+                />
               </div>
-              
-              <ContactLensForm 
-                rxData={contactLensRx} 
-                onChange={setContactLensRx}
-              />
-            </div>
-          </TabsContent>
+            </TabsContent>
+          </div>
         </div>
       </Tabs>
       

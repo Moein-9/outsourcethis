@@ -47,6 +47,55 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     onChange(updatedRx);
   };
 
+  // Generate sphere options from +4.00 to -9.00
+  const generateSphereOptions = () => {
+    const options = [];
+    options.push(<option key="sph-none" value="-">-</option>);
+    
+    // Add positive values from +4.00 to +0.25
+    for (let i = 4.00; i >= 0.25; i -= 0.25) {
+      const value = i.toFixed(2);
+      options.push(
+        <option key={`sph-plus-${value}`} value={`+${value}`}>+{value}</option>
+      );
+    }
+    
+    // Add 0.00
+    options.push(<option key="sph-zero" value="0.00">0.00</option>);
+    
+    // Add negative values from -0.25 to -9.00
+    for (let i = -0.25; i >= -9.00; i -= 0.25) {
+      const value = i.toFixed(2);
+      options.push(
+        <option key={`sph-minus-${Math.abs(i)}`} value={value}>{value}</option>
+      );
+    }
+    
+    return options;
+  };
+
+  // Generate cylinder options: -0.75, -1.25, -1.75, -2.25
+  const generateCylinderOptions = () => {
+    const cylValues = ["-", "-0.75", "-1.25", "-1.75", "-2.25"];
+    return cylValues.map(value => (
+      <option key={`cyl-${value}`} value={value}>{value}</option>
+    ));
+  };
+
+  // Generate axis options from 10° to 180° in increments of 10°
+  const generateAxisOptions = () => {
+    const options = [];
+    options.push(<option key="axis-none" value="-">-</option>);
+    
+    for (let i = 10; i <= 180; i += 10) {
+      options.push(
+        <option key={`axis-${i}`} value={i.toString()}>{i}°</option>
+      );
+    }
+    
+    return options;
+  };
+
   return (
     <div className="rounded-lg border p-4 bg-white shadow-sm">
       <div className="flex items-center justify-between mb-4 pb-2 border-b">
@@ -92,21 +141,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   value={rxData.rightEye.sphere}
                   onChange={(e) => handleRightEyeChange("sphere", e.target.value)}
                 >
-                  <option value="-">-</option>
-                  <option value="-0.50">-0.50</option>
-                  <option value="-1.00">-1.00</option>
-                  <option value="-1.50">-1.50</option>
-                  <option value="-2.00">-2.00</option>
-                  <option value="-2.50">-2.50</option>
-                  <option value="-3.00">-3.00</option>
-                  <option value="-3.50">-3.50</option>
-                  <option value="-4.00">-4.00</option>
-                  <option value="-4.50">-4.50</option>
-                  <option value="-5.00">-5.00</option>
-                  <option value="+0.50">+0.50</option>
-                  <option value="+1.00">+1.00</option>
-                  <option value="+1.50">+1.50</option>
-                  <option value="+2.00">+2.00</option>
+                  {generateSphereOptions()}
                 </select>
               </td>
               <td className="border border-blue-100 p-2">
@@ -115,11 +150,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   value={rxData.rightEye.cylinder}
                   onChange={(e) => handleRightEyeChange("cylinder", e.target.value)}
                 >
-                  <option value="-">-</option>
-                  <option value="-0.75">-0.75</option>
-                  <option value="-1.25">-1.25</option>
-                  <option value="-1.75">-1.75</option>
-                  <option value="-2.25">-2.25</option>
+                  {generateCylinderOptions()}
                 </select>
               </td>
               <td className="border border-blue-100 p-2">
@@ -128,25 +159,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   value={rxData.rightEye.axis}
                   onChange={(e) => handleRightEyeChange("axis", e.target.value)}
                 >
-                  <option value="-">-</option>
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                  <option value="40">40</option>
-                  <option value="50">50</option>
-                  <option value="60">60</option>
-                  <option value="70">70</option>
-                  <option value="80">80</option>
-                  <option value="90">90</option>
-                  <option value="100">100</option>
-                  <option value="110">110</option>
-                  <option value="120">120</option>
-                  <option value="130">130</option>
-                  <option value="140">140</option>
-                  <option value="150">150</option>
-                  <option value="160">160</option>
-                  <option value="170">170</option>
-                  <option value="180">180</option>
+                  {generateAxisOptions()}
                 </select>
               </td>
               <td className="border border-blue-100 p-2">
@@ -192,21 +205,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   value={rxData.leftEye.sphere}
                   onChange={(e) => handleLeftEyeChange("sphere", e.target.value)}
                 >
-                  <option value="-">-</option>
-                  <option value="-0.50">-0.50</option>
-                  <option value="-1.00">-1.00</option>
-                  <option value="-1.50">-1.50</option>
-                  <option value="-2.00">-2.00</option>
-                  <option value="-2.50">-2.50</option>
-                  <option value="-3.00">-3.00</option>
-                  <option value="-3.50">-3.50</option>
-                  <option value="-4.00">-4.00</option>
-                  <option value="-4.50">-4.50</option>
-                  <option value="-5.00">-5.00</option>
-                  <option value="+0.50">+0.50</option>
-                  <option value="+1.00">+1.00</option>
-                  <option value="+1.50">+1.50</option>
-                  <option value="+2.00">+2.00</option>
+                  {generateSphereOptions()}
                 </select>
               </td>
               <td className="border border-rose-100 p-2">
@@ -215,11 +214,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   value={rxData.leftEye.cylinder}
                   onChange={(e) => handleLeftEyeChange("cylinder", e.target.value)}
                 >
-                  <option value="-">-</option>
-                  <option value="-0.75">-0.75</option>
-                  <option value="-1.25">-1.25</option>
-                  <option value="-1.75">-1.75</option>
-                  <option value="-2.25">-2.25</option>
+                  {generateCylinderOptions()}
                 </select>
               </td>
               <td className="border border-rose-100 p-2">
@@ -228,25 +223,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   value={rxData.leftEye.axis}
                   onChange={(e) => handleLeftEyeChange("axis", e.target.value)}
                 >
-                  <option value="-">-</option>
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                  <option value="40">40</option>
-                  <option value="50">50</option>
-                  <option value="60">60</option>
-                  <option value="70">70</option>
-                  <option value="80">80</option>
-                  <option value="90">90</option>
-                  <option value="100">100</option>
-                  <option value="110">110</option>
-                  <option value="120">120</option>
-                  <option value="130">130</option>
-                  <option value="140">140</option>
-                  <option value="150">150</option>
-                  <option value="160">160</option>
-                  <option value="170">170</option>
-                  <option value="180">180</option>
+                  {generateAxisOptions()}
                 </select>
               </td>
               <td className="border border-rose-100 p-2">
