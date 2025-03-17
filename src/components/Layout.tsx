@@ -39,13 +39,13 @@ export const Layout: React.FC<LayoutProps> = ({
     <div className="rtl min-h-screen bg-background font-cairo">
       <header className="fixed top-0 left-0 right-0 bg-white border-b border-border shadow-sm z-10 px-4 py-2 flex justify-between items-center">
         <MoenLogo 
-          className="h-10 w-auto" 
-          onClick={() => handleNavigate("dashboard")}
+          className="h-10 w-auto cursor-pointer" 
+          onClick={() => navigate("/")}
         />
         <div className="flex space-x-2 space-x-reverse">
           <Button 
             variant={activeSection === "dashboard" ? "default" : "outline"} 
-            onClick={() => handleNavigate("dashboard")}
+            onClick={() => navigate("/")}
           >
             الرئيسية
           </Button>
