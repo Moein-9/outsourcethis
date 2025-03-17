@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -169,7 +170,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
         <div className="flex items-center gap-3">
           <Badge 
             variant={hasExistingPatient ? "outline" : "secondary"} 
-            className={`cursor-pointer bg-blue-50 text-blue-700 border-blue-200`}
+            className={`cursor-pointer ${hasExistingPatient ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}
             onClick={togglePatientStatus}
           >
             {hasExistingPatient ? "يوجد ملف عميل" : "لا يوجد ملف عميل"}
