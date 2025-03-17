@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Eye, AlertTriangle } from "lucide-react";
 import { ContactLensRx } from "@/store/patientStore";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Form,
   FormControl,
@@ -25,6 +26,8 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   onChange,
   showMissingRxWarning = false
 }) => {
+  const { t } = useLanguage();
+  
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
     const updatedRx = {
       ...rxData,
@@ -101,7 +104,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       <div className="flex items-center justify-between mb-4 pb-2 border-b">
         <h4 className="font-medium text-blue-700 flex items-center gap-2">
           <Eye className="w-4 h-4 text-blue-600" />
-          وصفة العدسات اللاصقة
+          {t("contact_lens_prescription")}
         </h4>
       </div>
 
@@ -109,7 +112,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
         <div className="p-3 mb-4 bg-amber-50 border border-amber-200 rounded-md flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
           <p className="text-amber-700 text-sm">
-            لا توجد وصفة عدسات لاصقة لهذا العميل. يرجى إدخال وصفة العدسات.
+            {t("no_prescription_warning")}
           </p>
         </div>
       )}
@@ -119,11 +122,11 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
           <thead>
             <tr className="bg-blue-50">
               <th className="border border-blue-100 p-2 text-blue-700 text-sm"></th>
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm">SPHERE (SPH)</th>
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm">CYLINDER (CYL)</th>
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm">AXIS</th>
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm">BASE CURVE (BC)</th>
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm">DIAMETER (DIA)</th>
+              <th className="border border-blue-100 p-2 text-blue-700 text-sm">{t("sphere")}</th>
+              <th className="border border-blue-100 p-2 text-blue-700 text-sm">{t("cylinder")}</th>
+              <th className="border border-blue-100 p-2 text-blue-700 text-sm">{t("axis")}</th>
+              <th className="border border-blue-100 p-2 text-blue-700 text-sm">{t("base_curve")}</th>
+              <th className="border border-blue-100 p-2 text-blue-700 text-sm">{t("diameter")}</th>
             </tr>
           </thead>
           <tbody>
@@ -132,7 +135,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               <td className="border border-blue-100 p-2">
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="font-medium text-blue-800">العين اليمنى (OD)</span>
+                  <span className="font-medium text-blue-800">{t("right_eye")}</span>
                 </div>
               </td>
               <td className="border border-blue-100 p-2">
@@ -196,7 +199,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               <td className="border border-rose-100 p-2">
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-                  <span className="font-medium text-rose-800">العين اليسرى (OS)</span>
+                  <span className="font-medium text-rose-800">{t("left_eye")}</span>
                 </div>
               </td>
               <td className="border border-rose-100 p-2">

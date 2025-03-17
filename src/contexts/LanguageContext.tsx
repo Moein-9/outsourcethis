@@ -333,6 +333,244 @@ const translations: Record<string, Record<string, string>> = {
   "no_data": {
     ar: "لا توجد بيانات للعرض",
     en: "No data to display"
+  },
+  
+  // Client Form - Personal Information
+  "personal_information": {
+    ar: "المعلومات الشخصية",
+    en: "Personal Information"
+  },
+  "name": {
+    ar: "الاسم",
+    en: "Name"
+  },
+  "full_name": {
+    ar: "الاسم الكامل",
+    en: "Full Name"
+  },
+  "phone": {
+    ar: "الهاتف",
+    en: "Phone"
+  },
+  "phone_number": {
+    ar: "رقم الهاتف",
+    en: "Phone Number"
+  },
+  "birth_date": {
+    ar: "تاريخ الميلاد",
+    en: "Birth Date"
+  },
+  "day": {
+    ar: "اليوم",
+    en: "Day"
+  },
+  "month": {
+    ar: "الشهر",
+    en: "Month"
+  },
+  "year": {
+    ar: "السنة",
+    en: "Year"
+  },
+  "client_didnt_share_birthdate": {
+    ar: "لم يشارك العميل تاريخ الميلاد",
+    en: "Client did not share birth date"
+  },
+  "notes": {
+    ar: "ملاحظات",
+    en: "Notes"
+  },
+  "client_notes": {
+    ar: "ملاحظات أو تفصيلات العميل",
+    en: "Client notes or details"
+  },
+  
+  // Frame Section
+  "frame": {
+    ar: "الإطار",
+    en: "Frame"
+  },
+  "search": {
+    ar: "بحث",
+    en: "Search"
+  },
+  "search_example": {
+    ar: "مثال: RayBan...",
+    en: "Example: RayBan..."
+  },
+  "add_new_frame": {
+    ar: "إضافة إطار جديد",
+    en: "Add New Frame"
+  },
+  "search_brand_model": {
+    ar: "بحث (Brand/Model/Color/Size):",
+    en: "Search (Brand/Model/Color/Size):"
+  },
+  
+  // Discount and Payment
+  "discount_and_payment": {
+    ar: "الخصم والدفعة",
+    en: "Discount and Payment"
+  },
+  "discount": {
+    ar: "الخصم (د.ك)",
+    en: "Discount (KD)"
+  },
+  "payment": {
+    ar: "الدفعة (د.ك)",
+    en: "Payment (KD)"
+  },
+  "full_payment": {
+    ar: "دفع كامل",
+    en: "Full Payment"
+  },
+  
+  // Payment Methods
+  "payment_method": {
+    ar: "طريقة الدفع",
+    en: "Payment Method"
+  },
+  "cash": {
+    ar: "نقداً",
+    en: "Cash"
+  },
+  "knet": {
+    ar: "كي نت",
+    en: "KNET"
+  },
+  "visa": {
+    ar: "Visa",
+    en: "Visa"
+  },
+  "mastercard": {
+    ar: "MasterCard",
+    en: "MasterCard"
+  },
+  "print_client_order": {
+    ar: "طباعة أمر العميل",
+    en: "Print Client Order"
+  },
+  "preview_invoice": {
+    ar: "معاينة الفاتورة",
+    en: "Preview Invoice"
+  },
+  "save_and_print": {
+    ar: "حفظ وطباعة",
+    en: "Save and Print"
+  },
+  
+  // Frame Inventory Management
+  "frame_management": {
+    ar: "إدارة الإطارات",
+    en: "Frame Management"
+  },
+  "search_for_frame": {
+    ar: "البحث عن إطار (ماركة، موديل، لون...)",
+    en: "Search for frame (brand, model, color...)"
+  },
+  "print_labels_button": {
+    ar: "طباعة البطاقات",
+    en: "Print Labels"
+  },
+  "add_new_frame_button": {
+    ar: "إضافة إطار جديد",
+    en: "Add New Frame"
+  },
+  "in_stock": {
+    ar: "في المخزون",
+    en: "In Stock"
+  },
+  "color": {
+    ar: "اللون",
+    en: "Color"
+  },
+  "size": {
+    ar: "المقاس",
+    en: "Size"
+  },
+  "edit": {
+    ar: "تعديل",
+    en: "Edit"
+  },
+  "copy": {
+    ar: "نسخ",
+    en: "Copy"
+  },
+  "print_button": {
+    ar: "طباعة",
+    en: "Print"
+  },
+  
+  // Client Search
+  "client_search": {
+    ar: "بحث عن عميل",
+    en: "Client Search"
+  },
+  "search_by_name_or_phone": {
+    ar: "ابحث بالاسم أو رقم الهاتف",
+    en: "Search by name or phone number"
+  },
+  "search_button": {
+    ar: "بحث",
+    en: "Search"
+  },
+  
+  // Brand and Model
+  "brand": {
+    ar: "الماركة",
+    en: "Brand"
+  },
+  "model": {
+    ar: "الموديل",
+    en: "Model"
+  },
+  "add_frame": {
+    ar: "إضافة إطار",
+    en: "Add Frame"
+  },
+  "new_frame": {
+    ar: "إطار جديد",
+    en: "New Frame"
+  },
+  "enter_frame_details": {
+    ar: "أدخل تفاصيل الإطار الجديد لإضافته إلى المخزون",
+    en: "Enter the new frame details to add it to inventory"
+  },
+  "brand_placeholder": {
+    ar: "مثال: RayBan",
+    en: "Example: RayBan"
+  },
+  "model_placeholder": {
+    ar: "مثال: RB3025",
+    en: "Example: RB3025"
+  },
+  "color_placeholder": {
+    ar: "مثال: أسود",
+    en: "Example: Black"
+  },
+  "size_placeholder": {
+    ar: "مثال: 52-18-145",
+    en: "Example: 52-18-145"
+  },
+  "price_label": {
+    ar: "السعر (KWD)",
+    en: "Price (KWD)"
+  },
+  "quantity": {
+    ar: "الكمية",
+    en: "Quantity"
+  },
+  "save_frame": {
+    ar: "حفظ الإطار",
+    en: "Save Frame"
+  },
+  "show_all_frames": {
+    ar: "عرض جميع الإطارات",
+    en: "Show All Frames"
+  },
+  "no_matching_frames": {
+    ar: "لم يتم العثور على إطارات مطابقة للبحث.",
+    en: "No matching frames found."
   }
 };
 
