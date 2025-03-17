@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -15,7 +14,8 @@ import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { 
   User, Glasses, Package, Receipt, CreditCard, Eye, Search, 
-  Banknote, Plus, PackageCheck, EyeOff, ExternalLink 
+  Banknote, Plus, PackageCheck, EyeOff, ExternalLink,
+  ClipboardCheck // Changed from ClipboardList to ClipboardCheck
 } from "lucide-react";
 
 const CreateInvoice: React.FC = () => {
@@ -437,7 +437,7 @@ const CreateInvoice: React.FC = () => {
                       <Button 
                         variant="outline" 
                         className="mt-3 w-full" 
-                        onClick={() => setRxVisible(!rxVisible)}
+                        onClick={()={() => setRxVisible(!rxVisible)}
                       >
                         {rxVisible ? (
                           <>
@@ -861,207 +861,3 @@ const CreateInvoice: React.FC = () => {
                   className="w-12 h-10 object-contain mx-auto mb-2 bg-white rounded"
                 />
                 <span className="text-sm font-medium">Visa</span>
-              </div>
-              
-              <div 
-                className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
-                  paymentMethod === "MasterCard" 
-                    ? "border-primary bg-primary/5 shadow-sm" 
-                    : "hover:border-primary/30 hover:bg-muted/10"
-                }`}
-                onClick={() => setPaymentMethod("MasterCard")}
-              >
-                <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
-                  alt="MasterCard" 
-                  title="MasterCard"
-                  className="w-12 h-10 object-contain mx-auto mb-2"
-                />
-                <span className="text-sm font-medium">MasterCard</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Section: Invoice Summary */}
-        <div className="bg-white rounded-lg border p-6 shadow-sm h-fit sticky top-24">
-          <div className="text-center font-semibold text-lg border-b border-primary/30 pb-3 mb-4 text-primary flex justify-center items-center gap-2">
-            <Package className="w-5 h-5" />
-            ملخص الفاتورة
-          </div>
-          
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">سعر العدسة:</span>
-              <span>{lensPrice.toFixed(2)} د.ك</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">سعر الطلاء:</span>
-              <span>{coatingPrice.toFixed(2)} د.ك</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">سعر الإطار:</span>
-              <span>{frameTotal.toFixed(2)} د.ك</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">الخصم:</span>
-              <span className="text-destructive">-{discount.toFixed(2)} د.ك</span>
-            </div>
-            
-            <div className="flex justify-between mt-2 pt-2 border-t font-semibold text-lg">
-              <span>المجموع:</span>
-              <span>{total.toFixed(2)} د.ك</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">الدفعة:</span>
-              <span>{deposit.toFixed(2)} د.ك</span>
-            </div>
-            <div className="flex justify-between text-primary font-semibold">
-              <span>المتبقي:</span>
-              <span>{remaining.toFixed(2)} د.ك</span>
-            </div>
-            <div className="flex justify-between border-t pt-2 mt-2">
-              <span className="text-muted-foreground">طريقة الدفع:</span>
-              <span className="font-medium">{paymentMethod || "غير محدد"}</span>
-            </div>
-          </div>
-          
-          <div className="space-y-3 mt-6">
-            <Button 
-              onClick={handleSaveInvoice} 
-              className="w-full"
-              size="lg"
-            >
-              حفظ الفاتورة
-            </Button>
-            <div className="grid grid-cols-2 gap-3">
-              <Button 
-                variant="outline"
-                onClick={() => setInvoicePrintOpen(true)}
-                className="flex items-center gap-1"
-              >
-                <Receipt className="w-4 h-4" />
-                طباعة الفاتورة
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setWorkOrderPrintOpen(true)}
-                className="flex items-center gap-1"
-              >
-                <ClipboardList className="w-4 h-4" />
-                طباعة أمر العمل
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Invoice Print Sheet */}
-      <Sheet open={invoicePrintOpen} onOpenChange={setInvoicePrintOpen}>
-        <SheetContent className="w-full sm:max-w-[600px]">
-          <SheetHeader>
-            <SheetTitle className="text-center flex items-center justify-center gap-2">
-              <Receipt className="w-5 h-5" />
-              فاتورة بيع
-            </SheetTitle>
-          </SheetHeader>
-          
-          {/* Use our new ReceiptInvoice component */}
-          <ReceiptInvoice 
-            invoice={{
-              invoiceId: "INV123",
-              patientName: currentPatient ? currentPatient.name : manualName,
-              patientPhone: currentPatient ? currentPatient.phone : manualPhone,
-              lensType,
-              lensPrice,
-              coating,
-              coatingPrice,
-              frameBrand: skipFrame ? "" : selectedFrame.brand,
-              frameModel: skipFrame ? "" : selectedFrame.model,
-              frameColor: skipFrame ? "" : selectedFrame.color,
-              framePrice: skipFrame ? 0 : selectedFrame.price,
-              discount,
-              deposit,
-              total,
-              remaining,
-              paymentMethod,
-              createdAt: new Date().toISOString(),
-              isPaid: remaining === 0
-            }}
-            isPrintable
-          />
-          
-          <div className="flex justify-center gap-3 mt-6">
-            <Button 
-              onClick={() => window.print()}
-              className="flex items-center gap-1"
-            >
-              <ExternalLink className="w-4 h-4" />
-              طباعة
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => setInvoicePrintOpen(false)}
-            >
-              إغلاق
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Work Order Print Sheet */}
-      <Sheet open={workOrderPrintOpen} onOpenChange={setWorkOrderPrintOpen}>
-        <SheetContent className="w-full sm:max-w-[800px]">
-          <SheetHeader>
-            <SheetTitle className="text-center flex items-center justify-center gap-2">
-              <ClipboardList className="w-5 h-5" />
-              أمر العمل
-            </SheetTitle>
-          </SheetHeader>
-          
-          <WorkOrderPrint 
-            invoice={{
-              invoiceId: "INV123",
-              patientName: currentPatient ? currentPatient.name : manualName,
-              patientPhone: currentPatient ? currentPatient.phone : manualPhone,
-              patientId: currentPatient?.patientId,
-              lensType,
-              lensPrice,
-              coating,
-              coatingPrice,
-              frameBrand: skipFrame ? "" : selectedFrame.brand,
-              frameModel: skipFrame ? "" : selectedFrame.model,
-              frameColor: skipFrame ? "" : selectedFrame.color,
-              framePrice: skipFrame ? 0 : selectedFrame.price,
-              discount,
-              deposit,
-              total,
-              remaining,
-              paymentMethod,
-              createdAt: new Date().toISOString(),
-              isPaid: remaining === 0
-            }}
-          />
-          
-          <div className="flex justify-center gap-3 mt-6">
-            <Button 
-              onClick={() => window.print()}
-              className="flex items-center gap-1"
-            >
-              <ExternalLink className="w-4 h-4" />
-              طباعة
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => setWorkOrderPrintOpen(false)}
-            >
-              إغلاق
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
-    </div>
-  );
-};
-
-export default CreateInvoice;
