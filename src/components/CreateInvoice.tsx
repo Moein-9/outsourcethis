@@ -894,4 +894,13 @@ const CreateInvoice: React.FC = () => {
           />
           
           <div className="flex justify-center space-x-2 space-x-reverse mt-6">
-            <Button onClick={()
+            <Button onClick={() => window.print()}>طباعة</Button>
+            <Button variant="outline" onClick={() => setWorkOrderPrintOpen(false)}>إغلاق</Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+};
+
+export default CreateInvoice;
