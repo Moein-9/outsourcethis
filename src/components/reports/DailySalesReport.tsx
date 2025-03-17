@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  ChartLineUp, 
+  ChartLine, 
   Printer, 
   CreditCard, 
   Wallet, 
@@ -33,7 +32,7 @@ import {
 import { SalesChart } from "./SalesChart";
 
 export const DailySalesReport: React.FC = () => {
-  const { invoices } = useInvoiceStore();
+  const { invoices } = useInvoiceStore() || { invoices: [] };
   const [todaySales, setTodaySales] = useState<ReturnType<typeof useInvoiceStore>["invoices"]>([]);
   const [paymentBreakdown, setPaymentBreakdown] = useState<{
     method: string;
@@ -47,7 +46,6 @@ export const DailySalesReport: React.FC = () => {
   const [totalCoatingRevenue, setTotalCoatingRevenue] = useState(0);
   const [totalDeposit, setTotalDeposit] = useState(0);
   
-  // Filter today's sales
   useEffect(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -60,7 +58,6 @@ export const DailySalesReport: React.FC = () => {
     
     setTodaySales(todaySalesData);
     
-    // Calculate totals
     const revenue = todaySalesData.reduce((sum, invoice) => sum + invoice.total, 0);
     const lensRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.lensPrice, 0);
     const frameRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.framePrice, 0);
@@ -73,7 +70,6 @@ export const DailySalesReport: React.FC = () => {
     setTotalCoatingRevenue(coatingRevenue);
     setTotalDeposit(deposits);
     
-    // Calculate payment breakdown
     const paymentMethods: Record<string, { amount: number; count: number }> = {};
     
     todaySalesData.forEach(invoice => {
@@ -94,7 +90,6 @@ export const DailySalesReport: React.FC = () => {
     setPaymentBreakdown(breakdownData);
   }, [invoices]);
   
-  // Print function for daily report
   const handlePrintReport = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -314,11 +309,8 @@ export const DailySalesReport: React.FC = () => {
     printWindow.document.write(printContent);
     printWindow.document.close();
     
-    // Print after resources are loaded
     printWindow.onload = function() {
       printWindow.focus();
-      // Uncomment to automatically trigger print
-      // printWindow.print();
     };
   };
   
@@ -332,7 +324,6 @@ export const DailySalesReport: React.FC = () => {
         </Button>
       </div>
       
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -391,7 +382,6 @@ export const DailySalesReport: React.FC = () => {
         </Card>
       </div>
       
-      {/* Charts - Today's Sales Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <Card>
           <CardHeader>
@@ -443,7 +433,6 @@ export const DailySalesReport: React.FC = () => {
         </Card>
       </div>
       
-      {/* Invoices Table */}
       <Card>
         <CardHeader>
           <CardTitle>قائمة الفواتير اليوم</CardTitle>
