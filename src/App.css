@@ -73,5 +73,10 @@
     page-break-inside: avoid;
     page-break-after: always;
   }
+  
+  /* Fix for QR code rendering in print */
+  #qr-single img, [id^="qr-"] img {
+    width: 42px !important;
+    height: 42px !important;
+  }
 }
-
