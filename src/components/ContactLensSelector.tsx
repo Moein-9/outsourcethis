@@ -212,7 +212,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                       <SelectValue placeholder="اختر القوة" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">الكل</SelectItem>
+                      <SelectItem value="all">الكل</SelectItem>
                       {powers.map(power => (
                         <SelectItem key={power} value={power}>{power}</SelectItem>
                       ))}
@@ -227,7 +227,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                       <SelectValue placeholder="اختر BC" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">الكل</SelectItem>
+                      <SelectItem value="all">الكل</SelectItem>
                       {baseCurves.map(bc => (
                         <SelectItem key={bc} value={bc}>{bc}</SelectItem>
                       ))}
@@ -242,7 +242,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                       <SelectValue placeholder="اختر البراند" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">الكل</SelectItem>
+                      <SelectItem value="all">الكل</SelectItem>
                       {brands.map(brand => (
                         <SelectItem key={brand} value={brand}>{brand}</SelectItem>
                       ))}
@@ -335,9 +335,9 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                     size="sm"
                     onClick={() => {
                       setSearch("");
-                      setFilterBrand("");
-                      setFilterPower("");
-                      setFilterBC("");
+                      setFilterBrand("all");
+                      setFilterPower("all");
+                      setFilterBC("all");
                       setResults(mockContactLenses);
                     }}
                     className="border-amber-200 hover:bg-amber-50 text-amber-700"
