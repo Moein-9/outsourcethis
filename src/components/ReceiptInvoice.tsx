@@ -29,6 +29,7 @@ interface ReceiptInvoiceProps {
   deposit?: number;
   remaining?: number;
   paymentMethod?: string;
+  authNumber?: string;
 }
 
 export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ 
@@ -48,7 +49,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   total,
   deposit,
   remaining,
-  paymentMethod
+  paymentMethod,
+  authNumber
 }) => {
   // Use either the passed props or invoice data
   const name = patientName || invoice.patientName;
@@ -66,38 +68,41 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const rem = remaining !== undefined ? remaining : invoice.remaining;
   const payMethod = paymentMethod || invoice.paymentMethod;
   const isPaid = rem <= 0;
+  
+  // Get auth number from either invoice payments or direct prop
+  const authNum = authNumber || (invoice.payments?.find(p => p.authNumber)?.authNumber || "");
 
   const containerClass = isPrintable 
     ? "w-[80mm] mx-auto bg-white p-4 text-[12px] border shadow-sm print:shadow-none" 
     : "w-full bg-white p-4 border rounded-lg shadow-sm";
   
   return (
-    <div className={containerClass} style={{ fontFamily: 'Courier New, monospace' }}>
+    <div className={containerClass} style={{ fontFamily: 'Courier New, monospace' }} dir="rtl">
       <div className="text-center border-b pb-3 mb-3">
         <div className="flex justify-center mb-2">
           <Receipt className="w-10 h-10 text-primary" />
         </div>
-        <h2 className="font-bold text-xl mb-1">OPTICS STORE</h2>
-        <p className="text-sm text-muted-foreground">Kuwait City, Block 5</p>
-        <p className="text-sm text-muted-foreground">Tel: +965 2345-6789</p>
+        <h2 className="font-bold text-xl mb-1">متجر النظارات</h2>
+        <p className="text-sm text-muted-foreground">مدينة الكويت، بلوك 5</p>
+        <p className="text-sm text-muted-foreground">هاتف: 6789-2345 965+</p>
       </div>
 
       <div className="mb-4 text-sm">
         <div className="flex justify-between border-b pb-1 mb-1">
-          <span className="font-semibold">Invoice #:</span>
+          <span className="font-semibold">رقم الفاتورة:</span>
           <span>{invoice.invoiceId}</span>
         </div>
         <div className="flex justify-between border-b pb-1 mb-1">
-          <span className="font-semibold">Date:</span>
+          <span className="font-semibold">التاريخ:</span>
           <span>{format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}</span>
         </div>
         <div className="flex justify-between border-b pb-1 mb-1">
-          <span className="font-semibold">Customer:</span>
+          <span className="font-semibold">العميل:</span>
           <span>{name}</span>
         </div>
         {phone && (
           <div className="flex justify-between border-b pb-1 mb-1">
-            <span className="font-semibold">Phone:</span>
+            <span className="font-semibold">الهاتف:</span>
             <span>{phone}</span>
           </div>
         )}
@@ -105,72 +110,75 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
 
       <div className="border-t border-b py-2 mb-3">
         <div className="text-center mb-2 font-bold text-xs uppercase tracking-wide">
-          *** ITEMS ***
+          *** المنتجات ***
         </div>
         
         {lens && (
           <div className="flex justify-between mb-1 text-sm">
-            <span>Lenses ({lens})</span>
-            <span>{lensP.toFixed(2)} KWD</span>
+            <span>العدسات ({lens})</span>
+            <span>{lensP.toFixed(2)} د.ك</span>
           </div>
         )}
         
         {coat && (
           <div className="flex justify-between mb-1 text-sm">
-            <span>Coating ({coat})</span>
-            <span>{coatP.toFixed(2)} KWD</span>
+            <span>الطلاء ({coat})</span>
+            <span>{coatP.toFixed(2)} د.ك</span>
           </div>
         )}
         
         {frameBrand && (
           <div className="flex justify-between mb-1 text-sm">
-            <span>Frame ({frameBrand} {frameModel})</span>
-            <span>{frameP.toFixed(2)} KWD</span>
+            <span>الإطار ({frameBrand} {frameModel})</span>
+            <span>{frameP.toFixed(2)} د.ك</span>
           </div>
         )}
       </div>
 
       <div className="text-sm mb-4">
         <div className="flex justify-between">
-          <span>Subtotal:</span>
-          <span>{(tot + disc).toFixed(2)} KWD</span>
+          <span>المجموع الفرعي:</span>
+          <span>{(tot + disc).toFixed(2)} د.ك</span>
         </div>
         {disc > 0 && (
           <div className="flex justify-between text-destructive">
-            <span>Discount:</span>
-            <span>-{disc.toFixed(2)} KWD</span>
+            <span>الخصم:</span>
+            <span>-{disc.toFixed(2)} د.ك</span>
           </div>
         )}
         <div className="flex justify-between font-bold mt-1 pt-1 border-t">
-          <span>Total:</span>
-          <span>{tot.toFixed(2)} KWD</span>
+          <span>الإجمالي:</span>
+          <span>{tot.toFixed(2)} د.ك</span>
         </div>
       </div>
 
       <div className="space-y-1 text-sm mb-3">
         <div className="text-center mb-1 font-bold text-xs uppercase tracking-wide">
-          *** PAYMENTS ***
+          *** المدفوعات ***
         </div>
         
         {invoice.payments?.map((payment, index) => (
           <div key={index} className="flex justify-between text-sm">
             <span>
               {format(new Date(payment.date), 'dd/MM/yyyy')} ({payment.method})
-              {payment.authNumber && ` - Auth: ${payment.authNumber}`}
+              {payment.authNumber && ` - رقم التفويض: ${payment.authNumber}`}
             </span>
-            <span>{payment.amount.toFixed(2)} KWD</span>
+            <span>{payment.amount.toFixed(2)} د.ك</span>
           </div>
         )) || (
           <div className="flex justify-between text-sm">
-            <span>{format(new Date(invoice.createdAt), 'dd/MM/yyyy')} ({payMethod})</span>
-            <span>{dep.toFixed(2)} KWD</span>
+            <span>
+              {format(new Date(invoice.createdAt), 'dd/MM/yyyy')} ({payMethod})
+              {authNum && ` - رقم التفويض: ${authNum}`}
+            </span>
+            <span>{dep.toFixed(2)} د.ك</span>
           </div>
         )}
         
         {rem > 0 && (
           <div className="flex justify-between font-bold mt-1 pt-1 border-t">
-            <span>Balance Due:</span>
-            <span>{rem.toFixed(2)} KWD</span>
+            <span>المبلغ المتبقي:</span>
+            <span>{rem.toFixed(2)} د.ك</span>
           </div>
         )}
       </div>
@@ -178,13 +186,13 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       {isPaid && (
         <div className="flex items-center justify-center gap-2 my-3 text-primary font-bold p-1 border border-primary rounded">
           <CheckCircle2 className="w-4 h-4" />
-          <span>PAID IN FULL</span>
+          <span>مدفوع بالكامل</span>
         </div>
       )}
 
       <div className="text-center mt-3 pt-3 border-t">
-        <p className="font-semibold text-sm">Thank you for your business!</p>
-        <p className="text-xs mt-1 text-muted-foreground">Keep this receipt for your records</p>
+        <p className="font-semibold text-sm">شكراً لتعاملكم معنا!</p>
+        <p className="text-xs mt-1 text-muted-foreground">احتفظ بهذه الفاتورة لسجلاتك</p>
         <div className="mt-3 text-[10px] flex gap-1 justify-center">
           <span>{'•'.repeat(15)}</span>
         </div>
