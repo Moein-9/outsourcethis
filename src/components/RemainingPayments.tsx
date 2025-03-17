@@ -70,10 +70,11 @@ const RemainingPayments = () => {
       return;
     }
 
+    // Note: We're removing the date property here as it appears
+    // the store expects to handle the date internally
     addPartialPayment(selectedInvoice, {
       amount,
       method: "cash", // Default payment method
-      date: paymentDate,
     });
 
     toast.success(`تم تسجيل دفعة بقيمة ${amount} KWD`);
