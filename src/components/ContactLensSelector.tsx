@@ -74,7 +74,7 @@ const mockContactLenses: ContactLensItem[] = [
 
 export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSelect }) => {
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<ContactLensItem[]>([]);
+  const [results, setResults] = useState<ContactLensItem[]>(mockContactLenses);
   const [selectedLenses, setSelectedLenses] = useState<ContactLensItem[]>([]);
   
   const [powerFilter, setPowerFilter] = useState("");
@@ -197,7 +197,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         <SelectValue placeholder="اختر القوة" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">الكل</SelectItem>
+                        <SelectItem value="all">الكل</SelectItem>
                         {powers.map(power => (
                           <SelectItem key={power} value={power}>{power}</SelectItem>
                         ))}
@@ -214,7 +214,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         <SelectValue placeholder="اختر BC" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">الكل</SelectItem>
+                        <SelectItem value="all">الكل</SelectItem>
                         {baseCurves.map(bc => (
                           <SelectItem key={bc} value={bc}>{bc}</SelectItem>
                         ))}
