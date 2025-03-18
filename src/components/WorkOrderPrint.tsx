@@ -68,7 +68,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const isContactLens = contactLenses && contactLenses.length > 0;
   const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
 
-  // Add special CSS for print media to ensure only this component is printed
+  // Add special CSS for print media to ensure only this component is printed and only print 1 copy
   return (
     <div className={`max-w-2xl mx-auto bg-white p-6 border rounded-lg shadow-sm print:shadow-none ${dirClass}`}>
       <style>
@@ -299,12 +299,12 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 <div className="space-y-2">
                   <div className="flex">
                     <span className="font-semibold w-20">{t("price")}:</span>
-                    <span>{invoice.lensPrice.toFixed(2)} {t("currency")}</span>
+                    <span>{invoice.lensPrice.toFixed(2)} KWD</span>
                   </div>
                   {coatingValue && (
                     <div className="flex">
                       <span className="font-semibold w-20">{t("coatingPrice")}:</span>
-                      <span>{invoice.coatingPrice.toFixed(2)} {t("currency")}</span>
+                      <span>{invoice.coatingPrice.toFixed(2)} KWD</span>
                     </div>
                   )}
                 </div>

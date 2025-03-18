@@ -39,39 +39,32 @@ export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
         pageBreakInside: "avoid",
       }}
     >
-      {/* Left side - Mini QR Code */}
-      <div className="w-[22%] flex items-center justify-center pl-1">
+      {/* Left section for brand, size, and price */}
+      <div className="w-1/2 h-full border-r px-2 py-1 flex flex-col justify-center">
+        <div className="font-bold text-[9pt] mb-1">{frame.brand}</div>
+        <div className="text-[7pt] mb-1">{frame.size || "N/A"}</div>
+        <div className="font-bold text-[10pt]">K.D. {frame.price.toFixed(3)}</div>
+      </div>
+      
+      {/* Right section for logo and QR code */}
+      <div className="w-1/2 h-full p-1 flex flex-col justify-between items-center">
+        <div className="store-logo">
+          <img 
+            src="/lovable-uploads/51989331-75fe-4ab7-8a52-c85e9e842039.png" 
+            alt="Moen Optician" 
+            className="h-6 w-auto"
+          />
+        </div>
+        
         <QRCode 
           value={qrData} 
           size={28} 
           level="M"
           renderAs="svg"
           includeMargin={false}
-          className="h-8 w-8"
+          className="h-6 w-6"
           id={`qr-code-${frame.frameId}`}
         />
-      </div>
-      
-      {/* Right side - Compact information layout */}
-      <div className="w-[78%] flex flex-col justify-center h-full pr-2 py-0.5">
-        <div className="flex justify-between items-center mb-0.5">
-          <img 
-            src="/lovable-uploads/51989331-75fe-4ab7-8a52-c85e9e842039.png" 
-            alt="Moen Optician" 
-            className="h-2.5 w-auto"
-          />
-          <span className="text-xs font-bold">#{frame.frameId}</span>
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-bold">{frame.brand}</span>
-          <span className="text-xs">{frame.model}</span>
-        </div>
-        
-        <div className="flex justify-between items-center mt-0.5">
-          <span className="text-xs text-gray-700">{frame.size || "N/A"} | {frame.color}</span>
-          <span className="text-lg font-bold">KWD {frame.price.toFixed(3)}</span>
-        </div>
       </div>
     </div>
   );
