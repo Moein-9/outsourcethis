@@ -91,7 +91,8 @@ export const usePrintLabel = () => {
       return;
     }
     
-    const printContent = `
+    // Change from const to let for printContent
+    let printContent = `
       <!DOCTYPE html>
       <html>
       <head>

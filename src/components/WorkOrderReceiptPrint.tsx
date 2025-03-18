@@ -57,6 +57,14 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     });
   };
 
+  // Calculate subtotal (total + discount)
+  const subtotal = invoice.total + invoice.discount;
+  
+  // Calculate amount paid (deposit or sum of payments)
+  const amountPaid = invoice.payments 
+    ? invoice.payments.reduce((sum, payment) => sum + payment.amount, 0) 
+    : invoice.deposit;
+
   return (
     <div style={{ width: "80mm", fontFamily: "Arial, sans-serif" }} dir={dir} className="print-receipt">
       {/* Header */}
@@ -242,7 +250,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </h2>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
           <span style={{ fontWeight: "bold" }}>{t("subtotal")}:</span>
-          <span>{invoice.subtotal.toFixed(3)} KWD</span>
+          <span>{subtotal.toFixed(3)} KWD</span>
         </div>
         {invoice.discount > 0 && (
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
@@ -256,11 +264,11 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
           <span style={{ fontWeight: "bold" }}>{t("paid")}:</span>
-          <span>{invoice.amountPaid.toFixed(3)} KWD</span>
+          <span>{amountPaid.toFixed(3)} KWD</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
           <span style={{ fontWeight: "bold" }}>{t("remaining")}:</span>
-          <span>{(invoice.total - invoice.amountPaid).toFixed(3)} KWD</span>
+          <span>{(invoice.total - amountPaid).toFixed(3)} KWD</span>
         </div>
       </div>
       
