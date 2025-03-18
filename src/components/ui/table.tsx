@@ -77,21 +77,23 @@ const TableHead = React.forwardRef<
   React.ThHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => {
   const { language } = useLanguageStore();
-  // Get parent table direction if possible, otherwise use language
-  const parentTableEl = React.useRef<HTMLTableElement | null>(null);
+  // Instead of trying to access ref from props, use a state variable
   const [textAlignClass, setTextAlignClass] = React.useState(language === 'ar' ? 'text-right' : 'text-left');
   
+  // Try to find parent table element and determine direction
+  const cellRef = React.useRef<HTMLTableCellElement | null>(null);
+  
   React.useEffect(() => {
-    if (props.ref && typeof props.ref !== 'function') {
-      // Try to find parent table
-      let element: HTMLElement | null = props.ref.current;
+    // Search for parent table when component mounts
+    const findParentTableDirection = () => {
+      if (!cellRef.current) return;
+      
+      let element: HTMLElement | null = cellRef.current;
       while (element && element.tagName !== 'TABLE') {
         element = element.parentElement;
       }
       
       if (element) {
-        parentTableEl.current = element as HTMLTableElement;
-        // Check if table has rtl or ltr class
         if (element.classList.contains('rtl')) {
           setTextAlignClass('text-right');
         } else if (element.classList.contains('ltr')) {
@@ -100,14 +102,26 @@ const TableHead = React.forwardRef<
           setTextAlignClass(language === 'ar' ? 'text-right' : 'text-left');
         }
       }
-    } else {
-      setTextAlignClass(language === 'ar' ? 'text-right' : 'text-left');
+    };
+    
+    findParentTableDirection();
+  }, [language]);
+  
+  // Use function that assigns to both refs
+  const assignRefs = (el: HTMLTableCellElement | null) => {
+    // assign to local ref
+    cellRef.current = el;
+    // forward the ref
+    if (typeof ref === 'function') {
+      ref(el);
+    } else if (ref) {
+      ref.current = el;
     }
-  }, [props.ref, language]);
+  };
   
   return (
     <th
-      ref={ref}
+      ref={assignRefs}
       className={cn(
         `h-12 px-4 ${textAlignClass} align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0`,
         className
@@ -123,21 +137,23 @@ const TableCell = React.forwardRef<
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => {
   const { language } = useLanguageStore();
-  // Get parent table direction if possible, otherwise use language
-  const parentTableEl = React.useRef<HTMLTableElement | null>(null);
+  // Instead of trying to access ref from props, use a state variable
   const [textAlignClass, setTextAlignClass] = React.useState(language === 'ar' ? 'text-right' : 'text-left');
   
+  // Try to find parent table element and determine direction
+  const cellRef = React.useRef<HTMLTableCellElement | null>(null);
+  
   React.useEffect(() => {
-    if (props.ref && typeof props.ref !== 'function') {
-      // Try to find parent table
-      let element: HTMLElement | null = props.ref.current;
+    // Search for parent table when component mounts
+    const findParentTableDirection = () => {
+      if (!cellRef.current) return;
+      
+      let element: HTMLElement | null = cellRef.current;
       while (element && element.tagName !== 'TABLE') {
         element = element.parentElement;
       }
       
       if (element) {
-        parentTableEl.current = element as HTMLTableElement;
-        // Check if table has rtl or ltr class
         if (element.classList.contains('rtl')) {
           setTextAlignClass('text-right');
         } else if (element.classList.contains('ltr')) {
@@ -146,14 +162,26 @@ const TableCell = React.forwardRef<
           setTextAlignClass(language === 'ar' ? 'text-right' : 'text-left');
         }
       }
-    } else {
-      setTextAlignClass(language === 'ar' ? 'text-right' : 'text-left');
+    };
+    
+    findParentTableDirection();
+  }, [language]);
+  
+  // Use function that assigns to both refs
+  const assignRefs = (el: HTMLTableCellElement | null) => {
+    // assign to local ref
+    cellRef.current = el;
+    // forward the ref
+    if (typeof ref === 'function') {
+      ref(el);
+    } else if (ref) {
+      ref.current = el;
     }
-  }, [props.ref, language]);
+  };
   
   return (
     <td
-      ref={ref}
+      ref={assignRefs}
       className={cn(`p-4 ${textAlignClass} align-middle [&:has([role=checkbox])]:pr-0`, className)}
       {...props}
     />
