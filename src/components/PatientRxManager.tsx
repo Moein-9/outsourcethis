@@ -21,7 +21,7 @@ import { RxData, usePatientStore } from "@/store/patientStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format, parseISO } from "date-fns";
 import { ar } from "date-fns/locale";
-import enUS from "date-fns/locale/en-US";
+import { enUS } from "date-fns/locale/en-US";
 import { 
   AlertCircle, 
   FileText, 
