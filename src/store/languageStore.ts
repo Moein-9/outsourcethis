@@ -117,6 +117,7 @@ const translations: Record<string, Record<string, string>> = {
     discount: 'Discount',
     total: 'Total',
     paymentMethod: 'Payment Method',
+    // The 'cash' key was duplicated in the original code
     // cash: 'Cash', - Commented out as it's defined again in the additional section
     creditCard: 'Credit Card',
     deposit: 'Deposit',
@@ -186,7 +187,7 @@ const translations: Record<string, Record<string, string>> = {
     deleteContactLensConfirm: 'Are you sure you want to delete this contact lens?',
     
     // Remaining Payments
-    duePayments: 'Due Payments',
+    duePayments: 'Manage incomplete invoices and record remaining payments',
     clientId: 'Client ID',
     invoiceId: 'Invoice ID',
     invoiceDate: 'Invoice Date',
@@ -295,6 +296,14 @@ const translations: Record<string, Record<string, string>> = {
     paymentTotalLabel: "Total:",
     paidLabel: "Paid:",
     remainingLabel: "Remaining:",
+    
+    // LensSelector Component
+    frameOnly: "Frame only (without lenses)",
+    
+    // Additional translations for images shown
+    medicalLenses: "Medical Lenses",
+    selectLensType: "Select Lens Type",
+    selectCoatings: "Select Coatings",
   },
   ar: {
     // General UI
@@ -303,7 +312,7 @@ const translations: Record<string, Record<string, string>> = {
     createClient: 'إنشاء عميل',
     createInvoice: 'إنشاء فاتورة',
     inventory: 'المخزون',
-    remainingPayments: 'المدفوعات المتبقية',
+    remainingPayments: 'المتبقي للدفع',
     patientSearch: 'بحث عن مريض',
     reportsPage: 'التقارير',
     systemDescription: 'نظام شامل لإدارة عمليات متجر النظارات والمرضى والمبيعات.',
@@ -378,7 +387,7 @@ const translations: Record<string, Record<string, string>> = {
     searchClient: 'بحث عن عميل',
     clientName: 'اسم العميل',
     clientPhone: 'هاتف العميل',
-    lensDetails: 'تفاصيل العدسة',
+    lensDetails: 'العدسات الطبية',
     lensType: 'نوع العدسة',
     selectLens: 'اختر العدسة',
     lensPrice: 'سعر العدسة',
@@ -473,7 +482,7 @@ const translations: Record<string, Record<string, string>> = {
     deleteContactLensConfirm: 'هل أنت متأكد من رغبتك في حذف هذه العدسة اللاصقة؟',
     
     // Remaining Payments
-    duePayments: 'المدفوعات المستحقة',
+    duePayments: 'إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية',
     clientId: 'رقم العميل',
     invoiceId: 'رقم الفاتورة',
     invoiceDate: 'تاريخ الفاتورة',
@@ -581,6 +590,14 @@ const translations: Record<string, Record<string, string>> = {
     paymentTotalLabel: "المجموع:",
     paidLabel: "المدفوع:",
     remainingLabel: "المتبقي:",
+    
+    // LensSelector Component
+    frameOnly: "إطار فقط (بدون عدسات)",
+    
+    // Additional translations for images shown
+    medicalLenses: "العدسات الطبية",
+    selectLensType: "اختر نوع العدسة",
+    selectCoatings: "اختر الطلاءات",
   }
 };
 
@@ -592,4 +609,3 @@ export const useLanguageStore = create<LanguageStore>((set) => ({
     return translations[language][key] || key;
   },
 }));
-
