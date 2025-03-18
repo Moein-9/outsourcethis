@@ -63,9 +63,19 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         <div className="store-logo" style={{
           display: "flex",
           justifyContent: "center",
-          width: "100%"
+          width: "100%",
+          marginBottom: "1mm"
         }}>
-          <MoenLogo className="w-auto" style={{ maxHeight: "5mm", height: "auto" }} />
+          <MoenLogo className="w-auto" style={{ maxHeight: "4.5mm", height: "auto" }} />
+        </div>
+        
+        {/* Frame ID */}
+        <div style={{
+          fontSize: "6pt",
+          textAlign: "center",
+          marginBottom: "1mm"
+        }}>
+          {frame.frameId}
         </div>
 
         {/* QR Code - positioned at bottom right */}
@@ -76,7 +86,8 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         }}>
           <QRCodeSVG 
             value={frame.frameId} 
-            size={20} // Smaller QR code to fit in the layout
+            size={22} // Sized for optimal scanning while fitting in layout
+            level="L" // Low error correction to make the QR code smaller but still functional
           />
         </div>
       </div>
