@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
@@ -515,7 +514,6 @@ const CreateInvoice: React.FC = () => {
     authNumber: authNumber
   };
   
-  // Get the appropriate text direction based on current language
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   
@@ -993,7 +991,7 @@ const CreateInvoice: React.FC = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div 
                 className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
-                  paymentMethod === language === 'ar' ? "نقداً" : "Cash" 
+                  paymentMethod === (language === 'ar' ? "نقداً" : "Cash")
                     ? "border-primary bg-primary/5 shadow-sm" 
                     : "hover:border-primary/30 hover:bg-muted/10"
                 }`}
@@ -1010,7 +1008,7 @@ const CreateInvoice: React.FC = () => {
               
               <div 
                 className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
-                  paymentMethod === language === 'ar' ? "كي نت" : "KNET" 
+                  paymentMethod === (language === 'ar' ? "كي نت" : "KNET")
                     ? "border-primary bg-primary/5 shadow-sm" 
                     : "hover:border-primary/30 hover:bg-muted/10"
                 }`}
@@ -1288,4 +1286,3 @@ const CreateInvoice: React.FC = () => {
 };
 
 export default CreateInvoice;
-
