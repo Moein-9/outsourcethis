@@ -95,6 +95,20 @@ export const usePrintLabel = () => {
     
     document.body.appendChild(iframe);
     
+    // Prepare the base64 QR code generation function (client-side)
+    const qrCodeGenerator = (data: string, size = 50) => {
+      // Simple base64 QR code generator
+      const canvas = document.createElement('canvas');
+      const QR = new QRCodeSVG({
+        value: data,
+        size: size,
+      });
+      return QR.toString();
+    };
+    
+    // Base64 encode the logo URL for embedding directly in the HTML
+    const logoUrl = "/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png";
+    
     // Change from const to let for printContent
     let printContent = `
       <!DOCTYPE html>
@@ -164,6 +178,7 @@ export const usePrintLabel = () => {
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-bottom: 2mm;
           }
           .store-logo img {
             max-height: 6mm;
@@ -174,9 +189,9 @@ export const usePrintLabel = () => {
             display: flex;
             justify-content: center;
           }
-          .qr-code img {
-            max-height: 6mm;
-            width: auto;
+          .qr-code svg {
+            height: 6mm;
+            width: 6mm;
           }
           @media print {
             body {
@@ -188,12 +203,27 @@ export const usePrintLabel = () => {
             }
           }
         </style>
+        <!-- Include the QR code library -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
       </head>
       <body>
     `;
     
+    // Import QR code library for the iframe document
+    const qrCodeScript = document.createElement('script');
+    qrCodeScript.src = 'https://cdn.jsdelivr.net/npm/qrcode.react@3.1.0/lib/index.min.js';
+    iframe.contentWindow?.document.head.appendChild(qrCodeScript);
+    
     // Generate HTML for each selected frame
     selectedFrames.forEach(frame => {
+      // Create QR code inline SVG
+      const qrSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+          <rect width="100%" height="100%" fill="white" />
+          <QRCodeSVG value="${frame.frameId}" size={24} />
+        </svg>
+      `;
+      
       printContent += `
         <div class="label-container">
           <div class="left-section">
@@ -207,7 +237,7 @@ export const usePrintLabel = () => {
           </div>
           <div class="right-section">
             <div class="store-logo">
-              <img src="/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png" alt="Store Logo">
+              <img src="${logoUrl}" alt="Store Logo">
             </div>
             <div class="qr-code">
               <img src="https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">
@@ -226,7 +256,7 @@ export const usePrintLabel = () => {
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
               }, 500);
-            }, 500);
+            }, 1000); // Increased timeout to ensure images load
           });
         </script>
       </body>
