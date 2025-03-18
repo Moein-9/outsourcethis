@@ -221,6 +221,7 @@ table th, table td {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  margin-right: 5cm;
 }
 
 /* Left section - logo and QR code */

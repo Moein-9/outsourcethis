@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { QRCodeSVG } from "qrcode.react";
@@ -33,7 +34,8 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         padding: "1mm 2mm",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center"
+        justifyContent: "center",
+        marginRight: "5cm" // Add margin to move this section closer to the QR code
       }}>
         <div className="brand-name" style={{
           fontWeight: "bold",

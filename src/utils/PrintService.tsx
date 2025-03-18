@@ -188,6 +188,7 @@ export const PrintService = {
         display: flex;
         flex-direction: column;
         justify-content: center;
+        margin-right: 5cm;
       }
       .left-section {
         width: 45mm;
