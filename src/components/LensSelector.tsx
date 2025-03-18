@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensType, LensCoating, useInventoryStore } from "@/store/inventoryStore";
@@ -22,7 +23,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
 }) => {
   const { t, language } = useLanguageStore();
   const lensTypes = useInventoryStore((state) => state.lensTypes);
-  const coatings = useInventoryStore((state) => state.coatings);
+  const coatings = useInventoryStore((state) => state.lensCoatings);
   
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
@@ -73,11 +74,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
         <Tabs defaultValue="lensType" className="w-full">
           <TabsList className="w-full mb-4">
             <TabsTrigger value="lensType" className="flex-1">
-              {/* Changed from Arabic to English */}
               Select Lens Type
             </TabsTrigger>
             <TabsTrigger value="coating" className="flex-1">
-              {/* Changed from Arabic to English */}
               Select Coatings
             </TabsTrigger>
           </TabsList>
@@ -97,7 +96,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                   <div className="flex justify-between items-start">
                     <div className={`${textAlignClass}`}>
                       <div className="font-medium">{lens.name}</div>
-                      <div className="text-sm text-muted-foreground">{lens.description}</div>
+                      <div className="text-sm text-muted-foreground">{lens.type}</div>
                     </div>
                     <div className="text-right font-semibold">
                       {lens.price.toFixed(2)} {t('kwd')}
@@ -131,7 +130,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                   <div className="flex justify-between items-start">
                     <div className={`${textAlignClass}`}>
                       <div className="font-medium">{coating.name}</div>
-                      <div className="text-sm text-muted-foreground">{coating.description}</div>
+                      <div className="text-sm text-muted-foreground">{coating.description || ''}</div>
                     </div>
                     <div className="text-right font-semibold">
                       {coating.price.toFixed(2)} {t('kwd')}
