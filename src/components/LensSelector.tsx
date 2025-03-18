@@ -73,11 +73,11 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
       {!skipLens && (
         <Tabs defaultValue="lensType" className="w-full">
           <TabsList className="w-full mb-4">
-            <TabsTrigger value="lensType" className="flex-1">
-              Select Lens Type
+            <TabsTrigger value="lensType" className="flex-1 bg-[#8B5CF6] data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
+              <span className="text-white">1</span> - {t('selectLensType')}
             </TabsTrigger>
-            <TabsTrigger value="coating" className="flex-1">
-              Select Coatings
+            <TabsTrigger value="coating" className="flex-1 bg-[#F97316] data-[state=active]:bg-[#F97316] data-[state=active]:text-white">
+              <span className="text-white">2</span> - {t('selectCoatings')}
             </TabsTrigger>
           </TabsList>
           
@@ -88,8 +88,8 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                   key={lens.id}
                   className={`border rounded-lg p-3 cursor-pointer transition-all ${
                     selectedLensType?.id === lens.id
-                      ? "border-primary bg-primary/5 shadow-sm" 
-                      : "hover:border-primary/30 hover:bg-muted/10"
+                      ? "border-[#8B5CF6] bg-[#8B5CF6]/10 shadow-sm" 
+                      : "hover:border-[#8B5CF6]/30 hover:bg-muted/10"
                   }`}
                   onClick={() => handleLensTypeSelect(lens)}
                 >
@@ -105,7 +105,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                   
                   {selectedLensType?.id === lens.id && (
                     <div className="mt-2 flex justify-end">
-                      <div className="bg-primary text-white rounded-full p-1">
+                      <div className="bg-[#8B5CF6] text-white rounded-full p-1">
                         <Check className="w-4 h-4" />
                       </div>
                     </div>
@@ -122,8 +122,8 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                   key={coating.id}
                   className={`border rounded-lg p-3 cursor-pointer transition-all ${
                     selectedCoating?.id === coating.id
-                      ? "border-primary bg-primary/5 shadow-sm" 
-                      : "hover:border-primary/30 hover:bg-muted/10"
+                      ? "border-[#F97316] bg-[#F97316]/10 shadow-sm" 
+                      : "hover:border-[#F97316]/30 hover:bg-muted/10"
                   }`}
                   onClick={() => handleCoatingSelect(coating)}
                 >
@@ -139,7 +139,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                   
                   {selectedCoating?.id === coating.id && (
                     <div className="mt-2 flex justify-end">
-                      <div className="bg-primary text-white rounded-full p-1">
+                      <div className="bg-[#F97316] text-white rounded-full p-1">
                         <Check className="w-4 h-4" />
                       </div>
                     </div>
@@ -150,8 +150,8 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               <div
                 className={`border rounded-lg p-3 cursor-pointer transition-all ${
                   selectedCoating === null && !skipLens
-                    ? "border-primary bg-primary/5 shadow-sm" 
-                    : "hover:border-primary/30 hover:bg-muted/10"
+                    ? "border-[#F97316] bg-[#F97316]/10 shadow-sm" 
+                    : "hover:border-[#F97316]/30 hover:bg-muted/10"
                 }`}
                 onClick={() => {
                   setSelectedCoating(null);
@@ -170,7 +170,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                 
                 {selectedCoating === null && !skipLens && (
                   <div className="mt-2 flex justify-end">
-                    <div className="bg-primary text-white rounded-full p-1">
+                    <div className="bg-[#F97316] text-white rounded-full p-1">
                       <X className="w-4 h-4" />
                     </div>
                   </div>
