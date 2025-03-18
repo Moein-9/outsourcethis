@@ -66,13 +66,48 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     ? invoice.payments.reduce((sum, payment) => sum + payment.amount, 0) 
     : invoice.deposit;
 
+  // Add print trigger effect
+  React.useEffect(() => {
+    // Set explicit print settings for receipt paper
+    const printStyles = `
+      @page {
+        size: 80mm auto;
+        margin: 0;
+      }
+      body, html {
+        width: 80mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .print-receipt {
+        width: 80mm !important;
+        max-width: 80mm !important;
+      }
+    `;
+    
+    // Add print-specific styles
+    const styleElem = document.createElement('style');
+    styleElem.innerHTML = printStyles;
+    document.head.appendChild(styleElem);
+    
+    // Auto-print after a delay to ensure rendering
+    const timer = setTimeout(() => {
+      window.print();
+      // Remove style after printing
+      setTimeout(() => document.head.removeChild(styleElem), 500);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div 
       style={{ 
         width: "80mm", 
         fontFamily: "Arial, sans-serif",
         maxHeight: "100%",
-        overflow: "hidden" 
+        overflow: "hidden",
+        margin: "0 auto"
       }} 
       dir={dir} 
       className="print-receipt"
@@ -101,7 +136,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             html, body {
               margin: 0 !important;
               padding: 0 !important;
-              width: 80mm;
+              width: 80mm !important;
             }
           }
         `}

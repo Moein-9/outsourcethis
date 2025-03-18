@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { toast } from 'sonner';
 
@@ -92,6 +93,11 @@ export const PrintService = {
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
+            html, body {
+              width: ${size.includes('mm') ? size.split(' ')[0] : 'auto'};
+              height: auto !important;
+              overflow: hidden;
+            }
           }
           ${css}
         </style>
@@ -144,6 +150,21 @@ export const PrintService = {
     const css = `
       #print-content {
         width: 80mm;
+        padding: 0;
+      }
+      @page {
+        size: 80mm auto;
+        margin: 0;
+      }
+      html, body {
+        width: 80mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .receipt-container {
+        width: 80mm;
+        max-width: 80mm;
+        margin: 0;
         padding: 0;
       }
     `;

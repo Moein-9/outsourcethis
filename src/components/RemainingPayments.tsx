@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore, Payment } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -62,12 +61,10 @@ export const RemainingPayments: React.FC = () => {
   const [showReceipt, setShowReceipt] = useState<string | null>(null);
   const navigate = useNavigate();
   
-  // Payment form state
   const [paymentEntries, setPaymentEntries] = useState<{method: string; amount: number; authNumber?: string}[]>([
     { method: language === 'ar' ? "نقداً" : "Cash", amount: 0 }
   ]);
   
-  // Update payment method when language changes
   useEffect(() => {
     setPaymentEntries(entries => 
       entries.map(entry => ({
@@ -77,27 +74,20 @@ export const RemainingPayments: React.FC = () => {
     );
   }, [language]);
   
-  // Helper function to update payment method based on language
   const updatePaymentMethodByLanguage = (method: string): string => {
     if (language === 'ar') {
-      // Convert English methods to Arabic
       if (method === "Cash") return "نقداً";
       if (method === "KNET") return "كي نت";
-      // Visa and MasterCard stay the same in both languages
       return method;
     } else {
-      // Convert Arabic methods to English
       if (method === "نقداً") return "Cash";
       if (method === "كي نت") return "KNET";
-      // Visa and MasterCard stay the same in both languages
       return method;
     }
   };
   
-  // Calculate remaining amount after current payment entries
   const [remainingAfterPayment, setRemainingAfterPayment] = useState<number | null>(null);
   
-  // Update remaining amount when payment entries change
   useEffect(() => {
     if (selectedInvoice) {
       const invoice = getInvoiceById(selectedInvoice);
@@ -109,10 +99,8 @@ export const RemainingPayments: React.FC = () => {
     }
   }, [paymentEntries, selectedInvoice, getInvoiceById]);
   
-  // Get unpaid invoices
   let unpaidInvoices = invoices.filter(invoice => !invoice.isPaid);
   
-  // Apply search filter
   if (searchTerm) {
     unpaidInvoices = unpaidInvoices.filter(inv => 
       inv.patientName.includes(searchTerm) || 
@@ -121,14 +109,12 @@ export const RemainingPayments: React.FC = () => {
     );
   }
   
-  // Apply sorting
   unpaidInvoices = [...unpaidInvoices].sort((a, b) => {
     const dateA = new Date(a.createdAt).getTime();
     const dateB = new Date(b.createdAt).getTime();
     return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
   });
   
-  // Navigate to patient search with patient details
   const goToPatientProfile = (patientId?: string, patientName?: string, patientPhone?: string) => {
     if (patientId) {
       navigate('/', { 
@@ -149,12 +135,10 @@ export const RemainingPayments: React.FC = () => {
     }
   };
   
-  // Add payment entry
   const addPaymentEntry = () => {
     setPaymentEntries([...paymentEntries, { method: language === 'ar' ? "نقداً" : "Cash", amount: 0 }]);
   };
   
-  // Remove payment entry
   const removePaymentEntry = (index: number) => {
     if (paymentEntries.length > 1) {
       const newEntries = [...paymentEntries];
@@ -163,24 +147,20 @@ export const RemainingPayments: React.FC = () => {
     }
   };
   
-  // Update payment entry
   const updatePaymentEntry = (index: number, field: string, value: string | number) => {
     const newEntries = [...paymentEntries];
     newEntries[index] = { ...newEntries[index], [field]: value };
     setPaymentEntries(newEntries);
   };
   
-  // Calculate total payment amount
   const calculateTotalPayment = () => {
     return paymentEntries.reduce((sum, entry) => sum + (entry.amount || 0), 0);
   };
   
-  // Handle payment submission
   const handleSubmitPayment = (invoiceId: string) => {
     const invoice = getInvoiceById(invoiceId);
     if (!invoice) return;
     
-    // Validate payment entries
     const totalPayment = calculateTotalPayment();
     if (totalPayment <= 0) {
       toast.error(language === 'ar' ? "يرجى إدخال مبلغ الدفع" : "Please enter a payment amount");
@@ -192,7 +172,6 @@ export const RemainingPayments: React.FC = () => {
       return;
     }
     
-    // Process each payment entry
     for (const entry of paymentEntries) {
       if (entry.amount > 0) {
         addPartialPayment(invoiceId, {
@@ -205,72 +184,78 @@ export const RemainingPayments: React.FC = () => {
     
     toast.success(language === 'ar' ? "تم تسجيل الدفع بنجاح" : "Payment recorded successfully");
     
-    // Check if payment is complete
     const updatedInvoice = getInvoiceById(invoiceId);
     if (updatedInvoice?.isPaid) {
-      // Set the invoice for printing
       setInvoiceForPrint(invoiceId);
     }
     
-    // Reset form and close dialog
     setPaymentEntries([{ method: language === 'ar' ? "نقداً" : "Cash", amount: 0 }]);
     setSelectedInvoice(null);
   };
   
-  // Handle print receipt
   const handlePrintReceipt = (invoiceId: string) => {
     const invoice = getInvoiceById(invoiceId);
     if (!invoice) return;
     
+    const receiptContent = document.getElementById(`print-receipt-${invoice.invoiceId}`)?.innerHTML;
+    if (!receiptContent) {
+      toast.error(language === 'ar' ? "لم يتم العثور على محتوى الإيصال" : "Receipt content not found");
+      return;
+    }
+    
     const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    if (!printWindow) {
+      toast.error(language === 'ar' ? "تم حظر النافذة المنبثقة" : "Popup blocked");
+      return;
+    }
+    
+    const printStyles = `
+      @page {
+        size: 80mm auto;
+        margin: 0;
+      }
+      body {
+        width: 80mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: 'Courier New', monospace;
+      }
+      .receipt-container {
+        width: 80mm !important;
+        max-width: 80mm !important;
+        padding: 5mm;
+        box-sizing: border-box;
+        margin: 0 auto;
+      }
+      @media print {
+        .print-button {
+          display: none !important;
+        }
+      }
+    `;
     
     const printContent = `
       <!DOCTYPE html>
-      <html dir="${language === 'ar' ? 'rtl' : 'ltr'}">
+      <html dir="${language === 'ar' ? 'rtl' : 'ltr'}" lang="${language}">
       <head>
         <title>${language === 'ar' ? 'فاتورة' : 'Invoice'} ${invoice.invoiceId}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          @media print {
-            body { 
-              width: 80mm;
-              margin: 0;
-              padding: 0;
-            }
-          }
-          body {
-            font-family: 'Arial', sans-serif;
-            direction: ${language === 'ar' ? 'rtl' : 'ltr'};
-            padding: 10px;
-            max-width: 80mm;
-            margin: 0 auto;
-          }
-          .receipt-container {
-            border: 1px solid #ddd;
-            padding: 10px;
-          }
-          .hidden-print {
-            display: block;
-          }
-          @media print {
-            .hidden-print {
-              display: none;
-            }
-          }
-        </style>
+        <style>${printStyles}</style>
       </head>
       <body>
-        <div id="receipt-container"></div>
-        <button class="hidden-print" onclick="window.print()">${language === 'ar' ? 'طباعة' : 'Print'}</button>
+        <div class="receipt-container">
+          ${receiptContent}
+        </div>
+        <button class="print-button" onclick="window.print(); setTimeout(() => window.close(), 500);" 
+          style="display: block; margin: 20px auto; padding: 10px 20px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          ${language === 'ar' ? 'طباعة' : 'Print'}
+        </button>
         <script>
-          // This script will render the receipt
-          document.getElementById('receipt-container').innerHTML = \`
-            <div id="receipt-content">
-              ${document.getElementById('print-receipt-' + invoice.invoiceId)?.innerHTML || ''}
-            </div>
-          \`;
+          setTimeout(() => {
+            window.print();
+            setTimeout(() => window.close(), 500);
+          }, 500);
         </script>
       </body>
       </html>
@@ -324,7 +309,7 @@ export const RemainingPayments: React.FC = () => {
         <Card className="border-dashed border-2 border-muted">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <CheckCircle2 className="h-12 w-12 text-muted mb-4" />
-            <h3 className="text-xl font-medium mb-2">{language === 'ar' ? "جميع الفواتير مدفوعة بالكامل" : "All invoices fully paid"}</h3>
+            <h3 className="text-xl font-medium mb-2">{language === 'ar' ? "جميع ا��فواتير مدفوعة بالكامل" : "All invoices fully paid"}</h3>
             <p className="text-muted-foreground text-center max-w-md">
               {language === 'ar' 
                 ? "لا توجد فواتير تحتاج إلى دفعات متبقية. جميع المعاملات مكتملة."
@@ -485,7 +470,6 @@ export const RemainingPayments: React.FC = () => {
                         className="flex-1 text-xs bg-amber-500 hover:bg-amber-600"
                         onClick={() => {
                           setSelectedInvoice(invoice.invoiceId);
-                          // Reset payment entries with calculated remaining amount
                           setPaymentEntries([{ method: language === 'ar' ? "نقداً" : "Cash", amount: invoice.remaining }]);
                           setRemainingAfterPayment(0);
                         }}
@@ -630,7 +614,6 @@ export const RemainingPayments: React.FC = () => {
         </div>
       )}
       
-      {/* After payment success - Print invoice dialog */}
       {invoiceForPrint && (
         <Dialog
           open={Boolean(invoiceForPrint)}

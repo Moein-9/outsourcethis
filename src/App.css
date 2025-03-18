@@ -180,13 +180,19 @@ table th, table td {
   /* Fix for multi-page printing issue */
   .print-container, 
   .print-receipt {
-    width: auto;
+    width: 80mm;
     height: auto;
     page-break-after: avoid;
     page-break-inside: avoid;
     position: absolute;
     left: 0;
     top: 0;
+  }
+  
+  /* Receipt-specific print styling */
+  .print-receipt {
+    width: 80mm !important;
+    max-width: 80mm !important;
   }
   
   /* Fix for A4 documents */

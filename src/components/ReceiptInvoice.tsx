@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -82,10 +83,31 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   // Fix to ensure the print dialog only prompts once
   const handlePrintInvoice = () => {
     if (isPrintable) {
+      // Set explicit print settings for receipt paper
+      const printStyles = `
+        @page {
+          size: 80mm auto;
+          margin: 0;
+        }
+        body, html {
+          width: 80mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+      `;
+      
+      // Add print-specific styles
+      const styleElem = document.createElement('style');
+      styleElem.innerHTML = printStyles;
+      document.head.appendChild(styleElem);
+      
       window.onafterprint = () => {
         window.onafterprint = null; // Clear handler after first print
+        document.head.removeChild(styleElem); // Remove the temporary style
       };
-      window.print();
+      
+      // Delay printing to ensure styles are applied
+      setTimeout(() => window.print(), 300);
     }
   };
 
@@ -99,7 +121,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   }, [isPrintable]);
   
   return (
-    <div className={containerClass} style={{ fontFamily: 'Courier New, monospace' }}>
+    <div className={containerClass} style={{ fontFamily: 'Courier New, monospace', maxWidth: '80mm' }}>
       <div className="text-center border-b pb-3 mb-3">
         <div className="flex justify-center mb-2">
           <MoenLogo className="w-auto h-16 mb-2" />
