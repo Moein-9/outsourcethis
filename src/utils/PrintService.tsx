@@ -171,6 +171,69 @@ export const PrintService = {
         size: 100mm 16mm;
         margin: 0;
       }
+      .label-container {
+        width: 100mm;
+        height: 16mm;
+        display: flex;
+        font-family: Arial, sans-serif;
+        page-break-inside: avoid;
+        page-break-after: always;
+        position: relative;
+        overflow: hidden;
+        border-radius: 8mm;
+      }
+      .left-section {
+        width: 45mm;
+        height: 100%;
+        padding: 1mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .right-section {
+        width: 45mm;
+        height: 100%;
+        padding: 1mm 2mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .brand-name {
+        font-weight: bold;
+        font-size: 9pt;
+        margin-bottom: 1mm;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .detail-info {
+        font-size: 7pt;
+        margin-bottom: 1mm;
+        line-height: 1.1;
+      }
+      .price {
+        font-weight: bold;
+        font-size: 9pt;
+      }
+      .store-logo {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 1mm;
+      }
+      .store-logo img {
+        max-height: 4mm;
+        width: auto;
+      }
+      .qr-code {
+        display: flex;
+        justify-content: center;
+      }
+      .qr-code img {
+        height: 22px;
+        width: 22px;
+      }
     `;
     
     const htmlTemplate = PrintService.getHtmlTemplate(title, 'print-content', css, '100mm 16mm', '0');
