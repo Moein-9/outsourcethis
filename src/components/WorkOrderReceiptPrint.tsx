@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -6,6 +5,7 @@ import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { enUS } from "date-fns/locale/en-US";
 import { QRCodeSVG } from "qrcode.react";
+import { MoenLogo } from "@/assets/logo";
 
 interface WorkOrderReceiptPrintProps {
   invoice: Invoice;
@@ -72,6 +72,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       window.onafterprint = () => {
         window.onafterprint = null; // Clear handler after first print
       };
+      window.print();
     }, 300);
     return () => clearTimeout(timer);
   }, []);
@@ -81,11 +82,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "10px" }}>
         <div style={{ marginBottom: "5px" }}>
-          <img 
-            src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" 
-            alt="Moen Optician" 
-            style={{ height: "30px", width: "auto", margin: "0 auto" }}
-          />
+          <MoenLogo style={{ height: "30px", width: "auto", margin: "0 auto" }} />
         </div>
         <h1 style={{ fontSize: "16px", fontWeight: "bold", margin: "5px 0" }}>
           {t("opticalStoreName")}

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { QRCodeSVG } from "qrcode.react";
@@ -61,7 +62,7 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         {/* Store Logo */}
         <div className="store-logo">
           <img 
-            src="/lovable-uploads/65134e9d-139c-462c-a2ad-648373fd57e0.png" 
+            src="/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png" 
             alt="Store Logo" 
             style={{ maxHeight: "6mm", height: "auto" }}
           />
@@ -200,7 +201,7 @@ export const usePrintLabel = () => {
           </div>
           <div class="right-section">
             <div class="store-logo">
-              <img src="/lovable-uploads/65134e9d-139c-462c-a2ad-648373fd57e0.png" alt="Store Logo">
+              <img src="/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png" alt="Store Logo">
             </div>
             <div class="qr-code">
               <img src="https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">

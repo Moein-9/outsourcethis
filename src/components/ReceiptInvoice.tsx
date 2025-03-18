@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -103,11 +102,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
     <div className={containerClass} style={{ fontFamily: 'Courier New, monospace' }}>
       <div className="text-center border-b pb-3 mb-3">
         <div className="flex justify-center mb-2">
-          <img 
-            src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" 
-            alt="Moen Optician" 
-            className="w-auto h-16 mb-2" 
-          />
+          <MoenLogo className="w-auto h-16 mb-2" />
         </div>
         <h2 className="font-bold text-xl mb-1">{storeInfo.name}</h2>
         <p className="text-sm text-muted-foreground">{storeInfo.address}</p>
