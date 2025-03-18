@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -95,11 +94,16 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
               padding: 0;
               font-family: Arial, sans-serif;
             }
+            #print-content {
+              width: ${selectedFormat === 'receipt' ? '80mm' : '210mm'};
+              margin: 0 auto;
+              padding: ${selectedFormat === 'receipt' ? '0' : '10mm'};
+            }
             @media print {
               @page {
                 margin: ${selectedFormat === 'receipt' ? '0' : '10mm'};
                 padding: 0;
-                size: ${selectedFormat === 'receipt' ? '80mm auto' : 'auto'};
+                size: ${selectedFormat === 'receipt' ? '80mm' : 'A4'};
               }
               body {
                 -webkit-print-color-adjust: exact;
@@ -109,7 +113,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           </style>
         </head>
         <body>
-          <div id="content"></div>
+          <div id="print-content"></div>
           <script>
             document.addEventListener('DOMContentLoaded', function() {
               setTimeout(function() {
@@ -128,44 +132,166 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
       iframe.contentWindow.document.close();
       
       // After document is loaded, inject the content
+      const printContent = document.createElement('div');
+      
+      if (selectedFormat === "a4") {
+        const workOrderPrint = document.createElement('div');
+        workOrderPrint.innerHTML = `
+          <h1 style="text-align: center; font-size: 24px; margin-bottom: 20px;">${t("workOrder")}</h1>
+          <p style="text-align: center; font-size: 18px; margin-bottom: 20px;">${t("orderNumber")}: ${invoice.invoiceId}</p>
+          <!-- Additional work order content would be inserted here -->
+        `;
+        printContent.appendChild(workOrderPrint);
+      } else {
+        const receiptPrint = document.createElement('div');
+        receiptPrint.innerHTML = `
+          <h1 style="text-align: center; font-size: 16px; margin-bottom: 10px;">${t("receiptFormat")}</h1>
+          <p style="text-align: center; font-size: 14px; margin-bottom: 10px;">${t("orderNumber")}: ${invoice.invoiceId}</p>
+          <!-- Additional receipt content would be inserted here -->
+        `;
+        printContent.appendChild(receiptPrint);
+      }
+      
       iframe.onload = () => {
-        const contentDiv = iframe.contentDocument?.getElementById('content');
+        const contentDiv = iframe.contentDocument?.getElementById('print-content');
         if (contentDiv) {
           if (selectedFormat === "a4") {
-            // Render A4 content directly
-            const container = document.createElement('div');
-            container.style.width = '210mm';
-            container.style.margin = '0 auto';
-            
-            // Copy styles to the iframe
-            const styles = Array.from(document.styleSheets)
-              .map(styleSheet => {
-                try {
-                  return Array.from(styleSheet.cssRules)
-                    .map(rule => rule.cssText)
-                    .join('\n');
-                } catch (e) {
-                  return '';
-                }
-              })
-              .join('\n');
-            
-            const styleElement = iframe.contentDocument.createElement('style');
-            styleElement.textContent = styles;
-            iframe.contentDocument.head.appendChild(styleElement);
-            
-            // Create a version of WorkOrderPrint in the iframe
-            contentDiv.innerHTML = `
-              <div style="width: 210mm; margin: 0 auto; padding: 10mm;">
-                <!-- The invoice content will be injected here by React rendering -->
+            const componentHtml = `
+              <div id="work-order">
+                <!-- Using the full WorkOrderPrint component content -->
               </div>
             `;
+            contentDiv.innerHTML = componentHtml;
             
+            // Append styles for proper rendering
+            const style = document.createElement('style');
+            style.textContent = `
+              #work-order {
+                width: 100%;
+                max-width: 210mm;
+                margin: 0 auto;
+                font-family: Arial, sans-serif;
+              }
+            `;
+            iframe.contentDocument?.head.appendChild(style);
+            
+            // Render the actual component content
+            const workOrder = iframe.contentDocument?.getElementById('work-order');
+            if (workOrder) {
+              // This simplified version just shows the essential information
+              workOrder.innerHTML = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                  <h1 style="font-size: 24px; margin-bottom: 10px;">${t("workOrder")}</h1>
+                  <p style="font-size: 16px;">${t("orderNumber")}: ${invoice.invoiceId}</p>
+                  <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
+                </div>
+                
+                <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                  <h2 style="font-size: 18px; margin-bottom: 10px;">${t("patientInformation")}</h2>
+                  <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
+                  <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
+                </div>
+                
+                ${frame ? `
+                <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                  <h2 style="font-size: 18px; margin-bottom: 10px;">${t("frameDetails")}</h2>
+                  <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
+                  <p><strong>${t("model")}:</strong> ${frame.model}</p>
+                  <p><strong>${t("color")}:</strong> ${frame.color}</p>
+                  <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} KWD</p>
+                </div>
+                ` : ''}
+                
+                ${rx ? `
+                <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                  <h2 style="font-size: 18px; margin-bottom: 10px;">${t("prescriptionDetails")}</h2>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                      <tr>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("eye")}</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">SPH</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">CYL</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">AXIS</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">ADD</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">PD</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("rightEye")} (OD)</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.sphereOD || "-"}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.cylOD || "-"}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.axisOD || "-"}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.addOD || "-"}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.pdRight || "-"}</td>
+                      </tr>
+                      <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("leftEye")} (OS)</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.sphereOS || "-"}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.cylOS || "-"}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.axisOS || "-"}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.addOS || "-"}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.pdLeft || "-"}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                ` : ''}
+                
+                <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                  <h2 style="font-size: 18px; margin-bottom: 10px;">${t("paymentInformation")}</h2>
+                  <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} KWD</p>
+                  <p><strong>${t("paid")}:</strong> ${(invoice.deposit || 0).toFixed(3)} KWD</p>
+                  <p><strong>${t("remaining")}:</strong> ${(invoice.total - (invoice.deposit || 0)).toFixed(3)} KWD</p>
+                </div>
+                
+                <div style="margin-top: 40px; display: flex; justify-content: space-between;">
+                  <div>
+                    <p style="font-weight: bold;">${t("technicianSignature")}</p>
+                    <div style="margin-top: 30px; border-bottom: 1px solid #000; width: 150px;"></div>
+                  </div>
+                  <div>
+                    <p style="font-weight: bold;">${t("qualityConfirmation")}</p>
+                    <div style="margin-top: 30px; border-bottom: 1px solid #000; width: 150px;"></div>
+                  </div>
+                </div>
+              `;
+            }
           } else {
-            // Receipt content
+            // Receipt format
             contentDiv.innerHTML = `
-              <div style="width: 80mm; margin: 0 auto;">
-                <!-- The receipt content will be injected here by React rendering -->
+              <div style="width: 80mm; font-family: Arial, sans-serif; padding: 5mm 2mm;">
+                <div style="text-align: center; margin-bottom: 10px;">
+                  <h1 style="font-size: 16px; margin-bottom: 5px;">${t("receiptFormat")}</h1>
+                  <p style="font-size: 14px;">${t("orderNumber")}: ${invoice.invoiceId}</p>
+                  <p style="font-size: 12px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
+                </div>
+                
+                <div style="margin-bottom: 10px; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 5px 0;">
+                  <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
+                  <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
+                </div>
+                
+                ${frame ? `
+                <div style="margin-bottom: 10px;">
+                  <h2 style="font-size: 14px; margin-bottom: 5px;">${t("frameDetails")}</h2>
+                  <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
+                  <p><strong>${t("model")}:</strong> ${frame.model}</p>
+                  <p><strong>${t("color")}:</strong> ${frame.color}</p>
+                  <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} KWD</p>
+                </div>
+                ` : ''}
+                
+                <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px;">
+                  <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} KWD</p>
+                  <p><strong>${t("paid")}:</strong> ${(invoice.deposit || 0).toFixed(3)} KWD</p>
+                  <p><strong>${t("remaining")}:</strong> ${(invoice.total - (invoice.deposit || 0)).toFixed(3)} KWD</p>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px; font-size: 12px;">
+                  <p>${t("thankYouForYourPurchase")}</p>
+                  <p>${t("pleaseKeepReceipt")}</p>
+                </div>
               </div>
             `;
           }
@@ -173,6 +299,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
       };
     } else {
       setPrintingInProgress(false);
+      toast.error(t("printFrameCreationFailed"));
     }
   };
   

@@ -67,7 +67,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const isContactLens = contactLenses && contactLenses.length > 0;
   const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
 
-  // Add special CSS for print media to ensure only this component is printed and only print 1 copy
   return (
     <div className={`max-w-2xl mx-auto bg-white p-6 border rounded-lg shadow-sm print:shadow-none ${dirClass}`}>
       <style>
@@ -84,12 +83,19 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               left: 0;
               top: 0;
               width: 100%;
-              height: 100%;
               padding: 2rem;
+              margin: 0;
             }
             @page {
               size: A4;
               margin: 1cm;
+            }
+            html, body {
+              height: 297mm; /* A4 height */
+              width: 210mm;  /* A4 width */
+              margin: 0 !important;
+              padding: 0 !important;
+              overflow: hidden;
             }
           }
         `}
@@ -100,7 +106,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <div className="absolute right-0 top-0">
             <ClipboardCheck className="w-10 h-10 text-primary" />
           </div>
-          <MoenLogo className="mx-auto w-auto h-20 mb-2" />
+          <MoenLogo className="mx-auto w-auto h-16 mb-2" />
           <h1 className="text-2xl font-bold mb-1">{t("workOrder")}</h1>
           <p className="text-lg text-primary font-medium">{t("orderNumber")}: {invoice.invoiceId}</p>
           <p className="text-muted-foreground">
@@ -112,24 +118,24 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 mb-6">
-          <div className="bg-muted/10 p-4 rounded-lg border">
-            <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-              <User className="w-5 h-5" />
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="bg-muted/10 p-3 rounded-lg border">
+            <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
+              <User className="w-4 h-4" />
               {t("patientInformation")}
             </h3>
-            <div className="space-y-2">
+            <div className="space-y-1 text-sm">
               <div className="flex">
-                <span className="font-semibold w-20">{t("name")}:</span>
+                <span className="font-semibold w-16">{t("name")}:</span>
                 <span>{name}</span>
               </div>
               <div className="flex">
-                <span className="font-semibold w-20">{t("phone")}:</span>
+                <span className="font-semibold w-16">{t("phone")}:</span>
                 <span>{phone}</span>
               </div>
               {invoice.patientId && (
                 <div className="flex">
-                  <span className="font-semibold w-20">{t("patientId")}:</span>
+                  <span className="font-semibold w-16">{t("patientId")}:</span>
                   <span>{invoice.patientId}</span>
                 </div>
               )}
@@ -137,22 +143,22 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
 
           {!isContactLens && frameData && (
-            <div className="bg-muted/10 p-4 rounded-lg border">
-              <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-                <Glasses className="w-5 h-5" />
+            <div className="bg-muted/10 p-3 rounded-lg border">
+              <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
+                <Glasses className="w-4 h-4" />
                 {t("frameDetails")}
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1 text-sm">
                 <div className="flex">
-                  <span className="font-semibold w-20">{t("brand")}:</span>
+                  <span className="font-semibold w-16">{t("brand")}:</span>
                   <span>{frameData.brand}</span>
                 </div>
                 <div className="flex">
-                  <span className="font-semibold w-20">{t("model")}:</span>
+                  <span className="font-semibold w-16">{t("model")}:</span>
                   <span>{frameData.model}</span>
                 </div>
                 <div className="flex">
-                  <span className="font-semibold w-20">{t("color")}:</span>
+                  <span className="font-semibold w-16">{t("color")}:</span>
                   <span>{frameData.color}</span>
                 </div>
               </div>
@@ -160,36 +166,22 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           )}
           
           {isContactLens && (
-            <div className="bg-muted/10 p-4 rounded-lg border">
-              <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-                <Contact className="w-5 h-5" />
+            <div className="bg-muted/10 p-3 rounded-lg border">
+              <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
+                <Contact className="w-4 h-4" />
                 {t("contactLensDetails")}
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1 text-sm">
                 {contactLenses.map((lens, idx) => (
-                  <div key={idx} className="space-y-1 border-b pb-2 border-dashed border-gray-200 last:border-0">
+                  <div key={idx} className="space-y-0.5 border-b pb-1 border-dashed border-gray-200 last:border-0 text-xs">
                     <div className="flex">
-                      <span className="font-semibold w-20">{t("lens")} {idx + 1}:</span>
+                      <span className="font-semibold w-16">{t("lens")} {idx + 1}:</span>
                       <span>{lens.brand} {lens.type}</span>
                     </div>
                     <div className="flex">
-                      <span className="font-semibold w-20">{t("power")}:</span>
+                      <span className="font-semibold w-16">{t("power")}:</span>
                       <span>{lens.power}</span>
                     </div>
-                    <div className="flex">
-                      <span className="font-semibold w-20">BC:</span>
-                      <span>{lens.bc}</span>
-                    </div>
-                    <div className="flex">
-                      <span className="font-semibold w-20">{t("diameter")}:</span>
-                      <span>{lens.diameter}</span>
-                    </div>
-                    {lens.color && (
-                      <div className="flex">
-                        <span className="font-semibold w-20">{t("color")}:</span>
-                        <span>{lens.color}</span>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -197,39 +189,39 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           )}
         </div>
 
-        {!isContactLens && (
-          <div className="mb-6 bg-muted/10 p-4 rounded-lg border">
-            <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-              <Eye className="w-5 h-5" />
+        {!isContactLens && rx && (
+          <div className="mb-4 bg-muted/10 p-3 rounded-lg border">
+            <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
+              <Eye className="w-4 h-4" />
               {t("prescriptionDetails")}
             </h3>
-            <table className="w-full border-collapse bg-white">
+            <table className="w-full border-collapse bg-white text-xs">
               <thead className="bg-muted">
                 <tr>
-                  <th className="border p-2 text-center">{t("eye")}</th>
-                  <th className="border p-2 text-center">SPH</th>
-                  <th className="border p-2 text-center">CYL</th>
-                  <th className="border p-2 text-center">AXIS</th>
-                  <th className="border p-2 text-center">ADD</th>
-                  <th className="border p-2 text-center">PD</th>
+                  <th className="border p-1 text-center">{t("eye")}</th>
+                  <th className="border p-1 text-center">SPH</th>
+                  <th className="border p-1 text-center">CYL</th>
+                  <th className="border p-1 text-center">AXIS</th>
+                  <th className="border p-1 text-center">ADD</th>
+                  <th className="border p-1 text-center">PD</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border p-2 font-medium text-center">{t("rightEye")} (OD)</td>
-                  <td className="border p-2 text-center">{rx?.sphereOD || "_____"}</td>
-                  <td className="border p-2 text-center">{rx?.cylOD || "_____"}</td>
-                  <td className="border p-2 text-center">{rx?.axisOD || "_____"}</td>
-                  <td className="border p-2 text-center">{rx?.addOD || "_____"}</td>
-                  <td className="border p-2 text-center">{rx?.pdRight || "_____"}</td>
+                  <td className="border p-1 font-medium text-center">{t("rightEye")}</td>
+                  <td className="border p-1 text-center">{rx?.sphereOD || "_____"}</td>
+                  <td className="border p-1 text-center">{rx?.cylOD || "_____"}</td>
+                  <td className="border p-1 text-center">{rx?.axisOD || "_____"}</td>
+                  <td className="border p-1 text-center">{rx?.addOD || "_____"}</td>
+                  <td className="border p-1 text-center">{rx?.pdRight || "_____"}</td>
                 </tr>
                 <tr>
-                  <td className="border p-2 font-medium text-center">{t("leftEye")} (OS)</td>
-                  <td className="border p-2 text-center">{rx?.sphereOS || "_____"}</td>
-                  <td className="border p-2 text-center">{rx?.cylOS || "_____"}</td>
-                  <td className="border p-2 text-center">{rx?.axisOS || "_____"}</td>
-                  <td className="border p-2 text-center">{rx?.addOS || "_____"}</td>
-                  <td className="border p-2 text-center">{rx?.pdLeft || "_____"}</td>
+                  <td className="border p-1 font-medium text-center">{t("leftEye")}</td>
+                  <td className="border p-1 text-center">{rx?.sphereOS || "_____"}</td>
+                  <td className="border p-1 text-center">{rx?.cylOS || "_____"}</td>
+                  <td className="border p-1 text-center">{rx?.axisOS || "_____"}</td>
+                  <td className="border p-1 text-center">{rx?.addOS || "_____"}</td>
+                  <td className="border p-1 text-center">{rx?.pdLeft || "_____"}</td>
                 </tr>
               </tbody>
             </table>
@@ -237,38 +229,38 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         )}
         
         {isContactLens && contactLensRx && (
-          <div className="mb-6 bg-muted/10 p-4 rounded-lg border">
-            <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-              <Eye className="w-5 h-5" />
+          <div className="mb-4 bg-muted/10 p-3 rounded-lg border">
+            <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
+              <Eye className="w-4 h-4" />
               {t("contactLensPrescription")}
             </h3>
-            <table className="w-full border-collapse bg-white">
+            <table className="w-full border-collapse bg-white text-xs">
               <thead className="bg-muted">
                 <tr>
-                  <th className="border p-2 text-center">{t("eye")}</th>
-                  <th className="border p-2 text-center">Sphere</th>
-                  <th className="border p-2 text-center">Cylinder</th>
-                  <th className="border p-2 text-center">Axis</th>
-                  <th className="border p-2 text-center">BC</th>
-                  <th className="border p-2 text-center">Dia</th>
+                  <th className="border p-1 text-center">{t("eye")}</th>
+                  <th className="border p-1 text-center">Sphere</th>
+                  <th className="border p-1 text-center">Cylinder</th>
+                  <th className="border p-1 text-center">Axis</th>
+                  <th className="border p-1 text-center">BC</th>
+                  <th className="border p-1 text-center">Dia</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border p-2 font-medium text-center">{t("rightEye")} (OD)</td>
-                  <td className="border p-2 text-center">{contactLensRx.rightEye.sphere || "_____"}</td>
-                  <td className="border p-2 text-center">{contactLensRx.rightEye.cylinder || "_____"}</td>
-                  <td className="border p-2 text-center">{contactLensRx.rightEye.axis || "_____"}</td>
-                  <td className="border p-2 text-center">{contactLensRx.rightEye.bc || "_____"}</td>
-                  <td className="border p-2 text-center">{contactLensRx.rightEye.dia || "_____"}</td>
+                  <td className="border p-1 font-medium text-center">{t("rightEye")}</td>
+                  <td className="border p-1 text-center">{contactLensRx.rightEye.sphere || "_____"}</td>
+                  <td className="border p-1 text-center">{contactLensRx.rightEye.cylinder || "_____"}</td>
+                  <td className="border p-1 text-center">{contactLensRx.rightEye.axis || "_____"}</td>
+                  <td className="border p-1 text-center">{contactLensRx.rightEye.bc || "_____"}</td>
+                  <td className="border p-1 text-center">{contactLensRx.rightEye.dia || "_____"}</td>
                 </tr>
                 <tr>
-                  <td className="border p-2 font-medium text-center">{t("leftEye")} (OS)</td>
-                  <td className="border p-2 text-center">{contactLensRx.leftEye.sphere || "_____"}</td>
-                  <td className="border p-2 text-center">{contactLensRx.leftEye.cylinder || "_____"}</td>
-                  <td className="border p-2 text-center">{contactLensRx.leftEye.axis || "_____"}</td>
-                  <td className="border p-2 text-center">{contactLensRx.leftEye.bc || "_____"}</td>
-                  <td className="border p-2 text-center">{contactLensRx.leftEye.dia || "_____"}</td>
+                  <td className="border p-1 font-medium text-center">{t("leftEye")}</td>
+                  <td className="border p-1 text-center">{contactLensRx.leftEye.sphere || "_____"}</td>
+                  <td className="border p-1 text-center">{contactLensRx.leftEye.cylinder || "_____"}</td>
+                  <td className="border p-1 text-center">{contactLensRx.leftEye.axis || "_____"}</td>
+                  <td className="border p-1 text-center">{contactLensRx.leftEye.bc || "_____"}</td>
+                  <td className="border p-1 text-center">{contactLensRx.leftEye.dia || "_____"}</td>
                 </tr>
               </tbody>
             </table>
@@ -276,33 +268,33 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         )}
 
         {!isContactLens && (
-          <div className="space-y-4">
-            <div className="bg-muted/10 p-4 rounded-lg border">
-              <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-                <Ruler className="w-5 h-5" />
+          <div className="space-y-3">
+            <div className="bg-muted/10 p-3 rounded-lg border">
+              <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
+                <Ruler className="w-4 h-4" />
                 {t("lensDetails")}
               </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="space-y-1">
                   <div className="flex">
-                    <span className="font-semibold w-20">{t("type")}:</span>
+                    <span className="font-semibold w-16">{t("type")}:</span>
                     <span>{lensTypeValue}</span>
                   </div>
                   {coatingValue && (
                     <div className="flex">
-                      <span className="font-semibold w-20">{t("coating")}:</span>
+                      <span className="font-semibold w-16">{t("coating")}:</span>
                       <span>{coatingValue}</span>
                     </div>
                   )}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <div className="flex">
-                    <span className="font-semibold w-20">{t("price")}:</span>
+                    <span className="font-semibold w-16">{t("price")}:</span>
                     <span>{invoice.lensPrice.toFixed(2)} KWD</span>
                   </div>
                   {coatingValue && (
                     <div className="flex">
-                      <span className="font-semibold w-20">{t("coatingPrice")}:</span>
+                      <span className="font-semibold w-16">{t("coatingPrice")}:</span>
                       <span>{invoice.coatingPrice.toFixed(2)} KWD</span>
                     </div>
                   )}
@@ -312,27 +304,27 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         )}
 
-        <div className="bg-muted/10 p-4 rounded-lg border mt-6">
-          <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-            <CircleDot className="w-5 h-5" />
+        <div className="bg-muted/10 p-3 rounded-lg border mt-4">
+          <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
+            <CircleDot className="w-4 h-4" />
             {t("additionalNotes")}
           </h3>
-          <div className="border rounded p-4 min-h-[100px] bg-white"></div>
+          <div className="border rounded p-2 min-h-[50px] bg-white"></div>
         </div>
 
-        <div className="mt-8 pt-4 border-t grid grid-cols-2 gap-6">
+        <div className="mt-6 pt-3 border-t grid grid-cols-2 gap-4">
           <div>
-            <p className="font-semibold text-primary">{t("technicianSignature")}</p>
-            <div className="mt-6 border-b w-40 h-8"></div>
-            <div className="mt-2 text-sm text-muted-foreground">{t("date")}: ___ / ___ / _____</div>
+            <p className="font-semibold text-primary text-sm">{t("technicianSignature")}</p>
+            <div className="mt-4 border-b w-32 h-6"></div>
+            <div className="mt-1 text-xs text-muted-foreground">{t("date")}: ___ / ___ / _____</div>
           </div>
           <div>
-            <p className="font-semibold text-primary">{t("qualityConfirmation")}</p>
-            <div className="flex items-center mt-6 gap-2">
-              <BadgeCheck className="w-6 h-6 text-primary" />
-              <div className="border-b w-32 h-8"></div>
+            <p className="font-semibold text-primary text-sm">{t("qualityConfirmation")}</p>
+            <div className="flex items-center mt-4 gap-1">
+              <BadgeCheck className="w-4 h-4 text-primary" />
+              <div className="border-b w-28 h-6"></div>
             </div>
-            <div className="mt-2 text-sm text-muted-foreground">{t("date")}: ___ / ___ / _____</div>
+            <div className="mt-1 text-xs text-muted-foreground">{t("date")}: ___ / ___ / _____</div>
           </div>
         </div>
       </div>

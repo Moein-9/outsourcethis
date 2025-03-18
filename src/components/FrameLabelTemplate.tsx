@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { QRCodeSVG } from "qrcode.react";
@@ -20,17 +21,19 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
       display: "flex",
       fontFamily: "Arial, sans-serif",
       pageBreakInside: "avoid",
-      marginBottom: "5mm" // Space between labels when printing multiple
+      marginBottom: "5mm", // Space between labels when printing multiple
+      position: "relative"
     }}>
-      {/* Left section (Logo and QR) - previously right */}
+      {/* Left section (Logo and QR) */}
       <div style={{
         width: "40mm",
         height: "100%",
-        borderRight: "1px solid #000",
         padding: "2mm",
         display: "flex",
         flexDirection: "column",
-        position: "relative"
+        position: "relative",
+        justifyContent: "center",
+        alignItems: "center"
       }}>
         {/* Store Logo */}
         <div className="store-logo" style={{
@@ -39,10 +42,10 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
           width: "100%",
           marginBottom: "1mm"
         }}>
-          <MoenLogo className="w-auto" style={{ maxHeight: "4.5mm", height: "auto" }} />
+          <MoenLogo className="w-auto" style={{ maxHeight: "5mm", height: "auto" }} />
         </div>
         
-        {/* Frame ID */}
+        {/* Frame ID - positioned below logo */}
         <div style={{
           fontSize: "6pt",
           textAlign: "center",
@@ -51,21 +54,20 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
           {frame.frameId}
         </div>
 
-        {/* QR Code - positioned toward center (20mm closer) */}
+        {/* QR Code */}
         <div className="qr-code" style={{
-          position: "absolute",
-          bottom: "2mm",
-          right: "-12mm" // Moving it 20mm closer toward center from original position
+          display: "flex",
+          justifyContent: "center"
         }}>
           <QRCodeSVG 
             value={frame.frameId} 
-            size={22} // Sized for optimal scanning while fitting in layout
-            level="L" // Low error correction to make the QR code smaller but still functional
+            size={24} // Sized for optimal scanning while fitting in layout
+            level="M" // Medium error correction for reliable scanning
           />
         </div>
       </div>
 
-      {/* Right section (Brand, Model, Color, Size, Price) - previously left */}
+      {/* Right section (Brand, Model, Color, Size, Price) */}
       <div style={{
         width: "60mm",
         height: "100%",
@@ -80,7 +82,7 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
           marginBottom: "1mm"
         }}>{frame.brand}</div>
         <div style={{
-          fontSize: "7pt",
+          fontSize: "8pt",
           marginBottom: "1mm"
         }}>
           <span style={{ fontWeight: "bold" }}>Model:</span> {frame.model || "-"} <span style={{ fontWeight: "bold" }}>Color:</span> {frame.color || "-"} <span style={{ fontWeight: "bold" }}>Size:</span> {frame.size || "-"}
@@ -101,7 +103,7 @@ export const usePrintLabel = () => {
     
     if (selectedFrames.length === 0) return;
     
-    // Instead of using window.open, create an iframe for printing
+    // Create an iframe for printing
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.right = '0';
@@ -112,7 +114,7 @@ export const usePrintLabel = () => {
     
     document.body.appendChild(iframe);
     
-    // Base64 encode the logo URL for embedding directly in the HTML
+    // Logo URL for embedding
     const logoUrl = "/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png";
     
     // Change from const to let for printContent
@@ -141,16 +143,17 @@ export const usePrintLabel = () => {
             font-family: Arial, sans-serif;
             page-break-inside: avoid;
             margin-bottom: 5mm;
+            position: relative;
           }
           /* Left section (Logo and QR) */
           .left-section {
             width: 40mm;
             height: 100%;
-            border-right: 1px solid #000;
             padding: 2mm;
             display: flex;
             flex-direction: column;
-            position: relative;
+            justify-content: center;
+            align-items: center;
           }
           /* Right section (Brand, Model, Color, Size, Price) */
           .right-section {
@@ -168,7 +171,7 @@ export const usePrintLabel = () => {
             margin-bottom: 1mm;
           }
           .detail-info {
-            font-size: 7pt;
+            font-size: 8pt;
             margin-bottom: 1mm;
           }
           .detail-label {
@@ -183,7 +186,7 @@ export const usePrintLabel = () => {
             display: flex;
             justify-content: center;
             width: 100%;
-            margin-bottom: 2mm;
+            margin-bottom: 1mm;
           }
           .store-logo img {
             max-height: 5mm;
@@ -197,13 +200,12 @@ export const usePrintLabel = () => {
           }
           /* QR code container */
           .qr-code {
-            position: absolute;
-            bottom: 2mm;
-            right: -12mm;
+            display: flex;
+            justify-content: center;
           }
           .qr-code img {
-            height: 5mm;
-            width: 5mm;
+            height: 24px;
+            width: 24px;
           }
           @media print {
             body {
@@ -229,7 +231,7 @@ export const usePrintLabel = () => {
             </div>
             <div class="frame-id">${frame.frameId}</div>
             <div class="qr-code">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">
             </div>
           </div>
           <div class="right-section">
@@ -254,7 +256,7 @@ export const usePrintLabel = () => {
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
               }, 500);
-            }, 2000); // Increased timeout to ensure images load
+            }, 1000); // Timeout to ensure images load
           });
         </script>
       </body>
