@@ -1,871 +1,386 @@
-import React, { useRef, useEffect } from "react";
+
+import React, { useState, useRef } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
+import { QRCodeSVG } from "qrcode.react";
+import { Printer, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Printer, Tag } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Separator } from "@/components/ui/separator";
-import QRCode from "qrcode.react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguageStore } from "@/store/languageStore";
 
-// Dimensions: 100mm x 16mm (standard Zebra label size)
-const LABEL_WIDTH = "100mm";
-const LABEL_HEIGHT = "16mm";
-
-interface FrameLabelProps {
-  frame: FrameItem;
-}
-
-// Export the FrameLabel component so it can be used in other components
-export const FrameLabel: React.FC<FrameLabelProps> = ({ frame }) => {
-  // Generate QR data - keep it minimal for better scanning
-  const qrData = JSON.stringify({
-    brand: frame.brand,
-    model: frame.model
-  });
-  
+const LabelComponent = ({ frame }: { frame: FrameItem }) => {
   return (
-    <div 
-      className="flex items-center bg-white print:border-0 frame-label"
-      style={{ 
-        width: LABEL_WIDTH, 
-        height: LABEL_HEIGHT,
-        pageBreakInside: "avoid",
-      }}
-    >
-      {/* Left section for brand, size, and price */}
-      <div className="w-1/2 h-full border-r px-2 py-1 flex flex-col justify-center">
-        <div className="font-bold text-[9pt] mb-1">{frame.brand}</div>
-        <div className="text-[7pt] mb-1">{frame.size || "N/A"}</div>
-        <div className="font-bold text-[10pt]">K.D. {frame.price.toFixed(3)}</div>
+    <div className="label-container" style={{
+      width: "100mm",
+      height: "16mm",
+      border: "1px solid #000",
+      display: "flex",
+      fontFamily: "Arial, sans-serif",
+      pageBreakInside: "avoid",
+      marginBottom: "5mm" // Space between labels when printing multiple
+    }}>
+      {/* Left section (Brand, Size, Price) */}
+      <div style={{
+        width: "50mm",
+        height: "100%",
+        borderRight: "1px solid #000",
+        padding: "2mm",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center"
+      }}>
+        <div style={{
+          fontWeight: "bold",
+          fontSize: "9pt",
+          marginBottom: "1mm"
+        }}>{frame.brand}</div>
+        <div style={{
+          fontSize: "7pt",
+          marginBottom: "1mm"
+        }}>{frame.size || "-"}</div>
+        <div style={{
+          fontWeight: "bold",
+          fontSize: "10pt"
+        }}>K.D. {frame.price.toFixed(3)}</div>
       </div>
-      
-      {/* Right section for logo and QR code */}
-      <div className="w-1/2 h-full p-1 flex flex-col justify-between items-center">
+
+      {/* Right section (Logo top, QR bottom) */}
+      <div style={{
+        width: "50mm",
+        height: "100%",
+        padding: "2mm",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        alignItems: "center"
+      }}>
+        {/* Store Logo */}
         <div className="store-logo">
           <img 
-            src="/lovable-uploads/51989331-75fe-4ab7-8a52-c85e9e842039.png" 
-            alt="Moen Optician" 
-            className="h-6 w-auto"
+            src="/lovable-uploads/268d32e7-5d4a-4f77-bda8-2566232a44ab.png" 
+            alt="Store Logo" 
+            style={{ maxHeight: "6mm", height: "auto" }}
           />
         </div>
-        
-        <QRCode 
-          value={qrData} 
-          size={28} 
-          level="M"
-          renderAs="svg"
-          includeMargin={false}
-          className="h-6 w-6"
-          id={`qr-code-${frame.frameId}`}
-        />
-      </div>
-    </div>
-  );
-};
 
-export const FrameLabelTemplate: React.FC = () => {
-  const { frames } = useInventoryStore();
-  const [selectedFrames, setSelectedFrames] = React.useState<string[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const printWindowRef = useRef<Window | null>(null);
-  
-  // Clean up print window when component unmounts
-  useEffect(() => {
-    return () => {
-      if (printWindowRef.current) {
-        printWindowRef.current.close();
-      }
-    };
-  }, []);
-  
-  const toggleFrameSelection = (frameId: string) => {
-    setSelectedFrames(prev => 
-      prev.includes(frameId) 
-        ? prev.filter(id => id !== frameId) 
-        : [...prev, frameId]
-    );
-  };
-  
-  const handleSelectAll = () => {
-    if (selectedFrames.length === frames.length) {
-      setSelectedFrames([]);
-    } else {
-      setSelectedFrames(frames.map(frame => frame.frameId));
-    }
-  };
-  
-  const handlePrint = () => {
-    if (selectedFrames.length === 0) {
-      toast.error("يرجى تحديد إطار واحد على الأقل للطباعة");
-      return;
-    }
-    
-    setIsDialogOpen(true);
-  };
-  
-  const printLabels = () => {
-    // Close any previously opened print windows
-    if (printWindowRef.current) {
-      printWindowRef.current.close();
-    }
-    
-    // Create a new window for printing to avoid printing the entire page
-    const printWindow = window.open('', '_blank');
-    printWindowRef.current = printWindow;
-    
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Frame Labels</title>
-            <style>
-              @page {
-                size: ${LABEL_WIDTH} ${LABEL_HEIGHT};
-                margin: 0;
-              }
-              body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Cairo', Arial, sans-serif;
-                background: white;
-              }
-              .label-container {
-                width: ${LABEL_WIDTH};
-                height: ${LABEL_HEIGHT};
-                display: flex;
-                page-break-after: always;
-                border: none;
-                overflow: hidden;
-                position: relative;
-                box-sizing: border-box;
-              }
-              .qr-side {
-                width: 25%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 1px;
-              }
-              .separator {
-                width: 1px;
-                height: 100%;
-                background-color: #e0e0e0;
-              }
-              .info-side {
-                width: 75%;
-                padding: 1px;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-              }
-              .top-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 0.5px;
-              }
-              .middle-row {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                align-items: center;
-                gap: 1px;
-              }
-              .bottom-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-top: 1px;
-              }
-              .logo {
-                height: 14px;
-                width: auto;
-                object-fit: contain;
-              }
-              .frame-id {
-                display: flex;
-                align-items: center;
-                font-size: 7px;
-                font-weight: bold;
-                color: black;
-              }
-              .id-icon {
-                height: 10px;
-                width: 10px;
-                margin-right: 2px;
-                color: #f0b429;
-              }
-              .model-container {
-                display: flex;
-                align-items: center;
-                font-size: 7px;
-                font-weight: 500;
-              }
-              .model-icon {
-                height: 10px;
-                width: 10px;
-                margin-right: 2px;
-                color: #f0b429;
-              }
-              .size-color {
-                display: flex;
-                align-items: center;
-                font-size: 6px;
-                color: #444;
-              }
-              .info-icon {
-                height: 8px;
-                width: 8px;
-                margin-right: 2px;
-                color: #666;
-              }
-              .brand {
-                font-size: 9px;
-                font-weight: bold;
-                text-transform: uppercase;
-                color: #f0b429;
-              }
-              .price {
-                display: flex;
-                align-items: center;
-                font-size: 10px;
-                font-weight: bold;
-              }
-              .price-icon {
-                height: 12px;
-                width: 12px;
-                margin-right: 2px;
-                color: #f0b429;
-              }
-            </style>
-            <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-          </head>
-          <body>
-      `);
-
-      selectedFrames.forEach(frameId => {
-        const frame = frames.find(f => f.frameId === frameId);
-        if (frame) {
-          const qrData = JSON.stringify({
-            brand: frame.brand,
-            model: frame.model
-          });
-          
-          printWindow.document.write(`
-            <div class="label-container">
-              <div class="qr-side">
-                <div id="qr-${frameId}"></div>
-              </div>
-              <div class="separator"></div>
-              <div class="info-side">
-                <div class="top-row">
-                  <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
-                  <div class="frame-id">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="id-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M4 18h16"/><path d="M4 6h16"/><path d="M16 6l-4 12-4-12"/></svg>
-                    ${frame.frameId}
-                  </div>
-                </div>
-                <div class="middle-row">
-                  <div class="model-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="model-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 7-8 10a1 1 0 0 1-1.6 0L4 10l2-7Z"/><path d="M21 10H3"/></svg>
-                    ${frame.model}
-                  </div>
-                  <div class="size-color">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                    ${frame.size || 'N/A'} | ${frame.color}
-                  </div>
-                </div>
-                <div class="bottom-row">
-                  <div class="brand">${frame.brand}</div>
-                  <div class="price">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="price-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
-                    K.D. ${frame.price.toFixed(3)}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <script>
-              (function() {
-                const qr = qrcode(0, 'M');
-                qr.addData(${JSON.stringify(qrData)});
-                qr.make();
-                document.getElementById('qr-${frameId}').innerHTML = qr.createImgTag(2, 0);
-              })();
-            </script>
-          `);
-        }
-      });
-
-      printWindow.document.write(`
-          </body>
-        </html>
-      `);
-      
-      printWindow.document.close();
-      
-      printWindow.addEventListener('load', () => {
-        printWindow.focus();
-        
-        try {
-          // Create a MediaQueryList object
-          const mediaQueryList = printWindow.matchMedia('print');
-          
-          // Add event listener for print dialog close
-          const handlePrintChange = (mql) => {
-            if (!mql.matches && !printWindow.closed) {
-              // Print dialog was closed/canceled
-              setTimeout(() => {
-                printWindow.close();
-                setIsDialogOpen(false);
-              }, 100);
-            }
-          };
-          
-          mediaQueryList.addEventListener('change', handlePrintChange);
-          
-          printWindow.print();
-          
-          // Successful print (user clicked Print)
-          setTimeout(() => {
-            // Only handle if window hasn't been closed yet by the mediaQueryList listener
-            if (!printWindow.closed) {
-              setIsDialogOpen(false);
-              toast.success(`تم إرسال ${selectedFrames.length} بطاقة للطباعة`);
-            }
-          }, 1000);
-        } catch (error) {
-          console.error("Print error:", error);
-          toast.error("حدث خطأ أثناء محاولة الطباعة");
-          printWindow.close();
-        }
-      });
-    } else {
-      toast.error("فشل في فتح نافذة الطباعة");
-    }
-  };
-  
-  // Function to handle quick print from frame inventory
-  const singleFramePrint = (frameId: string) => {
-    // Close any previously opened print windows
-    if (printWindowRef.current) {
-      printWindowRef.current.close();
-    }
-    
-    const frame = frames.find(f => f.frameId === frameId);
-    if (!frame) {
-      toast.error("لم يتم العثور على الإطار");
-      return;
-    }
-    
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-    printWindowRef.current = printWindow;
-    
-    if (printWindow) {
-      const qrData = JSON.stringify({
-        brand: frame.brand,
-        model: frame.model
-      });
-      
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Frame Label</title>
-            <style>
-              @page {
-                size: ${LABEL_WIDTH} ${LABEL_HEIGHT};
-                margin: 0;
-              }
-              body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Cairo', Arial, sans-serif;
-                background: white;
-              }
-              .label-container {
-                width: ${LABEL_WIDTH};
-                height: ${LABEL_HEIGHT};
-                display: flex;
-                border: none;
-                overflow: hidden;
-                position: relative;
-                box-sizing: border-box;
-              }
-              .qr-side {
-                width: 25%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 1px;
-              }
-              .separator {
-                width: 1px;
-                height: 100%;
-                background-color: #e0e0e0;
-              }
-              .info-side {
-                width: 75%;
-                padding: 1px;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-              }
-              .top-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 0.5px;
-              }
-              .middle-row {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                align-items: center;
-                gap: 1px;
-              }
-              .bottom-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-top: 1px;
-              }
-              .logo {
-                height: 14px;
-                width: auto;
-                object-fit: contain;
-              }
-              .frame-id {
-                display: flex;
-                align-items: center;
-                font-size: 7px;
-                font-weight: bold;
-                color: black;
-              }
-              .id-icon {
-                height: 10px;
-                width: 10px;
-                margin-right: 2px;
-                color: #f0b429;
-              }
-              .model-container {
-                display: flex;
-                align-items: center;
-                font-size: 7px;
-                font-weight: 500;
-              }
-              .model-icon {
-                height: 10px;
-                width: 10px;
-                margin-right: 2px;
-                color: #f0b429;
-              }
-              .size-color {
-                display: flex;
-                align-items: center;
-                font-size: 6px;
-                color: #444;
-              }
-              .info-icon {
-                height: 8px;
-                width: 8px;
-                margin-right: 2px;
-                color: #666;
-              }
-              .brand {
-                font-size: 9px;
-                font-weight: bold;
-                text-transform: uppercase;
-                color: #f0b429;
-              }
-              .price {
-                display: flex;
-                align-items: center;
-                font-size: 10px;
-                font-weight: bold;
-              }
-              .price-icon {
-                height: 12px;
-                width: 12px;
-                margin-right: 2px;
-                color: #f0b429;
-              }
-            </style>
-            <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-          </head>
-          <body>
-            <div class="label-container">
-              <div class="qr-side">
-                <div id="qr-single"></div>
-              </div>
-              <div class="separator"></div>
-              <div class="info-side">
-                <div class="top-row">
-                  <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" class="logo" alt="Moen Logo">
-                  <div class="frame-id">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="id-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M4 18h16"/><path d="M4 6h16"/><path d="M16 6l-4 12-4-12"/></svg>
-                    ${frame.frameId}
-                  </div>
-                </div>
-                <div class="middle-row">
-                  <div class="model-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="model-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 7-8 10a1 1 0 0 1-1.6 0L4 10l2-7Z"/><path d="M21 10H3"/></svg>
-                    ${frame.model}
-                  </div>
-                  <div class="size-color">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                    ${frame.size || 'N/A'} | ${frame.color}
-                  </div>
-                </div>
-                <div class="bottom-row">
-                  <div class="brand">${frame.brand}</div>
-                  <div class="price">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="price-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
-                    K.D. ${frame.price.toFixed(3)}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <script>
-              (function() {
-                const qr = qrcode(0, 'M');
-                qr.addData(${JSON.stringify(qrData)});
-                qr.make();
-                document.getElementById('qr-single').innerHTML = qr.createImgTag(2, 0);
-              })();
-            </script>
-          </body>
-        </html>
-      `);
-      
-      printWindow.document.close();
-      
-      printWindow.addEventListener('load', () => {
-        printWindow.focus();
-        
-        try {
-          // Create a MediaQueryList object
-          const mediaQueryList = printWindow.matchMedia('print');
-          
-          // Add event listener for print dialog close
-          const handlePrintChange = (mql) => {
-            if (!mql.matches && !printWindow.closed) {
-              // Print dialog was closed/canceled
-              setTimeout(() => {
-                printWindow.close();
-              }, 100);
-            }
-          };
-          
-          mediaQueryList.addEventListener('change', handlePrintChange);
-          
-          printWindow.print();
-          
-          // Successful print (user clicked Print)
-          setTimeout(() => {
-            // Only handle if window hasn't been closed yet by the mediaQueryList listener
-            if (!printWindow.closed) {
-              toast.success("تم إرسال البطاقة للطباعة");
-            }
-          }, 1000);
-        } catch (error) {
-          console.error("Print error:", error);
-          toast.error("حدث خطأ أثناء محاولة الطباعة");
-          printWindow.close();
-        }
-      });
-    } else {
-      toast.error("فشل في فتح نافذة الطباعة");
-    }
-  };
-  
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">طباعة بطاقات الإطارات</h2>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleSelectAll}
-          >
-            {selectedFrames.length === frames.length ? "إلغاء تحديد الكل" : "تحديد الكل"}
-          </Button>
-          <Button 
-            size="sm" 
-            onClick={handlePrint}
-            disabled={selectedFrames.length === 0}
-          >
-            <Printer className="h-4 w-4 mr-1" /> طباعة البطاقات ({selectedFrames.length})
-          </Button>
+        {/* QR Code */}
+        <div className="qr-code">
+          <QRCodeSVG 
+            value={frame.frameId} 
+            size={24} // ~6mm
+          />
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-        {frames.map(frame => (
-          <div 
-            key={frame.frameId}
-            className={`border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${
-              selectedFrames.includes(frame.frameId) ? "border-primary bg-primary/5" : "border-gray-200"
-            }`}
-            onClick={() => toggleFrameSelection(frame.frameId)}
-          >
-            <div className="flex items-start gap-2">
-              <Tag className={`h-4 w-4 ${selectedFrames.includes(frame.frameId) ? "text-primary" : "text-muted-foreground"}`} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{frame.brand} - {frame.model}</p>
-                <p className="text-xs text-muted-foreground truncate">{frame.color}, {frame.size || "No size"}</p>
-                <p className="text-sm font-bold mt-1">{frame.price.toFixed(3)} KWD</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      
-      {frames.length === 0 && (
-        <div className="bg-muted/30 rounded-lg p-12 text-center">
-          <Tag className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-          <h3 className="text-lg font-medium mb-1">لا توجد إطارات</h3>
-          <p className="text-muted-foreground mb-4">
-            لا توجد إطارات في المخزون حاليًا.
-          </p>
-        </div>
-      )}
-      
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>معاينة بطاقات الإطارات</DialogTitle>
-            <DialogDescription>
-              ستتم طباعة البطاقات التالية. تأكد من إعداد طابعة Zebra وتحديد الحجم الصحيح (100مم × 16مم).
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-2 max-h-60 overflow-y-auto p-2">
-            {selectedFrames.slice(0, 3).map(frameId => {
-              const frame = frames.find(f => f.frameId === frameId);
-              return frame ? <FrameLabel key={frameId} frame={frame} /> : null;
-            })}
-            {selectedFrames.length > 3 && (
-              <p className="text-center text-sm text-muted-foreground pt-2">
-                و {selectedFrames.length - 3} بطاقات أخرى...
-              </p>
-            )}
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              إلغاء
-            </Button>
-            <Button onClick={printLabels}>
-              <Printer className="h-4 w-4 mr-1" /> طباعة البطاقات
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
 
 export const usePrintLabel = () => {
-  const { frames } = useInventoryStore();
-  const printWindowRef = useRef<Window | null>(null);
-  
-  // Clean up print window when component unmounts
-  useEffect(() => {
-    return () => {
-      if (printWindowRef.current) {
-        printWindowRef.current.close();
-      }
-    };
-  }, []);
-  
-  const printSingleLabel = (frameId: string) => {
-    // Close any previously opened print windows
-    if (printWindowRef.current) {
-      printWindowRef.current.close();
-    }
+  const printSelectedFrames = (frameIds: string[]) => {
+    const { frames } = useInventoryStore.getState();
+    const selectedFrames = frames.filter(frame => frameIds.includes(frame.frameId));
     
-    const frame = frames.find(f => f.frameId === frameId);
-    if (!frame) {
-      toast.error("لم يتم العثور على الإطار");
+    if (selectedFrames.length === 0) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error("Failed to open print window");
       return;
     }
     
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-    printWindowRef.current = printWindow;
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Frame Labels</title>
+        <style>
+          /* Reset default margins/padding */
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            padding: 2mm;
+          }
+          /* Main container for the label */
+          .label-container {
+            width: 100mm;
+            height: 16mm;
+            border: 1px solid #000;
+            display: flex;
+            font-family: Arial, sans-serif;
+            page-break-inside: avoid;
+            margin-bottom: 5mm;
+          }
+          /* Left section (Brand, Size, Price) */
+          .left-section {
+            width: 50mm;
+            height: 100%;
+            border-right: 1px solid #000;
+            padding: 2mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+          }
+          /* Text styling */
+          .brand-name {
+            font-weight: bold;
+            font-size: 9pt;
+            margin-bottom: 1mm;
+          }
+          .size-info {
+            font-size: 7pt;
+            margin-bottom: 1mm;
+          }
+          .price {
+            font-weight: bold;
+            font-size: 10pt;
+          }
+          /* Right section (Logo top, QR bottom) */
+          .right-section {
+            width: 50mm;
+            height: 100%;
+            padding: 2mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+          }
+          /* Logo container (top) */
+          .store-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .store-logo img {
+            max-height: 6mm;
+            width: auto;
+          }
+          /* QR code container (bottom) */
+          .qr-code {
+            display: flex;
+            justify-content: center;
+          }
+          .qr-code img {
+            max-height: 6mm;
+            width: auto;
+          }
+          @media print {
+            body {
+              padding: 0;
+            }
+          }
+        </style>
+      </head>
+      <body>
+    `;
     
-    if (printWindow) {
-      const qrData = JSON.stringify({
-        brand: frame.brand,
-        model: frame.model
-      });
-      
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Frame Label</title>
-            <style>
-              @page {
-                size: ${LABEL_WIDTH} ${LABEL_HEIGHT};
-                margin: 0;
-              }
-              body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Cairo', Arial, sans-serif;
-                background: white;
-              }
-              .label-container {
-                width: ${LABEL_WIDTH};
-                height: ${LABEL_HEIGHT};
-                display: flex;
-                border: none;
-                overflow: hidden;
-                position: relative;
-                box-sizing: border-box;
-              }
-              .qr-side {
-                width: 25%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-              }
-              .info-side {
-                width: 75%;
-                padding-right: 8px;
-                padding-top: 2px;
-                padding-bottom: 2px;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-              }
-              .top-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              }
-              .store-name {
-                font-size: 10px;
-                font-weight: bold;
-                direction: rtl;
-              }
-              .frame-id {
-                font-size: 10px;
-                font-weight: 600;
-                letter-spacing: 0.5px;
-              }
-              .middle-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin: 1px 0;
-              }
-              .brand {
-                font-size: 14px;
-                font-weight: bold;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-              }
-              .model {
-                font-size: 9px;
-                letter-spacing: 0.5px;
-              }
-              .bottom-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-end;
-              }
-              .details {
-                font-size: 8px;
-                color: #444;
-              }
-              .price {
-                font-size: 16px;
-                font-weight: bold;
-              }
-            </style>
-            <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-          </head>
-          <body>
-            <div class="label-container">
-              <div class="qr-side">
-                <div id="qr-single"></div>
-              </div>
-              <div class="info-side">
-                <div class="top-row">
-                  <div class="store-name">نظارات الفتتين</div>
-                  <div class="frame-id">#${frame.frameId}</div>
-                </div>
-                <div class="middle-row">
-                  <div class="brand">${frame.brand}</div>
-                  <div class="model">${frame.model}</div>
-                </div>
-                <div class="bottom-row">
-                  <div class="details">${frame.size || 'N/A'} | ${frame.color}</div>
-                  <div class="price">K.D. ${frame.price.toFixed(3)}</div>
-                </div>
-              </div>
+    // Generate HTML for each selected frame
+    selectedFrames.forEach(frame => {
+      printContent += `
+        <div class="label-container">
+          <div class="left-section">
+            <div class="brand-name">${frame.brand}</div>
+            <div class="size-info">${frame.size || "-"}</div>
+            <div class="price">K.D. ${frame.price.toFixed(3)}</div>
+          </div>
+          <div class="right-section">
+            <div class="store-logo">
+              <img src="/lovable-uploads/268d32e7-5d4a-4f77-bda8-2566232a44ab.png" alt="Store Logo">
             </div>
-            <script>
-              (function() {
-                const qr = qrcode(0, 'M');
-                qr.addData(${JSON.stringify(qrData)});
-                qr.make();
-                document.getElementById('qr-single').innerHTML = qr.createImgTag(2, 0);
-              })();
-            </script>
-          </body>
-        </html>
-      `);
-      
-      printWindow.document.close();
-      
-      printWindow.addEventListener('load', () => {
-        printWindow.focus();
-        
-        try {
-          // Create a MediaQueryList object
-          const mediaQueryList = printWindow.matchMedia('print');
-          
-          // Add event listener for print dialog close
-          const handlePrintChange = (mql) => {
-            if (!mql.matches && !printWindow.closed) {
-              // Print dialog was closed/canceled
-              setTimeout(() => {
-                printWindow.close();
-              }, 100);
-            }
+            <div class="qr-code">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    
+    printContent += `
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() {
+              window.close();
+            }, 500);
           };
-          
-          mediaQueryList.addEventListener('change', handlePrintChange);
-          
-          printWindow.print();
-          
-          // Successful print (user clicked Print)
-          setTimeout(() => {
-            // Only handle if window hasn't been closed yet by the mediaQueryList listener
-            if (!printWindow.closed) {
-              toast.success("تم إرسال البطاقة للطباعة");
-            }
-          }, 1000);
-        } catch (error) {
-          console.error("Print error:", error);
-          toast.error("حدث خطأ أثناء محاولة الطباعة");
-          printWindow.close();
-        }
-      });
+        </script>
+      </body>
+      </html>
+    `;
+    
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
+  
+  const printSingleLabel = (frameId: string) => {
+    printSelectedFrames([frameId]);
+  };
+  
+  return { printSelectedFrames, printSingleLabel };
+};
+
+export const FrameLabelTemplate: React.FC = () => {
+  const { frames } = useInventoryStore();
+  const { t } = useLanguageStore();
+  const [selectedFrames, setSelectedFrames] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [filteredFrames, setFilteredFrames] = useState(frames);
+  const { printSelectedFrames } = usePrintLabel();
+  
+  // Handle frame selection
+  const toggleFrameSelection = (frameId: string) => {
+    if (selectedFrames.includes(frameId)) {
+      setSelectedFrames(selectedFrames.filter(id => id !== frameId));
     } else {
-      toast.error("فشل في فتح نافذة الطباعة");
+      setSelectedFrames([...selectedFrames, frameId]);
     }
   };
   
-  return { printSingleLabel };
+  // Select/deselect all frames
+  const toggleSelectAll = () => {
+    if (selectedFrames.length === filteredFrames.length) {
+      setSelectedFrames([]);
+    } else {
+      setSelectedFrames(filteredFrames.map(frame => frame.frameId));
+    }
+  };
+  
+  // Filter frames based on search text
+  const handleSearch = () => {
+    if (!searchText.trim()) {
+      setFilteredFrames(frames);
+      return;
+    }
+    
+    const filtered = frames.filter(frame => {
+      const searchLower = searchText.toLowerCase();
+      return (
+        frame.brand.toLowerCase().includes(searchLower) ||
+        frame.model.toLowerCase().includes(searchLower) ||
+        frame.color.toLowerCase().includes(searchLower) ||
+        (frame.size && frame.size.toLowerCase().includes(searchLower))
+      );
+    });
+    
+    setFilteredFrames(filtered);
+  };
+  
+  // Handle print button click
+  const handlePrint = () => {
+    if (selectedFrames.length === 0) {
+      toast.warning(t("selectFramesForPrinting"));
+      return;
+    }
+    
+    printSelectedFrames(selectedFrames);
+  };
+  
+  // Reset search and selection
+  const handleReset = () => {
+    setSearchText("");
+    setSelectedFrames([]);
+    setFilteredFrames(frames);
+  };
+  
+  // Filter frames when search text changes
+  React.useEffect(() => {
+    handleSearch();
+  }, [searchText]);
+  
+  // Update filtered frames when frames change
+  React.useEffect(() => {
+    setFilteredFrames(frames);
+  }, [frames]);
+  
+  return (
+    <div className="space-y-4">
+      {/* Controls */}
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <Label htmlFor="search-frames" className="text-xs font-medium mb-1 block">
+              {t("searchFrames")}
+            </Label>
+            <Input
+              id="search-frames"
+              placeholder={t("searchByBrandModelColor")}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </div>
+          <div className="flex items-end">
+            <Button variant="outline" size="sm" onClick={handleReset} className="h-10">
+              <X className="h-4 w-4 mr-1" /> {t("reset")}
+            </Button>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="select-all"
+              checked={selectedFrames.length === filteredFrames.length && filteredFrames.length > 0}
+              onCheckedChange={toggleSelectAll}
+            />
+            <Label htmlFor="select-all" className="text-sm cursor-pointer">
+              {t("selectAll")} ({filteredFrames.length})
+            </Label>
+          </div>
+          
+          <Button 
+            onClick={handlePrint} 
+            disabled={selectedFrames.length === 0}
+            className="gap-1"
+          >
+            <Printer className="h-4 w-4" /> {t("printSelected")} ({selectedFrames.length})
+          </Button>
+        </div>
+      </div>
+      
+      {/* Preview */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">{t("labelPreview")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {filteredFrames.length > 0 ? (
+            <div className="space-y-3">
+              {filteredFrames.map((frame) => (
+                <div key={frame.frameId} className="flex items-center gap-3">
+                  <Checkbox
+                    id={`frame-${frame.frameId}`}
+                    checked={selectedFrames.includes(frame.frameId)}
+                    onCheckedChange={() => toggleFrameSelection(frame.frameId)}
+                  />
+                  <div className="flex-1 border rounded overflow-hidden">
+                    <LabelComponent frame={frame} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-muted-foreground">{t("noFramesFound")}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      
+      {/* Print preview (hidden) */}
+      <div id="print-container" className="hidden">
+        {selectedFrames.map((frameId) => {
+          const frame = frames.find(f => f.frameId === frameId);
+          if (!frame) return null;
+          return <LabelComponent key={frameId} frame={frame} />;
+        })}
+      </div>
+    </div>
+  );
 };

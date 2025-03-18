@@ -158,7 +158,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
       </Dialog>
       
       {/* Hidden print component */}
-      <div className="hidden">
+      <div className="hidden print:block print:m-0">
         {renderPrintComponent()}
       </div>
     </>
