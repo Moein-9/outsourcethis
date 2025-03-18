@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { QRCodeSVG } from "qrcode.react";
@@ -49,26 +50,33 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         }}>K.D. {frame.price.toFixed(3)}</div>
       </div>
 
-      {/* Right section (Logo top, QR bottom) */}
+      {/* Right section (Logo top, QR bottom right) */}
       <div style={{
         width: "40mm",
         height: "100%",
         padding: "2mm",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
-        alignItems: "center"
+        position: "relative"
       }}>
         {/* Store Logo */}
-        <div className="store-logo">
-          <MoenLogo className="w-auto" style={{ maxHeight: "6mm", height: "auto" }} />
+        <div className="store-logo" style={{
+          display: "flex",
+          justifyContent: "center",
+          width: "100%"
+        }}>
+          <MoenLogo className="w-auto" style={{ maxHeight: "5mm", height: "auto" }} />
         </div>
 
-        {/* QR Code */}
-        <div className="qr-code">
+        {/* QR Code - positioned at bottom right */}
+        <div className="qr-code" style={{
+          position: "absolute",
+          bottom: "2mm",
+          right: "2mm"
+        }}>
           <QRCodeSVG 
             value={frame.frameId} 
-            size={24} // ~6mm
+            size={20} // Smaller QR code to fit in the layout
           />
         </div>
       </div>
@@ -158,28 +166,28 @@ export const usePrintLabel = () => {
             padding: 2mm;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
+            position: relative;
           }
           /* Logo container (top) */
           .store-logo {
             display: flex;
             justify-content: center;
-            align-items: center;
+            width: 100%;
             margin-bottom: 2mm;
           }
           .store-logo img {
-            max-height: 6mm;
+            max-height: 5mm;
             width: auto;
           }
-          /* QR code container (bottom) */
+          /* QR code container (bottom right) */
           .qr-code {
-            display: flex;
-            justify-content: center;
+            position: absolute;
+            bottom: 2mm;
+            right: 2mm;
           }
           .qr-code img {
-            height: 6mm;
-            width: 6mm;
+            height: 5mm;
+            width: 5mm;
           }
           @media print {
             body {
@@ -229,7 +237,7 @@ export const usePrintLabel = () => {
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
               }, 500);
-            }, 1500); // Increased timeout to ensure images load
+            }, 2000); // Increased timeout to ensure images load
           });
         </script>
       </body>
