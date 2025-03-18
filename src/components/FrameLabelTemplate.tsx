@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguageStore } from "@/store/languageStore";
+import { MoenLogo } from "@/assets/logo";
 
 const LabelComponent = ({ frame }: { frame: FrameItem }) => {
   return (
@@ -61,11 +62,7 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
       }}>
         {/* Store Logo */}
         <div className="store-logo">
-          <img 
-            src="/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png" 
-            alt="Store Logo" 
-            style={{ maxHeight: "6mm", height: "auto" }}
-          />
+          <MoenLogo className="w-auto" style={{ maxHeight: "6mm", height: "auto" }} />
         </div>
 
         {/* QR Code */}
@@ -87,11 +84,16 @@ export const usePrintLabel = () => {
     
     if (selectedFrames.length === 0) return;
     
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      toast.error("Failed to open print window");
-      return;
-    }
+    // Instead of using window.open, create an iframe for printing
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    
+    document.body.appendChild(iframe);
     
     // Change from const to let for printContent
     let printContent = `
@@ -180,6 +182,10 @@ export const usePrintLabel = () => {
             body {
               padding: 0;
             }
+            @page {
+              size: 100mm 16mm;
+              margin: 0;
+            }
           }
         </style>
       </head>
@@ -213,20 +219,37 @@ export const usePrintLabel = () => {
     
     printContent += `
         <script>
-          window.onload = function() {
-            window.print();
+          document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
-              window.close();
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 500);
             }, 500);
-          };
+          });
         </script>
       </body>
       </html>
     `;
     
-    printWindow.document.open();
-    printWindow.document.write(printContent);
-    printWindow.document.close();
+    // Listen for completion message
+    window.addEventListener('message', function handler(e) {
+      if (e.data === 'print-complete') {
+        window.removeEventListener('message', handler);
+        document.body.removeChild(iframe);
+      }
+    }, { once: true });
+    
+    // Write the HTML to the iframe and trigger printing
+    if (iframe.contentWindow) {
+      iframe.contentWindow.document.open();
+      iframe.contentWindow.document.write(printContent);
+      iframe.contentWindow.document.close();
+    } else {
+      toast.error("Failed to create print frame");
+      document.body.removeChild(iframe);
+    }
   };
   
   const printSingleLabel = (frameId: string) => {

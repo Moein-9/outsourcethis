@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -5,7 +6,7 @@ import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { enUS } from "date-fns/locale/en-US";
 import { QRCodeSVG } from "qrcode.react";
-import { MoenLogo } from "@/assets/logo";
+import { MoenLogo, storeInfo } from "@/assets/logo";
 
 interface WorkOrderReceiptPrintProps {
   invoice: Invoice;
@@ -65,15 +66,18 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     ? invoice.payments.reduce((sum, payment) => sum + payment.amount, 0) 
     : invoice.deposit;
 
-  // Fix to ensure the print dialog only prompts once
+  // Directly handle printing rather than using window.print()
   React.useEffect(() => {
     // Small delay to ensure the component is fully rendered
     const timer = setTimeout(() => {
-      window.onafterprint = () => {
-        window.onafterprint = null; // Clear handler after first print
-      };
-      window.print();
-    }, 300);
+      if (document.readyState === "complete") {
+        window.print();
+      } else {
+        window.addEventListener("load", () => {
+          window.print();
+        }, { once: true });
+      }
+    }, 500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -81,14 +85,14 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     <div style={{ width: "80mm", fontFamily: "Arial, sans-serif" }} dir={dir} className="print-receipt">
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "10px" }}>
-        <div style={{ marginBottom: "5px" }}>
-          <MoenLogo style={{ height: "30px", width: "auto", margin: "0 auto" }} />
+        <div style={{ marginBottom: "5px", display: "flex", justifyContent: "center" }}>
+          <MoenLogo className="w-auto" style={{ height: "30px", margin: "0 auto" }} />
         </div>
         <h1 style={{ fontSize: "16px", fontWeight: "bold", margin: "5px 0" }}>
-          {t("opticalStoreName")}
+          {storeInfo.name}
         </h1>
-        <p style={{ fontSize: "12px", margin: "2px 0" }}>{t("opticalStoreAddress")}</p>
-        <p style={{ fontSize: "12px", margin: "2px 0" }}>{t("opticalStorePhone")}</p>
+        <p style={{ fontSize: "12px", margin: "2px 0" }}>{storeInfo.address}</p>
+        <p style={{ fontSize: "12px", margin: "2px 0" }}>{storeInfo.phone}</p>
       </div>
       
       {/* Divider */}

@@ -61,40 +61,44 @@
   direction: ltr;
 }
 
-/* Improved print styling for frame labels */
+/* Improved print styling for all documents */
 @media print {
   @page {
-    size: 100mm 16mm;
     margin: 0;
     padding: 0;
+    size: auto;
+  }
+  
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    width: auto !important;
   }
   
   body * {
     visibility: hidden;
-    margin: 0;
-    padding: 0;
   }
   
+  .print-receipt, .print-receipt *, 
   .print-container, .print-container * {
     visibility: visible;
   }
   
-  .print-container {
+  .print-receipt, .print-container {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100mm;
-    height: 16mm;
-    overflow: hidden;
   }
   
   /* Hide all UI elements when printing */
-  header, nav, button, .dialog, .dialog-overlay {
+  header, nav, button, .dialog, .dialog-overlay, 
+  .no-print, button, nav, .sidebar {
     display: none !important;
   }
 }
 
-/* Updated label printing styles */
+/* Frame label printing styles */
 @media print {
   .frame-label {
     width: 100mm;
@@ -106,7 +110,7 @@
     padding: 0;
   }
   
-  /* Fix for multiple pages issue */
+  /* Fix for frame labels */
   @page {
     size: 100mm 16mm;
     margin: 0;
@@ -119,4 +123,3 @@
     page-break-inside: avoid;
   }
 }
-

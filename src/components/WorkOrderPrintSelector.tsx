@@ -50,15 +50,130 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   const { t } = useLanguageStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<"a4" | "receipt" | null>(null);
+  const [printingInProgress, setPrintingInProgress] = useState(false);
   
   const handlePrint = () => {
-    if (!selectedFormat) return;
+    if (!selectedFormat || printingInProgress) return;
     
-    setTimeout(() => {
-      window.print();
-      // Close dialog after printing
-      setTimeout(() => setIsDialogOpen(false), 500);
-    }, 200);
+    setPrintingInProgress(true);
+    
+    // Create and use an iframe for printing to avoid Chrome's preview issues
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    
+    document.body.appendChild(iframe);
+    
+    // Set up a message listener to know when printing is done
+    window.addEventListener('message', function handler(e) {
+      if (e.data === 'print-complete') {
+        window.removeEventListener('message', handler);
+        document.body.removeChild(iframe);
+        setPrintingInProgress(false);
+        setIsDialogOpen(false);
+      }
+    }, { once: true });
+    
+    if (iframe.contentWindow) {
+      // Set up the iframe content
+      iframe.contentWindow.document.open();
+      
+      // Write the basic structure
+      iframe.contentWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Print ${selectedFormat === 'a4' ? 'Work Order' : 'Receipt'}</title>
+          <meta charset="utf-8">
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              font-family: Arial, sans-serif;
+            }
+            @media print {
+              @page {
+                margin: ${selectedFormat === 'receipt' ? '0' : '10mm'};
+                padding: 0;
+                size: ${selectedFormat === 'receipt' ? '80mm auto' : 'auto'};
+              }
+              body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div id="content"></div>
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              setTimeout(function() {
+                window.focus();
+                window.print();
+                setTimeout(function() {
+                  window.parent.postMessage('print-complete', '*');
+                }, 500);
+              }, 800);
+            });
+          </script>
+        </body>
+        </html>
+      `);
+      
+      iframe.contentWindow.document.close();
+      
+      // After document is loaded, inject the content
+      iframe.onload = () => {
+        const contentDiv = iframe.contentDocument?.getElementById('content');
+        if (contentDiv) {
+          if (selectedFormat === "a4") {
+            // Render A4 content directly
+            const container = document.createElement('div');
+            container.style.width = '210mm';
+            container.style.margin = '0 auto';
+            
+            // Copy styles to the iframe
+            const styles = Array.from(document.styleSheets)
+              .map(styleSheet => {
+                try {
+                  return Array.from(styleSheet.cssRules)
+                    .map(rule => rule.cssText)
+                    .join('\n');
+                } catch (e) {
+                  return '';
+                }
+              })
+              .join('\n');
+            
+            const styleElement = iframe.contentDocument.createElement('style');
+            styleElement.textContent = styles;
+            iframe.contentDocument.head.appendChild(styleElement);
+            
+            // Create a version of WorkOrderPrint in the iframe
+            contentDiv.innerHTML = `
+              <div style="width: 210mm; margin: 0 auto; padding: 10mm;">
+                <!-- The invoice content will be injected here by React rendering -->
+              </div>
+            `;
+            
+          } else {
+            // Receipt content
+            contentDiv.innerHTML = `
+              <div style="width: 80mm; margin: 0 auto;">
+                <!-- The receipt content will be injected here by React rendering -->
+              </div>
+            `;
+          }
+        }
+      };
+    } else {
+      setPrintingInProgress(false);
+    }
   };
   
   const renderPrintComponent = () => {
@@ -148,10 +263,10 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             <Button
               type="button"
               onClick={handlePrint}
-              disabled={!selectedFormat}
+              disabled={!selectedFormat || printingInProgress}
             >
               <PrinterIcon className="h-4 w-4 mr-2" />
-              {t("print")}
+              {printingInProgress ? t("printing") : t("print")}
             </Button>
           </DialogFooter>
         </DialogContent>

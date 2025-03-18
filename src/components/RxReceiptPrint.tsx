@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { RxData } from "@/store/patientStore";
@@ -30,6 +31,23 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
     : "w-full bg-white p-4 border rounded-lg shadow-sm";
   
   const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
+
+  // Better print handling
+  React.useEffect(() => {
+    if (isPrintable) {
+      // Use a longer timeout to ensure everything is fully rendered
+      const timer = setTimeout(() => {
+        if (document.readyState === "complete") {
+          window.print();
+        } else {
+          window.addEventListener("load", () => {
+            window.print();
+          }, { once: true });
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [isPrintable]);
   
   return (
     <div className={`${containerClass} ${dirClass}`} style={{ fontFamily: 'Courier New, monospace' }}>
