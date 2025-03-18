@@ -1,997 +1,387 @@
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
-interface LanguageState {
-  language: 'ar' | 'en';
-  setLanguage: (language: 'ar' | 'en') => void;
+type LanguageStore = {
+  language: 'en' | 'ar';
+  setLanguage: (language: 'en' | 'ar') => void;
   t: (key: string) => string;
-}
+};
 
-// Translation dictionary
+// Translations for both languages
 const translations: Record<string, Record<string, string>> = {
-  // Navigation
-  "dashboard": {
-    ar: "الرئيسية", 
-    en: "Dashboard"
-  },
-  "createClient": {
-    ar: "إنشاء عميل", 
-    en: "New Client"
-  },
-  "createInvoice": {
-    ar: "إنشاء فاتورة", 
-    en: "New Invoice"
-  },
-  "inventory": {
-    ar: "إدارة المخزون", 
-    en: "Inventory"
-  },
-  "remainingPayments": {
-    ar: "المتبقي", 
-    en: "Payments Due"
-  },
-  "patientSearch": {
-    ar: "بحث عن عميل", 
-    en: "Client Search"
-  },
-  // Dashboard
-  "welcome": {
-    ar: "مرحباً بك في نظام معين للبصريات",
-    en: "Welcome to Moen Optical System"
-  },
-  "systemDescription": {
-    ar: "نظام إدارة متكامل للعيادات والمستشفيات",
-    en: "Integrated management system for clinics and hospitals"
-  },
-  "reportsPage": {
-    ar: "صفحة التقارير",
-    en: "Reports Page"
-  },
-  "currentTime": {
-    ar: "الوقت الحالي",
-    en: "Current Time"
-  },
-  // Inventory tabs
-  "frames": {
-    ar: "الإطارات",
-    en: "Frames"
-  },
-  "contactLenses": {
-    ar: "العدسات اللاصقة",
-    en: "Contact Lenses"
-  },
-  "lensTypes": {
-    ar: "أنواع العدسات",
-    en: "Lens Types"
-  },
-  "lensCoatings": {
-    ar: "طلاءات العدسات",
-    en: "Lens Coatings"
-  },
-  "frameManagement": {
-    ar: "إدارة الإطارات",
-    en: "Frames Management"
-  },
-  "contactLensManagement": {
-    ar: "إدارة العدسات اللاصقة",
-    en: "Contact Lens Management"
-  },
-  // Client creation
-  "createClientTitle": {
-    ar: "إنشاء عميل",
-    en: "Create Client"
-  },
-  "prescriptionGlasses": {
-    ar: "نظارات طبية",
-    en: "Prescription Glasses"
-  },
-  "contactLensesTab": {
-    ar: "عدسات لاصقة",
-    en: "Contact Lenses"
-  },
-  "personalInfo": {
-    ar: "المعلومات الشخصية",
-    en: "Personal Information"
-  },
-  "name": {
-    ar: "الاسم",
-    en: "Name"
-  },
-  "fullName": {
-    ar: "الاسم الكامل",
-    en: "Full Name"
-  },
-  "phone": {
-    ar: "الهاتف",
-    en: "Phone"
-  },
-  "phoneNumber": {
-    ar: "رقم الهاتف",
-    en: "Phone Number"
-  },
-  "dateOfBirth": {
-    ar: "تاريخ الميلاد",
-    en: "Date of Birth"
-  },
-  "day": {
-    ar: "اليوم",
-    en: "Day"
-  },
-  "month": {
-    ar: "الشهر",
-    en: "Month"
-  },
-  "year": {
-    ar: "السنة",
-    en: "Year"
-  },
-  "clientDidntShareDOB": {
-    ar: "لم يشارك العميل بتاريخ الميلاد",
-    en: "Client did not share birth date"
-  },
-  "notes": {
-    ar: "ملاحظات",
-    en: "Notes"
-  },
-  "clientNotesPreferences": {
-    ar: "ملاحظات أو تفضيلات العميل",
-    en: "Client notes or preferences"
-  },
-  // Prescription
-  "glassesPrescription": {
-    ar: "وصفات النظارات",
-    en: "Glasses Prescription"
-  },
-  "prescriptionDate": {
-    ar: "تاريخ الوصفة الطبية",
-    en: "Prescription Date"
-  },
-  "choosePrescriptionDate": {
-    ar: "اختر تاريخ الوصفة",
-    en: "Choose prescription date"
-  },
-  "right": {
-    ar: "يمين",
-    en: "Right"
-  },
-  "left": {
-    ar: "يسار",
-    en: "Left"
-  },
-  "saveAndContinue": {
-    ar: "حفظ ومتابعة",
-    en: "Save & Continue"
-  },
-  // Remaining Payments
-  "remainingPaymentsTitle": {
-    ar: "المتبقي للدفع",
-    en: "Payments Due"
-  },
-  "remainingPaymentsDescription": {
-    ar: "إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية",
-    en: "Manage incomplete invoices and record remaining payments"
-  },
-  "searchClientOrInvoice": {
-    ar: "البحث عن عميل أو رقم فاتورة...",
-    en: "Search for client or invoice number..."
-  },
-  "sortBy": {
-    ar: "ترتيب حسب",
-    en: "Sort by"
-  },
-  "newestFirst": {
-    ar: "الأحدث أولاً",
-    en: "Newest first"
-  },
-  "oldestFirst": {
-    ar: "الأقدم أولاً",
-    en: "Oldest first"
-  },
-  "allInvoicesPaid": {
-    ar: "جميع الفواتير مدفوعة بالكامل",
-    en: "All invoices are fully paid"
-  },
-  "noRemainingPayments": {
-    ar: "لا توجد فواتير تحتاج إلى دفعات متبقية. جميع المعاملات مكتملة.",
-    en: "No invoices need remaining payments. All transactions are complete."
-  },
-  "remaining": {
-    ar: "متبقي",
-    en: "Remaining"
-  },
-  "glassesDetails": {
-    ar: "تفاصيل النظارة",
-    en: "Glasses Details"
-  },
-  "lensType": {
-    ar: "نوع العدسة",
-    en: "Lens Type"
-  },
-  "frame": {
-    ar: "الإطار",
-    en: "Frame"
-  },
-  "coating": {
-    ar: "الطلاء",
-    en: "Coating"
-  },
-  "totalPrice": {
-    ar: "السعر الإجمالي",
-    en: "Total Price"
-  },
-  "invoiceTotal": {
-    ar: "إجمالي الفاتورة",
-    en: "Invoice Total"
-  },
-  "paid": {
-    ar: "المدفوع",
-    en: "Paid"
-  },
-  "paymentHistory": {
-    ar: "سجل الدفعات",
-    en: "Payment History"
-  },
-  "viewInvoice": {
-    ar: "عرض الفاتورة",
-    en: "View Invoice"
-  },
-  "clientProfile": {
-    ar: "ملف العميل",
-    en: "Client Profile"
-  },
-  "makePayment": {
-    ar: "تسديد الدفعة",
-    en: "Make Payment"
-  },
-  "newPayment": {
-    ar: "تسجيل دفعة جديدة",
-    en: "Record New Payment"
-  },
-  "paymentDetails": {
-    ar: "تسجيل دفعة للفاتورة",
-    en: "Payment for invoice"
-  },
-  "totalAmount": {
-    ar: "المبلغ الإجمالي",
-    en: "Total Amount"
-  },
-  "previouslyPaid": {
-    ar: "المدفوع سابقاً",
-    en: "Previously Paid"
-  },
-  "remainingAmount": {
-    ar: "المبلغ المتبقي",
-    en: "Remaining Amount"
-  },
-  "remainingAfterPayment": {
-    ar: "المتبقي بعد الدفع",
-    en: "Remaining After Payment"
-  },
-  "paymentMethods": {
-    ar: "طرق الدفع",
-    en: "Payment Methods"
-  },
-  "addPaymentMethod": {
-    ar: "إضافة طريقة دفع",
-    en: "Add Payment Method"
-  },
-  "paymentMethod": {
-    ar: "طريقة الدفع",
-    en: "Payment Method"
-  },
-  "choosePaymentMethod": {
-    ar: "اختر طريقة الدفع",
-    en: "Choose payment method"
-  },
-  "cash": {
-    ar: "نقداً",
-    en: "Cash"
-  },
-  "knet": {
-    ar: "كي نت",
-    en: "K-NET"
-  },
-  "amount": {
-    ar: "المبلغ",
-    en: "Amount"
-  },
-  "authNumber": {
-    ar: "رقم التفويض",
-    en: "Authorization Number"
-  },
-  "totalPaid": {
-    ar: "إجمالي المدفوع",
-    en: "Total Paid"
-  },
-  "cancel": {
-    ar: "إلغاء",
-    en: "Cancel"
-  },
-  "confirmPayment": {
-    ar: "تأكيد الدفع",
-    en: "Confirm Payment"
-  },
-  "paymentSuccessful": {
-    ar: "تم تسجيل الدفع بنجاح",
-    en: "Payment Recorded Successfully"
-  },
-  "paymentSuccessMessage": {
-    ar: "تم إكمال الدفع بنجاح! هل ترغب في طباعة الفاتورة النهائية؟",
-    en: "Payment completed successfully! Would you like to print the final invoice?"
-  },
-  "close": {
-    ar: "إغلاق",
-    en: "Close"
-  },
-  "printInvoice": {
-    ar: "طباعة الفاتورة",
-    en: "Print Invoice"
-  },
-  "error": {
-    ar: "خطأ",
-    en: "Error"
-  },
-  "success": {
-    ar: "تم الحفظ",
-    en: "Saved"
-  },
-  "successMessage": {
-    ar: "تم حفظ البيانات بنجاح.",
-    en: "Data saved successfully."
-  },
-  "requiredField": {
-    ar: "حقل مطلوب.",
-    en: "This field is required."
-  },
-  // Months
-  "january": {
-    ar: "يناير",
-    en: "January"
-  },
-  "february": {
-    ar: "فبراير",
-    en: "February"
-  },
-  "march": {
-    ar: "مارس",
-    en: "March"
-  },
-  "april": {
-    ar: "أبريل",
-    en: "April"
-  },
-  "may": {
-    ar: "مايو",
-    en: "May"
-  },
-  "june": {
-    ar: "يونيو",
-    en: "June"
-  },
-  "july": {
-    ar: "يوليو",
-    en: "July"
-  },
-  "august": {
-    ar: "أغسطس",
-    en: "August"
-  },
-  "september": {
-    ar: "سبتمبر",
-    en: "September"
-  },
-  "october": {
-    ar: "أكتوبر",
-    en: "October"
-  },
-  "november": {
-    ar: "نوفمبر",
-    en: "November"
-  },
-  "december": {
-    ar: "ديسمبر",
-    en: "December"
-  },
-  // Receipt and invoice translations
-  "invoice": {
-    ar: "فاتورة",
-    en: "Invoice"
-  },
-  "invoiceNumber": {
-    ar: "رقم الفاتورة",
-    en: "Invoice Number"
-  },
-  "date": {
-    ar: "التاريخ",
-    en: "Date"
-  },
-  "client": {
-    ar: "العميل",
-    en: "Client"
-  },
-  "products": {
-    ar: "المنتجات",
-    en: "Products"
-  },
-  "subtotal": {
-    ar: "المجموع الفرعي",
-    en: "Subtotal"
-  },
-  "discount": {
-    ar: "الخصم",
-    en: "Discount"
-  },
-  "total": {
-    ar: "الإجمالي",
-    en: "Total"
-  },
-  "payments": {
-    ar: "المدفوعات",
-    en: "Payments"
-  },
-  "remainingBalance": {
-    ar: "المبلغ المتبقي",
-    en: "Remaining Balance"
-  },
-  "fullyPaid": {
-    ar: "تم الدفع بالكامل",
-    en: "Fully Paid"
-  },
-  "thankYou": {
-    ar: "شكراً لتعاملكم معنا!",
-    en: "Thank you for your business!"
-  },
-  "pleaseKeepReceipt": {
-    ar: "يرجى الاحتفاظ بهذه الفاتورة للرجوع إليها",
-    en: "Please keep this receipt for your records"
-  },
-  // Language toggle
-  "language": {
-    ar: "English",
-    en: "العربية"
-  },
-  "languageCode": {
-    ar: "EN",
-    en: "AR"
-  },
-  // Frame inventory translations
-  "search": {
-    ar: "بحث",
-    en: "Search"
-  },
-  "searchForFrame": {
-    ar: "البحث عن إطار (ماركة، موديل، لون...)",
-    en: "Search for frame (brand, model, color...)"
-  },
-  "printLabels": {
-    ar: "طباعة البطاقات",
-    en: "Print Labels"
-  },
-  "addNewFrame": {
-    ar: "إضافة إطار جديد",
-    en: "Add New Frame"
-  },
-  "addNewFrameTitle": {
-    ar: "إضافة إطار جديد",
-    en: "Add New Frame"
-  },
-  "addNewFrameDescription": {
-    ar: "أدخل تفاصيل الإطار الجديد لإضافته إلى المخزون",
-    en: "Enter new frame details to add to inventory"
-  },
-  "brand": {
-    ar: "الماركة",
-    en: "Brand"
-  },
-  "model": {
-    ar: "الموديل",
-    en: "Model"
-  },
-  "color": {
-    ar: "اللون",
-    en: "Color"
-  },
-  "size": {
-    ar: "المقاس",
-    en: "Size"
-  },
-  "price": {
-    ar: "السعر",
-    en: "Price"
-  },
-  "quantity": {
-    ar: "الكمية",
-    en: "Quantity"
-  },
-  "inStock": {
-    ar: "في المخزون",
-    en: "In Stock"
-  },
-  "edit": {
-    ar: "تعديل",
-    en: "Edit"
-  },
-  "copy": {
-    ar: "نسخ",
-    en: "Copy"
-  },
-  "print": {
-    ar: "طباعة",
-    en: "Print"
-  },
-  "save": {
-    ar: "حفظ",
-    en: "Save"
-  },
-  "saveFrame": {
-    ar: "حفظ الإطار",
-    en: "Save Frame"
-  },
-  "noFramesFound": {
-    ar: "لا توجد إطارات",
-    en: "No Frames Found"
-  },
-  "noFramesMatchingSearch": {
-    ar: "لم يتم العثور على إطارات مطابقة للبحث.",
-    en: "No frames match your search criteria."
-  },
-  "showAllFrames": {
-    ar: "عرض جميع الإطارات",
-    en: "Show All Frames"
-  },
-  "printFrameLabels": {
-    ar: "طباعة بطاقات الإطارات",
-    en: "Print Frame Labels"
-  },
-  "selectFramesForLabels": {
-    ar: "حدد الإطارات التي تريد طباعة بطاقات لها",
-    en: "Select frames to print labels for"
-  },
-  "brandExample": {
-    ar: "مثال: RayBan",
-    en: "Example: RayBan"
-  },
-  "modelExample": {
-    ar: "مثال: RB3025",
-    en: "Example: RB3025"
-  },
-  "colorExample": {
-    ar: "مثال: أسود",
-    en: "Example: Black"
-  },
-  "sizeExample": {
-    ar: "مثال: 52-18-145",
-    en: "Example: 52-18-145"
-  },
-  // New Client and Prescription additional translations
-  "clientInformation": {
-    ar: "بيانات العميل",
-    en: "Client Information"
-  },
-  "existingClient": {
-    ar: "عميل موجود",
-    en: "Existing Client"
-  },
-  "sphere": {
-    ar: "المحدب",
-    en: "Sphere"
-  },
-  "cylinder": {
-    ar: "الاسطواني",
-    en: "Cylinder"
-  },
-  "axis": {
-    ar: "المحور",
-    en: "Axis"
-  },
-  "add": {
-    ar: "الإضافة",
-    en: "Add"
-  },
-  "pd": {
-    ar: "المسافة بين البؤبؤين",
-    en: "PD"
-  },
-  "rightEye": {
-    ar: "العين اليمنى (OD)",
-    en: "Right Eye (OD)"
-  },
-  "leftEye": {
-    ar: "العين اليسرى (OS)",
-    en: "Left Eye (OS)"
-  },
-  "choose": {
-    ar: "اختر...",
-    en: "Choose..."
-  },
-  "addLens": {
-    ar: "إضافة نوع عدسة",
-    en: "Add Lens Type"
-  },
-  "addCoating": {
-    ar: "إضافة طلاء",
-    en: "Add Coating"
-  },
-  "addNewLensTitle": {
-    ar: "إضافة نوع عدسة جديد",
-    en: "Add New Lens Type"
-  },
-  "addNewLensDescription": {
-    ar: "أدخل تفاصيل نوع العدسة الجديد أدناه",
-    en: "Enter new lens type details below"
-  },
-  "lensName": {
-    ar: "اسم العدسة",
-    en: "Lens Name"
-  },
-  "lensNameExample": {
-    ar: "مثال: عدسات القراءة الممتازة",
-    en: "Example: Premium Reading Lenses"
-  },
-  "type": {
-    ar: "النوع",
-    en: "Type"
-  },
-  "addNewCoatingTitle": {
-    ar: "إضافة طلاء جديد",
-    en: "Add New Coating"
-  },
-  "addNewCoatingDescription": {
-    ar: "أدخل تفاصيل الطلاء الجديد أدناه",
-    en: "Enter new coating details below"
-  },
-  "coatingName": {
-    ar: "اسم الطلاء",
-    en: "Coating Name"
-  },
-  "coatingNameExample": {
-    ar: "مثال: مضاد للانعكاس",
-    en: "Example: Anti-reflective"
-  },
-  "description": {
-    ar: "الوصف",
-    en: "Description"
-  },
-  "coatingDescription": {
-    ar: "وصف مختصر للطلاء",
-    en: "Brief description of coating"
-  },
-  "fillRequiredFields": {
-    ar: "يرجى ملء جميع الحقول المطلوبة",
-    en: "Please fill in all required fields"
-  },
-  "lensAddedSuccess": {
-    ar: "تمت إضافة نوع العدسة بنجاح",
-    en: "Lens type added successfully"
-  },
-  "coatingAddedSuccess": {
-    ar: "تمت إضافة الطلاء بنجاح",
-    en: "Coating added successfully"
-  },
-  "lensUpdatedSuccess": {
-    ar: "تم تحديث نوع العدسة بنجاح",
-    en: "Lens type updated successfully"
-  },
-  "coatingUpdatedSuccess": {
-    ar: "تم تحديث الطلاء بنجاح",
-    en: "Coating updated successfully"
-  },
-  "lensDeletedSuccess": {
-    ar: "تم حذف نوع العدسة بنجاح",
-    en: "Lens type deleted successfully"
-  },
-  "coatingDeletedSuccess": {
-    ar: "تم حذف الطلاء بنجاح",
-    en: "Coating deleted successfully"
-  },
-  "noLensesInCategory": {
-    ar: "لا توجد عدسات في هذه الفئة",
-    en: "No lenses in this category"
-  },
-  "noCoatings": {
-    ar: "لا توجد طلاءات للعدسات",
-    en: "No lens coatings"
-  },
-  "editCoating": {
-    ar: "تعديل الطلاء",
-    en: "Edit Coating"
-  },
-  "updateCoatingDetails": {
-    ar: "قم بتحديث تفاصيل الطلاء أدناه",
-    en: "Update coating details below"
-  },
-  "editLensType": {
-    ar: "تعديل نوع العدسة",
-    en: "Edit Lens Type"
-  },
-  "updateLensDetails": {
-    ar: "قم بتحديث تفاصيل نوع العدسة أدناه",
-    en: "Update lens type details below"
-  },
-  "saveChanges": {
-    ar: "حفظ التغييرات",
-    en: "Save Changes"
-  },
-  // Lens Type Categories
-  "distance": {
-    ar: "النظر البعيد",
-    en: "Distance"
-  },
-  "reading": {
-    ar: "القراءة",
-    en: "Reading"
-  },
-  "progressive": {
-    ar: "التقدمية",
-    en: "Progressive"
-  },
-  "bifocal": {
-    ar: "ثنائية البؤرة",
-    en: "Bifocal"
-  },
-  "sunglasses": {
-    ar: "النظارات الشمسية",
-    en: "Sunglasses"
-  },
-  // Invoice Creation Additional Translations
-  "createInvoiceTitle": {
-    ar: "إنشاء فاتورة",
-    en: "Create Invoice"
-  },
-  "medicalGlasses": {
-    ar: "النظارات الطبية",
-    en: "Prescription Glasses"
-  },
-  "addGlassesItemBtn": {
-    ar: "إضافة نظارة",
-    en: "Add Glasses"
-  },
-  "selectClient": {
-    ar: "اختيار عميل",
-    en: "Select Client"
-  },
-  "invoiceItems": {
-    ar: "عناصر الفاتورة",
-    en: "Invoice Items"
-  },
-  "selectLensType": {
-    ar: "اختر نوع العدسة",
-    en: "Select Lens Type"
-  },
-  "selectFrameType": {
-    ar: "اختر الإطار",
-    en: "Select Frame"
-  },
-  "selectCoating": {
-    ar: "اختر الطلاء",
-    en: "Select Coating"
-  },
-  "addAnotherPayment": {
-    ar: "إضافة دفعة أخرى",
-    en: "Add Another Payment"
-  },
-  "paymentType": {
-    ar: "نوع الدفع",
-    en: "Payment Type"
-  },
-  "visa": {
-    ar: "فيزا",
-    en: "Visa"
-  },
-  "masterCard": {
-    ar: "ماستركارد",
-    en: "MasterCard"
-  },
-  "invoiceValue": {
-    ar: "قيمة الفاتورة",
-    en: "Invoice Value"
-  },
-  "totalInvoice": {
-    ar: "إجمالي الفاتورة",
-    en: "Total Invoice"
-  },
-  "discountAndTax": {
-    ar: "الخصم والضريبة",
-    en: "Discount & Tax"
-  },
-  "applyTaxInvoice": {
-    ar: "تطبيق ضريبة الفاتورة",
-    en: "Apply Invoice Tax"
-  },
-  "tax": {
-    ar: "الضريبة",
-    en: "Tax"
-  },
-  "applyDiscount": {
-    ar: "تطبيق خصم",
-    en: "Apply Discount"
-  },
-  "percentageValue": {
-    ar: "القيمة المئوية",
-    en: "Percentage Value"
-  },
-  "discountAmount": {
-    ar: "مبلغ الخصم",
-    en: "Discount Amount"
-  },
-  "paymentMethod": {
-    ar: "طريقة الدفع",
-    en: "Payment Method"
-  },
-  "saveInvoice": {
-    ar: "حفظ الفاتورة",
-    en: "Save Invoice"
-  },
-  "printAndSave": {
-    ar: "طباعة وحفظ",
-    en: "Print & Save"
-  },
-  "searchClient": {
-    ar: "البحث عن عميل",
-    en: "Search for Client"
-  },
-  "enterClientNameOrPhone": {
-    ar: "أدخل اسم العميل أو رقم الهاتف",
-    en: "Enter client name or phone number"
-  },
-  "select": {
-    ar: "اختيار",
-    en: "Select"
-  },
-  "paymentDate": {
-    ar: "تاريخ الدفع",
-    en: "Payment Date"
-  },
-  // Patient/Client Search Additional Translations
-  "clientSearch": {
-    ar: "بحث عن عميل",
-    en: "Client Search"  
-  },
-  "clientSearchDescription": {
-    ar: "البحث عن العملاء وإدارة ملفاتهم وتاريخهم",
-    en: "Search for clients and manage their profiles and history"
-  },
-  "searchResults": {
-    ar: "نتائج البحث",
-    en: "Search Results"
-  },
-  "noClientsFound": {
-    ar: "لم يتم العثور على عملاء",
-    en: "No clients found"
-  },
-  "clientDetails": {
-    ar: "تفاصيل العميل",
-    en: "Client Details"
-  },
-  "clientFile": {
-    ar: "ملف العميل",
-    en: "Client File"
-  },
-  "visitHistory": {
-    ar: "سجل الزيارات",
-    en: "Visit History"
-  },
-  "transactionHistory": {
-    ar: "سجل المعاملات",
-    en: "Transaction History"
-  },
-  "prescriptionHistory": {
-    ar: "سجل الوصفات الطبية",
-    en: "Prescription History"
-  },
-  "contactLensPrescription": {
-    ar: "وصفة العدسات اللاصقة",
-    en: "Contact Lens Prescription"
-  },
-  "createNewPrescription": {
-    ar: "إنشاء وصفة طبية جديدة",
-    en: "Create New Prescription"
-  },
-  "viewPrescription": {
-    ar: "عرض الوصفة الطبية",
-    en: "View Prescription"
-  },
-  "printPrescription": {
-    ar: "طباعة الوصفة الطبية",
-    en: "Print Prescription"
-  },
-  "currentPrescription": {
-    ar: "الوصفة الطبية الحالية",
-    en: "Current Prescription"
-  },
-  "careInstructions": {
-    ar: "تعليمات العناية",
-    en: "Care Instructions"
-  },
-  "noHistoryFound": {
-    ar: "لا يوجد سجل",
-    en: "No history found"
-  },
-  "phoneNumber": {
-    ar: "رقم الهاتف",
-    en: "Phone Number"
-  },
-  "lastVisit": {
-    ar: "آخر زيارة",
-    en: "Last Visit"
-  },
-  // Additional RX Manager Translations
-  "rxAndCareInstructions": {
-    ar: "الوصفة الطبية وتعليمات العناية",
-    en: "Prescription & Care Instructions"
-  },
-  "currentRx": {
-    ar: "الوصفة الطبية الحالية",
-    en: "Current Prescription"
-  },
-  "rxHistory": {
-    ar: "تاريخ الوصفات الطبية",
-    en: "Prescription History"
-  },
-  "newRx": {
-    ar: "وصفة جديدة",
-    en: "New Prescription"
-  },
-  "addNewRx": {
-    ar: "إضافة وصفة طبية جديدة",
-    en: "Add New Prescription"
-  },
-  "addNewRxFor": {
-    ar: "أدخل بيانات الوصفة الطبية الجديدة للمريض",
-    en: "Enter new prescription data for patient"
-  },
-  "glassesCareTips": {
-    ar: "تعليمات العناية بالنظارة",
-    en: "Glasses Care Tips"
-  },
-  "tip1": {
-    ar: "يجب تنظيف العدسات بانتظام بمنظف خاص",
-    en: "Clean lenses regularly with a special cleaner"
-  },
-  "tip2": {
-    ar: "تجنب ملامسة العدسات للماء الساخن",
-    en: "Avoid hot water on lenses"
-  },
-  "tip3": {
-    ar: "استخدم حافظة نظارات عند عدم الاستخدام",
-    en: "Use a case when not wearing glasses"
-  },
-  "tip4": {
-    ar: "راجع الطبيب كل 6-12 شهر",
-    en: "See your doctor every 6-12 months"
-  },
-  "noPreviousRx": {
-    ar: "لا يوجد سجل وصفات طبية سابقة",
-    en: "No previous prescription records"
-  },
-  "noPreviousRxDescription": {
-    ar: "لم يتم تسجيل أي وصفات طبية سابقة لهذا المريض",
-    en: "No previous prescriptions have been recorded for this patient"
-  },
-  "dataError": {
-    ar: "خطأ في البيانات",
-    en: "Data Error"
-  },
-  "fillAllRequiredFields": {
-    ar: "يرجى ملء جميع الحقول المطلوبة",
-    en: "Please fill all required fields"
+  en: {
+    // General UI
+    welcome: 'Welcome to the Optical System',
+    dashboard: 'Dashboard',
+    createClient: 'Create Client',
+    createInvoice: 'Create Invoice',
+    inventory: 'Inventory',
+    remainingPayments: 'Remaining Payments',
+    patientSearch: 'Patient Search',
+    reportsPage: 'Reports',
+    systemDescription: 'Comprehensive system for managing optical store operations, patients, and sales.',
+    currentTime: 'Current Time',
+    
+    // Create Client
+    clientInformation: 'Client Information',
+    personalInfo: 'Personal Information',
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    fullName: 'Full Name',
+    civilId: 'Civil ID',
+    phoneNumber: 'Phone Number',
+    dateOfBirth: 'Date of Birth',
+    age: 'Age',
+    gender: 'Gender',
+    male: 'Male',
+    female: 'Female',
+    address: 'Address',
+    email: 'Email',
+    notes: 'Notes',
+    saveClient: 'Save Client',
+    clientSaved: 'Client saved successfully',
+    enterFirstName: 'Enter first name',
+    enterLastName: 'Enter last name',
+    enterCivilId: 'Enter civil ID',
+    enterPhoneNumber: 'Enter phone number',
+    enterEmail: 'Enter email',
+    selectDateOfBirth: 'Select date of birth',
+    selectGender: 'Select gender',
+    enterAddress: 'Enter address',
+    enterNotes: 'Enter notes',
+    
+    // Create Invoice
+    invoiceCreation: 'Invoice Creation',
+    clientDetails: 'Client Details',
+    searchClient: 'Search Client',
+    clientName: 'Client Name',
+    clientPhone: 'Client Phone',
+    lensDetails: 'Lens Details',
+    lensType: 'Lens Type',
+    selectLens: 'Select Lens',
+    lensPrice: 'Lens Price',
+    frameDetails: 'Frame Details',
+    frameBrand: 'Frame Brand',
+    frameModel: 'Frame Model',
+    frameColor: 'Frame Color',
+    framePrice: 'Frame Price',
+    coatingDetails: 'Coating Details',
+    coatingType: 'Coating Type',
+    selectCoating: 'Select Coating',
+    coatingPrice: 'Coating Price',
+    prescription: 'Prescription',
+    rightEye: 'Right Eye',
+    leftEye: 'Left Eye',
+    sphere: 'Sphere',
+    cylinder: 'Cylinder',
+    axis: 'Axis',
+    addition: 'Addition',
+    pupillaryDistance: 'Pupillary Distance',
+    paymentDetails: 'Payment Details',
+    subtotal: 'Subtotal',
+    discount: 'Discount',
+    total: 'Total',
+    paymentMethod: 'Payment Method',
+    cash: 'Cash',
+    creditCard: 'Credit Card',
+    deposit: 'Deposit',
+    remaining: 'Remaining',
+    createInvoiceBtn: 'Create Invoice',
+    invoiceCreated: 'Invoice created successfully',
+    
+    // Inventory
+    frames: 'Frames',
+    lenses: 'Lenses',
+    contactLenses: 'Contact Lenses',
+    frameInventory: 'Frame Inventory',
+    addFrame: 'Add Frame',
+    editFrame: 'Edit Frame',
+    deleteFrame: 'Delete Frame',
+    brand: 'Brand',
+    model: 'Model',
+    color: 'Color',
+    size: 'Size',
+    price: 'Price',
+    quantity: 'Quantity',
+    actions: 'Actions',
+    addNewFrame: 'Add New Frame',
+    updateFrame: 'Update Frame',
+    confirmDelete: 'Confirm Delete',
+    deleteFrameConfirm: 'Are you sure you want to delete this frame?',
+    cancel: 'Cancel',
+    save: 'Save',
+    delete: 'Delete',
+    
+    // Lens Types
+    lensInventory: 'Lens Inventory',
+    addLens: 'Add Lens',
+    editLens: 'Edit Lens',
+    deleteLens: 'Delete Lens',
+    lensName: 'Lens Name',
+    description: 'Description',
+    addNewLens: 'Add New Lens',
+    updateLens: 'Update Lens',
+    deleteLensConfirm: 'Are you sure you want to delete this lens?',
+    
+    // Coating
+    coatingInventory: 'Coating Inventory',
+    addCoating: 'Add Coating',
+    editCoating: 'Edit Coating',
+    deleteCoating: 'Delete Coating',
+    coatingName: 'Coating Name',
+    addNewCoating: 'Add New Coating',
+    updateCoating: 'Update Coating',
+    deleteCoatingConfirm: 'Are you sure you want to delete this coating?',
+    
+    // Contact Lenses
+    contactLensInventory: 'Contact Lens Inventory',
+    addContactLens: 'Add Contact Lens',
+    editContactLens: 'Edit Contact Lens',
+    deleteContactLens: 'Delete Contact Lens',
+    contactLensBrand: 'Brand',
+    power: 'Power',
+    baseCurve: 'Base Curve',
+    diameter: 'Diameter',
+    addNewContactLens: 'Add New Contact Lens',
+    updateContactLens: 'Update Contact Lens',
+    deleteContactLensConfirm: 'Are you sure you want to delete this contact lens?',
+    
+    // Remaining Payments
+    duePayments: 'Due Payments',
+    clientId: 'Client ID',
+    invoiceId: 'Invoice ID',
+    invoiceDate: 'Invoice Date',
+    amountDue: 'Amount Due',
+    status: 'Status',
+    payNow: 'Pay Now',
+    paymentComplete: 'Payment Complete',
+    partialPayment: 'Partial Payment',
+    makePayment: 'Make Payment',
+    paymentAmount: 'Payment Amount',
+    process: 'Process',
+    
+    // Patient Search
+    searchResults: 'Search Results',
+    noResults: 'No results found',
+    searchByName: 'Search by name',
+    searchByPhone: 'Search by phone',
+    search: 'Search',
+    viewDetails: 'View Details',
+    patientDetails: 'Patient Details',
+    invoiceHistory: 'Invoice History',
+    prescriptionHistory: 'Prescription History',
+    date: 'Date',
+    
+    // Common Actions
+    edit: 'Edit',
+    view: 'View',
+    print: 'Print',
+    close: 'Close',
+    yes: 'Yes',
+    no: 'No',
+    add: 'Add',
+    update: 'Update',
+    submit: 'Submit',
+    confirm: 'Confirm',
+
+    // Units and Labels
+    kwd: 'KWD',
+    piece: 'Piece',
+    pieces: 'Pieces',
+    mm: 'mm',
+    cm: 'cm',
+    diopter: 'Diopter',
+  },
+  ar: {
+    // General UI
+    welcome: 'مرحبًا بكم في نظام النظارات',
+    dashboard: 'لوحة التحكم',
+    createClient: 'إنشاء عميل',
+    createInvoice: 'إنشاء فاتورة',
+    inventory: 'المخزون',
+    remainingPayments: 'المدفوعات المتبقية',
+    patientSearch: 'بحث عن مريض',
+    reportsPage: 'التقارير',
+    systemDescription: 'نظام شامل لإدارة عمليات متجر النظارات والمرضى والمبيعات.',
+    currentTime: 'الوقت الحالي',
+    
+    // Create Client
+    clientInformation: 'معلومات العميل',
+    personalInfo: 'المعلومات الشخصية',
+    firstName: 'الاسم الأول',
+    lastName: 'اسم العائلة',
+    fullName: 'الاسم الكامل',
+    civilId: 'الرقم المدني',
+    phoneNumber: 'رقم الهاتف',
+    dateOfBirth: 'تاريخ الميلاد',
+    age: 'العمر',
+    gender: 'الجنس',
+    male: 'ذكر',
+    female: 'أنثى',
+    address: 'العنوان',
+    email: 'البريد الإلكتروني',
+    notes: 'ملاحظات',
+    saveClient: 'حفظ العميل',
+    clientSaved: 'تم حفظ العميل بنجاح',
+    enterFirstName: 'أدخل الاسم الأول',
+    enterLastName: 'أدخل اسم العائلة',
+    enterCivilId: 'أدخل الرقم المدني',
+    enterPhoneNumber: 'أدخل رقم الهاتف',
+    enterEmail: 'أدخل البريد الإلكتروني',
+    selectDateOfBirth: 'اختر تاريخ الميلاد',
+    selectGender: 'اختر الجنس',
+    enterAddress: 'أدخل العنوان',
+    enterNotes: 'أدخل ملاحظات',
+    
+    // Create Invoice
+    invoiceCreation: 'إنشاء فاتورة',
+    clientDetails: 'تفاصيل العميل',
+    searchClient: 'بحث عن عميل',
+    clientName: 'اسم العميل',
+    clientPhone: 'هاتف العميل',
+    lensDetails: 'تفاصيل العدسة',
+    lensType: 'نوع العدسة',
+    selectLens: 'اختر العدسة',
+    lensPrice: 'سعر العدسة',
+    frameDetails: 'تفاصيل الإطار',
+    frameBrand: 'ماركة الإطار',
+    frameModel: 'موديل الإطار',
+    frameColor: 'لون الإطار',
+    framePrice: 'سعر الإطار',
+    coatingDetails: 'تفاصيل الطلاء',
+    coatingType: 'نوع الطلاء',
+    selectCoating: 'اختر الطلاء',
+    coatingPrice: 'سعر الطلاء',
+    prescription: 'الوصفة الطبية',
+    rightEye: 'العين اليمنى',
+    leftEye: 'العين اليسرى',
+    sphere: 'المجال',
+    cylinder: 'الاسطوانة',
+    axis: 'المحور',
+    addition: 'الإضافة',
+    pupillaryDistance: 'المسافة البؤبؤية',
+    paymentDetails: 'تفاصيل الدفع',
+    subtotal: 'المجموع الفرعي',
+    discount: 'الخصم',
+    total: 'المجموع',
+    paymentMethod: 'طريقة الدفع',
+    cash: 'نقداً',
+    creditCard: 'بطاقة ائتمان',
+    deposit: 'العربون',
+    remaining: 'المتبقي',
+    createInvoiceBtn: 'إنشاء الفاتورة',
+    invoiceCreated: 'تم إنشاء الفاتورة بنجاح',
+    
+    // Inventory
+    frames: 'الإطارات',
+    lenses: 'العدسات',
+    contactLenses: 'العدسات اللاصقة',
+    frameInventory: 'مخزون الإطارات',
+    addFrame: 'إضافة إطار',
+    editFrame: 'تعديل إطار',
+    deleteFrame: 'حذف إطار',
+    brand: 'الماركة',
+    model: 'الموديل',
+    color: 'اللون',
+    size: 'الحجم',
+    price: 'السعر',
+    quantity: 'الكمية',
+    actions: 'الإجراءات',
+    addNewFrame: 'إضافة إطار جديد',
+    updateFrame: 'تحديث الإطار',
+    confirmDelete: 'تأكيد الحذف',
+    deleteFrameConfirm: 'هل أنت متأكد من رغبتك في حذف هذا الإطار؟',
+    cancel: 'إلغاء',
+    save: 'حفظ',
+    delete: 'حذف',
+    
+    // Lens Types
+    lensInventory: 'مخزون العدسات',
+    addLens: 'إضافة عدسة',
+    editLens: 'تعديل عدسة',
+    deleteLens: 'حذف عدسة',
+    lensName: 'اسم العدسة',
+    description: 'الوصف',
+    addNewLens: 'إضافة عدسة جديدة',
+    updateLens: 'تحديث العدسة',
+    deleteLensConfirm: 'هل أنت متأكد من رغبتك في حذف هذه العدسة؟',
+    
+    // Coating
+    coatingInventory: 'مخزون الطلاءات',
+    addCoating: 'إضافة طلاء',
+    editCoating: 'تعديل طلاء',
+    deleteCoating: 'حذف طلاء',
+    coatingName: 'اسم الطلاء',
+    addNewCoating: 'إضافة طلاء جديد',
+    updateCoating: 'تحديث الطلاء',
+    deleteCoatingConfirm: 'هل أنت متأكد من رغبتك في حذف هذا الطلاء؟',
+    
+    // Contact Lenses
+    contactLensInventory: 'مخزون العدسات اللاصقة',
+    addContactLens: 'إضافة عدسة لاصقة',
+    editContactLens: 'تعديل عدسة لاصقة',
+    deleteContactLens: 'حذف عدسة لاصقة',
+    contactLensBrand: 'الماركة',
+    power: 'القوة',
+    baseCurve: 'المنحنى الأساسي',
+    diameter: 'القطر',
+    addNewContactLens: 'إضافة عدسة لاصقة جديدة',
+    updateContactLens: 'تحديث العدسة اللاصقة',
+    deleteContactLensConfirm: 'هل أنت متأكد من رغبتك في حذف هذه العدسة اللاصقة؟',
+    
+    // Remaining Payments
+    duePayments: 'المدفوعات المستحقة',
+    clientId: 'رقم العميل',
+    invoiceId: 'رقم الفاتورة',
+    invoiceDate: 'تاريخ الفاتورة',
+    amountDue: 'المبلغ المستحق',
+    status: 'الحالة',
+    payNow: 'ادفع الآن',
+    paymentComplete: 'تم الدفع بالكامل',
+    partialPayment: 'دفع جزئي',
+    makePayment: 'إجراء الدفع',
+    paymentAmount: 'مبلغ الدفع',
+    process: 'معالجة',
+    
+    // Patient Search
+    searchResults: 'نتائج البحث',
+    noResults: 'لا توجد نتائج',
+    searchByName: 'بحث بالاسم',
+    searchByPhone: 'بحث برقم الهاتف',
+    search: 'بحث',
+    viewDetails: 'عرض التفاصيل',
+    patientDetails: 'تفاصيل المريض',
+    invoiceHistory: 'تاريخ الفواتير',
+    prescriptionHistory: 'تاريخ الوصفات الطبية',
+    date: 'التاريخ',
+    
+    // Common Actions
+    edit: 'تعديل',
+    view: 'عرض',
+    print: 'طباعة',
+    close: 'إغلاق',
+    yes: 'نعم',
+    no: 'لا',
+    add: 'إضافة',
+    update: 'تحديث',
+    submit: 'تقديم',
+    confirm: 'تأكيد',
+
+    // Units and Labels
+    kwd: 'د.ك',
+    piece: 'قطعة',
+    pieces: 'قطع',
+    mm: 'ملم',
+    cm: 'سم',
+    diopter: 'ديوبتر',
   }
 };
 
-export const useLanguageStore = create<LanguageState>()(
-  persist(
-    (set, get) => ({
-      language: 'ar',
-      setLanguage: (language) => set({ language }),
-      t: (key) => {
-        const lang = get().language;
-        // If translation exists, return it, otherwise return the key
-        return translations[key]?.[lang] || key;
-      }
-    }),
-    {
-      name: 'language-store'
-    }
-  )
-);
+export const useLanguageStore = create<LanguageStore>((set) => ({
+  language: 'ar', // Default language
+  setLanguage: (language) => set({ language }),
+  t: (key) => {
+    const { language } = useLanguageStore.getState();
+    return translations[language][key] || key;
+  },
+}));
