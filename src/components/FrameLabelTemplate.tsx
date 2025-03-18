@@ -74,7 +74,7 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         {/* Store Logo */}
         <div className="store-logo">
           <img 
-            src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" 
+            src="/lovable-uploads/65134e9d-139c-462c-a2ad-648373fd57e0.png" 
             alt="Store Logo" 
             style={{ maxHeight: "6mm", height: "auto" }}
           />
@@ -211,7 +211,7 @@ export const usePrintLabel = () => {
           </div>
           <div class="right-section">
             <div class="store-logo">
-              <img src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" alt="Store Logo">
+              <img src="/lovable-uploads/65134e9d-139c-462c-a2ad-648373fd57e0.png" alt="Store Logo">
             </div>
             <div class="qr-code">
               <img src="https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">

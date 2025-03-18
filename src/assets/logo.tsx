@@ -7,7 +7,7 @@ export const MoenLogo: React.FC<{ className?: string; onClick?: () => void }> = 
 }) => {
   return (
     <img 
-      src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" 
+      src="/lovable-uploads/65134e9d-139c-462c-a2ad-648373fd57e0.png" 
       alt="Moen Optician" 
       className={className}
       onClick={onClick}
@@ -22,7 +22,7 @@ export const MoenLogoGreen: React.FC<{ className?: string; onClick?: () => void 
 }) => {
   return (
     <img 
-      src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" 
+      src="/lovable-uploads/65134e9d-139c-462c-a2ad-648373fd57e0.png" 
       alt="Moen Optician" 
       className={className}
       onClick={onClick}
@@ -37,7 +37,7 @@ export const MoenLogoBlack: React.FC<{ className?: string; onClick?: () => void 
 }) => {
   return (
     <img 
-      src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" 
+      src="/lovable-uploads/65134e9d-139c-462c-a2ad-648373fd57e0.png" 
       alt="Moen Optician" 
       className={className}
       onClick={onClick}
