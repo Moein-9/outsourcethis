@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { QRCodeSVG } from "qrcode.react";
@@ -21,12 +20,37 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
       display: "flex",
       fontFamily: "Arial, sans-serif",
       pageBreakInside: "avoid",
-      marginBottom: "5mm", // Space between labels when printing multiple
-      position: "relative"
+      marginBottom: "5mm",
+      position: "relative",
+      overflow: "hidden"
     }}>
-      {/* Left section (Logo and QR) */}
       <div style={{
-        width: "40mm",
+        width: "50mm",
+        height: "100%",
+        padding: "2mm",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center"
+      }}>
+        <div style={{
+          fontWeight: "bold",
+          fontSize: "11pt",
+          marginBottom: "1mm"
+        }}>{frame.brand}</div>
+        <div style={{
+          fontSize: "9pt",
+          marginBottom: "1mm"
+        }}>
+          Model: {frame.model || "-"} Color: {frame.color || "-"} Size: {frame.size || "-"}
+        </div>
+        <div style={{
+          fontWeight: "bold",
+          fontSize: "11pt"
+        }}>K.D. {frame.price.toFixed(3)}</div>
+      </div>
+
+      <div style={{
+        width: "50mm",
         height: "100%",
         padding: "2mm",
         display: "flex",
@@ -35,7 +59,6 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         justifyContent: "center",
         alignItems: "center"
       }}>
-        {/* Store Logo */}
         <div className="store-logo" style={{
           display: "flex",
           justifyContent: "center",
@@ -45,52 +68,17 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
           <MoenLogo className="w-auto" style={{ maxHeight: "5mm", height: "auto" }} />
         </div>
         
-        {/* Frame ID - positioned below logo */}
-        <div style={{
-          fontSize: "6pt",
-          textAlign: "center",
-          marginBottom: "1mm"
-        }}>
-          {frame.frameId}
-        </div>
-
-        {/* QR Code */}
         <div className="qr-code" style={{
           display: "flex",
-          justifyContent: "center"
+          justifyContent: "center",
+          marginTop: "1mm"
         }}>
           <QRCodeSVG 
             value={frame.frameId} 
-            size={24} // Sized for optimal scanning while fitting in layout
-            level="M" // Medium error correction for reliable scanning
+            size={30}
+            level="M"
           />
         </div>
-      </div>
-
-      {/* Right section (Brand, Model, Color, Size, Price) */}
-      <div style={{
-        width: "60mm",
-        height: "100%",
-        padding: "2mm",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center"
-      }}>
-        <div style={{
-          fontWeight: "bold",
-          fontSize: "9pt",
-          marginBottom: "1mm"
-        }}>{frame.brand}</div>
-        <div style={{
-          fontSize: "8pt",
-          marginBottom: "1mm"
-        }}>
-          <span style={{ fontWeight: "bold" }}>Model:</span> {frame.model || "-"} <span style={{ fontWeight: "bold" }}>Color:</span> {frame.color || "-"} <span style={{ fontWeight: "bold" }}>Size:</span> {frame.size || "-"}
-        </div>
-        <div style={{
-          fontWeight: "bold",
-          fontSize: "9pt"
-        }}>K.D. {frame.price.toFixed(3)}</div>
       </div>
     </div>
   );
@@ -103,7 +91,6 @@ export const usePrintLabel = () => {
     
     if (selectedFrames.length === 0) return;
     
-    // Create an iframe for printing
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.right = '0';
@@ -114,10 +101,8 @@ export const usePrintLabel = () => {
     
     document.body.appendChild(iframe);
     
-    // Logo URL for embedding
     const logoUrl = "/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png";
     
-    // Change from const to let for printContent
     let printContent = `
       <!DOCTYPE html>
       <html>
@@ -125,16 +110,15 @@ export const usePrintLabel = () => {
         <meta charset="UTF-8">
         <title>Frame Labels</title>
         <style>
-          /* Reset default margins/padding */
           * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
           }
           body {
-            padding: 2mm;
+            padding: 0;
+            margin: 0;
           }
-          /* Main container for the label */
           .label-container {
             width: 100mm;
             height: 16mm;
@@ -142,12 +126,20 @@ export const usePrintLabel = () => {
             display: flex;
             font-family: Arial, sans-serif;
             page-break-inside: avoid;
-            margin-bottom: 5mm;
+            margin-bottom: 0;
             position: relative;
+            overflow: hidden;
           }
-          /* Left section (Logo and QR) */
           .left-section {
-            width: 40mm;
+            width: 50mm;
+            height: 100%;
+            padding: 2mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+          }
+          .right-section {
+            width: 50mm;
             height: 100%;
             padding: 2mm;
             display: flex;
@@ -155,33 +147,19 @@ export const usePrintLabel = () => {
             justify-content: center;
             align-items: center;
           }
-          /* Right section (Brand, Model, Color, Size, Price) */
-          .right-section {
-            width: 60mm;
-            height: 100%;
-            padding: 2mm;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-          }
-          /* Text styling */
           .brand-name {
             font-weight: bold;
-            font-size: 9pt;
+            font-size: 11pt;
             margin-bottom: 1mm;
           }
           .detail-info {
-            font-size: 8pt;
+            font-size: 9pt;
             margin-bottom: 1mm;
-          }
-          .detail-label {
-            font-weight: bold;
           }
           .price {
             font-weight: bold;
-            font-size: 9pt;
+            font-size: 11pt;
           }
-          /* Logo container */
           .store-logo {
             display: flex;
             justify-content: center;
@@ -192,28 +170,28 @@ export const usePrintLabel = () => {
             max-height: 5mm;
             width: auto;
           }
-          /* Frame ID */
-          .frame-id {
-            font-size: 6pt;
-            text-align: center;
-            margin-bottom: 1mm;
-          }
-          /* QR code container */
           .qr-code {
             display: flex;
             justify-content: center;
+            margin-top: 1mm;
           }
           .qr-code img {
-            height: 24px;
-            width: 24px;
+            height: 30px;
+            width: 30px;
           }
           @media print {
             body {
               padding: 0;
+              margin: 0;
             }
             @page {
               size: 100mm 16mm;
               margin: 0;
+              padding: 0;
+            }
+            .label-container {
+              page-break-after: always;
+              border: none;
             }
           }
         </style>
@@ -221,27 +199,25 @@ export const usePrintLabel = () => {
       <body>
     `;
     
-    // Generate HTML for each selected frame
     selectedFrames.forEach(frame => {
       printContent += `
         <div class="label-container">
           <div class="left-section">
+            <div class="brand-name">${frame.brand}</div>
+            <div class="detail-info">
+              Model: ${frame.model || "-"} 
+              Color: ${frame.color || "-"} 
+              Size: ${frame.size || "-"}
+            </div>
+            <div class="price">K.D. ${frame.price.toFixed(3)}</div>
+          </div>
+          <div class="right-section">
             <div class="store-logo">
               <img src="${logoUrl}" alt="Store Logo">
             </div>
-            <div class="frame-id">${frame.frameId}</div>
             <div class="qr-code">
               <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">
             </div>
-          </div>
-          <div class="right-section">
-            <div class="brand-name">${frame.brand}</div>
-            <div class="detail-info">
-              <span class="detail-label">Model:</span> ${frame.model || "-"} 
-              <span class="detail-label">Color:</span> ${frame.color || "-"} 
-              <span class="detail-label">Size:</span> ${frame.size || "-"}
-            </div>
-            <div class="price">K.D. ${frame.price.toFixed(3)}</div>
           </div>
         </div>
       `;
@@ -256,14 +232,13 @@ export const usePrintLabel = () => {
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
               }, 500);
-            }, 1000); // Timeout to ensure images load
+            }, 1000);
           });
         </script>
       </body>
       </html>
     `;
     
-    // Listen for completion message
     window.addEventListener('message', function handler(e) {
       if (e.data === 'print-complete') {
         window.removeEventListener('message', handler);
@@ -271,7 +246,6 @@ export const usePrintLabel = () => {
       }
     }, { once: true });
     
-    // Write the HTML to the iframe and trigger printing
     if (iframe.contentWindow) {
       iframe.contentWindow.document.open();
       iframe.contentWindow.document.write(printContent);
@@ -297,7 +271,6 @@ export const FrameLabelTemplate: React.FC = () => {
   const [filteredFrames, setFilteredFrames] = useState(frames);
   const { printSelectedFrames } = usePrintLabel();
   
-  // Handle frame selection
   const toggleFrameSelection = (frameId: string) => {
     if (selectedFrames.includes(frameId)) {
       setSelectedFrames(selectedFrames.filter(id => id !== frameId));
@@ -306,7 +279,6 @@ export const FrameLabelTemplate: React.FC = () => {
     }
   };
   
-  // Select/deselect all frames
   const toggleSelectAll = () => {
     if (selectedFrames.length === filteredFrames.length) {
       setSelectedFrames([]);
@@ -315,7 +287,6 @@ export const FrameLabelTemplate: React.FC = () => {
     }
   };
   
-  // Filter frames based on search text
   const handleSearch = () => {
     if (!searchText.trim()) {
       setFilteredFrames(frames);
@@ -335,7 +306,6 @@ export const FrameLabelTemplate: React.FC = () => {
     setFilteredFrames(filtered);
   };
   
-  // Handle print button click
   const handlePrint = () => {
     if (selectedFrames.length === 0) {
       toast.warning(t("selectFramesForPrinting"));
@@ -345,26 +315,22 @@ export const FrameLabelTemplate: React.FC = () => {
     printSelectedFrames(selectedFrames);
   };
   
-  // Reset search and selection
   const handleReset = () => {
     setSearchText("");
     setSelectedFrames([]);
     setFilteredFrames(frames);
   };
   
-  // Filter frames when search text changes
   React.useEffect(() => {
     handleSearch();
   }, [searchText]);
   
-  // Update filtered frames when frames change
   React.useEffect(() => {
     setFilteredFrames(frames);
   }, [frames]);
   
   return (
     <div className="space-y-4">
-      {/* Controls */}
       <div className="space-y-4">
         <div className="flex gap-2">
           <div className="flex-1">
@@ -407,7 +373,6 @@ export const FrameLabelTemplate: React.FC = () => {
         </div>
       </div>
       
-      {/* Preview */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">{t("labelPreview")}</CardTitle>
@@ -436,7 +401,6 @@ export const FrameLabelTemplate: React.FC = () => {
         </CardContent>
       </Card>
       
-      {/* Print preview (hidden) */}
       <div id="print-container" className="hidden">
         {selectedFrames.map((frameId) => {
           const frame = frames.find(f => f.frameId === frameId);

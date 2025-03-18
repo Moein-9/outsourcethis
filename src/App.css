@@ -158,11 +158,11 @@ table th, table td {
   
   /* QR code size control */
   [id^="qr-code-"] svg {
-    width: 28px !important;
-    height: 28px !important;
+    width: 30px !important;
+    height: 30px !important;
   }
   
-  /* Ensure all content is visible and fits in the red safe zone */
+  /* Ensure all content is visible and fits in the safe zone */
   .frame-label {
     width: 100mm;
     height: 16mm;
@@ -174,7 +174,31 @@ table th, table td {
   
   /* Logo sizing */
   .frame-label img {
-    max-height: 2.5mm;
+    max-height: 5mm;
     width: auto;
+  }
+  
+  /* Fix for multi-page printing issue */
+  .print-container, 
+  .print-receipt {
+    width: auto;
+    height: auto;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  
+  /* Fix for A4 documents */
+  .print-a4 {
+    width: 210mm;
+    min-height: 297mm;
+    page-break-after: always;
+  }
+  
+  /* Prevent multiple copies */
+  .hidden {
+    display: none !important;
   }
 }

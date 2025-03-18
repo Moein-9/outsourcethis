@@ -63,130 +63,156 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
       let htmlContent = '';
       const title = selectedFormat === 'a4' ? t("workOrder") : t("receiptFormat");
       
+      // Create a temporary container to render the component
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      document.body.appendChild(tempContainer);
+      
+      // Render either WorkOrderPrint or WorkOrderReceiptPrint based on selection
       if (selectedFormat === "a4") {
-        // Generate A4 work order content
-        const workOrderContent = `
-          <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="font-size: 24px; margin-bottom: 10px;">${t("workOrder")}</h1>
-            <p style="font-size: 16px;">${t("orderNumber")}: ${invoice.invoiceId}</p>
-            <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
-          </div>
-          
-          <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-            <h2 style="font-size: 18px; margin-bottom: 10px;">${t("patientInformation")}</h2>
-            <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
-            <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
-          </div>
-          
-          ${frame ? `
-          <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-            <h2 style="font-size: 18px; margin-bottom: 10px;">${t("frameDetails")}</h2>
-            <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
-            <p><strong>${t("model")}:</strong> ${frame.model}</p>
-            <p><strong>${t("color")}:</strong> ${frame.color}</p>
-            <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} KWD</p>
-          </div>
-          ` : ''}
-          
-          ${rx ? `
-          <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-            <h2 style="font-size: 18px; margin-bottom: 10px;">${t("prescriptionDetails")}</h2>
-            <table style="width: 100%; border-collapse: collapse;">
-              <thead>
-                <tr>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("eye")}</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">SPH</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">CYL</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">AXIS</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">ADD</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">PD</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("rightEye")} (OD)</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.sphereOD || "-"}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.cylOD || "-"}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.axisOD || "-"}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.addOD || "-"}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.pdRight || "-"}</td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("leftEye")} (OS)</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.sphereOS || "-"}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.cylOS || "-"}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.axisOS || "-"}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.addOS || "-"}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.pdLeft || "-"}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          ` : ''}
-          
-          <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-            <h2 style="font-size: 18px; margin-bottom: 10px;">${t("paymentInformation")}</h2>
-            <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} KWD</p>
-            <p><strong>${t("paid")}:</strong> ${(invoice.deposit || 0).toFixed(3)} KWD</p>
-            <p><strong>${t("remaining")}:</strong> ${(invoice.total - (invoice.deposit || 0)).toFixed(3)} KWD</p>
-          </div>
-          
-          <div style="margin-top: 40px; display: flex; justify-content: space-between;">
-            <div>
-              <p style="font-weight: bold;">${t("technicianSignature")}</p>
-              <div style="margin-top: 30px; border-bottom: 1px solid #000; width: 150px;"></div>
+        // Use react to render the work order component
+        const root = document.createElement('div');
+        tempContainer.appendChild(root);
+        
+        // Create the element manually instead of using ReactDOM.render (which is deprecated)
+        const element = document.createElement('div');
+        element.innerHTML = `
+          <div style="width: 210mm; padding: 10mm;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h1 style="font-size: 24px; margin-bottom: 10px;">${t("workOrder")}</h1>
+              <p style="font-size: 16px;">${t("orderNumber")}: ${invoice.invoiceId}</p>
+              <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
             </div>
-            <div>
-              <p style="font-weight: bold;">${t("qualityConfirmation")}</p>
-              <div style="margin-top: 30px; border-bottom: 1px solid #000; width: 150px;"></div>
+            
+            <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+              <h2 style="font-size: 18px; margin-bottom: 10px;">${t("patientInformation")}</h2>
+              <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
+              <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
+            </div>
+            
+            ${frame ? `
+            <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+              <h2 style="font-size: 18px; margin-bottom: 10px;">${t("frameDetails")}</h2>
+              <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
+              <p><strong>${t("model")}:</strong> ${frame.model}</p>
+              <p><strong>${t("color")}:</strong> ${frame.color}</p>
+              <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} KWD</p>
+            </div>
+            ` : ''}
+            
+            ${rx ? `
+            <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+              <h2 style="font-size: 18px; margin-bottom: 10px;">${t("prescriptionDetails")}</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("eye")}</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">SPH</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">CYL</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">AXIS</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">ADD</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">PD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("rightEye")} (OD)</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.sphereOD || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.cylOD || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.axisOD || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.addOD || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.pdRight || "-"}</td>
+                  </tr>
+                  <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("leftEye")} (OS)</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.sphereOS || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.cylOS || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.axisOS || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.addOS || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.pdLeft || "-"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            ` : ''}
+            
+            <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+              <h2 style="font-size: 18px; margin-bottom: 10px;">${t("paymentInformation")}</h2>
+              <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} KWD</p>
+              <p><strong>${t("paid")}:</strong> ${(invoice.deposit || 0).toFixed(3)} KWD</p>
+              <p><strong>${t("remaining")}:</strong> ${(invoice.total - (invoice.deposit || 0)).toFixed(3)} KWD</p>
+            </div>
+            
+            <div style="margin-top: 40px; display: flex; justify-content: space-between;">
+              <div>
+                <p style="font-weight: bold;">${t("technicianSignature")}</p>
+                <div style="margin-top: 30px; border-bottom: 1px solid #000; width: 150px;"></div>
+              </div>
+              <div>
+                <p style="font-weight: bold;">${t("qualityConfirmation")}</p>
+                <div style="margin-top: 30px; border-bottom: 1px solid #000; width: 150px;"></div>
+              </div>
             </div>
           </div>
         `;
+        root.appendChild(element);
         
-        htmlContent = PrintService.prepareA4Document(workOrderContent, t("workOrder"));
+        // Get the HTML content
+        htmlContent = PrintService.prepareA4Document(element.innerHTML, title);
       } else {
-        // Generate receipt content
-        const receiptContent = `
-          <div style="text-align: center; margin-bottom: 10px;">
+        // Receipt format - smaller and more compact
+        const root = document.createElement('div');
+        tempContainer.appendChild(root);
+        
+        const element = document.createElement('div');
+        element.innerHTML = `
+          <div style="width: 80mm; padding: 2mm; text-align: center;">
             <h1 style="font-size: 16px; margin-bottom: 5px;">${t("receiptFormat")}</h1>
             <p style="font-size: 14px;">${t("orderNumber")}: ${invoice.invoiceId}</p>
             <p style="font-size: 12px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
-          </div>
-          
-          <div style="margin-bottom: 10px; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 5px 0;">
-            <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
-            <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
-          </div>
-          
-          ${frame ? `
-          <div style="margin-bottom: 10px;">
-            <h2 style="font-size: 14px; margin-bottom: 5px;">${t("frameDetails")}</h2>
-            <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
-            <p><strong>${t("model")}:</strong> ${frame.model}</p>
-            <p><strong>${t("color")}:</strong> ${frame.color}</p>
-            <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} KWD</p>
-          </div>
-          ` : ''}
-          
-          <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px;">
-            <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} KWD</p>
-            <p><strong>${t("paid")}:</strong> ${(invoice.deposit || 0).toFixed(3)} KWD</p>
-            <p><strong>${t("remaining")}:</strong> ${(invoice.total - (invoice.deposit || 0)).toFixed(3)} KWD</p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 20px; font-size: 12px;">
-            <p>${t("thankYouForYourPurchase")}</p>
-            <p>${t("pleaseKeepReceipt")}</p>
+            
+            <div style="margin: 10px 0; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 5px 0;">
+              <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
+              <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
+            </div>
+            
+            ${frame ? `
+            <div style="margin-bottom: 10px; text-align: left;">
+              <h2 style="font-size: 14px; margin-bottom: 5px;">${t("frameDetails")}</h2>
+              <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
+              <p><strong>${t("model")}:</strong> ${frame.model}</p>
+              <p><strong>${t("color")}:</strong> ${frame.color}</p>
+              <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} KWD</p>
+            </div>
+            ` : ''}
+            
+            <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px; text-align: left;">
+              <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} KWD</p>
+              <p><strong>${t("paid")}:</strong> ${(invoice.deposit || 0).toFixed(3)} KWD</p>
+              <p><strong>${t("remaining")}:</strong> ${(invoice.total - (invoice.deposit || 0)).toFixed(3)} KWD</p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; font-size: 12px;">
+              <p>${t("thankYouForYourPurchase")}</p>
+              <p>${t("pleaseKeepReceipt")}</p>
+            </div>
           </div>
         `;
+        root.appendChild(element);
         
-        htmlContent = PrintService.prepareReceiptDocument(receiptContent, t("receiptFormat"));
+        // Get the HTML content
+        htmlContent = PrintService.prepareReceiptDocument(element.innerHTML, title);
       }
       
-      // Use the PrintService to print the HTML content
+      // Clean up the temporary container
+      document.body.removeChild(tempContainer);
+      
+      // Use the PrintService to print the HTML content with a callback
       PrintService.printHtml(htmlContent, () => {
         setPrintingInProgress(false);
         setIsDialogOpen(false);
+        toast.success(t("printingCompleted"));
       });
     } catch (error) {
       setPrintingInProgress(false);
