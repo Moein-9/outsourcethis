@@ -1,9 +1,14 @@
 
 import React from "react";
 
-export const MoenLogo: React.FC<{ className?: string; onClick?: () => void }> = ({ 
+export const MoenLogo: React.FC<{ 
+  className?: string; 
+  onClick?: () => void;
+  style?: React.CSSProperties;
+}> = ({ 
   className = "w-auto h-12", 
-  onClick 
+  onClick,
+  style
 }) => {
   return (
     <img 
@@ -11,14 +16,19 @@ export const MoenLogo: React.FC<{ className?: string; onClick?: () => void }> = 
       alt="Moen Optician" 
       className={className}
       onClick={onClick}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      style={{ cursor: onClick ? 'pointer' : 'default', ...style }}
     />
   );
 };
 
-export const MoenLogoGreen: React.FC<{ className?: string; onClick?: () => void }> = ({ 
+export const MoenLogoGreen: React.FC<{ 
+  className?: string; 
+  onClick?: () => void;
+  style?: React.CSSProperties;
+}> = ({ 
   className = "w-auto h-12", 
-  onClick 
+  onClick,
+  style
 }) => {
   return (
     <img 
@@ -26,14 +36,19 @@ export const MoenLogoGreen: React.FC<{ className?: string; onClick?: () => void 
       alt="Moen Optician" 
       className={className}
       onClick={onClick}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      style={{ cursor: onClick ? 'pointer' : 'default', ...style }}
     />
   );
 };
 
-export const MoenLogoBlack: React.FC<{ className?: string; onClick?: () => void }> = ({ 
+export const MoenLogoBlack: React.FC<{ 
+  className?: string; 
+  onClick?: () => void;
+  style?: React.CSSProperties;
+}> = ({ 
   className = "w-auto h-12", 
-  onClick 
+  onClick,
+  style
 }) => {
   return (
     <img 
@@ -41,7 +56,7 @@ export const MoenLogoBlack: React.FC<{ className?: string; onClick?: () => void 
       alt="Moen Optician" 
       className={className}
       onClick={onClick}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      style={{ cursor: onClick ? 'pointer' : 'default', ...style }}
     />
   );
 };
