@@ -66,10 +66,11 @@ import {
   parseISO, 
   differenceInYears 
 } from "date-fns";
-import { ar } from "date-fns/locale";
+import { ar, enUS } from "date-fns/locale";
 import { ReceiptInvoice } from "./ReceiptInvoice";
 import { RxReceiptPrint } from "./RxReceiptPrint";
 import { PatientRxManager } from "./PatientRxManager";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface PatientWithMeta extends Patient {
   patientId: string;
@@ -82,6 +83,7 @@ interface PatientWithMeta extends Patient {
 export const PatientSearch: React.FC = () => {
   const { patients, searchPatients } = usePatientStore();
   const { invoices, workOrders, getInvoicesByPatientId, getWorkOrdersByPatientId } = useInvoiceStore();
+  const { language, t } = useLanguageStore();
   
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<PatientWithMeta[]>([]);
@@ -105,7 +107,7 @@ export const PatientSearch: React.FC = () => {
   
   const handleSearch = () => {
     if (!searchTerm.trim()) {
-      toast.error("الرجاء إدخال مصطلح البحث");
+      toast.error(language === 'ar' ? "الرجاء إدخال مصطلح البحث" : "Please enter a search term");
       return;
     }
     
@@ -125,7 +127,7 @@ export const PatientSearch: React.FC = () => {
     setShowResults(true);
     
     if (filteredResults.length === 0) {
-      toast.info("لم يتم العثور على نتائج مطابقة");
+      toast.info(language === 'ar' ? "لم يتم العثور على نتائج مطابقة" : "No matching results found");
     }
   };
   
@@ -149,17 +151,17 @@ export const PatientSearch: React.FC = () => {
   };
   
   const getPatientAge = (dateOfBirth?: string) => {
-    if (!dateOfBirth) return "غير معروف";
+    if (!dateOfBirth) return language === 'ar' ? "غير معروف" : "Unknown";
     const age = differenceInYears(new Date(), new Date(dateOfBirth));
     return age;
   };
   
   const formatDate = (dateString?: string) => {
-    if (!dateString) return "تاريخ غير متوفر";
+    if (!dateString) return language === 'ar' ? "تاريخ غير متوفر" : "Date not available";
     try {
-      return format(parseISO(dateString), "PPP", { locale: ar });
+      return format(parseISO(dateString), "PPP", { locale: language === 'ar' ? ar : enUS });
     } catch (error) {
-      return "تاريخ غير صالح";
+      return language === 'ar' ? "تاريخ غير صالح" : "Invalid date";
     }
   };
   
@@ -178,6 +180,9 @@ export const PatientSearch: React.FC = () => {
       return invoice && invoice.isPaid;
     });
   };
+
+  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
   return (
     <div className="space-y-6">
@@ -185,54 +190,58 @@ export const PatientSearch: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserSearch className="h-5 w-5 text-primary" />
-            بحث عن عميل
+            {t('searchClient')}
           </CardTitle>
           <CardDescription>
-            ابحث عن العملاء بواسطة الاسم، رقم الهاتف، أو أي معلومات شخصية
+            {language === 'ar' 
+              ? "ابحث عن العملاء بواسطة الاسم، رقم الهاتف، أو أي معلومات شخصية"
+              : "Search for clients by name, phone number, or any personal information"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="ابحث عن عميل..."
-                  className="pr-9"
+                  placeholder={language === 'ar' ? "ابحث عن عميل..." : "Search for a client..."}
+                  className={language === 'ar' ? "pr-9" : "pl-9"}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
               </div>
               
               <div className="flex gap-2">
                 <Button onClick={handleSearch} className="shrink-0">
-                  <Search className="h-4 w-4 ml-1" />
-                  بحث
+                  <Search className={`h-4 w-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                  {t('search')}
                 </Button>
                 <Button variant="outline" onClick={clearSearch} className="shrink-0">
-                  مسح
+                  {language === 'ar' ? "مسح" : "Clear"}
                 </Button>
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className={`flex flex-col sm:flex-row gap-3 pt-2 ${dirClass}`}>
               <div className="flex items-center gap-2">
-                <Label htmlFor="visitDateFilter" className="whitespace-nowrap">تاريخ الزيارة:</Label>
+                <Label htmlFor="visitDateFilter" className="whitespace-nowrap">
+                  {language === 'ar' ? "تاريخ الزيارة:" : "Visit Date:"}
+                </Label>
                 <Select value={visitDateFilter} onValueChange={setVisitDateFilter}>
                   <SelectTrigger id="visitDateFilter" className="w-[140px]">
-                    <SelectValue placeholder="جميع الزيارات" />
+                    <SelectValue placeholder={language === 'ar' ? "جميع الزيارات" : "All Visits"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all_visits">جميع الزيارات</SelectItem>
-                    <SelectItem value="last_week">الأسبوع الماضي</SelectItem>
-                    <SelectItem value="last_month">الشهر الماضي</SelectItem>
-                    <SelectItem value="last_year">السنة الماضية</SelectItem>
+                    <SelectItem value="all_visits">{language === 'ar' ? "جميع الزيارات" : "All Visits"}</SelectItem>
+                    <SelectItem value="last_week">{language === 'ar' ? "الأسبوع الماضي" : "Last Week"}</SelectItem>
+                    <SelectItem value="last_month">{language === 'ar' ? "الشهر الماضي" : "Last Month"}</SelectItem>
+                    <SelectItem value="last_year">{language === 'ar' ? "السنة الماضية" : "Last Year"}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
-              <Button variant="outline" size="icon" className="ml-auto">
+              <Button variant="outline" size="icon" className={language === 'ar' ? "mr-auto" : "ml-auto"}>
                 <Filter className="h-4 w-4" />
               </Button>
             </div>
@@ -243,9 +252,11 @@ export const PatientSearch: React.FC = () => {
       {showResults && (
         <Card className="mb-6 border-amber-200 shadow-md">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">نتائج البحث</CardTitle>
+            <CardTitle className="text-lg">{t('searchResults')}</CardTitle>
             <CardDescription>
-              تم العثور على {searchResults.length} عميل
+              {language === 'ar' 
+                ? `تم العثور على ${searchResults.length} عميل`
+                : `Found ${searchResults.length} client${searchResults.length !== 1 ? 's' : ''}`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -255,12 +266,12 @@ export const PatientSearch: React.FC = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-12">#</TableHead>
-                      <TableHead>الاسم</TableHead>
-                      <TableHead>رقم الهاتف</TableHead>
-                      <TableHead>تاريخ الميلاد</TableHead>
-                      <TableHead>العمر</TableHead>
-                      <TableHead>آخر زيارة</TableHead>
-                      <TableHead className="text-right">الإجراءات</TableHead>
+                      <TableHead>{t('name')}</TableHead>
+                      <TableHead>{t('phoneNumber')}</TableHead>
+                      <TableHead>{t('dateOfBirth')}</TableHead>
+                      <TableHead>{t('age')}</TableHead>
+                      <TableHead>{language === 'ar' ? "آخر زيارة" : "Last Visit"}</TableHead>
+                      <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -272,7 +283,7 @@ export const PatientSearch: React.FC = () => {
                         <TableCell>{formatDate(patient.dateOfBirth)}</TableCell>
                         <TableCell>{getPatientAge(patient.dateOfBirth)}</TableCell>
                         <TableCell>
-                          {patient.lastVisit ? formatDate(patient.lastVisit) : 'لا توجد زيارات'}
+                          {patient.lastVisit ? formatDate(patient.lastVisit) : (language === 'ar' ? 'لا توجد زيارات' : 'No visits')}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button 
@@ -280,8 +291,8 @@ export const PatientSearch: React.FC = () => {
                             size="sm"
                             onClick={() => handlePatientSelect(patient)}
                           >
-                            <Eye className="h-4 w-4 ml-2" />
-                            ملف العميل
+                            <Eye className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                            {language === 'ar' ? "ملف العميل" : "Client File"}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -292,9 +303,11 @@ export const PatientSearch: React.FC = () => {
             ) : (
               <div className="text-center py-6">
                 <UserSearch className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                <h3 className="text-lg font-medium mb-1">لا توجد نتائج</h3>
+                <h3 className="text-lg font-medium mb-1">{t('noResults')}</h3>
                 <p className="text-muted-foreground mb-4">
-                  لم يتم العثور على نتائج مطابقة لمعايير البحث. جرب استخدام كلمات بحث مختلفة.
+                  {language === 'ar' 
+                    ? "لم يتم العثور على نتائج مطابقة لمعايير البحث. جرب استخدام كلمات بحث مختلفة."
+                    : "No results match your search criteria. Try using different search terms."}
                 </p>
               </div>
             )}
@@ -307,9 +320,9 @@ export const PatientSearch: React.FC = () => {
           {selectedPatient && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-xl">ملف العميل</DialogTitle>
+                <DialogTitle className="text-xl">{language === 'ar' ? "ملف العميل" : "Client Profile"}</DialogTitle>
                 <DialogDescription>
-                  تفاصيل بيانات العميل وسجل المعاملات
+                  {language === 'ar' ? "تفاصيل بيانات العميل وسجل المعاملات" : "Client details and transaction history"}
                 </DialogDescription>
               </DialogHeader>
               
@@ -317,7 +330,9 @@ export const PatientSearch: React.FC = () => {
                 <div className="md:col-span-1">
                   <Card className="border-primary/20 shadow-md">
                     <CardHeader className="pb-2 bg-gradient-to-r from-primary/10 to-primary/5 rounded-t-lg">
-                      <CardTitle className="text-lg text-primary">البيانات الشخصية</CardTitle>
+                      <CardTitle className="text-lg text-primary">
+                        {language === 'ar' ? "البيانات الشخصية" : "Personal Information"}
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-col items-center mb-4">
@@ -332,38 +347,42 @@ export const PatientSearch: React.FC = () => {
                       
                       <div className="space-y-4">
                         <div className="flex items-start">
-                          <Phone className="h-5 w-5 text-primary mt-0.5 ml-3" />
+                          <Phone className={`h-5 w-5 text-primary mt-0.5 ${language === 'ar' ? 'ml-3' : 'mr-3'}`} />
                           <div>
-                            <div className="text-sm text-muted-foreground">رقم الهاتف</div>
+                            <div className="text-sm text-muted-foreground">{t('phoneNumber')}</div>
                             <div dir="ltr" className="text-right">{selectedPatient.phone}</div>
                           </div>
                         </div>
                         
                         <div className="flex items-start">
-                          <Calendar className="h-5 w-5 text-primary mt-0.5 ml-3" />
+                          <Calendar className={`h-5 w-5 text-primary mt-0.5 ${language === 'ar' ? 'ml-3' : 'mr-3'}`} />
                           <div>
-                            <div className="text-sm text-muted-foreground">تاريخ الميلاد</div>
+                            <div className="text-sm text-muted-foreground">{t('dateOfBirth')}</div>
                             <div>{formatDate(selectedPatient.dateOfBirth)}</div>
                             <div className="text-sm text-muted-foreground mt-0.5">
-                              {getPatientAge(selectedPatient.dateOfBirth)} سنة
+                              {getPatientAge(selectedPatient.dateOfBirth)} {language === 'ar' ? "سنة" : "years"}
                             </div>
                           </div>
                         </div>
                         
                         <div className="flex items-start">
-                          <Clock className="h-5 w-5 text-primary mt-0.5 ml-3" />
+                          <Clock className={`h-5 w-5 text-primary mt-0.5 ${language === 'ar' ? 'ml-3' : 'mr-3'}`} />
                           <div>
-                            <div className="text-sm text-muted-foreground">تاريخ التسجيل</div>
+                            <div className="text-sm text-muted-foreground">
+                              {language === 'ar' ? "تاريخ التسجيل" : "Registration Date"}
+                            </div>
                             <div>{formatDate(selectedPatient.createdAt)}</div>
                           </div>
                         </div>
 
                         <div className="flex items-start">
-                          <BadgeDollarSign className="h-5 w-5 text-green-500 mt-0.5 ml-3" />
+                          <BadgeDollarSign className={`h-5 w-5 text-green-500 mt-0.5 ${language === 'ar' ? 'ml-3' : 'mr-3'}`} />
                           <div>
-                            <div className="text-sm text-muted-foreground">إجمالي المعاملات</div>
+                            <div className="text-sm text-muted-foreground">
+                              {language === 'ar' ? "إجمالي المعاملات" : "Total Transactions"}
+                            </div>
                             <div className="font-semibold text-green-600">
-                              {patientInvoices.reduce((sum, inv) => sum + inv.total, 0).toFixed(3)} KWD
+                              {patientInvoices.reduce((sum, inv) => sum + inv.total, 0).toFixed(3)} {t('kwd')}
                             </div>
                           </div>
                         </div>
@@ -371,12 +390,12 @@ export const PatientSearch: React.FC = () => {
 
                       <div className="mt-6 pt-4 border-t border-dashed space-y-2">
                         <Button variant="outline" className="w-full justify-start">
-                          <FileBarChart className="h-4 w-4 ml-2 text-amber-500" />
-                          تقرير العميل
+                          <FileBarChart className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'} text-amber-500`} />
+                          {language === 'ar' ? "تقرير العميل" : "Client Report"}
                         </Button>
                         <Button variant="outline" className="w-full justify-start" onClick={() => setShowRxPrintPreview(true)}>
-                          <Receipt className="h-4 w-4 ml-2 text-blue-500" />
-                          طباعة الوصفة الطبية
+                          <Receipt className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'} text-blue-500`} />
+                          {language === 'ar' ? "طباعة الوصفة الطبية" : "Print Prescription"}
                         </Button>
                       </div>
                     </CardContent>
@@ -388,10 +407,10 @@ export const PatientSearch: React.FC = () => {
                     <CardHeader className="pb-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-t-lg">
                       <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
                         <Receipt className="h-5 w-5" />
-                        سجل المعاملات
+                        {language === 'ar' ? "سجل المعاملات" : "Transaction History"}
                       </CardTitle>
                       <CardDescription>
-                        أوامر العمل والفواتير الخاصة بالعميل
+                        {language === 'ar' ? "أوامر العمل والفواتير الخاصة بالعميل" : "Work orders and invoices for the client"}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -403,10 +422,10 @@ export const PatientSearch: React.FC = () => {
                       >
                         <TabsList className="w-full mb-4 grid grid-cols-2 bg-amber-100/50">
                           <TabsTrigger value="active" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white">
-                            أوامر عمل نشطة
+                            {language === 'ar' ? "أوامر عمل نشطة" : "Active Work Orders"}
                           </TabsTrigger>
                           <TabsTrigger value="completed" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
-                            المعاملات المكتملة
+                            {language === 'ar' ? "المعاملات المكتملة" : "Completed Transactions"}
                           </TabsTrigger>
                         </TabsList>
                         
@@ -414,7 +433,7 @@ export const PatientSearch: React.FC = () => {
                           <div>
                             <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-amber-700">
                               <AlertCircle className="h-4 w-4 text-amber-500" />
-                              أوامر العمل قيد التنفيذ
+                              {language === 'ar' ? "أوامر العمل قيد التنفيذ" : "Work Orders in Progress"}
                             </h3>
                             
                             {getActiveWorkOrders(patientWorkOrders).length > 0 ? (
@@ -423,19 +442,20 @@ export const PatientSearch: React.FC = () => {
                                   <TableHeader className="bg-amber-50">
                                     <TableRow>
                                       <TableHead className="w-12">#</TableHead>
-                                      <TableHead>رقم الطلب</TableHead>
-                                      <TableHead>نوع العدسة</TableHead>
-                                      <TableHead>تاريخ الطلب</TableHead>
-                                      <TableHead>الحالة</TableHead>
-                                      <TableHead className="text-right">الإجراءات</TableHead>
+                                      <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                                      <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
+                                      <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
+                                      <TableHead>{t('status')}</TableHead>
+                                      <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
                                     {getActiveWorkOrders(patientWorkOrders).map((workOrder, index) => {
                                       const invoice = invoices.find(inv => inv.workOrderId === workOrder.id);
-                                      const status = !invoice ? "قيد التنفيذ" : 
-                                        invoice.isPaid ? "مدفوعة" : 
-                                        invoice.deposit > 0 ? "مدفوعة جزئيًا" : "غير مدفوعة";
+                                      const status = !invoice ? (language === 'ar' ? "قيد التنفيذ" : "In Progress") : 
+                                        invoice.isPaid ? (language === 'ar' ? "مدفوعة" : "Paid") : 
+                                        invoice.deposit > 0 ? (language === 'ar' ? "مدفوعة جزئيًا" : "Partially Paid") : 
+                                        (language === 'ar' ? "غير مدفوعة" : "Unpaid");
                                       
                                       const statusColor = !invoice ? "bg-amber-500" : 
                                         invoice.isPaid ? "bg-green-500" : 
@@ -453,12 +473,12 @@ export const PatientSearch: React.FC = () => {
                                           <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                               <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
-                                                <Eye className="h-3.5 w-3.5 ml-1 text-amber-600" />
-                                                عرض
+                                                <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
+                                                {t('view')}
                                               </Button>
                                               <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
-                                                <Printer className="h-3.5 w-3.5 ml-1 text-amber-600" />
-                                                طباعة
+                                                <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
+                                                {t('print')}
                                               </Button>
                                             </div>
                                           </TableCell>
@@ -471,9 +491,13 @@ export const PatientSearch: React.FC = () => {
                             ) : (
                               <div className="text-center py-6 border rounded-md bg-amber-50/20">
                                 <FileText className="h-10 w-10 mx-auto text-amber-300 mb-3" />
-                                <h3 className="text-lg font-medium mb-1 text-amber-700">لا توجد أوامر عمل نشطة</h3>
+                                <h3 className="text-lg font-medium mb-1 text-amber-700">
+                                  {language === 'ar' ? "لا توجد أوامر عمل نشطة" : "No Active Work Orders"}
+                                </h3>
                                 <p className="text-muted-foreground max-w-md mx-auto">
-                                  لا يوجد أوامر عمل نشطة لهذا العميل حالياً.
+                                  {language === 'ar' 
+                                    ? "لا يوجد أوامر عمل نشطة لهذا العميل حالياً."
+                                    : "There are no active work orders for this client at the moment."}
                                 </p>
                               </div>
                             )}
@@ -484,7 +508,7 @@ export const PatientSearch: React.FC = () => {
                           <div>
                             <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-green-700">
                               <AlertCircle className="h-4 w-4 text-green-500" />
-                              الفواتير المكتملة
+                              {language === 'ar' ? "الفواتير المكتملة" : "Completed Invoices"}
                             </h3>
                             
                             {patientInvoices.filter(inv => inv.isPaid).length > 0 ? (
@@ -493,11 +517,11 @@ export const PatientSearch: React.FC = () => {
                                   <TableHeader className="bg-green-50">
                                     <TableRow>
                                       <TableHead className="w-12">#</TableHead>
-                                      <TableHead>رقم الفاتورة</TableHead>
-                                      <TableHead>المبلغ</TableHead>
-                                      <TableHead>تاريخ الفاتورة</TableHead>
-                                      <TableHead>الحالة</TableHead>
-                                      <TableHead className="text-right">الإجراءات</TableHead>
+                                      <TableHead>{language === 'ar' ? "رقم الفاتورة" : "Invoice No."}</TableHead>
+                                      <TableHead>{language === 'ar' ? "المبلغ" : "Amount"}</TableHead>
+                                      <TableHead>{language === 'ar' ? "تاريخ الفاتورة" : "Invoice Date"}</TableHead>
+                                      <TableHead>{t('status')}</TableHead>
+                                      <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
@@ -505,20 +529,22 @@ export const PatientSearch: React.FC = () => {
                                       <TableRow key={invoice.invoiceId} className={index % 2 === 0 ? 'bg-green-50/30' : ''}>
                                         <TableCell className="font-medium">{index + 1}</TableCell>
                                         <TableCell>INV-{invoice.invoiceId.substring(0, 8)}</TableCell>
-                                        <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
+                                        <TableCell>{invoice.total.toFixed(3)} {t('kwd')}</TableCell>
                                         <TableCell>{formatDate(invoice.createdAt)}</TableCell>
                                         <TableCell>
-                                          <Badge className="bg-green-500">مدفوعة</Badge>
+                                          <Badge className="bg-green-500">
+                                            {language === 'ar' ? "مدفوعة" : "Paid"}
+                                          </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
                                           <div className="flex justify-end gap-2">
                                             <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
-                                              <Eye className="h-3.5 w-3.5 ml-1 text-green-600" />
-                                              عرض
+                                              <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
+                                              {t('view')}
                                             </Button>
                                             <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
-                                              <Printer className="h-3.5 w-3.5 ml-1 text-green-600" />
-                                              طباعة
+                                              <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
+                                              {t('print')}
                                             </Button>
                                           </div>
                                         </TableCell>
@@ -530,9 +556,13 @@ export const PatientSearch: React.FC = () => {
                             ) : (
                               <div className="text-center py-6 border rounded-md bg-green-50/20">
                                 <FileText className="h-10 w-10 mx-auto text-green-300 mb-3" />
-                                <h3 className="text-lg font-medium mb-1 text-green-700">لا توجد فواتير مكتملة</h3>
+                                <h3 className="text-lg font-medium mb-1 text-green-700">
+                                  {language === 'ar' ? "لا توجد فواتير مكتملة" : "No Completed Invoices"}
+                                </h3>
                                 <p className="text-muted-foreground max-w-md mx-auto">
-                                  لا يوجد فواتير مكتملة لهذا العميل حالياً.
+                                  {language === 'ar' 
+                                    ? "لا يوجد فواتير مكتملة لهذا العميل حالياً."
+                                    : "There are no completed invoices for this client at the moment."}
                                 </p>
                               </div>
                             )}
@@ -541,7 +571,7 @@ export const PatientSearch: React.FC = () => {
                           <div>
                             <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-blue-700">
                               <AlertCircle className="h-4 w-4 text-blue-500" />
-                              أوامر العمل المكتملة
+                              {language === 'ar' ? "أوامر العمل المكتملة" : "Completed Work Orders"}
                             </h3>
                             
                             {getCompletedWorkOrders(patientWorkOrders).length > 0 ? (
@@ -550,11 +580,11 @@ export const PatientSearch: React.FC = () => {
                                   <TableHeader className="bg-blue-50">
                                     <TableRow>
                                       <TableHead className="w-12">#</TableHead>
-                                      <TableHead>رقم الطلب</TableHead>
-                                      <TableHead>نوع العدسة</TableHead>
-                                      <TableHead>تاريخ الطلب</TableHead>
-                                      <TableHead>الحالة</TableHead>
-                                      <TableHead className="text-right">الإجراءات</TableHead>
+                                      <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                                      <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
+                                      <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
+                                      <TableHead>{t('status')}</TableHead>
+                                      <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
@@ -565,17 +595,19 @@ export const PatientSearch: React.FC = () => {
                                         <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
                                         <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
                                         <TableCell>
-                                          <Badge className="bg-blue-500">مكتمل</Badge>
+                                          <Badge className="bg-blue-500">
+                                            {language === 'ar' ? "مكتمل" : "Completed"}
+                                          </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
                                           <div className="flex justify-end gap-2">
                                             <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
-                                              <Eye className="h-3.5 w-3.5 ml-1 text-blue-600" />
-                                              عرض
+                                              <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                              {t('view')}
                                             </Button>
                                             <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
-                                              <Printer className="h-3.5 w-3.5 ml-1 text-blue-600" />
-                                              طباعة
+                                              <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                              {t('print')}
                                             </Button>
                                           </div>
                                         </TableCell>
@@ -587,9 +619,13 @@ export const PatientSearch: React.FC = () => {
                             ) : (
                               <div className="text-center py-6 border rounded-md bg-blue-50/20">
                                 <FileText className="h-10 w-10 mx-auto text-blue-300 mb-3" />
-                                <h3 className="text-lg font-medium mb-1 text-blue-700">لا توجد أوامر عمل مكتملة</h3>
+                                <h3 className="text-lg font-medium mb-1 text-blue-700">
+                                  {language === 'ar' ? "لا توجد أوامر عمل مكتملة" : "No Completed Work Orders"}
+                                </h3>
                                 <p className="text-muted-foreground max-w-md mx-auto">
-                                  لا يوجد أوامر عمل مكتملة لهذا العميل حالياً.
+                                  {language === 'ar' 
+                                    ? "لا يوجد أوامر عمل مكتملة لهذا العميل حالياً."
+                                    : "There are no completed work orders for this client at the moment."}
                                 </p>
                               </div>
                             )}
@@ -615,11 +651,11 @@ export const PatientSearch: React.FC = () => {
               
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsProfileOpen(false)}>
-                  إغلاق
+                  {t('close')}
                 </Button>
                 <Button>
-                  <Printer className="h-4 w-4 ml-2" />
-                  طباعة ملف العميل
+                  <Printer className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                  {language === 'ar' ? "طباعة ملف العميل" : "Print Client File"}
                 </Button>
               </DialogFooter>
             </>
@@ -632,9 +668,11 @@ export const PatientSearch: React.FC = () => {
           {selectedPatient && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-lg">معاينة الوصفة الطبية</DialogTitle>
+                <DialogTitle className="text-lg">
+                  {language === 'ar' ? "معاينة الوصفة الطبية" : "Prescription Preview"}
+                </DialogTitle>
                 <DialogDescription>
-                  معاينة قبل الطباعة
+                  {language === 'ar' ? "معاينة قبل الطباعة" : "Preview before printing"}
                 </DialogDescription>
               </DialogHeader>
               
@@ -652,13 +690,13 @@ export const PatientSearch: React.FC = () => {
               
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowRxPrintPreview(false)}>
-                  إغلاق
+                  {t('close')}
                 </Button>
                 <Button onClick={() => {
                   window.print();
                 }}>
-                  <Printer className="h-4 w-4 ml-2" />
-                  طباعة الوصفة
+                  <Printer className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                  {language === 'ar' ? "طباعة الوصفة" : "Print Prescription"}
                 </Button>
               </DialogFooter>
             </>
