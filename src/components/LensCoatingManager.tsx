@@ -9,9 +9,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Edit, Plus, Trash } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguageStore } from "@/store/languageStore";
 
 export const LensCoatingManager: React.FC = () => {
   const { lensCoatings, addLensCoating, updateLensCoating, deleteLensCoating } = useInventoryStore();
+  const { t, language } = useLanguageStore();
   
   // New coating form state
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -28,7 +30,7 @@ export const LensCoatingManager: React.FC = () => {
   
   const handleAddCoating = () => {
     if (!newCoatingName || newCoatingPrice === "") {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+      toast.error(t("fillRequiredFields"));
       return;
     }
     
@@ -38,7 +40,7 @@ export const LensCoatingManager: React.FC = () => {
       description: newCoatingDescription
     });
     
-    toast.success("تمت إضافة الطلاء بنجاح");
+    toast.success(t("coatingAddedSuccess"));
     
     // Reset form
     setNewCoatingName("");
@@ -49,7 +51,7 @@ export const LensCoatingManager: React.FC = () => {
   
   const handleEditCoating = () => {
     if (!editCoatingName || editCoatingPrice === "") {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+      toast.error(t("fillRequiredFields"));
       return;
     }
     
@@ -59,7 +61,7 @@ export const LensCoatingManager: React.FC = () => {
       description: editCoatingDescription
     });
     
-    toast.success("تم تحديث الطلاء بنجاح");
+    toast.success(t("coatingUpdatedSuccess"));
     
     // Reset form
     setIsEditDialogOpen(false);
@@ -67,7 +69,7 @@ export const LensCoatingManager: React.FC = () => {
   
   const handleDeleteCoating = (id: string) => {
     deleteLensCoating(id);
-    toast.success("تم حذف الطلاء بنجاح");
+    toast.success(t("coatingDeletedSuccess"));
   };
   
   const startEditCoating = (coating: LensCoating) => {
@@ -81,33 +83,33 @@ export const LensCoatingManager: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">طلاءات العدسات</h2>
+        <h2 className="text-xl font-bold">{t("lensCoatings")}</h2>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-1">
               <Plus size={16} />
-              إضافة طلاء
+              {t("addCoating")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>إضافة طلاء جديد</DialogTitle>
+              <DialogTitle>{t("addNewCoatingTitle")}</DialogTitle>
               <DialogDescription>
-                أدخل تفاصيل الطلاء الجديد أدناه
+                {t("addNewCoatingDescription")}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">اسم الطلاء</Label>
+                <Label htmlFor="name">{t("coatingName")}</Label>
                 <Input
                   id="name"
                   value={newCoatingName}
                   onChange={(e) => setNewCoatingName(e.target.value)}
-                  placeholder="مثال: مضاد للانعكاس"
+                  placeholder={t("coatingNameExample")}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="price">السعر (د.ك)</Label>
+                <Label htmlFor="price">{t("price")}</Label>
                 <Input
                   id="price"
                   type="number"
@@ -117,19 +119,19 @@ export const LensCoatingManager: React.FC = () => {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="description">الوصف (اختياري)</Label>
+                <Label htmlFor="description">{t("description")}</Label>
                 <Textarea
                   id="description"
                   value={newCoatingDescription}
                   onChange={(e) => setNewCoatingDescription(e.target.value)}
-                  placeholder="وصف مختصر للطلاء"
+                  placeholder={t("coatingDescription")}
                   rows={3}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>إلغاء</Button>
-              <Button onClick={handleAddCoating}>إضافة</Button>
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t("cancel")}</Button>
+              <Button onClick={handleAddCoating}>{t("save")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -143,7 +145,7 @@ export const LensCoatingManager: React.FC = () => {
                 <CardTitle className="text-base">{coating.name}</CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0 pb-2">
-                <p className="text-lg font-bold">{coating.price.toFixed(2)} د.ك</p>
+                <p className="text-lg font-bold">{coating.price.toFixed(2)} {language === 'ar' ? 'د.ك' : 'KD'}</p>
                 {coating.description && (
                   <p className="text-sm text-muted-foreground mt-1">{coating.description}</p>
                 )}
@@ -161,9 +163,9 @@ export const LensCoatingManager: React.FC = () => {
         </div>
       ) : (
         <div className="text-center p-8 bg-muted/50 rounded-lg">
-          <p>لا توجد طلاءات للعدسات</p>
+          <p>{t("noCoatings")}</p>
           <Button variant="outline" size="sm" className="mt-2" onClick={() => setIsAddDialogOpen(true)}>
-            إضافة طلاء جديد
+            {t("addCoating")}
           </Button>
         </div>
       )}
@@ -172,14 +174,14 @@ export const LensCoatingManager: React.FC = () => {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>تعديل الطلاء</DialogTitle>
+            <DialogTitle>{t("editCoating")}</DialogTitle>
             <DialogDescription>
-              قم بتحديث تفاصيل الطلاء أدناه
+              {t("updateCoatingDetails")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="edit-name">اسم الطلاء</Label>
+              <Label htmlFor="edit-name">{t("coatingName")}</Label>
               <Input
                 id="edit-name"
                 value={editCoatingName}
@@ -187,7 +189,7 @@ export const LensCoatingManager: React.FC = () => {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-price">السعر (د.ك)</Label>
+              <Label htmlFor="edit-price">{t("price")}</Label>
               <Input
                 id="edit-price"
                 type="number"
@@ -196,7 +198,7 @@ export const LensCoatingManager: React.FC = () => {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-description">الوصف (اختياري)</Label>
+              <Label htmlFor="edit-description">{t("description")}</Label>
               <Textarea
                 id="edit-description"
                 value={editCoatingDescription}
@@ -206,8 +208,8 @@ export const LensCoatingManager: React.FC = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>إلغاء</Button>
-            <Button onClick={handleEditCoating}>حفظ التغييرات</Button>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>{t("cancel")}</Button>
+            <Button onClick={handleEditCoating}>{t("saveChanges")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

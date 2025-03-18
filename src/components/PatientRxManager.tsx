@@ -21,6 +21,7 @@ import { RxData, usePatientStore } from "@/store/patientStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format, parseISO } from "date-fns";
 import { ar } from "date-fns/locale";
+import { en } from 'date-fns/locale';
 import { 
   AlertCircle, 
   FileText, 
@@ -36,6 +37,7 @@ import {
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
 import { toast } from "@/components/ui/use-toast";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface PatientRxManagerProps {
   patientId: string;
@@ -57,6 +59,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   onRxPrintRequest
 }) => {
   const { updatePatientRx } = usePatientStore();
+  const { t, language } = useLanguageStore();
   const [isNewRxOpen, setIsNewRxOpen] = useState(false);
   const [newRx, setNewRx] = useState<RxData>({
     sphereOD: "",
@@ -105,8 +108,8 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     // Validate all fields are filled
     if (!newRx.sphereOD || !newRx.sphereOS || !newRx.pdRight || !newRx.pdLeft) {
       toast({
-        title: "خطأ في البيانات",
-        description: "يرجى ملء جميع الحقول المطلوبة",
+        title: t("dataError"),
+        description: t("fillAllRequiredFields"),
         variant: "destructive"
       });
       return;
@@ -119,8 +122,8 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     });
 
     toast({
-      title: "تم الحفظ",
-      description: "تم حفظ الوصفة الطبية بنجاح",
+      title: t("success"),
+      description: t("successMessage"),
     });
 
     setIsNewRxOpen(false);
@@ -132,11 +135,11 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return "تاريخ غير متوفر";
+    if (!dateString) return language === 'ar' ? "تاريخ غير متوفر" : "Date not available";
     try {
-      return format(parseISO(dateString), "PPP", { locale: ar });
+      return format(parseISO(dateString), "PPP", { locale: language === 'ar' ? ar : en });
     } catch (error) {
-      return "تاريخ غير صالح";
+      return language === 'ar' ? "تاريخ غير صالح" : "Invalid date";
     }
   };
 
@@ -210,17 +213,17 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
         <div>
           <CardTitle className="text-lg flex items-center gap-2 text-blue-700">
             <Glasses className="h-5 w-5" />
-            الوصفة الطبية وتعليمات العناية
+            {t("rxAndCareInstructions")}
           </CardTitle>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={onRxPrintRequest} className="border-blue-300 hover:bg-blue-50">
             <Printer className="h-4 w-4 ml-2 text-blue-600" />
-            طباعة الوصفة
+            {t("printPrescription")}
           </Button>
           <Button size="sm" onClick={() => setIsNewRxOpen(true)} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="h-4 w-4 ml-2" />
-            وصفة جديدة
+            {t("newRx")}
           </Button>
         </div>
       </CardHeader>
@@ -230,11 +233,11 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-medium text-blue-800 flex items-center gap-2">
                 <Eye className="h-5 w-5 text-blue-600" />
-                الوصفة الطبية الحالية
+                {t("currentRx")}
               </h4>
               <Badge className="bg-green-500">
                 <Calendar className="h-3 w-3 mr-1" />
-                {currentRx.createdAt ? formatDate(currentRx.createdAt) : 'تاريخ غير متوفر'}
+                {currentRx.createdAt ? formatDate(currentRx.createdAt) : language === 'ar' ? 'تاريخ غير متوفر' : 'Date not available'}
               </Badge>
             </div>
             <div className="overflow-x-auto bg-white rounded-md shadow-sm">
@@ -251,7 +254,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="font-medium bg-blue-50/50">العين اليمنى (OD)</TableCell>
+                    <TableCell className="font-medium bg-blue-50/50">{t("rightEye")}</TableCell>
                     <TableCell>{currentRx?.sphereOD || "-"}</TableCell>
                     <TableCell>{currentRx?.cylOD || "-"}</TableCell>
                     <TableCell>{currentRx?.axisOD || "-"}</TableCell>
@@ -259,7 +262,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     <TableCell rowSpan={2}>{currentRx?.pdRight || "-"}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium bg-rose-50/50">العين اليسرى (OS)</TableCell>
+                    <TableCell className="font-medium bg-rose-50/50">{t("leftEye")}</TableCell>
                     <TableCell>{currentRx?.sphereOS || "-"}</TableCell>
                     <TableCell>{currentRx?.cylOS || "-"}</TableCell>
                     <TableCell>{currentRx?.axisOS || "-"}</TableCell>
@@ -274,7 +277,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-medium text-gray-700 flex items-center gap-2">
                 <History className="h-5 w-5 text-amber-600" />
-                تاريخ الوصفات الطبية
+                {t("rxHistory")}
               </h4>
             </div>
             {rxHistory && rxHistory.length > 0 ? (
@@ -282,11 +285,11 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 <Table>
                   <TableHeader className="bg-amber-50">
                     <TableRow>
-                      <TableHead className="text-amber-800">التاريخ</TableHead>
-                      <TableHead className="text-amber-800">العين اليمنى (OD)</TableHead>
-                      <TableHead className="text-amber-800">العين اليسرى (OS)</TableHead>
+                      <TableHead className="text-amber-800">{t("date")}</TableHead>
+                      <TableHead className="text-amber-800">{t("rightEye")}</TableHead>
+                      <TableHead className="text-amber-800">{t("leftEye")}</TableHead>
                       <TableHead className="text-amber-800">PD</TableHead>
-                      <TableHead className="text-right text-amber-800">الإجراءات</TableHead>
+                      <TableHead className="text-right text-amber-800">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -328,7 +331,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                             onClick={() => handleViewRx(rx)}
                           >
                             <Eye className="h-3.5 w-3.5 ml-1" />
-                            عرض
+                            {language === 'ar' ? 'عرض' : 'View'}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -339,9 +342,9 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
             ) : (
               <div className="text-center py-6 border rounded-md bg-gray-50">
                 <FileText className="h-10 w-10 mx-auto text-gray-400 mb-3" />
-                <h3 className="text-lg font-medium mb-1 text-gray-600">لا يوجد سجل وصفات طبية سابقة</h3>
+                <h3 className="text-lg font-medium mb-1 text-gray-600">{t("noPreviousRx")}</h3>
                 <p className="text-sm text-gray-500 max-w-md mx-auto">
-                  لم يتم تسجيل أي وصفات طبية سابقة لهذا المريض
+                  {t("noPreviousRxDescription")}
                 </p>
               </div>
             )}
@@ -350,24 +353,24 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
           <div className="bg-green-50 p-4 rounded-lg border border-green-200">
             <h4 className="font-medium mb-3 text-green-800 flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-green-600" />
-              تعليمات العناية بالنظارة
+              {t("glassesCareTips")}
             </h4>
             <ul className="text-gray-700 list-disc list-inside space-y-2 pl-2">
               <li className="flex items-start">
                 <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 ml-2 flex-shrink-0" />
-                <span>يجب تنظيف العدسات بانتظام بمنظف خاص</span>
+                <span>{t("tip1")}</span>
               </li>
               <li className="flex items-start">
                 <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 ml-2 flex-shrink-0" />
-                <span>تجنب ملامسة العدسات للماء الساخن</span>
+                <span>{t("tip2")}</span>
               </li>
               <li className="flex items-start">
                 <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 ml-2 flex-shrink-0" />
-                <span>استخدم حافظة نظارات عند عدم الاستخدام</span>
+                <span>{t("tip3")}</span>
               </li>
               <li className="flex items-start">
                 <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 ml-2 flex-shrink-0" />
-                <span>راجع الطبيب كل 6-12 شهر</span>
+                <span>{t("tip4")}</span>
               </li>
             </ul>
           </div>
@@ -378,9 +381,9 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
       <Dialog open={isNewRxOpen} onOpenChange={setIsNewRxOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle className="text-xl">إضافة وصفة طبية جديدة</DialogTitle>
+            <DialogTitle className="text-xl">{t("addNewRx")}</DialogTitle>
             <DialogDescription>
-              أدخل بيانات الوصفة الطبية الجديدة للمريض {patientName}
+              {t("addNewRxFor")} {patientName}
             </DialogDescription>
           </DialogHeader>
           
@@ -388,13 +391,13 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200 mb-4">
               <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
                 <div className="lg:col-span-6">
-                  <h3 className="text-lg font-medium text-blue-800 mb-2">وصفة النظارات الطبية</h3>
+                  <h3 className="text-lg font-medium text-blue-800 mb-2">{t("glassesPrescription")}</h3>
                 </div>
                 
                 <div className="lg:col-span-1">
-                  <Label className="block mb-1">العين</Label>
+                  <Label className="block mb-1">{t("rightEye")}</Label>
                   <div className="h-10 flex items-center justify-center font-semibold bg-blue-100 rounded border border-blue-200">
-                    OD (اليمنى)
+                    OD 
                   </div>
                 </div>
                 
@@ -406,7 +409,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     value={newRx.sphereOD}
                     onChange={(e) => handleRxInputChange("OD", "sphere", e.target.value)}
                   >
-                    <option value="" disabled>اختر...</option>
+                    <option value="" disabled>{t("choose")}</option>
                     {generateSphOptions()}
                   </select>
                 </div>
@@ -419,7 +422,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     value={newRx.cylOD}
                     onChange={(e) => handleRxInputChange("OD", "cyl", e.target.value)}
                   >
-                    <option value="" disabled>اختر...</option>
+                    <option value="" disabled>{t("choose")}</option>
                     {generateCylOptions()}
                   </select>
                 </div>
@@ -432,7 +435,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     value={newRx.axisOD}
                     onChange={(e) => handleRxInputChange("OD", "axis", e.target.value)}
                   >
-                    <option value="" disabled>اختر...</option>
+                    <option value="" disabled>{t("choose")}</option>
                     {generateAxisOptions()}
                   </select>
                 </div>
@@ -445,7 +448,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     value={newRx.addOD}
                     onChange={(e) => handleRxInputChange("OD", "add", e.target.value)}
                   >
-                    <option value="" disabled>اختر...</option>
+                    <option value="" disabled>{t("choose")}</option>
                     {generateAddOptions()}
                   </select>
                 </div>
@@ -458,15 +461,16 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     value={newRx.pdRight}
                     onChange={(e) => handlePdChange("Right", e.target.value)}
                   >
-                    <option value="" disabled>اختر...</option>
+                    <option value="" disabled>{t("choose")}</option>
                     {generatePdOptions()}
                   </select>
                 </div>
                 
                 {/* Left Eye Row */}
                 <div className="lg:col-span-1">
+                  <Label className="block mb-1">{t("leftEye")}</Label>
                   <div className="h-10 flex items-center justify-center font-semibold bg-rose-100 rounded border border-rose-200">
-                    OS (اليسرى)
+                    OS
                   </div>
                 </div>
                 
@@ -477,7 +481,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     value={newRx.sphereOS}
                     onChange={(e) => handleRxInputChange("OS", "sphere", e.target.value)}
                   >
-                    <option value="" disabled>اختر...</option>
+                    <option value="" disabled>{t("choose")}</option>
                     {generateSphOptions()}
                   </select>
                 </div>
@@ -489,7 +493,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     value={newRx.cylOS}
                     onChange={(e) => handleRxInputChange("OS", "cyl", e.target.value)}
                   >
-                    <option value="" disabled>اختر...</option>
+                    <option value="" disabled>{t("choose")}</option>
                     {generateCylOptions()}
                   </select>
                 </div>
@@ -501,7 +505,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     value={newRx.axisOS}
                     onChange={(e) => handleRxInputChange("OS", "axis", e.target.value)}
                   >
-                    <option value="" disabled>اختر...</option>
+                    <option value="" disabled>{t("choose")}</option>
                     {generateAxisOptions()}
                   </select>
                 </div>
@@ -513,7 +517,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     value={newRx.addOS}
                     onChange={(e) => handleRxInputChange("OS", "add", e.target.value)}
                   >
-                    <option value="" disabled>اختر...</option>
+                    <option value="" disabled>{t("choose")}</option>
                     {generateAddOptions()}
                   </select>
                 </div>
@@ -525,7 +529,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     value={newRx.pdLeft}
                     onChange={(e) => handlePdChange("Left", e.target.value)}
                   >
-                    <option value="" disabled>اختر...</option>
+                    <option value="" disabled>{t("choose")}</option>
                     {generatePdOptions()}
                   </select>
                 </div>
@@ -535,10 +539,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsNewRxOpen(false)}>
-              إلغاء
+              {t("cancel")}
             </Button>
             <Button onClick={handleSaveNewRx} className="bg-blue-600 hover:bg-blue-700">
-              حفظ الوصفة الجديدة
+              {t("save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -548,7 +552,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
       <Dialog open={isViewRxOpen} onOpenChange={setIsViewRxOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-xl">تفاصيل الوصفة الطبية</DialogTitle>
+            <DialogTitle className="text-xl">{t("viewPrescription")}</DialogTitle>
             <DialogDescription>
               {viewRxDetails?.createdAt && formatDate(viewRxDetails.createdAt)}
             </DialogDescription>
@@ -571,7 +575,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     </TableHeader>
                     <TableBody>
                       <TableRow>
-                        <TableCell className="font-medium bg-amber-50/50">العين اليمنى (OD)</TableCell>
+                        <TableCell className="font-medium bg-amber-50/50">{t("rightEye")}</TableCell>
                         <TableCell>{viewRxDetails.sphereOD || "-"}</TableCell>
                         <TableCell>{viewRxDetails.cylOD || "-"}</TableCell>
                         <TableCell>{viewRxDetails.axisOD || "-"}</TableCell>
@@ -579,7 +583,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                         <TableCell rowSpan={2}>{viewRxDetails.pdRight || "-"}</TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell className="font-medium bg-rose-50/50">العين اليسرى (OS)</TableCell>
+                        <TableCell className="font-medium bg-rose-50/50">{t("leftEye")}</TableCell>
                         <TableCell>{viewRxDetails.sphereOS || "-"}</TableCell>
                         <TableCell>{viewRxDetails.cylOS || "-"}</TableCell>
                         <TableCell>{viewRxDetails.axisOS || "-"}</TableCell>
@@ -594,7 +598,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsViewRxOpen(false)}>
-              إغلاق
+              {t("close")}
             </Button>
             <Button 
               variant="outline" 
@@ -605,7 +609,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
               }}
             >
               <Printer className="h-4 w-4 ml-2 text-blue-600" />
-              طباعة الوصفة
+              {t("printPrescription")}
             </Button>
           </DialogFooter>
         </DialogContent>

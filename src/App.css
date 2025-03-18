@@ -73,9 +73,35 @@
 }
 
 /* Always keep numbers in English even in RTL mode */
-.rtl .force-ltr-numbers {
+.rtl .force-ltr-numbers,
+.force-ltr-numbers {
   direction: ltr;
   display: inline-block;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tables with numeric data should always show numbers in LTR */
+table th, table td {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+/* RTL-specific table alignment */
+.rtl table th.text-right, 
+.rtl table td.text-right {
+  text-align: left;
+}
+
+.rtl table th.text-left, 
+.rtl table td.text-left {
+  text-align: right;
+}
+
+.rtl-language .numeric {
+  direction: ltr;
+  display: inline-block;
+  text-align: right;
 }
 
 /* Frame label print styling */

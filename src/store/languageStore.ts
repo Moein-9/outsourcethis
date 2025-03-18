@@ -563,6 +563,419 @@ const translations: Record<string, Record<string, string>> = {
   "sizeExample": {
     ar: "مثال: 52-18-145",
     en: "Example: 52-18-145"
+  },
+  // New Client and Prescription additional translations
+  "clientInformation": {
+    ar: "بيانات العميل",
+    en: "Client Information"
+  },
+  "existingClient": {
+    ar: "عميل موجود",
+    en: "Existing Client"
+  },
+  "sphere": {
+    ar: "المحدب",
+    en: "Sphere"
+  },
+  "cylinder": {
+    ar: "الاسطواني",
+    en: "Cylinder"
+  },
+  "axis": {
+    ar: "المحور",
+    en: "Axis"
+  },
+  "add": {
+    ar: "الإضافة",
+    en: "Add"
+  },
+  "pd": {
+    ar: "المسافة بين البؤبؤين",
+    en: "PD"
+  },
+  "rightEye": {
+    ar: "العين اليمنى (OD)",
+    en: "Right Eye (OD)"
+  },
+  "leftEye": {
+    ar: "العين اليسرى (OS)",
+    en: "Left Eye (OS)"
+  },
+  "choose": {
+    ar: "اختر...",
+    en: "Choose..."
+  },
+  "addLens": {
+    ar: "إضافة نوع عدسة",
+    en: "Add Lens Type"
+  },
+  "addCoating": {
+    ar: "إضافة طلاء",
+    en: "Add Coating"
+  },
+  "addNewLensTitle": {
+    ar: "إضافة نوع عدسة جديد",
+    en: "Add New Lens Type"
+  },
+  "addNewLensDescription": {
+    ar: "أدخل تفاصيل نوع العدسة الجديد أدناه",
+    en: "Enter new lens type details below"
+  },
+  "lensName": {
+    ar: "اسم العدسة",
+    en: "Lens Name"
+  },
+  "lensNameExample": {
+    ar: "مثال: عدسات القراءة الممتازة",
+    en: "Example: Premium Reading Lenses"
+  },
+  "type": {
+    ar: "النوع",
+    en: "Type"
+  },
+  "addNewCoatingTitle": {
+    ar: "إضافة طلاء جديد",
+    en: "Add New Coating"
+  },
+  "addNewCoatingDescription": {
+    ar: "أدخل تفاصيل الطلاء الجديد أدناه",
+    en: "Enter new coating details below"
+  },
+  "coatingName": {
+    ar: "اسم الطلاء",
+    en: "Coating Name"
+  },
+  "coatingNameExample": {
+    ar: "مثال: مضاد للانعكاس",
+    en: "Example: Anti-reflective"
+  },
+  "description": {
+    ar: "الوصف",
+    en: "Description"
+  },
+  "coatingDescription": {
+    ar: "وصف مختصر للطلاء",
+    en: "Brief description of coating"
+  },
+  "fillRequiredFields": {
+    ar: "يرجى ملء جميع الحقول المطلوبة",
+    en: "Please fill in all required fields"
+  },
+  "lensAddedSuccess": {
+    ar: "تمت إضافة نوع العدسة بنجاح",
+    en: "Lens type added successfully"
+  },
+  "coatingAddedSuccess": {
+    ar: "تمت إضافة الطلاء بنجاح",
+    en: "Coating added successfully"
+  },
+  "lensUpdatedSuccess": {
+    ar: "تم تحديث نوع العدسة بنجاح",
+    en: "Lens type updated successfully"
+  },
+  "coatingUpdatedSuccess": {
+    ar: "تم تحديث الطلاء بنجاح",
+    en: "Coating updated successfully"
+  },
+  "lensDeletedSuccess": {
+    ar: "تم حذف نوع العدسة بنجاح",
+    en: "Lens type deleted successfully"
+  },
+  "coatingDeletedSuccess": {
+    ar: "تم حذف الطلاء بنجاح",
+    en: "Coating deleted successfully"
+  },
+  "noLensesInCategory": {
+    ar: "لا توجد عدسات في هذه الفئة",
+    en: "No lenses in this category"
+  },
+  "noCoatings": {
+    ar: "لا توجد طلاءات للعدسات",
+    en: "No lens coatings"
+  },
+  "editCoating": {
+    ar: "تعديل الطلاء",
+    en: "Edit Coating"
+  },
+  "updateCoatingDetails": {
+    ar: "قم بتحديث تفاصيل الطلاء أدناه",
+    en: "Update coating details below"
+  },
+  "editLensType": {
+    ar: "تعديل نوع العدسة",
+    en: "Edit Lens Type"
+  },
+  "updateLensDetails": {
+    ar: "قم بتحديث تفاصيل نوع العدسة أدناه",
+    en: "Update lens type details below"
+  },
+  "saveChanges": {
+    ar: "حفظ التغييرات",
+    en: "Save Changes"
+  },
+  // Lens Type Categories
+  "distance": {
+    ar: "النظر البعيد",
+    en: "Distance"
+  },
+  "reading": {
+    ar: "القراءة",
+    en: "Reading"
+  },
+  "progressive": {
+    ar: "التقدمية",
+    en: "Progressive"
+  },
+  "bifocal": {
+    ar: "ثنائية البؤرة",
+    en: "Bifocal"
+  },
+  "sunglasses": {
+    ar: "النظارات الشمسية",
+    en: "Sunglasses"
+  },
+  // Invoice Creation Additional Translations
+  "createInvoiceTitle": {
+    ar: "إنشاء فاتورة",
+    en: "Create Invoice"
+  },
+  "medicalGlasses": {
+    ar: "النظارات الطبية",
+    en: "Prescription Glasses"
+  },
+  "addGlassesItemBtn": {
+    ar: "إضافة نظارة",
+    en: "Add Glasses"
+  },
+  "selectClient": {
+    ar: "اختيار عميل",
+    en: "Select Client"
+  },
+  "invoiceItems": {
+    ar: "عناصر الفاتورة",
+    en: "Invoice Items"
+  },
+  "selectLensType": {
+    ar: "اختر نوع العدسة",
+    en: "Select Lens Type"
+  },
+  "selectFrameType": {
+    ar: "اختر الإطار",
+    en: "Select Frame"
+  },
+  "selectCoating": {
+    ar: "اختر الطلاء",
+    en: "Select Coating"
+  },
+  "addAnotherPayment": {
+    ar: "إضافة دفعة أخرى",
+    en: "Add Another Payment"
+  },
+  "paymentType": {
+    ar: "نوع الدفع",
+    en: "Payment Type"
+  },
+  "visa": {
+    ar: "فيزا",
+    en: "Visa"
+  },
+  "masterCard": {
+    ar: "ماستركارد",
+    en: "MasterCard"
+  },
+  "invoiceValue": {
+    ar: "قيمة الفاتورة",
+    en: "Invoice Value"
+  },
+  "totalInvoice": {
+    ar: "إجمالي الفاتورة",
+    en: "Total Invoice"
+  },
+  "discountAndTax": {
+    ar: "الخصم والضريبة",
+    en: "Discount & Tax"
+  },
+  "applyTaxInvoice": {
+    ar: "تطبيق ضريبة الفاتورة",
+    en: "Apply Invoice Tax"
+  },
+  "tax": {
+    ar: "الضريبة",
+    en: "Tax"
+  },
+  "applyDiscount": {
+    ar: "تطبيق خصم",
+    en: "Apply Discount"
+  },
+  "percentageValue": {
+    ar: "القيمة المئوية",
+    en: "Percentage Value"
+  },
+  "discountAmount": {
+    ar: "مبلغ الخصم",
+    en: "Discount Amount"
+  },
+  "paymentMethod": {
+    ar: "طريقة الدفع",
+    en: "Payment Method"
+  },
+  "saveInvoice": {
+    ar: "حفظ الفاتورة",
+    en: "Save Invoice"
+  },
+  "printAndSave": {
+    ar: "طباعة وحفظ",
+    en: "Print & Save"
+  },
+  "searchClient": {
+    ar: "البحث عن عميل",
+    en: "Search for Client"
+  },
+  "enterClientNameOrPhone": {
+    ar: "أدخل اسم العميل أو رقم الهاتف",
+    en: "Enter client name or phone number"
+  },
+  "select": {
+    ar: "اختيار",
+    en: "Select"
+  },
+  "paymentDate": {
+    ar: "تاريخ الدفع",
+    en: "Payment Date"
+  },
+  // Patient/Client Search Additional Translations
+  "clientSearch": {
+    ar: "بحث عن عميل",
+    en: "Client Search"  
+  },
+  "clientSearchDescription": {
+    ar: "البحث عن العملاء وإدارة ملفاتهم وتاريخهم",
+    en: "Search for clients and manage their profiles and history"
+  },
+  "searchResults": {
+    ar: "نتائج البحث",
+    en: "Search Results"
+  },
+  "noClientsFound": {
+    ar: "لم يتم العثور على عملاء",
+    en: "No clients found"
+  },
+  "clientDetails": {
+    ar: "تفاصيل العميل",
+    en: "Client Details"
+  },
+  "clientFile": {
+    ar: "ملف العميل",
+    en: "Client File"
+  },
+  "visitHistory": {
+    ar: "سجل الزيارات",
+    en: "Visit History"
+  },
+  "transactionHistory": {
+    ar: "سجل المعاملات",
+    en: "Transaction History"
+  },
+  "prescriptionHistory": {
+    ar: "سجل الوصفات الطبية",
+    en: "Prescription History"
+  },
+  "contactLensPrescription": {
+    ar: "وصفة العدسات اللاصقة",
+    en: "Contact Lens Prescription"
+  },
+  "createNewPrescription": {
+    ar: "إنشاء وصفة طبية جديدة",
+    en: "Create New Prescription"
+  },
+  "viewPrescription": {
+    ar: "عرض الوصفة الطبية",
+    en: "View Prescription"
+  },
+  "printPrescription": {
+    ar: "طباعة الوصفة الطبية",
+    en: "Print Prescription"
+  },
+  "currentPrescription": {
+    ar: "الوصفة الطبية الحالية",
+    en: "Current Prescription"
+  },
+  "careInstructions": {
+    ar: "تعليمات العناية",
+    en: "Care Instructions"
+  },
+  "noHistoryFound": {
+    ar: "لا يوجد سجل",
+    en: "No history found"
+  },
+  "phoneNumber": {
+    ar: "رقم الهاتف",
+    en: "Phone Number"
+  },
+  "lastVisit": {
+    ar: "آخر زيارة",
+    en: "Last Visit"
+  },
+  // Additional RX Manager Translations
+  "rxAndCareInstructions": {
+    ar: "الوصفة الطبية وتعليمات العناية",
+    en: "Prescription & Care Instructions"
+  },
+  "currentRx": {
+    ar: "الوصفة الطبية الحالية",
+    en: "Current Prescription"
+  },
+  "rxHistory": {
+    ar: "تاريخ الوصفات الطبية",
+    en: "Prescription History"
+  },
+  "newRx": {
+    ar: "وصفة جديدة",
+    en: "New Prescription"
+  },
+  "addNewRx": {
+    ar: "إضافة وصفة طبية جديدة",
+    en: "Add New Prescription"
+  },
+  "addNewRxFor": {
+    ar: "أدخل بيانات الوصفة الطبية الجديدة للمريض",
+    en: "Enter new prescription data for patient"
+  },
+  "glassesCareTips": {
+    ar: "تعليمات العناية بالنظارة",
+    en: "Glasses Care Tips"
+  },
+  "tip1": {
+    ar: "يجب تنظيف العدسات بانتظام بمنظف خاص",
+    en: "Clean lenses regularly with a special cleaner"
+  },
+  "tip2": {
+    ar: "تجنب ملامسة العدسات للماء الساخن",
+    en: "Avoid hot water on lenses"
+  },
+  "tip3": {
+    ar: "استخدم حافظة نظارات عند عدم الاستخدام",
+    en: "Use a case when not wearing glasses"
+  },
+  "tip4": {
+    ar: "راجع الطبيب كل 6-12 شهر",
+    en: "See your doctor every 6-12 months"
+  },
+  "noPreviousRx": {
+    ar: "لا يوجد سجل وصفات طبية سابقة",
+    en: "No previous prescription records"
+  },
+  "noPreviousRxDescription": {
+    ar: "لم يتم تسجيل أي وصفات طبية سابقة لهذا المريض",
+    en: "No previous prescriptions have been recorded for this patient"
+  },
+  "dataError": {
+    ar: "خطأ في البيانات",
+    en: "Data Error"
+  },
+  "fillAllRequiredFields": {
+    ar: "يرجى ملء جميع الحقول المطلوبة",
+    en: "Please fill all required fields"
   }
 };
 

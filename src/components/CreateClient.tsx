@@ -13,9 +13,11 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensForm } from "@/components/ContactLensForm";
+import { useLanguageStore } from "@/store/languageStore";
 
 export const CreateClient: React.FC = () => {
   const addPatient = usePatientStore((state) => state.addPatient);
+  const { t, language } = useLanguageStore();
   
   const [activeTab, setActiveTab] = useState<"glasses" | "contactLenses">("glasses");
   const [name, setName] = useState("");
@@ -125,18 +127,18 @@ export const CreateClient: React.FC = () => {
   // Generate month options
   const generateMonthOptions = () => {
     const months = [
-      { value: 1, text: "يناير" },
-      { value: 2, text: "فبراير" },
-      { value: 3, text: "مارس" },
-      { value: 4, text: "أبريل" },
-      { value: 5, text: "مايو" },
-      { value: 6, text: "يونيو" },
-      { value: 7, text: "يوليو" },
-      { value: 8, text: "أغسطس" },
-      { value: 9, text: "سبتمبر" },
-      { value: 10, text: "أكتوبر" },
-      { value: 11, text: "نوفمبر" },
-      { value: 12, text: "ديسمبر" }
+      { value: 1, text: t("january") },
+      { value: 2, text: t("february") },
+      { value: 3, text: t("march") },
+      { value: 4, text: t("april") },
+      { value: 5, text: t("may") },
+      { value: 6, text: t("june") },
+      { value: 7, text: t("july") },
+      { value: 8, text: t("august") },
+      { value: 9, text: t("september") },
+      { value: 10, text: t("october") },
+      { value: 11, text: t("november") },
+      { value: 12, text: t("december") }
     ];
     
     return months.map(month => (
@@ -165,8 +167,8 @@ export const CreateClient: React.FC = () => {
     
     if (!name.trim()) {
       toast({
-        title: "خطأ",
-        description: "حقل الاسم مطلوب.",
+        title: t("error"),
+        description: t("requiredField"),
         variant: "destructive"
       });
       return;
@@ -229,8 +231,8 @@ export const CreateClient: React.FC = () => {
     }
     
     toast({
-      title: "تم الحفظ",
-      description: "تم حفظ بيانات العميل بنجاح."
+      title: t("success"),
+      description: t("successMessage")
     });
     
     // Reset form
@@ -260,7 +262,7 @@ export const CreateClient: React.FC = () => {
   
   return (
     <div className="py-4">
-      <h2 className="text-2xl font-bold mb-4">إنشاء عميل</h2>
+      <h2 className="text-2xl font-bold mb-4">{t("createClientTitle")}</h2>
       
       <Tabs defaultValue="glasses" value={activeTab} onValueChange={(value) => setActiveTab(value as "glasses" | "contactLenses")}>
         <TabsList className="mb-6 w-full md:w-auto bg-slate-100 border-slate-200 p-1 shadow-md">
@@ -268,13 +270,13 @@ export const CreateClient: React.FC = () => {
             value="glasses" 
             className="px-8 py-3 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-white"
           >
-            نظارات طبية
+            {t("prescriptionGlasses")}
           </TabsTrigger>
           <TabsTrigger 
             value="contactLenses" 
             className="px-8 py-3 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-white"
           >
-            عدسات لاصقة
+            {t("contactLensesTab")}
           </TabsTrigger>
         </TabsList>
       
@@ -282,32 +284,32 @@ export const CreateClient: React.FC = () => {
           {/* Left: Patient Information - Switched from right to left */}
           <div className="order-2 md:order-2 bg-card rounded-md p-4 border">
             <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
-              المعلومات الشخصية
+              {t("personalInfo")}
             </div>
             
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">الاسم</Label>
+                <Label htmlFor="name">{t("name")}</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="الاسم الكامل"
+                  placeholder={t("fullName")}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="phone">الهاتف</Label>
+                <Label htmlFor="phone">{t("phone")}</Label>
                 <Input
                   id="phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="رقم الهاتف"
+                  placeholder={t("phoneNumber")}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="dob">تاريخ الميلاد</Label>
+                <Label htmlFor="dob">{t("dateOfBirth")}</Label>
                 <div className="grid grid-cols-3 gap-2">
                   <select
                     id="dobDay"
@@ -316,7 +318,7 @@ export const CreateClient: React.FC = () => {
                     onChange={(e) => setDobDay(e.target.value)}
                     disabled={noDob}
                   >
-                    <option value="" disabled>اليوم</option>
+                    <option value="" disabled>{t("day")}</option>
                     {generateDayOptions()}
                   </select>
                   <select
@@ -326,7 +328,7 @@ export const CreateClient: React.FC = () => {
                     onChange={(e) => setDobMonth(e.target.value)}
                     disabled={noDob}
                   >
-                    <option value="" disabled>الشهر</option>
+                    <option value="" disabled>{t("month")}</option>
                     {generateMonthOptions()}
                   </select>
                   <select
@@ -336,7 +338,7 @@ export const CreateClient: React.FC = () => {
                     onChange={(e) => setDobYear(e.target.value)}
                     disabled={noDob}
                   >
-                    <option value="" disabled>السنة</option>
+                    <option value="" disabled>{t("year")}</option>
                     {generateYearOptions()}
                   </select>
                 </div>
@@ -351,18 +353,18 @@ export const CreateClient: React.FC = () => {
                     htmlFor="noDobCheck" 
                     className="font-normal text-sm"
                   >
-                    لم يشارك العميل بتاريخ الميلاد
+                    {t("clientDidntShareDOB")}
                   </Label>
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="notes">ملاحظات</Label>
+                <Label htmlFor="notes">{t("notes")}</Label>
                 <Textarea
                   id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="ملاحظات أو تفضيلات العميل"
+                  placeholder={t("clientNotesPreferences")}
                 />
               </div>
             </div>
@@ -373,11 +375,11 @@ export const CreateClient: React.FC = () => {
             <TabsContent value="glasses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
                 <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
-                  وصفات النظارات
+                  {t("glassesPrescription")}
                 </div>
                 
                 <div className="mb-4">
-                  <Label htmlFor="rxDate">تاريخ الوصفة الطبية</Label>
+                  <Label htmlFor="rxDate">{t("prescriptionDate")}</Label>
                   <div className="mt-1">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -386,7 +388,7 @@ export const CreateClient: React.FC = () => {
                           className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
                         >
                           <CalendarIcon className="ml-2 h-4 w-4" />
-                          {rxDate ? format(rxDate, "PPP") : "اختر تاريخ الوصفة"}
+                          {rxDate ? format(rxDate, "PPP") : t("choosePrescriptionDate")}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -414,14 +416,14 @@ export const CreateClient: React.FC = () => {
                     </thead>
                     <tbody>
                       <tr>
-                        <th className="text-center border border-border bg-muted p-2">OD (يمين)</th>
+                        <th className="text-center border border-border bg-muted p-2">OD ({t("right")})</th>
                         <td className="border border-border p-1">
                           <select
                             className="w-full p-1 rounded-md border-input bg-background"
                             value={sphOD}
                             onChange={(e) => setSphOD(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{t("choose")}</option>
                             {generateSphOptions()}
                           </select>
                         </td>
@@ -431,7 +433,7 @@ export const CreateClient: React.FC = () => {
                             value={cylOD}
                             onChange={(e) => setCylOD(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{t("choose")}</option>
                             {generateCylOptions()}
                           </select>
                         </td>
@@ -441,7 +443,7 @@ export const CreateClient: React.FC = () => {
                             value={axisOD}
                             onChange={(e) => setAxisOD(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{t("choose")}</option>
                             {generateAxisOptions()}
                           </select>
                         </td>
@@ -451,20 +453,20 @@ export const CreateClient: React.FC = () => {
                             value={addOD}
                             onChange={(e) => setAddOD(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{t("choose")}</option>
                             {generateAddOptions()}
                           </select>
                         </td>
                       </tr>
                       <tr>
-                        <th className="text-center border border-border bg-muted p-2">OS (يسار)</th>
+                        <th className="text-center border border-border bg-muted p-2">OS ({t("left")})</th>
                         <td className="border border-border p-1">
                           <select
                             className="w-full p-1 rounded-md border-input bg-background"
                             value={sphOS}
                             onChange={(e) => setSphOS(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{t("choose")}</option>
                             {generateSphOptions()}
                           </select>
                         </td>
@@ -474,7 +476,7 @@ export const CreateClient: React.FC = () => {
                             value={cylOS}
                             onChange={(e) => setCylOS(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{t("choose")}</option>
                             {generateCylOptions()}
                           </select>
                         </td>
@@ -484,7 +486,7 @@ export const CreateClient: React.FC = () => {
                             value={axisOS}
                             onChange={(e) => setAxisOS(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{t("choose")}</option>
                             {generateAxisOptions()}
                           </select>
                         </td>
@@ -494,7 +496,7 @@ export const CreateClient: React.FC = () => {
                             value={addOS}
                             onChange={(e) => setAddOS(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{t("choose")}</option>
                             {generateAddOptions()}
                           </select>
                         </td>
@@ -507,7 +509,7 @@ export const CreateClient: React.FC = () => {
                             value={pdRight}
                             onChange={(e) => setPdRight(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{t("choose")}</option>
                             {generatePdOptions()}
                           </select>
                         </td>
@@ -517,7 +519,7 @@ export const CreateClient: React.FC = () => {
                             value={pdLeft}
                             onChange={(e) => setPdLeft(e.target.value)}
                           >
-                            <option value="" disabled>اختر...</option>
+                            <option value="" disabled>{t("choose")}</option>
                             {generatePdOptions()}
                           </select>
                         </td>
@@ -531,11 +533,11 @@ export const CreateClient: React.FC = () => {
             <TabsContent value="contactLenses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
                 <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
-                  وصفات العدسات اللاصقة
+                  {t("contactLensPrescription")}
                 </div>
                 
                 <div className="mb-4">
-                  <Label htmlFor="contactRxDate">تاريخ الوصفة الطبية</Label>
+                  <Label htmlFor="contactRxDate">{t("prescriptionDate")}</Label>
                   <div className="mt-1">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -544,7 +546,7 @@ export const CreateClient: React.FC = () => {
                           className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
                         >
                           <CalendarIcon className="ml-2 h-4 w-4" />
-                          {rxDate ? format(rxDate, "PPP") : "اختر تاريخ الوصفة"}
+                          {rxDate ? format(rxDate, "PPP") : t("choosePrescriptionDate")}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -573,7 +575,7 @@ export const CreateClient: React.FC = () => {
         className="mt-6" 
         onClick={handleSubmit}
       >
-        حفظ ومتابعة
+        {t("saveAndContinue")}
       </Button>
     </div>
   );
