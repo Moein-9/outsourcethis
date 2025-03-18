@@ -17,9 +17,10 @@ export const LanguageToggle: React.FC = () => {
       size="sm" 
       onClick={toggleLanguage}
       className="flex items-center gap-1.5"
+      title={language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
     >
       <Globe className="h-3.5 w-3.5" />
-      <span>{language === 'ar' ? 'EN' : 'عربي'}</span>
+      <span>{language === 'ar' ? 'English' : 'العربية'}</span>
     </Button>
   );
 };
