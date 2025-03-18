@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
 import { useInvoiceStore } from "@/store/invoiceStore";
+import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 
 const CreateInvoice: React.FC = () => {
+  const { t, language } = useLanguageStore();
   const searchPatients = usePatientStore((state) => state.searchPatients);
   const searchFrames = useInventoryStore((state) => state.searchFrames);
   const addFrame = useInventoryStore((state) => state.addFrame);
@@ -127,8 +129,8 @@ const CreateInvoice: React.FC = () => {
   const handlePatientSearch = () => {
     if (!patientSearch.trim()) {
       toast({
-        title: "خطأ",
-        description: "الرجاء إدخال رقم الهاتف للبحث.",
+        title: t('error'),
+        description: t('phoneSearchError'),
         variant: "destructive"
       });
       return;
@@ -139,7 +141,7 @@ const CreateInvoice: React.FC = () => {
     
     if (results.length === 0) {
       toast({
-        description: "لم يتم العثور على عملاء بهذا الرقم.",
+        description: t('noClientsFound'),
       });
     }
   };
@@ -147,8 +149,8 @@ const CreateInvoice: React.FC = () => {
   const handleFrameSearch = () => {
     if (!frameSearch.trim()) {
       toast({
-        title: "خطأ",
-        description: "الرجاء إدخال كلمات البحث.",
+        title: t('error'),
+        description: t('searchTermError'),
         variant: "destructive"
       });
       return;
@@ -159,7 +161,7 @@ const CreateInvoice: React.FC = () => {
     
     if (results.length === 0) {
       toast({
-        description: "لم يتم العثور على إطار.",
+        description: t('noFramesFound'),
       });
     }
   };
@@ -205,8 +207,8 @@ const CreateInvoice: React.FC = () => {
   const handleAddNewFrame = () => {
     if (!newBrand || !newModel || !newColor || !newPrice) {
       toast({
-        title: "خطأ",
-        description: "الرجاء إدخال تفاصيل الإطار.",
+        title: t('error'),
+        description: t('frameDetailsError'),
         variant: "destructive"
       });
       return;
@@ -217,8 +219,8 @@ const CreateInvoice: React.FC = () => {
     
     if (isNaN(price) || price <= 0) {
       toast({
-        title: "خطأ",
-        description: "الرجاء إدخال سعر صحيح.",
+        title: t('error'),
+        description: t('priceError'),
         variant: "destructive"
       });
       return;
@@ -226,8 +228,8 @@ const CreateInvoice: React.FC = () => {
     
     if (isNaN(qty) || qty <= 0) {
       toast({
-        title: "خطأ",
-        description: "الرجاء إدخال كمية صحيحة.",
+        title: t('error'),
+        description: t('quantityError'),
         variant: "destructive"
       });
       return;
@@ -259,7 +261,7 @@ const CreateInvoice: React.FC = () => {
     setNewQty("1");
     
     toast({
-      description: "تم إضافة الإطار بنجاح.",
+      description: t('frameAddedSuccess'),
     });
   };
   
@@ -298,7 +300,7 @@ const CreateInvoice: React.FC = () => {
       setRemaining(Math.max(0, lensesTotal - discount - deposit));
       
       toast({
-        description: `تم تحديث العدسات اللاصقة (${selection.items.length} عدسة)`,
+        description: `${t('contactLensesTotal')} (${selection.items.length} ${t('lensCount')})`,
       });
     }
   };
@@ -317,8 +319,8 @@ const CreateInvoice: React.FC = () => {
       patientId = currentPatient.patientId;
     } else {
       toast({
-        title: "خطأ",
-        description: "الرجاء اختيار عميل أو تفعيل الخيار 'لا يوجد ملف عميل'.",
+        title: t('error'),
+        description: t('clientSelectionError'),
         variant: "destructive"
       });
       return;
@@ -327,8 +329,8 @@ const CreateInvoice: React.FC = () => {
     if (invoiceType === "glasses") {
       if (!selectedLensType && !skipFrame) {
         toast({
-          title: "خطأ",
-          description: "الرجاء اختيار نوع العدسة.",
+          title: t('error'),
+          description: t('lensSelectionError'),
           variant: "destructive"
         });
         return;
@@ -336,8 +338,8 @@ const CreateInvoice: React.FC = () => {
       
       if (!skipFrame && (!selectedFrame.brand || !selectedFrame.model)) {
         toast({
-          title: "خطأ",
-          description: "الرجاء اختيار إطار أو تفعيل خيار 'عدسات فقط'.",
+          title: t('error'),
+          description: t('frameSelectionError'),
           variant: "destructive"
         });
         return;
@@ -345,8 +347,8 @@ const CreateInvoice: React.FC = () => {
     } else {
       if (contactLensItems.length === 0) {
         toast({
-          title: "خطأ",
-          description: "الرجاء اختيار عدسة لاصقة واحدة على الأقل.",
+          title: t('error'),
+          description: t('contactLensSelectionError'),
           variant: "destructive"
         });
         return;
@@ -355,14 +357,14 @@ const CreateInvoice: React.FC = () => {
     
     if (!paymentMethod) {
       toast({
-        title: "خطأ",
-        description: "الرجاء اختيار طريقة الدفع.",
+        title: t('error'),
+        description: t('paymentMethodError'),
         variant: "destructive"
       });
       return;
     }
     
-    const paymentDetails = (paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") 
+    const paymentDetails = (paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت" || paymentMethod === "KNET") 
       ? { authNumber } 
       : {};
     
@@ -427,8 +429,8 @@ const CreateInvoice: React.FC = () => {
     const invoiceId = addInvoice(invoiceData);
     
     toast({
-      title: "تم الحفظ",
-      description: `تم حفظ الفاتورة برقم ${invoiceId} بنجاح.`,
+      title: t('success'),
+      description: `${t('invoiceSavedSuccess')} ${invoiceId}.`,
     });
     
     resetForm();
@@ -513,12 +515,16 @@ const CreateInvoice: React.FC = () => {
     authNumber: authNumber
   };
   
+  // Get the appropriate text direction based on current language
+  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  
   return (
     <div className="py-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-right">
+        <h2 className={`text-2xl font-bold flex items-center gap-2 ${textAlignClass}`}>
           <FileText className="w-6 h-6 text-primary" />
-          إنشاء فاتورة
+          {t('invoiceTitle')}
         </h2>
         <Tabs 
           value={invoiceType} 
@@ -531,14 +537,14 @@ const CreateInvoice: React.FC = () => {
               className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-primary data-[state=active]:text-white"
             >
               <Glasses className="w-5 h-5" />
-              نظارات
+              {t('glasses')}
             </TabsTrigger>
             <TabsTrigger 
               value="contacts" 
               className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-primary data-[state=active]:text-white"
             >
               <Eye className="w-5 h-5" />
-              عدسات لاصقة
+              {t('contacts')}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -548,11 +554,11 @@ const CreateInvoice: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-lg p-6 border shadow-sm">
             <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
-              <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+              <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
                 <User className="w-5 h-5" />
-                ١) بيانات العميل
+                {t('clientSection')}
               </h3>
-              <div className="flex items-center space-x-2 space-x-reverse">
+              <div className={`flex items-center ${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
                 <Checkbox 
                   id="skipPatientCheck" 
                   checked={skipPatient} 
@@ -560,9 +566,9 @@ const CreateInvoice: React.FC = () => {
                 />
                 <Label 
                   htmlFor="skipPatientCheck" 
-                  className="font-normal text-sm mr-2"
+                  className={`font-normal text-sm ${language === 'ar' ? 'mr-2' : 'ml-2'}`}
                 >
-                  لا يوجد ملف عميل
+                  {t('noClientFile')}
                 </Label>
               </div>
             </div>
@@ -571,18 +577,18 @@ const CreateInvoice: React.FC = () => {
               <>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="patientSearch" className="text-muted-foreground block text-right">رقم الهاتف:</Label>
-                    <div className="flex space-x-2 space-x-reverse">
+                    <Label htmlFor="patientSearch" className={`text-muted-foreground block ${textAlignClass}`}>{t('phoneColon')}</Label>
+                    <div className={`flex ${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
                       <Input
                         id="patientSearch"
                         value={patientSearch}
                         onChange={(e) => setPatientSearch(e.target.value)}
-                        placeholder="اكتب للبحث..."
-                        className="flex-1 text-right"
+                        placeholder={t('typeToSearch')}
+                        className={`flex-1 ${textAlignClass}`}
                       />
                       <Button onClick={handlePatientSearch} className="gap-1">
                         <Search className="w-4 h-4" />
-                        بحث
+                        {t('search')}
                       </Button>
                     </div>
                   </div>
@@ -595,8 +601,8 @@ const CreateInvoice: React.FC = () => {
                           className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
                           onClick={() => selectPatient(patient)}
                         >
-                          <div className="font-medium text-right">{patient.name}</div>
-                          <div className="text-sm text-muted-foreground text-right">{patient.phone}</div>
+                          <div className={`font-medium ${textAlignClass}`}>{patient.name}</div>
+                          <div className={`text-sm text-muted-foreground ${textAlignClass}`}>{patient.phone}</div>
                         </div>
                       ))}
                     </div>
@@ -605,16 +611,16 @@ const CreateInvoice: React.FC = () => {
                   {currentPatient && (
                     <div className="mt-4">
                       <div className="border-2 border-primary/20 rounded-lg p-4 bg-primary/5">
-                        <div className="flex justify-between mb-2 text-right">
-                          <span className="font-semibold">اسم العميل:</span>
+                        <div className={`flex justify-between mb-2 ${textAlignClass}`}>
+                          <span className="font-semibold">{t('clientName')}:</span>
                           <span>{currentPatient.name}</span>
                         </div>
-                        <div className="flex justify-between mb-2 text-right">
-                          <span className="font-semibold">الهاتف:</span>
+                        <div className={`flex justify-between mb-2 ${textAlignClass}`}>
+                          <span className="font-semibold">{t('clientPhone')}:</span>
                           <span dir="ltr">{currentPatient.phone}</span>
                         </div>
-                        <div className="flex justify-between text-right">
-                          <span className="font-semibold">Patient ID:</span>
+                        <div className={`flex justify-between ${textAlignClass}`}>
+                          <span className="font-semibold">{t('patientID')}:</span>
                           <span>{currentPatient.patientId || "N/A"}</span>
                         </div>
                       </div>
@@ -626,13 +632,13 @@ const CreateInvoice: React.FC = () => {
                       >
                         {rxVisible ? (
                           <>
-                            <EyeOff className="w-4 h-4 ml-1" />
-                            إخفاء الوصفة
+                            <EyeOff className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                            {t('hideRx')}
                           </>
                         ) : (
                           <>
-                            <Eye className="w-4 h-4 ml-1" />
-                            عرض الوصفة
+                            <Eye className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                            {t('showRx')}
                           </>
                         )}
                       </Button>
@@ -642,17 +648,17 @@ const CreateInvoice: React.FC = () => {
                           <table className="w-full border-collapse ltr">
                             <thead>
                               <tr className="bg-muted/50">
-                                <th className="p-2 border text-center">العين</th>
-                                <th className="p-2 border text-center">Sphere</th>
-                                <th className="p-2 border text-center">Cyl</th>
-                                <th className="p-2 border text-center">Axis</th>
-                                <th className="p-2 border text-center">Add</th>
-                                <th className="p-2 border text-center">PD</th>
+                                <th className="p-2 border text-center">{t('eye')}</th>
+                                <th className="p-2 border text-center">{t('sphere')}</th>
+                                <th className="p-2 border text-center">{t('cylinder')}</th>
+                                <th className="p-2 border text-center">{t('axis')}</th>
+                                <th className="p-2 border text-center">{t('addition')}</th>
+                                <th className="p-2 border text-center">{t('pdRight')}</th>
                               </tr>
                             </thead>
                             <tbody>
                               <tr>
-                                <td className="p-2 border font-bold text-center">OD (يمين)</td>
+                                <td className="p-2 border font-bold text-center">{t('rightEyeAbbr')}</td>
                                 <td className="p-2 border text-center">{currentPatient.rx.sphereOD || "—"}</td>
                                 <td className="p-2 border text-center">{currentPatient.rx.cylOD || "—"}</td>
                                 <td className="p-2 border text-center">{currentPatient.rx.axisOD || "—"}</td>
@@ -660,7 +666,7 @@ const CreateInvoice: React.FC = () => {
                                 <td className="p-2 border text-center">{currentPatient.rx.pdRight || "—"}</td>
                               </tr>
                               <tr>
-                                <td className="p-2 border font-bold text-center">OS (يسار)</td>
+                                <td className="p-2 border font-bold text-center">{t('leftEyeAbbr')}</td>
                                 <td className="p-2 border text-center">{currentPatient.rx.sphereOS || "—"}</td>
                                 <td className="p-2 border text-center">{currentPatient.rx.cylOS || "—"}</td>
                                 <td className="p-2 border text-center">{currentPatient.rx.axisOS || "—"}</td>
@@ -688,21 +694,21 @@ const CreateInvoice: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="manualName" className="text-muted-foreground block text-right">اسم العميل (اختياري):</Label>
+                  <Label htmlFor="manualName" className={`text-muted-foreground block ${textAlignClass}`}>{t('clientName')} ({t('optional')}):</Label>
                   <Input
                     id="manualName"
                     value={manualName}
                     onChange={(e) => setManualName(e.target.value)}
-                    className="text-right"
+                    className={textAlignClass}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="manualPhone" className="text-muted-foreground block text-right">هاتف العميل (اختياري):</Label>
+                  <Label htmlFor="manualPhone" className={`text-muted-foreground block ${textAlignClass}`}>{t('clientPhone')} ({t('optional')}):</Label>
                   <Input
                     id="manualPhone"
                     value={manualPhone}
                     onChange={(e) => setManualPhone(e.target.value)}
-                    className="text-right"
+                    className={textAlignClass}
                   />
                 </div>
                 
@@ -720,9 +726,9 @@ const CreateInvoice: React.FC = () => {
             <>
               <div className="bg-white rounded-lg p-6 border shadow-sm">
                 <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
-                  <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                  <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
                     <Eye className="w-5 h-5" />
-                    ٢) العدسات الطبية
+                    {t('lensSection')}
                   </h3>
                 </div>
                 
@@ -737,26 +743,26 @@ const CreateInvoice: React.FC = () => {
               {!skipFrame && (
                 <div className="bg-white rounded-lg p-6 border shadow-sm">
                   <div className="border-b border-primary/30 pb-3 mb-4">
-                    <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                    <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
                       <Glasses className="w-5 h-5" />
-                      ٣) الإطار
+                      {t('frameSection')}
                     </h3>
                   </div>
                   
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="frameSearchBox" className="text-muted-foreground block text-right">بحث (Brand/Model/Color/Size):</Label>
-                      <div className="flex space-x-2 space-x-reverse">
+                      <Label htmlFor="frameSearchBox" className={`text-muted-foreground block ${textAlignClass}`}>{t('searchTerm')}</Label>
+                      <div className={`flex ${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
                         <Input
                           id="frameSearchBox"
                           value={frameSearch}
                           onChange={(e) => setFrameSearch(e.target.value)}
-                          placeholder="مثال: RayBan..."
-                          className="flex-1 text-right"
+                          placeholder={t('searchExample')}
+                          className={`flex-1 ${textAlignClass}`}
                         />
                         <Button onClick={handleFrameSearch} className="gap-1">
                           <Search className="w-4 h-4" />
-                          بحث
+                          {t('search')}
                         </Button>
                       </div>
                     </div>
@@ -766,12 +772,12 @@ const CreateInvoice: React.FC = () => {
                         <table className="w-full border-collapse">
                           <thead>
                             <tr className="bg-muted/50">
-                              <th className="p-2 border">Brand</th>
-                              <th className="p-2 border">Model</th>
-                              <th className="p-2 border">Color</th>
-                              <th className="p-2 border">Size</th>
-                              <th className="p-2 border">Price (KWD)</th>
-                              <th className="p-2 border">Qty</th>
+                              <th className="p-2 border">{t('brand')}</th>
+                              <th className="p-2 border">{t('model')}</th>
+                              <th className="p-2 border">{t('color')}</th>
+                              <th className="p-2 border">{t('size')}</th>
+                              <th className="p-2 border">{t('price')} ({t('kwd')})</th>
+                              <th className="p-2 border">{t('quantity')}</th>
                               <th className="p-2 border"></th>
                             </tr>
                           </thead>
@@ -794,8 +800,8 @@ const CreateInvoice: React.FC = () => {
                                     onClick={() => selectFrame(frame)}
                                     className="w-full"
                                   >
-                                    <Plus className="w-4 h-4 mr-1" />
-                                    اختر
+                                    <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                                    {t('choose')}
                                   </Button>
                                 </td>
                               </tr>
@@ -807,27 +813,27 @@ const CreateInvoice: React.FC = () => {
                     
                     {selectedFrame.brand && (
                       <div className="mt-4 p-3 border rounded-lg bg-primary/5 border-primary/20">
-                        <h4 className="font-medium text-primary mb-2 flex items-center">
-                          <PackageCheck className="w-4 h-4 mr-1" />
-                          الإطار المختار
+                        <h4 className={`font-medium text-primary mb-2 flex items-center ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
+                          <PackageCheck className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                          {t('selectedFrame')}
                         </h4>
                         <table className="w-full">
                           <thead>
                             <tr className="border-b">
-                              <th className="p-1 text-right text-muted-foreground text-sm">Brand</th>
-                              <th className="p-1 text-right text-muted-foreground text-sm">Model</th>
-                              <th className="p-1 text-right text-muted-foreground text-sm">Color</th>
-                              <th className="p-1 text-right text-muted-foreground text-sm">Size</th>
-                              <th className="p-1 text-right text-muted-foreground text-sm">Price (KWD)</th>
+                              <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('brand')}</th>
+                              <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('model')}</th>
+                              <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('color')}</th>
+                              <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('size')}</th>
+                              <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('price')} ({t('kwd')})</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <td className="p-1 text-right">{selectedFrame.brand}</td>
-                              <td className="p-1 text-right">{selectedFrame.model}</td>
-                              <td className="p-1 text-right">{selectedFrame.color}</td>
-                              <td className="p-1 text-right">{selectedFrame.size}</td>
-                              <td className="p-1 text-right">{selectedFrame.price.toFixed(2)}</td>
+                              <td className={`p-1 ${textAlignClass}`}>{selectedFrame.brand}</td>
+                              <td className={`p-1 ${textAlignClass}`}>{selectedFrame.model}</td>
+                              <td className={`p-1 ${textAlignClass}`}>{selectedFrame.color}</td>
+                              <td className={`p-1 ${textAlignClass}`}>{selectedFrame.size}</td>
+                              <td className={`p-1 ${textAlignClass}`}>{selectedFrame.price.toFixed(2)}</td>
                             </tr>
                           </tbody>
                         </table>
@@ -839,80 +845,80 @@ const CreateInvoice: React.FC = () => {
                       onClick={() => setShowManualFrame(!showManualFrame)}
                       className="w-full"
                     >
-                      <Plus className="w-4 h-4 ml-1" />
-                      إضافة إطار جديد
+                      <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                      {t('addFrameButton')}
                     </Button>
                     
                     {showManualFrame && (
                       <div className="p-4 border rounded-lg mt-2 bg-muted/10">
-                        <h4 className="font-semibold mb-3 text-primary">بيانات الإطار الجديد</h4>
+                        <h4 className={`font-semibold mb-3 text-primary ${textAlignClass}`}>{t('newFrameDetails')}</h4>
                         <div className="space-y-3">
                           <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
-                              <Label htmlFor="newBrand" className="text-muted-foreground">Brand:</Label>
+                              <Label htmlFor="newBrand" className="text-muted-foreground">{t('brand')}:</Label>
                               <Input
                                 id="newBrand"
                                 value={newBrand}
                                 onChange={(e) => setNewBrand(e.target.value)}
-                                className="text-right"
+                                className={textAlignClass}
                               />
                             </div>
                             <div className="space-y-1">
-                              <Label htmlFor="newModel" className="text-muted-foreground">Model:</Label>
+                              <Label htmlFor="newModel" className="text-muted-foreground">{t('model')}:</Label>
                               <Input
                                 id="newModel"
                                 value={newModel}
                                 onChange={(e) => setNewModel(e.target.value)}
-                                className="text-right"
+                                className={textAlignClass}
                               />
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
-                              <Label htmlFor="newColor" className="text-muted-foreground">Color:</Label>
+                              <Label htmlFor="newColor" className="text-muted-foreground">{t('color')}:</Label>
                               <Input
                                 id="newColor"
                                 value={newColor}
                                 onChange={(e) => setNewColor(e.target.value)}
-                                className="text-right"
+                                className={textAlignClass}
                               />
                             </div>
                             <div className="space-y-1">
-                              <Label htmlFor="newSize" className="text-muted-foreground">Size:</Label>
+                              <Label htmlFor="newSize" className="text-muted-foreground">{t('size')}:</Label>
                               <Input
                                 id="newSize"
                                 value={newSize}
                                 onChange={(e) => setNewSize(e.target.value)}
-                                placeholder="مثال: 51-18-145"
-                                className="text-right"
+                                placeholder={t('searchExample')}
+                                className={textAlignClass}
                               />
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
-                              <Label htmlFor="newPrice" className="text-muted-foreground">Price (KWD):</Label>
+                              <Label htmlFor="newPrice" className="text-muted-foreground">{t('price')} ({t('kwd')}):</Label>
                               <Input
                                 id="newPrice"
                                 type="number"
                                 step="0.01"
                                 value={newPrice}
                                 onChange={(e) => setNewPrice(e.target.value)}
-                                className="text-right"
+                                className={textAlignClass}
                               />
                             </div>
                             <div className="space-y-1">
-                              <Label htmlFor="newQty" className="text-muted-foreground">Qty (عدد القطع):</Label>
+                              <Label htmlFor="newQty" className="text-muted-foreground">{t('quantity')} ({t('pieces')}):</Label>
                               <Input
                                 id="newQty"
                                 type="number"
                                 step="1"
                                 value={newQty}
                                 onChange={(e) => setNewQty(e.target.value)}
-                                className="text-right"
+                                className={textAlignClass}
                               />
                             </div>
                           </div>
-                          <Button onClick={handleAddNewFrame} className="w-full">حفظ الإطار</Button>
+                          <Button onClick={handleAddNewFrame} className="w-full">{t('saveFrame')}</Button>
                         </div>
                       </div>
                     )}
@@ -926,9 +932,9 @@ const CreateInvoice: React.FC = () => {
 
           <div className="bg-white rounded-lg p-6 border shadow-sm">
             <div className="border-b border-primary/30 pb-3 mb-4">
-              <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+              <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
                 <Banknote className="w-5 h-5" />
-                ٤) الخصم والدفعة
+                {t('discountSection')}
               </h3>
             </div>
             
@@ -938,14 +944,14 @@ const CreateInvoice: React.FC = () => {
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <BadgePercent className="w-5 h-5 text-primary" />
                   </div>
-                  <Label htmlFor="discount" className="text-muted-foreground mb-1.5 block text-right">الخصم (د.ك):</Label>
+                  <Label htmlFor="discount" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>{t('discountColon')}</Label>
                   <Input
                     id="discount"
                     type="number"
                     step="0.01"
                     value={discount || ""}
                     onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                    className="pl-10 border-primary/20 focus:border-primary text-right"
+                    className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
                   />
                 </div>
                 
@@ -953,14 +959,14 @@ const CreateInvoice: React.FC = () => {
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <Banknote className="w-5 h-5 text-green-500" />
                   </div>
-                  <Label htmlFor="deposit" className="text-muted-foreground mb-1.5 block text-right">الدفعة (د.ك):</Label>
+                  <Label htmlFor="deposit" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>{t('depositColon')}</Label>
                   <Input
                     id="deposit"
                     type="number"
                     step="0.01"
                     value={deposit || ""}
                     onChange={(e) => setDeposit(parseFloat(e.target.value) || 0)}
-                    className="pl-10 border-primary/20 focus:border-primary text-right"
+                    className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
                   />
                 </div>
               </div>
@@ -970,53 +976,53 @@ const CreateInvoice: React.FC = () => {
                 onClick={handlePayInFull} 
                 className="w-full border-primary/20 hover:bg-primary/5 text-primary hover:text-primary/80"
               >
-                <Banknote className="w-5 h-5 ml-2 text-green-500" />
-                دفع كامل ({total.toFixed(2)} د.ك)
+                <Banknote className={`w-5 h-5 ${language === 'ar' ? 'ml-2' : 'mr-2'} text-green-500`} />
+                {t('payInFull')} ({total.toFixed(2)} {t('kwd')})
               </Button>
             </div>
           </div>
 
           <div className="bg-white rounded-lg p-6 border shadow-sm">
             <div className="border-b border-primary/30 pb-3 mb-4">
-              <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+              <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
                 <CreditCard className="w-5 h-5" />
-                ٥) طريقة الدفع
+                {t('paymentSection')}
               </h3>
             </div>
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div 
                 className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
-                  paymentMethod === "نقداً" 
+                  paymentMethod === language === 'ar' ? "نقداً" : "Cash" 
                     ? "border-primary bg-primary/5 shadow-sm" 
                     : "hover:border-primary/30 hover:bg-muted/10"
                 }`}
-                onClick={() => setPaymentMethod("نقداً")}
+                onClick={() => setPaymentMethod(language === 'ar' ? "نقداً" : "Cash")}
               >
                 <img 
                   src="https://cdn-icons-png.flaticon.com/512/7083/7083125.png" 
-                  alt="Cash" 
-                  title="Cash"
+                  alt={t('cash')} 
+                  title={t('cash')}
                   className="w-12 h-10 object-contain mx-auto mb-2"
                 />
-                <span className="text-sm font-medium">نقداً</span>
+                <span className="text-sm font-medium">{t('cash')}</span>
               </div>
               
               <div 
                 className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
-                  paymentMethod === "كي نت" 
+                  paymentMethod === language === 'ar' ? "كي نت" : "KNET" 
                     ? "border-primary bg-primary/5 shadow-sm" 
                     : "hover:border-primary/30 hover:bg-muted/10"
                 }`}
-                onClick={() => setPaymentMethod("كي نت")}
+                onClick={() => setPaymentMethod(language === 'ar' ? "كي نت" : "KNET")}
               >
                 <img 
                   src="https://kabkg.com/staticsite/images/knet.png" 
-                  alt="KNET" 
-                  title="KNET"
+                  alt={t('knet')} 
+                  title={t('knet')}
                   className="w-12 h-10 object-contain mx-auto mb-2"
                 />
-                <span className="text-sm font-medium">كي نت</span>
+                <span className="text-sm font-medium">{t('knet')}</span>
               </div>
               
               <div 
@@ -1033,7 +1039,7 @@ const CreateInvoice: React.FC = () => {
                   title="Visa"
                   className="w-12 h-10 object-contain mx-auto mb-2 bg-white rounded"
                 />
-                <span className="text-sm font-medium">Visa</span>
+                <span className="text-sm font-medium">{t('visa')}</span>
               </div>
               
               <div 
@@ -1050,13 +1056,13 @@ const CreateInvoice: React.FC = () => {
                   title="MasterCard"
                   className="w-12 h-10 object-contain mx-auto mb-2 bg-white rounded"
                 />
-                <span className="text-sm font-medium">MasterCard</span>
+                <span className="text-sm font-medium">{t('mastercard')}</span>
               </div>
             </div>
             
-            {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") && (
+            {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت" || paymentMethod === "KNET") && (
               <div className="mt-4 space-y-2">
-                <Label htmlFor="authNumber" className="text-muted-foreground block text-right">رقم الموافقة (Authorization No.):</Label>
+                <Label htmlFor="authNumber" className={`text-muted-foreground block ${textAlignClass}`}>{t('approvalNumber')}:</Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <CardIcon className="w-5 h-5 text-primary" />
@@ -1066,7 +1072,7 @@ const CreateInvoice: React.FC = () => {
                     value={authNumber}
                     onChange={(e) => setAuthNumber(e.target.value)}
                     placeholder="xxxxxx"
-                    className="pl-10 text-right"
+                    className={`pl-10 ${textAlignClass}`}
                   />
                 </div>
               </div>
@@ -1079,17 +1085,17 @@ const CreateInvoice: React.FC = () => {
                 onClick={handlePrintWorkOrder}
               >
                 <Printer className="w-4 h-4" />
-                طباعة أمر العمل
+                {t('printWorkOrder')}
               </Button>
               
-              <div className="space-x-2 space-x-reverse">
+              <div className={`${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
                 <Button 
                   variant="outline" 
                   className="flex items-center gap-2"
                   onClick={() => setInvoicePrintOpen(true)}
                 >
                   <Receipt className="w-4 h-4" />
-                  معاينة الفاتورة
+                  {t('previewInvoice')}
                 </Button>
                 
                 <Button 
@@ -1097,7 +1103,7 @@ const CreateInvoice: React.FC = () => {
                   onClick={handleSaveInvoice}
                 >
                   <ExternalLink className="w-4 h-4" />
-                  حفظ وطباعة
+                  {t('saveAndPrint')}
                 </Button>
               </div>
             </div>
@@ -1106,85 +1112,85 @@ const CreateInvoice: React.FC = () => {
         
         <div className="space-y-5">
           <div className="bg-white rounded-lg p-6 border shadow-sm sticky top-5">
-            <h3 className="text-lg font-semibold mb-4 text-primary flex items-center gap-2">
+            <h3 className={`text-lg font-semibold mb-4 text-primary flex items-center gap-2 ${textAlignClass}`}>
               <FileText className="w-5 h-5" />
-              ملخص الفاتورة
+              {t('invoiceSummary')}
             </h3>
             
             <div className="space-y-3">
               {invoiceType === "glasses" ? (
                 <>
                   {selectedLensType && (
-                    <div className="flex justify-between text-right">
-                      <span className="text-muted-foreground">العدسة:</span>
+                    <div className={`flex justify-between ${textAlignClass}`}>
+                      <span className="text-muted-foreground">{t('lensType')}:</span>
                       <span className="font-medium">{selectedLensType.name}</span>
                     </div>
                   )}
                   
                   {selectedLensType?.price > 0 && (
-                    <div className="flex justify-between text-right">
-                      <span className="text-muted-foreground">سعر العدسة:</span>
-                      <span>{selectedLensType.price.toFixed(2)} د.ك</span>
+                    <div className={`flex justify-between ${textAlignClass}`}>
+                      <span className="text-muted-foreground">{t('lensTotal')}:</span>
+                      <span>{selectedLensType.price.toFixed(2)} {t('kwd')}</span>
                     </div>
                   )}
                   
                   {selectedCoating && (
-                    <div className="flex justify-between text-right">
-                      <span className="text-muted-foreground">الطلاء:</span>
+                    <div className={`flex justify-between ${textAlignClass}`}>
+                      <span className="text-muted-foreground">{t('coatingType')}:</span>
                       <span className="font-medium">{selectedCoating.name}</span>
                     </div>
                   )}
                   
                   {selectedCoating?.price > 0 && (
-                    <div className="flex justify-between text-right">
-                      <span className="text-muted-foreground">سعر الطلاء:</span>
-                      <span>{selectedCoating.price.toFixed(2)} د.ك</span>
+                    <div className={`flex justify-between ${textAlignClass}`}>
+                      <span className="text-muted-foreground">{t('coatingTotal')}:</span>
+                      <span>{selectedCoating.price.toFixed(2)} {t('kwd')}</span>
                     </div>
                   )}
                   
                   {!skipFrame && selectedFrame.brand && (
                     <>
-                      <div className="flex justify-between text-right">
-                        <span className="text-muted-foreground">الإطار:</span>
+                      <div className={`flex justify-between ${textAlignClass}`}>
+                        <span className="text-muted-foreground">{t('frameBrand')}:</span>
                         <span className="font-medium">{selectedFrame.brand} {selectedFrame.model}</span>
                       </div>
-                      <div className="flex justify-between text-right">
-                        <span className="text-muted-foreground">سعر الإطار:</span>
-                        <span>{selectedFrame.price.toFixed(2)} د.ك</span>
+                      <div className={`flex justify-between ${textAlignClass}`}>
+                        <span className="text-muted-foreground">{t('frameTotal')}:</span>
+                        <span>{selectedFrame.price.toFixed(2)} {t('kwd')}</span>
                       </div>
                     </>
                   )}
                   
                   {discount > 0 && (
-                    <div className="flex justify-between text-rose-500 text-right">
-                      <span>الخصم:</span>
-                      <span>- {discount.toFixed(2)} د.ك</span>
+                    <div className={`flex justify-between text-rose-500 ${textAlignClass}`}>
+                      <span>{t('discount')}:</span>
+                      <span>- {discount.toFixed(2)} {t('kwd')}</span>
                     </div>
                   )}
                   
-                  {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") && authNumber && (
-                    <div className="flex justify-between text-right">
-                      <span className="text-muted-foreground">رقم الموافقة:</span>
+                  {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت" || paymentMethod === "KNET") && authNumber && (
+                    <div className={`flex justify-between ${textAlignClass}`}>
+                      <span className="text-muted-foreground">{t('approvalNumberLabel')}</span>
                       <span>{authNumber}</span>
                     </div>
                   )}
                   
                   <div className="pt-2 border-t">
-                    <div className="flex justify-between font-bold text-lg text-right">
-                      <span>المجموع:</span>
-                      <span>{total.toFixed(2)} د.ك</span>
+                    <div className={`flex justify-between font-bold text-lg ${textAlignClass}`}>
+                      <span>{t('paymentTotalLabel')}</span>
+                      <span>{total.toFixed(2)} {t('kwd')}</span>
                     </div>
                     
                     {deposit > 0 && (
                       <>
-                        <div className="flex justify-between text-green-600 mt-1 text-right">
-                          <span>المدفوع:</span>
-                          <span>{deposit.toFixed(2)} د.ك</span>
+                        <div className={`flex justify-between text-green-600 mt-1 ${textAlignClass}`}>
+                          <span>{t('paidLabel')}</span>
+                          <span>{deposit.toFixed(2)} {t('kwd')}</span>
                         </div>
                         
-                        <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t text-right">
-                          <span>المتبقي:</span>
-                          <span>{remaining.toFixed(2)} د.ك</span>
+                        <div className={`flex justify-between font-bold text-lg mt-2 pt-2 border-t ${textAlignClass}`}>
+                          <span>{t('remainingLabel')}</span>
+                          <span>{remaining.toFixed(2)} {t('kwd')}</span>
                         </div>
                       </>
                     )}
@@ -1194,22 +1200,22 @@ const CreateInvoice: React.FC = () => {
                 <>
                   {contactLensItems.length > 0 && (
                     <div className="space-y-2 mb-2">
-                      <div className="flex justify-between text-right">
-                        <span className="text-muted-foreground">العدسات اللاصقة:</span>
-                        <span className="font-medium">{contactLensItems.length} عدسة</span>
+                      <div className={`flex justify-between ${textAlignClass}`}>
+                        <span className="text-muted-foreground">{t('contactLenses')}:</span>
+                        <span className="font-medium">{contactLensItems.length} {t('lensCount')}</span>
                       </div>
                       
                       {contactLensItems.map((lens, idx) => (
-                        <div key={idx} className="flex justify-between text-right text-sm">
-                          <span className="text-muted-foreground pl-2">{lens.brand} {lens.type}:</span>
-                          <span>{lens.price.toFixed(2)} د.ك</span>
+                        <div key={idx} className={`flex justify-between ${textAlignClass} text-sm`}>
+                          <span className={`text-muted-foreground ${language === 'ar' ? 'pl-2' : 'pr-2'}`}>{lens.brand} {lens.type}:</span>
+                          <span>{lens.price.toFixed(2)} {t('kwd')}</span>
                         </div>
                       ))}
                       
                       {contactLensItems.length > 0 && (
-                        <div className="flex justify-between text-right pt-1 border-t border-dashed border-gray-200">
-                          <span className="text-muted-foreground">إجمالي العدسات:</span>
-                          <span className="font-medium">{contactLensItems.reduce((sum, lens) => sum + lens.price, 0).toFixed(2)} د.ك</span>
+                        <div className={`flex justify-between ${textAlignClass} pt-1 border-t border-dashed border-gray-200`}>
+                          <span className="text-muted-foreground">{t('contactLensesTotal')}:</span>
+                          <span className="font-medium">{contactLensItems.reduce((sum, lens) => sum + lens.price, 0).toFixed(2)} {t('kwd')}</span>
                         </div>
                       )}
                     </div>
@@ -1226,12 +1232,12 @@ const CreateInvoice: React.FC = () => {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <ClipboardCheck className="w-5 h-5" />
-              أمر العمل
+              {t('workOrder')}
             </SheetTitle>
             <SheetDescription>
               <Button onClick={handlePrintWorkOrder} className="mt-2">
-                <Printer className="w-4 h-4 mr-2" />
-                طباعة
+                <Printer className={`w-4 h-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                {t('print')}
               </Button>
             </SheetDescription>
           </SheetHeader>
@@ -1247,7 +1253,7 @@ const CreateInvoice: React.FC = () => {
             />
           </div>
           <SheetFooter className="print:hidden mt-4">
-            <Button onClick={() => setWorkOrderPrintOpen(false)}>إغلاق</Button>
+            <Button onClick={() => setWorkOrderPrintOpen(false)}>{t('close')}</Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>
@@ -1257,12 +1263,12 @@ const CreateInvoice: React.FC = () => {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Receipt className="w-5 h-5" />
-              الفاتورة
+              {t('invoice')}
             </SheetTitle>
             <SheetDescription>
               <Button onClick={handlePrintInvoice} className="mt-2">
-                <Printer className="w-4 h-4 mr-2" />
-                طباعة
+                <Printer className={`w-4 h-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                {t('print')}
               </Button>
             </SheetDescription>
           </SheetHeader>
@@ -1273,7 +1279,7 @@ const CreateInvoice: React.FC = () => {
             />
           </div>
           <SheetFooter className="print:hidden mt-4">
-            <Button onClick={() => setInvoicePrintOpen(false)}>إغلاق</Button>
+            <Button onClick={() => setInvoicePrintOpen(false)}>{t('close')}</Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>
@@ -1282,3 +1288,4 @@ const CreateInvoice: React.FC = () => {
 };
 
 export default CreateInvoice;
+
