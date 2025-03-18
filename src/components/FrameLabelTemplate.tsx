@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { QRCodeSVG } from "qrcode.react";
@@ -23,37 +22,11 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
       pageBreakInside: "avoid",
       marginBottom: "5mm" // Space between labels when printing multiple
     }}>
-      {/* Left section (Brand, Model, Color, Size, Price) */}
-      <div style={{
-        width: "60mm",
-        height: "100%",
-        borderRight: "1px solid #000",
-        padding: "2mm",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center"
-      }}>
-        <div style={{
-          fontWeight: "bold",
-          fontSize: "9pt",
-          marginBottom: "1mm"
-        }}>{frame.brand}</div>
-        <div style={{
-          fontSize: "7pt",
-          marginBottom: "1mm"
-        }}>
-          <span style={{ fontWeight: "bold" }}>Model:</span> {frame.model || "-"} <span style={{ fontWeight: "bold" }}>Color:</span> {frame.color || "-"} <span style={{ fontWeight: "bold" }}>Size:</span> {frame.size || "-"}
-        </div>
-        <div style={{
-          fontWeight: "bold",
-          fontSize: "9pt"
-        }}>K.D. {frame.price.toFixed(3)}</div>
-      </div>
-
-      {/* Right section (Logo top, QR bottom right) */}
+      {/* Left section (Logo and QR) - previously right */}
       <div style={{
         width: "40mm",
         height: "100%",
+        borderRight: "1px solid #000",
         padding: "2mm",
         display: "flex",
         flexDirection: "column",
@@ -78,11 +51,11 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
           {frame.frameId}
         </div>
 
-        {/* QR Code - positioned at bottom right */}
+        {/* QR Code - positioned toward center (20mm closer) */}
         <div className="qr-code" style={{
           position: "absolute",
           bottom: "2mm",
-          right: "2mm"
+          right: "-12mm" // Moving it 20mm closer toward center from original position
         }}>
           <QRCodeSVG 
             value={frame.frameId} 
@@ -90,6 +63,32 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
             level="L" // Low error correction to make the QR code smaller but still functional
           />
         </div>
+      </div>
+
+      {/* Right section (Brand, Model, Color, Size, Price) - previously left */}
+      <div style={{
+        width: "60mm",
+        height: "100%",
+        padding: "2mm",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center"
+      }}>
+        <div style={{
+          fontWeight: "bold",
+          fontSize: "9pt",
+          marginBottom: "1mm"
+        }}>{frame.brand}</div>
+        <div style={{
+          fontSize: "7pt",
+          marginBottom: "1mm"
+        }}>
+          <span style={{ fontWeight: "bold" }}>Model:</span> {frame.model || "-"} <span style={{ fontWeight: "bold" }}>Color:</span> {frame.color || "-"} <span style={{ fontWeight: "bold" }}>Size:</span> {frame.size || "-"}
+        </div>
+        <div style={{
+          fontWeight: "bold",
+          fontSize: "9pt"
+        }}>K.D. {frame.price.toFixed(3)}</div>
       </div>
     </div>
   );
@@ -143,11 +142,20 @@ export const usePrintLabel = () => {
             page-break-inside: avoid;
             margin-bottom: 5mm;
           }
-          /* Left section (Brand, Model, Color, Size, Price) */
+          /* Left section (Logo and QR) */
           .left-section {
-            width: 60mm;
+            width: 40mm;
             height: 100%;
             border-right: 1px solid #000;
+            padding: 2mm;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+          }
+          /* Right section (Brand, Model, Color, Size, Price) */
+          .right-section {
+            width: 60mm;
+            height: 100%;
             padding: 2mm;
             display: flex;
             flex-direction: column;
@@ -170,16 +178,7 @@ export const usePrintLabel = () => {
             font-weight: bold;
             font-size: 9pt;
           }
-          /* Right section (Logo top, QR bottom) */
-          .right-section {
-            width: 40mm;
-            height: 100%;
-            padding: 2mm;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-          }
-          /* Logo container (top) */
+          /* Logo container */
           .store-logo {
             display: flex;
             justify-content: center;
@@ -190,11 +189,17 @@ export const usePrintLabel = () => {
             max-height: 5mm;
             width: auto;
           }
-          /* QR code container (bottom right) */
+          /* Frame ID */
+          .frame-id {
+            font-size: 6pt;
+            text-align: center;
+            margin-bottom: 1mm;
+          }
+          /* QR code container */
           .qr-code {
             position: absolute;
             bottom: 2mm;
-            right: 2mm;
+            right: -12mm;
           }
           .qr-code img {
             height: 5mm;
@@ -219,6 +224,15 @@ export const usePrintLabel = () => {
       printContent += `
         <div class="label-container">
           <div class="left-section">
+            <div class="store-logo">
+              <img src="${logoUrl}" alt="Store Logo">
+            </div>
+            <div class="frame-id">${frame.frameId}</div>
+            <div class="qr-code">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">
+            </div>
+          </div>
+          <div class="right-section">
             <div class="brand-name">${frame.brand}</div>
             <div class="detail-info">
               <span class="detail-label">Model:</span> ${frame.model || "-"} 
@@ -226,14 +240,6 @@ export const usePrintLabel = () => {
               <span class="detail-label">Size:</span> ${frame.size || "-"}
             </div>
             <div class="price">K.D. ${frame.price.toFixed(3)}</div>
-          </div>
-          <div class="right-section">
-            <div class="store-logo">
-              <img src="${logoUrl}" alt="Store Logo">
-            </div>
-            <div class="qr-code">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">
-            </div>
           </div>
         </div>
       `;
