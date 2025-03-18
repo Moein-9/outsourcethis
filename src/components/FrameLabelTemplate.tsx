@@ -22,9 +22,9 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
       pageBreakInside: "avoid",
       marginBottom: "5mm" // Space between labels when printing multiple
     }}>
-      {/* Left section (Brand, Size, Price) */}
+      {/* Left section (Brand, Model, Color, Size, Price) */}
       <div style={{
-        width: "50mm",
+        width: "60mm",
         height: "100%",
         borderRight: "1px solid #000",
         padding: "2mm",
@@ -40,16 +40,30 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         <div style={{
           fontSize: "7pt",
           marginBottom: "1mm"
-        }}>{frame.size || "-"}</div>
+        }}>
+          <span style={{ fontWeight: "bold" }}>Model:</span> {frame.model || "-"}
+        </div>
+        <div style={{
+          fontSize: "7pt",
+          marginBottom: "1mm"
+        }}>
+          <span style={{ fontWeight: "bold" }}>Color:</span> {frame.color || "-"}
+        </div>
+        <div style={{
+          fontSize: "7pt",
+          marginBottom: "1mm"
+        }}>
+          <span style={{ fontWeight: "bold" }}>Size:</span> {frame.size || "-"}
+        </div>
         <div style={{
           fontWeight: "bold",
-          fontSize: "10pt"
+          fontSize: "9pt"
         }}>K.D. {frame.price.toFixed(3)}</div>
       </div>
 
       {/* Right section (Logo top, QR bottom) */}
       <div style={{
-        width: "50mm",
+        width: "40mm",
         height: "100%",
         padding: "2mm",
         display: "flex",
@@ -60,7 +74,7 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         {/* Store Logo */}
         <div className="store-logo">
           <img 
-            src="/lovable-uploads/268d32e7-5d4a-4f77-bda8-2566232a44ab.png" 
+            src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" 
             alt="Store Logo" 
             style={{ maxHeight: "6mm", height: "auto" }}
           />
@@ -118,9 +132,9 @@ export const usePrintLabel = () => {
             page-break-inside: avoid;
             margin-bottom: 5mm;
           }
-          /* Left section (Brand, Size, Price) */
+          /* Left section (Brand, Model, Color, Size, Price) */
           .left-section {
-            width: 50mm;
+            width: 60mm;
             height: 100%;
             border-right: 1px solid #000;
             padding: 2mm;
@@ -134,17 +148,20 @@ export const usePrintLabel = () => {
             font-size: 9pt;
             margin-bottom: 1mm;
           }
-          .size-info {
+          .detail-info {
             font-size: 7pt;
             margin-bottom: 1mm;
           }
+          .detail-label {
+            font-weight: bold;
+          }
           .price {
             font-weight: bold;
-            font-size: 10pt;
+            font-size: 9pt;
           }
           /* Right section (Logo top, QR bottom) */
           .right-section {
-            width: 50mm;
+            width: 40mm;
             height: 100%;
             padding: 2mm;
             display: flex;
@@ -187,12 +204,14 @@ export const usePrintLabel = () => {
         <div class="label-container">
           <div class="left-section">
             <div class="brand-name">${frame.brand}</div>
-            <div class="size-info">${frame.size || "-"}</div>
+            <div class="detail-info"><span class="detail-label">Model:</span> ${frame.model || "-"}</div>
+            <div class="detail-info"><span class="detail-label">Color:</span> ${frame.color || "-"}</div>
+            <div class="detail-info"><span class="detail-label">Size:</span> ${frame.size || "-"}</div>
             <div class="price">K.D. ${frame.price.toFixed(3)}</div>
           </div>
           <div class="right-section">
             <div class="store-logo">
-              <img src="/lovable-uploads/268d32e7-5d4a-4f77-bda8-2566232a44ab.png" alt="Store Logo">
+              <img src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" alt="Store Logo">
             </div>
             <div class="qr-code">
               <img src="https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">

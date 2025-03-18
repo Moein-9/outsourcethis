@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -79,11 +80,34 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
     ? "w-[80mm] mx-auto bg-white p-4 text-[12px] border shadow-sm print:shadow-none" 
     : "w-full bg-white p-4 border rounded-lg shadow-sm";
   
+  // Fix to ensure the print dialog only prompts once
+  const handlePrintInvoice = () => {
+    if (isPrintable) {
+      window.onafterprint = () => {
+        window.onafterprint = null; // Clear handler after first print
+      };
+      window.print();
+    }
+  };
+
+  // For printable invoices, auto-trigger print dialog once component is mounted
+  React.useEffect(() => {
+    if (isPrintable) {
+      // Small delay to ensure the component is fully rendered
+      const timer = setTimeout(handlePrintInvoice, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isPrintable]);
+  
   return (
     <div className={containerClass} style={{ fontFamily: 'Courier New, monospace' }}>
       <div className="text-center border-b pb-3 mb-3">
         <div className="flex justify-center mb-2">
-          <MoenLogo className="w-auto h-16 mb-2" />
+          <img 
+            src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" 
+            alt="Moen Optician" 
+            className="w-auto h-16 mb-2" 
+          />
         </div>
         <h2 className="font-bold text-xl mb-1">{storeInfo.name}</h2>
         <p className="text-sm text-muted-foreground">{storeInfo.address}</p>

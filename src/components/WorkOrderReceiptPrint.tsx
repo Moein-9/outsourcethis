@@ -65,10 +65,28 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     ? invoice.payments.reduce((sum, payment) => sum + payment.amount, 0) 
     : invoice.deposit;
 
+  // Fix to ensure the print dialog only prompts once
+  React.useEffect(() => {
+    // Small delay to ensure the component is fully rendered
+    const timer = setTimeout(() => {
+      window.onafterprint = () => {
+        window.onafterprint = null; // Clear handler after first print
+      };
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div style={{ width: "80mm", fontFamily: "Arial, sans-serif" }} dir={dir} className="print-receipt">
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "10px" }}>
+        <div style={{ marginBottom: "5px" }}>
+          <img 
+            src="/lovable-uploads/41d720a7-f9c6-4e2e-ad9b-1bf22f7969a1.png" 
+            alt="Moen Optician" 
+            style={{ height: "30px", width: "auto", margin: "0 auto" }}
+          />
+        </div>
         <h1 style={{ fontSize: "16px", fontWeight: "bold", margin: "5px 0" }}>
           {t("opticalStoreName")}
         </h1>
