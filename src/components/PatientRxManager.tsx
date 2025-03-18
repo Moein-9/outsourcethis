@@ -21,7 +21,7 @@ import { RxData, usePatientStore } from "@/store/patientStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format, parseISO } from "date-fns";
 import { ar } from "date-fns/locale";
-import { en } from 'date-fns/locale';
+import enUS from "date-fns/locale/en-US";
 import { 
   AlertCircle, 
   FileText, 
@@ -137,7 +137,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   const formatDate = (dateString?: string) => {
     if (!dateString) return language === 'ar' ? "تاريخ غير متوفر" : "Date not available";
     try {
-      return format(parseISO(dateString), "PPP", { locale: language === 'ar' ? ar : en });
+      return format(parseISO(dateString), "PPP", { locale: language === 'ar' ? ar : enUS });
     } catch (error) {
       return language === 'ar' ? "تاريخ غير صالح" : "Invalid date";
     }
