@@ -60,22 +60,43 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     setPrintingInProgress(true);
     
     try {
-      let htmlContent = '';
       const title = selectedFormat === 'a4' ? t("workOrder") : t("receiptFormat");
       
       // Create a temporary container to render the component
       const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
+      tempContainer.style.position = 'fixed';
       tempContainer.style.left = '-9999px';
+      tempContainer.style.visibility = 'hidden';
       document.body.appendChild(tempContainer);
       
-      // Render either WorkOrderPrint or WorkOrderReceiptPrint based on selection
+      // Render the appropriate component
+      const component = selectedFormat === "a4" 
+        ? <WorkOrderPrint 
+            invoice={invoice}
+            patientName={patientName}
+            patientPhone={patientPhone}
+            rx={rx}
+            lensType={lensType}
+            coating={coating}
+            frame={frame}
+            contactLenses={contactLenses}
+            contactLensRx={contactLensRx}
+          />
+        : <WorkOrderReceiptPrint
+            invoice={invoice}
+            patientName={patientName}
+            patientPhone={patientPhone}
+            rx={rx}
+            lensType={lensType}
+            coating={coating}
+            frame={frame}
+            contactLenses={contactLenses}
+            contactLensRx={contactLensRx}
+          />;
+          
+      // Use PrintService directly to render proper document
       if (selectedFormat === "a4") {
-        // Use react to render the work order component
-        const root = document.createElement('div');
-        tempContainer.appendChild(root);
-        
-        // Create the element manually instead of using ReactDOM.render (which is deprecated)
+        // For A4, create element with basic info
         const element = document.createElement('div');
         element.innerHTML = `
           <div style="width: 210mm; padding: 10mm;">
@@ -156,17 +177,19 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             </div>
           </div>
         `;
-        root.appendChild(element);
         
         // Get the HTML content
-        htmlContent = PrintService.prepareA4Document(element.innerHTML, title);
+        const htmlContent = PrintService.prepareA4Document(element.innerHTML, title);
+        // Use the PrintService to print the HTML content with a callback
+        PrintService.printHtml(htmlContent, () => {
+          setPrintingInProgress(false);
+          setIsDialogOpen(false);
+          toast.success(t("printingCompleted"));
+        });
       } else {
-        // Receipt format - smaller and more compact
-        const root = document.createElement('div');
-        tempContainer.appendChild(root);
-        
-        const element = document.createElement('div');
-        element.innerHTML = `
+        // For receipt, we'll render a simple version and let PrintService handle the formatting
+        const receiptElement = document.createElement('div');
+        receiptElement.innerHTML = `
           <div style="width: 80mm; padding: 2mm; text-align: center;">
             <h1 style="font-size: 16px; margin-bottom: 5px;">${t("receiptFormat")}</h1>
             <p style="font-size: 14px;">${t("orderNumber")}: ${invoice.invoiceId}</p>
@@ -199,60 +222,28 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             </div>
           </div>
         `;
-        root.appendChild(element);
         
         // Get the HTML content
-        htmlContent = PrintService.prepareReceiptDocument(element.innerHTML, title);
+        const htmlContent = PrintService.prepareReceiptDocument(receiptElement.innerHTML, title);
+        PrintService.printHtml(htmlContent, () => {
+          setPrintingInProgress(false);
+          setIsDialogOpen(false);
+          toast.success(t("printingCompleted"));
+        });
       }
       
       // Clean up the temporary container
-      document.body.removeChild(tempContainer);
+      setTimeout(() => {
+        if (document.body.contains(tempContainer)) {
+          document.body.removeChild(tempContainer);
+        }
+      }, 1000);
       
-      // Use the PrintService to print the HTML content with a callback
-      PrintService.printHtml(htmlContent, () => {
-        setPrintingInProgress(false);
-        setIsDialogOpen(false);
-        toast.success(t("printingCompleted"));
-      });
     } catch (error) {
       setPrintingInProgress(false);
       toast.error(t("printingFailed"));
       console.error('Printing error:', error);
     }
-  };
-  
-  const renderPrintComponent = () => {
-    if (selectedFormat === "a4") {
-      return (
-        <WorkOrderPrint
-          invoice={invoice}
-          patientName={patientName}
-          patientPhone={patientPhone}
-          rx={rx}
-          lensType={lensType}
-          coating={coating}
-          frame={frame}
-          contactLenses={contactLenses}
-          contactLensRx={contactLensRx}
-        />
-      );
-    } else if (selectedFormat === "receipt") {
-      return (
-        <WorkOrderReceiptPrint
-          invoice={invoice}
-          patientName={patientName}
-          patientPhone={patientPhone}
-          rx={rx}
-          lensType={lensType}
-          coating={coating}
-          frame={frame}
-          contactLenses={contactLenses}
-          contactLensRx={contactLensRx}
-        />
-      );
-    }
-    
-    return null;
   };
   
   return (
@@ -316,11 +307,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      {/* Hidden print component */}
-      <div className="hidden print:block print:m-0">
-        {renderPrintComponent()}
-      </div>
     </>
   );
 };

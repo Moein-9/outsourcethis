@@ -7,6 +7,7 @@ import { ar } from "date-fns/locale";
 import { enUS } from "date-fns/locale/en-US";
 import { QRCodeSVG } from "qrcode.react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
+import { PrintService } from "@/utils/PrintService";
 
 interface WorkOrderReceiptPrintProps {
   invoice: Invoice;
@@ -68,33 +69,17 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
 
   // Add print trigger effect
   React.useEffect(() => {
-    // Set explicit print settings for receipt paper
-    const printStyles = `
-      @page {
-        size: 80mm auto;
-        margin: 0;
-      }
-      body, html {
-        width: 80mm !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      .print-receipt {
-        width: 80mm !important;
-        max-width: 80mm !important;
-      }
-    `;
-    
-    // Add print-specific styles
-    const styleElem = document.createElement('style');
-    styleElem.innerHTML = printStyles;
-    document.head.appendChild(styleElem);
-    
     // Auto-print after a delay to ensure rendering
     const timer = setTimeout(() => {
-      window.print();
-      // Remove style after printing
-      setTimeout(() => document.head.removeChild(styleElem), 500);
+      // Get the receipt content
+      const receiptElement = document.getElementById('work-order-receipt');
+      if (!receiptElement) return;
+      
+      const content = receiptElement.outerHTML;
+      const htmlContent = PrintService.prepareReceiptDocument(content, t("receiptFormat"));
+      
+      // Use PrintService to handle the printing
+      PrintService.printHtml(htmlContent);
     }, 500);
     
     return () => clearTimeout(timer);
@@ -102,12 +87,15 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
 
   return (
     <div 
+      id="work-order-receipt"
       style={{ 
         width: "80mm", 
         fontFamily: "Arial, sans-serif",
-        maxHeight: "100%",
+        maxWidth: "80mm",
         overflow: "hidden",
-        margin: "0 auto"
+        margin: "0 auto",
+        padding: "4mm",
+        backgroundColor: "white"
       }} 
       dir={dir} 
       className="print-receipt"
@@ -115,28 +103,31 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       <style>
         {`
           @media print {
+            @page {
+              size: 80mm auto !important;
+              margin: 0 !important;
+            }
             body * {
               visibility: hidden;
             }
-            .print-receipt, .print-receipt * {
+            #work-order-receipt, #work-order-receipt * {
               visibility: visible;
             }
-            .print-receipt {
+            #work-order-receipt {
               position: absolute;
               left: 0;
               top: 0;
-              width: 80mm;
-              margin: 0;
-              padding: 0;
-            }
-            @page {
-              size: 80mm auto;
-              margin: 0;
+              width: 80mm !important;
+              max-width: 80mm !important;
+              margin: 0 !important;
+              padding: 4mm !important;
             }
             html, body {
+              width: 80mm !important;
+              max-width: 80mm !important;
               margin: 0 !important;
               padding: 0 !important;
-              width: 80mm !important;
+              height: auto !important;
             }
           }
         `}

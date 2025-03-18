@@ -45,6 +45,23 @@ export const PrintService = {
       iframe.contentWindow.document.open();
       iframe.contentWindow.document.write(htmlContent);
       iframe.contentWindow.document.close();
+      
+      // Attempt to force iframe onload before printing
+      iframe.onload = function() {
+        try {
+          setTimeout(() => {
+            if (iframe.contentWindow) {
+              iframe.contentWindow.focus();
+              iframe.contentWindow.print();
+            }
+          }, 500);
+        } catch (error) {
+          console.error('Print error:', error);
+          toast.error("Failed to print");
+          document.body.removeChild(iframe);
+          if (onComplete) onComplete();
+        }
+      };
     } else {
       toast.error("Failed to create print frame");
       document.body.removeChild(iframe);
@@ -94,7 +111,7 @@ export const PrintService = {
               print-color-adjust: exact;
             }
             html, body {
-              width: ${size.includes('mm') ? size.split(' ')[0] : 'auto'};
+              width: ${size.includes('mm') ? size : 'auto'};
               height: auto !important;
               overflow: hidden;
             }
@@ -148,28 +165,36 @@ export const PrintService = {
    */
   prepareReceiptDocument: (content: string, title: string = 'Receipt') => {
     const css = `
-      #print-content {
-        width: 80mm;
-        padding: 0;
-      }
       @page {
-        size: 80mm auto;
-        margin: 0;
+        size: 80mm auto !important;
+        margin: 0 !important;
       }
-      html, body {
+      body, html {
         width: 80mm !important;
+        max-width: 80mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+      }
+      #print-content {
+        width: 80mm !important;
+        max-width: 80mm !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-family: 'Courier New', monospace;
+      }
+      .receipt-container {
+        width: 80mm !important;
+        max-width: 80mm !important;
         margin: 0 !important;
         padding: 0 !important;
       }
-      .receipt-container {
-        width: 80mm;
-        max-width: 80mm;
-        margin: 0;
-        padding: 0;
+      * {
+        page-break-inside: avoid !important;
       }
     `;
     
-    const htmlTemplate = PrintService.getHtmlTemplate(title, 'print-content', css, '80mm', '0');
+    const htmlTemplate = PrintService.getHtmlTemplate(title, 'print-content', css, '80mm auto', '0');
     
     // Insert content into the template
     return htmlTemplate.replace('<div id="print-content"></div>', `<div id="print-content">${content}</div>`);

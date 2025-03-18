@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -145,12 +146,21 @@ table th, table td {
   }
   
   /* Hide all UI elements when printing */
-  header, nav, button, .dialog, .dialog-overlay {
+  header, nav, button, .dialog, .dialog-overlay, .no-print {
     display: none !important;
   }
   
+  /* Receipt-specific print styling */
+  .print-receipt {
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
   /* Ensure page break behavior */
-  .label-container {
+  .label-container, 
+  .print-container {
     page-break-inside: avoid;
     page-break-after: always;
   }
@@ -177,22 +187,30 @@ table th, table td {
     width: auto;
   }
   
-  /* Fix for multi-page printing issue */
-  .print-container, 
-  .print-receipt {
-    width: 80mm;
-    height: auto;
-    page-break-after: avoid;
-    page-break-inside: avoid;
-    position: absolute;
-    left: 0;
-    top: 0;
+  /* Define page size for receipt printing */
+  @page {
+    size: 80mm auto !important;
+    margin: 0 !important;
   }
   
-  /* Receipt-specific print styling */
-  .print-receipt {
+  /* Fix for receipt printing */
+  .print-receipt,
+  #receipt-invoice,
+  #work-order-receipt {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
     width: 80mm !important;
     max-width: 80mm !important;
+    padding: 4mm !important;
+    margin: 0 !important;
+    visibility: visible !important;
+  }
+  
+  /* Make sure each label gets its own page */
+  .label-container {
+    page-break-after: always;
+    page-break-inside: avoid;
   }
   
   /* Fix for A4 documents */
@@ -200,6 +218,18 @@ table th, table td {
     width: 210mm;
     min-height: 297mm;
     page-break-after: always;
+  }
+  
+  /* Ensure element visibility in print */
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-receipt *, 
+  .print-container *,
+  #receipt-invoice *,
+  #work-order-receipt * {
+    visibility: visible !important;
   }
   
   /* Prevent multiple copies */

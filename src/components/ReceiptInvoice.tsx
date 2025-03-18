@@ -5,6 +5,8 @@ import { Invoice } from "@/store/invoiceStore";
 import { CheckCircle2, Receipt } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
 import { MoenLogo, storeInfo } from "@/assets/logo";
+import { PrintService } from "@/utils/PrintService";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface ReceiptInvoiceProps {
   invoice: Invoice;
@@ -56,6 +58,9 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   authNumber,
   contactLenses
 }) => {
+  const { language } = useLanguageStore();
+  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  
   // Use either the passed props or invoice data
   const name = patientName || invoice.patientName;
   const phone = patientPhone || invoice.patientPhone;
@@ -76,52 +81,79 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   
   const isContactLens = invoiceType === "contacts" || !frameBrand;
 
-  const containerClass = isPrintable 
-    ? "w-[80mm] mx-auto bg-white p-4 text-[12px] border shadow-sm print:shadow-none" 
-    : "w-full bg-white p-4 border rounded-lg shadow-sm";
-  
   // Fix to ensure the print dialog only prompts once
-  const handlePrintInvoice = () => {
-    if (isPrintable) {
-      // Set explicit print settings for receipt paper
-      const printStyles = `
-        @page {
-          size: 80mm auto;
-          margin: 0;
-        }
-        body, html {
-          width: 80mm !important;
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-      `;
-      
-      // Add print-specific styles
-      const styleElem = document.createElement('style');
-      styleElem.innerHTML = printStyles;
-      document.head.appendChild(styleElem);
-      
-      window.onafterprint = () => {
-        window.onafterprint = null; // Clear handler after first print
-        document.head.removeChild(styleElem); // Remove the temporary style
-      };
-      
-      // Delay printing to ensure styles are applied
-      setTimeout(() => window.print(), 300);
-    }
+  const handlePrintReceipt = () => {
+    if (!isPrintable) return;
+    
+    // Get the receipt content
+    const receiptElement = document.getElementById('receipt-invoice');
+    if (!receiptElement) return;
+    
+    const content = receiptElement.outerHTML;
+    const htmlContent = PrintService.prepareReceiptDocument(content, 'Receipt');
+    
+    // Use PrintService to handle the printing
+    PrintService.printHtml(htmlContent);
   };
 
   // For printable invoices, auto-trigger print dialog once component is mounted
   React.useEffect(() => {
     if (isPrintable) {
       // Small delay to ensure the component is fully rendered
-      const timer = setTimeout(handlePrintInvoice, 300);
+      const timer = setTimeout(handlePrintReceipt, 500);
       return () => clearTimeout(timer);
     }
   }, [isPrintable]);
   
   return (
-    <div className={containerClass} style={{ fontFamily: 'Courier New, monospace', maxWidth: '80mm' }}>
+    <div className={`${dirClass} print-receipt`} id="receipt-invoice"
+         style={{ 
+           width: '80mm', 
+           maxWidth: '80mm',
+           margin: '0 auto',
+           backgroundColor: 'white',
+           padding: '4mm',
+           fontSize: '12px',
+           border: isPrintable ? 'none' : '1px solid #ddd',
+           borderRadius: isPrintable ? '0' : '5px',
+           boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
+           fontFamily: 'Courier New, monospace'
+         }}>
+      <style>
+        {`
+          @media print {
+            @page {
+              size: 80mm auto !important;
+              margin: 0 !important;
+            }
+            body * {
+              visibility: hidden;
+            }
+            #receipt-invoice, #receipt-invoice * {
+              visibility: visible;
+            }
+            #receipt-invoice {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 80mm !important;
+              max-width: 80mm !important;
+              padding: 4mm !important;
+              margin: 0 !important;
+              border: none !important;
+              box-shadow: none !important;
+            }
+            html, body {
+              width: 80mm !important;
+              max-width: 80mm !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+          }
+        `}
+      </style>
+      
       <div className="text-center border-b pb-3 mb-3">
         <div className="flex justify-center mb-2">
           <MoenLogo className="w-auto h-16 mb-2" />
