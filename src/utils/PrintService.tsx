@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { toast } from 'sonner';
 
@@ -182,6 +181,14 @@ export const PrintService = {
         overflow: hidden;
         border-radius: 8mm;
       }
+      .right-section {
+        width: 45mm;
+        height: 100%;
+        padding: 1mm 2mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
       .left-section {
         width: 45mm;
         height: 100%;
@@ -191,21 +198,13 @@ export const PrintService = {
         justify-content: center;
         align-items: center;
       }
-      .right-section {
-        width: 45mm;
-        height: 100%;
-        padding: 1mm 2mm;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
       .brand-name {
         font-weight: bold;
         font-size: 9pt;
         margin-bottom: 1mm;
         white-space: nowrap;
         overflow: hidden;
-        text-overflow: ellipsis;
+        text-overflow: "ellipsis";
       }
       .detail-info {
         font-size: 7pt;

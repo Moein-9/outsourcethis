@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { QRCodeSVG } from "qrcode.react";
@@ -27,37 +26,6 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
       overflow: "hidden",
       borderRadius: "8mm"
     }}>
-      {/* Left section - QR code and logo */}
-      <div className="left-section" style={{
-        width: "45mm",
-        height: "100%",
-        padding: "1mm",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center"
-      }}>
-        <div className="store-logo" style={{
-          display: "flex",
-          justifyContent: "center",
-          width: "100%",
-          marginBottom: "1mm"
-        }}>
-          <MoenLogo className="w-auto" style={{ maxHeight: "4mm", height: "auto" }} />
-        </div>
-        
-        <div className="qr-code" style={{
-          display: "flex",
-          justifyContent: "center"
-        }}>
-          <QRCodeSVG 
-            value={frame.frameId} 
-            size={22}
-            level="M"
-          />
-        </div>
-      </div>
-
       {/* Right section - brand info */}
       <div className="right-section" style={{
         width: "45mm",
@@ -88,6 +56,37 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
           fontWeight: "bold",
           fontSize: "9pt"
         }}>K.D. {frame.price.toFixed(3)}</div>
+      </div>
+
+      {/* Left section - QR code and logo */}
+      <div className="left-section" style={{
+        width: "45mm",
+        height: "100%",
+        padding: "1mm",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center"
+      }}>
+        <div className="store-logo" style={{
+          display: "flex",
+          justifyContent: "center",
+          width: "100%",
+          marginBottom: "1mm"
+        }}>
+          <MoenLogo className="w-auto" style={{ maxHeight: "4mm", height: "auto" }} />
+        </div>
+        
+        <div className="qr-code" style={{
+          display: "flex",
+          justifyContent: "center"
+        }}>
+          <QRCodeSVG 
+            value={frame.frameId} 
+            size={22}
+            level="M"
+          />
+        </div>
       </div>
     </div>
   );
@@ -400,3 +399,4 @@ export const FrameLabelTemplate: React.FC = () => {
     </div>
   );
 };
+

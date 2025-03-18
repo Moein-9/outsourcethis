@@ -213,6 +213,16 @@ table th, table td {
   border-radius: 8mm;
 }
 
+/* Right section - brand info */
+.right-section {
+  width: 45mm;
+  height: 100%;
+  padding: 1mm 2mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 /* Left section - logo and QR code */
 .left-section {
   width: 45mm;
@@ -222,16 +232,6 @@ table th, table td {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-/* Right section - text content */
-.right-section {
-  width: 45mm;
-  height: 100%;
-  padding: 1mm 2mm;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 
 /* Brand name styling */
