@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Dialog, 
   DialogContent, 
@@ -58,7 +58,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   notes,
   onRxPrintRequest
 }) => {
-  const { updatePatientRx } = usePatientStore();
+  const { updatePatientRx, getPatientById } = usePatientStore();
   const { t, language } = useLanguageStore();
   const [isNewRxOpen, setIsNewRxOpen] = useState(false);
   const [newRx, setNewRx] = useState<RxData>({
@@ -77,6 +77,16 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   const [viewRxDetails, setViewRxDetails] = useState<RxData | null>(null);
   const [isViewRxOpen, setIsViewRxOpen] = useState(false);
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
+  
+  // Local state to hold the latest patient data including updated Rx
+  const [localCurrentRx, setLocalCurrentRx] = useState(currentRx);
+  const [localRxHistory, setLocalRxHistory] = useState(rxHistory);
+  
+  // Update local state whenever props change
+  useEffect(() => {
+    setLocalCurrentRx(currentRx);
+    setLocalRxHistory(rxHistory);
+  }, [currentRx, rxHistory]);
 
   const handleRxInputChange = (eye: "OD" | "OS", field: "sphere" | "cyl" | "axis" | "add", value: string) => {
     if (eye === "OD") {
@@ -115,10 +125,24 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
       return;
     }
 
-    updatePatientRx(patientId, {
+    // Add timestamp to the new RX
+    const timestampedNewRx = {
       ...newRx,
       createdAt: new Date().toISOString()
-    });
+    };
+
+    // Update the global store
+    updatePatientRx(patientId, timestampedNewRx);
+    
+    // Update local state for immediate UI reflection
+    // Move current Rx to history
+    setLocalRxHistory(prev => [
+      { ...localCurrentRx, createdAt: localCurrentRx.createdAt || new Date().toISOString() },
+      ...prev
+    ]);
+    
+    // Set new Rx as current
+    setLocalCurrentRx(timestampedNewRx);
 
     toast({
       title: t("success"),
@@ -126,6 +150,21 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     });
 
     setIsNewRxOpen(false);
+    
+    // Reset form
+    setNewRx({
+      sphereOD: "",
+      cylOD: "",
+      axisOD: "",
+      addOD: "",
+      sphereOS: "",
+      cylOS: "",
+      axisOS: "",
+      addOS: "",
+      pdRight: "",
+      pdLeft: "",
+      createdAt: new Date().toISOString()
+    });
   };
 
   const handleViewRx = (rx: RxData) => {
@@ -247,7 +286,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
               </h4>
               <Badge className="bg-green-500">
                 <Calendar className="h-3 w-3 mr-1" />
-                {currentRx.createdAt ? formatDate(currentRx.createdAt) : language === 'ar' ? 'تاريخ غير متوفر' : 'Date not available'}
+                {localCurrentRx.createdAt ? formatDate(localCurrentRx.createdAt) : language === 'ar' ? 'تاريخ غير متوفر' : 'Date not available'}
               </Badge>
             </div>
             <div className="overflow-x-auto bg-white rounded-md shadow-sm">
@@ -266,19 +305,19 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 <TableBody>
                   <TableRow>
                     <TableCell className="font-medium bg-blue-50/50">{t("rightEye")} (OD)</TableCell>
-                    <TableCell>{currentRx?.sphereOD || "-"}</TableCell>
-                    <TableCell>{currentRx?.cylOD || "-"}</TableCell>
-                    <TableCell>{currentRx?.axisOD || "-"}</TableCell>
-                    <TableCell>{currentRx?.addOD || "-"}</TableCell>
-                    <TableCell>{currentRx?.pdRight || "-"}</TableCell>
+                    <TableCell>{localCurrentRx?.sphereOD || "-"}</TableCell>
+                    <TableCell>{localCurrentRx?.cylOD || "-"}</TableCell>
+                    <TableCell>{localCurrentRx?.axisOD || "-"}</TableCell>
+                    <TableCell>{localCurrentRx?.addOD || "-"}</TableCell>
+                    <TableCell>{localCurrentRx?.pdRight || "-"}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium bg-rose-50/50">{t("leftEye")} (OS)</TableCell>
-                    <TableCell>{currentRx?.sphereOS || "-"}</TableCell>
-                    <TableCell>{currentRx?.cylOS || "-"}</TableCell>
-                    <TableCell>{currentRx?.axisOS || "-"}</TableCell>
-                    <TableCell>{currentRx?.addOS || "-"}</TableCell>
-                    <TableCell>{currentRx?.pdLeft || "-"}</TableCell>
+                    <TableCell>{localCurrentRx?.sphereOS || "-"}</TableCell>
+                    <TableCell>{localCurrentRx?.cylOS || "-"}</TableCell>
+                    <TableCell>{localCurrentRx?.axisOS || "-"}</TableCell>
+                    <TableCell>{localCurrentRx?.addOS || "-"}</TableCell>
+                    <TableCell>{localCurrentRx?.pdLeft || "-"}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -292,7 +331,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 {t("rxHistory")}
               </h4>
             </div>
-            {rxHistory && rxHistory.length > 0 ? (
+            {localRxHistory && localRxHistory.length > 0 ? (
               <div className="rounded-md border overflow-hidden shadow-sm">
                 <Table className="ltr">
                   <TableHeader className="bg-amber-50">
@@ -305,7 +344,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rxHistory.map((rx, index) => (
+                    {localRxHistory.map((rx, index) => (
                       <TableRow key={index} className={index % 2 === 0 ? "bg-amber-50/30" : "bg-white"}>
                         <TableCell className="font-medium">{formatDate(rx.createdAt)}</TableCell>
                         <TableCell className="text-sm">

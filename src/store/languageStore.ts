@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -117,8 +116,6 @@ const translations: Record<string, Record<string, string>> = {
     discount: 'Discount',
     total: 'Total',
     paymentMethod: 'Payment Method',
-    // The 'cash' key was duplicated in the original code
-    // cash: 'Cash', - Commented out as it's defined again in the additional section
     creditCard: 'Credit Card',
     deposit: 'Deposit',
     remaining: 'Remaining',
@@ -304,6 +301,29 @@ const translations: Record<string, Record<string, string>> = {
     medicalLenses: "Medical Lenses",
     selectLensType: "Select Lens Type",
     selectCoatings: "Select Coatings",
+    
+    // RX Manager translations with improved spacing
+    rxAndCareInstructions: "Rx and Care Instructions",
+    printPrescription: "Print Prescription",
+    newRx: "New Rx",
+    currentRx: "Current Rx",
+    rxHistory: "Rx History",
+    noPreviousRx: "No Previous Prescriptions",
+    noPreviousRxDescription: "This patient doesn't have any previous prescription history yet.",
+    addNewRx: "Add New Prescription",
+    addNewRxFor: "Add new prescription for",
+    viewPrescription: "View Prescription",
+    selectLanguageForPrinting: "Select Language for Printing",
+    dataError: "Data Error",
+    fillAllRequiredFields: "Please fill all required fields",
+    
+    // Glasses care tips
+    glassesCareTips: "Glasses Care Tips",
+    tip1: "Clean your glasses regularly with a microfiber cloth.",
+    tip2: "Always store your glasses in a protective case.",
+    tip3: "Avoid placing your glasses lens-side down.",
+    tip4: "Schedule regular eye exams to ensure your prescription is accurate.",
+    thankYou: "Thank you for choosing Moen Optician. We look forward to serving you again!"
   },
   ar: {
     // General UI
@@ -598,6 +618,29 @@ const translations: Record<string, Record<string, string>> = {
     medicalLenses: "العدسات الطبية",
     selectLensType: "اختر نوع العدسة",
     selectCoatings: "اختر الطلاءات",
+    
+    // RX Manager translations with proper Arabic translations
+    rxAndCareInstructions: "تعليمات الوصفة والعناية",
+    printPrescription: "طباعة الوصفة",
+    newRx: "وصفة جديدة",
+    currentRx: "الوصفة الحالية",
+    rxHistory: "سجل الوصفات",
+    noPreviousRx: "لا توجد وصفات سابقة",
+    noPreviousRxDescription: "لا يملك هذا المريض أي سجل وصفات سابق حتى الآن",
+    addNewRx: "إضافة وصفة جديدة",
+    addNewRxFor: "إضافة وصفة جديدة لـ",
+    viewPrescription: "عرض الوصفة",
+    selectLanguageForPrinting: "اختر لغة الطباعة",
+    dataError: "خطأ في البيانات",
+    fillAllRequiredFields: "يرجى ملء جميع الحقول المطلوبة",
+    
+    // Glasses care tips in Arabic
+    glassesCareTips: "نصائح للعناية بالنظارات",
+    tip1: "نظف نظارتك بانتظام باستخدام قماش ناعم.",
+    tip2: "احتفظ دائماً بنظارتك داخل العلبة الواقية.",
+    tip3: "تجنب وضع النظارة بحيث تكون العدسات ملامسة للسطح.",
+    tip4: "احرص على فحص عينيك بانتظام للتأكد من صحة الوصفة.",
+    thankYou: "شكراً لاختياركم موين للبصريات، نتطلع لخدمتكم مرة أخرى!"
   }
 };
 
