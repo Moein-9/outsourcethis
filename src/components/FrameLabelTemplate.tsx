@@ -29,37 +29,6 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
       <div style={{
         width: "45mm",
         height: "100%",
-        padding: "1mm 2mm",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center"
-      }}>
-        <div style={{
-          fontWeight: "bold",
-          fontSize: "10pt",
-          marginBottom: "1mm",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis"
-        }}>{frame.brand}</div>
-        <div style={{
-          fontSize: "8pt",
-          marginBottom: "1mm",
-          lineHeight: "1.1"
-        }}>
-          Model: {frame.model || "-"}<br/>
-          Color: {frame.color || "-"}<br/>
-          Size: {frame.size || "-"}
-        </div>
-        <div style={{
-          fontWeight: "bold",
-          fontSize: "10pt"
-        }}>K.D. {frame.price.toFixed(3)}</div>
-      </div>
-
-      <div style={{
-        width: "45mm",
-        height: "100%",
         padding: "1mm",
         display: "flex",
         flexDirection: "column",
@@ -81,10 +50,41 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         }}>
           <QRCodeSVG 
             value={frame.frameId} 
-            size={24}
+            size={22}
             level="M"
           />
         </div>
+      </div>
+
+      <div style={{
+        width: "45mm",
+        height: "100%",
+        padding: "1mm 2mm",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center"
+      }}>
+        <div style={{
+          fontWeight: "bold",
+          fontSize: "9pt",
+          marginBottom: "1mm",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis"
+        }}>{frame.brand}</div>
+        <div style={{
+          fontSize: "7pt",
+          marginBottom: "1mm",
+          lineHeight: "1.1"
+        }}>
+          Model: {frame.model || "-"}<br/>
+          Color: {frame.color || "-"}<br/>
+          Size: {frame.size || "-"}
+        </div>
+        <div style={{
+          fontWeight: "bold",
+          fontSize: "9pt"
+        }}>K.D. {frame.price.toFixed(3)}</div>
       </div>
     </div>
   );
