@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { QRCodeSVG } from "qrcode.react";
@@ -41,19 +40,7 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
           fontSize: "7pt",
           marginBottom: "1mm"
         }}>
-          <span style={{ fontWeight: "bold" }}>Model:</span> {frame.model || "-"}
-        </div>
-        <div style={{
-          fontSize: "7pt",
-          marginBottom: "1mm"
-        }}>
-          <span style={{ fontWeight: "bold" }}>Color:</span> {frame.color || "-"}
-        </div>
-        <div style={{
-          fontSize: "7pt",
-          marginBottom: "1mm"
-        }}>
-          <span style={{ fontWeight: "bold" }}>Size:</span> {frame.size || "-"}
+          <span style={{ fontWeight: "bold" }}>Model:</span> {frame.model || "-"} <span style={{ fontWeight: "bold" }}>Color:</span> {frame.color || "-"} <span style={{ fontWeight: "bold" }}>Size:</span> {frame.size || "-"}
         </div>
         <div style={{
           fontWeight: "bold",
@@ -204,9 +191,11 @@ export const usePrintLabel = () => {
         <div class="label-container">
           <div class="left-section">
             <div class="brand-name">${frame.brand}</div>
-            <div class="detail-info"><span class="detail-label">Model:</span> ${frame.model || "-"}</div>
-            <div class="detail-info"><span class="detail-label">Color:</span> ${frame.color || "-"}</div>
-            <div class="detail-info"><span class="detail-label">Size:</span> ${frame.size || "-"}</div>
+            <div class="detail-info">
+              <span class="detail-label">Model:</span> ${frame.model || "-"} 
+              <span class="detail-label">Color:</span> ${frame.color || "-"} 
+              <span class="detail-label">Size:</span> ${frame.size || "-"}
+            </div>
             <div class="price">K.D. ${frame.price.toFixed(3)}</div>
           </div>
           <div class="right-section">
