@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -461,9 +460,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                   <Label htmlFor="sphereOD" className="block mb-1">SPH</Label>
                   <select
                     id="sphereOD"
-                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2"
+                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2 ltr"
                     value={newRx.sphereOD}
                     onChange={(e) => handleRxInputChange("OD", "sphere", e.target.value)}
+                    dir="ltr"
                   >
                     <option value="" disabled>{t("choose")}</option>
                     {generateSphOptions()}
@@ -474,9 +474,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                   <Label htmlFor="cylOD" className="block mb-1">CYL</Label>
                   <select
                     id="cylOD"
-                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2"
+                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2 ltr"
                     value={newRx.cylOD}
                     onChange={(e) => handleRxInputChange("OD", "cyl", e.target.value)}
+                    dir="ltr"
                   >
                     <option value="" disabled>{t("choose")}</option>
                     {generateCylOptions()}
@@ -487,9 +488,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                   <Label htmlFor="axisOD" className="block mb-1">AXIS</Label>
                   <select
                     id="axisOD"
-                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2"
+                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2 ltr"
                     value={newRx.axisOD}
                     onChange={(e) => handleRxInputChange("OD", "axis", e.target.value)}
+                    dir="ltr"
                   >
                     <option value="" disabled>{t("choose")}</option>
                     {generateAxisOptions()}
@@ -500,9 +502,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                   <Label htmlFor="addOD" className="block mb-1">ADD</Label>
                   <select
                     id="addOD"
-                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2"
+                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2 ltr"
                     value={newRx.addOD}
                     onChange={(e) => handleRxInputChange("OD", "add", e.target.value)}
+                    dir="ltr"
                   >
                     <option value="" disabled>{t("choose")}</option>
                     {generateAddOptions()}
@@ -513,9 +516,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                   <Label htmlFor="pdRight" className="block mb-1">PD ({t("right")})</Label>
                   <select
                     id="pdRight"
-                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2"
+                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2 ltr"
                     value={newRx.pdRight}
                     onChange={(e) => handlePdChange("Right", e.target.value)}
+                    dir="ltr"
                   >
                     <option value="" disabled>{t("choose")}</option>
                     {generatePdOptions()}
@@ -532,9 +536,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 <div className="lg:col-span-1">
                   <select
                     id="sphereOS"
-                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2"
+                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2 ltr"
                     value={newRx.sphereOS}
                     onChange={(e) => handleRxInputChange("OS", "sphere", e.target.value)}
+                    dir="ltr"
                   >
                     <option value="" disabled>{t("choose")}</option>
                     {generateSphOptions()}
@@ -544,9 +549,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 <div className="lg:col-span-1">
                   <select
                     id="cylOS"
-                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2"
+                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2 ltr"
                     value={newRx.cylOS}
                     onChange={(e) => handleRxInputChange("OS", "cyl", e.target.value)}
+                    dir="ltr"
                   >
                     <option value="" disabled>{t("choose")}</option>
                     {generateCylOptions()}
@@ -556,9 +562,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 <div className="lg:col-span-1">
                   <select
                     id="axisOS"
-                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2"
+                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2 ltr"
                     value={newRx.axisOS}
                     onChange={(e) => handleRxInputChange("OS", "axis", e.target.value)}
+                    dir="ltr"
                   >
                     <option value="" disabled>{t("choose")}</option>
                     {generateAxisOptions()}
@@ -568,9 +575,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 <div className="lg:col-span-1">
                   <select
                     id="addOS"
-                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2"
+                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2 ltr"
                     value={newRx.addOS}
                     onChange={(e) => handleRxInputChange("OS", "add", e.target.value)}
+                    dir="ltr"
                   >
                     <option value="" disabled>{t("choose")}</option>
                     {generateAddOptions()}
@@ -581,9 +589,10 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                   <Label htmlFor="pdLeft" className="block mb-1">PD ({t("left")})</Label>
                   <select
                     id="pdLeft"
-                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2"
+                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2 ltr"
                     value={newRx.pdLeft}
                     onChange={(e) => handlePdChange("Left", e.target.value)}
+                    dir="ltr"
                   >
                     <option value="" disabled>{t("choose")}</option>
                     {generatePdOptions()}

@@ -127,7 +127,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   );
 };
 
-// Language selection dialog for RX printing - updated to be centered regardless of scroll position
+// Language selection dialog for RX printing - fixed to be centered regardless of scroll position
 export const RxLanguageDialog: React.FC<{
   isOpen: boolean;
   onClose: () => void;
