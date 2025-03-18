@@ -117,7 +117,7 @@ const translations: Record<string, Record<string, string>> = {
     discount: 'Discount',
     total: 'Total',
     paymentMethod: 'Payment Method',
-    cash: 'Cash',
+    // cash: 'Cash', - Commented out as it's defined again in the additional section
     creditCard: 'Credit Card',
     deposit: 'Deposit',
     remaining: 'Remaining',
