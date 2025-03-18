@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Eye, AlertTriangle } from "lucide-react";
 import { ContactLensRx } from "@/store/patientStore";
+import { useLanguageStore } from "@/store/languageStore";
 import {
   Form,
   FormControl,
@@ -25,6 +26,8 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   onChange,
   showMissingRxWarning = false
 }) => {
+  const { language, t } = useLanguageStore();
+
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
     const updatedRx = {
       ...rxData,
@@ -96,12 +99,15 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     return options;
   };
 
+  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+
   return (
-    <div className="rounded-lg border p-4 bg-white shadow-sm">
-      <div className="flex items-center justify-between mb-4 pb-2 border-b">
+    <div className={`rounded-lg border p-4 bg-white shadow-sm ${dirClass}`}>
+      <div className={`flex items-center justify-between mb-4 pb-2 border-b ${textAlignClass}`}>
         <h4 className="font-medium text-blue-700 flex items-center gap-2">
           <Eye className="w-4 h-4 text-blue-600" />
-          وصفة العدسات اللاصقة
+          {t("contactLensPrescription")}
         </h4>
       </div>
 
@@ -109,13 +115,14 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
         <div className="p-3 mb-4 bg-amber-50 border border-amber-200 rounded-md flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
           <p className="text-amber-700 text-sm">
-            لا توجد وصفة عدسات لاصقة لهذا العميل. يرجى إدخال وصفة العدسات.
+            {t("noContactLensRx")}
           </p>
         </div>
       )}
 
       <div className="space-y-6">
-        <table className="w-full border-collapse">
+        {/* Always left-to-right table regardless of language */}
+        <table className="w-full border-collapse ltr">
           <thead>
             <tr className="bg-blue-50">
               <th className="border border-blue-100 p-2 text-blue-700 text-sm"></th>
@@ -132,7 +139,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               <td className="border border-blue-100 p-2">
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="font-medium text-blue-800">العين اليمنى (OD)</span>
+                  <span className="font-medium text-blue-800">{t("rightEye")} (OD)</span>
                 </div>
               </td>
               <td className="border border-blue-100 p-2">
@@ -196,7 +203,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               <td className="border border-rose-100 p-2">
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-                  <span className="font-medium text-rose-800">العين اليسرى (OS)</span>
+                  <span className="font-medium text-rose-800">{t("leftEye")} (OS)</span>
                 </div>
               </td>
               <td className="border border-rose-100 p-2">

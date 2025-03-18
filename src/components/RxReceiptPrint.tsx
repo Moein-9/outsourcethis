@@ -12,6 +12,7 @@ interface RxReceiptPrintProps {
   rx: RxData;
   notes?: string;
   isPrintable?: boolean;
+  forcedLanguage?: 'en' | 'ar'; // For forced language printing
 }
 
 export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
@@ -19,9 +20,12 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   patientPhone,
   rx,
   notes,
-  isPrintable = false
+  isPrintable = false,
+  forcedLanguage
 }) => {
-  const { language, t } = useLanguageStore();
+  const { language: appLanguage, t } = useLanguageStore();
+  const language = forcedLanguage || appLanguage;
+  
   const containerClass = isPrintable 
     ? "w-[80mm] mx-auto bg-white p-4 text-[12px] border shadow-sm print:shadow-none" 
     : "w-full bg-white p-4 border rounded-lg shadow-sm";
@@ -61,7 +65,8 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
           <Eye className="h-3 w-3" /> {t("glassesPrescription")}
         </div>
         
-        <table className="w-full border-collapse mt-2">
+        {/* Always left-to-right table regardless of language */}
+        <table className="w-full border-collapse mt-2 ltr">
           <thead>
             <tr>
               <th className="border border-gray-300 p-1 text-xs"></th>
@@ -79,7 +84,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
               <td className="border border-gray-300 p-1 text-xs">{rx.cylOD}</td>
               <td className="border border-gray-300 p-1 text-xs">{rx.axisOD}</td>
               <td className="border border-gray-300 p-1 text-xs">{rx.addOD}</td>
-              <td className="border border-gray-300 p-1 text-xs">{rx.pdRight}</td>
+              <td className="border border-gray-300 p-1 text-xs">{rx.pdRight || "-"}</td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-1 text-xs font-medium">{t("leftEye")} (OS)</td>
@@ -87,7 +92,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
               <td className="border border-gray-300 p-1 text-xs">{rx.cylOS}</td>
               <td className="border border-gray-300 p-1 text-xs">{rx.axisOS}</td>
               <td className="border border-gray-300 p-1 text-xs">{rx.addOS}</td>
-              <td className="border border-gray-300 p-1 text-xs">{rx.pdLeft}</td>
+              <td className="border border-gray-300 p-1 text-xs">{rx.pdLeft || "-"}</td>
             </tr>
           </tbody>
         </table>
@@ -104,7 +109,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
         <div className="text-center font-semibold border-b pb-1 mb-1">
           {t("glassesCareTips")}
         </div>
-        <ul className="list-disc list-inside space-y-1">
+        <ul className={`list-disc list-inside space-y-1 ${dirClass}`}>
           <li>{t("tip1")}</li>
           <li>{t("tip2")}</li>
           <li>{t("tip3")}</li>
@@ -117,6 +122,45 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
         <div className="mt-3 text-[10px] flex gap-1 justify-center">
           <span>{'•'.repeat(15)}</span>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// Language selection dialog for RX printing
+export const RxLanguageDialog: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onSelect: (language: 'en' | 'ar') => void;
+}> = ({ isOpen, onClose, onSelect }) => {
+  const { t } = useLanguageStore();
+  
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+        <h3 className="text-lg font-medium mb-4 text-center">{t("selectLanguageForPrinting")}</h3>
+        <div className="flex gap-4 justify-center">
+          <button
+            onClick={() => onSelect('en')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            English
+          </button>
+          <button
+            onClick={() => onSelect('ar')}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+          >
+            العربية
+          </button>
+        </div>
+        <button
+          onClick={onClose}
+          className="mt-4 px-4 py-2 w-full border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+        >
+          {t("cancel")}
+        </button>
       </div>
     </div>
   );

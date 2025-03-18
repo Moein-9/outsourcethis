@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils"
 
 const Table = React.forwardRef<
   HTMLTableElement,
-  React.HTMLAttributes<HTMLTableElement>
->(({ className, ...props }, ref) => {
+  React.HTMLAttributes<HTMLTableElement> & { forceDirection?: 'ltr' | 'rtl' }
+>(({ className, forceDirection, ...props }, ref) => {
   const { language } = useLanguageStore();
-  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  const dirClass = forceDirection || (language === 'ar' ? 'rtl' : 'ltr');
   
   return (
     <div className="relative w-full overflow-auto">
@@ -77,7 +77,33 @@ const TableHead = React.forwardRef<
   React.ThHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => {
   const { language } = useLanguageStore();
-  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  // Get parent table direction if possible, otherwise use language
+  const parentTableEl = React.useRef<HTMLTableElement | null>(null);
+  const [textAlignClass, setTextAlignClass] = React.useState(language === 'ar' ? 'text-right' : 'text-left');
+  
+  React.useEffect(() => {
+    if (props.ref && typeof props.ref !== 'function') {
+      // Try to find parent table
+      let element: HTMLElement | null = props.ref.current;
+      while (element && element.tagName !== 'TABLE') {
+        element = element.parentElement;
+      }
+      
+      if (element) {
+        parentTableEl.current = element as HTMLTableElement;
+        // Check if table has rtl or ltr class
+        if (element.classList.contains('rtl')) {
+          setTextAlignClass('text-right');
+        } else if (element.classList.contains('ltr')) {
+          setTextAlignClass('text-left');
+        } else {
+          setTextAlignClass(language === 'ar' ? 'text-right' : 'text-left');
+        }
+      }
+    } else {
+      setTextAlignClass(language === 'ar' ? 'text-right' : 'text-left');
+    }
+  }, [props.ref, language]);
   
   return (
     <th
@@ -97,7 +123,33 @@ const TableCell = React.forwardRef<
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => {
   const { language } = useLanguageStore();
-  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  // Get parent table direction if possible, otherwise use language
+  const parentTableEl = React.useRef<HTMLTableElement | null>(null);
+  const [textAlignClass, setTextAlignClass] = React.useState(language === 'ar' ? 'text-right' : 'text-left');
+  
+  React.useEffect(() => {
+    if (props.ref && typeof props.ref !== 'function') {
+      // Try to find parent table
+      let element: HTMLElement | null = props.ref.current;
+      while (element && element.tagName !== 'TABLE') {
+        element = element.parentElement;
+      }
+      
+      if (element) {
+        parentTableEl.current = element as HTMLTableElement;
+        // Check if table has rtl or ltr class
+        if (element.classList.contains('rtl')) {
+          setTextAlignClass('text-right');
+        } else if (element.classList.contains('ltr')) {
+          setTextAlignClass('text-left');
+        } else {
+          setTextAlignClass(language === 'ar' ? 'text-right' : 'text-left');
+        }
+      }
+    } else {
+      setTextAlignClass(language === 'ar' ? 'text-right' : 'text-left');
+    }
+  }, [props.ref, language]);
   
   return (
     <td

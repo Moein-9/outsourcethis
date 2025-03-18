@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   Dialog, 
@@ -36,6 +37,7 @@ import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { useLanguageStore } from "@/store/languageStore";
+import { RxLanguageDialog } from "./RxReceiptPrint";
 
 interface PatientRxManagerProps {
   patientId: string;
@@ -44,7 +46,7 @@ interface PatientRxManagerProps {
   currentRx: RxData;
   rxHistory?: RxData[];
   notes?: string;
-  onRxPrintRequest: () => void;
+  onRxPrintRequest: (language?: 'en' | 'ar') => void;
 }
 
 export const PatientRxManager: React.FC<PatientRxManagerProps> = ({ 
@@ -74,6 +76,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   });
   const [viewRxDetails, setViewRxDetails] = useState<RxData | null>(null);
   const [isViewRxOpen, setIsViewRxOpen] = useState(false);
+  const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
 
   const handleRxInputChange = (eye: "OD" | "OS", field: "sphere" | "cyl" | "axis" | "add", value: string) => {
     if (eye === "OD") {
@@ -128,6 +131,15 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   const handleViewRx = (rx: RxData) => {
     setViewRxDetails(rx);
     setIsViewRxOpen(true);
+  };
+
+  const handlePrintRequest = () => {
+    setIsLanguageDialogOpen(true);
+  };
+
+  const handleLanguageSelection = (selectedLanguage: 'en' | 'ar') => {
+    setIsLanguageDialogOpen(false);
+    onRxPrintRequest(selectedLanguage);
   };
 
   const formatDate = (dateString?: string) => {
@@ -215,7 +227,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
           </CardTitle>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onRxPrintRequest} className="border-blue-300 hover:bg-blue-50">
+          <Button variant="outline" size="sm" onClick={handlePrintRequest} className="border-blue-300 hover:bg-blue-50">
             <Printer className="h-4 w-4 mr-1.5" />
             {t("printPrescription")}
           </Button>
@@ -239,7 +251,8 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
               </Badge>
             </div>
             <div className="overflow-x-auto bg-white rounded-md shadow-sm">
-              <Table>
+              {/* Always left-to-right table regardless of language */}
+              <Table className="ltr">
                 <TableHeader className="bg-blue-100">
                   <TableRow>
                     <TableHead className="text-blue-800"></TableHead>
@@ -281,22 +294,14 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
             </div>
             {rxHistory && rxHistory.length > 0 ? (
               <div className="rounded-md border overflow-hidden shadow-sm">
-                <Table className={dirClass}>
+                <Table className="ltr">
                   <TableHeader className="bg-amber-50">
                     <TableRow>
                       <TableHead className="text-amber-800">{t("date")}</TableHead>
-                      <TableHead className="text-amber-800">
-                        {language === 'ar' ? 'العين اليمنى (OD)' : 'Right Eye (OD)'}
-                      </TableHead>
-                      <TableHead className="text-amber-800">
-                        {language === 'ar' ? 'العين اليسرى (OS)' : 'Left Eye (OS)'}
-                      </TableHead>
-                      <TableHead className="text-amber-800">
-                        {language === 'ar' ? 'المسافة البؤبؤية (PD)' : 'PD (Right - Left)'}
-                      </TableHead>
-                      <TableHead className={`${textAlignClass} text-amber-800`}>
-                        {t("actions")}
-                      </TableHead>
+                      <TableHead className="text-amber-800">{t("rightEye")} (OD)</TableHead>
+                      <TableHead className="text-amber-800">{t("leftEye")} (OS)</TableHead>
+                      <TableHead className="text-amber-800">{t("pupillaryDistance")}</TableHead>
+                      <TableHead className="text-amber-800 text-right">{t("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -331,11 +336,11 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span>{t("right")}: {rx.pdRight || "-"}</span>
-                            <span>{t("left")}: {rx.pdLeft || "-"}</span>
+                            <span><strong>{t("right")}:</strong> {rx.pdRight || "-"}</span>
+                            <span><strong>{t("left")}:</strong> {rx.pdLeft || "-"}</span>
                           </div>
                         </TableCell>
-                        <TableCell className={textAlignClass}>
+                        <TableCell className="text-right">
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -367,7 +372,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
               <AlertCircle className="h-5 w-5 text-green-600" />
               {t("glassesCareTips")}
             </h4>
-            <ul className={`text-gray-700 list-disc space-y-2 pl-4 ${dirClass}`}>
+            <ul className={`space-y-3 pl-1 ${dirClass}`}>
               <li className="flex items-start">
                 <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 mr-2 flex-shrink-0" />
                 <span>{t("tip1")}</span>
@@ -389,6 +394,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
         </div>
       </CardContent>
 
+      {/* New RX Dialog */}
       <Dialog open={isNewRxOpen} onOpenChange={setIsNewRxOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -559,6 +565,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
         </DialogContent>
       </Dialog>
 
+      {/* View RX Dialog */}
       <Dialog open={isViewRxOpen} onOpenChange={setIsViewRxOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -572,7 +579,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
             <div className="py-4">
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-lg border border-amber-200 mb-4">
                 <div className="overflow-x-auto bg-white rounded-md shadow-sm">
-                  <Table>
+                  <Table className="ltr">
                     <TableHeader className="bg-amber-100">
                       <TableRow>
                         <TableHead className="text-amber-800"></TableHead>
@@ -616,7 +623,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
               className="border-blue-300 hover:bg-blue-50"
               onClick={() => {
                 setIsViewRxOpen(false);
-                onRxPrintRequest();
+                handlePrintRequest();
               }}
             >
               <Printer className="h-4 w-4 mr-1.5" />
@@ -625,6 +632,13 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Language selection dialog */}
+      <RxLanguageDialog
+        isOpen={isLanguageDialogOpen}
+        onClose={() => setIsLanguageDialogOpen(false)}
+        onSelect={handleLanguageSelection}
+      />
     </Card>
   );
 };
