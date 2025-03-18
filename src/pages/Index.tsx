@@ -14,7 +14,7 @@ import { useLanguageStore } from "@/store/languageStore";
 const Index = () => {
   const [activeSection, setActiveSection] = React.useState("dashboard");
   const location = useLocation();
-  const { language } = useLanguageStore();
+  const { language, setLanguage } = useLanguageStore();
   
   // Check if we have state passed from navigation
   useEffect(() => {

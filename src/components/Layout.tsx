@@ -55,41 +55,47 @@ export const Layout: React.FC<LayoutProps> = ({
           <Button 
             variant={activeSection === "dashboard" ? "default" : "outline"} 
             onClick={handleHomeNavigation}
+            className="whitespace-nowrap"
           >
             {t('dashboard')}
           </Button>
           <Button 
             variant={activeSection === "createClient" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("createClient")}
+            className="whitespace-nowrap"
           >
             {t('createClient')}
           </Button>
           <Button 
             variant={activeSection === "createInvoice" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("createInvoice")}
+            className="whitespace-nowrap"
           >
             {t('createInvoice')}
           </Button>
           <Button 
             variant={activeSection === "inventory" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("inventory")}
+            className="whitespace-nowrap"
           >
             {t('inventory')}
           </Button>
           <Button 
             variant={activeSection === "remainingPayments" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("remainingPayments")}
+            className="whitespace-nowrap"
           >
             {t('remainingPayments')}
           </Button>
           <Button 
             variant={activeSection === "patientSearch" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("patientSearch")}
+            className="whitespace-nowrap"
           >
             {t('patientSearch')}
           </Button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <LanguageToggle />
           <div className="flex items-center gap-2 font-medium text-foreground/80">
             <Clock className="h-4 w-4" />
