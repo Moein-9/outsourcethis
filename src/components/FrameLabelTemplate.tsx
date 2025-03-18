@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { QRCodeSVG } from "qrcode.react";
@@ -26,7 +27,8 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
       overflow: "hidden",
       borderRadius: "8mm"
     }}>
-      <div style={{
+      {/* Left section - QR code and logo */}
+      <div className="left-section" style={{
         width: "45mm",
         height: "100%",
         padding: "1mm",
@@ -56,7 +58,8 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         </div>
       </div>
 
-      <div style={{
+      {/* Right section - brand info */}
+      <div className="right-section" style={{
         width: "45mm",
         height: "100%",
         padding: "1mm 2mm",
@@ -64,7 +67,7 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         flexDirection: "column",
         justifyContent: "center"
       }}>
-        <div style={{
+        <div className="brand-name" style={{
           fontWeight: "bold",
           fontSize: "9pt",
           marginBottom: "1mm",
@@ -72,7 +75,7 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
           overflow: "hidden",
           textOverflow: "ellipsis"
         }}>{frame.brand}</div>
-        <div style={{
+        <div className="detail-info" style={{
           fontSize: "7pt",
           marginBottom: "1mm",
           lineHeight: "1.1"
@@ -81,7 +84,7 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
           Color: {frame.color || "-"}<br/>
           Size: {frame.size || "-"}
         </div>
-        <div style={{
+        <div className="price" style={{
           fontWeight: "bold",
           fontSize: "9pt"
         }}>K.D. {frame.price.toFixed(3)}</div>
