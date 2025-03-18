@@ -36,6 +36,7 @@ import {
   Printer 
 } from "lucide-react";
 import { FrameLabelTemplate, usePrintLabel } from "./FrameLabelTemplate";
+import { useLanguageStore } from "@/store/languageStore";
 
 // Frame Item Component
 const FrameItemCard = ({ frame, index, onPrintLabel }: { 
@@ -43,6 +44,8 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
   index: number;
   onPrintLabel: (frameId: string) => void;
 }) => {
+  const { t, language } = useLanguageStore();
+  
   return (
     <Card key={index} className="overflow-hidden hover:shadow-md transition-all duration-200 border-gray-200">
       <CardHeader className="p-3 bg-gray-50 border-b flex flex-row justify-between items-start">
@@ -54,26 +57,26 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
           </div>
         </div>
         <Badge variant="destructive" className="text-xs rounded-full">
-          في المخزون:{frame.qty}
+          {language === 'ar' ? `في المخزون:${frame.qty}` : `In Stock: ${frame.qty}`}
         </Badge>
       </CardHeader>
       <CardContent className="p-3 pt-2 text-sm">
         <div className="flex justify-between py-1 border-b border-gray-100">
-          <span className="text-blue-500">اللون:</span>
+          <span className="text-blue-500">{t('color')}:</span>
           <span>{frame.color || "-"}</span>
         </div>
         <div className="flex justify-between py-1">
-          <span className="text-blue-500">المقاس:</span>
+          <span className="text-blue-500">{t('size')}:</span>
           <span>{frame.size || "-"}</span>
         </div>
       </CardContent>
       <CardFooter className="p-0 border-t">
         <div className="grid grid-cols-3 w-full divide-x divide-x-reverse">
           <Button variant="ghost" className="rounded-none h-10 text-blue-600">
-            <Edit className="h-4 w-4 mr-1" /> تعديل
+            <Edit className="h-4 w-4 mr-1" /> {t('edit')}
           </Button>
           <Button variant="ghost" className="rounded-none h-10 text-amber-600">
-            <Copy className="h-4 w-4 mr-1" /> نسخ
+            <Copy className="h-4 w-4 mr-1" /> {t('copy')}
           </Button>
           <Button 
             variant="ghost" 
@@ -83,7 +86,7 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
               onPrintLabel(frame.frameId);
             }}
           >
-            <QrCode className="h-4 w-4 mr-1" /> طباعة
+            <QrCode className="h-4 w-4 mr-1" /> {t('print')}
           </Button>
         </div>
       </CardFooter>
@@ -94,6 +97,7 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
 export const FrameInventory: React.FC = () => {
   const { frames, addFrame, searchFrames } = useInventoryStore();
   const { printSingleLabel } = usePrintLabel();
+  const { t, language } = useLanguageStore();
   
   const [frameSearchTerm, setFrameSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchFrames>>([]);
@@ -117,13 +121,13 @@ export const FrameInventory: React.FC = () => {
     setSearchResults(results);
     
     if (results.length === 0) {
-      toast.info("لم يتم العثور على إطارات مطابقة للبحث.");
+      toast.info(t('noFramesMatchingSearch'));
     }
   };
   
   const handleAddFrame = () => {
     if (!frameBrand || !frameModel || !frameColor || !framePrice) {
-      toast.error("الرجاء إدخال تفاصيل الإطار كاملة");
+      toast.error(language === 'ar' ? "الرجاء إدخال تفاصيل الإطار كاملة" : "Please enter complete frame details");
       return;
     }
     
@@ -131,12 +135,12 @@ export const FrameInventory: React.FC = () => {
     const qty = parseInt(frameQty);
     
     if (isNaN(price) || price <= 0) {
-      toast.error("الرجاء إدخال سعر صحيح");
+      toast.error(language === 'ar' ? "الرجاء إدخال سعر صحيح" : "Please enter a valid price");
       return;
     }
     
     if (isNaN(qty) || qty <= 0) {
-      toast.error("الرجاء إدخال كمية صحيحة");
+      toast.error(language === 'ar' ? "الرجاء إدخال كمية صحيحة" : "Please enter a valid quantity");
       return;
     }
     
@@ -149,7 +153,10 @@ export const FrameInventory: React.FC = () => {
       qty
     });
     
-    toast.success(`تم إضافة الإطار بنجاح: ${frameBrand} ${frameModel}`);
+    toast.success(language === 'ar' 
+      ? `تم إضافة الإطار بنجاح: ${frameBrand} ${frameModel}` 
+      : `Frame added successfully: ${frameBrand} ${frameModel}`
+    );
     
     setFrameBrand("");
     setFrameModel("");
@@ -175,13 +182,13 @@ export const FrameInventory: React.FC = () => {
             <Input
               value={frameSearchTerm}
               onChange={(e) => setFrameSearchTerm(e.target.value)}
-              placeholder="البحث عن إطار (ماركة، موديل، لون...)"
+              placeholder={t('searchForFrame')}
               className="pl-9 w-full"
               onKeyDown={(e) => e.key === 'Enter' && handleFrameSearch()}
             />
           </div>
           <Button onClick={handleFrameSearch} variant="secondary" className="shrink-0">
-            <Search className="h-4 w-4 mr-1" /> بحث
+            <Search className="h-4 w-4 mr-1" /> {t('search')}
           </Button>
         </div>
         
@@ -191,71 +198,71 @@ export const FrameInventory: React.FC = () => {
             onClick={() => setIsLabelDialogOpen(true)}
             className="shrink-0"
           >
-            <Tag className="h-4 w-4 mr-1" /> طباعة البطاقات
+            <Tag className="h-4 w-4 mr-1" /> {t('printLabels')}
           </Button>
           
           <Dialog open={isAddFrameDialogOpen} onOpenChange={setIsAddFrameDialogOpen}>
             <DialogTrigger asChild>
               <Button className="shrink-0">
-                <Plus className="h-4 w-4 mr-1" /> إضافة إطار جديد
+                <Plus className="h-4 w-4 mr-1" /> {t('addNewFrame')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>إضافة إطار جديد</DialogTitle>
+                <DialogTitle>{t('addNewFrameTitle')}</DialogTitle>
                 <DialogDescription>
-                  أدخل تفاصيل الإطار الجديد لإضافته إلى المخزون
+                  {t('addNewFrameDescription')}
                 </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="frameBrand">الماركة</Label>
+                    <Label htmlFor="frameBrand">{t('brand')}</Label>
                     <Input
                       id="frameBrand"
                       value={frameBrand}
                       onChange={(e) => setFrameBrand(e.target.value)}
-                      placeholder="مثال: RayBan"
+                      placeholder={t('brandExample')}
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="frameModel">الموديل</Label>
+                    <Label htmlFor="frameModel">{t('model')}</Label>
                     <Input
                       id="frameModel"
                       value={frameModel}
                       onChange={(e) => setFrameModel(e.target.value)}
-                      placeholder="مثال: RB3025"
+                      placeholder={t('modelExample')}
                     />
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="frameColor">اللون</Label>
+                    <Label htmlFor="frameColor">{t('color')}</Label>
                     <Input
                       id="frameColor"
                       value={frameColor}
                       onChange={(e) => setFrameColor(e.target.value)}
-                      placeholder="مثال: أسود"
+                      placeholder={t('colorExample')}
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="frameSize">المقاس</Label>
+                    <Label htmlFor="frameSize">{t('size')}</Label>
                     <Input
                       id="frameSize"
                       value={frameSize}
                       onChange={(e) => setFrameSize(e.target.value)}
-                      placeholder="مثال: 52-18-145"
+                      placeholder={t('sizeExample')}
                     />
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="framePrice">السعر (KWD)</Label>
+                    <Label htmlFor="framePrice">{t('price')} (KWD)</Label>
                     <Input
                       id="framePrice"
                       type="number"
@@ -268,7 +275,7 @@ export const FrameInventory: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="frameQty">الكمية</Label>
+                    <Label htmlFor="frameQty">{t('quantity')}</Label>
                     <Input
                       id="frameQty"
                       type="number"
@@ -283,10 +290,10 @@ export const FrameInventory: React.FC = () => {
               
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddFrameDialogOpen(false)}>
-                  إلغاء
+                  {t('cancel')}
                 </Button>
                 <Button onClick={handleAddFrame}>
-                  <Save className="h-4 w-4 mr-1" /> حفظ الإطار
+                  <Save className="h-4 w-4 mr-1" /> {t('saveFrame')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -308,15 +315,15 @@ export const FrameInventory: React.FC = () => {
       ) : (
         <div className="bg-muted/30 rounded-lg p-12 text-center">
           <Package className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-          <h3 className="text-lg font-medium mb-1">لا توجد إطارات</h3>
+          <h3 className="text-lg font-medium mb-1">{t('noFramesFound')}</h3>
           <p className="text-muted-foreground mb-4">
-            لم يتم العثور على إطارات مطابقة للبحث.
+            {t('noFramesMatchingSearch')}
           </p>
           <Button variant="outline" onClick={() => {
             setFrameSearchTerm("");
             setSearchResults(frames);
           }}>
-            عرض جميع الإطارات
+            {t('showAllFrames')}
           </Button>
         </div>
       )}
@@ -324,9 +331,9 @@ export const FrameInventory: React.FC = () => {
       <Dialog open={isLabelDialogOpen} onOpenChange={setIsLabelDialogOpen}>
         <DialogContent className="max-w-5xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>طباعة بطاقات الإطارات</DialogTitle>
+            <DialogTitle>{t('printFrameLabels')}</DialogTitle>
             <DialogDescription>
-              حدد الإطارات التي تريد طباعة بطاقات لها
+              {t('selectFramesForLabels')}
             </DialogDescription>
           </DialogHeader>
           
@@ -336,7 +343,7 @@ export const FrameInventory: React.FC = () => {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsLabelDialogOpen(false)}>
-              إغلاق
+              {t('close')}
             </Button>
           </DialogFooter>
         </DialogContent>

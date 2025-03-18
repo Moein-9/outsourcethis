@@ -454,6 +454,115 @@ const translations: Record<string, Record<string, string>> = {
   "languageCode": {
     ar: "EN",
     en: "AR"
+  },
+  // Frame inventory translations
+  "search": {
+    ar: "بحث",
+    en: "Search"
+  },
+  "searchForFrame": {
+    ar: "البحث عن إطار (ماركة، موديل، لون...)",
+    en: "Search for frame (brand, model, color...)"
+  },
+  "printLabels": {
+    ar: "طباعة البطاقات",
+    en: "Print Labels"
+  },
+  "addNewFrame": {
+    ar: "إضافة إطار جديد",
+    en: "Add New Frame"
+  },
+  "addNewFrameTitle": {
+    ar: "إضافة إطار جديد",
+    en: "Add New Frame"
+  },
+  "addNewFrameDescription": {
+    ar: "أدخل تفاصيل الإطار الجديد لإضافته إلى المخزون",
+    en: "Enter new frame details to add to inventory"
+  },
+  "brand": {
+    ar: "الماركة",
+    en: "Brand"
+  },
+  "model": {
+    ar: "الموديل",
+    en: "Model"
+  },
+  "color": {
+    ar: "اللون",
+    en: "Color"
+  },
+  "size": {
+    ar: "المقاس",
+    en: "Size"
+  },
+  "price": {
+    ar: "السعر",
+    en: "Price"
+  },
+  "quantity": {
+    ar: "الكمية",
+    en: "Quantity"
+  },
+  "inStock": {
+    ar: "في المخزون",
+    en: "In Stock"
+  },
+  "edit": {
+    ar: "تعديل",
+    en: "Edit"
+  },
+  "copy": {
+    ar: "نسخ",
+    en: "Copy"
+  },
+  "print": {
+    ar: "طباعة",
+    en: "Print"
+  },
+  "save": {
+    ar: "حفظ",
+    en: "Save"
+  },
+  "saveFrame": {
+    ar: "حفظ الإطار",
+    en: "Save Frame"
+  },
+  "noFramesFound": {
+    ar: "لا توجد إطارات",
+    en: "No Frames Found"
+  },
+  "noFramesMatchingSearch": {
+    ar: "لم يتم العثور على إطارات مطابقة للبحث.",
+    en: "No frames match your search criteria."
+  },
+  "showAllFrames": {
+    ar: "عرض جميع الإطارات",
+    en: "Show All Frames"
+  },
+  "printFrameLabels": {
+    ar: "طباعة بطاقات الإطارات",
+    en: "Print Frame Labels"
+  },
+  "selectFramesForLabels": {
+    ar: "حدد الإطارات التي تريد طباعة بطاقات لها",
+    en: "Select frames to print labels for"
+  },
+  "brandExample": {
+    ar: "مثال: RayBan",
+    en: "Example: RayBan"
+  },
+  "modelExample": {
+    ar: "مثال: RB3025",
+    en: "Example: RB3025"
+  },
+  "colorExample": {
+    ar: "مثال: أسود",
+    en: "Example: Black"
+  },
+  "sizeExample": {
+    ar: "مثال: 52-18-145",
+    en: "Example: 52-18-145"
   }
 };
 

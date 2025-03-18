@@ -53,6 +53,31 @@
   text-align: left;
 }
 
+/* Ensure inputs in RTL mode have proper alignment */
+.rtl input,
+.rtl textarea,
+.rtl select {
+  text-align: right;
+}
+
+/* Ensure inputs in LTR mode have proper alignment */
+.ltr input,
+.ltr textarea,
+.ltr select {
+  text-align: left;
+}
+
+/* Language specific styles */
+.rtl .flip-icons svg {
+  transform: scaleX(-1);
+}
+
+/* Always keep numbers in English even in RTL mode */
+.rtl .force-ltr-numbers {
+  direction: ltr;
+  display: inline-block;
+}
+
 /* Frame label print styling */
 @media print {
   @page {

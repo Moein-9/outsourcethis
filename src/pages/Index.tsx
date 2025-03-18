@@ -27,6 +27,15 @@ const Index = () => {
   useEffect(() => {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
+    
+    // Apply RTL or LTR class to the body for global styling
+    if (language === 'ar') {
+      document.body.classList.add('rtl-language');
+      document.body.classList.remove('ltr-language');
+    } else {
+      document.body.classList.add('ltr-language');
+      document.body.classList.remove('rtl-language');
+    }
   }, [language]);
 
   return (
