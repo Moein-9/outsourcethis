@@ -10,52 +10,59 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguageStore } from "@/store/languageStore";
 import { MoenLogo } from "@/assets/logo";
+import { PrintService } from "@/utils/PrintService";
 
 const LabelComponent = ({ frame }: { frame: FrameItem }) => {
   return (
     <div className="label-container" style={{
       width: "100mm",
       height: "16mm",
-      border: "1px solid #000",
+      border: "1px dashed #ccc",
       display: "flex",
       fontFamily: "Arial, sans-serif",
       pageBreakInside: "avoid",
       marginBottom: "5mm",
       position: "relative",
-      overflow: "hidden"
+      overflow: "hidden",
+      borderRadius: "8mm"
     }}>
       <div style={{
-        width: "50mm",
+        width: "45mm",
         height: "100%",
-        padding: "2mm",
+        padding: "1mm 2mm",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center"
       }}>
         <div style={{
           fontWeight: "bold",
-          fontSize: "11pt",
-          marginBottom: "1mm"
+          fontSize: "10pt",
+          marginBottom: "1mm",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis"
         }}>{frame.brand}</div>
         <div style={{
-          fontSize: "9pt",
-          marginBottom: "1mm"
+          fontSize: "8pt",
+          marginBottom: "1mm",
+          lineHeight: "1.1"
         }}>
-          Model: {frame.model || "-"} Color: {frame.color || "-"} Size: {frame.size || "-"}
+          Model: {frame.model || "-"}<br/>
+          Color: {frame.color || "-"}<br/>
+          Size: {frame.size || "-"}
         </div>
         <div style={{
           fontWeight: "bold",
-          fontSize: "11pt"
+          fontSize: "10pt"
         }}>K.D. {frame.price.toFixed(3)}</div>
       </div>
 
       <div style={{
-        width: "50mm",
+        width: "45mm",
         height: "100%",
-        padding: "2mm",
+        padding: "1mm",
         display: "flex",
         flexDirection: "column",
-        position: "relative",
         justifyContent: "center",
         alignItems: "center"
       }}>
@@ -65,17 +72,16 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
           width: "100%",
           marginBottom: "1mm"
         }}>
-          <MoenLogo className="w-auto" style={{ maxHeight: "5mm", height: "auto" }} />
+          <MoenLogo className="w-auto" style={{ maxHeight: "4mm", height: "auto" }} />
         </div>
         
         <div className="qr-code" style={{
           display: "flex",
-          justifyContent: "center",
-          marginTop: "1mm"
+          justifyContent: "center"
         }}>
           <QRCodeSVG 
             value={frame.frameId} 
-            size={30}
+            size={24}
             level="M"
           />
         </div>
@@ -91,19 +97,35 @@ export const usePrintLabel = () => {
     
     if (selectedFrames.length === 0) return;
     
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    
-    document.body.appendChild(iframe);
-    
     const logoUrl = "/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png";
     
-    let printContent = `
+    let labelContent = '';
+    
+    selectedFrames.forEach(frame => {
+      labelContent += `
+        <div class="label-container">
+          <div class="left-section">
+            <div class="brand-name">${frame.brand}</div>
+            <div class="detail-info">
+              Model: ${frame.model || "-"}<br/>
+              Color: ${frame.color || "-"}<br/>
+              Size: ${frame.size || "-"}
+            </div>
+            <div class="price">K.D. ${frame.price.toFixed(3)}</div>
+          </div>
+          <div class="right-section">
+            <div class="store-logo">
+              <img src="${logoUrl}" alt="Store Logo">
+            </div>
+            <div class="qr-code">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    
+    const printContent = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -122,26 +144,26 @@ export const usePrintLabel = () => {
           .label-container {
             width: 100mm;
             height: 16mm;
-            border: 1px solid #000;
             display: flex;
             font-family: Arial, sans-serif;
             page-break-inside: avoid;
-            margin-bottom: 0;
+            page-break-after: always;
             position: relative;
             overflow: hidden;
+            border-radius: 8mm;
           }
           .left-section {
-            width: 50mm;
+            width: 45mm;
             height: 100%;
-            padding: 2mm;
+            padding: 1mm 2mm;
             display: flex;
             flex-direction: column;
             justify-content: center;
           }
           .right-section {
-            width: 50mm;
+            width: 45mm;
             height: 100%;
-            padding: 2mm;
+            padding: 1mm;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -149,16 +171,20 @@ export const usePrintLabel = () => {
           }
           .brand-name {
             font-weight: bold;
-            font-size: 11pt;
+            font-size: 10pt;
             margin-bottom: 1mm;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
           .detail-info {
-            font-size: 9pt;
+            font-size: 8pt;
             margin-bottom: 1mm;
+            line-height: 1.1;
           }
           .price {
             font-weight: bold;
-            font-size: 11pt;
+            font-size: 10pt;
           }
           .store-logo {
             display: flex;
@@ -167,17 +193,16 @@ export const usePrintLabel = () => {
             margin-bottom: 1mm;
           }
           .store-logo img {
-            max-height: 5mm;
+            max-height: 4mm;
             width: auto;
           }
           .qr-code {
             display: flex;
             justify-content: center;
-            margin-top: 1mm;
           }
           .qr-code img {
-            height: 30px;
-            width: 30px;
+            height: 24px;
+            width: 24px;
           }
           @media print {
             body {
@@ -190,40 +215,13 @@ export const usePrintLabel = () => {
               padding: 0;
             }
             .label-container {
-              page-break-after: always;
               border: none;
             }
           }
         </style>
       </head>
       <body>
-    `;
-    
-    selectedFrames.forEach(frame => {
-      printContent += `
-        <div class="label-container">
-          <div class="left-section">
-            <div class="brand-name">${frame.brand}</div>
-            <div class="detail-info">
-              Model: ${frame.model || "-"} 
-              Color: ${frame.color || "-"} 
-              Size: ${frame.size || "-"}
-            </div>
-            <div class="price">K.D. ${frame.price.toFixed(3)}</div>
-          </div>
-          <div class="right-section">
-            <div class="store-logo">
-              <img src="${logoUrl}" alt="Store Logo">
-            </div>
-            <div class="qr-code">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">
-            </div>
-          </div>
-        </div>
-      `;
-    });
-    
-    printContent += `
+        ${labelContent}
         <script>
           document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
@@ -239,21 +237,9 @@ export const usePrintLabel = () => {
       </html>
     `;
     
-    window.addEventListener('message', function handler(e) {
-      if (e.data === 'print-complete') {
-        window.removeEventListener('message', handler);
-        document.body.removeChild(iframe);
-      }
-    }, { once: true });
-    
-    if (iframe.contentWindow) {
-      iframe.contentWindow.document.open();
-      iframe.contentWindow.document.write(printContent);
-      iframe.contentWindow.document.close();
-    } else {
-      toast.error("Failed to create print frame");
-      document.body.removeChild(iframe);
-    }
+    PrintService.printHtml(printContent, () => {
+      toast.success("Labels sent to printer");
+    });
   };
   
   const printSingleLabel = (frameId: string) => {
