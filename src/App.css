@@ -42,6 +42,17 @@
   color: #888;
 }
 
+/* Language direction utilities */
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
 /* Frame label print styling */
 @media print {
   @page {

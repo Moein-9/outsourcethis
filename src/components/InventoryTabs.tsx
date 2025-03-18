@@ -6,8 +6,11 @@ import { LensCoatingManager } from "@/components/LensCoatingManager";
 import { FrameInventory } from "@/components/FrameInventory";
 import { ContactLensInventory } from "@/components/ContactLensInventory";
 import { Glasses, Contact, Layers, Paintbrush } from "lucide-react";
+import { useLanguageStore } from "@/store/languageStore";
 
 export const InventoryTabs: React.FC = () => {
+  const { t } = useLanguageStore();
+
   return (
     <Tabs defaultValue="frames" className="w-full">
       <TabsList className="mb-6 w-full justify-start overflow-x-auto bg-gradient-to-r from-blue-50 to-purple-50 p-1.5 rounded-lg border border-gray-200 shadow-sm">
@@ -16,28 +19,28 @@ export const InventoryTabs: React.FC = () => {
           className="data-[state=active]:bg-blue-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Glasses className="w-4 h-4" />
-          <span>الإطارات</span>
+          <span>{t('frames')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="contactLenses" 
           className="data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Contact className="w-4 h-4" />
-          <span>العدسات اللاصقة</span>
+          <span>{t('contactLenses')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="lensTypes" 
           className="data-[state=active]:bg-purple-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Layers className="w-4 h-4" />
-          <span>أنواع العدسات</span>
+          <span>{t('lensTypes')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="lensCoatings" 
           className="data-[state=active]:bg-teal-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Paintbrush className="w-4 h-4" />
-          <span>طلاءات العدسات</span>
+          <span>{t('lensCoatings')}</span>
         </TabsTrigger>
       </TabsList>
       
@@ -45,7 +48,7 @@ export const InventoryTabs: React.FC = () => {
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold mb-4 text-blue-800 flex items-center gap-2">
             <Glasses className="w-5 h-5" />
-            إدارة الإطارات
+            {t('frameManagement')}
           </h3>
           <FrameInventory />
         </div>
@@ -55,7 +58,7 @@ export const InventoryTabs: React.FC = () => {
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold mb-4 text-amber-800 flex items-center gap-2">
             <Contact className="w-5 h-5" />
-            إدارة العدسات اللاصقة
+            {t('contactLensManagement')}
           </h3>
           <ContactLensInventory />
         </div>
@@ -65,7 +68,7 @@ export const InventoryTabs: React.FC = () => {
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold mb-4 text-purple-800 flex items-center gap-2">
             <Layers className="w-5 h-5" />
-            أنواع العدسات
+            {t('lensTypes')}
           </h3>
           <LensTypeManager />
         </div>
@@ -75,7 +78,7 @@ export const InventoryTabs: React.FC = () => {
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold mb-4 text-teal-800 flex items-center gap-2">
             <Paintbrush className="w-5 h-5" />
-            طلاءات العدسات
+            {t('lensCoatings')}
           </h3>
           <LensCoatingManager />
         </div>

@@ -9,10 +9,12 @@ import { InventoryTabs } from "@/components/InventoryTabs";
 import { RemainingPayments } from "@/components/RemainingPayments";
 import { PatientSearch } from "@/components/PatientSearch";
 import { useLocation } from "react-router-dom";
+import { useLanguageStore } from "@/store/languageStore";
 
 const Index = () => {
   const [activeSection, setActiveSection] = React.useState("dashboard");
   const location = useLocation();
+  const { language } = useLanguageStore();
   
   // Check if we have state passed from navigation
   useEffect(() => {
@@ -20,6 +22,12 @@ const Index = () => {
       setActiveSection(location.state.section);
     }
   }, [location.state]);
+
+  // Update document's direction based on language
+  useEffect(() => {
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [language]);
 
   return (
     <Layout
