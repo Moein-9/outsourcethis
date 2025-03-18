@@ -63,7 +63,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
       </div>
       
       {onSkipLensChange && (
-        <div className={`flex items-center space-x-2 ${language === 'ar' ? 'space-x-reverse justify-end' : 'justify-start'} px-3 py-2 border-b border-gray-100`}>
+        <div className={`flex items-center space-x-2 ${language === 'ar' ? 'space-x-reverse flex-row-reverse' : ''} px-3 py-2 border-b border-gray-100`}>
           <Checkbox 
             id="skipLensCheck" 
             checked={skipLens}
@@ -72,7 +72,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
           />
           <Label 
             htmlFor="skipLensCheck" 
-            className={`font-medium text-sm ${language === 'ar' ? 'mr-2' : 'ml-2'} cursor-pointer text-gray-700`}
+            className={`font-medium text-sm cursor-pointer text-gray-700`}
           >
             {t('frameOnly')}
           </Label>

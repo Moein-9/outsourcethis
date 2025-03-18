@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore, ContactLensRx } from "@/store/patientStore";
 import { toast } from "@/components/ui/use-toast";
@@ -46,6 +45,10 @@ export const CreateClient: React.FC = () => {
     rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" },
     leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" }
   });
+  
+  // Direction class based on language
+  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
   // Generate options for select elements
   const generateSphOptions = () => {
@@ -261,8 +264,8 @@ export const CreateClient: React.FC = () => {
   };
   
   return (
-    <div className="py-4">
-      <h2 className="text-2xl font-bold mb-4">{t("createClientTitle")}</h2>
+    <div className={`py-4 ${dirClass}`}>
+      <h2 className={`text-2xl font-bold mb-4 ${textAlignClass}`}>{t("createClientTitle")}</h2>
       
       <Tabs defaultValue="glasses" value={activeTab} onValueChange={(value) => setActiveTab(value as "glasses" | "contactLenses")}>
         <TabsList className="mb-6 w-full md:w-auto bg-slate-100 border-slate-200 p-1 shadow-md">
@@ -281,39 +284,41 @@ export const CreateClient: React.FC = () => {
         </TabsList>
       
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left: Patient Information - Switched from right to left */}
-          <div className="order-2 md:order-2 bg-card rounded-md p-4 border">
-            <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
+          {/* Left: Patient Information */}
+          <div className="bg-card rounded-md p-4 border">
+            <div className={`text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary ${textAlignClass}`}>
               {t("personalInfo")}
             </div>
             
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">{t("name")}</Label>
+                <Label htmlFor="name" className={textAlignClass}>{t("name")}</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t("fullName")}
+                  className={textAlignClass}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="phone">{t("phone")}</Label>
+                <Label htmlFor="phone" className={textAlignClass}>{t("phone")}</Label>
                 <Input
                   id="phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder={t("phoneNumber")}
+                  className={textAlignClass}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="dob">{t("dateOfBirth")}</Label>
+                <Label htmlFor="dob" className={textAlignClass}>{t("dateOfBirth")}</Label>
                 <div className="grid grid-cols-3 gap-2">
                   <select
                     id="dobDay"
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                    className={`h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${textAlignClass}`}
                     value={dobDay}
                     onChange={(e) => setDobDay(e.target.value)}
                     disabled={noDob}
@@ -323,7 +328,7 @@ export const CreateClient: React.FC = () => {
                   </select>
                   <select
                     id="dobMonth"
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                    className={`h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${textAlignClass}`}
                     value={dobMonth}
                     onChange={(e) => setDobMonth(e.target.value)}
                     disabled={noDob}
@@ -333,7 +338,7 @@ export const CreateClient: React.FC = () => {
                   </select>
                   <select
                     id="dobYear"
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                    className={`h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${textAlignClass}`}
                     value={dobYear}
                     onChange={(e) => setDobYear(e.target.value)}
                     disabled={noDob}
@@ -343,7 +348,7 @@ export const CreateClient: React.FC = () => {
                   </select>
                 </div>
                 
-                <div className="flex items-center space-x-2 space-x-reverse mt-2">
+                <div className={`flex items-center space-x-2 ${language === 'ar' ? 'space-x-reverse' : ''} mt-2`}>
                   <Checkbox 
                     id="noDobCheck" 
                     checked={noDob} 
@@ -351,7 +356,7 @@ export const CreateClient: React.FC = () => {
                   />
                   <Label 
                     htmlFor="noDobCheck" 
-                    className="font-normal text-sm"
+                    className={`font-normal text-sm ${language === 'ar' ? 'mr-2' : 'ml-2'}`}
                   >
                     {t("clientDidntShareDOB")}
                   </Label>
@@ -359,27 +364,28 @@ export const CreateClient: React.FC = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="notes">{t("notes")}</Label>
+                <Label htmlFor="notes" className={textAlignClass}>{t("notes")}</Label>
                 <Textarea
                   id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={t("clientNotesPreferences")}
+                  className={textAlignClass}
                 />
               </div>
             </div>
           </div>
           
-          {/* Right: Prescription Content - Switched from left to right */}
-          <div className="order-1 md:order-1">
+          {/* Right: Prescription Content */}
+          <div>
             <TabsContent value="glasses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
-                <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
+                <div className={`text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary ${textAlignClass}`}>
                   {t("glassesPrescription")}
                 </div>
                 
                 <div className="mb-4">
-                  <Label htmlFor="rxDate">{t("prescriptionDate")}</Label>
+                  <Label htmlFor="rxDate" className={textAlignClass}>{t("prescriptionDate")}</Label>
                   <div className="mt-1">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -387,7 +393,7 @@ export const CreateClient: React.FC = () => {
                           variant={"outline"}
                           className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
                         >
-                          <CalendarIcon className="ml-2 h-4 w-4" />
+                          <CalendarIcon className="mr-2 h-4 w-4" />
                           {rxDate ? format(rxDate, "PPP") : t("choosePrescriptionDate")}
                         </Button>
                       </PopoverTrigger>
@@ -404,7 +410,7 @@ export const CreateClient: React.FC = () => {
                 </div>
                 
                 <div className="overflow-x-auto">
-                  <table className="w-full border-collapse ltr">
+                  <table className="w-full border-collapse">
                     <thead>
                       <tr>
                         <th className="text-center border border-border bg-muted p-2"></th>
@@ -412,11 +418,12 @@ export const CreateClient: React.FC = () => {
                         <th className="text-center border border-border bg-muted p-2">CYL</th>
                         <th className="text-center border border-border bg-muted p-2">AXIS</th>
                         <th className="text-center border border-border bg-muted p-2">ADD</th>
+                        <th className="text-center border border-border bg-muted p-2">PD</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <th className="text-center border border-border bg-muted p-2">OD ({t("right")})</th>
+                        <th className="text-center border border-border bg-muted p-2">{t("rightEye")} (OD)</th>
                         <td className="border border-border p-1">
                           <select
                             className="w-full p-1 rounded-md border-input bg-background"
@@ -457,9 +464,19 @@ export const CreateClient: React.FC = () => {
                             {generateAddOptions()}
                           </select>
                         </td>
+                        <td className="border border-border p-1">
+                          <select
+                            className="w-full p-1 rounded-md border-input bg-background"
+                            value={pdRight}
+                            onChange={(e) => setPdRight(e.target.value)}
+                          >
+                            <option value="" disabled>{t("choose")}</option>
+                            {generatePdOptions()}
+                          </select>
+                        </td>
                       </tr>
                       <tr>
-                        <th className="text-center border border-border bg-muted p-2">OS ({t("left")})</th>
+                        <th className="text-center border border-border bg-muted p-2">{t("leftEye")} (OS)</th>
                         <td className="border border-border p-1">
                           <select
                             className="w-full p-1 rounded-md border-input bg-background"
@@ -500,20 +517,7 @@ export const CreateClient: React.FC = () => {
                             {generateAddOptions()}
                           </select>
                         </td>
-                      </tr>
-                      <tr>
-                        <th className="text-center border border-border bg-muted p-2">PD</th>
-                        <td className="border border-border p-1" colSpan={2}>
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
-                            value={pdRight}
-                            onChange={(e) => setPdRight(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generatePdOptions()}
-                          </select>
-                        </td>
-                        <td className="border border-border p-1" colSpan={2}>
+                        <td className="border border-border p-1">
                           <select
                             className="w-full p-1 rounded-md border-input bg-background"
                             value={pdLeft}
@@ -532,12 +536,12 @@ export const CreateClient: React.FC = () => {
             
             <TabsContent value="contactLenses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
-                <div className="text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary">
+                <div className={`text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary ${textAlignClass}`}>
                   {t("contactLensPrescription")}
                 </div>
                 
                 <div className="mb-4">
-                  <Label htmlFor="contactRxDate">{t("prescriptionDate")}</Label>
+                  <Label htmlFor="contactRxDate" className={textAlignClass}>{t("prescriptionDate")}</Label>
                   <div className="mt-1">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -545,7 +549,7 @@ export const CreateClient: React.FC = () => {
                           variant={"outline"}
                           className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
                         >
-                          <CalendarIcon className="ml-2 h-4 w-4" />
+                          <CalendarIcon className="mr-2 h-4 w-4" />
                           {rxDate ? format(rxDate, "PPP") : t("choosePrescriptionDate")}
                         </Button>
                       </PopoverTrigger>

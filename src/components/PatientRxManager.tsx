@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Dialog, 
@@ -31,8 +30,7 @@ import {
   Eye,
   Plus,
   Calendar,
-  CheckCircle2,
-  ArrowRight
+  CheckCircle2
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
@@ -105,7 +103,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   };
 
   const handleSaveNewRx = () => {
-    // Validate all fields are filled
     if (!newRx.sphereOD || !newRx.sphereOS || !newRx.pdRight || !newRx.pdLeft) {
       toast({
         title: t("dataError"),
@@ -115,7 +112,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
       return;
     }
 
-    // Update the patient's RX
     updatePatientRx(patientId, {
       ...newRx,
       createdAt: new Date().toISOString()
@@ -143,7 +139,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     }
   };
 
-  // Generate options for select elements
   const generateSphOptions = () => {
     const options = [];
     for (let i = 10; i >= -10; i -= 0.25) {
@@ -207,6 +202,9 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     return options;
   };
 
+  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+
   return (
     <Card className="mt-6 border-blue-200">
       <CardHeader className="pb-2 flex flex-row justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
@@ -218,11 +216,11 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={onRxPrintRequest} className="border-blue-300 hover:bg-blue-50">
-            <Printer className="h-4 w-4 ml-2 text-blue-600" />
+            <Printer className="h-4 w-4 mr-1.5" />
             {t("printPrescription")}
           </Button>
           <Button size="sm" onClick={() => setIsNewRxOpen(true)} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4 ml-2" />
+            <Plus className="h-4 w-4 mr-1.5" />
             {t("newRx")}
           </Button>
         </div>
@@ -254,19 +252,20 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="font-medium bg-blue-50/50">{t("rightEye")}</TableCell>
+                    <TableCell className="font-medium bg-blue-50/50">{t("rightEye")} (OD)</TableCell>
                     <TableCell>{currentRx?.sphereOD || "-"}</TableCell>
                     <TableCell>{currentRx?.cylOD || "-"}</TableCell>
                     <TableCell>{currentRx?.axisOD || "-"}</TableCell>
                     <TableCell>{currentRx?.addOD || "-"}</TableCell>
-                    <TableCell rowSpan={2}>{currentRx?.pdRight || "-"}</TableCell>
+                    <TableCell>{currentRx?.pdRight || "-"}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium bg-rose-50/50">{t("leftEye")}</TableCell>
+                    <TableCell className="font-medium bg-rose-50/50">{t("leftEye")} (OS)</TableCell>
                     <TableCell>{currentRx?.sphereOS || "-"}</TableCell>
                     <TableCell>{currentRx?.cylOS || "-"}</TableCell>
                     <TableCell>{currentRx?.axisOS || "-"}</TableCell>
                     <TableCell>{currentRx?.addOS || "-"}</TableCell>
+                    <TableCell>{currentRx?.pdLeft || "-"}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -282,14 +281,22 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
             </div>
             {rxHistory && rxHistory.length > 0 ? (
               <div className="rounded-md border overflow-hidden shadow-sm">
-                <Table>
+                <Table className={dirClass}>
                   <TableHeader className="bg-amber-50">
                     <TableRow>
                       <TableHead className="text-amber-800">{t("date")}</TableHead>
-                      <TableHead className="text-amber-800">{t("rightEye")}</TableHead>
-                      <TableHead className="text-amber-800">{t("leftEye")}</TableHead>
-                      <TableHead className="text-amber-800">PD</TableHead>
-                      <TableHead className="text-right text-amber-800">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
+                      <TableHead className="text-amber-800">
+                        {language === 'ar' ? 'العين اليمنى (OD)' : 'Right Eye (OD)'}
+                      </TableHead>
+                      <TableHead className="text-amber-800">
+                        {language === 'ar' ? 'العين اليسرى (OS)' : 'Left Eye (OS)'}
+                      </TableHead>
+                      <TableHead className="text-amber-800">
+                        {language === 'ar' ? 'المسافة البؤبؤية (PD)' : 'PD (Right - Left)'}
+                      </TableHead>
+                      <TableHead className={`${textAlignClass} text-amber-800`}>
+                        {t("actions")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -299,39 +306,44 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                         <TableCell className="text-sm">
                           <div className="space-y-1">
                             <div className="flex items-center">
-                              <span className="font-medium ml-1">SPH:</span> {rx.sphereOD || "-"}
+                              <span className="font-medium mr-1">SPH:</span> {rx.sphereOD || "-"}
                             </div>
                             <div className="flex items-center">
-                              <span className="font-medium ml-1">CYL:</span> {rx.cylOD || "-"}
+                              <span className="font-medium mr-1">CYL:</span> {rx.cylOD || "-"}
                             </div>
                             <div className="flex items-center">
-                              <span className="font-medium ml-1">AXIS:</span> {rx.axisOD || "-"}
+                              <span className="font-medium mr-1">AXIS:</span> {rx.axisOD || "-"}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-sm">
                           <div className="space-y-1">
                             <div className="flex items-center">
-                              <span className="font-medium ml-1">SPH:</span> {rx.sphereOS || "-"}
+                              <span className="font-medium mr-1">SPH:</span> {rx.sphereOS || "-"}
                             </div>
                             <div className="flex items-center">
-                              <span className="font-medium ml-1">CYL:</span> {rx.cylOS || "-"}
+                              <span className="font-medium mr-1">CYL:</span> {rx.cylOS || "-"}
                             </div>
                             <div className="flex items-center">
-                              <span className="font-medium ml-1">AXIS:</span> {rx.axisOS || "-"}
+                              <span className="font-medium mr-1">AXIS:</span> {rx.axisOS || "-"}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>{rx.pdRight} - {rx.pdLeft}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span>{t("right")}: {rx.pdRight || "-"}</span>
+                            <span>{t("left")}: {rx.pdLeft || "-"}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className={textAlignClass}>
                           <Button 
                             variant="ghost" 
                             size="sm" 
                             className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
                             onClick={() => handleViewRx(rx)}
                           >
-                            <Eye className="h-3.5 w-3.5 ml-1" />
-                            {language === 'ar' ? 'عرض' : 'View'}
+                            <Eye className="h-3.5 w-3.5 mr-1.5" />
+                            {t("view")}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -355,21 +367,21 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
               <AlertCircle className="h-5 w-5 text-green-600" />
               {t("glassesCareTips")}
             </h4>
-            <ul className="text-gray-700 list-disc list-inside space-y-2 pl-2">
+            <ul className={`text-gray-700 list-disc space-y-2 pl-4 ${dirClass}`}>
               <li className="flex items-start">
-                <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 ml-2 flex-shrink-0" />
+                <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 mr-2 flex-shrink-0" />
                 <span>{t("tip1")}</span>
               </li>
               <li className="flex items-start">
-                <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 ml-2 flex-shrink-0" />
+                <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 mr-2 flex-shrink-0" />
                 <span>{t("tip2")}</span>
               </li>
               <li className="flex items-start">
-                <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 ml-2 flex-shrink-0" />
+                <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 mr-2 flex-shrink-0" />
                 <span>{t("tip3")}</span>
               </li>
               <li className="flex items-start">
-                <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 ml-2 flex-shrink-0" />
+                <CheckCircle2 className="h-4 w-4 text-green-500 mt-1 mr-2 flex-shrink-0" />
                 <span>{t("tip4")}</span>
               </li>
             </ul>
@@ -377,7 +389,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
         </div>
       </CardContent>
 
-      {/* New RX Dialog */}
       <Dialog open={isNewRxOpen} onOpenChange={setIsNewRxOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -454,7 +465,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 </div>
                 
                 <div className="lg:col-span-1">
-                  <Label htmlFor="pdRight" className="block mb-1">PD</Label>
+                  <Label htmlFor="pdRight" className="block mb-1">PD ({t("right")})</Label>
                   <select
                     id="pdRight"
                     className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2"
@@ -466,7 +477,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                   </select>
                 </div>
                 
-                {/* Left Eye Row */}
                 <div className="lg:col-span-1">
                   <Label className="block mb-1">{t("leftEye")}</Label>
                   <div className="h-10 flex items-center justify-center font-semibold bg-rose-100 rounded border border-rose-200">
@@ -523,6 +533,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 </div>
                 
                 <div className="lg:col-span-1">
+                  <Label htmlFor="pdLeft" className="block mb-1">PD ({t("left")})</Label>
                   <select
                     id="pdLeft"
                     className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2"
@@ -548,7 +559,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* View RX Details Dialog */}
       <Dialog open={isViewRxOpen} onOpenChange={setIsViewRxOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -575,19 +585,20 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                     </TableHeader>
                     <TableBody>
                       <TableRow>
-                        <TableCell className="font-medium bg-amber-50/50">{t("rightEye")}</TableCell>
+                        <TableCell className="font-medium bg-amber-50/50">{t("rightEye")} (OD)</TableCell>
                         <TableCell>{viewRxDetails.sphereOD || "-"}</TableCell>
                         <TableCell>{viewRxDetails.cylOD || "-"}</TableCell>
                         <TableCell>{viewRxDetails.axisOD || "-"}</TableCell>
                         <TableCell>{viewRxDetails.addOD || "-"}</TableCell>
-                        <TableCell rowSpan={2}>{viewRxDetails.pdRight || "-"}</TableCell>
+                        <TableCell>{viewRxDetails.pdRight || "-"}</TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell className="font-medium bg-rose-50/50">{t("leftEye")}</TableCell>
+                        <TableCell className="font-medium bg-rose-50/50">{t("leftEye")} (OS)</TableCell>
                         <TableCell>{viewRxDetails.sphereOS || "-"}</TableCell>
                         <TableCell>{viewRxDetails.cylOS || "-"}</TableCell>
                         <TableCell>{viewRxDetails.axisOS || "-"}</TableCell>
                         <TableCell>{viewRxDetails.addOS || "-"}</TableCell>
+                        <TableCell>{viewRxDetails.pdLeft || "-"}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -608,7 +619,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 onRxPrintRequest();
               }}
             >
-              <Printer className="h-4 w-4 ml-2 text-blue-600" />
+              <Printer className="h-4 w-4 mr-1.5" />
               {t("printPrescription")}
             </Button>
           </DialogFooter>

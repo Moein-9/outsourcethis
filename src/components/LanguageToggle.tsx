@@ -20,7 +20,7 @@ export const LanguageToggle: React.FC = () => {
       title={language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
     >
       <Globe className={`h-3.5 w-3.5 ${language === 'ar' ? 'text-green-600' : 'text-blue-600'}`} />
-      <span className={language === 'ar' ? 'text-blue-600 font-medium' : 'text-green-600 font-medium'}>
+      <span className={language === 'ar' ? 'text-green-600 font-medium' : 'text-blue-600 font-medium'}>
         {language === 'ar' ? 'English' : 'العربية'}
       </span>
     </Button>
