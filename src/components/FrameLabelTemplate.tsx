@@ -59,6 +59,9 @@ export const usePrintLabel = () => {
     let labelContent = '';
     
     selectedFrames.forEach(frame => {
+      // Create QR code as a Data URL using a simple library approach
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=22x22&data=${encodeURIComponent(frame.frameId)}`;
+      
       labelContent += `
         <div class="label-container">
           <div class="right-section">
@@ -75,15 +78,7 @@ export const usePrintLabel = () => {
               <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" style="max-height: 4mm; width: auto;" />
             </div>
             <div class="qr-code">
-              <img src="data:image/svg+xml;base64,${btoa(
-                new XMLSerializer().serializeToString(
-                  new QRCodeSVG({
-                    value: frame.frameId,
-                    size: 22,
-                    level: "M"
-                  }).props.children
-                )
-              )}" width="22" height="22" />
+              <img src="${qrCodeUrl}" width="22" height="22" alt="QR Code" />
             </div>
           </div>
         </div>
