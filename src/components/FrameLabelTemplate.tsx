@@ -59,7 +59,7 @@ export const usePrintLabel = () => {
     let labelContent = '';
     
     selectedFrames.forEach(frame => {
-      // Create QR code as a Data URL using a simple library approach
+      // Create QR code URL using a simple API
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=22x22&data=${encodeURIComponent(frame.frameId)}`;
       
       labelContent += `

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -72,7 +71,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       dir={isRtl ? "rtl" : "ltr"}
       style={{ 
         width: "80mm", 
-        fontFamily: "Arial, sans-serif",
+        fontFamily: isRtl ? "'Zain', sans-serif" : "'Yrsa', serif",
         maxWidth: "80mm",
         overflow: "hidden",
         margin: "0 auto",
@@ -99,7 +98,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       {/* Order Info */}
       <div style={{ marginBottom: "8px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "4px" }}>
-          <span style={{ fontWeight: "bold" }}>{t("workOrderNumber")}:</span>
+          <span style={{ fontWeight: "bold" }}>{t("workOrderNumber")}:</span> 
           <span>{invoice.invoiceId}</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "4px" }}>
@@ -277,18 +276,16 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
   container.style.display = 'none';
   document.body.appendChild(container);
   
-  // Render the component to string
-  const element = document.createElement('div');
-  element.appendChild(container);
-  
-  // Create HTML representation (simplified version)
-  const { invoice, patientName, rx, frame, lensType } = props;
+  // Get language info
   const { language, t } = useLanguageStore.getState();
   const isRtl = language === 'ar';
   
-  // Create simplified HTML content
+  // Destructure necessary props
+  const { invoice, patientName, rx, frame, lensType } = props;
+  
+  // Create simplified HTML content with proper font families
   const htmlContent = `
-    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: Arial, sans-serif; text-align: ${isRtl ? 'right' : 'left'};">
+    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; text-align: ${isRtl ? 'right' : 'left'};">
       <div style="text-align: center; margin-bottom: 10px;">
         <h1 style="font-size: 14px; font-weight: bold;">${t("workOrder")}</h1>
         <p style="font-size: 12px;">${invoice.invoiceId}</p>
@@ -329,12 +326,29 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
     </div>
   `;
   
-  // Use PrintService to handle the printing
-  const printDoc = PrintService.prepareReceiptDocument(htmlContent, t("workOrder"));
-  PrintService.printHtml(printDoc, 'receipt', () => {
-    // Clean up
+  // Use PrintService to handle the printing with enhanced error handling
+  try {
+    // Add a class to body to help with print styling
+    document.body.classList.add('printing');
+    
+    // Use the receipt document preparation
+    const printDoc = PrintService.prepareWorkOrderDocument(htmlContent, t("workOrder"));
+    
+    // Print with improved callback
+    PrintService.printHtml(printDoc, 'receipt', () => {
+      // Clean up
+      document.body.classList.remove('printing');
+      if (document.body.contains(container)) {
+        document.body.removeChild(container);
+      }
+      toast.success(t("printJobSent"));
+    });
+  } catch (error) {
+    console.error('Print error:', error);
+    document.body.classList.remove('printing');
     if (document.body.contains(container)) {
       document.body.removeChild(container);
     }
-  });
+    toast.error(t("printError"));
+  }
 };

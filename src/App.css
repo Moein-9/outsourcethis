@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -50,6 +51,15 @@
 .ltr {
   direction: ltr;
   text-align: left;
+}
+
+/* Font usage classes */
+.font-zain {
+  font-family: 'Zain', sans-serif;
+}
+
+.font-yrsa {
+  font-family: 'Yrsa', serif;
 }
 
 /* Ensure inputs in RTL mode have proper alignment */
@@ -220,9 +230,34 @@ table th, table td {
     display: none !important;
   }
   
-  /* Arabic text fix for thermal printers */
-  [dir="rtl"] * {
-    font-family: 'Arial', sans-serif !important;
+  /* Font fixes for printed content */
+  [dir="rtl"] {
+    font-family: 'Zain', sans-serif !important;
+  }
+  
+  .ltr-print, [dir="ltr"] {
+    font-family: 'Yrsa', serif !important;
+  }
+  
+  /* Fix for print dialog issue - RED FLAG (highest priority) */
+  body.printing {
+    position: relative !important;
+    width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  
+  body.printing * {
+    visibility: visible !important;
+  }
+  
+  .print-receipt, #receipt-invoice, #work-order-receipt {
+    width: 80mm !important;
+    max-width: 80mm !important;
+    page-break-after: always !important;
+    visibility: visible !important;
+    position: static !important;
   }
 }
 
@@ -232,7 +267,7 @@ table th, table td {
   height: 16mm;
   display: flex;
   justify-content: space-between;
-  font-family: Arial, sans-serif;
+  font-family: 'Yrsa', serif;
   overflow: hidden;
   border-radius: 8mm;
   position: relative;

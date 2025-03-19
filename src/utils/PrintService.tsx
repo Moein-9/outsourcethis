@@ -39,7 +39,9 @@ export const PrintService = {
       window.addEventListener('message', function handler(e) {
         if (e.data === 'print-complete') {
           window.removeEventListener('message', handler);
-          document.body.removeChild(iframe);
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
           if (onComplete) onComplete();
         }
       });
@@ -54,14 +56,15 @@ export const PrintService = {
         setTimeout(() => {
           if (iframe.contentWindow) {
             iframe.contentWindow.focus();
+            // Use printImmediately for a more direct approach
             iframe.contentWindow.print();
             
             // Signal completion after printing
             setTimeout(() => {
               window.postMessage('print-complete', '*');
-            }, 500);
+            }, 1000); // Increased timeout for better reliability
           }
-        }, 500);
+        }, 800); // Increased delay to ensure content is fully loaded
       } else {
         toast.error("Failed to create print frame");
         if (onComplete) onComplete();
@@ -87,6 +90,8 @@ export const PrintService = {
         <title>${title}</title>
         <meta charset="UTF-8">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
         <style>
           @page {
             size: 80mm auto !important;
@@ -94,15 +99,24 @@ export const PrintService = {
           }
           
           @font-face {
-            font-family: 'ArialForPrint';
-            src: local('Arial');
+            font-family: 'Zain';
+            src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+            font-weight: normal;
+            font-style: normal;
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
+            font-weight: normal;
+            font-style: normal;
           }
           
           body {
             margin: 0;
             padding: 0;
             width: 80mm;
-            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            font-family: 'Yrsa', serif;
             direction: initial;
           }
           
@@ -110,10 +124,11 @@ export const PrintService = {
           [dir="rtl"] {
             direction: rtl;
             text-align: right;
+            font-family: 'Zain', sans-serif;
           }
           
           .arabic {
-            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            font-family: 'Zain', sans-serif;
             direction: rtl;
             text-align: right;
           }
@@ -131,19 +146,36 @@ export const PrintService = {
             page-break-after: always;
             page-break-inside: avoid;
           }
+          
+          /* Fix for print dialog appearing but not working */
+          @media print {
+            body {
+              width: 80mm !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            
+            .receipt-container {
+              width: 72mm !important;
+              margin: 0 !important;
+              padding: 4mm !important;
+            }
+          }
         </style>
       </head>
       <body>
         <div class="receipt-container">${content}</div>
         <script>
           document.addEventListener('DOMContentLoaded', function() {
+            // Force printing after a delay to ensure everything is loaded
             setTimeout(function() {
               window.focus();
               window.print();
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 300);
+              }, 1000);
+            }, 500);
           });
         </script>
       </body>
@@ -164,11 +196,17 @@ export const PrintService = {
       <head>
         <title>${title}</title>
         <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
         <style>
           @page {
             size: 100mm 16mm !important;
             margin: 0mm !important;
             padding: 0mm !important;
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
           }
           
           body {
@@ -177,7 +215,7 @@ export const PrintService = {
             width: 100mm !important;
             max-width: 100mm !important;
             overflow: hidden !important;
-            font-family: Arial, sans-serif !important;
+            font-family: 'Yrsa', serif !important;
           }
           
           .label-container {
@@ -263,8 +301,8 @@ export const PrintService = {
               window.print();
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 300);
+              }, 1000);
+            }, 500);
           });
         </script>
       </body>
@@ -286,6 +324,8 @@ export const PrintService = {
         <title>${title}</title>
         <meta charset="UTF-8">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
         <style>
           @page {
             size: 80mm auto !important;
@@ -293,25 +333,31 @@ export const PrintService = {
           }
           
           @font-face {
-            font-family: 'ArialForPrint';
-            src: local('Arial');
+            font-family: 'Zain';
+            src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
           }
           
           body {
             margin: 0;
             padding: 0;
             width: 80mm;
-            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            font-family: 'Yrsa', serif;
           }
           
           /* Ensure Arabic displays correctly */
           [dir="rtl"] {
             direction: rtl;
             text-align: right;
+            font-family: 'Zain', sans-serif;
           }
           
           .arabic {
-            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            font-family: 'Zain', sans-serif;
             direction: rtl;
             text-align: right;
           }
@@ -363,6 +409,22 @@ export const PrintService = {
             padding: 1mm 2mm;
             font-size: 8pt;
           }
+          
+          /* Fix for print dialog */
+          @media print {
+            body {
+              width: 80mm !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            
+            .rx-container {
+              width: 72mm !important;
+              margin: 0 !important;
+              padding: 4mm !important;
+            }
+          }
         </style>
       </head>
       <body>
@@ -374,8 +436,8 @@ export const PrintService = {
               window.print();
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 300);
+              }, 1000);
+            }, 500);
           });
         </script>
       </body>
@@ -397,6 +459,8 @@ export const PrintService = {
         <title>${title}</title>
         <meta charset="UTF-8">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
         <style>
           @page {
             size: 80mm auto !important;
@@ -404,25 +468,31 @@ export const PrintService = {
           }
           
           @font-face {
-            font-family: 'ArialForPrint';
-            src: local('Arial');
+            font-family: 'Zain';
+            src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
           }
           
           body {
             margin: 0;
             padding: 0;
             width: 80mm;
-            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            font-family: 'Yrsa', serif;
           }
           
           /* Ensure Arabic displays correctly */
           [dir="rtl"] {
             direction: rtl;
             text-align: right;
+            font-family: 'Zain', sans-serif;
           }
           
           .arabic {
-            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            font-family: 'Zain', sans-serif;
             direction: rtl;
             text-align: right;
           }
@@ -486,6 +556,22 @@ export const PrintService = {
             text-align: center;
             font-size: 8pt;
           }
+          
+          /* Fix for print dialog */
+          @media print {
+            body {
+              width: 80mm !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            
+            .workorder-container {
+              width: 72mm !important;
+              margin: 0 !important;
+              padding: 4mm !important;
+            }
+          }
         </style>
       </head>
       <body>
@@ -497,8 +583,8 @@ export const PrintService = {
               window.print();
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 300);
+              }, 1000);
+            }, 500);
           });
         </script>
       </body>
@@ -519,6 +605,8 @@ export const PrintService = {
       <head>
         <title>${title}</title>
         <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
         <style>
           @page {
             size: A4 !important;
@@ -526,12 +614,17 @@ export const PrintService = {
           }
           
           @font-face {
-            font-family: 'ArialForPrint';
-            src: local('Arial');
+            font-family: 'Zain';
+            src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
           }
           
           body {
-            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            font-family: 'Yrsa', serif;
             margin: 0;
             padding: 0;
           }
@@ -548,12 +641,29 @@ export const PrintService = {
           [dir="rtl"] {
             direction: rtl;
             text-align: right;
+            font-family: 'Zain', sans-serif;
           }
           
           .arabic {
-            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            font-family: 'Zain', sans-serif;
             direction: rtl;
             text-align: right;
+          }
+          
+          /* Fix for print dialog */
+          @media print {
+            body {
+              width: 210mm !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            
+            .a4-container {
+              width: 190mm !important;
+              margin: 10mm !important;
+              padding: 0 !important;
+            }
           }
         </style>
       </head>
@@ -566,8 +676,8 @@ export const PrintService = {
               window.print();
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 300);
+              }, 1000);
+            }, 500);
           });
         </script>
       </body>

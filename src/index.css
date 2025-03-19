@@ -1,5 +1,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -53,6 +55,14 @@
   font-family: 'Cairo', sans-serif;
 }
 
+.font-zain {
+  font-family: 'Zain', sans-serif;
+}
+
+.font-yrsa {
+  font-family: 'Yrsa', serif;
+}
+
 .rtl {
   direction: rtl;
 }
@@ -96,6 +106,19 @@
   .no-print, button, nav, .sidebar {
     display: none !important;
   }
+  
+  /* Critical fix for printing dialog issues */
+  body.printing {
+    width: 80mm !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  
+  body.printing * {
+    visibility: visible !important;
+  }
 }
 
 /* Frame label printing styles */
@@ -121,5 +144,16 @@
   .label-container {
     page-break-after: always;
     page-break-inside: avoid;
+  }
+}
+
+/* Arabic text fixes for all printed content */
+@media print {
+  [dir="rtl"] {
+    font-family: 'Zain', sans-serif !important;
+  }
+  
+  .ltr, [dir="ltr"] {
+    font-family: 'Yrsa', serif !important;
   }
 }
