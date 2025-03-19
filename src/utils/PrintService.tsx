@@ -93,46 +93,43 @@ export const PrintService = {
             margin: 0mm !important;
           }
           
+          @font-face {
+            font-family: 'ArialForPrint';
+            src: local('Arial');
+          }
+          
           body {
             margin: 0;
             padding: 0;
-            font-family: 'Courier New', monospace;
-            width: 80mm !important;
-            max-width: 80mm !important;
-            overflow: hidden !important;
+            width: 80mm;
+            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            direction: initial;
           }
           
           /* Ensure Arabic displays correctly */
           [dir="rtl"] {
             direction: rtl;
             text-align: right;
-            font-family: 'Arial', sans-serif;
+          }
+          
+          .arabic {
+            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            direction: rtl;
+            text-align: right;
           }
           
           /* Force single page printing */
           html, body {
-            height: auto !important;
+            height: auto;
           }
           
           /* Ensure content is properly contained */
           .receipt-container {
-            width: 80mm !important;
-            max-width: 80mm !important;
-            padding: 4mm !important;
-            margin: 0 !important;
-            page-break-after: always !important;
-            page-break-inside: avoid !important;
-          }
-          
-          /* Fix for Arabic text in receipts */
-          @font-face {
-            font-family: 'ArialForPrint';
-            src: local('Arial');
-            unicode-range: U+0600-06FF;
-          }
-          
-          * {
-            font-family: 'ArialForPrint', 'Arial', 'Courier New', monospace;
+            width: 72mm;
+            padding: 4mm;
+            margin: 0;
+            page-break-after: always;
+            page-break-inside: avoid;
           }
         </style>
       </head>
@@ -180,6 +177,7 @@ export const PrintService = {
             width: 100mm !important;
             max-width: 100mm !important;
             overflow: hidden !important;
+            font-family: Arial, sans-serif !important;
           }
           
           .label-container {
@@ -187,11 +185,9 @@ export const PrintService = {
             height: 16mm !important;
             display: flex !important;
             justify-content: space-between !important;
-            font-family: Arial, sans-serif !important;
             margin: 0 !important;
             padding: 0 !important;
             overflow: hidden !important;
-            border-radius: 8mm !important;
             page-break-after: always !important;
             page-break-inside: avoid !important;
           }
@@ -277,6 +273,240 @@ export const PrintService = {
   },
   
   /**
+   * Prepares HTML for RX printing (thermal printer, 80mm width)
+   * @param content HTML content to print
+   * @param title Document title
+   * @returns Complete HTML document
+   */
+  prepareRxDocument: (content: string, title: string = 'Prescription') => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+          @page {
+            size: 80mm auto !important;
+            margin: 0mm !important;
+          }
+          
+          @font-face {
+            font-family: 'ArialForPrint';
+            src: local('Arial');
+          }
+          
+          body {
+            margin: 0;
+            padding: 0;
+            width: 80mm;
+            font-family: 'ArialForPrint', 'Arial', sans-serif;
+          }
+          
+          /* Ensure Arabic displays correctly */
+          [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+          }
+          
+          .arabic {
+            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            direction: rtl;
+            text-align: right;
+          }
+          
+          /* Force single page printing */
+          html, body {
+            height: auto;
+          }
+          
+          /* Ensure content is properly contained */
+          .rx-container {
+            width: 72mm;
+            padding: 4mm;
+            margin: 0;
+            page-break-after: always;
+            page-break-inside: avoid;
+          }
+          
+          /* Additional styles for RX */
+          .rx-header {
+            text-align: center;
+            margin-bottom: 5mm;
+          }
+          
+          .rx-logo {
+            max-width: 60mm;
+            max-height: 10mm;
+            margin: 0 auto;
+            display: block;
+          }
+          
+          .rx-title {
+            font-size: 12pt;
+            font-weight: bold;
+            margin: 3mm 0;
+          }
+          
+          .rx-section {
+            margin-bottom: 4mm;
+          }
+          
+          .rx-table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          
+          .rx-table td, .rx-table th {
+            border: 1px solid #000;
+            padding: 1mm 2mm;
+            font-size: 8pt;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="rx-container">${content}</div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 500);
+            }, 300);
+          });
+        </script>
+      </body>
+      </html>
+    `;
+  },
+  
+  /**
+   * Prepares HTML for work order printing (thermal printer, 80mm width)
+   * @param content HTML content to print
+   * @param title Document title
+   * @returns Complete HTML document
+   */
+  prepareWorkOrderDocument: (content: string, title: string = 'Work Order') => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+          @page {
+            size: 80mm auto !important;
+            margin: 0mm !important;
+          }
+          
+          @font-face {
+            font-family: 'ArialForPrint';
+            src: local('Arial');
+          }
+          
+          body {
+            margin: 0;
+            padding: 0;
+            width: 80mm;
+            font-family: 'ArialForPrint', 'Arial', sans-serif;
+          }
+          
+          /* Ensure Arabic displays correctly */
+          [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+          }
+          
+          .arabic {
+            font-family: 'ArialForPrint', 'Arial', sans-serif;
+            direction: rtl;
+            text-align: right;
+          }
+          
+          /* Force single page printing */
+          html, body {
+            height: auto;
+          }
+          
+          /* Ensure content is properly contained */
+          .workorder-container {
+            width: 72mm;
+            padding: 4mm;
+            margin: 0;
+            page-break-after: always;
+            page-break-inside: avoid;
+          }
+          
+          /* WorkOrder specific styles */
+          .order-header {
+            text-align: center;
+            margin-bottom: 5mm;
+          }
+          
+          .order-logo {
+            max-width: 60mm;
+            max-height: 10mm;
+            margin: 0 auto;
+            display: block;
+          }
+          
+          .order-title {
+            font-size: 12pt;
+            font-weight: bold;
+            margin: 3mm 0;
+            text-align: center;
+          }
+          
+          .order-section {
+            margin-bottom: 4mm;
+          }
+          
+          .order-field {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2mm;
+            font-size: 8pt;
+          }
+          
+          .order-label {
+            font-weight: bold;
+          }
+          
+          .order-divider {
+            border-top: 1px dashed #000;
+            margin: 3mm 0;
+          }
+          
+          .order-signature {
+            margin-top: 5mm;
+            text-align: center;
+            font-size: 8pt;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="workorder-container">${content}</div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 500);
+            }, 300);
+          });
+        </script>
+      </body>
+      </html>
+    `;
+  },
+  
+  /**
    * Prepares HTML for A4 document printing
    * @param content HTML content to print
    * @param title Document title
@@ -295,8 +525,13 @@ export const PrintService = {
             margin: 10mm !important;
           }
           
+          @font-face {
+            font-family: 'ArialForPrint';
+            src: local('Arial');
+          }
+          
           body {
-            font-family: Arial, sans-serif;
+            font-family: 'ArialForPrint', 'Arial', sans-serif;
             margin: 0;
             padding: 0;
           }
@@ -311,6 +546,12 @@ export const PrintService = {
           
           /* Ensure Arabic displays correctly */
           [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+          }
+          
+          .arabic {
+            font-family: 'ArialForPrint', 'Arial', sans-serif;
             direction: rtl;
             text-align: right;
           }
