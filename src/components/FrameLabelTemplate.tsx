@@ -34,8 +34,8 @@ const LabelComponent = ({ frame }: { frame: FrameItem }) => {
         padding: "1mm 2mm",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
-        marginRight: "5cm" // Add margin to move this section closer to the QR code
+        justifyContent: "center"
+        // Removed the excessive margin-right
       }}>
         <div className="brand-name" style={{
           fontWeight: "bold",
@@ -101,14 +101,13 @@ export const usePrintLabel = () => {
     
     if (selectedFrames.length === 0) return;
     
-    const logoUrl = "/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png";
-    
+    // Use the PrepareLabel method from PrintService
     let labelContent = '';
     
     selectedFrames.forEach(frame => {
       labelContent += `
         <div class="label-container">
-          <div class="left-section">
+          <div class="right-section">
             <div class="brand-name">${frame.brand}</div>
             <div class="detail-info">
               Model: ${frame.model || "-"}<br/>
@@ -117,131 +116,23 @@ export const usePrintLabel = () => {
             </div>
             <div class="price">K.D. ${frame.price.toFixed(3)}</div>
           </div>
-          <div class="right-section">
+          <div class="left-section">
             <div class="store-logo">
-              <img src="${logoUrl}" alt="Store Logo">
+              <MoenLogo style="height: 4mm; width: auto;" />
             </div>
             <div class="qr-code">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(frame.frameId)}" alt="QR Code">
+              <div id="qr-code-${frame.frameId}"></div>
             </div>
           </div>
         </div>
       `;
     });
     
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>Frame Labels</title>
-        <style>
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-          body {
-            padding: 0;
-            margin: 0;
-          }
-          .label-container {
-            width: 100mm;
-            height: 16mm;
-            display: flex;
-            font-family: Arial, sans-serif;
-            page-break-inside: avoid;
-            page-break-after: always;
-            position: relative;
-            overflow: hidden;
-            border-radius: 8mm;
-          }
-          .left-section {
-            width: 45mm;
-            height: 100%;
-            padding: 1mm 2mm;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-          }
-          .right-section {
-            width: 45mm;
-            height: 100%;
-            padding: 1mm;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-          }
-          .brand-name {
-            font-weight: bold;
-            font-size: 10pt;
-            margin-bottom: 1mm;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-          .detail-info {
-            font-size: 8pt;
-            margin-bottom: 1mm;
-            line-height: 1.1;
-          }
-          .price {
-            font-weight: bold;
-            font-size: 10pt;
-          }
-          .store-logo {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            margin-bottom: 1mm;
-          }
-          .store-logo img {
-            max-height: 4mm;
-            width: auto;
-          }
-          .qr-code {
-            display: flex;
-            justify-content: center;
-          }
-          .qr-code img {
-            height: 24px;
-            width: 24px;
-          }
-          @media print {
-            body {
-              padding: 0;
-              margin: 0;
-            }
-            @page {
-              size: 100mm 16mm;
-              margin: 0;
-              padding: 0;
-            }
-            .label-container {
-              border: none;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        ${labelContent}
-        <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-              window.focus();
-              window.print();
-              setTimeout(function() {
-                window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 1000);
-          });
-        </script>
-      </body>
-      </html>
-    `;
+    // Use the PrintService's prepareLabelDocument method
+    const htmlContent = PrintService.prepareLabelDocument(labelContent);
     
-    PrintService.printHtml(printContent, () => {
+    // Print the label using PrintService
+    PrintService.printHtml(htmlContent, () => {
       toast.success("Labels sent to printer");
     });
   };
@@ -390,15 +281,6 @@ export const FrameLabelTemplate: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      
-      <div id="print-container" className="hidden">
-        {selectedFrames.map((frameId) => {
-          const frame = frames.find(f => f.frameId === frameId);
-          if (!frame) return null;
-          return <LabelComponent key={frameId} frame={frame} />;
-        })}
-      </div>
     </div>
   );
 };
-

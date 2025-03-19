@@ -130,18 +130,20 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               visibility: hidden;
             }
             #receipt-invoice, #receipt-invoice * {
-              visibility: visible;
+              visibility: visible !important;
             }
             #receipt-invoice {
-              position: absolute;
-              left: 0;
-              top: 0;
+              position: absolute !important;
+              left: 0 !important;
+              top: 0 !important;
               width: 80mm !important;
               max-width: 80mm !important;
               padding: 4mm !important;
               margin: 0 !important;
               border: none !important;
               box-shadow: none !important;
+              page-break-after: always !important;
+              page-break-inside: avoid !important;
             }
             html, body {
               width: 80mm !important;
@@ -149,6 +151,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               height: auto !important;
               margin: 0 !important;
               padding: 0 !important;
+              overflow: hidden !important;
             }
           }
         `}

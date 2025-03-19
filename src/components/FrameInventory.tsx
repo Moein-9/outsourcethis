@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
@@ -126,7 +127,7 @@ export const FrameInventory: React.FC = () => {
   
   const handleAddFrame = () => {
     if (!frameBrand || !frameModel || !frameColor || !framePrice) {
-      toast.error(language === 'ar' ? "الرجاء إدخال تفاصيل الإطار كاملة" : "Please enter complete frame details");
+      toast.error(t("pleaseEnterCompleteFrameDetails"));
       return;
     }
     
@@ -134,12 +135,12 @@ export const FrameInventory: React.FC = () => {
     const qty = parseInt(frameQty);
     
     if (isNaN(price) || price <= 0) {
-      toast.error(language === 'ar' ? "الرجاء إدخال سعر صحيح" : "Please enter a valid price");
+      toast.error(t("pleaseEnterValidPrice"));
       return;
     }
     
     if (isNaN(qty) || qty <= 0) {
-      toast.error(language === 'ar' ? "الرجاء إدخال كمية صحيحة" : "Please enter a valid quantity");
+      toast.error(t("pleaseEnterValidQuantity"));
       return;
     }
     
@@ -152,10 +153,7 @@ export const FrameInventory: React.FC = () => {
       qty
     });
     
-    toast.success(language === 'ar' 
-      ? `تم إضافة الإطار بنجاح: ${frameBrand} ${frameModel}` 
-      : `Frame added successfully: ${frameBrand} ${frameModel}`
-    );
+    toast.success(t("frameAddedSuccessfully", { brand: frameBrand, model: frameModel }));
     
     setFrameBrand("");
     setFrameModel("");

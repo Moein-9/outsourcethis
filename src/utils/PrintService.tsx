@@ -169,7 +169,8 @@ export const PrintService = {
         size: 80mm auto !important;
         margin: 0 !important;
       }
-      body, html {
+      /* Force exact dimensions and prevent browser scaling */
+      html, body {
         width: 80mm !important;
         max-width: 80mm !important;
         margin: 0 !important;
@@ -182,6 +183,8 @@ export const PrintService = {
         padding: 0 !important;
         margin: 0 !important;
         font-family: 'Courier New', monospace;
+        page-break-after: always;
+        page-break-inside: avoid;
       }
       .receipt-container {
         width: 80mm !important;
@@ -189,8 +192,20 @@ export const PrintService = {
         margin: 0 !important;
         padding: 0 !important;
       }
+      /* Disable browser page-break behavior */
       * {
         page-break-inside: avoid !important;
+      }
+      /* Explicitly hide all elements except the receipt */
+      body * {
+        visibility: visible !important;
+      }
+      /* Ensure only one page prints */
+      #print-content:after {
+        content: "";
+        display: block;
+        page-break-after: always;
+        height: 0;
       }
     `;
     
@@ -220,6 +235,7 @@ export const PrintService = {
         width: 100mm;
         height: 16mm;
         display: flex;
+        justify-content: space-between;
         font-family: Arial, sans-serif;
         page-break-inside: avoid;
         page-break-after: always;
@@ -234,7 +250,6 @@ export const PrintService = {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        margin-right: 5cm;
       }
       .left-section {
         width: 45mm;
@@ -251,7 +266,7 @@ export const PrintService = {
         margin-bottom: 1mm;
         white-space: nowrap;
         overflow: hidden;
-        text-overflow: "ellipsis";
+        text-overflow: ellipsis;
       }
       .detail-info {
         font-size: 7pt;

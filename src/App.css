@@ -156,6 +156,8 @@ table th, table td {
     max-width: 80mm !important;
     margin: 0 !important;
     padding: 0 !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
   }
   
   /* Ensure page break behavior */
@@ -205,6 +207,8 @@ table th, table td {
     padding: 4mm !important;
     margin: 0 !important;
     visibility: visible !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
   }
   
   /* Make sure each label gets its own page */
@@ -236,6 +240,27 @@ table th, table td {
   .hidden {
     display: none !important;
   }
+  
+  /* Prevent excessive page printing */
+  #root > div > *:not(.print-receipt):not(.print-container):not(#receipt-invoice):not(#work-order-receipt) {
+    display: none !important;
+  }
+  
+  /* Force 80mm size and single page */
+  @page {
+    size: 80mm auto !important;
+    margin: 0 !important;
+  }
+  
+  /* Force single page with explicit page break */
+  .print-receipt:after,
+  #receipt-invoice:after,
+  #work-order-receipt:after {
+    content: "";
+    display: block;
+    page-break-after: always;
+    height: 0;
+  }
 }
 
 /* Frame label specific styling */
@@ -257,7 +282,7 @@ table th, table td {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-right: 5cm;
+  /* Removed excessive margin-right */
 }
 
 /* Left section - logo and QR code */
