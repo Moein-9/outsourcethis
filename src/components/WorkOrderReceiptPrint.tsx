@@ -7,6 +7,7 @@ import { enUS } from "date-fns/locale/en-US";
 import { QRCodeSVG } from "qrcode.react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { PrintService } from "@/utils/PrintService";
+import { toast } from "@/components/ui/use-toast";
 
 interface WorkOrderReceiptPrintProps {
   invoice: Invoice;
@@ -40,14 +41,12 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
   
-  // Format date based on language
   const formatDate = (date: Date | string) => {
     if (!date) return "";
     const dateObj = typeof date === "string" ? new Date(date) : date;
     return format(dateObj, "PPP", { locale: isRtl ? ar : enUS });
   };
   
-  // Generate QR code data
   const generateQRData = () => {
     return JSON.stringify({
       invoiceId: invoice.invoiceId,
@@ -57,10 +56,8 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     });
   };
 
-  // Calculate subtotal (total + discount)
   const subtotal = invoice.total + invoice.discount;
   
-  // Calculate amount paid (deposit or sum of payments)
   const amountPaid = invoice.payments 
     ? invoice.payments.reduce((sum, payment) => sum + payment.amount, 0) 
     : invoice.deposit;
@@ -80,7 +77,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       }}
       className="print-receipt"
     >
-      {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "8px" }}>
         <div style={{ marginBottom: "4px", display: "flex", justifyContent: "center" }}>
           <MoenLogo className="w-auto" style={{ height: "28px", margin: "0 auto" }} />
@@ -92,10 +88,8 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         <p style={{ fontSize: "10px", margin: "2px 0" }}>{storeInfo.phone}</p>
       </div>
       
-      {/* Divider */}
       <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }}></div>
       
-      {/* Order Info */}
       <div style={{ marginBottom: "8px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "4px" }}>
           <span style={{ fontWeight: "bold" }}>{t("workOrderNumber")}:</span> 
@@ -107,7 +101,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </div>
       </div>
       
-      {/* Patient Info */}
       <div style={{ marginBottom: "8px", fontSize: "10px" }}>
         <h2 style={{ fontSize: "12px", fontWeight: "bold", margin: "4px 0", borderBottom: "1px solid #ccc", paddingBottom: "2px" }}>
           {t("patientInformation")}
@@ -126,7 +119,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </div>
       </div>
       
-      {/* Prescription - Simplified */}
       {rx && (
         <div style={{ marginBottom: "8px", fontSize: "10px" }}>
           <h2 style={{ fontSize: "12px", fontWeight: "bold", margin: "4px 0", borderBottom: "1px solid #ccc", paddingBottom: "2px" }}>
@@ -164,7 +156,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </div>
       )}
       
-      {/* Product Details - Simplified */}
       <div style={{ marginBottom: "8px", fontSize: "10px" }}>
         <h2 style={{ fontSize: "12px", fontWeight: "bold", margin: "4px 0", borderBottom: "1px solid #ccc", paddingBottom: "2px" }}>
           {t("productDetails")}
@@ -225,7 +216,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         )}
       </div>
       
-      {/* Payment Info */}
       <div style={{ marginBottom: "8px", fontSize: "10px" }}>
         <h2 style={{ fontSize: "12px", fontWeight: "bold", margin: "4px 0", borderBottom: "1px solid #ccc", paddingBottom: "2px" }}>
           {t("paymentInformation")}
@@ -254,10 +244,8 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </div>
       </div>
       
-      {/* Divider */}
       <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }}></div>
       
-      {/* Footer */}
       <div style={{ textAlign: "center", marginBottom: "8px", fontSize: "9px" }}>
         <p style={{ margin: "2px 0" }}>{t("thankYouForYourPurchase")}</p>
         <p style={{ margin: "2px 0" }}>{t("pleaseKeepReceipt")}</p>
@@ -269,21 +257,16 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   );
 };
 
-// Helper function to directly print a work order receipt
 export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
-  // Create a temporary container div
   const container = document.createElement('div');
   container.style.display = 'none';
   document.body.appendChild(container);
   
-  // Get language info
   const { language, t } = useLanguageStore.getState();
   const isRtl = language === 'ar';
   
-  // Destructure necessary props
   const { invoice, patientName, rx, frame, lensType } = props;
   
-  // Create simplified HTML content with proper font families
   const htmlContent = `
     <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; text-align: ${isRtl ? 'right' : 'left'};">
       <div style="text-align: center; margin-bottom: 10px;">
@@ -326,22 +309,20 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
     </div>
   `;
   
-  // Use PrintService to handle the printing with enhanced error handling
   try {
-    // Add a class to body to help with print styling
     document.body.classList.add('printing');
     
-    // Use the receipt document preparation
     const printDoc = PrintService.prepareWorkOrderDocument(htmlContent, t("workOrder"));
     
-    // Print with improved callback
     PrintService.printHtml(printDoc, 'receipt', () => {
-      // Clean up
       document.body.classList.remove('printing');
       if (document.body.contains(container)) {
         document.body.removeChild(container);
       }
-      toast.success(t("printJobSent"));
+      toast({
+        title: t("success"),
+        description: t("printJobSent")
+      });
     });
   } catch (error) {
     console.error('Print error:', error);
@@ -349,6 +330,10 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
     if (document.body.contains(container)) {
       document.body.removeChild(container);
     }
-    toast.error(t("printError"));
+    toast({
+      title: t("error"),
+      description: t("printError"),
+      variant: "destructive"
+    });
   }
 };
