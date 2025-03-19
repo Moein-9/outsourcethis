@@ -7,7 +7,7 @@ import { enUS } from "date-fns/locale/en-US";
 import { QRCodeSVG } from "qrcode.react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { PrintService } from "@/utils/PrintService";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 interface WorkOrderReceiptPrintProps {
   invoice: Invoice;
