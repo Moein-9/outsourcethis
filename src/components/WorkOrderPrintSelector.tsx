@@ -12,11 +12,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PrinterIcon, Newspaper, FileText } from "lucide-react";
-import { WorkOrderPrint } from "./WorkOrderPrint";
-import { WorkOrderReceiptPrint } from "./WorkOrderReceiptPrint";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "sonner";
 import { PrintService } from "@/utils/PrintService";
+import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
 
 interface WorkOrderPrintSelectorProps {
   invoice: Invoice;
@@ -49,10 +48,11 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLensRx,
   trigger
 }) => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<"a4" | "receipt" | null>(null);
   const [printingInProgress, setPrintingInProgress] = useState(false);
+  const isRtl = language === 'ar';
   
   const handlePrint = () => {
     if (!selectedFormat || printingInProgress) return;
@@ -60,71 +60,54 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     setPrintingInProgress(true);
     
     try {
-      const title = selectedFormat === 'a4' ? t("workOrder") : t("receiptFormat");
-      
-      // Create a temporary container to render the component
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'fixed';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.visibility = 'hidden';
-      document.body.appendChild(tempContainer);
-      
-      // Render the appropriate component
-      const component = selectedFormat === "a4" 
-        ? <WorkOrderPrint 
-            invoice={invoice}
-            patientName={patientName}
-            patientPhone={patientPhone}
-            rx={rx}
-            lensType={lensType}
-            coating={coating}
-            frame={frame}
-            contactLenses={contactLenses}
-            contactLensRx={contactLensRx}
-          />
-        : <WorkOrderReceiptPrint
-            invoice={invoice}
-            patientName={patientName}
-            patientPhone={patientPhone}
-            rx={rx}
-            lensType={lensType}
-            coating={coating}
-            frame={frame}
-            contactLenses={contactLenses}
-            contactLensRx={contactLensRx}
-          />;
-          
-      // Use PrintService directly to render proper document
-      if (selectedFormat === "a4") {
-        // For A4, create element with basic info
-        const element = document.createElement('div');
-        element.innerHTML = `
-          <div style="width: 210mm; padding: 10mm;">
-            <div style="text-align: center; margin-bottom: 20px;">
-              <h1 style="font-size: 24px; margin-bottom: 10px;">${t("workOrder")}</h1>
-              <p style="font-size: 16px;">${t("orderNumber")}: ${invoice.invoiceId}</p>
+      if (selectedFormat === "receipt") {
+        // Use the helper function to print work order receipt
+        printWorkOrderReceipt({
+          invoice,
+          patientName,
+          patientPhone,
+          rx,
+          lensType,
+          coating,
+          frame,
+          contactLenses,
+          contactLensRx
+        });
+        
+        setTimeout(() => {
+          setPrintingInProgress(false);
+          setIsDialogOpen(false);
+          toast.success(t("printingCompleted"));
+        }, 1000);
+      } else {
+        // A4 format - generate HTML for A4 printing
+        const a4Content = `
+          <div style="font-family: Arial, sans-serif; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
+            <div style="text-align: center; margin-bottom: 10mm;">
+              <h1 style="font-size: 24px; margin-bottom: 5mm;">${t("workOrder")}</h1>
+              <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.invoiceId}</p>
               <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
             </div>
             
-            <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-              <h2 style="font-size: 18px; margin-bottom: 10px;">${t("patientInformation")}</h2>
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("patientInformation")}</h2>
               <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
               <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
             </div>
             
             ${frame ? `
-            <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-              <h2 style="font-size: 18px; margin-bottom: 10px;">${t("frameDetails")}</h2>
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("frameDetails")}</h2>
               <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
               <p><strong>${t("model")}:</strong> ${frame.model}</p>
               <p><strong>${t("color")}:</strong> ${frame.color}</p>
-              <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} KWD</p>
+              <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} ${t("currency")}</p>
             </div>
             ` : ''}
             
             ${rx ? `
-            <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-              <h2 style="font-size: 18px; margin-bottom: 10px;">${t("prescriptionDetails")}</h2>
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("prescriptionDetails")}</h2>
               <table style="width: 100%; border-collapse: collapse;">
                 <thead>
                   <tr>
@@ -158,91 +141,52 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             </div>
             ` : ''}
             
-            <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-              <h2 style="font-size: 18px; margin-bottom: 10px;">${t("paymentInformation")}</h2>
-              <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} KWD</p>
-              <p><strong>${t("paid")}:</strong> ${(invoice.deposit || 0).toFixed(3)} KWD</p>
-              <p><strong>${t("remaining")}:</strong> ${(invoice.total - (invoice.deposit || 0)).toFixed(3)} KWD</p>
-            </div>
-            
-            <div style="margin-top: 40px; display: flex; justify-content: space-between;">
-              <div>
-                <p style="font-weight: bold;">${t("technicianSignature")}</p>
-                <div style="margin-top: 30px; border-bottom: 1px solid #000; width: 150px;"></div>
-              </div>
-              <div>
-                <p style="font-weight: bold;">${t("qualityConfirmation")}</p>
-                <div style="margin-top: 30px; border-bottom: 1px solid #000; width: 150px;"></div>
-              </div>
-            </div>
-          </div>
-        `;
-        
-        // Get the HTML content
-        const htmlContent = PrintService.prepareA4Document(element.innerHTML, title);
-        // Use the PrintService to print the HTML content with a callback
-        PrintService.printHtml(htmlContent, () => {
-          setPrintingInProgress(false);
-          setIsDialogOpen(false);
-          toast.success(t("printingCompleted"));
-        });
-      } else {
-        // For receipt, we'll render a simple version and let PrintService handle the formatting
-        const receiptElement = document.createElement('div');
-        receiptElement.innerHTML = `
-          <div style="width: 80mm; padding: 2mm; text-align: center;">
-            <h1 style="font-size: 16px; margin-bottom: 5px;">${t("receiptFormat")}</h1>
-            <p style="font-size: 14px;">${t("orderNumber")}: ${invoice.invoiceId}</p>
-            <p style="font-size: 12px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
-            
-            <div style="margin: 10px 0; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 5px 0;">
-              <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
-              <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
-            </div>
-            
-            ${frame ? `
-            <div style="margin-bottom: 10px; text-align: left;">
-              <h2 style="font-size: 14px; margin-bottom: 5px;">${t("frameDetails")}</h2>
-              <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
-              <p><strong>${t("model")}:</strong> ${frame.model}</p>
-              <p><strong>${t("color")}:</strong> ${frame.color}</p>
-              <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} KWD</p>
+            ${lensType ? `
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("lensDetails")}</h2>
+              <p><strong>${t("type")}:</strong> ${lensType}</p>
+              <p><strong>${t("price")}:</strong> ${invoice.lensPrice.toFixed(3)} ${t("currency")}</p>
+              ${coating ? `<p><strong>${t("coating")}:</strong> ${coating}</p>` : ''}
+              ${coating ? `<p><strong>${t("coatingPrice")}:</strong> ${invoice.coatingPrice.toFixed(3)} ${t("currency")}</p>` : ''}
             </div>
             ` : ''}
             
-            <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px; text-align: left;">
-              <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} KWD</p>
-              <p><strong>${t("paid")}:</strong> ${(invoice.deposit || 0).toFixed(3)} KWD</p>
-              <p><strong>${t("remaining")}:</strong> ${(invoice.total - (invoice.deposit || 0)).toFixed(3)} KWD</p>
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("paymentInformation")}</h2>
+              <p><strong>${t("subtotal")}:</strong> ${(invoice.total + invoice.discount).toFixed(3)} ${t("currency")}</p>
+              ${invoice.discount > 0 ? `<p><strong>${t("discount")}:</strong> -${invoice.discount.toFixed(3)} ${t("currency")}</p>` : ''}
+              <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} ${t("currency")}</p>
+              <p><strong>${t("paid")}:</strong> ${invoice.deposit.toFixed(3)} ${t("currency")}</p>
+              <p><strong>${t("remaining")}:</strong> ${(invoice.total - invoice.deposit).toFixed(3)} ${t("currency")}</p>
             </div>
             
-            <div style="text-align: center; margin-top: 20px; font-size: 12px;">
-              <p>${t("thankYouForYourPurchase")}</p>
-              <p>${t("pleaseKeepReceipt")}</p>
+            <div style="margin-top: 20mm; display: flex; justify-content: space-between;">
+              <div>
+                <p style="font-weight: bold; margin-bottom: 30px;">${t("technicianSignature")}</p>
+                <div style="border-bottom: 1px solid #000; width: 150px;"></div>
+                <p style="margin-top: 5px; font-size: 12px;">${t("date")}: ___/___/_____</p>
+              </div>
+              <div>
+                <p style="font-weight: bold; margin-bottom: 30px;">${t("qualityConfirmation")}</p>
+                <div style="border-bottom: 1px solid #000; width: 150px;"></div>
+                <p style="margin-top: 5px; font-size: 12px;">${t("date")}: ___/___/_____</p>
+              </div>
             </div>
           </div>
         `;
         
-        // Get the HTML content
-        const htmlContent = PrintService.prepareReceiptDocument(receiptElement.innerHTML, title);
-        PrintService.printHtml(htmlContent, () => {
+        // Use PrintService to handle the printing
+        const htmlContent = PrintService.prepareA4Document(a4Content, t("workOrder"));
+        PrintService.printHtml(htmlContent, 'a4', () => {
           setPrintingInProgress(false);
           setIsDialogOpen(false);
           toast.success(t("printingCompleted"));
         });
       }
-      
-      // Clean up the temporary container
-      setTimeout(() => {
-        if (document.body.contains(tempContainer)) {
-          document.body.removeChild(tempContainer);
-        }
-      }, 1000);
-      
     } catch (error) {
+      console.error('Printing error:', error);
       setPrintingInProgress(false);
       toast.error(t("printingFailed"));
-      console.error('Printing error:', error);
     }
   };
   

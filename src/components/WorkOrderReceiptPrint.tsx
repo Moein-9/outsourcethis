@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { format } from "date-fns";
@@ -40,7 +40,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
-  const dir = isRtl ? "rtl" : "ltr";
   
   // Format date based on language
   const formatDate = (date: Date | string) => {
@@ -67,27 +66,10 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     ? invoice.payments.reduce((sum, payment) => sum + payment.amount, 0) 
     : invoice.deposit;
 
-  // Add print trigger effect
-  React.useEffect(() => {
-    // Auto-print after a delay to ensure rendering
-    const timer = setTimeout(() => {
-      // Get the receipt content
-      const receiptElement = document.getElementById('work-order-receipt');
-      if (!receiptElement) return;
-      
-      const content = receiptElement.outerHTML;
-      const htmlContent = PrintService.prepareReceiptDocument(content, t("receiptFormat"));
-      
-      // Use PrintService to handle the printing
-      PrintService.printHtml(htmlContent);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div 
       id="work-order-receipt"
+      dir={isRtl ? "rtl" : "ltr"}
       style={{ 
         width: "80mm", 
         fontFamily: "Arial, sans-serif",
@@ -96,46 +78,9 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         margin: "0 auto",
         padding: "4mm",
         backgroundColor: "white"
-      }} 
-      dir={dir} 
+      }}
       className="print-receipt"
     >
-      <style>
-        {`
-          @media print {
-            @page {
-              size: 80mm auto !important;
-              margin: 0 !important;
-            }
-            body * {
-              visibility: hidden;
-            }
-            #work-order-receipt, #work-order-receipt * {
-              visibility: visible !important;
-            }
-            #work-order-receipt {
-              position: absolute !important;
-              left: 0 !important;
-              top: 0 !important;
-              width: 80mm !important;
-              max-width: 80mm !important;
-              margin: 0 !important;
-              padding: 4mm !important;
-              page-break-after: always !important;
-              page-break-inside: avoid !important;
-            }
-            html, body {
-              width: 80mm !important;
-              max-width: 80mm !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              height: auto !important;
-              overflow: hidden !important;
-            }
-          }
-        `}
-      </style>
-      
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "8px" }}>
         <div style={{ marginBottom: "4px", display: "flex", justifyContent: "center" }}>
@@ -240,7 +185,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
               </div>
               <div style={{ marginBottom: "2px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
-                <span>{frame.price.toFixed(3)} KWD</span>
+                <span>{frame.price.toFixed(3)} {t("currency")}</span>
               </div>
             </div>
           </div>
@@ -256,7 +201,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
               </div>
               <div style={{ marginBottom: "2px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
-                <span>{invoice.lensPrice.toFixed(3)} KWD</span>
+                <span>{invoice.lensPrice.toFixed(3)} {t("currency")}</span>
               </div>
             </div>
           </div>
@@ -273,7 +218,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
                 </div>
                 <div style={{ marginBottom: "2px", display: "flex", justifyContent: "space-between" }}>
                   <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
-                  <span>{lens.price.toFixed(3)} KWD</span>
+                  <span>{lens.price.toFixed(3)} {t("currency")}</span>
                 </div>
               </div>
             ))}
@@ -288,25 +233,25 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </h2>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{t("subtotal")}:</span>
-          <span>{subtotal.toFixed(3)} KWD</span>
+          <span>{subtotal.toFixed(3)} {t("currency")}</span>
         </div>
         {invoice.discount > 0 && (
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
             <span style={{ fontWeight: "bold" }}>{t("discount")}:</span>
-            <span>-{invoice.discount.toFixed(3)} KWD</span>
+            <span>-{invoice.discount.toFixed(3)} {t("currency")}</span>
           </div>
         )}
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{t("total")}:</span>
-          <span>{invoice.total.toFixed(3)} KWD</span>
+          <span>{invoice.total.toFixed(3)} {t("currency")}</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{t("paid")}:</span>
-          <span>{amountPaid.toFixed(3)} KWD</span>
+          <span>{amountPaid.toFixed(3)} {t("currency")}</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{t("remaining")}:</span>
-          <span>{(invoice.total - amountPaid).toFixed(3)} KWD</span>
+          <span>{(invoice.total - amountPaid).toFixed(3)} {t("currency")}</span>
         </div>
       </div>
       
@@ -323,4 +268,73 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       </div>
     </div>
   );
+};
+
+// Helper function to directly print a work order receipt
+export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
+  // Create a temporary container div
+  const container = document.createElement('div');
+  container.style.display = 'none';
+  document.body.appendChild(container);
+  
+  // Render the component to string
+  const element = document.createElement('div');
+  element.appendChild(container);
+  
+  // Create HTML representation (simplified version)
+  const { invoice, patientName, rx, frame, lensType } = props;
+  const { language, t } = useLanguageStore.getState();
+  const isRtl = language === 'ar';
+  
+  // Create simplified HTML content
+  const htmlContent = `
+    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: Arial, sans-serif; text-align: ${isRtl ? 'right' : 'left'};">
+      <div style="text-align: center; margin-bottom: 10px;">
+        <h1 style="font-size: 14px; font-weight: bold;">${t("workOrder")}</h1>
+        <p style="font-size: 12px;">${invoice.invoiceId}</p>
+        <p style="font-size: 10px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
+      </div>
+      
+      <div style="margin-bottom: 10px; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 5px 0;">
+        <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName}</p>
+        <p><strong>${t("phone")}:</strong> ${props.patientPhone || invoice.patientPhone}</p>
+      </div>
+      
+      ${frame ? `
+      <div style="margin-bottom: 10px;">
+        <h2 style="font-size: 12px; font-weight: bold;">${t("frame")}</h2>
+        <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
+        <p><strong>${t("model")}:</strong> ${frame.model}</p>
+        <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} ${t("currency")}</p>
+      </div>
+      ` : ''}
+      
+      ${lensType ? `
+      <div style="margin-bottom: 10px;">
+        <h2 style="font-size: 12px; font-weight: bold;">${t("lensType")}</h2>
+        <p><strong>${t("type")}:</strong> ${lensType}</p>
+        <p><strong>${t("price")}:</strong> ${invoice.lensPrice.toFixed(3)} ${t("currency")}</p>
+      </div>
+      ` : ''}
+      
+      <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px;">
+        <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} ${t("currency")}</p>
+        <p><strong>${t("paid")}:</strong> ${invoice.deposit.toFixed(3)} ${t("currency")}</p>
+        <p><strong>${t("remaining")}:</strong> ${(invoice.total - invoice.deposit).toFixed(3)} ${t("currency")}</p>
+      </div>
+      
+      <div style="text-align: center; margin-top: 20px; font-size: 10px;">
+        <p>${t("thankYouForYourPurchase")}</p>
+      </div>
+    </div>
+  `;
+  
+  // Use PrintService to handle the printing
+  const printDoc = PrintService.prepareReceiptDocument(htmlContent, t("workOrder"));
+  PrintService.printHtml(printDoc, 'receipt', () => {
+    // Clean up
+    if (document.body.contains(container)) {
+      document.body.removeChild(container);
+    }
+  });
 };

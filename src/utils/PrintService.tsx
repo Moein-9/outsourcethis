@@ -3,124 +3,141 @@ import React from 'react';
 import { toast } from 'sonner';
 
 /**
- * PrintService handles printing functionality across the application
- * It ensures consistent printing behavior for different document types
+ * Unified PrintService for handling all printing needs across the application
  */
 export const PrintService = {
   /**
-   * Create a hidden iframe for printing to bypass browser print preview
-   * @returns The created iframe element
+   * Creates a hidden print frame for printing
+   * @returns The iframe element
    */
   createPrintFrame: () => {
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
+    iframe.style.visibility = 'hidden';
     iframe.style.width = '0';
     iframe.style.height = '0';
-    iframe.style.border = '0';
     document.body.appendChild(iframe);
-    
     return iframe;
   },
-  
+
   /**
-   * Print HTML content in an iframe
-   * @param htmlContent The HTML content to print
-   * @param onComplete Callback function to execute when printing is complete
+   * Print HTML content with support for different paper types
+   * @param htmlContent HTML content to print
+   * @param paperType Type of paper to print on (receipt, label, a4)
+   * @param onComplete Callback after printing
    */
-  printHtml: (htmlContent: string, onComplete?: () => void) => {
-    const iframe = PrintService.createPrintFrame();
-    
-    // Set up a message listener to know when printing is done
-    window.addEventListener('message', function handler(e) {
-      if (e.data === 'print-complete') {
-        window.removeEventListener('message', handler);
-        document.body.removeChild(iframe);
-        if (onComplete) onComplete();
-      }
-    }, { once: true });
-    
-    if (iframe.contentWindow) {
-      iframe.contentWindow.document.open();
-      iframe.contentWindow.document.write(htmlContent);
-      iframe.contentWindow.document.close();
+  printHtml: (
+    htmlContent: string, 
+    paperType: 'receipt' | 'label' | 'a4' = 'receipt',
+    onComplete?: () => void
+  ) => {
+    try {
+      // Create the print frame
+      const iframe = PrintService.createPrintFrame();
       
-      // Attempt to force iframe onload before printing
-      iframe.onload = function() {
-        try {
-          setTimeout(() => {
-            if (iframe.contentWindow) {
-              iframe.contentWindow.focus();
-              iframe.contentWindow.print();
-            }
-          }, 500);
-        } catch (error) {
-          console.error('Print error:', error);
-          toast.error("Failed to print");
+      // Add a listener for print completion
+      window.addEventListener('message', function handler(e) {
+        if (e.data === 'print-complete') {
+          window.removeEventListener('message', handler);
           document.body.removeChild(iframe);
           if (onComplete) onComplete();
         }
-      };
-    } else {
-      toast.error("Failed to create print frame");
-      document.body.removeChild(iframe);
+      });
+      
+      // Write the content to the iframe
+      if (iframe.contentWindow) {
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(htmlContent);
+        iframe.contentWindow.document.close();
+        
+        // Focus and print after a slight delay to ensure content is loaded
+        setTimeout(() => {
+          if (iframe.contentWindow) {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+            
+            // Signal completion after printing
+            setTimeout(() => {
+              window.postMessage('print-complete', '*');
+            }, 500);
+          }
+        }, 500);
+      } else {
+        toast.error("Failed to create print frame");
+        if (onComplete) onComplete();
+      }
+    } catch (error) {
+      console.error('Print error:', error);
+      toast.error("Failed to print");
       if (onComplete) onComplete();
     }
   },
   
   /**
-   * Generate base HTML template for printing
+   * Prepares HTML for receipt printing (thermal printer, 80mm width)
+   * @param content HTML content to print
    * @param title Document title
-   * @param contentId ID for the content container
-   * @param css Additional CSS styles
-   * @param size Page size (e.g., 'A4', '80mm')
-   * @param margins Page margins
-   * @returns HTML template string
+   * @returns Complete HTML document
    */
-  getHtmlTemplate: (
-    title: string,
-    contentId: string = 'print-content',
-    css: string = '',
-    size: string = 'A4',
-    margins: string = '10mm'
-  ) => {
+  prepareReceiptDocument: (content: string, title: string = 'Receipt') => {
     return `
       <!DOCTYPE html>
       <html>
       <head>
         <title>${title}</title>
-        <meta charset="utf-8">
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <style>
+          @page {
+            size: 80mm auto !important;
+            margin: 0mm !important;
+          }
+          
           body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Courier New', monospace;
+            width: 80mm !important;
+            max-width: 80mm !important;
+            overflow: hidden !important;
           }
-          #${contentId} {
-            margin: 0 auto;
+          
+          /* Ensure Arabic displays correctly */
+          [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+            font-family: 'Arial', sans-serif;
           }
-          @media print {
-            @page {
-              margin: ${margins};
-              padding: 0;
-              size: ${size};
-            }
-            body {
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            html, body {
-              width: ${size.includes('mm') ? size : 'auto'};
-              height: auto !important;
-              overflow: hidden;
-            }
+          
+          /* Force single page printing */
+          html, body {
+            height: auto !important;
           }
-          ${css}
+          
+          /* Ensure content is properly contained */
+          .receipt-container {
+            width: 80mm !important;
+            max-width: 80mm !important;
+            padding: 4mm !important;
+            margin: 0 !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+          }
+          
+          /* Fix for Arabic text in receipts */
+          @font-face {
+            font-family: 'ArialForPrint';
+            src: local('Arial');
+            unicode-range: U+0600-06FF;
+          }
+          
+          * {
+            font-family: 'ArialForPrint', 'Arial', 'Courier New', monospace;
+          }
         </style>
       </head>
       <body>
-        <div id="${contentId}"></div>
+        <div class="receipt-container">${content}</div>
         <script>
           document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
@@ -129,7 +146,7 @@ export const PrintService = {
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
               }, 500);
-            }, 800);
+            }, 300);
           });
         </script>
       </body>
@@ -138,168 +155,182 @@ export const PrintService = {
   },
   
   /**
-   * Prepare a standardized HTML document for A4 printing
-   * @param content HTML content to insert in the document
+   * Prepares HTML for label printing (100mm × 16mm)
+   * @param content HTML content to print
    * @param title Document title
-   * @returns Complete HTML document for printing
+   * @returns Complete HTML document
    */
-  prepareA4Document: (content: string, title: string = 'Print Document') => {
-    const css = `
-      #print-content {
-        width: 210mm;
-        padding: 10mm;
-      }
+  prepareLabelDocument: (content: string, title: string = 'Label') => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <style>
+          @page {
+            size: 100mm 16mm !important;
+            margin: 0mm !important;
+            padding: 0mm !important;
+          }
+          
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100mm !important;
+            max-width: 100mm !important;
+            overflow: hidden !important;
+          }
+          
+          .label-container {
+            width: 100mm !important;
+            height: 16mm !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            font-family: Arial, sans-serif !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            border-radius: 8mm !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+          }
+          
+          .right-section {
+            width: 45mm !important;
+            height: 100% !important;
+            padding: 1mm 2mm !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+          }
+          
+          .left-section {
+            width: 45mm !important;
+            height: 100% !important;
+            padding: 1mm !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+          }
+          
+          .brand-name {
+            font-weight: bold !important;
+            font-size: 9pt !important;
+            margin-bottom: 1mm !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          
+          .detail-info {
+            font-size: 7pt !important;
+            margin-bottom: 1mm !important;
+            line-height: 1.1 !important;
+          }
+          
+          .price {
+            font-weight: bold !important;
+            font-size: 9pt !important;
+          }
+          
+          .store-logo {
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important;
+            margin-bottom: 1mm !important;
+          }
+          
+          .store-logo img {
+            max-height: 4mm !important;
+            width: auto !important;
+          }
+          
+          .qr-code {
+            display: flex !important;
+            justify-content: center !important;
+          }
+          
+          .qr-code img, .qr-code svg {
+            height: 22px !important;
+            width: 22px !important;
+          }
+        </style>
+      </head>
+      <body>
+        ${content}
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 500);
+            }, 300);
+          });
+        </script>
+      </body>
+      </html>
     `;
-    
-    const htmlTemplate = PrintService.getHtmlTemplate(title, 'print-content', css, 'A4', '10mm');
-    
-    // Insert content into the template
-    return htmlTemplate.replace('<div id="print-content"></div>', `<div id="print-content">${content}</div>`);
   },
   
   /**
-   * Prepare a standardized HTML document for receipt printing
-   * @param content HTML content to insert in the document
+   * Prepares HTML for A4 document printing
+   * @param content HTML content to print
    * @param title Document title
-   * @returns Complete HTML document for printing
+   * @returns Complete HTML document
    */
-  prepareReceiptDocument: (content: string, title: string = 'Receipt') => {
-    const css = `
-      @page {
-        size: 80mm auto !important;
-        margin: 0 !important;
-      }
-      /* Force exact dimensions and prevent browser scaling */
-      html, body {
-        width: 80mm !important;
-        max-width: 80mm !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-      }
-      #print-content {
-        width: 80mm !important;
-        max-width: 80mm !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        font-family: 'Courier New', monospace;
-        page-break-after: always;
-        page-break-inside: avoid;
-      }
-      .receipt-container {
-        width: 80mm !important;
-        max-width: 80mm !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      /* Disable browser page-break behavior */
-      * {
-        page-break-inside: avoid !important;
-      }
-      /* Explicitly hide all elements except the receipt */
-      body * {
-        visibility: visible !important;
-      }
-      /* Ensure only one page prints */
-      #print-content:after {
-        content: "";
-        display: block;
-        page-break-after: always;
-        height: 0;
-      }
+  prepareA4Document: (content: string, title: string = 'Document') => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <style>
+          @page {
+            size: A4 !important;
+            margin: 10mm !important;
+          }
+          
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+          }
+          
+          .a4-container {
+            width: 100%;
+            max-width: 210mm;
+            margin: 0 auto;
+            page-break-after: always;
+            page-break-inside: avoid;
+          }
+          
+          /* Ensure Arabic displays correctly */
+          [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="a4-container">${content}</div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 500);
+            }, 300);
+          });
+        </script>
+      </body>
+      </html>
     `;
-    
-    const htmlTemplate = PrintService.getHtmlTemplate(title, 'print-content', css, '80mm auto', '0');
-    
-    // Insert content into the template
-    return htmlTemplate.replace('<div id="print-content"></div>', `<div id="print-content">${content}</div>`);
-  },
-  
-  /**
-   * Prepare a standardized HTML document for label printing
-   * @param content HTML content to insert in the document
-   * @param title Document title
-   * @returns Complete HTML document for printing
-   */
-  prepareLabelDocument: (content: string, title: string = 'Labels') => {
-    const css = `
-      #print-content {
-        width: 100mm;
-        padding: 0;
-      }
-      @page {
-        size: 100mm 16mm;
-        margin: 0;
-      }
-      .label-container {
-        width: 100mm;
-        height: 16mm;
-        display: flex;
-        justify-content: space-between;
-        font-family: Arial, sans-serif;
-        page-break-inside: avoid;
-        page-break-after: always;
-        position: relative;
-        overflow: hidden;
-        border-radius: 8mm;
-      }
-      .right-section {
-        width: 45mm;
-        height: 100%;
-        padding: 1mm 2mm;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
-      .left-section {
-        width: 45mm;
-        height: 100%;
-        padding: 1mm;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-      }
-      .brand-name {
-        font-weight: bold;
-        font-size: 9pt;
-        margin-bottom: 1mm;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .detail-info {
-        font-size: 7pt;
-        margin-bottom: 1mm;
-        line-height: 1.1;
-      }
-      .price {
-        font-weight: bold;
-        font-size: 9pt;
-      }
-      .store-logo {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        margin-bottom: 1mm;
-      }
-      .store-logo img {
-        max-height: 4mm;
-        width: auto;
-      }
-      .qr-code {
-        display: flex;
-        justify-content: center;
-      }
-      .qr-code img {
-        height: 22px;
-        width: 22px;
-      }
-    `;
-    
-    const htmlTemplate = PrintService.getHtmlTemplate(title, 'print-content', css, '100mm 16mm', '0');
-    
-    // Insert content into the template
-    return htmlTemplate.replace('<div id="print-content"></div>', `<div id="print-content">${content}</div>`);
   }
 };

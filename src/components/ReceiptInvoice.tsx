@@ -2,17 +2,16 @@
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
-import { CheckCircle2, Receipt } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
 import { MoenLogo, storeInfo } from "@/assets/logo";
-import { PrintService } from "@/utils/PrintService";
 import { useLanguageStore } from "@/store/languageStore";
 
 interface ReceiptInvoiceProps {
   invoice: Invoice;
   isPrintable?: boolean;
   
-  // Additional props for direct usage without an Invoice object
+  // Optional direct props
   patientName?: string;
   patientPhone?: string;
   invoiceType?: "glasses" | "contacts";
@@ -40,7 +39,6 @@ interface ReceiptInvoiceProps {
 export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ 
   invoice,
   isPrintable = false,
-  // Optional direct props
   patientName,
   patientPhone,
   invoiceType,
@@ -58,10 +56,11 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   authNumber,
   contactLenses
 }) => {
-  const { language } = useLanguageStore();
-  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  const { language, t } = useLanguageStore();
+  const isRtl = language === 'ar';
+  const dirClass = isRtl ? 'rtl' : 'ltr';
   
-  // Use either the passed props or invoice data
+  // Use either passed props or invoice data
   const name = patientName || invoice.patientName;
   const phone = patientPhone || invoice.patientPhone;
   const lens = lensType || invoice.lensType;
@@ -76,112 +75,54 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const dep = deposit !== undefined ? deposit : invoice.deposit;
   const rem = remaining !== undefined ? remaining : invoice.remaining;
   const payMethod = paymentMethod || invoice.paymentMethod;
-  const auth = authNumber || (invoice as any).authNumber; // Use passed or from invoice
+  const auth = authNumber || (invoice as any).authNumber;
   const isPaid = rem <= 0;
   
   const isContactLens = invoiceType === "contacts" || !frameBrand;
-
-  // Fix to ensure the print dialog only prompts once
-  const handlePrintReceipt = () => {
-    if (!isPrintable) return;
-    
-    // Get the receipt content
-    const receiptElement = document.getElementById('receipt-invoice');
-    if (!receiptElement) return;
-    
-    const content = receiptElement.outerHTML;
-    const htmlContent = PrintService.prepareReceiptDocument(content, 'Receipt');
-    
-    // Use PrintService to handle the printing
-    PrintService.printHtml(htmlContent);
-  };
-
-  // For printable invoices, auto-trigger print dialog once component is mounted
-  React.useEffect(() => {
-    if (isPrintable) {
-      // Small delay to ensure the component is fully rendered
-      const timer = setTimeout(handlePrintReceipt, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isPrintable]);
   
   return (
-    <div className={`${dirClass} print-receipt`} id="receipt-invoice"
-         style={{ 
-           width: '80mm', 
-           maxWidth: '80mm',
-           margin: '0 auto',
-           backgroundColor: 'white',
-           padding: '4mm',
-           fontSize: '12px',
-           border: isPrintable ? 'none' : '1px solid #ddd',
-           borderRadius: isPrintable ? '0' : '5px',
-           boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
-           fontFamily: 'Courier New, monospace'
-         }}>
-      <style>
-        {`
-          @media print {
-            @page {
-              size: 80mm auto !important;
-              margin: 0 !important;
-            }
-            body * {
-              visibility: hidden;
-            }
-            #receipt-invoice, #receipt-invoice * {
-              visibility: visible !important;
-            }
-            #receipt-invoice {
-              position: absolute !important;
-              left: 0 !important;
-              top: 0 !important;
-              width: 80mm !important;
-              max-width: 80mm !important;
-              padding: 4mm !important;
-              margin: 0 !important;
-              border: none !important;
-              box-shadow: none !important;
-              page-break-after: always !important;
-              page-break-inside: avoid !important;
-            }
-            html, body {
-              width: 80mm !important;
-              max-width: 80mm !important;
-              height: auto !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              overflow: hidden !important;
-            }
-          }
-        `}
-      </style>
-      
+    <div 
+      className={`${dirClass} print-receipt`} 
+      id="receipt-invoice"
+      dir={isRtl ? "rtl" : "ltr"}
+      style={{ 
+        width: '80mm', 
+        maxWidth: '80mm',
+        margin: '0 auto',
+        backgroundColor: 'white',
+        padding: '4mm',
+        fontSize: '12px',
+        border: isPrintable ? 'none' : '1px solid #ddd',
+        borderRadius: isPrintable ? '0' : '5px',
+        boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
+        fontFamily: 'Arial, sans-serif'
+      }}
+    >
       <div className="text-center border-b pb-3 mb-3">
         <div className="flex justify-center mb-2">
           <MoenLogo className="w-auto h-16 mb-2" />
         </div>
         <h2 className="font-bold text-xl mb-1">{storeInfo.name}</h2>
         <p className="text-sm text-muted-foreground">{storeInfo.address}</p>
-        <p className="text-sm text-muted-foreground">هاتف: {storeInfo.phone}</p>
+        <p className="text-sm text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
       <div className="mb-4 text-sm">
         <div className="flex justify-between border-b pb-1 mb-1">
-          <span className="font-semibold">رقم الفاتورة:</span>
+          <span className="font-semibold">{t("invoiceNumber")}:</span>
           <span>{invoice.invoiceId}</span>
         </div>
         <div className="flex justify-between border-b pb-1 mb-1">
-          <span className="font-semibold">التاريخ:</span>
+          <span className="font-semibold">{t("date")}:</span>
           <span>{format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}</span>
         </div>
         <div className="flex justify-between border-b pb-1 mb-1">
-          <span className="font-semibold">العميل:</span>
+          <span className="font-semibold">{t("customer")}:</span>
           <span>{name}</span>
         </div>
         {phone && (
           <div className="flex justify-between border-b pb-1 mb-1">
-            <span className="font-semibold">الهاتف:</span>
+            <span className="font-semibold">{t("phone")}:</span>
             <span>{phone}</span>
           </div>
         )}
@@ -189,7 +130,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
 
       <div className="border-t border-b py-2 mb-3">
         <div className="text-center mb-2 font-bold text-xs uppercase tracking-wide">
-          *** المنتجات ***
+          {isRtl ? "*** المنتجات ***" : "*** PRODUCTS ***"}
         </div>
         
         {isContactLens && contactLenses && contactLenses.length > 0 ? (
@@ -197,7 +138,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           contactLenses.map((lens, idx) => (
             <div key={idx} className="flex justify-between mb-1 text-sm">
               <span>{lens.brand} {lens.type} {lens.power}</span>
-              <span>{lens.price.toFixed(2)} د.ك</span>
+              <span>{lens.price.toFixed(3)} {t("currency")}</span>
             </div>
           ))
         ) : (
@@ -205,22 +146,22 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           <>
             {lens && (
               <div className="flex justify-between mb-1 text-sm">
-                <span>العدسات ({lens})</span>
-                <span>{lensP.toFixed(2)} د.ك</span>
+                <span>{t("lenses")} ({lens})</span>
+                <span>{lensP.toFixed(3)} {t("currency")}</span>
               </div>
             )}
             
             {coat && (
               <div className="flex justify-between mb-1 text-sm">
-                <span>الطلاء ({coat})</span>
-                <span>{coatP.toFixed(2)} د.ك</span>
+                <span>{t("coating")} ({coat})</span>
+                <span>{coatP.toFixed(3)} {t("currency")}</span>
               </div>
             )}
             
             {frameBrand && (
               <div className="flex justify-between mb-1 text-sm">
-                <span>الإطار ({frameBrand} {frameModel})</span>
-                <span>{frameP.toFixed(2)} د.ك</span>
+                <span>{t("frame")} ({frameBrand} {frameModel})</span>
+                <span>{frameP.toFixed(3)} {t("currency")}</span>
               </div>
             )}
           </>
@@ -229,48 +170,48 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
 
       <div className="text-sm mb-4">
         <div className="flex justify-between">
-          <span>المجموع الفرعي:</span>
-          <span>{(tot + disc).toFixed(2)} د.ك</span>
+          <span>{t("subtotal")}:</span>
+          <span>{(tot + disc).toFixed(3)} {t("currency")}</span>
         </div>
         {disc > 0 && (
           <div className="flex justify-between text-destructive">
-            <span>الخصم:</span>
-            <span>-{disc.toFixed(2)} د.ك</span>
+            <span>{t("discount")}:</span>
+            <span>-{disc.toFixed(3)} {t("currency")}</span>
           </div>
         )}
         <div className="flex justify-between font-bold mt-1 pt-1 border-t">
-          <span>الإجمالي:</span>
-          <span>{tot.toFixed(2)} د.ك</span>
+          <span>{t("total")}:</span>
+          <span>{tot.toFixed(3)} {t("currency")}</span>
         </div>
       </div>
 
       <div className="space-y-1 text-sm mb-3">
         <div className="text-center mb-1 font-bold text-xs uppercase tracking-wide">
-          *** المدفوعات ***
+          {isRtl ? "*** المدفوعات ***" : "*** PAYMENTS ***"}
         </div>
         
         {invoice.payments?.map((payment, index) => (
           <div key={index} className="flex justify-between text-sm">
             <span>
               {format(new Date(payment.date), 'dd/MM/yyyy')} ({payment.method})
-              {payment.authNumber && ` - رقم الموافقة: ${payment.authNumber}`}
+              {payment.authNumber && ` - ${t("authNumber")}: ${payment.authNumber}`}
             </span>
-            <span>{payment.amount.toFixed(2)} د.ك</span>
+            <span>{payment.amount.toFixed(3)} {t("currency")}</span>
           </div>
         )) || (
           <div className="flex justify-between text-sm">
             <span>
               {format(new Date(invoice.createdAt), 'dd/MM/yyyy')} ({payMethod})
-              {auth && ` - رقم الموافقة: ${auth}`}
+              {auth && ` - ${t("authNumber")}: ${auth}`}
             </span>
-            <span>{dep.toFixed(2)} د.ك</span>
+            <span>{dep.toFixed(3)} {t("currency")}</span>
           </div>
         )}
         
         {rem > 0 && (
           <div className="flex justify-between font-bold mt-1 pt-1 border-t">
-            <span>المبلغ المتبقي:</span>
-            <span>{rem.toFixed(2)} د.ك</span>
+            <span>{t("remaining")}:</span>
+            <span>{rem.toFixed(3)} {t("currency")}</span>
           </div>
         )}
       </div>
@@ -278,13 +219,13 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       {isPaid && (
         <div className="flex items-center justify-center gap-2 my-3 text-primary font-bold p-1 border border-primary rounded">
           <CheckCircle2 className="w-4 h-4" />
-          <span>تم الدفع بالكامل</span>
+          <span>{t("paidInFull")}</span>
         </div>
       )}
 
       <div className="text-center mt-3 pt-3 border-t">
-        <p className="font-semibold text-sm">شكراً لتعاملكم معنا!</p>
-        <p className="text-xs mt-1 text-muted-foreground">يرجى الاحتفاظ بهذه الفاتورة للرجوع إليها</p>
+        <p className="font-semibold text-sm">{t("thankYou")}</p>
+        <p className="text-xs mt-1 text-muted-foreground">{t("keepReceipt")}</p>
         <div className="mt-3 text-[10px] flex gap-1 justify-center">
           <span>{'•'.repeat(15)}</span>
         </div>

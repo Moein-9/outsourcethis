@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { QRCodeSVG } from "qrcode.react";
 import { Printer, Check, X } from "lucide-react";
@@ -15,74 +15,25 @@ import { PrintService } from "@/utils/PrintService";
 
 const LabelComponent = ({ frame }: { frame: FrameItem }) => {
   return (
-    <div className="label-container" style={{
-      width: "100mm",
-      height: "16mm",
-      border: "1px dashed #ccc",
-      display: "flex",
-      fontFamily: "Arial, sans-serif",
-      pageBreakInside: "avoid",
-      marginBottom: "5mm",
-      position: "relative",
-      overflow: "hidden",
-      borderRadius: "8mm"
-    }}>
+    <div className="label-container">
       {/* Right section - brand info */}
-      <div className="right-section" style={{
-        width: "45mm",
-        height: "100%",
-        padding: "1mm 2mm",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center"
-        // Removed the excessive margin-right
-      }}>
-        <div className="brand-name" style={{
-          fontWeight: "bold",
-          fontSize: "9pt",
-          marginBottom: "1mm",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis"
-        }}>{frame.brand}</div>
-        <div className="detail-info" style={{
-          fontSize: "7pt",
-          marginBottom: "1mm",
-          lineHeight: "1.1"
-        }}>
+      <div className="right-section">
+        <div className="brand-name">{frame.brand}</div>
+        <div className="detail-info">
           Model: {frame.model || "-"}<br/>
           Color: {frame.color || "-"}<br/>
           Size: {frame.size || "-"}
         </div>
-        <div className="price" style={{
-          fontWeight: "bold",
-          fontSize: "9pt"
-        }}>K.D. {frame.price.toFixed(3)}</div>
+        <div className="price">K.D. {frame.price.toFixed(3)}</div>
       </div>
 
       {/* Left section - QR code and logo */}
-      <div className="left-section" style={{
-        width: "45mm",
-        height: "100%",
-        padding: "1mm",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center"
-      }}>
-        <div className="store-logo" style={{
-          display: "flex",
-          justifyContent: "center",
-          width: "100%",
-          marginBottom: "1mm"
-        }}>
+      <div className="left-section">
+        <div className="store-logo">
           <MoenLogo className="w-auto" style={{ maxHeight: "4mm", height: "auto" }} />
         </div>
         
-        <div className="qr-code" style={{
-          display: "flex",
-          justifyContent: "center"
-        }}>
+        <div className="qr-code">
           <QRCodeSVG 
             value={frame.frameId} 
             size={22}
@@ -99,9 +50,12 @@ export const usePrintLabel = () => {
     const { frames } = useInventoryStore.getState();
     const selectedFrames = frames.filter(frame => frameIds.includes(frame.frameId));
     
-    if (selectedFrames.length === 0) return;
+    if (selectedFrames.length === 0) {
+      toast.warning("No frames selected for printing");
+      return;
+    }
     
-    // Use the PrepareLabel method from PrintService
+    // Generate the HTML content for each label
     let labelContent = '';
     
     selectedFrames.forEach(frame => {
@@ -118,22 +72,30 @@ export const usePrintLabel = () => {
           </div>
           <div class="left-section">
             <div class="store-logo">
-              <MoenLogo style="height: 4mm; width: auto;" />
+              <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" style="max-height: 4mm; width: auto;" />
             </div>
             <div class="qr-code">
-              <div id="qr-code-${frame.frameId}"></div>
+              <img src="data:image/svg+xml;base64,${btoa(
+                new XMLSerializer().serializeToString(
+                  new QRCodeSVG({
+                    value: frame.frameId,
+                    size: 22,
+                    level: "M"
+                  }).props.children
+                )
+              )}" width="22" height="22" />
             </div>
           </div>
         </div>
       `;
     });
     
-    // Use the PrintService's prepareLabelDocument method
+    // Use PrintService to prepare and print the label document
     const htmlContent = PrintService.prepareLabelDocument(labelContent);
     
-    // Print the label using PrintService
-    PrintService.printHtml(htmlContent, () => {
-      toast.success("Labels sent to printer");
+    // Print the labels
+    PrintService.printHtml(htmlContent, 'label', () => {
+      toast.success(`${selectedFrames.length} label(s) sent to printer`);
     });
   };
   
@@ -202,11 +164,13 @@ export const FrameLabelTemplate: React.FC = () => {
     setFilteredFrames(frames);
   };
   
-  React.useEffect(() => {
+  // Update filtered frames when search text changes
+  useEffect(() => {
     handleSearch();
   }, [searchText]);
   
-  React.useEffect(() => {
+  // Update filtered frames when frame data changes
+  useEffect(() => {
     setFilteredFrames(frames);
   }, [frames]);
   

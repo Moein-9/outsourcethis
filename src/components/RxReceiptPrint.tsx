@@ -5,6 +5,7 @@ import { RxData } from "@/store/patientStore";
 import { Eye } from "lucide-react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
+import { PrintService } from "@/utils/PrintService";
 
 interface RxReceiptPrintProps {
   patientName: string;
@@ -25,32 +26,20 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
 }) => {
   const { language: appLanguage, t } = useLanguageStore();
   const language = forcedLanguage || appLanguage;
+  const isRtl = language === 'ar';
   
   const containerClass = isPrintable 
     ? "w-[80mm] mx-auto bg-white p-4 text-[12px] border shadow-sm print:shadow-none" 
     : "w-full bg-white p-4 border rounded-lg shadow-sm";
   
-  const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
+  const dirClass = isRtl ? 'rtl text-right' : 'ltr text-left';
 
-  // Better print handling
-  React.useEffect(() => {
-    if (isPrintable) {
-      // Use a longer timeout to ensure everything is fully rendered
-      const timer = setTimeout(() => {
-        if (document.readyState === "complete") {
-          window.print();
-        } else {
-          window.addEventListener("load", () => {
-            window.print();
-          }, { once: true });
-        }
-      }, 800);
-      return () => clearTimeout(timer);
-    }
-  }, [isPrintable]);
-  
   return (
-    <div className={`${containerClass} ${dirClass}`} style={{ fontFamily: 'Courier New, monospace' }}>
+    <div 
+      className={`${containerClass} ${dirClass}`} 
+      dir={isRtl ? "rtl" : "ltr"}
+      style={{ fontFamily: 'Arial, sans-serif' }}
+    >
       <div className="text-center border-b pb-3 mb-3">
         <div className="flex justify-center mb-2">
           <MoenLogo className="w-auto h-16 mb-2" />
@@ -144,7 +133,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   );
 };
 
-// Language selection dialog for RX printing - fixed to be centered regardless of scroll position
+// Language selection dialog for RX printing
 export const RxLanguageDialog: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -155,7 +144,7 @@ export const RxLanguageDialog: React.FC<{
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
       <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-auto">
         <h3 className="text-lg font-medium mb-4 text-center">{t("selectLanguageForPrinting")}</h3>
         <div className="flex gap-4 justify-center">
@@ -181,4 +170,92 @@ export const RxLanguageDialog: React.FC<{
       </div>
     </div>
   );
+};
+
+// Helper function to directly print an RX receipt
+export const printRxReceipt = (props: RxReceiptPrintProps) => {
+  const { patientName, patientPhone, rx, notes, forcedLanguage } = props;
+  const { language: appLanguage, t } = useLanguageStore.getState();
+  const language = forcedLanguage || appLanguage;
+  const isRtl = language === 'ar';
+  
+  // Create a simplified HTML version of the RX for printing
+  const htmlContent = `
+    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: Arial, sans-serif; padding: 4mm; text-align: ${isRtl ? 'right' : 'left'};">
+      <div style="text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 10px;">
+        <h1 style="font-size: 16px; font-weight: bold; margin: 5px 0;">${storeInfo.name}</h1>
+        <p style="font-size: 12px; margin: 2px 0;">${storeInfo.address}</p>
+        <p style="font-size: 12px; margin: 2px 0;">${t("phone")}: ${storeInfo.phone}</p>
+      </div>
+
+      <div style="margin-bottom: 15px; font-size: 12px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 3px;">
+          <span style="font-weight: bold;">${t("date")}:</span>
+          <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 3px;">
+          <span style="font-weight: bold;">${t("patient")}:</span>
+          <span>${patientName}</span>
+        </div>
+        ${patientPhone ? `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 3px;">
+          <span style="font-weight: bold;">${t("phone")}:</span>
+          <span>${patientPhone}</span>
+        </div>
+        ` : ''}
+      </div>
+
+      <div style="border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 10px 0; margin-bottom: 15px;">
+        <div style="text-align: center; margin-bottom: 10px; font-weight: bold; font-size: 12px; text-transform: uppercase;">
+          ${t("glassesPrescription")}
+        </div>
+        
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+          <thead>
+            <tr>
+              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;"></th>
+              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">SPH</th>
+              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">CYL</th>
+              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">AXIS</th>
+              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">ADD</th>
+              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">PD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border: 1px solid #ccc; padding: 4px; font-weight: bold; text-align: center;">${t("rightEye")} (OD)</td>
+              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.sphereOD}</td>
+              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.cylOD}</td>
+              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.axisOD}</td>
+              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.addOD}</td>
+              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.pdRight || "-"}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ccc; padding: 4px; font-weight: bold; text-align: center;">${t("leftEye")} (OS)</td>
+              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.sphereOS}</td>
+              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.cylOS}</td>
+              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.axisOS}</td>
+              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.addOS}</td>
+              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.pdLeft || "-"}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      ${notes ? `
+      <div style="margin-bottom: 15px; font-size: 12px;">
+        <div style="font-weight: bold; margin-bottom: 5px;">${t("notes")}:</div>
+        <p style="font-size: 11px;">${notes}</p>
+      </div>
+      ` : ''}
+
+      <div style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #ccc;">
+        <p style="font-weight: bold; font-size: 12px;">${t("thankYou")}</p>
+      </div>
+    </div>
+  `;
+  
+  // Use PrintService to handle the printing
+  const printDoc = PrintService.prepareReceiptDocument(htmlContent, t("glassesPrescription"));
+  PrintService.printHtml(printDoc, 'receipt');
 };
