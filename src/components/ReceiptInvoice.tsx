@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -95,7 +94,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         border: isPrintable ? 'none' : '1px solid #ddd',
         borderRadius: isPrintable ? '0' : '5px',
         boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
-        fontFamily: 'Arial, sans-serif'
+        fontFamily: isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'
       }}
     >
       <div className="text-center border-b pb-3 mb-3">

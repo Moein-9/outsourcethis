@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { RxData } from "@/store/patientStore";
@@ -38,7 +37,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
     <div 
       className={`${containerClass} ${dirClass}`} 
       dir={isRtl ? "rtl" : "ltr"}
-      style={{ fontFamily: 'Arial, sans-serif' }}
+      style={{ fontFamily: isRtl ? 'Zain, sans-serif' : 'Yrsa, serif' }}
     >
       <div className="text-center border-b pb-3 mb-3">
         <div className="flex justify-center mb-2">
@@ -71,7 +70,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
           <Eye className="h-3 w-3" /> {t("glassesPrescription")}
         </div>
         
-        {/* Always left-to-right table regardless of language */}
         <table className="w-full border-collapse mt-2 ltr">
           <thead>
             <tr>
@@ -133,7 +131,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   );
 };
 
-// Language selection dialog for RX printing
 export const RxLanguageDialog: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -172,16 +169,14 @@ export const RxLanguageDialog: React.FC<{
   );
 };
 
-// Helper function to directly print an RX receipt
 export const printRxReceipt = (props: RxReceiptPrintProps) => {
   const { patientName, patientPhone, rx, notes, forcedLanguage } = props;
   const { language: appLanguage, t } = useLanguageStore.getState();
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
   
-  // Create a simplified HTML version of the RX for printing
   const htmlContent = `
-    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: Arial, sans-serif; padding: 4mm; text-align: ${isRtl ? 'right' : 'left'};">
+    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; padding: 4mm; text-align: ${isRtl ? 'right' : 'left'};">
       <div style="text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 10px;">
         <h1 style="font-size: 16px; font-weight: bold; margin: 5px 0;">${storeInfo.name}</h1>
         <p style="font-size: 12px; margin: 2px 0;">${storeInfo.address}</p>
@@ -255,7 +250,6 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     </div>
   `;
   
-  // Use PrintService to handle the printing
   const printDoc = PrintService.prepareReceiptDocument(htmlContent, t("glassesPrescription"));
   PrintService.printHtml(printDoc, 'receipt');
 };

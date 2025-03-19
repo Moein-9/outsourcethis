@@ -107,7 +107,7 @@
     display: none !important;
   }
   
-  /* Critical fix for printing dialog issues */
+  /* Critical fix for printing dialog issues - RED FLAG #1 */
   body.printing {
     width: 80mm !important;
     height: auto !important;

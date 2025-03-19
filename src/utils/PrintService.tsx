@@ -147,7 +147,7 @@ export const PrintService = {
             page-break-inside: avoid;
           }
           
-          /* Fix for print dialog appearing but not working */
+          /* Fix for print dialog appearing but not working - RED FLAG #1 */
           @media print {
             body {
               width: 80mm !important;
