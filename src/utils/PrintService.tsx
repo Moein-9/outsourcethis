@@ -53,18 +53,19 @@ export const PrintService = {
         iframe.contentWindow.document.close();
         
         // Focus and print after a slight delay to ensure content is loaded
-        setTimeout(() => {
-          if (iframe.contentWindow) {
-            iframe.contentWindow.focus();
-            // Use printImmediately for a more direct approach
-            iframe.contentWindow.print();
+        // DISABLE SET TIMEOUT< this causing multiple print modal displayed
+        // setTimeout(() => {
+        //   if (iframe.contentWindow) {
+        //     iframe.contentWindow.focus();
+        //     // Use printImmediately for a more direct approach
+        //     iframe.contentWindow.print();
             
-            // Signal completion after printing
-            setTimeout(() => {
-              window.postMessage('print-complete', '*');
-            }, 1000); // Increased timeout for better reliability
-          }
-        }, 800); // Increased delay to ensure content is fully loaded
+        //     // Signal completion after printing
+        //     setTimeout(() => {
+        //       window.postMessage('print-complete', '*');
+        //     }, 1000); // Increased timeout for better reliability
+        //   }
+        // }, 800); // Increased delay to ensure content is fully loaded
       } else {
         toast.error("Failed to create print frame");
         if (onComplete) onComplete();
@@ -219,11 +220,11 @@ export const PrintService = {
           }
           
           .label-container {
-            width: 100mm !important;
+            width: 50mm !important;
             height: 16mm !important;
             display: flex !important;
             justify-content: space-between !important;
-            margin: 0 !important;
+            margin: 0 0 0 auto !important;
             padding: 0 !important;
             overflow: hidden !important;
             page-break-after: always !important;
@@ -251,22 +252,22 @@ export const PrintService = {
           
           .brand-name {
             font-weight: bold !important;
-            font-size: 9pt !important;
-            margin-bottom: 1mm !important;
+            font-size: 6pt !important;
+            margin-bottom: 0.5mm !important;
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
           }
           
           .detail-info {
-            font-size: 7pt !important;
-            margin-bottom: 1mm !important;
+            font-size: 5pt !important;
+            margin-bottom: 0.5mm !important;
             line-height: 1.1 !important;
           }
           
           .price {
             font-weight: bold !important;
-            font-size: 9pt !important;
+            font-size: 8pt !important;
           }
           
           .store-logo {
