@@ -49,7 +49,7 @@ export const usePrintLabel = () => {
   const printSelectedFrames = (frameIds: string[]) => {
     const { frames } = useInventoryStore.getState();
     const selectedFrames = frames.filter(frame => frameIds.includes(frame.frameId));
-    
+    console.log('wawa')
     if (selectedFrames.length === 0) {
       toast.warning("No frames selected for printing");
       return;
@@ -64,7 +64,16 @@ export const usePrintLabel = () => {
       
       labelContent += `
         <div class="label-container">
+          
           <div class="right-section">
+            <div class="store-logo">
+              <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" style="max-height: 4mm; width: auto;" />
+            </div>
+            <div class="qr-code">
+              <img src="${qrCodeUrl}" width="22" height="22" alt="QR Code" />
+            </div>
+          </div>
+          <div class="left-section">
             <div class="brand-name">${frame.brand}</div>
             <div class="detail-info">
               Model: ${frame.model || "-"}<br/>
@@ -72,14 +81,6 @@ export const usePrintLabel = () => {
               Size: ${frame.size || "-"}
             </div>
             <div class="price">K.D. ${frame.price.toFixed(3)}</div>
-          </div>
-          <div class="left-section">
-            <div class="store-logo">
-              <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" style="max-height: 4mm; width: auto;" />
-            </div>
-            <div class="qr-code">
-              <img src="${qrCodeUrl}" width="22" height="22" alt="QR Code" />
-            </div>
           </div>
         </div>
       `;
@@ -95,6 +96,7 @@ export const usePrintLabel = () => {
   };
   
   const printSingleLabel = (frameId: string) => {
+    console.log('dasd', frameId)
     printSelectedFrames([frameId]);
   };
   
