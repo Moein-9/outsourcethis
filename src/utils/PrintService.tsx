@@ -220,11 +220,11 @@ export const PrintService = {
           }
           
           .label-container {
-            width: 43mm !important;
+            width: 90mm !important;
             height: 16mm !important;
             display: flex !important;
             justify-content: space-between !important;
-            margin: 0 0 0 auto !important;
+            margin: 0 auto 0 auto !important;
             padding: 0 !important;
             overflow: hidden !important;
             page-break-after: always !important;
@@ -233,8 +233,9 @@ export const PrintService = {
           
           .right-section {
             width: 45mm !important;
+            margin-left: 25mm !important;
             height: 100% !important;
-            padding: 1mm 2mm !important;
+            padding: 1mm 0 !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: center !important;
@@ -260,7 +261,7 @@ export const PrintService = {
           }
           
           .detail-info {
-            font-size: 7pt !important;
+            font-size: 8pt !important;
             margin-bottom: 0.5mm !important;
             line-height: 1.1 !important;
             text-align: center !important;
@@ -279,7 +280,7 @@ export const PrintService = {
           }
           
           .store-logo img {
-            max-height: 2mm !important;
+            max-height: 3.5mm !important;
             width: auto !important;
           }
           
@@ -289,8 +290,8 @@ export const PrintService = {
           }
           
           .qr-code img, .qr-code svg {
-            height: 50px !important;
-            width: 50px !important;
+            height: 40px !important;
+            width: 40px !important;
           }
         </style>
       </head>
