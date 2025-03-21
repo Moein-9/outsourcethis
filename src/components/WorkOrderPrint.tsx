@@ -51,6 +51,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   contactLensRx
 }) => {
   const { language, t } = useLanguageStore();
+  const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
   
   const name = patientName || invoice.patientName;
   const phone = patientPhone || invoice.patientPhone;
@@ -65,50 +66,85 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   } : undefined);
   
   const isContactLens = contactLenses && contactLenses.length > 0;
-  const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
 
   return (
-    <div className={`max-w-2xl mx-auto bg-white p-6 border rounded-lg shadow-sm print:shadow-none ${dirClass}`}>
+    <div className="print-wrapper">
       <style>
         {`
           @media print {
-            body * {
-              visibility: hidden;
+            .hide-print {
+              display: none !important;
             }
-            #work-order-print, #work-order-print * {
-              visibility: visible;
-            }
-            #work-order-print {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
-              padding: 2rem;
+    
+            @page {
+              size: portrait;
+              width: 58mm;
               margin: 0;
             }
-            @page {
-              size: A4;
-              margin: 1cm;
+
+            /* Reset visibility */
+            * {
+              visibility: visible !important;
             }
+
             html, body {
-              height: 297mm; /* A4 height */
-              width: 210mm;  /* A4 width */
+              width: 58mm !important;
+              height: auto !important;
               margin: 0 !important;
               padding: 0 !important;
-              overflow: hidden;
+            }
+
+            .print-wrapper {
+              visibility: visible !important;
+              width: 58mm !important;
+            }
+
+            #thermal-print {
+              visibility: visible !important;
+              position: fixed !important;
+              left: 0 !important;
+              top: 0 !important;
+              width: 56mm !important;
+              padding: 0mm !important;
+              margin: 0 !important;
+              background: white !important;
+            }
+
+            /* Hide everything else */
+ 
+            /* Content styles */
+            .print-section {
+              width: 54mm !important;
+              margin-bottom: 2mm !important;
+              padding: 0 1mm !important;
+            }
+
+            .print-text-lg { font-size: 9pt !important; }
+            .print-text-md { font-size: 8pt !important; }
+            .print-text-sm { font-size: 7pt !important; }
+
+            table {
+              width: 100% !important;
+              border-collapse: collapse !important;
+            }
+
+            td, th {
+              border: 0.1mm solid black !important;
+              padding: 0.5mm !important;
+              text-align: center !important;
             }
           }
         `}
       </style>
-      
-      <div id="work-order-print" className={dirClass}>
+
+     <div id="work-order-print" className={dirClass}>
         <div className="text-center border-b pb-4 mb-6 relative">
           <div className="absolute right-0 top-0">
-            <ClipboardCheck className="w-10 h-10 text-primary" />
+            <ClipboardCheck className="w-10 h-10 text-primary hide-print" />
           </div>
-          <MoenLogo className="mx-auto w-auto h-16 mb-2" />
+          <MoenLogo className="mx-auto w-auto h-8 mb-2" />
           <h1 className="text-2xl font-bold mb-1">{t("workOrder")}</h1>
-          <p className="text-lg text-primary font-medium">{t("orderNumber")}: {invoice.invoiceId}</p>
+          <p className="text-lg text-primary font-medium">{invoice.invoiceId}</p>
           <p className="text-muted-foreground">
             {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
           </p>
@@ -118,8 +154,8 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="bg-muted/10 p-3 rounded-lg border">
+        <div className="grid gap-4 mb-4">
+          <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
             <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
               <User className="w-4 h-4" />
               {t("patientInformation")}
@@ -143,7 +179,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
 
           {!isContactLens && frameData && (
-            <div className="bg-muted/10 p-3 rounded-lg border">
+            <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
               <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
                 <Glasses className="w-4 h-4" />
                 {t("frameDetails")}
@@ -166,7 +202,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           )}
           
           {isContactLens && (
-            <div className="bg-muted/10 p-3 rounded-lg border">
+            <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
               <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
                 <Contact className="w-4 h-4" />
                 {t("contactLensDetails")}
@@ -190,7 +226,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         </div>
 
         {!isContactLens && rx && (
-          <div className="mb-4 bg-muted/10 p-3 rounded-lg border">
+          <div className="mb-4 bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
             <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
               <Eye className="w-4 h-4" />
               {t("prescriptionDetails")}
@@ -229,7 +265,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         )}
         
         {isContactLens && contactLensRx && (
-          <div className="mb-4 bg-muted/10 p-3 rounded-lg border">
+          <div className="mb-4 bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
             <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
               <Eye className="w-4 h-4" />
               {t("contactLensPrescription")}
@@ -269,7 +305,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
 
         {!isContactLens && (
           <div className="space-y-3">
-            <div className="bg-muted/10 p-3 rounded-lg border">
+            <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
               <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
                 <Ruler className="w-4 h-4" />
                 {t("lensDetails")}
@@ -304,7 +340,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         )}
 
-        <div className="bg-muted/10 p-3 rounded-lg border mt-4">
+        <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none mt-4">
           <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
             <CircleDot className="w-4 h-4" />
             {t("additionalNotes")}
@@ -312,7 +348,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <div className="border rounded p-2 min-h-[50px] bg-white"></div>
         </div>
 
-        <div className="mt-6 pt-3 border-t grid grid-cols-2 gap-4">
+        <div className="mt-6 pt-3 border-t grid gap-4">
           <div>
             <p className="font-semibold text-primary text-sm">{t("technicianSignature")}</p>
             <div className="mt-4 border-b w-32 h-6"></div>
