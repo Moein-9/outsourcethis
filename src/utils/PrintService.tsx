@@ -220,7 +220,7 @@ export const PrintService = {
           }
           
           .label-container {
-            width: 50mm !important;
+            width: 43mm !important;
             height: 16mm !important;
             display: flex !important;
             justify-content: space-between !important;
@@ -252,7 +252,7 @@ export const PrintService = {
           
           .brand-name {
             font-weight: bold !important;
-            font-size: 6pt !important;
+            font-size: 8pt !important;
             margin-bottom: 0.5mm !important;
             white-space: nowrap !important;
             overflow: hidden !important;
@@ -260,9 +260,10 @@ export const PrintService = {
           }
           
           .detail-info {
-            font-size: 5pt !important;
+            font-size: 7pt !important;
             margin-bottom: 0.5mm !important;
             line-height: 1.1 !important;
+            text-align: center !important;
           }
           
           .price {
@@ -274,11 +275,11 @@ export const PrintService = {
             display: flex !important;
             justify-content: center !important;
             width: 100% !important;
-            margin-bottom: 1mm !important;
+            margin-bottom: 0.2mm !important;
           }
           
           .store-logo img {
-            max-height: 4mm !important;
+            max-height: 2mm !important;
             width: auto !important;
           }
           
@@ -288,8 +289,8 @@ export const PrintService = {
           }
           
           .qr-code img, .qr-code svg {
-            height: 22px !important;
-            width: 22px !important;
+            height: 50px !important;
+            width: 50px !important;
           }
         </style>
       </head>
