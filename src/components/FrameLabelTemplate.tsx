@@ -67,7 +67,7 @@ export const usePrintLabel = () => {
           
           <div class="right-section">
             <div class="store-logo">
-              <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" style="max-height: 4mm; width: auto;" />
+              <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" style="max-height: 2.5mm; width: auto;" />
             </div>
             <div class="qr-code">
               <img src="${qrCodeUrl}" width="22" height="22" alt="QR Code" />
@@ -77,7 +77,7 @@ export const usePrintLabel = () => {
             <div class="brand-name">${frame.brand}</div>
             <div class="detail-info">
               Model: ${frame.model || "-"}<br/>
-              Color: ${frame.color || "-"}<br/>
+              Color: ${frame.color || "-"}
               Size: ${frame.size || "-"}
             </div>
             <div class="price">K.D. ${frame.price.toFixed(3)}</div>
@@ -96,7 +96,6 @@ export const usePrintLabel = () => {
   };
   
   const printSingleLabel = (frameId: string) => {
-    console.log('dasd', frameId)
     printSelectedFrames([frameId]);
   };
   
