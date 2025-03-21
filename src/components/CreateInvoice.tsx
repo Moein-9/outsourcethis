@@ -1226,9 +1226,9 @@ const CreateInvoice: React.FC = () => {
       </div>
       
       <Sheet open={workOrderPrintOpen} onOpenChange={setWorkOrderPrintOpen}>
-        <SheetContent className="w-full sm:max-w-3xl overflow-y-auto print:w-full print:max-w-none">
+        <SheetContent className="w-full sm:max-w-3xl overflow-y-auto print:w-full print:!px-1 print:max-w-none">
           <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
+            <SheetTitle className="flex items-center gap-2 hide-print">
               <ClipboardCheck className="w-5 h-5" />
               {t('workOrder')}
             </SheetTitle>
