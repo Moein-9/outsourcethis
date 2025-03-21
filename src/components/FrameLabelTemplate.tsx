@@ -1,246 +1,689 @@
 
-import React, { useState, useEffect } from "react";
-import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
-import { QRCodeSVG } from "qrcode.react";
-import { Printer, Check, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useLanguageStore } from "@/store/languageStore";
-import { MoenLogo } from "@/assets/logo";
-import { PrintService } from "@/utils/PrintService";
+import React from 'react';
+import { toast } from 'sonner';
 
-const LabelComponent = ({ frame }: { frame: FrameItem }) => {
-  return (
-    <div className="label-container">
-      {/* Right section - brand info */}
-      <div className="right-section">
-        <div className="brand-name">{frame.brand}</div>
-        <div className="detail-info">
-          Model: {frame.model || "-"}<br/>
-          Color: {frame.color || "-"}<br/>
-          Size: {frame.size || "-"}
-        </div>
-        <div className="price">K.D. {frame.price.toFixed(3)}</div>
-      </div>
+/**
+ * Unified PrintService for handling all printing needs across the application
+ */
+export const PrintService = {
+  /**
+   * Creates a hidden print frame for printing
+   * @returns The iframe element
+   */
+  createPrintFrame: () => {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.visibility = 'hidden';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    document.body.appendChild(iframe);
+    return iframe;
+  },
 
-      {/* Left section - QR code and logo */}
-      <div className="left-section">
-        <div className="store-logo">
-          <MoenLogo className="w-auto" style={{ maxHeight: "4mm", height: "auto" }} />
-        </div>
-        
-        <div className="qr-code">
-          <QRCodeSVG 
-            value={frame.frameId} 
-            size={22}
-            level="M"
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export const usePrintLabel = () => {
-  const printSelectedFrames = (frameIds: string[]) => {
-    const { frames } = useInventoryStore.getState();
-    const selectedFrames = frames.filter(frame => frameIds.includes(frame.frameId));
-    console.log('wawa')
-    if (selectedFrames.length === 0) {
-      toast.warning("No frames selected for printing");
-      return;
-    }
-    
-    // Generate the HTML content for each label
-    let labelContent = '';
-    
-    selectedFrames.forEach(frame => {
-      // Create QR code URL using a simple API
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=22x22&data=${encodeURIComponent(frame.frameId)}`;
+  /**
+   * Print HTML content with support for different paper types
+   * @param htmlContent HTML content to print
+   * @param paperType Type of paper to print on (receipt, label, a4)
+   * @param onComplete Callback after printing
+   */
+  printHtml: (
+    htmlContent: string, 
+    paperType: 'receipt' | 'label' | 'a4' = 'receipt',
+    onComplete?: () => void
+  ) => {
+    try {
+      // Create the print frame
+      const iframe = PrintService.createPrintFrame();
       
-      labelContent += `
-        <div class="label-container">
-          
-          <div class="right-section">
-            <div class="store-logo">
-              <img src="/lovable-uploads/90a547db-d744-4e5e-96e0-2b17500d03be.png" style="max-height: 2.5mm; width: auto;" />
-            </div>
-            <div class="qr-code">
-              <img src="${qrCodeUrl}" width="22" height="22" alt="QR Code" />
-            </div>
-          </div>
-          <div class="left-section">
-            <div class="brand-name">${frame.brand}</div>
-            <div class="detail-info">
-              Model: ${frame.model || "-"}<br/>
-              Color: ${frame.color || "-"}
-              Size: ${frame.size || "-"}
-            </div>
-            <div class="price">K.D. ${frame.price.toFixed(3)}</div>
-          </div>
-        </div>
-      `;
-    });
-    
-    // Use PrintService to prepare and print the label document
-    const htmlContent = PrintService.prepareLabelDocument(labelContent);
-    
-    // Print the labels
-    PrintService.printHtml(htmlContent, 'label', () => {
-      toast.success(`${selectedFrames.length} label(s) sent to printer`);
-    });
-  };
-  
-  const printSingleLabel = (frameId: string) => {
-    printSelectedFrames([frameId]);
-  };
-  
-  return { printSelectedFrames, printSingleLabel };
-};
-
-export const FrameLabelTemplate: React.FC = () => {
-  const { frames } = useInventoryStore();
-  const { t } = useLanguageStore();
-  const [selectedFrames, setSelectedFrames] = useState<string[]>([]);
-  const [searchText, setSearchText] = useState("");
-  const [filteredFrames, setFilteredFrames] = useState(frames);
-  const { printSelectedFrames } = usePrintLabel();
-  
-  const toggleFrameSelection = (frameId: string) => {
-    if (selectedFrames.includes(frameId)) {
-      setSelectedFrames(selectedFrames.filter(id => id !== frameId));
-    } else {
-      setSelectedFrames([...selectedFrames, frameId]);
-    }
-  };
-  
-  const toggleSelectAll = () => {
-    if (selectedFrames.length === filteredFrames.length) {
-      setSelectedFrames([]);
-    } else {
-      setSelectedFrames(filteredFrames.map(frame => frame.frameId));
-    }
-  };
-  
-  const handleSearch = () => {
-    if (!searchText.trim()) {
-      setFilteredFrames(frames);
-      return;
-    }
-    
-    const filtered = frames.filter(frame => {
-      const searchLower = searchText.toLowerCase();
-      return (
-        frame.brand.toLowerCase().includes(searchLower) ||
-        frame.model.toLowerCase().includes(searchLower) ||
-        frame.color.toLowerCase().includes(searchLower) ||
-        (frame.size && frame.size.toLowerCase().includes(searchLower))
-      );
-    });
-    
-    setFilteredFrames(filtered);
-  };
-  
-  const handlePrint = () => {
-    if (selectedFrames.length === 0) {
-      toast.warning(t("selectFramesForPrinting"));
-      return;
-    }
-    
-    printSelectedFrames(selectedFrames);
-  };
-  
-  const handleReset = () => {
-    setSearchText("");
-    setSelectedFrames([]);
-    setFilteredFrames(frames);
-  };
-  
-  // Update filtered frames when search text changes
-  useEffect(() => {
-    handleSearch();
-  }, [searchText]);
-  
-  // Update filtered frames when frame data changes
-  useEffect(() => {
-    setFilteredFrames(frames);
-  }, [frames]);
-  
-  return (
-    <div className="space-y-4">
-      <div className="space-y-4">
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Label htmlFor="search-frames" className="text-xs font-medium mb-1 block">
-              {t("searchFrames")}
-            </Label>
-            <Input
-              id="search-frames"
-              placeholder={t("searchByBrandModelColor")}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
-          </div>
-          <div className="flex items-end">
-            <Button variant="outline" size="sm" onClick={handleReset} className="h-10">
-              <X className="h-4 w-4 mr-1" /> {t("reset")}
-            </Button>
-          </div>
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="select-all"
-              checked={selectedFrames.length === filteredFrames.length && filteredFrames.length > 0}
-              onCheckedChange={toggleSelectAll}
-            />
-            <Label htmlFor="select-all" className="text-sm cursor-pointer">
-              {t("selectAll")} ({filteredFrames.length})
-            </Label>
-          </div>
-          
-          <Button 
-            onClick={handlePrint} 
-            disabled={selectedFrames.length === 0}
-            className="gap-1"
-          >
-            <Printer className="h-4 w-4" /> {t("printSelected")} ({selectedFrames.length})
-          </Button>
-        </div>
-      </div>
+      // Add a listener for print completion
+      window.addEventListener('message', function handler(e) {
+        if (e.data === 'print-complete') {
+          window.removeEventListener('message', handler);
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+          if (onComplete) onComplete();
+        }
+      });
       
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">{t("labelPreview")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredFrames.length > 0 ? (
-            <div className="space-y-3">
-              {filteredFrames.map((frame) => (
-                <div key={frame.frameId} className="flex items-center gap-3">
-                  <Checkbox
-                    id={`frame-${frame.frameId}`}
-                    checked={selectedFrames.includes(frame.frameId)}
-                    onCheckedChange={() => toggleFrameSelection(frame.frameId)}
-                  />
-                  <div className="flex-1 border rounded overflow-hidden">
-                    <LabelComponent frame={frame} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <p className="text-muted-foreground">{t("noFramesFound")}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
+      // Write the content to the iframe
+      if (iframe.contentWindow) {
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(htmlContent);
+        iframe.contentWindow.document.close();
+        
+        // Focus and print after a slight delay to ensure content is loaded
+        // DISABLE SET TIMEOUT< this causing multiple print modal displayed
+        // setTimeout(() => {
+        //   if (iframe.contentWindow) {
+        //     iframe.contentWindow.focus();
+        //     // Use printImmediately for a more direct approach
+        //     iframe.contentWindow.print();
+            
+        //     // Signal completion after printing
+        //     setTimeout(() => {
+        //       window.postMessage('print-complete', '*');
+        //     }, 1000); // Increased timeout for better reliability
+        //   }
+        // }, 800); // Increased delay to ensure content is fully loaded
+      } else {
+        toast.error("Failed to create print frame");
+        if (onComplete) onComplete();
+      }
+    } catch (error) {
+      console.error('Print error:', error);
+      toast.error("Failed to print");
+      if (onComplete) onComplete();
+    }
+  },
+  
+  /**
+   * Prepares HTML for receipt printing (thermal printer, 80mm width)
+   * @param content HTML content to print
+   * @param title Document title
+   * @returns Complete HTML document
+   */
+  prepareReceiptDocument: (content: string, title: string = 'Receipt') => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
+        <style>
+          @page {
+            size: 80mm auto !important;
+            margin: 0mm !important;
+          }
+          
+          @font-face {
+            font-family: 'Zain';
+            src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+            font-weight: normal;
+            font-style: normal;
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
+            font-weight: normal;
+            font-style: normal;
+          }
+          
+          body {
+            margin: 0;
+            padding: 0;
+            width: 80mm;
+            font-family: 'Yrsa', serif;
+            direction: initial;
+          }
+          
+          /* Ensure Arabic displays correctly */
+          [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+            font-family: 'Zain', sans-serif;
+          }
+          
+          .arabic {
+            font-family: 'Zain', sans-serif;
+            direction: rtl;
+            text-align: right;
+          }
+          
+          /* Force single page printing */
+          html, body {
+            height: auto;
+          }
+          
+          /* Ensure content is properly contained */
+          .receipt-container {
+            width: 72mm;
+            padding: 4mm;
+            margin: 0;
+            page-break-after: always;
+            page-break-inside: avoid;
+          }
+          
+          /* Fix for print dialog appearing but not working - RED FLAG #1 */
+          @media print {
+            body {
+              width: 80mm !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            
+            .receipt-container {
+              width: 72mm !important;
+              margin: 0 !important;
+              padding: 4mm !important;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="receipt-container">${content}</div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            // Force printing after a delay to ensure everything is loaded
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 1000);
+            }, 500);
+          });
+        </script>
+      </body>
+      </html>
+    `;
+  },
+  
+  /**
+   * Prepares HTML for label printing (100mm × 16mm)
+   * @param content HTML content to print
+   * @param title Document title
+   * @returns Complete HTML document
+   */
+  prepareLabelDocument: (content: string, title: string = 'Label') => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
+        <style>
+          @page {
+            size: 100mm 16mm !important;
+            margin: 0mm !important;
+            padding: 0mm !important;
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
+          }
+          
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100mm !important;
+            max-width: 100mm !important;
+            overflow: hidden !important;
+            font-family: 'Yrsa', serif !important;
+          }
+          
+          .label-container {
+            width: 50mm !important;
+            height: 16mm !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            margin: 0 auto 0 auto !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+          }
+          
+          .right-section {
+            width: 45mm !important;
+            height: 100% !important;
+            padding: 1mm 2mm !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+          }
+          
+          .left-section {
+            width: 45mm !important;
+            height: 100% !important;
+            padding: 1mm !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+          }
+          
+          .brand-name {
+            font-weight: bold !important;
+            font-size: 8pt !important;
+            margin-bottom: 0.5mm !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          
+          .detail-info {
+            font-size: 8pt !important;
+            margin-bottom: 0.5mm !important;
+            line-height: 1.1 !important;
+            text-align: center !important;
+          }
+          
+          .price {
+            font-weight: bold !important;
+            font-size: 8pt !important;
+          }
+          
+          .store-logo {
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important;
+            margin-bottom: 0.2mm !important;
+          }
+          
+          .store-logo img {
+            max-height: 3.5mm !important;
+            width: auto !important;
+          }
+          
+          .qr-code {
+            display: flex !important;
+            justify-content: center !important;
+          }
+          
+          .qr-code img, .qr-code svg {
+            height: 40px !important;
+            width: 40px !important;
+          }
+        </style>
+      </head>
+      <body>
+        ${content}
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 1000);
+            }, 500);
+          });
+        </script>
+      </body>
+      </html>
+    `;
+  },
+  
+  /**
+   * Prepares HTML for RX printing (thermal printer, 80mm width)
+   * @param content HTML content to print
+   * @param title Document title
+   * @returns Complete HTML document
+   */
+  prepareRxDocument: (content: string, title: string = 'Prescription') => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
+        <style>
+          @page {
+            size: 80mm auto !important;
+            margin: 0mm !important;
+          }
+          
+          @font-face {
+            font-family: 'Zain';
+            src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
+          }
+          
+          body {
+            margin: 0;
+            padding: 0;
+            width: 80mm;
+            font-family: 'Yrsa', serif;
+          }
+          
+          /* Ensure Arabic displays correctly */
+          [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+            font-family: 'Zain', sans-serif;
+          }
+          
+          .arabic {
+            font-family: 'Zain', sans-serif;
+            direction: rtl;
+            text-align: right;
+          }
+          
+          /* Force single page printing */
+          html, body {
+            height: auto;
+          }
+          
+          /* Ensure content is properly contained */
+          .rx-container {
+            width: 72mm;
+            padding: 4mm;
+            margin: 0;
+            page-break-after: always;
+            page-break-inside: avoid;
+          }
+          
+          /* Additional styles for RX */
+          .rx-header {
+            text-align: center;
+            margin-bottom: 5mm;
+          }
+          
+          .rx-logo {
+            max-width: 60mm;
+            max-height: 10mm;
+            margin: 0 auto;
+            display: block;
+          }
+          
+          .rx-title {
+            font-size: 12pt;
+            font-weight: bold;
+            margin: 3mm 0;
+          }
+          
+          .rx-section {
+            margin-bottom: 4mm;
+          }
+          
+          .rx-table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          
+          .rx-table td, .rx-table th {
+            border: 1px solid #000;
+            padding: 1mm 2mm;
+            font-size: 8pt;
+          }
+          
+          /* Fix for print dialog */
+          @media print {
+            body {
+              width: 80mm !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            
+            .rx-container {
+              width: 72mm !important;
+              margin: 0 !important;
+              padding: 4mm !important;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="rx-container">${content}</div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 1000);
+            }, 500);
+          });
+        </script>
+      </body>
+      </html>
+    `;
+  },
+  
+  /**
+   * Prepares HTML for work order printing (thermal printer, 80mm width)
+   * @param content HTML content to print
+   * @param title Document title
+   * @returns Complete HTML document
+   */
+  prepareWorkOrderDocument: (content: string, title: string = 'Work Order') => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
+        <style>
+          @page {
+            size: 80mm auto !important;
+            margin: 0mm !important;
+          }
+          
+          @font-face {
+            font-family: 'Zain';
+            src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
+          }
+          
+          body {
+            margin: 0;
+            padding: 0;
+            width: 80mm;
+            font-family: 'Yrsa', serif;
+          }
+          
+          /* Ensure Arabic displays correctly */
+          [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+            font-family: 'Zain', sans-serif;
+          }
+          
+          .arabic {
+            font-family: 'Zain', sans-serif;
+            direction: rtl;
+            text-align: right;
+          }
+          
+          /* Force single page printing */
+          html, body {
+            height: auto;
+          }
+          
+          /* Ensure content is properly contained */
+          .workorder-container {
+            width: 72mm;
+            padding: 4mm;
+            margin: 0;
+            page-break-after: always;
+            page-break-inside: avoid;
+          }
+          
+          /* WorkOrder specific styles */
+          .order-header {
+            text-align: center;
+            margin-bottom: 5mm;
+          }
+          
+          .order-logo {
+            max-width: 60mm;
+            max-height: 10mm;
+            margin: 0 auto;
+            display: block;
+          }
+          
+          .order-title {
+            font-size: 12pt;
+            font-weight: bold;
+            margin: 3mm 0;
+            text-align: center;
+          }
+          
+          .order-section {
+            margin-bottom: 4mm;
+          }
+          
+          .order-field {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2mm;
+            font-size: 8pt;
+          }
+          
+          .order-label {
+            font-weight: bold;
+          }
+          
+          .order-divider {
+            border-top: 1px dashed #000;
+            margin: 3mm 0;
+          }
+          
+          .order-signature {
+            margin-top: 5mm;
+            text-align: center;
+            font-size: 8pt;
+          }
+          
+          /* Fix for print dialog */
+          @media print {
+            body {
+              width: 80mm !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            
+            .workorder-container {
+              width: 72mm !important;
+              margin: 0 !important;
+              padding: 4mm !important;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="workorder-container">${content}</div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 1000);
+            }, 500);
+          });
+        </script>
+      </body>
+      </html>
+    `;
+  },
+  
+  /**
+   * Prepares HTML for A4 document printing
+   * @param content HTML content to print
+   * @param title Document title
+   * @returns Complete HTML document
+   */
+  prepareA4Document: (content: string, title: string = 'Document') => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
+        <style>
+          @page {
+            size: A4 !important;
+            margin: 10mm !important;
+          }
+          
+          @font-face {
+            font-family: 'Zain';
+            src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
+          }
+          
+          body {
+            font-family: 'Yrsa', serif;
+            margin: 0;
+            padding: 0;
+          }
+          
+          .a4-container {
+            width: 100%;
+            max-width: 210mm;
+            margin: 0 auto;
+            page-break-after: always;
+            page-break-inside: avoid;
+          }
+          
+          /* Ensure Arabic displays correctly */
+          [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+            font-family: 'Zain', sans-serif;
+          }
+          
+          .arabic {
+            font-family: 'Zain', sans-serif;
+            direction: rtl;
+            text-align: right;
+          }
+          
+          /* Fix for print dialog */
+          @media print {
+            body {
+              width: 210mm !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            
+            .a4-container {
+              width: 190mm !important;
+              margin: 10mm !important;
+              padding: 0 !important;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="a4-container">${content}</div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 1000);
+            }, 500);
+          });
+        </script>
+      </body>
+      </html>
+    `;
+  }
 };
