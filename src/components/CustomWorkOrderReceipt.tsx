@@ -107,18 +107,18 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         fontFamily: isRtl ? 'Cairo, sans-serif' : 'Cairo, sans-serif'
       }}
     >
-      {/* Header Section with Logo */}
-      <div className="text-center border-b pb-2 mb-2">
-        <div className="flex justify-center mb-1">
-          <MoenLogo className="w-auto h-14 mb-1" />
+      {/* Header Section with Logo - reduced spacing */}
+      <div className="text-center border-b pb-1 mb-1">
+        <div className="flex justify-center mb-0">
+          <MoenLogo className="w-auto h-12 mb-0" />
         </div>
-        <h2 className="font-bold text-lg mb-0.5">{storeInfo.name}</h2>
+        <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
         <p className="text-xs text-muted-foreground">{storeInfo.address}</p>
         <p className="text-xs text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      {/* Work Order Header */}
-      <div className="text-center mb-3">
+      {/* Work Order Header - reduced spacing */}
+      <div className="text-center mb-2">
         <h3 className="font-bold text-lg">
           {isRtl ? "أمر عمل" : "WORK ORDER"}
         </h3>
@@ -131,7 +131,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </p>
       </div>
 
-      {/* Patient Information */}
+      {/* Patient Information - adjusted padding */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl 
@@ -139,7 +139,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Patient Information | معلومات المريض"}
         </div>
         
-        <div className="space-y-1 text-xs px-2">
+        <div className="space-y-1 text-xs px-4">
           <div className="flex justify-between">
             <span className="font-semibold">{t("customer")}:</span>
             <span>{patientName}</span>
@@ -288,7 +288,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Payment Information */}
+      {/* Payment Information - adjusted padding */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl 
@@ -296,7 +296,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Payment Information | معلومات الدفع"}
         </div>
         
-        <div className="space-y-1 text-xs px-2">
+        <div className="space-y-1 text-xs px-4">
           <div className="flex justify-between">
             <span className="font-semibold">{t("subtotal")}:</span>
             <span>{subtotal.toFixed(3)} KWD</span>
@@ -368,6 +368,22 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </div>
             <div className="h-10"></div>
           </div>
+        </div>
+      </div>
+
+      {/* New Notes Section */}
+      <div className="mb-3">
+        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+          {isRtl 
+            ? "ملاحظات | Notes" 
+            : "Notes | ملاحظات"}
+        </div>
+        
+        <div className="border rounded p-2 min-h-16">
+          <div className="border-b border-dashed mb-2"></div>
+          <div className="border-b border-dashed mb-2"></div>
+          <div className="border-b border-dashed mb-2"></div>
+          <div className="border-b border-dashed mb-2"></div>
         </div>
       </div>
 
