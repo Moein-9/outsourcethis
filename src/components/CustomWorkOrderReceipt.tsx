@@ -44,15 +44,22 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const lensType = workOrder?.lensType || invoice?.lensType || "";
   const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
   
-  // Find the actual lens name from store
-  const lensName = lensTypes.find(lt => lt.type === lensType?.toLowerCase())?.name || getLensTypeArabic(lensType);
+  // Find the actual lens name from store based on type (lowercased for case-insensitive comparison)
+  // Important: We need to find the lens by its type value (e.g., "reading", "distance")
+  const matchingLens = lensTypes.find(lt => lt.type?.toLowerCase() === lensType?.toLowerCase());
+  const lensName = matchingLens?.name || getLensTypeArabic(lensType);
   
   // Extract coating data
   const coating = workOrder?.coating || invoice?.coating || "";
   const coatingPrice = workOrder?.coatingPrice || invoice?.coatingPrice || 0;
   
   // Find the actual coating name from store
-  const coatingName = lensCoatings.find(c => c.name.includes(coating) || c.description?.includes(coating))?.name || getCoatingArabic(coating);
+  // Try to match by partial name or description (case-insensitive)
+  const matchingCoating = lensCoatings.find(c => 
+    (c.name && coating && c.name.toLowerCase().includes(coating.toLowerCase())) || 
+    (c.description && coating && c.description.toLowerCase().includes(coating.toLowerCase()))
+  );
+  const coatingName = matchingCoating?.name || getCoatingArabic(coating);
   
   // Payment data
   const total = invoice?.total || workOrder?.total || 0;
@@ -66,6 +73,21 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const isPaid = remaining <= 0;
   
   const invoiceNumber = invoice?.invoiceId || invoice?.workOrderId || workOrder?.id || `WO${Date.now().toString().slice(-6)}`;
+  
+  // For debugging
+  console.log("Lens data:", { 
+    lensType, 
+    matchingLens, 
+    lensName, 
+    allLensTypes: lensTypes.map(lt => ({type: lt.type, name: lt.name}))
+  });
+  
+  console.log("Coating data:", { 
+    coating, 
+    matchingCoating, 
+    coatingName, 
+    allCoatings: lensCoatings.map(c => ({name: c.name, desc: c.description}))
+  });
   
   return (
     <div 

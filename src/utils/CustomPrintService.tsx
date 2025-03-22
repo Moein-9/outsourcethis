@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 import { toast } from '@/hooks/use-toast';
 import { useLanguageStore } from '@/store/languageStore';
+import { InventoryStoreProvider } from '@/store/inventoryStore';
 
 export const CustomPrintService = {
   printWorkOrder: (workOrder: any, invoice?: any, patient?: any) => {
@@ -130,11 +131,15 @@ export const CustomPrintService = {
       .rtl { direction: rtl; }
       .ltr { direction: ltr; }
       .text-right { text-align: right; }
+      .bg-slate-50 { background-color: #f8fafc; }
     `;
     printWindow.document.head.appendChild(style);
 
     // Render the receipt
     const { language, t } = useLanguageStore.getState();
+    
+    // Get the store state directly
+    const inventoryStore = require('@/store/inventoryStore').useInventoryStore.getState();
     
     createRoot(container).render(
       <CustomWorkOrderReceipt
