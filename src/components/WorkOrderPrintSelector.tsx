@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -33,9 +32,8 @@ interface WorkOrderPrintSelectorProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
-  thermalOnly?: boolean;
-  onCompletePrinting?: () => void;
   trigger?: React.ReactNode;
+  thermalOnly?: boolean;
 }
 
 export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
@@ -49,8 +47,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
-  thermalOnly = false,
-  onCompletePrinting
+  thermalOnly = false
 }) => {
   const { t, language } = useLanguageStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -66,7 +63,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     }
   };
   
-  const handlePrint = (event?: React.MouseEvent) => {
+  const handlePrint = () => {
     if (!selectedFormat || printingInProgress) return;
     
     setPrintingInProgress(true);
@@ -89,15 +86,10 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           setPrintingInProgress(false);
           setIsDialogOpen(false);
           toast.success(t("printingCompleted"));
-          
-          // Call the callback if provided
-          if (onCompletePrinting) {
-            onCompletePrinting();
-          }
         }, 1000);
       } else {
         const a4Content = `
-          <div style="font-family: ${isRtl ? 'Cairo, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
+          <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
             <div style="text-align: center; margin-bottom: 10mm;">
               <h1 style="font-size: 24px; margin-bottom: 5mm;">${t("workOrder")}</h1>
               <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.invoiceId}</p>
@@ -195,11 +187,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           setPrintingInProgress(false);
           setIsDialogOpen(false);
           toast.success(t("printingCompleted"));
-          
-          // Call the callback if provided
-          if (onCompletePrinting) {
-            onCompletePrinting();
-          }
         });
       }
     } catch (error) {

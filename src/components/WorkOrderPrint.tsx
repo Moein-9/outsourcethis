@@ -74,10 +74,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
       <style>
         {`
           @media print {
-            body * {
-              visibility: hidden;
-            }
-            
             .hide-print {
               display: none !important;
             }
@@ -100,12 +96,12 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               padding: 0 !important;
             }
 
-            .print-wrapper, .print-wrapper * {
+            .print-wrapper {
               visibility: visible !important;
               width: 80mm !important;
             }
 
-            #work-order-print {
+            #thermal-print {
               visibility: visible !important;
               position: fixed !important;
               left: 0 !important;
@@ -157,7 +153,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             
             .section-heading svg {
               margin-right: 2mm !important;
-              margin-left: 2mm !important;
             }
             
             .data-row {
@@ -210,7 +205,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         </div>
 
         <div className="section-heading">
-          <User style={{ width: "4mm", height: "4mm", marginRight: language === 'ar' ? '0' : '1mm', marginLeft: language === 'ar' ? '1mm' : '0' }} />
+          <User style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
           <span>{t("patientInformation")} {language === 'ar' && '(معلومات المريض)'}</span>
         </div>
         
@@ -234,7 +229,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         {!isContactLens && frameData && (
           <>
             <div className="section-heading">
-              <Glasses style={{ width: "4mm", height: "4mm", marginRight: language === 'ar' ? '0' : '1mm', marginLeft: language === 'ar' ? '1mm' : '0' }} />
+              <Glasses style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
               <span>{t("frameDetails")} {language === 'ar' && '(تفاصيل الإطار)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
@@ -261,7 +256,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         {isContactLens && (
           <>
             <div className="section-heading">
-              <Contact style={{ width: "4mm", height: "4mm", marginRight: language === 'ar' ? '0' : '1mm', marginLeft: language === 'ar' ? '1mm' : '0' }} />
+              <Contact style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
               <span>{t("contactLensDetails")} {language === 'ar' && '(تفاصيل العدسات اللاصقة)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
@@ -284,7 +279,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         {!isContactLens && rx && (
           <>
             <div className="section-heading">
-              <Eye style={{ width: "4mm", height: "4mm", marginRight: language === 'ar' ? '0' : '1mm', marginLeft: language === 'ar' ? '1mm' : '0' }} />
+              <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
               <span>{t("prescriptionDetails")} {language === 'ar' && '(تفاصيل الوصفة الطبية)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
@@ -325,7 +320,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         {isContactLens && contactLensRx && (
           <>
             <div className="section-heading">
-              <Eye style={{ width: "4mm", height: "4mm", marginRight: language === 'ar' ? '0' : '1mm', marginLeft: language === 'ar' ? '1mm' : '0' }} />
+              <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
               <span>{t("contactLensPrescription")} {language === 'ar' && '(وصفة العدسات اللاصقة)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
@@ -366,7 +361,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         {!isContactLens && (
           <>
             <div className="section-heading">
-              <Ruler style={{ width: "4mm", height: "4mm", marginRight: language === 'ar' ? '0' : '1mm', marginLeft: language === 'ar' ? '1mm' : '0' }} />
+              <Ruler style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
               <span>{t("lensDetails")} {language === 'ar' && '(تفاصيل العدسات)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
@@ -395,7 +390,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         )}
 
         <div className="section-heading">
-          <CircleDot style={{ width: "4mm", height: "4mm", marginRight: language === 'ar' ? '0' : '1mm', marginLeft: language === 'ar' ? '1mm' : '0' }} />
+          <CircleDot style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
           <span>{t("additionalNotes")} {language === 'ar' && '(ملاحظات إضافية)'}</span>
         </div>
         <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
