@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import QRCode from 'qrcode.react';
@@ -739,7 +738,7 @@ export const usePrintLabel = () => {
     const htmlDocument = PrintService.prepareLabelDocument(allLabelsContent);
     
     PrintService.printHtml(htmlDocument, 'label', () => {
-      toast.success(t('labelsPrintedSuccessfully', { count: selectedFrames.length }));
+      toast.success(t('labelsPrintedSuccessfully'));
     });
   };
   
@@ -860,4 +859,3 @@ export const FrameLabelTemplate: React.FC = () => {
     </div>
   );
 };
-
