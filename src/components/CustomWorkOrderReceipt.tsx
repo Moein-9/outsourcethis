@@ -23,14 +23,11 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const isRtl = language === 'ar';
   const dirClass = isRtl ? "rtl" : "ltr";
   
-  // Get data from either workOrder, invoice, or directly provided patient
   const patientName = patient?.name || invoice?.patientName || workOrder?.patientName || "Customer";
   const patientPhone = patient?.phone || invoice?.patientPhone || workOrder?.patientPhone;
   
-  // Extract prescription data
   const rx = patient?.rx || workOrder?.rx;
   
-  // Extract frame data
   const frameData = {
     brand: workOrder?.frameBrand || invoice?.frameBrand || "",
     model: workOrder?.frameModel || invoice?.frameModel || "",
@@ -39,28 +36,21 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
     price: workOrder?.framePrice || invoice?.framePrice || 0
   };
   
-  // Extract lens data
   const lensType = workOrder?.lensType || invoice?.lensType || "";
   const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
   
-  // Find the actual lens name from store based on type (lowercased for case-insensitive comparison)
-  // Important: We need to find the lens by its type value (e.g., "reading", "distance")
   const matchingLens = lensTypes.find(lt => lt.type?.toLowerCase() === lensType?.toLowerCase());
   const lensName = matchingLens?.name || getLensTypeArabic(lensType);
   
-  // Extract coating data
   const coating = workOrder?.coating || invoice?.coating || "";
   const coatingPrice = workOrder?.coatingPrice || invoice?.coatingPrice || 0;
   
-  // Find the actual coating name from store
-  // Try to match by partial name or description (case-insensitive)
   const matchingCoating = lensCoatings.find(c => 
     (c.name && coating && c.name.toLowerCase().includes(coating.toLowerCase())) || 
     (c.description && coating && c.description.toLowerCase().includes(coating.toLowerCase()))
   );
   const coatingName = matchingCoating?.name || getCoatingArabic(coating);
   
-  // Payment data
   const total = invoice?.total || workOrder?.total || 0;
   const deposit = invoice?.deposit || workOrder?.deposit || 0;
   const discount = invoice?.discount || workOrder?.discount || 0;
@@ -73,7 +63,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const invoiceNumber = invoice?.invoiceId || invoice?.workOrderId || workOrder?.id || `WO${Date.now().toString().slice(-6)}`;
   
-  // For debugging
   console.log("Lens data:", { 
     lensType, 
     matchingLens, 
@@ -106,7 +95,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         fontFamily: isRtl ? 'Cairo, sans-serif' : 'Cairo, sans-serif'
       }}
     >
-      {/* Header Section with Logo - reduced spacing */}
       <div className="text-center border-b pb-1 mb-1">
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-14 mb-0" />
@@ -116,7 +104,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <p className="text-xs text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      {/* Work Order Header - reduced spacing */}
       <div className="text-center mb-2">
         <h3 className="font-bold text-lg">
           {isRtl ? "أمر عمل" : "WORK ORDER"}
@@ -130,7 +117,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </p>
       </div>
 
-      {/* Patient Information - adjusted padding */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl 
@@ -153,7 +139,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Prescription Information */}
       {rx && (
         <div className="mb-3">
           <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
@@ -195,7 +180,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       )}
 
-      {/* Product Information */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl 
@@ -204,7 +188,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         
         <div className="space-y-1.5 text-xs px-2">
-          {/* Frame section */}
           {frameData.brand && (
             <div className="mb-2">
               <div className="font-semibold border-b pb-0.5 mb-1">
@@ -243,7 +226,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </div>
           )}
           
-          {/* Lens section */}
           {lensType && (
             <div className="mb-2">
               <div className="font-semibold border-b pb-0.5 mb-1">
@@ -264,7 +246,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </div>
           )}
           
-          {/* Coating section */}
           {coating && (
             <div className="mb-2">
               <div className="font-semibold border-b pb-0.5 mb-1">
@@ -287,7 +268,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Payment Information - adjusted padding */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl 
@@ -318,7 +298,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             <span>{amountPaid.toFixed(3)} KWD</span>
           </div>
           
-          {/* Payment Status Section */}
           {isPaid ? (
             <div className="mt-2 p-2 bg-green-100 rounded border border-green-300 text-center">
               <div className="flex items-center justify-center gap-1 text-green-700 font-bold">
@@ -345,7 +324,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Quality Confirmation */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl 
@@ -370,7 +348,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Notes Section */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl 
@@ -378,12 +355,11 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Notes | ملاحظات"}
         </div>
         
-        <div className="border rounded p-2 min-h-16">
+        <div className="border rounded p-2 min-h-24">
           
         </div>
       </div>
 
-      {/* Footer */}
       <div className="text-center border-t pt-2 text-xs">
         <p className="font-semibold">
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
@@ -397,8 +373,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   );
 };
 
-// Helper functions to map lens types and coatings to their Arabic equivalents
-// These are kept as fallbacks in case the store doesn't have the data
 const getLensTypeArabic = (lensType: string): string => {
   const lensTypeMap: Record<string, string> = {
     "Single Vision": "نظارات للنظر",
