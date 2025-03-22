@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { MoenLogo, storeInfo } from "@/assets/logo";
@@ -69,46 +68,50 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         maxWidth: '80mm',
         margin: '0 auto',
         backgroundColor: 'white',
-        padding: '3mm',
-        fontSize: '11px',
+        padding: '2mm',
+        fontSize: '10px',
         border: isPrintable ? 'none' : '1px solid #ddd',
         borderRadius: isPrintable ? '0' : '5px',
         boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
-        fontFamily: isRtl ? 'Cairo, sans-serif' : 'Cairo, sans-serif'
+        fontFamily: 'Cairo, sans-serif',
+        lineHeight: '1.1'
       }}
     >
-      {/* Header Section with Logo */}
-      <div className="text-center border-b pb-2 mb-2">
-        <div className="flex justify-center mb-1">
-          <MoenLogo className="w-auto h-14 mb-1" />
+      {/* Header Section with Logo - Reduced spacing */}
+      <div className="text-center border-b pb-1 mb-1">
+        <div className="flex justify-center mb-0.5">
+          <MoenLogo className="w-auto h-10 mb-0.5" />
         </div>
-        <h2 className="font-bold text-lg mb-0.5">{storeInfo.name}</h2>
-        <p className="text-xs text-muted-foreground">{storeInfo.address}</p>
-        <p className="text-xs text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
+        <h2 className="font-bold text-base mb-0">
+          {storeInfo.name}
+        </h2>
+        <p className="text-[9px] text-muted-foreground">{storeInfo.address}</p>
+        <p className="text-[9px] text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      {/* Work Order Header */}
-      <div className="text-center mb-3">
-        <h3 className="font-bold text-lg">
+      {/* Work Order Header - Reduced spacing */}
+      <div className="text-center mb-1">
+        <h3 className="font-bold text-base">
           {isRtl ? "أمر عمل" : "WORK ORDER"}
+          {!isRtl && " - أمر عمل"}
         </h3>
-        <p className="text-xs">
+        <p className="text-[9px]">
           {isRtl ? "ORDER #: " : "رقم الطلب: "}
           {invoiceNumber}
         </p>
-        <p className="text-xs">
+        <p className="text-[9px]">
           {format(new Date(), 'yyyy-MM-dd HH:mm')}
         </p>
       </div>
 
-      {/* Patient Information */}
-      <div className="mb-3">
-        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+      {/* Patient Information - Reduced spacing */}
+      <div className="mb-1">
+        <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
           {isRtl ? "معلومات المريض" : "PATIENT INFORMATION"}
           {!isRtl && " - معلومات المريض"}
         </div>
         
-        <div className="space-y-1 text-xs">
+        <div className="space-y-0.5 text-[9px]">
           <div className="flex justify-between">
             <span className="font-semibold">{t("customer")}:</span>
             <span>{patientName}</span>
@@ -123,63 +126,59 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Prescription Information */}
+      {/* Prescription Information - English format & Reduced spacing */}
       {rx && (
-        <div className="mb-3">
-          <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+        <div className="mb-1">
+          <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
             {isRtl ? "تفاصيل الوصفة الطبية" : "PRESCRIPTION DETAILS"}
             {!isRtl && " - تفاصيل الوصفة الطبية"}
           </div>
           
-          <table className="w-full border-collapse text-xs">
+          <table className="w-full border-collapse text-[8px]" style={{ direction: 'ltr' }}>
             <thead>
               <tr className="bg-muted/50">
-                <th className="p-1 border text-center">{t('eye')}</th>
-                <th className="p-1 border text-center">{t('sphere')}</th>
-                <th className="p-1 border text-center">{t('cylinder')}</th>
-                <th className="p-1 border text-center">{t('axis')}</th>
-                <th className="p-1 border text-center">{t('addition')}</th>
+                <th className="p-0.5 border text-center">Eye</th>
+                <th className="p-0.5 border text-center">SPH</th>
+                <th className="p-0.5 border text-center">CYL</th>
+                <th className="p-0.5 border text-center">AXIS</th>
+                <th className="p-0.5 border text-center">ADD</th>
+                <th className="p-0.5 border text-center">PD</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="p-1 border font-bold text-center">{t('rightEyeAbbr')}</td>
-                <td className="p-1 border text-center">{rx.sphereOD || "—"}</td>
-                <td className="p-1 border text-center">{rx.cylOD || "—"}</td>
-                <td className="p-1 border text-center">{rx.axisOD || "—"}</td>
-                <td className="p-1 border text-center">{rx.addOD || rx.add || "—"}</td>
+                <td className="p-0.5 border font-bold text-center">OD (R)</td>
+                <td className="p-0.5 border text-center">{rx.sphereOD || "—"}</td>
+                <td className="p-0.5 border text-center">{rx.cylOD || "—"}</td>
+                <td className="p-0.5 border text-center">{rx.axisOD || "—"}</td>
+                <td className="p-0.5 border text-center">{rx.addOD || rx.add || "—"}</td>
+                <td className="p-0.5 border text-center">{rx.pdOD || rx.pdRight || rx.pd || "—"}</td>
               </tr>
               <tr>
-                <td className="p-1 border font-bold text-center">{t('leftEyeAbbr')}</td>
-                <td className="p-1 border text-center">{rx.sphereOS || "—"}</td>
-                <td className="p-1 border text-center">{rx.cylOS || "—"}</td>
-                <td className="p-1 border text-center">{rx.axisOS || "—"}</td>
-                <td className="p-1 border text-center">{rx.addOS || rx.add || "—"}</td>
+                <td className="p-0.5 border font-bold text-center">OS (L)</td>
+                <td className="p-0.5 border text-center">{rx.sphereOS || "—"}</td>
+                <td className="p-0.5 border text-center">{rx.cylOS || "—"}</td>
+                <td className="p-0.5 border text-center">{rx.axisOS || "—"}</td>
+                <td className="p-0.5 border text-center">{rx.addOS || rx.add || "—"}</td>
+                <td className="p-0.5 border text-center">{rx.pdOS || rx.pdLeft || rx.pd || "—"}</td>
               </tr>
             </tbody>
           </table>
-          
-          <div className="flex justify-between mt-1 text-xs">
-            <div className="flex gap-1">
-              <span className="font-semibold">{t('pd')}:</span>
-              <span>{rx.pdRight || rx.pdOD || rx.pd || "-"} / {rx.pdLeft || rx.pdOS || rx.pd || "-"}</span>
-            </div>
-          </div>
         </div>
       )}
 
-      {/* Product Information */}
-      <div className="mb-3">
-        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+      {/* Product Information - Reduced spacing */}
+      <div className="mb-1">
+        <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
           {isRtl ? "تفاصيل المنتج" : "PRODUCT DETAILS"}
           {!isRtl && " - تفاصيل المنتج"}
         </div>
         
-        <div className="space-y-1.5 text-xs">
+        <div className="space-y-0.5 text-[9px]">
           {/* Frame section */}
           {frameData.brand && (
-            <div className="mb-2">
-              <div className="font-semibold border-b pb-0.5 mb-1">
+            <div className="mb-1">
+              <div className="font-semibold border-b pb-0.5 mb-0.5">
                 {isRtl ? "الإطار (Frame)" : "Frame (الإطار)"}:
               </div>
               <div className="px-1 space-y-0.5">
@@ -217,8 +216,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           
           {/* Lens section */}
           {lensType && (
-            <div className="mb-2">
-              <div className="font-semibold border-b pb-0.5 mb-1">
+            <div className="mb-1">
+              <div className="font-semibold border-b pb-0.5 mb-0.5">
                 {isRtl ? "العدسات (Lenses)" : "Lenses (العدسات)"}:
               </div>
               <div className="px-1 space-y-0.5">
@@ -238,8 +237,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           
           {/* Coating section */}
           {coating && (
-            <div className="mb-2">
-              <div className="font-semibold border-b pb-0.5 mb-1">
+            <div className="mb-1">
+              <div className="font-semibold border-b pb-0.5 mb-0.5">
                 {isRtl ? "الطلاء (Coating)" : "Coating (الطلاء)"}:
               </div>
               <div className="px-1 space-y-0.5">
@@ -259,14 +258,14 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Payment Information */}
-      <div className="mb-3">
-        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+      {/* Payment Information - Reduced spacing */}
+      <div className="mb-1">
+        <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
           {isRtl ? "معلومات الدفع" : "PAYMENT INFORMATION"}
           {!isRtl && " - معلومات الدفع"}
         </div>
         
-        <div className="space-y-1 text-xs">
+        <div className="space-y-0.5 text-[9px]">
           <div className="flex justify-between">
             <span className="font-semibold">{t("subtotal")}:</span>
             <span>{subtotal.toFixed(3)} KWD</span>
@@ -289,65 +288,67 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             <span>{amountPaid.toFixed(3)} KWD</span>
           </div>
           
-          {/* Payment Status Section */}
+          {/* Payment Status Section - More compact */}
           {isPaid ? (
-            <div className="mt-2 p-2 bg-green-100 rounded border border-green-300 text-center">
-              <div className="flex items-center justify-center gap-1 text-green-700 font-bold">
-                <CheckCircle2 className="w-4 h-4" />
+            <div className="mt-1 p-1 bg-green-100 rounded border border-green-300 text-center">
+              <div className="flex items-center justify-center gap-1 text-green-700 font-bold text-[10px]">
+                <CheckCircle2 className="w-3 h-3" />
                 <span>{isRtl ? "تم الدفع بالكامل" : "PAID IN FULL"}</span>
               </div>
-              {!isRtl ? <div className="text-green-600 text-xs">تم الدفع بالكامل</div> : 
-                       <div className="text-green-600 text-xs">PAID IN FULL</div>}
+              {!isRtl ? <div className="text-green-600 text-[8px]">تم الدفع بالكامل</div> : 
+                       <div className="text-green-600 text-[8px]">PAID IN FULL</div>}
             </div>
           ) : (
-            <div className="mt-2">
-              <div className="p-2 bg-red-100 rounded border border-red-300 text-center">
-                <div className="font-bold text-red-700 text-base">
+            <div className="mt-1">
+              <div className="p-1 bg-red-100 rounded border border-red-300 text-center">
+                <div className="font-bold text-red-700 text-[10px]">
                   {isRtl ? "المبلغ المتبقي" : "REMAINING AMOUNT"}
                 </div>
-                <div className="text-lg font-bold text-red-600 mt-1">
+                <div className="text-base font-bold text-red-600">
                   {remaining.toFixed(3)} KWD
                 </div>
-                {!isRtl ? <div className="text-red-600 text-xs">المبلغ المتبقي</div> : 
-                         <div className="text-red-600 text-xs">REMAINING AMOUNT</div>}
+                {!isRtl ? <div className="text-red-600 text-[8px]">المبلغ المتبقي</div> : 
+                         <div className="text-red-600 text-[8px]">REMAINING AMOUNT</div>}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Quality Confirmation */}
-      <div className="mb-3">
-        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+      {/* Quality Confirmation - Reduced spacing */}
+      <div className="mb-1">
+        <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
           {isRtl ? "تأكيد الجودة" : "QUALITY CONFIRMATION"}
           {!isRtl && " - تأكيد الجودة"}
         </div>
         
-        <div className="flex gap-2 text-xs mb-1">
-          <div className="border rounded p-1 flex-1">
-            <div className="font-semibold mb-1 text-center border-b pb-1">
+        <div className="flex gap-1 text-[8px] mb-0.5">
+          <div className="border rounded p-0.5 flex-1">
+            <div className="font-semibold mb-0.5 text-center border-b pb-0.5">
               {isRtl ? "توقيع الفني" : "Technician Signature"}
             </div>
-            <div className="h-10"></div>
+            <div className="h-7"></div>
           </div>
           
-          <div className="border rounded p-1 flex-1">
-            <div className="font-semibold mb-1 text-center border-b pb-1">
+          <div className="border rounded p-0.5 flex-1">
+            <div className="font-semibold mb-0.5 text-center border-b pb-0.5">
               {isRtl ? "توقيع المدير" : "Manager Signature"}
             </div>
-            <div className="h-10"></div>
+            <div className="h-7"></div>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="text-center border-t pt-2 text-xs">
-        <p className="font-semibold">
+      {/* Footer - Keep the Arabic text as requested */}
+      <div className="text-center border-t pt-1 text-[9px]">
+        <p className="font-semibold mb-0.5">
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
+          {!isRtl && " - شكراً لاختياركم نظارات المعين"}
         </p>
-        <p className="text-[9px] text-muted-foreground mt-1">
+        <p className="text-[8px] text-muted-foreground">
           {isRtl ? "هذا الإيصال يعتبر إثبات للطلب فقط وليس إيصال دفع" : 
                   "This receipt is proof of order only and not a payment receipt"}
+          {!isRtl && " - هذا الإيصال يعتبر إثبات للطلب فقط وليس إيصال دفع"}
         </p>
       </div>
     </div>

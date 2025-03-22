@@ -4,18 +4,20 @@ import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 import { toast } from '@/hooks/use-toast';
 import { useLanguageStore } from '@/store/languageStore';
+import { Button } from '@/components/ui/button';
+import { X, Printer } from 'lucide-react';
 
 export const CustomPrintService = {
-  printWorkOrder: (workOrder: any, invoice?: any, patient?: any) => {
-    console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
+  previewWorkOrder: (workOrder: any, invoice?: any, patient?: any) => {
+    console.log("CustomPrintService: Previewing work order", { workOrder, invoice, patient });
     
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      console.error('Failed to open print window');
+    // Create a new window for preview
+    const previewWindow = window.open('', '_blank');
+    if (!previewWindow) {
+      console.error('Failed to open preview window');
       toast({
         title: "Error",
-        description: "Failed to open print window. Please check your browser settings.",
+        description: "Failed to open preview window. Please check your browser settings.",
         variant: "destructive"
       });
       return;
@@ -23,10 +25,10 @@ export const CustomPrintService = {
 
     // Create a container for the receipt
     const container = document.createElement('div');
-    container.className = 'print-container';
-    printWindow.document.body.appendChild(container);
+    container.className = 'preview-container';
+    previewWindow.document.body.appendChild(container);
 
-    // Add necessary styles
+    // Add styles including reduced spacing
     const style = document.createElement('style');
     style.textContent = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -34,10 +36,50 @@ export const CustomPrintService = {
         margin: 0;
         padding: 0;
         font-family: 'Cairo', sans-serif;
+        background-color: #f4f4f4;
       }
-      .print-container {
+      .preview-container {
         width: 80mm;
-        margin: 0 auto;
+        margin: 20px auto;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      .print-actions {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 20px;
+        background: white;
+        box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+      }
+      .print-button, .close-button {
+        cursor: pointer;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .print-button {
+        background: #4CAF50;
+        color: white;
+        border: none;
+      }
+      .close-button {
+        background: #f0f0f0;
+        color: #333;
+        border: 1px solid #ddd;
+      }
+      .print-button svg, .close-button svg {
+        width: 16px;
+        height: 16px;
       }
       @media print {
         @page {
@@ -46,9 +88,19 @@ export const CustomPrintService = {
         }
         body {
           width: 80mm;
+          background: none;
+        }
+        .preview-container {
+          width: 100%;
+          margin: 0;
+          box-shadow: none;
+          border-radius: 0;
+        }
+        .print-actions {
+          display: none;
         }
       }
-      /* Basic utility classes */
+      /* Style utilities */
       .text-center { text-align: center; }
       .text-xs { font-size: 10px; }
       .text-sm { font-size: 12px; }
@@ -124,16 +176,22 @@ export const CustomPrintService = {
       .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
       .text-xs { font-size: 0.75rem; line-height: 1rem; }
       .text-\\[9px\\] { font-size: 9px; }
+      .text-\\[8px\\] { font-size: 8px; }
       .border-y { border-top: 1px solid; border-bottom: 1px solid; border-color: #e5e7eb; }
       .border { border: 1px solid #e5e7eb; }
       .rtl { direction: rtl; }
       .ltr { direction: ltr; }
     `;
-    printWindow.document.head.appendChild(style);
+    previewWindow.document.head.appendChild(style);
 
     // Render the receipt
     const { language, t } = useLanguageStore.getState();
     
+    // Create print actions
+    const actionsContainer = document.createElement('div');
+    actionsContainer.className = 'print-actions';
+
+    // Render the receipt content
     createRoot(container).render(
       <CustomWorkOrderReceipt
         workOrder={workOrder}
@@ -143,25 +201,28 @@ export const CustomPrintService = {
       />
     );
 
-    // Print after resources are loaded
-    printWindow.onload = function() {
-      setTimeout(() => {
-        try {
-          printWindow.print();
+    // Render print and close buttons
+    createRoot(actionsContainer).render(
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+        <button className="print-button" onClick={() => {
+          previewWindow.print();
+          
           // Notify success
           toast({
             title: t("printJobSent"),
             description: t("printJobSentDescription"),
           });
-        } catch (error) {
-          console.error('Print error:', error);
-          toast({
-            title: t("error"),
-            description: t("printError"),
-            variant: "destructive"
-          });
-        }
-      }, 500);
-    };
+        }}>
+          <Printer />
+          {language === 'ar' ? 'طباعة' : 'Print'}
+        </button>
+        <button className="close-button" onClick={() => previewWindow.close()}>
+          <X />
+          {language === 'ar' ? 'إغلاق' : 'Close'}
+        </button>
+      </div>
+    );
+    
+    previewWindow.document.body.appendChild(actionsContainer);
   }
 };
