@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -61,7 +62,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
     brand: invoice.frameBrand,
     model: invoice.frameModel,
     color: invoice.frameColor,
-    size: "",
+    size: invoice.frameSize || "",
     price: invoice.framePrice
   } : undefined);
   
@@ -137,14 +138,14 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         `}
       </style>
 
-     <div id="work-order-print" className={dirClass}>
+      <div id="work-order-print" className={dirClass}>
         <div className="text-center border-b pb-4 mb-6 relative">
           <div className="absolute right-0 top-0">
             <ClipboardCheck className="w-10 h-10 text-primary hide-print" />
           </div>
           <MoenLogo className="mx-auto w-auto h-8 mb-2" />
           <h1 className="text-2xl font-bold mb-1">{t("workOrder")}</h1>
-          <p className="text-lg text-primary font-medium">{invoice.invoiceId}</p>
+          <p className="text-lg text-primary font-medium">{invoice.invoiceId || invoice.workOrderId}</p>
           <p className="text-muted-foreground">
             {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
           </p>
@@ -158,7 +159,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
             <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
               <User className="w-4 h-4" />
-              {t("patientInformation")}
+              {t("patientInformation")} {language === 'ar' && '(معلومات المريض)'}
             </h3>
             <div className="space-y-1 text-sm">
               <div className="flex">
@@ -182,7 +183,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
               <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
                 <Glasses className="w-4 h-4" />
-                {t("frameDetails")}
+                {t("frameDetails")} {language === 'ar' && '(تفاصيل الإطار)'}
               </h3>
               <div className="space-y-1 text-sm">
                 <div className="flex">
@@ -197,6 +198,10 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                   <span className="font-semibold w-16">{t("color")}:</span>
                   <span>{frameData.color}</span>
                 </div>
+                <div className="flex">
+                  <span className="font-semibold w-16">{t("size")}:</span>
+                  <span>{frameData.size || "-"}</span>
+                </div>
               </div>
             </div>
           )}
@@ -205,7 +210,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
               <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
                 <Contact className="w-4 h-4" />
-                {t("contactLensDetails")}
+                {t("contactLensDetails")} {language === 'ar' && '(تفاصيل العدسات اللاصقة)'}
               </h3>
               <div className="space-y-1 text-sm">
                 {contactLenses.map((lens, idx) => (
@@ -229,7 +234,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <div className="mb-4 bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
             <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
               <Eye className="w-4 h-4" />
-              {t("prescriptionDetails")}
+              {t("prescriptionDetails")} {language === 'ar' && '(تفاصيل الوصفة الطبية)'}
             </h3>
             <table className="w-full border-collapse bg-white text-xs">
               <thead className="bg-muted">
@@ -244,7 +249,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               </thead>
               <tbody>
                 <tr>
-                  <td className="border p-1 font-medium text-center">{t("rightEye")}</td>
+                  <td className="border p-1 font-medium text-center">OD {language === 'ar' && '(يمين)'}</td>
                   <td className="border p-1 text-center">{rx?.sphereOD || "_____"}</td>
                   <td className="border p-1 text-center">{rx?.cylOD || "_____"}</td>
                   <td className="border p-1 text-center">{rx?.axisOD || "_____"}</td>
@@ -252,7 +257,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                   <td className="border p-1 text-center">{rx?.pdRight || "_____"}</td>
                 </tr>
                 <tr>
-                  <td className="border p-1 font-medium text-center">{t("leftEye")}</td>
+                  <td className="border p-1 font-medium text-center">OS {language === 'ar' && '(يسار)'}</td>
                   <td className="border p-1 text-center">{rx?.sphereOS || "_____"}</td>
                   <td className="border p-1 text-center">{rx?.cylOS || "_____"}</td>
                   <td className="border p-1 text-center">{rx?.axisOS || "_____"}</td>
@@ -268,7 +273,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <div className="mb-4 bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
             <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
               <Eye className="w-4 h-4" />
-              {t("contactLensPrescription")}
+              {t("contactLensPrescription")} {language === 'ar' && '(وصفة العدسات اللاصقة)'}
             </h3>
             <table className="w-full border-collapse bg-white text-xs">
               <thead className="bg-muted">
@@ -283,7 +288,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               </thead>
               <tbody>
                 <tr>
-                  <td className="border p-1 font-medium text-center">{t("rightEye")}</td>
+                  <td className="border p-1 font-medium text-center">OD {language === 'ar' && '(يمين)'}</td>
                   <td className="border p-1 text-center">{contactLensRx.rightEye.sphere || "_____"}</td>
                   <td className="border p-1 text-center">{contactLensRx.rightEye.cylinder || "_____"}</td>
                   <td className="border p-1 text-center">{contactLensRx.rightEye.axis || "_____"}</td>
@@ -291,7 +296,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                   <td className="border p-1 text-center">{contactLensRx.rightEye.dia || "_____"}</td>
                 </tr>
                 <tr>
-                  <td className="border p-1 font-medium text-center">{t("leftEye")}</td>
+                  <td className="border p-1 font-medium text-center">OS {language === 'ar' && '(يسار)'}</td>
                   <td className="border p-1 text-center">{contactLensRx.leftEye.sphere || "_____"}</td>
                   <td className="border p-1 text-center">{contactLensRx.leftEye.cylinder || "_____"}</td>
                   <td className="border p-1 text-center">{contactLensRx.leftEye.axis || "_____"}</td>
@@ -308,7 +313,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
               <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
                 <Ruler className="w-4 h-4" />
-                {t("lensDetails")}
+                {t("lensDetails")} {language === 'ar' && '(تفاصيل العدسات)'}
               </h3>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="space-y-1">
@@ -343,19 +348,19 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none mt-4">
           <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
             <CircleDot className="w-4 h-4" />
-            {t("additionalNotes")}
+            {t("additionalNotes")} {language === 'ar' && '(ملاحظات إضافية)'}
           </h3>
           <div className="border rounded p-2 min-h-[50px] bg-white"></div>
         </div>
 
         <div className="mt-6 pt-3 border-t grid gap-4">
           <div>
-            <p className="font-semibold text-primary text-sm">{t("technicianSignature")}</p>
+            <p className="font-semibold text-primary text-sm">{t("technicianSignature")} {language === 'ar' && '(توقيع الفني)'}</p>
             <div className="mt-4 border-b w-32 h-6"></div>
             <div className="mt-1 text-xs text-muted-foreground">{t("date")}: ___ / ___ / _____</div>
           </div>
           <div>
-            <p className="font-semibold text-primary text-sm">{t("qualityConfirmation")}</p>
+            <p className="font-semibold text-primary text-sm">{t("qualityConfirmation")} {language === 'ar' && '(تأكيد الجودة)'}</p>
             <div className="flex items-center mt-4 gap-1">
               <BadgeCheck className="w-4 h-4 text-primary" />
               <div className="border-b w-28 h-6"></div>

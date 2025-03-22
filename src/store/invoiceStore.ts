@@ -23,6 +23,7 @@ export interface Invoice {
   frameBrand: string;
   frameModel: string;
   frameColor: string;
+  frameSize?: string; // Added frame size
   framePrice: number;
   
   discount: number;
@@ -69,7 +70,7 @@ export const useInvoiceStore = create<InvoiceState>()(
   persist(
     (set, get) => ({
       invoices: [],
-      workOrders: [], // Initialize workOrders array
+      workOrders: [], 
       
       addInvoice: (invoice) => {
         const invoiceId = `INV${Date.now()}`;

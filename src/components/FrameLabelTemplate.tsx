@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import QRCode from 'qrcode.react';
 import { Button } from "@/components/ui/button";
 import { useInventoryStore, FrameItem } from '@/store/inventoryStore';
@@ -20,7 +20,11 @@ export const usePrintLabel = () => {
     const frame = frames.find(f => f.frameId === frameId);
     
     if (!frame) {
-      toast.error(t('frameNotFound'));
+      toast({
+        title: t('error'),
+        description: t('frameNotFound'),
+        variant: "destructive"
+      });
       return;
     }
     
@@ -28,21 +32,32 @@ export const usePrintLabel = () => {
     const htmlDocument = PrintService.prepareLabelDocument(labelContent);
     
     PrintService.printHtml(htmlDocument, 'label', () => {
-      toast.success(t('labelPrintedSuccessfully'));
+      toast({
+        title: t('success'),
+        description: t('labelPrintedSuccessfully')
+      });
     });
   };
   
   // Function to print multiple frame labels
   const printMultipleLabels = (frameIds: string[]) => {
     if (frameIds.length === 0) {
-      toast.error(t('noFramesSelected'));
+      toast({
+        title: t('error'),
+        description: t('noFramesSelected'),
+        variant: "destructive"
+      });
       return;
     }
     
     const selectedFrames = frames.filter(f => frameIds.includes(f.frameId));
     
     if (selectedFrames.length === 0) {
-      toast.error(t('noFramesFound'));
+      toast({
+        title: t('error'),
+        description: t('noFramesFound'),
+        variant: "destructive"
+      });
       return;
     }
     
@@ -54,7 +69,10 @@ export const usePrintLabel = () => {
     const htmlDocument = PrintService.prepareLabelDocument(allLabelsContent);
     
     PrintService.printHtml(htmlDocument, 'label', () => {
-      toast.success(t('labelsPrintedSuccessfully'));
+      toast({
+        title: t('success'),
+        description: t('labelsPrintedSuccessfully')
+      });
     });
   };
   

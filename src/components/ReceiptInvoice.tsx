@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -108,7 +109,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
 
       <div className="mb-4 text-sm">
         <div className="flex justify-between border-b pb-1 mb-1">
-          <span className="font-semibold">{t("invoiceNumber")}:</span>
+          <span className="font-semibold">{t("invoiceNumber")} {isRtl && '(رقم الفاتورة)'}:</span>
           <span>{invoice.invoiceId}</span>
         </div>
         <div className="flex justify-between border-b pb-1 mb-1">
@@ -116,7 +117,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           <span>{format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}</span>
         </div>
         <div className="flex justify-between border-b pb-1 mb-1">
-          <span className="font-semibold">{t("customer")}:</span>
+          <span className="font-semibold">{t("customer")} {isRtl && '(العميل)'}:</span>
           <span>{name}</span>
         </div>
         {phone && (
@@ -137,7 +138,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           contactLenses.map((lens, idx) => (
             <div key={idx} className="flex justify-between mb-1 text-sm">
               <span>{lens.brand} {lens.type} {lens.power}</span>
-              <span>{lens.price.toFixed(3)} {t("currency")}</span>
+              <span>{lens.price.toFixed(3)} KWD</span>
             </div>
           ))
         ) : (
@@ -146,21 +147,21 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             {lens && (
               <div className="flex justify-between mb-1 text-sm">
                 <span>{t("lenses")} ({lens})</span>
-                <span>{lensP.toFixed(3)} {t("currency")}</span>
+                <span>{lensP.toFixed(3)} KWD</span>
               </div>
             )}
             
             {coat && (
               <div className="flex justify-between mb-1 text-sm">
                 <span>{t("coating")} ({coat})</span>
-                <span>{coatP.toFixed(3)} {t("currency")}</span>
+                <span>{coatP.toFixed(3)} KWD</span>
               </div>
             )}
             
             {frameBrand && (
               <div className="flex justify-between mb-1 text-sm">
                 <span>{t("frame")} ({frameBrand} {frameModel})</span>
-                <span>{frameP.toFixed(3)} {t("currency")}</span>
+                <span>{frameP.toFixed(3)} KWD</span>
               </div>
             )}
           </>
@@ -170,17 +171,17 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       <div className="text-sm mb-4">
         <div className="flex justify-between">
           <span>{t("subtotal")}:</span>
-          <span>{(tot + disc).toFixed(3)} {t("currency")}</span>
+          <span>{(tot + disc).toFixed(3)} KWD</span>
         </div>
         {disc > 0 && (
           <div className="flex justify-between text-destructive">
             <span>{t("discount")}:</span>
-            <span>-{disc.toFixed(3)} {t("currency")}</span>
+            <span>-{disc.toFixed(3)} KWD</span>
           </div>
         )}
         <div className="flex justify-between font-bold mt-1 pt-1 border-t">
           <span>{t("total")}:</span>
-          <span>{tot.toFixed(3)} {t("currency")}</span>
+          <span>{tot.toFixed(3)} KWD</span>
         </div>
       </div>
 
@@ -195,7 +196,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               {format(new Date(payment.date), 'dd/MM/yyyy')} ({payment.method})
               {payment.authNumber && ` - ${t("authNumber")}: ${payment.authNumber}`}
             </span>
-            <span>{payment.amount.toFixed(3)} {t("currency")}</span>
+            <span>{payment.amount.toFixed(3)} KWD</span>
           </div>
         )) || (
           <div className="flex justify-between text-sm">
@@ -203,14 +204,14 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               {format(new Date(invoice.createdAt), 'dd/MM/yyyy')} ({payMethod})
               {auth && ` - ${t("authNumber")}: ${auth}`}
             </span>
-            <span>{dep.toFixed(3)} {t("currency")}</span>
+            <span>{dep.toFixed(3)} KWD</span>
           </div>
         )}
         
         {rem > 0 && (
           <div className="flex justify-between font-bold mt-1 pt-1 border-t">
             <span>{t("remaining")}:</span>
-            <span>{rem.toFixed(3)} {t("currency")}</span>
+            <span>{rem.toFixed(3)} KWD</span>
           </div>
         )}
       </div>
@@ -223,8 +224,14 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       )}
 
       <div className="text-center mt-3 pt-3 border-t">
-        <p className="font-semibold text-sm">{t("thankYou")}</p>
-        <p className="text-xs mt-1 text-muted-foreground">{t("keepReceipt")}</p>
+        {isRtl ? (
+          <p className="font-semibold text-sm">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً ونتطلع لزيارتكم القادمة!</p>
+        ) : (
+          <>
+            <p className="font-semibold text-sm">Thank you for choosing Moein Optical.</p>
+            <p className="text-xs mt-1">We're always delighted to serve you and look forward to your next visit!</p>
+          </>
+        )}
         <div className="mt-3 text-[10px] flex gap-1 justify-center">
           <span>{'•'.repeat(15)}</span>
         </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 /**
  * Unified PrintService for handling all printing needs across the application
@@ -10,12 +10,21 @@ export const PrintService = {
    * @returns The iframe element
    */
   createPrintFrame: () => {
+    // Remove any existing print frames to prevent issues
+    const existingFrames = document.querySelectorAll('iframe.print-frame');
+    existingFrames.forEach(frame => {
+      document.body.removeChild(frame);
+    });
+    
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.visibility = 'hidden';
     iframe.style.width = '0';
     iframe.style.height = '0';
     iframe.style.border = 'none';
+    iframe.style.left = '0';
+    iframe.style.top = '0';
+    iframe.className = 'print-frame';
     document.body.appendChild(iframe);
     return iframe;
   },
@@ -34,17 +43,26 @@ export const PrintService = {
     try {
       // Create the print frame
       const iframe = PrintService.createPrintFrame();
+      let printTimeout: ReturnType<typeof setTimeout>;
+      let completionTimeout: ReturnType<typeof setTimeout>;
       
-      // Add a listener for print completion
-      window.addEventListener('message', function handler(e) {
+      // Set up a listener for completion
+      const printCompleteHandler = (e: MessageEvent) => {
         if (e.data === 'print-complete') {
-          window.removeEventListener('message', handler);
-          if (document.body.contains(iframe)) {
-            document.body.removeChild(iframe);
-          }
-          if (onComplete) onComplete();
+          window.removeEventListener('message', printCompleteHandler);
+          
+          // Always clean up the iframe after printing
+          if (completionTimeout) clearTimeout(completionTimeout);
+          completionTimeout = setTimeout(() => {
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
+            }
+            if (onComplete) onComplete();
+          }, 500);
         }
-      });
+      };
+      
+      window.addEventListener('message', printCompleteHandler);
       
       // Write the content to the iframe
       if (iframe.contentWindow) {
@@ -52,25 +70,54 @@ export const PrintService = {
         iframe.contentWindow.document.write(htmlContent);
         iframe.contentWindow.document.close();
         
-        // Focus iframe and trigger print immediately
-        iframe.contentWindow.onload = function() {
-          setTimeout(() => {
+        // Focus iframe and trigger print after content is loaded
+        iframe.onload = function() {
+          if (printTimeout) clearTimeout(printTimeout);
+          
+          printTimeout = setTimeout(() => {
             if (iframe.contentWindow) {
+              // Make sure the iframe is focused before printing
               iframe.contentWindow.focus();
-              iframe.contentWindow.print();
               
-              // Signal completion after printing
-              window.postMessage('print-complete', '*');
+              try {
+                // Print with a small delay to ensure browser is ready
+                iframe.contentWindow.print();
+                
+                // Set a backup timeout in case the print complete event doesn't fire
+                setTimeout(() => {
+                  window.postMessage('print-complete', '*');
+                }, 2000);
+              } catch (printError) {
+                console.error('Print error:', printError);
+                toast({
+                  title: "Error",
+                  description: "Failed to print. Please try again.",
+                  variant: "destructive"
+                });
+                
+                // Clean up even if there's an error
+                window.postMessage('print-complete', '*');
+              }
             }
-          }, 200);
+          }, 300);
         };
       } else {
-        toast.error("Failed to create print frame");
+        toast({
+          title: "Error",
+          description: "Failed to create print frame. Please try again.",
+          variant: "destructive"
+        });
+        
         if (onComplete) onComplete();
       }
     } catch (error) {
       console.error('Print error:', error);
-      toast.error("Failed to print");
+      toast({
+        title: "Error",
+        description: "Failed to print. Please try again.",
+        variant: "destructive"
+      });
+      
       if (onComplete) onComplete();
     }
   },
@@ -147,7 +194,7 @@ export const PrintService = {
             page-break-inside: avoid !important;
           }
           
-          /* Fix for print dialog appearing but not working - RED FLAG #1 */
+          /* Fix for print dialog appearing but not working */
           @media print {
             body {
               width: 80mm !important;
@@ -155,6 +202,9 @@ export const PrintService = {
               margin: 0 !important;
               padding: 0 !important;
               overflow: visible !important;
+              -webkit-print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
             
             .receipt-container {
@@ -186,8 +236,17 @@ export const PrintService = {
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
               }, 500);
-            }, 200);
+            }, 300);
           });
+          
+          // Backup in case DOMContentLoaded doesn't fire properly
+          setTimeout(function() {
+            window.focus();
+            window.print();
+            setTimeout(function() {
+              window.parent.postMessage('print-complete', '*');
+            }, 500);
+          }, 1000);
         </script>
       </body>
       </html>
@@ -227,6 +286,9 @@ export const PrintService = {
             max-width: 100mm !important;
             overflow: hidden !important;
             font-family: 'Yrsa', serif !important;
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           
           .label-container {
@@ -314,9 +376,18 @@ export const PrintService = {
               window.print();
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
-              }, 1000);
-            }, 500);
+              }, 500);
+            }, 300);
           });
+          
+          // Backup in case DOMContentLoaded doesn't fire properly
+          setTimeout(function() {
+            window.focus();
+            window.print();
+            setTimeout(function() {
+              window.parent.postMessage('print-complete', '*');
+            }, 1000);
+          }, 1000);
         </script>
       </body>
       </html>
@@ -360,6 +431,9 @@ export const PrintService = {
             padding: 0;
             width: 80mm;
             font-family: 'Yrsa', serif;
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           
           /* Ensure Arabic displays correctly */
@@ -449,9 +523,18 @@ export const PrintService = {
               window.print();
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
-              }, 1000);
-            }, 500);
+              }, 500);
+            }, 300);
           });
+          
+          // Backup in case DOMContentLoaded doesn't fire properly
+          setTimeout(function() {
+            window.focus();
+            window.print();
+            setTimeout(function() {
+              window.parent.postMessage('print-complete', '*');
+            }, 500);
+          }, 1000);
         </script>
       </body>
       </html>
@@ -500,6 +583,9 @@ export const PrintService = {
             width: 80mm !important;
             font-family: 'Yrsa', serif !important;
             direction: initial !important;
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           
           /* Ensure Arabic displays correctly */
@@ -576,7 +662,7 @@ export const PrintService = {
             font-size: 8pt !important;
           }
           
-          /* Fix for print dialog - RED FLAG #1 */
+          /* Fix for print dialog */
           @media print {
             body {
               width: 80mm !important;
@@ -615,8 +701,17 @@ export const PrintService = {
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
               }, 500);
-            }, 200);
+            }, 300);
           });
+          
+          // Backup in case DOMContentLoaded doesn't fire properly
+          setTimeout(function() {
+            window.focus();
+            window.print();
+            setTimeout(function() {
+              window.parent.postMessage('print-complete', '*');
+            }, 500);
+          }, 1000);
         </script>
       </body>
       </html>
@@ -658,6 +753,9 @@ export const PrintService = {
             font-family: 'Yrsa', serif;
             margin: 0;
             padding: 0;
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           
           .a4-container {
@@ -707,13 +805,21 @@ export const PrintService = {
               window.print();
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
-              }, 1000);
-            }, 500);
+              }, 500);
+            }, 300);
           });
+          
+          // Backup in case DOMContentLoaded doesn't fire properly
+          setTimeout(function() {
+            window.focus();
+            window.print();
+            setTimeout(function() {
+              window.parent.postMessage('print-complete', '*');
+            }, 500);
+          }, 1000);
         </script>
       </body>
       </html>
     `;
   }
 };
-
