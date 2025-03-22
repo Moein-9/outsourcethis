@@ -101,6 +101,7 @@ export const CustomPrintService = {
       .justify-between { justify-content: space-between; }
       .justify-center { justify-content: center; }
       .items-center { align-items: center; }
+      .items-end { align-items: flex-end; }
       .h-4 { height: 1rem; }
       .h-8 { height: 2rem; }
       .h-10 { height: 2.5rem; }
@@ -128,6 +129,7 @@ export const CustomPrintService = {
       .border { border: 1px solid #e5e7eb; }
       .rtl { direction: rtl; }
       .ltr { direction: ltr; }
+      .text-right { text-align: right; }
     `;
     printWindow.document.head.appendChild(style);
 

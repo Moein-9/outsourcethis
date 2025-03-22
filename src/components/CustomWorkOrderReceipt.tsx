@@ -104,8 +104,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       {/* Patient Information */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
-          {isRtl ? "معلومات المريض" : "PATIENT INFORMATION"}
-          {!isRtl && " - معلومات المريض"}
+          {isRtl 
+            ? "معلومات المريض | Patient Information" 
+            : "Patient Information | معلومات المريض"}
         </div>
         
         <div className="space-y-1 text-xs">
@@ -127,52 +128,50 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       {rx && (
         <div className="mb-3">
           <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
-            {isRtl ? "تفاصيل الوصفة الطبية" : "PRESCRIPTION DETAILS"}
-            {!isRtl && " - تفاصيل الوصفة الطبية"}
+            {isRtl 
+              ? "تفاصيل الوصفة الطبية | Prescription Details" 
+              : "Prescription Details | تفاصيل الوصفة الطبية"}
           </div>
           
-          <table className="w-full border-collapse text-xs">
+          <table className="w-full border-collapse text-xs" style={{ direction: 'ltr' }}>
             <thead>
               <tr className="bg-muted/50">
-                <th className="p-1 border text-center">{t('eye')}</th>
-                <th className="p-1 border text-center">{t('sphere')}</th>
-                <th className="p-1 border text-center">{t('cylinder')}</th>
-                <th className="p-1 border text-center">{t('axis')}</th>
-                <th className="p-1 border text-center">{t('addition')}</th>
+                <th className="p-1 border text-center">Eye</th>
+                <th className="p-1 border text-center">Sphere</th>
+                <th className="p-1 border text-center">Cylinder</th>
+                <th className="p-1 border text-center">Axis</th>
+                <th className="p-1 border text-center">Add</th>
+                <th className="p-1 border text-center">PD</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="p-1 border font-bold text-center">{t('rightEyeAbbr')}</td>
+                <td className="p-1 border font-bold text-center">R</td>
                 <td className="p-1 border text-center">{rx.sphereOD || "—"}</td>
                 <td className="p-1 border text-center">{rx.cylOD || "—"}</td>
                 <td className="p-1 border text-center">{rx.axisOD || "—"}</td>
                 <td className="p-1 border text-center">{rx.addOD || rx.add || "—"}</td>
+                <td className="p-1 border text-center">{rx.pdRight || rx.pdOD || rx.pd || "—"}</td>
               </tr>
               <tr>
-                <td className="p-1 border font-bold text-center">{t('leftEyeAbbr')}</td>
+                <td className="p-1 border font-bold text-center">L</td>
                 <td className="p-1 border text-center">{rx.sphereOS || "—"}</td>
                 <td className="p-1 border text-center">{rx.cylOS || "—"}</td>
                 <td className="p-1 border text-center">{rx.axisOS || "—"}</td>
                 <td className="p-1 border text-center">{rx.addOS || rx.add || "—"}</td>
+                <td className="p-1 border text-center">{rx.pdLeft || rx.pdOS || rx.pd || "—"}</td>
               </tr>
             </tbody>
           </table>
-          
-          <div className="flex justify-between mt-1 text-xs">
-            <div className="flex gap-1">
-              <span className="font-semibold">{t('pd')}:</span>
-              <span>{rx.pdRight || rx.pdOD || rx.pd || "-"} / {rx.pdLeft || rx.pdOS || rx.pd || "-"}</span>
-            </div>
-          </div>
         </div>
       )}
 
       {/* Product Information */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
-          {isRtl ? "تفاصيل المنتج" : "PRODUCT DETAILS"}
-          {!isRtl && " - تفاصيل المنتج"}
+          {isRtl 
+            ? "تفاصيل المنتج | Product Details" 
+            : "Product Details | تفاصيل المنتج"}
         </div>
         
         <div className="space-y-1.5 text-xs">
@@ -224,7 +223,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
-                  <span>{lensType}</span>
+                  <span className="text-right">
+                    <div className="flex flex-col items-end">
+                      <span className="font-semibold">{getLensTypeArabic(lensType)}</span>
+                      <span className="text-xs text-muted-foreground">{lensType}</span>
+                    </div>
+                  </span>
                 </div>
                 {lensPrice > 0 && (
                   <div className="flex justify-between">
@@ -245,7 +249,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
-                  <span>{coating}</span>
+                  <span className="text-right">
+                    <div className="flex flex-col items-end">
+                      <span className="font-semibold">{getCoatingArabic(coating)}</span>
+                      <span className="text-xs text-muted-foreground">{coating}</span>
+                    </div>
+                  </span>
                 </div>
                 {coatingPrice > 0 && (
                   <div className="flex justify-between">
@@ -262,8 +271,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       {/* Payment Information */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
-          {isRtl ? "معلومات الدفع" : "PAYMENT INFORMATION"}
-          {!isRtl && " - معلومات الدفع"}
+          {isRtl 
+            ? "معلومات الدفع | Payment Information" 
+            : "Payment Information | معلومات الدفع"}
         </div>
         
         <div className="space-y-1 text-xs">
@@ -319,8 +329,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       {/* Quality Confirmation */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
-          {isRtl ? "تأكيد الجودة" : "QUALITY CONFIRMATION"}
-          {!isRtl && " - تأكيد الجودة"}
+          {isRtl 
+            ? "تأكيد الجودة | Quality Confirmation" 
+            : "Quality Confirmation | تأكيد الجودة"}
         </div>
         
         <div className="flex gap-2 text-xs mb-1">
@@ -352,4 +363,33 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
     </div>
   );
+};
+
+// Helper functions to map lens types and coatings to their Arabic equivalents
+const getLensTypeArabic = (lensType: string): string => {
+  const lensTypeMap: Record<string, string> = {
+    "Single Vision": "نظارات للنظر",
+    "Progressive": "عدسات متعددة البؤر",
+    "Bifocal": "ثنائية البؤرة",
+    "Reading": "نظارات للقراءة",
+    "Distance": "نظارات للنظر البعيد",
+    "Intermediate": "نظارات للمسافة المتوسطة",
+    // Add more mappings as needed
+  };
+  
+  return lensTypeMap[lensType] || lensType;
+};
+
+const getCoatingArabic = (coating: string): string => {
+  const coatingMap: Record<string, string> = {
+    "Anti-Reflective": "طلاء مضاد للانعكاس",
+    "Blue Light Filter": "فلتر الضوء الأزرق",
+    "Photochromic": "عدسات متغيرة اللون",
+    "Scratch Resistant": "مقاوم للخدش",
+    "UV Protection": "حماية من الأشعة فوق البنفسجية",
+    "Polarized": "استقطاب",
+    // Add more mappings as needed
+  };
+  
+  return coatingMap[coating] || coating;
 };
