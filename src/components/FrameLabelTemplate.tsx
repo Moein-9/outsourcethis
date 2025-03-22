@@ -142,7 +142,7 @@ export const FrameLabelTemplate: React.FC = () => {
   };
   
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex justify-between items-center">
         <div>
           <span className="font-medium">{t('selectedFrames')}: {selectedFrames.length}</span>
@@ -171,14 +171,14 @@ export const FrameLabelTemplate: React.FC = () => {
           >
             <div className="flex justify-between items-start">
               <div>
-                <div className="font-medium">{frame.brand} {frame.model}</div>
-                <div className="text-sm text-gray-500">
+                <div className="font-medium text-sm">{frame.brand} {frame.model}</div>
+                <div className="text-xs text-gray-500">
                   {frame.color}, {frame.size || '-'}
                 </div>
-                <div className="text-sm font-medium">{frame.price.toFixed(2)} KWD</div>
+                <div className="text-xs font-medium">{frame.price.toFixed(2)} KWD</div>
               </div>
               {selectedFrames.includes(frame.frameId) && (
-                <Check className="h-5 w-5 text-blue-500" />
+                <Check className="h-4 w-4 text-blue-500" />
               )}
             </div>
           </div>
@@ -186,7 +186,7 @@ export const FrameLabelTemplate: React.FC = () => {
       </div>
       
       {frames.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-6 text-gray-500">
           {t('noFramesAvailable')}
         </div>
       )}

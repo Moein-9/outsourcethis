@@ -164,6 +164,8 @@ export const PrintService = {
             width: 80mm !important;
             font-family: 'Yrsa', serif !important;
             direction: initial !important;
+            font-size: 10px !important;
+            line-height: 1.1 !important;
           }
           
           /* Ensure Arabic displays correctly */
@@ -187,11 +189,26 @@ export const PrintService = {
           
           /* Ensure content is properly contained */
           .receipt-container {
-            width: 72mm !important;
-            padding: 4mm !important;
+            width: 74mm !important;
+            padding: 3mm !important;
             margin: 0 !important;
             page-break-after: always !important;
             page-break-inside: avoid !important;
+          }
+          
+          /* Compact elements */
+          h1, h2, h3, p {
+            margin: 1px 0 !important;
+          }
+          
+          /* Remove all unnecessary spacing */
+          table td, table th {
+            padding: 1px !important;
+          }
+          
+          /* Reduce spacing between elements */
+          div {
+            margin-bottom: 2px !important;
           }
           
           /* Fix for print dialog appearing but not working */
@@ -205,12 +222,14 @@ export const PrintService = {
               -webkit-print-color-adjust: exact !important;
               color-adjust: exact !important;
               print-color-adjust: exact !important;
+              font-size: 10px !important;
+              line-height: 1.1 !important;
             }
             
             .receipt-container {
-              width: 72mm !important;
+              width: 74mm !important;
               margin: 0 !important;
-              padding: 4mm !important;
+              padding: 3mm !important;
             }
             
             /* Ensure only one copy prints */
@@ -434,6 +453,8 @@ export const PrintService = {
             -webkit-print-color-adjust: exact !important;
             color-adjust: exact !important;
             print-color-adjust: exact !important;
+            font-size: 10px !important;
+            line-height: 1.1 !important;
           }
           
           /* Ensure Arabic displays correctly */
@@ -456,8 +477,8 @@ export const PrintService = {
           
           /* Ensure content is properly contained */
           .rx-container {
-            width: 72mm;
-            padding: 4mm;
+            width: 74mm;
+            padding: 3mm;
             margin: 0;
             page-break-after: always;
             page-break-inside: avoid;
@@ -466,7 +487,7 @@ export const PrintService = {
           /* Additional styles for RX */
           .rx-header {
             text-align: center;
-            margin-bottom: 5mm;
+            margin-bottom: 3mm;
           }
           
           .rx-logo {
@@ -479,11 +500,11 @@ export const PrintService = {
           .rx-title {
             font-size: 12pt;
             font-weight: bold;
-            margin: 3mm 0;
+            margin: 2mm 0;
           }
           
           .rx-section {
-            margin-bottom: 4mm;
+            margin-bottom: 3mm;
           }
           
           .rx-table {
@@ -493,8 +514,13 @@ export const PrintService = {
           
           .rx-table td, .rx-table th {
             border: 1px solid #000;
-            padding: 1mm 2mm;
+            padding: 1mm;
             font-size: 8pt;
+          }
+          
+          /* Compact styles */
+          h1, h2, h3, p {
+            margin: 1px 0 !important;
           }
           
           /* Fix for print dialog */
@@ -504,12 +530,13 @@ export const PrintService = {
               height: auto !important;
               margin: 0 !important;
               padding: 0 !important;
+              font-size: 10px !important;
             }
             
             .rx-container {
-              width: 72mm !important;
+              width: 74mm !important;
               margin: 0 !important;
-              padding: 4mm !important;
+              padding: 3mm !important;
             }
           }
         </style>
@@ -586,6 +613,8 @@ export const PrintService = {
             -webkit-print-color-adjust: exact !important;
             color-adjust: exact !important;
             print-color-adjust: exact !important;
+            font-size: 10px !important;
+            line-height: 1.1 !important;
           }
           
           /* Ensure Arabic displays correctly */
@@ -609,8 +638,8 @@ export const PrintService = {
           
           /* Ensure content is properly contained */
           .workorder-container {
-            width: 72mm !important;
-            padding: 4mm !important;
+            width: 74mm !important;
+            padding: 3mm !important;
             margin: 0 !important;
             page-break-after: always !important;
             page-break-inside: avoid !important;
@@ -619,31 +648,31 @@ export const PrintService = {
           /* WorkOrder specific styles */
           .order-header {
             text-align: center !important;
-            margin-bottom: 5mm !important;
+            margin-bottom: 3mm !important;
           }
           
           .order-logo {
             max-width: 60mm !important;
-            max-height: 10mm !important;
+            max-height: 8mm !important;
             margin: 0 auto !important;
             display: block !important;
           }
           
           .order-title {
-            font-size: 12pt !important;
+            font-size: 11pt !important;
             font-weight: bold !important;
-            margin: 3mm 0 !important;
+            margin: 2mm 0 !important;
             text-align: center !important;
           }
           
           .order-section {
-            margin-bottom: 4mm !important;
+            margin-bottom: 3mm !important;
           }
           
           .order-field {
             display: flex !important;
             justify-content: space-between !important;
-            margin-bottom: 2mm !important;
+            margin-bottom: 1mm !important;
             font-size: 8pt !important;
           }
           
@@ -653,13 +682,18 @@ export const PrintService = {
           
           .order-divider {
             border-top: 1px dashed #000 !important;
-            margin: 3mm 0 !important;
+            margin: 2mm 0 !important;
           }
           
           .order-signature {
-            margin-top: 5mm !important;
+            margin-top: 3mm !important;
             text-align: center !important;
             font-size: 8pt !important;
+          }
+          
+          /* Compact styles */
+          h1, h2, h3, p {
+            margin: 1px 0 !important;
           }
           
           /* Fix for print dialog */
@@ -670,12 +704,13 @@ export const PrintService = {
               margin: 0 !important;
               padding: 0 !important;
               overflow: visible !important;
+              font-size: 10px !important;
             }
             
             .workorder-container {
-              width: 72mm !important;
+              width: 74mm !important;
               margin: 0 !important;
-              padding: 4mm !important;
+              padding: 3mm !important;
             }
             
             /* Ensure only one copy prints */

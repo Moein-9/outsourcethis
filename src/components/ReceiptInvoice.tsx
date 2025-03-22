@@ -90,53 +90,53 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         maxWidth: '80mm',
         margin: '0 auto',
         backgroundColor: 'white',
-        padding: '4mm',
-        fontSize: '12px',
+        padding: '3mm',
+        fontSize: '11px',
         border: isPrintable ? 'none' : '1px solid #ddd',
         borderRadius: isPrintable ? '0' : '5px',
         boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
         fontFamily: isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'
       }}
     >
-      <div className="text-center border-b pb-3 mb-3">
-        <div className="flex justify-center mb-2">
-          <MoenLogo className="w-auto h-16 mb-2" />
+      <div className="text-center border-b pb-2 mb-2">
+        <div className="flex justify-center mb-1">
+          <MoenLogo className="w-auto h-14 mb-1" />
         </div>
-        <h2 className="font-bold text-xl mb-1">{storeInfo.name}</h2>
-        <p className="text-sm text-muted-foreground">{storeInfo.address}</p>
-        <p className="text-sm text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
+        <h2 className="font-bold text-lg mb-0.5">{storeInfo.name}</h2>
+        <p className="text-xs text-muted-foreground">{storeInfo.address}</p>
+        <p className="text-xs text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      <div className="mb-4 text-sm">
-        <div className="flex justify-between border-b pb-1 mb-1">
-          <span className="font-semibold">{t("invoiceNumber")} {isRtl && '(رقم الفاتورة)'}:</span>
+      <div className="mb-2 text-xs">
+        <div className="flex justify-between border-b pb-0.5 mb-0.5">
+          <span className="font-semibold">{t("invoiceNumber")} {isRtl && ''}:</span>
           <span>{invoice.invoiceId}</span>
         </div>
-        <div className="flex justify-between border-b pb-1 mb-1">
+        <div className="flex justify-between border-b pb-0.5 mb-0.5">
           <span className="font-semibold">{t("date")}:</span>
           <span>{format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}</span>
         </div>
-        <div className="flex justify-between border-b pb-1 mb-1">
-          <span className="font-semibold">{t("customer")} {isRtl && '(العميل)'}:</span>
+        <div className="flex justify-between border-b pb-0.5 mb-0.5">
+          <span className="font-semibold">{t("customer")} {isRtl && ''}:</span>
           <span>{name}</span>
         </div>
         {phone && (
-          <div className="flex justify-between border-b pb-1 mb-1">
+          <div className="flex justify-between border-b pb-0.5 mb-0.5">
             <span className="font-semibold">{t("phone")}:</span>
             <span>{phone}</span>
           </div>
         )}
       </div>
 
-      <div className="border-t border-b py-2 mb-3">
-        <div className="text-center mb-2 font-bold text-xs uppercase tracking-wide">
+      <div className="border-t border-b py-1.5 mb-2">
+        <div className="text-center mb-1 font-bold text-xs uppercase tracking-wide">
           {isRtl ? "*** المنتجات ***" : "*** PRODUCTS ***"}
         </div>
         
         {isContactLens && contactLenses && contactLenses.length > 0 ? (
           // Contact lens specific rendering
           contactLenses.map((lens, idx) => (
-            <div key={idx} className="flex justify-between mb-1 text-sm">
+            <div key={idx} className="flex justify-between mb-0.5 text-xs">
               <span>{lens.brand} {lens.type} {lens.power}</span>
               <span>{lens.price.toFixed(3)} KWD</span>
             </div>
@@ -145,21 +145,21 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           // Normal glasses rendering
           <>
             {lens && (
-              <div className="flex justify-between mb-1 text-sm">
+              <div className="flex justify-between mb-0.5 text-xs">
                 <span>{t("lenses")} ({lens})</span>
                 <span>{lensP.toFixed(3)} KWD</span>
               </div>
             )}
             
             {coat && (
-              <div className="flex justify-between mb-1 text-sm">
+              <div className="flex justify-between mb-0.5 text-xs">
                 <span>{t("coating")} ({coat})</span>
                 <span>{coatP.toFixed(3)} KWD</span>
               </div>
             )}
             
             {frameBrand && (
-              <div className="flex justify-between mb-1 text-sm">
+              <div className="flex justify-between mb-0.5 text-xs">
                 <span>{t("frame")} ({frameBrand} {frameModel})</span>
                 <span>{frameP.toFixed(3)} KWD</span>
               </div>
@@ -168,7 +168,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         )}
       </div>
 
-      <div className="text-sm mb-4">
+      <div className="text-xs mb-2">
         <div className="flex justify-between">
           <span>{t("subtotal")}:</span>
           <span>{(tot + disc).toFixed(3)} KWD</span>
@@ -179,37 +179,37 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             <span>-{disc.toFixed(3)} KWD</span>
           </div>
         )}
-        <div className="flex justify-between font-bold mt-1 pt-1 border-t">
+        <div className="flex justify-between font-bold mt-0.5 pt-0.5 border-t">
           <span>{t("total")}:</span>
           <span>{tot.toFixed(3)} KWD</span>
         </div>
       </div>
 
-      <div className="space-y-1 text-sm mb-3">
+      <div className="space-y-0.5 text-xs mb-2">
         <div className="text-center mb-1 font-bold text-xs uppercase tracking-wide">
           {isRtl ? "*** المدفوعات ***" : "*** PAYMENTS ***"}
         </div>
         
         {invoice.payments?.map((payment, index) => (
-          <div key={index} className="flex justify-between text-sm">
+          <div key={index} className="flex justify-between text-xs">
             <span>
               {format(new Date(payment.date), 'dd/MM/yyyy')} ({payment.method})
-              {payment.authNumber && ` - ${t("authNumber")}: ${payment.authNumber}`}
+              {payment.authNumber && ` - ${payment.authNumber}`}
             </span>
             <span>{payment.amount.toFixed(3)} KWD</span>
           </div>
         )) || (
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-xs">
             <span>
               {format(new Date(invoice.createdAt), 'dd/MM/yyyy')} ({payMethod})
-              {auth && ` - ${t("authNumber")}: ${auth}`}
+              {auth && ` - ${auth}`}
             </span>
             <span>{dep.toFixed(3)} KWD</span>
           </div>
         )}
         
         {rem > 0 && (
-          <div className="flex justify-between font-bold mt-1 pt-1 border-t">
+          <div className="flex justify-between font-bold mt-0.5 pt-0.5 border-t">
             <span>{t("remaining")}:</span>
             <span>{rem.toFixed(3)} KWD</span>
           </div>
@@ -217,23 +217,20 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       </div>
 
       {isPaid && (
-        <div className="flex items-center justify-center gap-2 my-3 text-primary font-bold p-1 border border-primary rounded">
-          <CheckCircle2 className="w-4 h-4" />
-          <span>{t("paidInFull")}</span>
+        <div className="flex items-center justify-center gap-1 my-1.5 text-primary font-bold p-0.5 border border-primary rounded">
+          <CheckCircle2 className="w-3 h-3" />
+          <span className="text-xs">{t("paidInFull")}</span>
         </div>
       )}
 
-      <div className="text-center mt-3 pt-3 border-t">
+      <div className="text-center mt-2 pt-1 border-t">
         {isRtl ? (
-          <p className="font-semibold text-sm">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً ونتطلع لزيارتكم القادمة!</p>
+          <p className="font-semibold text-xs">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً ونتطلع لزيارتكم القادمة!</p>
         ) : (
-          <>
-            <p className="font-semibold text-sm">Thank you for choosing Moein Optical.</p>
-            <p className="text-xs mt-1">We're always delighted to serve you and look forward to your next visit!</p>
-          </>
+          <p className="font-semibold text-xs">Thank you for choosing Moein Optical. We're always delighted to serve you and look forward to your next visit!</p>
         )}
-        <div className="mt-3 text-[10px] flex gap-1 justify-center">
-          <span>{'•'.repeat(15)}</span>
+        <div className="mt-1 text-[8px] flex gap-1 justify-center">
+          <span>{'•'.repeat(10)}</span>
         </div>
       </div>
     </div>
