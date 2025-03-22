@@ -153,6 +153,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         contactLenses={contactLenses}
         contactLensRx={contactLensRx}
         thermalOnly={thermalOnly}
+        onPrintComplete={() => {}} // Add an empty function to avoid type error
       />
     );
     
@@ -184,6 +185,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           contactLenses={contactLenses}
           contactLensRx={contactLensRx}
           thermalOnly={thermalOnly}
+          onPrintComplete={() => {}} // Add an empty function to avoid type error
           trigger={
             <Button variant={variant} size={size} className={className}>
               <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
