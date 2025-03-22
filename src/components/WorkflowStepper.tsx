@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -57,7 +56,6 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const { addInvoice } = useInvoiceStore();
   const isRtl = language === 'ar';
   
-  // Current step properties
   const steps = [
     { id: 1, label: t("saveWorkOrder"), icon: <Save className="h-4 w-4" /> },
     { id: 2, label: t("printInvoice"), icon: <Printer className="h-4 w-4" /> },
@@ -65,17 +63,14 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     { id: 4, label: t("finish"), icon: <CheckCircle className="h-4 w-4" /> }
   ];
 
-  // Handle saving the work order
   const handleSaveWorkOrder = async () => {
     if (saving) return;
     
     setSaving(true);
     try {
-      // Use the callback to save the invoice and get the ID
       let savedInvoiceId;
       
       if (isNewInvoice) {
-        // Extract the relevant fields from the invoice for saving
         savedInvoiceId = addInvoice({
           patientId: invoice.patientId,
           patientName: invoice.patientName,
@@ -97,19 +92,15 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           workOrderId: invoice.workOrderId,
         });
       } else {
-        // If it already has an ID, use that
         savedInvoiceId = invoice.invoiceId;
       }
       
-      // Save the invoice ID for display
       setInvoiceId(savedInvoiceId);
       
-      // Call the onSave callback with the generated invoice ID
       if (onSave) {
         onSave(savedInvoiceId);
       }
       
-      // Move to the next step
       setCurrentStep(2);
       
       toast({
@@ -128,9 +119,7 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }
   };
 
-  // Handle printing the invoice
   const handlePrintInvoice = () => {
-    // Create invoice content
     const invoiceContent = `
       <div style="font-family: ${isRtl ? 'Cairo, sans-serif' : 'Yrsa, serif'}; direction: ${isRtl ? 'rtl' : 'ltr'}; text-align: ${isRtl ? 'right' : 'left'}; padding: 20px;">
         <div style="text-align: center; margin-bottom: 20px;">
@@ -223,10 +212,12 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     try {
       const htmlContent = PrintService.prepareA4Document(invoiceContent, t("invoice"));
       PrintService.printHtml(htmlContent, 'a4', () => {
-        // Move to the next step
         setInvoicePrinted(true);
         setCurrentStep(3);
-        toast.success(t("invoicePrinted"));
+        toast({
+          title: t("success"),
+          description: t("invoicePrinted")
+        });
       });
     } catch (error) {
       console.error("Error printing invoice:", error);
@@ -238,18 +229,15 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }
   };
 
-  // Handle printing the work order
   const printWorkOrder = () => {
     setWorkOrderPrinted(true);
     setCurrentStep(4);
   };
 
-  // Handle finishing the workflow
   const handleFinish = () => {
     if (onComplete) {
       onComplete();
     }
-    // Reset the stepper state
     setCurrentStep(1);
     setInvoiceId(null);
     setInvoicePrinted(false);
@@ -260,7 +248,6 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     <div className="border rounded-lg p-4 bg-card">
       <h3 className="text-lg font-semibold mb-4 text-center">{t("workOrderWorkflow")}</h3>
       
-      {/* Steps indicator */}
       <div className="flex items-center justify-between mb-6 relative">
         {steps.map((step, index) => (
           <div 
@@ -290,11 +277,9 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           </div>
         ))}
         
-        {/* Connecting lines between steps */}
         <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 -z-10"></div>
       </div>
       
-      {/* Display invoice ID if available */}
       {invoiceId && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-center">
           <p className="font-semibold">{t("generatedIds")}:</p>
@@ -302,9 +287,7 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         </div>
       )}
       
-      {/* Action buttons */}
       <div className="space-y-3">
-        {/* Step 1: Save Work Order */}
         {currentStep === 1 && (
           <Button 
             onClick={handleSaveWorkOrder} 
@@ -316,7 +299,6 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           </Button>
         )}
         
-        {/* Step 2: Print Invoice */}
         {currentStep === 2 && (
           <Button 
             onClick={handlePrintInvoice} 
@@ -328,7 +310,6 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           </Button>
         )}
         
-        {/* Step 3: Print Work Order */}
         {currentStep === 3 && (
           <WorkOrderPrintSelector
             invoice={{ ...invoice, invoiceId: invoiceId || invoice.invoiceId }}
@@ -354,7 +335,6 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           />
         )}
         
-        {/* Step 4: Finish */}
         {currentStep === 4 && (
           <Button 
             onClick={handleFinish} 
