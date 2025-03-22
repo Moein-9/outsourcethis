@@ -9,6 +9,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { PrintService } from "@/utils/PrintService";
 import { toast } from "@/hooks/use-toast";
+import { CheckCircle2 } from "lucide-react";
 
 interface WorkOrderReceiptPrintProps {
   invoice: Invoice;
@@ -62,6 +63,9 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   const amountPaid = invoice.payments 
     ? invoice.payments.reduce((sum, payment) => sum + payment.amount, 0) 
     : invoice.deposit || 0;
+    
+  const remaining = invoice.total - amountPaid;
+  const isPaid = remaining <= 0;
 
   const invoiceNumber = invoice.invoiceId || invoice.workOrderId || "";
 
@@ -74,49 +78,59 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         width: "80mm", 
         fontFamily: isRtl ? "'Zain', sans-serif" : "'Yrsa', serif",
         maxWidth: "80mm",
-        overflow: "hidden",
+        overflow: "visible",
         margin: "0 auto",
         padding: "2mm",
         backgroundColor: "white",
-        fontSize: "9px",
-        lineHeight: "1.1"
+        fontSize: "10px",
+        lineHeight: "1.2"
       }}
     >
-      <div style={{ textAlign: "center", marginBottom: "3px" }}>
+      <div style={{ textAlign: "center", marginBottom: "4px" }}>
         <div style={{ marginBottom: "2px", display: "flex", justifyContent: "center" }}>
-          <MoenLogo className="w-auto" style={{ height: "20px", margin: "0 auto" }} />
+          <MoenLogo className="w-auto" style={{ height: "24px", margin: "0 auto" }} />
         </div>
-        <h1 style={{ fontSize: "12px", fontWeight: "bold", margin: "1px 0" }}>
+        <h1 style={{ fontSize: "14px", fontWeight: "bold", margin: "2px 0" }}>
           {storeInfo.name}
         </h1>
-        <p style={{ fontSize: "8px", margin: "0" }}>{storeInfo.address}</p>
-        <p style={{ fontSize: "8px", margin: "0" }}>{storeInfo.phone}</p>
+        <p style={{ fontSize: "9px", margin: "0" }}>{storeInfo.address}</p>
+        <p style={{ fontSize: "9px", margin: "0" }}>{storeInfo.phone}</p>
       </div>
       
-      <div style={{ borderTop: "1px dashed #000", margin: "3px 0" }}></div>
+      <div style={{ borderTop: "1px dashed #000", margin: "4px 0" }}></div>
       
-      <div style={{ marginBottom: "3px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", marginBottom: "1px" }}>
+      <div style={{ marginBottom: "4px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{t("workOrderNumber")}:</span> 
           <span>{invoiceNumber}</span>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", marginBottom: "1px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{t("date")}:</span>
           <span>{formatDate(invoice.createdAt)}</span>
         </div>
       </div>
       
-      <div style={{ marginBottom: "3px", fontSize: "9px" }}>
-        <h2 style={{ fontSize: "10px", fontWeight: "bold", margin: "1px 0", borderBottom: "1px solid #ccc", paddingBottom: "1px" }}>
-          {t("patientInformation")}
+      <div style={{ marginBottom: "4px", fontSize: "10px" }}>
+        <h2 style={{ 
+          fontSize: "12px", 
+          fontWeight: "bold", 
+          margin: "2px 0", 
+          borderBottom: "1px solid #ccc", 
+          paddingBottom: "2px",
+          display: "flex",
+          justifyContent: "space-between"
+        }}>
+          <span>{t("patientInformation")}</span>
+          {!isRtl && <span style={{ fontSize: "10px" }}>معلومات المريض</span>}
+          {isRtl && <span style={{ fontSize: "10px" }}>Patient Info</span>}
         </h2>
-        <div style={{ marginLeft: "1px" }}>
-          <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+        <div style={{ marginLeft: "2px" }}>
+          <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
             <span style={{ fontWeight: "bold" }}>{t("name")}:</span>
             <span>{patientName || t("notSpecified")}</span>
           </div>
           {patientPhone && (
-            <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+            <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
               <span style={{ fontWeight: "bold" }}>{t("phone")}:</span>
               <span>{patientPhone}</span>
             </div>
@@ -125,44 +139,60 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       </div>
       
       {rx && (
-        <div style={{ marginBottom: "3px", fontSize: "8px" }}>
-          <h2 style={{ fontSize: "10px", fontWeight: "bold", margin: "1px 0", borderBottom: "1px solid #ccc", paddingBottom: "1px" }}>
-            {t("prescription")}
+        <div style={{ marginBottom: "4px", fontSize: "10px" }}>
+          <h2 style={{ 
+            fontSize: "12px", 
+            fontWeight: "bold", 
+            margin: "2px 0", 
+            borderBottom: "1px solid #ccc", 
+            paddingBottom: "2px",
+            display: "flex",
+            justifyContent: "space-between"
+          }}>
+            <span>{t("prescription")}</span>
+            {!isRtl && <span style={{ fontSize: "10px" }}>وصفة طبية</span>}
+            {isRtl && <span style={{ fontSize: "10px" }}>Prescription</span>}
           </h2>
           
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginTop: "1px" }}>
+          <table style={{ 
+            width: "100%", 
+            borderCollapse: "collapse", 
+            fontSize: "8px", 
+            marginTop: "2px",
+            direction: "ltr" // Always LTR for RX table
+          }}>
             <thead>
               <tr>
-                <th style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}></th>
-                <th style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>SPH</th>
-                <th style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>CYL</th>
-                <th style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>AX</th>
-                {(rx.pdOD || rx.pdOS || rx.pd) && <th style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>PD</th>}
+                <th style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}></th>
+                <th style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>SPH</th>
+                <th style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>CYL</th>
+                <th style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>AX</th>
+                {(rx.pdOD || rx.pdOS || rx.pd) && <th style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>PD</th>}
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ border: "1px solid #ddd", padding: "1px", fontWeight: "bold", textAlign: "center" }}>
-                  OD {isRtl && '(يمين)'}
+                <td style={{ border: "1px solid #ddd", padding: "2px", fontWeight: "bold", textAlign: "center" }}>
+                  OD {isRtl ? '(يمين)' : '(Right)'}
                 </td>
-                <td style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>{rx.sphereOD || "-"}</td>
-                <td style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>{rx.cylOD || "-"}</td>
-                <td style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>{rx.axisOD || "-"}</td>
+                <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.sphereOD || "-"}</td>
+                <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.cylOD || "-"}</td>
+                <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.axisOD || "-"}</td>
                 {(rx.pdOD || rx.pdOS || rx.pd) && (
-                  <td style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>
+                  <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>
                     {rx.pdOD || rx.pd || "-"}
                   </td>
                 )}
               </tr>
               <tr>
-                <td style={{ border: "1px solid #ddd", padding: "1px", fontWeight: "bold", textAlign: "center" }}>
-                  OS {isRtl && '(يسار)'}
+                <td style={{ border: "1px solid #ddd", padding: "2px", fontWeight: "bold", textAlign: "center" }}>
+                  OS {isRtl ? '(يسار)' : '(Left)'}
                 </td>
-                <td style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>{rx.sphereOS || "-"}</td>
-                <td style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>{rx.cylOS || "-"}</td>
-                <td style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>{rx.axisOS || "-"}</td>
+                <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.sphereOS || "-"}</td>
+                <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.cylOS || "-"}</td>
+                <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.axisOS || "-"}</td>
                 {(rx.pdOD || rx.pdOS || rx.pd) && (
-                  <td style={{ border: "1px solid #ddd", padding: "1px", textAlign: "center" }}>
+                  <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>
                     {rx.pdOS || rx.pd || "-"}
                   </td>
                 )}
@@ -171,7 +201,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           </table>
           
           {rx.add && (
-            <div style={{ marginTop: "1px", display: "flex", justifyContent: "space-between" }}>
+            <div style={{ marginTop: "2px", display: "flex", justifyContent: "space-between" }}>
               <span style={{ fontWeight: "bold" }}>ADD:</span>
               <span>{rx.add}</span>
             </div>
@@ -179,30 +209,42 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </div>
       )}
       
-      <div style={{ marginBottom: "3px", fontSize: "8px" }}>
-        <h2 style={{ fontSize: "10px", fontWeight: "bold", margin: "1px 0", borderBottom: "1px solid #ccc", paddingBottom: "1px" }}>
-          {t("productDetails")}
+      <div style={{ marginBottom: "4px", fontSize: "10px" }}>
+        <h2 style={{ 
+          fontSize: "12px", 
+          fontWeight: "bold", 
+          margin: "2px 0", 
+          borderBottom: "1px solid #ccc", 
+          paddingBottom: "2px",
+          display: "flex",
+          justifyContent: "space-between"
+        }}>
+          <span>{t("productDetails")}</span>
+          {!isRtl && <span style={{ fontSize: "10px" }}>تفاصيل المنتج</span>}
+          {isRtl && <span style={{ fontSize: "10px" }}>Product Details</span>}
         </h2>
         
         {frame && (
-          <div style={{ marginBottom: "2px" }}>
-            <h3 style={{ fontSize: "9px", fontWeight: "bold", margin: "1px 0" }}>{t("frame")}</h3>
-            <div style={{ marginLeft: "1px" }}>
-              <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+          <div style={{ marginBottom: "3px" }}>
+            <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
+              {t("frame")} {!isRtl ? "(الإطار)" : "(Frame)"}
+            </h3>
+            <div style={{ marginLeft: "2px" }}>
+              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("brand")}/{t("model")}:</span>
                 <span>{frame.brand} {frame.model}</span>
               </div>
-              <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("color")}:</span>
                 <span>{frame.color}</span>
               </div>
               {frame.size && (
-                <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+                <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                   <span style={{ fontWeight: "bold" }}>{t("size")}:</span>
                   <span>{frame.size}</span>
                 </div>
               )}
-              <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
                 <span>{frame.price.toFixed(3)} KWD</span>
               </div>
@@ -211,14 +253,16 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         )}
         
         {lensType && (
-          <div style={{ marginBottom: "2px" }}>
-            <h3 style={{ fontSize: "9px", fontWeight: "bold", margin: "1px 0" }}>{t("lensType")}</h3>
-            <div style={{ marginLeft: "1px" }}>
-              <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+          <div style={{ marginBottom: "3px" }}>
+            <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
+              {t("lensType")} {!isRtl ? "(العدسات الطبية)" : "(Lenses)"}
+            </h3>
+            <div style={{ marginLeft: "2px" }}>
+              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("type")}:</span>
-                <span>{lensType}</span>
+                <span>{lensType} {!isRtl ? `(${t("lensType")})` : ""}</span>
               </div>
-              <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
                 <span>{invoice.lensPrice.toFixed(3)} KWD</span>
               </div>
@@ -227,14 +271,16 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         )}
         
         {coating && (
-          <div style={{ marginBottom: "2px" }}>
-            <h3 style={{ fontSize: "9px", fontWeight: "bold", margin: "1px 0" }}>{t("coating")}</h3>
-            <div style={{ marginLeft: "1px" }}>
-              <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+          <div style={{ marginBottom: "3px" }}>
+            <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
+              {t("coating")} {!isRtl ? "(الطلاء)" : "(Coating)"}
+            </h3>
+            <div style={{ marginLeft: "2px" }}>
+              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("type")}:</span>
-                <span>{coating}</span>
+                <span>{coating} {!isRtl ? `(${t("coating")})` : ""}</span>
               </div>
-              <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
                 <span>{invoice.coatingPrice.toFixed(3)} KWD</span>
               </div>
@@ -243,15 +289,17 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         )}
         
         {contactLenses && contactLenses.length > 0 && (
-          <div style={{ marginBottom: "2px" }}>
-            <h3 style={{ fontSize: "9px", fontWeight: "bold", margin: "1px 0" }}>{t("contactLenses")}</h3>
+          <div style={{ marginBottom: "3px" }}>
+            <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
+              {t("contactLenses")} {!isRtl ? "(العدسات اللاصقة)" : "(Contact Lenses)"}
+            </h3>
             {contactLenses.slice(0, 2).map((lens, index) => (
-              <div key={index} style={{ marginLeft: "1px", marginBottom: "1px" }}>
-                <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+              <div key={index} style={{ marginLeft: "2px", marginBottom: "1px" }}>
+                <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                   <span style={{ fontWeight: "bold" }}>{t("brand")}:</span>
                   <span>{lens.brand}</span>
                 </div>
-                <div style={{ marginBottom: "0", display: "flex", justifyContent: "space-between" }}>
+                <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                   <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
                   <span>{lens.price.toFixed(3)} KWD</span>
                 </div>
@@ -261,44 +309,90 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         )}
       </div>
       
-      <div style={{ marginBottom: "3px", fontSize: "8px" }}>
-        <h2 style={{ fontSize: "10px", fontWeight: "bold", margin: "1px 0", borderBottom: "1px solid #ccc", paddingBottom: "1px" }}>
-          {t("paymentInformation")}
+      <div style={{ 
+        marginBottom: "4px", 
+        fontSize: "11px", 
+        border: "1px solid #ccc", 
+        padding: "3px",
+        borderRadius: "3px",
+      }}>
+        <h2 style={{ 
+          fontSize: "13px", 
+          fontWeight: "bold", 
+          margin: "1px 0 3px 0", 
+          borderBottom: "1px solid #ccc", 
+          paddingBottom: "2px",
+          display: "flex",
+          justifyContent: "space-between"
+        }}>
+          <span>{t("paymentInformation")}</span>
+          {!isRtl && <span style={{ fontSize: "11px" }}>معلومات الدفع</span>}
+          {isRtl && <span style={{ fontSize: "11px" }}>Payment Info</span>}
         </h2>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px" }}>
           <span style={{ fontWeight: "bold" }}>{t("subtotal")}:</span>
           <span>{subtotal.toFixed(3)} KWD</span>
         </div>
         {invoice.discount > 0 && (
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px" }}>
             <span style={{ fontWeight: "bold" }}>{t("discount")}:</span>
             <span>-{invoice.discount.toFixed(3)} KWD</span>
           </div>
         )}
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px" }}>
           <span style={{ fontWeight: "bold" }}>{t("total")}:</span>
           <span>{invoice.total.toFixed(3)} KWD</span>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px" }}>
           <span style={{ fontWeight: "bold" }}>{t("paid")}:</span>
           <span>{amountPaid.toFixed(3)} KWD</span>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0" }}>
-          <span style={{ fontWeight: "bold" }}>{t("remaining")}:</span>
-          <span>{(invoice.total - amountPaid).toFixed(3)} KWD</span>
-        </div>
+        
+        {isPaid ? (
+          <div style={{ 
+            display: "flex", 
+            justifyContent: "center", 
+            alignItems: "center", 
+            gap: "4px",
+            backgroundColor: "#F2FCE2", 
+            padding: "3px", 
+            borderRadius: "3px",
+            margin: "3px 0 1px 0",
+            fontWeight: "bold",
+            fontSize: "12px",
+            border: "1px solid #ccc"
+          }}>
+            <CheckCircle2 style={{ height: "12px", width: "12px" }} />
+            <span>{t("paidInFull")}</span>
+          </div>
+        ) : (
+          <div style={{ 
+            display: "flex", 
+            justifyContent: "space-between", 
+            backgroundColor: "#FEF2F2", 
+            padding: "3px", 
+            borderRadius: "3px",
+            margin: "3px 0 1px 0",
+            fontWeight: "bold",
+            fontSize: "12px",
+            border: "1px solid #FECACA"
+          }}>
+            <span>{t("remaining")}:</span>
+            <span>{remaining.toFixed(3)} KWD</span>
+          </div>
+        )}
       </div>
       
-      <div style={{ borderTop: "1px dashed #000", margin: "2px 0" }}></div>
+      <div style={{ borderTop: "1px dashed #000", margin: "2px 0", paddingTop: "2px" }}></div>
       
-      <div style={{ textAlign: "center", marginBottom: "2px", fontSize: "7px" }}>
+      <div style={{ textAlign: "center", marginBottom: "1px", fontSize: "8px" }}>
         {isRtl ? (
           <p style={{ margin: "0" }}>شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
         ) : (
           <p style={{ margin: "0" }}>Thank you for choosing Moein Optical. We're always delighted to serve you!</p>
         )}
-        <div style={{ margin: "2px auto", width: "30px", height: "30px" }}>
-          <QRCodeSVG value={generateQRData()} size={30} />
+        <div style={{ margin: "2px auto", width: "32px", height: "32px" }}>
+          <QRCodeSVG value={generateQRData()} size={32} />
         </div>
       </div>
     </div>

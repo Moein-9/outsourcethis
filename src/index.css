@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;500;600;700&display=swap');
@@ -83,30 +84,41 @@
     padding: 0 !important;
     height: auto !important;
     width: auto !important;
+    overflow: visible !important;
   }
   
   body * {
     visibility: hidden;
+    overflow: visible !important;
   }
   
   .print-receipt, .print-receipt *, 
   .print-container, .print-container * {
     visibility: visible;
+    overflow: visible !important;
   }
   
   .print-receipt, .print-container {
     position: absolute;
     left: 0;
     top: 0;
+    overflow: visible !important;
+  }
+  
+  /* Hide scrollbars when printing */
+  ::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
   }
   
   /* Hide all UI elements when printing */
   header, nav, button, .dialog, .dialog-overlay, 
-  .no-print, button, nav, .sidebar {
+  .no-print, button, nav, .sidebar, .scrollbar {
     display: none !important;
   }
   
-  /* Critical fix for printing dialog issues - RED FLAG #1 */
+  /* Critical fix for printing dialog issues */
   body.printing {
     width: 80mm !important;
     height: auto !important;
@@ -117,6 +129,7 @@
   
   body.printing * {
     visibility: visible !important;
+    overflow: visible !important;
   }
   
   /* Ensure only one copy prints */
@@ -136,7 +149,7 @@
     width: 100mm;
     height: 16mm;
     page-break-inside: avoid;
-    overflow: hidden;
+    overflow: visible !important;
     position: relative;
     margin: 0;
     padding: 0;
@@ -171,6 +184,7 @@
 .thermal-print {
   width: 80mm !important;
   font-family: 'Yrsa', serif !important;
+  overflow: visible !important;
 }
 
 .thermal-print[dir="rtl"] {
@@ -186,6 +200,7 @@
     margin: 0 !important;
     padding: 4mm !important;
     font-family: 'Yrsa', serif !important;
+    overflow: visible !important;
   }
   
   /* RTL thermal printing */
@@ -197,14 +212,21 @@
   .print-receipt, #work-order-receipt {
     page-break-after: always !important;
     page-break-inside: avoid !important;
+    overflow: visible !important;
   }
   
-  /* Critical fix for ensuring only one copy prints - RED FLAG #1 */
+  /* Critical fix for ensuring only one copy prints */
   #receipt-invoice, #work-order-receipt {
     width: 80mm !important;
     max-width: 80mm !important;
     page-break-after: always !important;
     visibility: visible !important;
     position: relative !important;
+    overflow: visible !important;
+  }
+  
+  /* Hide the preview text in actual prints */
+  .preview-text {
+    display: none !important;
   }
 }

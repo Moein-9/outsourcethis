@@ -111,7 +111,11 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   };
   
   const showPrintSelector = (invoiceToUse: Invoice) => {
-    return (
+    // Create and append WorkOrderPrintSelector
+    const selectorContainer = document.createElement('div');
+    document.body.appendChild(selectorContainer);
+    
+    const selector = (
       <WorkOrderPrintSelector
         invoice={invoiceToUse}
         patientName={patientName}
@@ -125,6 +129,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         thermalOnly={thermalOnly}
       />
     );
+    
+    return selector;
   };
 
   return (
