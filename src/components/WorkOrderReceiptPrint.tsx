@@ -78,7 +78,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         width: "80mm", 
         fontFamily: isRtl ? "'Zain', sans-serif" : "'Yrsa', serif",
         maxWidth: "80mm",
-        overflow: "visible",
+        overflow: "hidden", /* Changed from visible to hidden to remove scrollbars */
         margin: "0 auto",
         padding: "2mm",
         backgroundColor: "white",
@@ -118,7 +118,9 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           borderBottom: "1px solid #ccc", 
           paddingBottom: "2px",
           display: "flex",
-          justifyContent: "space-between"
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "4px" /* Added gap for better spacing */
         }}>
           <span>{t("patientInformation")}</span>
           {!isRtl && <span style={{ fontSize: "10px" }}>معلومات المريض</span>}
@@ -147,7 +149,9 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             borderBottom: "1px solid #ccc", 
             paddingBottom: "2px",
             display: "flex",
-            justifyContent: "space-between"
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "4px" /* Added gap for better spacing */
           }}>
             <span>{t("prescription")}</span>
             {!isRtl && <span style={{ fontSize: "10px" }}>وصفة طبية</span>}
@@ -217,7 +221,9 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           borderBottom: "1px solid #ccc", 
           paddingBottom: "2px",
           display: "flex",
-          justifyContent: "space-between"
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "4px" /* Added gap for better spacing */
         }}>
           <span>{t("productDetails")}</span>
           {!isRtl && <span style={{ fontSize: "10px" }}>تفاصيل المنتج</span>}
@@ -260,7 +266,11 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             <div style={{ marginLeft: "2px" }}>
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("type")}:</span>
-                <span>{lensType} {!isRtl ? `(${t("lensType")})` : ""}</span>
+                <span>
+                  {lensType} 
+                  {/* Always include both languages for lens type */}
+                  {isRtl ? ` (${t("lensType")} - Lens Type)` : ` (${t("lensType")} - نوع العدسات)`}
+                </span>
               </div>
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
@@ -278,7 +288,11 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             <div style={{ marginLeft: "2px" }}>
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("type")}:</span>
-                <span>{coating} {!isRtl ? `(${t("coating")})` : ""}</span>
+                <span>
+                  {coating}
+                  {/* Always include both languages for coating */}
+                  {isRtl ? ` (${t("coating")} - Coating)` : ` (${t("coating")} - طلاء)`}
+                </span>
               </div>
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
@@ -310,20 +324,23 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       </div>
       
       <div style={{ 
-        marginBottom: "4px", 
+        marginBottom: "3px", /* Reduced from 4px to 3px */
         fontSize: "11px", 
         border: "1px solid #ccc", 
         padding: "3px",
         borderRadius: "3px",
+        backgroundColor: "#f8f8f8" /* Added light background to make payment section stand out */
       }}>
         <h2 style={{ 
           fontSize: "13px", 
           fontWeight: "bold", 
-          margin: "1px 0 3px 0", 
+          margin: "1px 0 2px 0", /* Reduced from 3px to 2px */
           borderBottom: "1px solid #ccc", 
           paddingBottom: "2px",
           display: "flex",
-          justifyContent: "space-between"
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "4px" /* Added gap for better spacing */
         }}>
           <span>{t("paymentInformation")}</span>
           {!isRtl && <span style={{ fontSize: "11px" }}>معلومات الدفع</span>}
@@ -348,36 +365,39 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           <span>{amountPaid.toFixed(3)} KWD</span>
         </div>
         
+        {/* Enhanced payment status indicators */}
         {isPaid ? (
-          <div style={{ 
+          <div className="payment-paid" style={{ 
             display: "flex", 
             justifyContent: "center", 
             alignItems: "center", 
             gap: "4px",
-            backgroundColor: "#F2FCE2", 
-            padding: "3px", 
-            borderRadius: "3px",
-            margin: "3px 0 1px 0",
+            backgroundColor: "#E6F7E6", 
+            padding: "4px", 
+            borderRadius: "4px",
+            margin: "4px 0 1px 0",
             fontWeight: "bold",
-            fontSize: "12px",
-            border: "1px solid #ccc"
+            fontSize: "13px",
+            border: "1px solid #A3D9A3",
+            color: "#1F7A1F"
           }}>
-            <CheckCircle2 style={{ height: "12px", width: "12px" }} />
-            <span>{t("paidInFull")}</span>
+            <CheckCircle2 style={{ height: "15px", width: "15px" }} />
+            <span>{t("paidInFull")} {isRtl ? "(PAID)" : "(تم الدفع بالكامل)"}</span>
           </div>
         ) : (
-          <div style={{ 
+          <div className="payment-remaining" style={{ 
             display: "flex", 
             justifyContent: "space-between", 
-            backgroundColor: "#FEF2F2", 
-            padding: "3px", 
-            borderRadius: "3px",
-            margin: "3px 0 1px 0",
+            backgroundColor: "#FEE2E2", 
+            padding: "4px", 
+            borderRadius: "4px",
+            margin: "4px 0 1px 0",
             fontWeight: "bold",
-            fontSize: "12px",
-            border: "1px solid #FECACA"
+            fontSize: "13px",
+            border: "1px solid #FECACA",
+            color: "#B91C1C"
           }}>
-            <span>{t("remaining")}:</span>
+            <span>{t("remaining")} {isRtl ? "(REMAINING)" : "(المتبقي)"}:</span>
             <span>{remaining.toFixed(3)} KWD</span>
           </div>
         )}

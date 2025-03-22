@@ -84,25 +84,25 @@
     padding: 0 !important;
     height: auto !important;
     width: auto !important;
-    overflow: visible !important;
+    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
   }
   
   body * {
     visibility: hidden;
-    overflow: visible !important;
+    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
   }
   
   .print-receipt, .print-receipt *, 
   .print-container, .print-container * {
     visibility: visible;
-    overflow: visible !important;
+    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
   }
   
   .print-receipt, .print-container {
     position: absolute;
     left: 0;
     top: 0;
-    overflow: visible !important;
+    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
   }
   
   /* Hide scrollbars when printing */
@@ -124,12 +124,12 @@
     height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: visible !important;
+    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
   }
   
   body.printing * {
     visibility: visible !important;
-    overflow: visible !important;
+    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
   }
   
   /* Ensure only one copy prints */
@@ -149,7 +149,7 @@
     width: 100mm;
     height: 16mm;
     page-break-inside: avoid;
-    overflow: visible !important;
+    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
     position: relative;
     margin: 0;
     padding: 0;
@@ -184,7 +184,7 @@
 .thermal-print {
   width: 80mm !important;
   font-family: 'Yrsa', serif !important;
-  overflow: visible !important;
+  overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
 }
 
 .thermal-print[dir="rtl"] {
@@ -198,9 +198,9 @@
     width: 80mm !important;
     max-width: 80mm !important;
     margin: 0 !important;
-    padding: 4mm !important;
+    padding: 3mm !important; /* Reduced padding to fit more content */
     font-family: 'Yrsa', serif !important;
-    overflow: visible !important;
+    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
   }
   
   /* RTL thermal printing */
@@ -212,7 +212,7 @@
   .print-receipt, #work-order-receipt {
     page-break-after: always !important;
     page-break-inside: avoid !important;
-    overflow: visible !important;
+    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
   }
   
   /* Critical fix for ensuring only one copy prints */
@@ -222,11 +222,46 @@
     page-break-after: always !important;
     visibility: visible !important;
     position: relative !important;
-    overflow: visible !important;
+    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
   }
   
   /* Hide the preview text in actual prints */
   .preview-text {
     display: none !important;
+  }
+  
+  /* Optimize bottom spacing */
+  .signature-section {
+    margin-top: 2mm !important;
+    padding-top: 1mm !important;
+  }
+  
+  /* Payment status indicators */
+  .payment-paid {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 2px !important;
+    background-color: #E6F7E6 !important;
+    padding: 2px !important;
+    border-radius: 3px !important;
+    margin: 2px 0 !important;
+    font-weight: bold !important;
+    font-size: 12px !important;
+    border: 1px solid #A3D9A3 !important;
+    color: #1F7A1F !important;
+  }
+  
+  .payment-remaining {
+    display: flex !important;
+    justify-content: space-between !important;
+    background-color: #FEE2E2 !important;
+    padding: 2px !important;
+    border-radius: 3px !important;
+    margin: 2px 0 !important;
+    font-weight: bold !important;
+    font-size: 12px !important;
+    border: 1px solid #FECACA !important;
+    color: #B91C1C !important;
   }
 }

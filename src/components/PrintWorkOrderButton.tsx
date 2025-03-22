@@ -111,8 +111,9 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   };
   
   const showPrintSelector = (invoiceToUse: Invoice) => {
-    // Create and append WorkOrderPrintSelector
+    // Create the print selector with proper styling for printing
     const selectorContainer = document.createElement('div');
+    selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars
     document.body.appendChild(selectorContainer);
     
     const selector = (
