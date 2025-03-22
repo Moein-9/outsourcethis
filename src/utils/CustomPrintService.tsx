@@ -82,6 +82,8 @@ export const CustomPrintService = {
       .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
       .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
       .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+      .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+      .px-4 { padding-left: 1rem; padding-right: 1rem; }
       .pl-2 { padding-left: 0.5rem; }
       .pb-1 { padding-bottom: 0.25rem; }
       .pb-2 { padding-bottom: 0.5rem; }
@@ -149,31 +151,66 @@ export const CustomPrintService = {
       />
     );
 
-    // Print after resources are loaded
-    printWindow.onload = function() {
-      setTimeout(() => {
-        try {
-          // Force Chrome's print dialog instead of browser's default print dialog
-          if (printWindow.document.execCommand) {
-            printWindow.document.execCommand('print', false, null);
-          } else {
-            printWindow.print();
+    // Script to ensure print dialog opens immediately after content loads
+    const script = document.createElement('script');
+    script.innerHTML = `
+      window.onload = function() {
+        setTimeout(function() {
+          window.focus();
+          try {
+            if (window.chrome) {
+              // Try to force Chrome's print dialog specifically
+              document.execCommand('print', false, null);
+            } else {
+              window.print();
+            }
+            // Notify parent window that printing has started
+            window.opener && window.opener.postMessage('print-started', '*');
+          } catch (e) {
+            console.error('Print error:', e);
+            // Fallback to regular print
+            window.print();
+            window.opener && window.opener.postMessage('print-fallback', '*');
           }
-          
-          // Notify success
-          toast({
-            title: t("printJobSent"),
-            description: t("printJobSentDescription"),
-          });
-        } catch (error) {
-          console.error('Print error:', error);
-          toast({
-            title: t("error"),
-            description: t("printError"),
-            variant: "destructive"
-          });
+        }, 800);
+      };
+      
+      // Backup in case onload doesn't fire properly
+      setTimeout(function() {
+        window.focus();
+        try {
+          if (window.chrome) {
+            document.execCommand('print', false, null);
+          } else {
+            window.print();
+          }
+        } catch (e) {
+          console.error('Print timeout fallback:', e);
+          window.print();
         }
-      }, 500);
+      }, 1500);
+    `;
+    printWindow.document.body.appendChild(script);
+
+    // Listen for messages from the print window
+    const messageHandler = (event: MessageEvent) => {
+      if (event.data === 'print-started' || event.data === 'print-fallback') {
+        // Notify success after we know print dialog has opened
+        toast({
+          title: t("printJobSent"),
+          description: t("printJobSentDescription"),
+        });
+        window.removeEventListener('message', messageHandler);
+      }
     };
+    window.addEventListener('message', messageHandler);
+
+    // Fallback toast in case no message is received
+    setTimeout(() => {
+      toast({
+        title: t("printJobSent"),
+        description: t("printJobSentDescription"),
+      });
+    }, 2000);
   }
 };
