@@ -58,6 +58,77 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const invoiceNumber = invoice?.invoiceId || invoice?.workOrderId || workOrder?.id || `WO${Date.now().toString().slice(-6)}`;
   
+  // Function to get both Arabic and English names for lens types (based on the screenshot)
+  const getBilingualLensType = (type: string) => {
+    // This is a simple mapping - you might want to enhance this with more accurate translations
+    const lensTypeMap: Record<string, { ar: string, en: string }> = {
+      'reading': { ar: 'نظارات طبية للقراءة', en: 'reading' },
+      'distance': { ar: 'نظارات للنظر البعيد', en: 'distance' },
+      'bifocal': { ar: 'عدسات ثنائية', en: 'bifocal' },
+      'progressive': { ar: 'عدسات تقدمية', en: 'progressive' },
+      'sunglasses': { ar: 'عدسات شمسية', en: 'sunglasses' },
+      // Add more mappings as needed
+    };
+    
+    // Find the exact match or closest match
+    const exactMatch = Object.entries(lensTypeMap).find(([key]) => 
+      key.toLowerCase() === type.toLowerCase()
+    );
+    
+    if (exactMatch) {
+      return exactMatch[1];
+    }
+    
+    // If no exact match, find if the type contains any of the keys
+    const partialMatch = Object.entries(lensTypeMap).find(([key]) => 
+      type.toLowerCase().includes(key.toLowerCase())
+    );
+    
+    if (partialMatch) {
+      return partialMatch[1];
+    }
+    
+    // Default fallback
+    return { ar: type, en: type };
+  };
+  
+  // Function to get both Arabic and English names for coating
+  const getBilingualCoating = (coatingType: string) => {
+    // This is a simple mapping - you might want to enhance this with more accurate translations
+    const coatingMap: Record<string, { ar: string, en: string }> = {
+      'anti-reflective': { ar: 'طلاء مضاد للانعكاس', en: 'anti-reflective' },
+      'blue light': { ar: 'طلاء مضاد للضوء الأزرق', en: 'blue light' },
+      'photochromic': { ar: 'طلاء متغير اللون', en: 'photochromic' },
+      'scratch resistant': { ar: 'طلاء مقاوم للخدوش', en: 'scratch resistant' },
+      // Add more mappings as needed
+    };
+    
+    // Find the exact match or closest match
+    const exactMatch = Object.entries(coatingMap).find(([key]) => 
+      key.toLowerCase() === coatingType.toLowerCase()
+    );
+    
+    if (exactMatch) {
+      return exactMatch[1];
+    }
+    
+    // If no exact match, find if the type contains any of the keys
+    const partialMatch = Object.entries(coatingMap).find(([key]) => 
+      coatingType.toLowerCase().includes(key.toLowerCase())
+    );
+    
+    if (partialMatch) {
+      return partialMatch[1];
+    }
+    
+    // Default fallback
+    return { ar: coatingType, en: coatingType };
+  };
+  
+  // Get bilingual descriptions for lens type and coating
+  const lensTypeInfo = lensType ? getBilingualLensType(lensType) : null;
+  const coatingInfo = coating ? getBilingualCoating(coating) : null;
+  
   return (
     <div 
       className={`${dirClass} print-receipt`} 
@@ -126,7 +197,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Prescription Information - English format & Reduced spacing */}
+      {/* Prescription Information - Keep LTR format for RX table */}
       {rx && (
         <div className="mb-1">
           <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
@@ -214,7 +285,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </div>
           )}
           
-          {/* Lens section */}
+          {/* Lens section - Updated with bilingual display */}
           {lensType && (
             <div className="mb-1">
               <div className="font-semibold border-b pb-0.5 mb-0.5">
@@ -223,7 +294,10 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
-                  <span>{lensType}</span>
+                  <div className="text-right">
+                    <div className="font-semibold">{lensTypeInfo?.ar || lensType}</div>
+                    <div className="text-[8px] text-muted-foreground">{lensTypeInfo?.en || ""}</div>
+                  </div>
                 </div>
                 {lensPrice > 0 && (
                   <div className="flex justify-between">
@@ -235,7 +309,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </div>
           )}
           
-          {/* Coating section */}
+          {/* Coating section - Updated with bilingual display */}
           {coating && (
             <div className="mb-1">
               <div className="font-semibold border-b pb-0.5 mb-0.5">
@@ -244,7 +318,10 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
-                  <span>{coating}</span>
+                  <div className="text-right">
+                    <div className="font-semibold">{coatingInfo?.ar || coating}</div>
+                    <div className="text-[8px] text-muted-foreground">{coatingInfo?.en || ""}</div>
+                  </div>
                 </div>
                 {coatingPrice > 0 && (
                   <div className="flex justify-between">
