@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -118,50 +117,54 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      {/* Customer Information Card - More compact design */}
+      {/* Customer Information Card - More compact design with side-by-side translation */}
       <div className="mb-2 border-2 border-black rounded p-1.5">
         <div className="flex items-center justify-between mb-1 border-b border-gray-400 pb-1">
-          <span className="font-bold text-base">{t("customerInfo")}</span>
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1">
             <User className="w-4 h-4" />
-            <span className="font-bold text-sm">{name}</span>
+            <span className="font-bold text-base">
+              {isRtl ? "معلومات العميل | Customer Info" : "Customer Info | معلومات العميل"}
+            </span>
           </div>
+          <span className="font-bold text-sm">{name}</span>
         </div>
         
         {phone && (
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-sm">{t("phone")}:</span>
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1">
               <Phone className="w-3.5 h-3.5" />
-              <span className="font-semibold text-sm">{phone}</span>
+              <span className="font-semibold text-sm">{t("phone")}:</span>
             </div>
+            <span className="font-semibold text-sm">{phone}</span>
           </div>
         )}
       </div>
 
-      {/* Invoice Details - Compact horizontal layout */}
+      {/* Invoice Number - Compact horizontal layout with side-by-side translation */}
       <div className="mb-2 border-2 border-black rounded p-1.5">
         <div className="flex items-center justify-between mb-1 border-b border-gray-400 pb-1">
-          <span className="font-bold text-base">{t("invoiceDetails")}</span>
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1">
             <Receipt className="w-4 h-4" />
-            <span className="font-bold text-sm">#{invoice.invoiceId}</span>
+            <span className="font-bold text-base">
+              {isRtl ? "رقم الفاتورة | Invoice Number" : "Invoice Number | رقم الفاتورة"}
+            </span>
           </div>
+          <span className="font-bold text-sm">#{invoice.invoiceId}</span>
         </div>
         
         <div className="flex justify-between items-center">
-          <span className="font-semibold text-sm">{t("date")}:</span>
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
-            <span className="font-semibold text-sm">{format(new Date(invoice.createdAt), 'dd/MM/yyyy')}</span>
+            <span className="font-semibold text-sm">{t("date")}:</span>
           </div>
+          <span className="font-semibold text-sm">{format(new Date(invoice.createdAt), 'dd/MM/yyyy')}</span>
         </div>
       </div>
 
-      {/* Products Section - More compact with less padding */}
+      {/* Products Section - More compact with less padding and side-by-side translation */}
       <div className="mb-2">
         <div className="text-center py-0.5 bg-black text-white mb-1 font-bold text-base rounded">
-          {t("products")}
+          {isRtl ? "المنتجات | Products" : "Products | المنتجات"}
         </div>
         
         <div>
@@ -173,39 +176,39 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                   <div className="font-bold text-sm">{lens.brand} {lens.type}</div>
                   <div className="text-xs font-medium">{lens.power}</div>
                 </div>
-                <span className="font-bold text-sm">{lens.price.toFixed(3)} KWD</span>
+                <span className="font-bold text-sm pr-1">{lens.price.toFixed(3)} KWD</span>
               </div>
             ))
           ) : (
-            // Normal glasses rendering
+            // Normal glasses rendering in specific order: Frame, Lenses, Coating
             <>
+              {frameBrand && (
+                <div className="flex justify-between mb-1 border-b border-gray-300 pb-1">
+                  <div>
+                    <div className="font-bold text-sm">{isRtl ? "الإطار | Frame" : "Frame | الإطار"}</div>
+                    <div className="text-xs font-medium">{frameBrand} {frameModel}</div>
+                  </div>
+                  <span className="font-bold text-sm pr-1">{frameP.toFixed(3)} KWD</span>
+                </div>
+              )}
+              
               {lens && (
                 <div className="flex justify-between mb-1 border-b border-gray-300 pb-1">
                   <div>
-                    <div className="font-bold text-sm">{t("lenses")}</div>
+                    <div className="font-bold text-sm">{isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}</div>
                     <div className="text-xs font-medium">{lens}</div>
                   </div>
-                  <span className="font-bold text-sm">{lensP.toFixed(3)} KWD</span>
+                  <span className="font-bold text-sm pr-1">{lensP.toFixed(3)} KWD</span>
                 </div>
               )}
               
               {coat && (
                 <div className="flex justify-between mb-1 border-b border-gray-300 pb-1">
                   <div>
-                    <div className="font-bold text-sm">{t("coating")}</div>
+                    <div className="font-bold text-sm">{isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}</div>
                     <div className="text-xs font-medium">{coat}</div>
                   </div>
-                  <span className="font-bold text-sm">{coatP.toFixed(3)} KWD</span>
-                </div>
-              )}
-              
-              {frameBrand && (
-                <div className="flex justify-between mb-1 border-b border-gray-300 pb-1">
-                  <div>
-                    <div className="font-bold text-sm">{t("frame")}</div>
-                    <div className="text-xs font-medium">{frameBrand} {frameModel}</div>
-                  </div>
-                  <span className="font-bold text-sm">{frameP.toFixed(3)} KWD</span>
+                  <span className="font-bold text-sm pr-1">{coatP.toFixed(3)} KWD</span>
                 </div>
               )}
             </>
@@ -218,25 +221,25 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         <div className="space-y-1">
           <div className="flex justify-between text-sm">
             <span className="font-bold">{t("subtotal")}:</span>
-            <span className="font-semibold">{(tot + disc).toFixed(3)} KWD</span>
+            <span className="font-semibold pr-1">{(tot + disc).toFixed(3)} KWD</span>
           </div>
           {disc > 0 && (
             <div className="flex justify-between text-sm">
               <span className="font-bold">{t("discount")}:</span>
-              <span className="font-semibold">-{disc.toFixed(3)} KWD</span>
+              <span className="font-semibold pr-1">-{disc.toFixed(3)} KWD</span>
             </div>
           )}
           <div className="flex justify-between pt-0.5 mt-0.5 border-t-2 border-black">
             <span className="font-bold text-base">{t("total")}:</span>
-            <span className="font-bold text-base">{tot.toFixed(3)} KWD</span>
+            <span className="font-bold text-base pr-1">{tot.toFixed(3)} KWD</span>
           </div>
         </div>
       </div>
 
-      {/* Payment Section - More compact display */}
+      {/* Payment Section - More compact display with side-by-side translation */}
       <div className="mb-2">
         <div className="text-center py-0.5 bg-black text-white mb-1 font-bold text-base rounded">
-          {t("payments")}
+          {isRtl ? "الدفع | Payment" : "Payment | الدفع"}
         </div>
         
         <div>
@@ -252,7 +255,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                   {payment.authNumber && <span> - {payment.authNumber}</span>}
                 </div>
               </div>
-              <span className="font-bold text-sm">{payment.amount.toFixed(3)} KWD</span>
+              <span className="font-bold text-sm pr-1">{payment.amount.toFixed(3)} KWD</span>
             </div>
           )) || (
             <div className="flex justify-between mb-1 pb-1 border-b border-gray-300">
@@ -266,14 +269,14 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                   {auth && <span> - {auth}</span>}
                 </div>
               </div>
-              <span className="font-bold text-sm">{dep.toFixed(3)} KWD</span>
+              <span className="font-bold text-sm pr-1">{dep.toFixed(3)} KWD</span>
             </div>
           )}
           
           {rem > 0 ? (
             <div className="flex justify-between font-bold mt-1 pt-1 border-t-2 border-black">
               <span className="text-base">{t("remaining")}:</span>
-              <span className="text-base">{rem.toFixed(3)} KWD</span>
+              <span className="text-base pr-1">{rem.toFixed(3)} KWD</span>
             </div>
           ) : (
             <div className="flex items-center justify-center gap-1 mt-1 font-bold border-2 border-black py-1 rounded">
@@ -296,7 +299,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
       
-      {/* Updated Print-specific styles for more compact printing */}
+      {/* Print-specific styles */}
       <style>
         {`
           @media print {
