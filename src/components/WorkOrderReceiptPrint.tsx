@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -100,11 +101,11 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       
       <div style={{ marginBottom: "4px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "2px" }}>
-          <span style={{ fontWeight: "bold" }}>{t("workOrderNumber")}:</span> 
+          <span style={{ fontWeight: "bold" }}>{isRtl ? "رقم أمر العمل" : "Work Order Number"}:</span> 
           <span>{invoiceNumber}</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "2px" }}>
-          <span style={{ fontWeight: "bold" }}>{t("date")}:</span>
+          <span style={{ fontWeight: "bold" }}>{isRtl ? "التاريخ" : "Date"}:</span>
           <span>{formatDate(invoice.createdAt)}</span>
         </div>
       </div>
@@ -121,9 +122,17 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           justifyContent: "space-between",
           gap: "4px"
         }}>
-          <span>{t("patientInformation")}</span>
-          {!isRtl && <span style={{ fontSize: "10px" }}>معلومات المريض</span>}
-          {isRtl && <span style={{ fontSize: "10px" }}>Patient Info</span>}
+          {isRtl ? (
+            <>
+              <span>معلومات المريض</span>
+              <span style={{ fontSize: "10px" }}>patient Information</span>
+            </>
+          ) : (
+            <>
+              <span>patient Information</span>
+              <span style={{ fontSize: "10px" }}>معلومات المريض</span>
+            </>
+          )}
         </h2>
         <div style={{ marginLeft: "2px" }}>
           <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
@@ -152,9 +161,17 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             justifyContent: "space-between",
             gap: "4px"
           }}>
-            <span>{t("prescription")}</span>
-            {!isRtl && <span style={{ fontSize: "10px" }}>وصفة طبية</span>}
-            {isRtl && <span style={{ fontSize: "10px" }}>Prescription</span>}
+            {isRtl ? (
+              <>
+                <span>تفاصيل الوصفة الطبية</span>
+                <span style={{ fontSize: "10px" }}>prescription Details</span>
+              </>
+            ) : (
+              <>
+                <span>prescription Details</span>
+                <span style={{ fontSize: "10px" }}>تفاصيل الوصفة الطبية</span>
+              </>
+            )}
           </h2>
           
           <table style={{ 
@@ -224,33 +241,41 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           justifyContent: "space-between",
           gap: "4px"
         }}>
-          <span>{t("productDetails")}</span>
-          {!isRtl && <span style={{ fontSize: "10px" }}>تفاصيل المنتج</span>}
-          {isRtl && <span style={{ fontSize: "10px" }}>Product Details</span>}
+          {isRtl ? (
+            <>
+              <span>تفاصيل المنتج</span>
+              <span style={{ fontSize: "10px" }}>product Details</span>
+            </>
+          ) : (
+            <>
+              <span>product Details</span>
+              <span style={{ fontSize: "10px" }}>تفاصيل المنتج</span>
+            </>
+          )}
         </h2>
         
         {frame && (
           <div style={{ marginBottom: "3px" }}>
             <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
-              {t("frame")} {!isRtl ? "(الإطار)" : "(Frame)"}
+              {isRtl ? 'الإطار' : 'Frame'} {isRtl ? <span style={{ fontSize: "10px" }}>(Frame)</span> : <span style={{ fontSize: "10px" }}>(الإطار)</span>}
             </h3>
             <div style={{ marginLeft: "2px" }}>
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: "bold" }}>{t("brand")}/{t("model")}:</span>
+                <span style={{ fontWeight: "bold" }}>{isRtl ? "الماركة/الموديل" : "Brand/Model"}:</span>
                 <span>{frame.brand} {frame.model}</span>
               </div>
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: "bold" }}>{t("color")}:</span>
+                <span style={{ fontWeight: "bold" }}>{isRtl ? "اللون" : "Color"}:</span>
                 <span>{frame.color}</span>
               </div>
               {frame.size && (
                 <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: "bold" }}>{t("size")}:</span>
+                  <span style={{ fontWeight: "bold" }}>{isRtl ? "الحجم" : "Size"}:</span>
                   <span>{frame.size}</span>
                 </div>
               )}
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
+                <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
                 <span>{frame.price.toFixed(3)} KWD</span>
               </div>
             </div>
@@ -260,19 +285,15 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         {lensType && (
           <div style={{ marginBottom: "3px" }}>
             <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
-              {t("lensType")} {!isRtl ? "(العدسات الطبية)" : "(Lenses)"}
+              {isRtl ? 'العدسات الطبية' : 'Lenses'} {isRtl ? <span style={{ fontSize: "10px" }}>(Lenses)</span> : <span style={{ fontSize: "10px" }}>(العدسات الطبية)</span>}
             </h3>
             <div style={{ marginLeft: "2px" }}>
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: "bold" }}>{t("type")}:</span>
-                <span>
-                  {lensType} 
-                  {/* Always include both languages for lens type */}
-                  {isRtl ? ` (${t("lensType")} - Lens Type)` : ` (${t("lensType")} - نوع العدسات)`}
-                </span>
+                <span style={{ fontWeight: "bold" }}>{isRtl ? "النوع" : "Type"}:</span>
+                <span>{lensType}</span>
               </div>
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
+                <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
                 <span>{invoice.lensPrice.toFixed(3)} KWD</span>
               </div>
             </div>
@@ -282,19 +303,15 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         {coating && (
           <div style={{ marginBottom: "3px" }}>
             <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
-              {t("coating")} {!isRtl ? "(الطلاء)" : "(Coating)"}
+              {isRtl ? 'الطلاء' : 'Coating'} {isRtl ? <span style={{ fontSize: "10px" }}>(Coating)</span> : <span style={{ fontSize: "10px" }}>(الطلاء)</span>}
             </h3>
             <div style={{ marginLeft: "2px" }}>
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: "bold" }}>{t("type")}:</span>
-                <span>
-                  {coating}
-                  {/* Always include both languages for coating */}
-                  {isRtl ? ` (${t("coating")} - Coating)` : ` (${t("coating")} - طلاء)`}
-                </span>
+                <span style={{ fontWeight: "bold" }}>{isRtl ? "النوع" : "Type"}:</span>
+                <span>{coating}</span>
               </div>
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
+                <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
                 <span>{invoice.coatingPrice.toFixed(3)} KWD</span>
               </div>
             </div>
@@ -304,16 +321,16 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         {contactLenses && contactLenses.length > 0 && (
           <div style={{ marginBottom: "3px" }}>
             <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
-              {t("contactLenses")} {!isRtl ? "(العدسات اللاصقة)" : "(Contact Lenses)"}
+              {isRtl ? 'العدسات اللاصقة' : 'Contact Lenses'} {isRtl ? <span style={{ fontSize: "10px" }}>(Contact Lenses)</span> : <span style={{ fontSize: "10px" }}>(العدسات اللاصقة)</span>}
             </h3>
             {contactLenses.slice(0, 2).map((lens, index) => (
               <div key={index} style={{ marginLeft: "2px", marginBottom: "1px" }}>
                 <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: "bold" }}>{t("brand")}:</span>
+                  <span style={{ fontWeight: "bold" }}>{isRtl ? "الماركة" : "Brand"}:</span>
                   <span>{lens.brand}</span>
                 </div>
                 <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: "bold" }}>{t("price")}:</span>
+                  <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
                   <span>{lens.price.toFixed(3)} KWD</span>
                 </div>
               </div>
@@ -323,44 +340,52 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       </div>
       
       <div style={{ 
-        marginBottom: "3px", /* Reduced from 4px to 3px */
+        marginBottom: "3px",
         fontSize: "11px", 
         border: "1px solid #ccc", 
         padding: "3px",
         borderRadius: "3px",
-        backgroundColor: "#f8f8f8" /* Added light background to make payment section stand out */
+        backgroundColor: "#f8f8f8"
       }}>
         <h2 style={{ 
           fontSize: "13px", 
           fontWeight: "bold", 
-          margin: "1px 0 2px 0", /* Reduced from 3px to 2px */
+          margin: "1px 0 2px 0",
           borderBottom: "1px solid #ccc", 
           paddingBottom: "2px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "4px" /* Added gap for better spacing */
+          gap: "4px"
         }}>
-          <span>{t("paymentInformation")}</span>
-          {!isRtl && <span style={{ fontSize: "11px" }}>معلومات الدفع</span>}
-          {isRtl && <span style={{ fontSize: "11px" }}>Payment Info</span>}
+          {isRtl ? (
+            <>
+              <span>معلومات الدفع</span>
+              <span style={{ fontSize: "11px" }}>payment Information</span>
+            </>
+          ) : (
+            <>
+              <span>payment Information</span>
+              <span style={{ fontSize: "11px" }}>معلومات الدفع</span>
+            </>
+          )}
         </h2>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px" }}>
-          <span style={{ fontWeight: "bold" }}>{t("subtotal")}:</span>
+          <span style={{ fontWeight: "bold" }}>{isRtl ? "المجموع الفرعي" : "Subtotal"}:</span>
           <span>{subtotal.toFixed(3)} KWD</span>
         </div>
         {invoice.discount > 0 && (
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px" }}>
-            <span style={{ fontWeight: "bold" }}>{t("discount")}:</span>
+            <span style={{ fontWeight: "bold" }}>{isRtl ? "الخصم" : "Discount"}:</span>
             <span>-{invoice.discount.toFixed(3)} KWD</span>
           </div>
         )}
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px" }}>
-          <span style={{ fontWeight: "bold" }}>{t("total")}:</span>
+          <span style={{ fontWeight: "bold" }}>{isRtl ? "المجموع" : "Total"}:</span>
           <span>{invoice.total.toFixed(3)} KWD</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px" }}>
-          <span style={{ fontWeight: "bold" }}>{t("paid")}:</span>
+          <span style={{ fontWeight: "bold" }}>{isRtl ? "المدفوع" : "Paid"}:</span>
           <span>{amountPaid.toFixed(3)} KWD</span>
         </div>
         
@@ -381,7 +406,11 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             color: "#1F7A1F"
           }}>
             <CheckCircle2 style={{ height: "15px", width: "15px" }} />
-            <span>{t("paidInFull")} {isRtl ? "(PAID)" : "(تم الدفع بالكامل)"}</span>
+            {isRtl ? (
+              <span>تم الدفع بالكامل (PAID IN FULL)</span>
+            ) : (
+              <span>PAID IN FULL (تم الدفع بالكامل)</span>
+            )}
           </div>
         ) : (
           <div className="payment-remaining" style={{ 
@@ -392,14 +421,61 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             borderRadius: "4px",
             margin: "4px 0 1px 0",
             fontWeight: "bold",
-            fontSize: "13px",
+            fontSize: "15px", /* Increased from 13px to 15px to make it more prominent */
             border: "1px solid #FECACA",
             color: "#B91C1C"
           }}>
-            <span>{t("remaining")} {isRtl ? "(REMAINING)" : "(المتبقي)"}:</span>
+            {isRtl ? (
+              <span>المتبقي (REMAINING):</span>
+            ) : (
+              <span>REMAINING (المتبقي):</span>
+            )}
             <span>{remaining.toFixed(3)} KWD</span>
           </div>
         )}
+      </div>
+
+      {/* Added quality confirmation section as shown in screenshot */}
+      <div style={{ marginTop: "10px", borderTop: "1px dashed #000", paddingTop: "5px" }}>
+        <div style={{ marginBottom: "8px" }}>
+          <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            {isRtl ? (
+              <>
+                <span>تأكيد الجودة</span>
+                <span style={{ fontSize: "10px" }}>quality Confirmation</span>
+              </>
+            ) : (
+              <>
+                <span>quality Confirmation</span>
+                <span style={{ fontSize: "10px" }}>تأكيد الجودة</span>
+              </>
+            )}
+          </h3>
+          <div style={{ borderBottom: "1px solid #ccc", height: "15px", marginTop: "5px" }}></div>
+          <div style={{ display: "flex", justifyContent: "flex-end", fontSize: "9px", marginTop: "2px" }}>
+            <span>{isRtl ? "التاريخ" : "Date"}: ____ /____ /____</span>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: "5px" }}>
+          <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            {isRtl ? (
+              <>
+                <span>توقيع الفني</span>
+                <span style={{ fontSize: "10px" }}>technician Signature</span>
+              </>
+            ) : (
+              <>
+                <span>technician Signature</span>
+                <span style={{ fontSize: "10px" }}>توقيع الفني</span>
+              </>
+            )}
+          </h3>
+          <div style={{ borderBottom: "1px solid #ccc", height: "15px", marginTop: "5px" }}></div>
+          <div style={{ display: "flex", justifyContent: "flex-end", fontSize: "9px", marginTop: "2px" }}>
+            <span>{isRtl ? "التاريخ" : "Date"}: ____ /____ /____</span>
+          </div>
+        </div>
       </div>
       
       <div style={{ borderTop: "1px dashed #000", margin: "2px 0", paddingTop: "2px" }}></div>
