@@ -2,6 +2,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
+import { toast } from '@/hooks/use-toast';
+import { useLanguageStore } from '@/store/languageStore';
 
 export const CustomPrintService = {
   printWorkOrder: (workOrder: any, invoice?: any, patient?: any) => {
@@ -11,6 +13,11 @@ export const CustomPrintService = {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       console.error('Failed to open print window');
+      toast({
+        title: "Error",
+        description: "Failed to open print window. Please check your browser settings.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -51,6 +58,7 @@ export const CustomPrintService = {
       .font-bold { font-weight: bold; }
       .font-semibold { font-weight: 600; }
       .border-b { border-bottom: 1px solid #ccc; }
+      .border-t { border-top: 1px solid #ccc; }
       .border-dashed { border-style: dashed; }
       .border { border: 1px solid; }
       .border-black { border-color: black; }
@@ -65,14 +73,18 @@ export const CustomPrintService = {
       .mt-2 { margin-top: 0.5rem; }
       .mt-4 { margin-top: 1rem; }
       .mx-auto { margin-left: auto; margin-right: auto; }
+      .p-1 { padding: 0.25rem; }
       .p-2 { padding: 0.5rem; }
       .p-3 { padding: 0.75rem; }
+      .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
       .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
       .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
       .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
       .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
       .pl-2 { padding-left: 0.5rem; }
+      .pb-1 { padding-bottom: 0.25rem; }
       .pb-2 { padding-bottom: 0.5rem; }
+      .pt-2 { padding-top: 0.5rem; }
       .grid { display: grid; }
       .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid-cols-8 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
@@ -80,45 +92,75 @@ export const CustomPrintService = {
       .gap-2 { gap: 0.5rem; }
       .gap-x-1 { column-gap: 0.25rem; }
       .flex { display: flex; }
+      .flex-1 { flex: 1 1 0%; }
       .flex-col { flex-direction: column; }
+      .space-y-0.5 > * + * { margin-top: 0.125rem; }
       .space-y-1 > * + * { margin-top: 0.25rem; }
+      .space-y-1.5 > * + * { margin-top: 0.375rem; }
       .space-y-2 > * + * { margin-top: 0.5rem; }
       .justify-between { justify-content: space-between; }
       .justify-center { justify-content: center; }
       .items-center { align-items: center; }
+      .h-4 { height: 1rem; }
       .h-8 { height: 2rem; }
       .h-10 { height: 2.5rem; }
+      .h-14 { height: 3.5rem; }
+      .w-4 { width: 1rem; }
+      .w-auto { width: auto; }
       .w-full { width: 100%; }
       .bg-green-100 { background-color: #dcfce7; }
       .bg-red-100 { background-color: #fee2e2; }
-      .bg-green-500 { background-color: #22c55e; }
-      .bg-red-500 { background-color: #ef4444; }
+      .bg-muted { background-color: #f3f4f6; }
+      .bg-muted\\/50 { background-color: rgba(243, 244, 246, 0.5); }
+      .text-muted-foreground { color: #6b7280; }
       .text-white { color: white; }
       .text-green-600 { color: #16a34a; }
       .text-green-700 { color: #15803d; }
       .text-red-600 { color: #dc2626; }
       .text-red-700 { color: #b91c1c; }
       .text-blue-500 { color: #3b82f6; }
+      .text-base { font-size: 1rem; line-height: 1.5rem; }
+      .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+      .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+      .text-xs { font-size: 0.75rem; line-height: 1rem; }
+      .text-\\[9px\\] { font-size: 9px; }
+      .border-y { border-top: 1px solid; border-bottom: 1px solid; border-color: #e5e7eb; }
+      .border { border: 1px solid #e5e7eb; }
       .rtl { direction: rtl; }
       .ltr { direction: ltr; }
     `;
     printWindow.document.head.appendChild(style);
 
     // Render the receipt
+    const { language, t } = useLanguageStore.getState();
+    
     createRoot(container).render(
       <CustomWorkOrderReceipt
         workOrder={workOrder}
         invoice={invoice}
         patient={patient}
+        isPrintable={true}
       />
     );
 
     // Print after resources are loaded
     printWindow.onload = function() {
       setTimeout(() => {
-        printWindow.print();
-        // Close window automatically after printing
-        // printWindow.close();
+        try {
+          printWindow.print();
+          // Notify success
+          toast({
+            title: t("printJobSent"),
+            description: t("printJobSentDescription"),
+          });
+        } catch (error) {
+          console.error('Print error:', error);
+          toast({
+            title: t("error"),
+            description: t("printError"),
+            variant: "destructive"
+          });
+        }
       }, 500);
     };
   }

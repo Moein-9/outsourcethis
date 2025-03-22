@@ -49,8 +49,15 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   // Payment data
   const total = invoice?.total || workOrder?.total || 0;
   const deposit = invoice?.deposit || workOrder?.deposit || 0;
-  const remaining = invoice?.remaining || workOrder?.remaining || 0;
+  const discount = invoice?.discount || workOrder?.discount || 0;
+  const subtotal = total + discount;
+  const amountPaid = invoice?.payments 
+    ? invoice.payments.reduce((sum, payment) => sum + payment.amount, 0) 
+    : deposit || 0;
+  const remaining = total - amountPaid;
   const isPaid = remaining <= 0;
+  
+  const invoiceNumber = invoice?.invoiceId || invoice?.workOrderId || workOrder?.id || `WO${Date.now().toString().slice(-6)}`;
   
   return (
     <div 
@@ -87,7 +94,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </h3>
         <p className="text-xs">
           {isRtl ? "ORDER #: " : "رقم الطلب: "}
-          {workOrder?.id || invoice?.workOrderId || `WO${Date.now().toString().slice(-6)}`}
+          {invoiceNumber}
         </p>
         <p className="text-xs">
           {format(new Date(), 'yyyy-MM-dd HH:mm')}
@@ -140,22 +147,22 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                 <td className="p-1 border text-center">{rx.sphereOD || "—"}</td>
                 <td className="p-1 border text-center">{rx.cylOD || "—"}</td>
                 <td className="p-1 border text-center">{rx.axisOD || "—"}</td>
-                <td className="p-1 border text-center">{rx.addOD || "—"}</td>
+                <td className="p-1 border text-center">{rx.addOD || rx.add || "—"}</td>
               </tr>
               <tr>
                 <td className="p-1 border font-bold text-center">{t('leftEyeAbbr')}</td>
                 <td className="p-1 border text-center">{rx.sphereOS || "—"}</td>
                 <td className="p-1 border text-center">{rx.cylOS || "—"}</td>
                 <td className="p-1 border text-center">{rx.axisOS || "—"}</td>
-                <td className="p-1 border text-center">{rx.addOS || "—"}</td>
+                <td className="p-1 border text-center">{rx.addOS || rx.add || "—"}</td>
               </tr>
             </tbody>
           </table>
           
           <div className="flex justify-between mt-1 text-xs">
-            <div className="flex space-x-1">
+            <div className="flex gap-1">
               <span className="font-semibold">{t('pd')}:</span>
-              <span>{rx.pdRight || "-"} / {rx.pdLeft || "-"}</span>
+              <span>{rx.pdRight || rx.pdOD || rx.pd || "-"} / {rx.pdLeft || rx.pdOS || rx.pd || "-"}</span>
             </div>
           </div>
         </div>
@@ -198,6 +205,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                     <span>{frameData.size}</span>
                   </div>
                 )}
+                {frameData.price > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isRtl ? "السعر (Price)" : "Price (السعر)"}:</span>
+                    <span>{frameData.price.toFixed(3)} KWD</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -208,11 +221,17 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <div className="font-semibold border-b pb-0.5 mb-1">
                 {isRtl ? "العدسات (Lenses)" : "Lenses (العدسات)"}:
               </div>
-              <div className="px-1">
+              <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
                   <span>{lensType}</span>
                 </div>
+                {lensPrice > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isRtl ? "السعر (Price)" : "Price (السعر)"}:</span>
+                    <span>{lensPrice.toFixed(3)} KWD</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -223,11 +242,17 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <div className="font-semibold border-b pb-0.5 mb-1">
                 {isRtl ? "الطلاء (Coating)" : "Coating (الطلاء)"}:
               </div>
-              <div className="px-1">
+              <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
                   <span>{coating}</span>
                 </div>
+                {coatingPrice > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isRtl ? "السعر (Price)" : "Price (السعر)"}:</span>
+                    <span>{coatingPrice.toFixed(3)} KWD</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -243,13 +268,25 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         
         <div className="space-y-1 text-xs">
           <div className="flex justify-between">
+            <span className="font-semibold">{t("subtotal")}:</span>
+            <span>{subtotal.toFixed(3)} KWD</span>
+          </div>
+          
+          {discount > 0 && (
+            <div className="flex justify-between">
+              <span className="font-semibold">{t("discount")}:</span>
+              <span>-{discount.toFixed(3)} KWD</span>
+            </div>
+          )}
+          
+          <div className="flex justify-between">
             <span className="font-semibold">{t("total")}:</span>
             <span>{total.toFixed(3)} KWD</span>
           </div>
           
           <div className="flex justify-between">
-            <span className="font-semibold">{t("deposit")}:</span>
-            <span>{deposit.toFixed(3)} KWD</span>
+            <span className="font-semibold">{t("paid")}:</span>
+            <span>{amountPaid.toFixed(3)} KWD</span>
           </div>
           
           {/* Payment Status Section */}
