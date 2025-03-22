@@ -109,8 +109,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
     >
       {/* Header Section with Logo - reduced spacing */}
       <div className="text-center border-b pb-1 mb-1">
-        <div className="flex justify-center mb-0">
-          <MoenLogo className="w-auto h-12 mb-0" />
+        <div className="flex justify-center mb-1">
+          <MoenLogo className="w-auto h-14 mb-0" />
         </div>
         <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
         <p className="text-xs text-muted-foreground">{storeInfo.address}</p>
@@ -371,7 +371,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* New Notes Section */}
+      {/* Notes Section */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl 
