@@ -4,7 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
 
 interface PrintWorkOrderButtonProps {
@@ -46,6 +52,11 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto p-0">
         <div className="p-6 flex flex-col items-center">
+          <DialogTitle className="sr-only">{t('workOrderPreview')}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t('previewBeforePrinting')}
+          </DialogDescription>
+          
           <div className="w-full max-w-[80mm] bg-white p-0 border rounded shadow-sm mb-4">
             <CustomWorkOrderReceipt 
               workOrder={workOrder} 

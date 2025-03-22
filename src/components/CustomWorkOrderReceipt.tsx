@@ -225,7 +225,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
                   <div className="text-right">
                     <div className="flex flex-col items-end">
-                      <span className="font-semibold">{getLensTypeArabic(lensType)}</span>
+                      <span className="font-semibold">{lensType === "Distance" ? "نظارات للنظر البعيد" : getLensTypeArabic(lensType)}</span>
                       <span className="border rounded px-1 bg-slate-50 text-xs text-blue-500">{lensType}</span>
                     </div>
                   </div>
