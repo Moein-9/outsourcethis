@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -78,7 +77,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         width: "80mm", 
         fontFamily: isRtl ? "'Zain', sans-serif" : "'Yrsa', serif",
         maxWidth: "80mm",
-        overflow: "hidden", /* Changed from visible to hidden to remove scrollbars */
+        overflow: "hidden", 
         margin: "0 auto",
         padding: "2mm",
         backgroundColor: "white",
@@ -120,7 +119,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "4px" /* Added gap for better spacing */
+          gap: "4px"
         }}>
           <span>{t("patientInformation")}</span>
           {!isRtl && <span style={{ fontSize: "10px" }}>معلومات المريض</span>}
@@ -151,7 +150,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: "4px" /* Added gap for better spacing */
+            gap: "4px"
           }}>
             <span>{t("prescription")}</span>
             {!isRtl && <span style={{ fontSize: "10px" }}>وصفة طبية</span>}
@@ -223,7 +222,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "4px" /* Added gap for better spacing */
+          gap: "4px"
         }}>
           <span>{t("productDetails")}</span>
           {!isRtl && <span style={{ fontSize: "10px" }}>تفاصيل المنتج</span>}
