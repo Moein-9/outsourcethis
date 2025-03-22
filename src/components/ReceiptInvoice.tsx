@@ -1,8 +1,7 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
-import { CheckCircle2, Receipt, CreditCard, Calendar, Phone, User } from "lucide-react";
+import { CheckCircle2, Receipt, CreditCard, Calendar, Phone, User, UserCircle2 } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
@@ -11,7 +10,6 @@ interface ReceiptInvoiceProps {
   invoice: Invoice;
   isPrintable?: boolean;
   
-  // Optional direct props
   patientName?: string;
   patientPhone?: string;
   invoiceType?: "glasses" | "contacts";
@@ -60,7 +58,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const isRtl = language === 'ar';
   const dirClass = isRtl ? 'rtl' : 'ltr';
   
-  // Use either passed props or invoice data
   const name = patientName || invoice.patientName;
   const phone = patientPhone || invoice.patientPhone;
   const lens = lensType || invoice.lensType;
@@ -100,7 +97,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         pageBreakAfter: 'always'
       }}
     >
-      {/* Header Section - Logo and store info */}
       <div className="text-center border-b-2 border-black pb-1 mb-2">
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-10" />
@@ -110,7 +106,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         <p className="text-xs font-medium">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      {/* Receipt Title - Centered with icon */}
       <div className="mb-2 text-center">
         <div className="inline-flex items-center justify-center gap-1 border-2 border-black px-2 py-0.5 rounded">
           <Receipt className="w-4 h-4" />
@@ -118,9 +113,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      {/* Customer Information Section */}
       <div className="mb-2 border-2 border-black rounded p-1.5">
-        {/* Section title - bilingual */}
         <div className="text-center mb-1 border-b border-gray-400 pb-1">
           <div className="flex items-center justify-center gap-1">
             <User className="w-4 h-4" />
@@ -130,10 +123,12 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           </div>
         </div>
         
-        {/* Customer details */}
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-sm">{t("name")}:</span>
+            <div className="flex items-center gap-1">
+              <UserCircle2 className="w-3.5 h-3.5" />
+              <span className="font-semibold text-sm">{t("name")}:</span>
+            </div>
             <span className="font-semibold text-sm">{name}</span>
           </div>
           
@@ -149,9 +144,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      {/* Invoice Number Section */}
       <div className="mb-2 border-2 border-black rounded p-1.5">
-        {/* Section title - bilingual */}
         <div className="text-center mb-1 border-b border-gray-400 pb-1">
           <div className="flex items-center justify-center gap-1">
             <Receipt className="w-4 h-4" />
@@ -161,7 +154,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           </div>
         </div>
         
-        {/* Invoice details */}
         <div className="space-y-1">
           <div className="flex justify-between items-center">
             <span className="font-semibold text-sm">#{invoice.invoiceId}</span>
@@ -173,7 +165,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      {/* Products Section */}
       <div className="mb-2">
         <div className="text-center py-1 bg-black text-white mb-2 font-bold text-base rounded">
           {isRtl ? "المنتجات | Products" : "Products | المنتجات"}
@@ -181,7 +172,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         
         <div className="space-y-2 px-1">
           {isContactLens && contactLenses && contactLenses.length > 0 ? (
-            // Contact lens specific rendering
             contactLenses.map((lens, idx) => (
               <div key={idx} className="p-1.5 border border-gray-300 rounded">
                 <div className="flex justify-between mb-1">
@@ -192,9 +182,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               </div>
             ))
           ) : (
-            // Normal glasses rendering in specific order: Frame, Lenses, Coating
             <div className="space-y-2">
-              {/* Frame */}
               {frameBrand && (
                 <div className="p-1.5 border border-gray-300 rounded">
                   <div className="flex justify-between mb-1">
@@ -205,7 +193,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                 </div>
               )}
               
-              {/* Lenses */}
               {lens && (
                 <div className="p-1.5 border border-gray-300 rounded">
                   <div className="flex justify-between mb-1">
@@ -216,7 +203,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                 </div>
               )}
               
-              {/* Coating */}
               {coat && (
                 <div className="p-1.5 border border-gray-300 rounded">
                   <div className="flex justify-between mb-1">
@@ -231,7 +217,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      {/* Totals Section */}
       <div className="mb-2 border-2 border-black rounded p-1.5">
         <div className="space-y-1">
           <div className="flex justify-between text-sm">
@@ -251,7 +236,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      {/* Payment Section */}
       <div className="mb-2">
         <div className="text-center py-1 bg-black text-white mb-2 font-bold text-base rounded">
           {isRtl ? "الدفع | Payment" : "Payment | الدفع"}
@@ -302,7 +286,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      {/* Footer Section */}
       <div className="text-center mt-3 pt-1 border-t-2 border-black">
         {isRtl ? (
           <p className="font-bold text-sm mb-0">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
@@ -314,7 +297,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
       
-      {/* Print-specific styles */}
       <style>
         {`
           @media print {
@@ -349,13 +331,11 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               max-height: none !important;
             }
             
-            /* Force content to be visible */
             .print-receipt * {
               visibility: visible !important;
               opacity: 1 !important;
             }
             
-            /* Improve dynamic sizing */
             html, body {
               height: auto !important;
               min-height: 0 !important;
@@ -363,21 +343,18 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               overflow: visible !important;
             }
             
-            /* Fix Chrome printing issues */
             body {
               -webkit-print-color-adjust: exact !important;
               color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
             
-            /* Dynamic height adjustment */
             .print-receipt {
               height: fit-content !important;
               min-height: fit-content !important;
               max-height: fit-content !important;
             }
             
-            /* Ensure proper page breaks and avoid blank pages */
             .print-receipt {
               break-inside: avoid !important;
               break-after: avoid-page !important;
@@ -385,7 +362,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               page-break-after: avoid !important;
             }
             
-            /* Fix for Google Cloud Print */
             @supports (-webkit-appearance:none) {
               body, html, #receipt-invoice {
                 height: fit-content !important;
