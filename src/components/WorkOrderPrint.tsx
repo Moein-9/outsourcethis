@@ -67,6 +67,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   } : undefined);
   
   const isContactLens = contactLenses && contactLenses.length > 0;
+  const orderNumber = invoice.invoiceId || invoice.workOrderId || "NEW ORDER";
 
   return (
     <div className="print-wrapper">
@@ -78,9 +79,9 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             }
     
             @page {
-              size: portrait;
-              width: 58mm;
-              margin: 0;
+              size: 80mm auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
             }
 
             /* Reset visibility */
@@ -89,7 +90,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             }
 
             html, body {
-              width: 58mm !important;
+              width: 80mm !important;
               height: auto !important;
               margin: 0 !important;
               padding: 0 !important;
@@ -97,7 +98,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
 
             .print-wrapper {
               visibility: visible !important;
-              width: 58mm !important;
+              width: 80mm !important;
             }
 
             #thermal-print {
@@ -105,267 +106,313 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               position: fixed !important;
               left: 0 !important;
               top: 0 !important;
-              width: 56mm !important;
+              width: 80mm !important;
               padding: 0mm !important;
               margin: 0 !important;
               background: white !important;
             }
 
-            /* Hide everything else */
- 
             /* Content styles */
             .print-section {
-              width: 54mm !important;
-              margin-bottom: 2mm !important;
+              width: 75mm !important;
+              margin-bottom: 3mm !important;
               padding: 0 1mm !important;
             }
 
-            .print-text-lg { font-size: 9pt !important; }
-            .print-text-md { font-size: 8pt !important; }
-            .print-text-sm { font-size: 7pt !important; }
+            .print-text-lg { font-size: 14pt !important; }
+            .print-text-md { font-size: 12pt !important; }
+            .print-text-sm { font-size: 10pt !important; }
 
             table {
               width: 100% !important;
               border-collapse: collapse !important;
+              direction: ltr !important;
             }
 
             td, th {
-              border: 0.1mm solid black !important;
-              padding: 0.5mm !important;
+              border: 0.2mm solid black !important;
+              padding: 1mm !important;
               text-align: center !important;
+              font-size: 9pt !important;
+            }
+            
+            th {
+              font-weight: bold !important;
+              background-color: #f0f0f0 !important;
+            }
+            
+            .section-heading {
+              font-size: 12pt !important;
+              font-weight: bold !important;
+              margin: 4mm 0 2mm 0 !important;
+              border-bottom: 0.3mm solid #000 !important;
+              padding-bottom: 1mm !important;
+              display: flex !important;
+              align-items: center !important;
+            }
+            
+            .section-heading svg {
+              margin-right: 2mm !important;
+            }
+            
+            .data-row {
+              display: flex !important;
+              justify-content: space-between !important;
+              margin-bottom: 1mm !important;
+              font-size: 10pt !important;
+            }
+            
+            .data-label {
+              font-weight: bold !important;
+              min-width: 30mm !important;
+            }
+            
+            .data-value {
+              flex: 1 !important;
+              text-align: ${language === 'ar' ? 'right' : 'left'} !important;
+            }
+            
+            .signature-line {
+              border-bottom: 0.3mm solid #000 !important;
+              width: 50mm !important;
+              height: 8mm !important;
+              margin: 2mm 0 !important;
+            }
+            
+            .date-line {
+              font-size: 9pt !important;
+              margin-top: 1mm !important;
             }
           }
         `}
       </style>
 
-      <div id="work-order-print" className={dirClass}>
-        <div className="text-center border-b pb-4 mb-6 relative">
-          <div className="absolute right-0 top-0">
-            <ClipboardCheck className="w-10 h-10 text-primary hide-print" />
+      <div id="work-order-print" className={dirClass} style={{ width: "80mm", padding: "2mm" }}>
+        <div style={{ textAlign: "center", marginBottom: "5mm", position: "relative" }}>
+          <div className="absolute right-0 top-0 hide-print">
+            <ClipboardCheck className="w-10 h-10 text-primary" />
           </div>
-          <MoenLogo className="mx-auto w-auto h-8 mb-2" />
-          <h1 className="text-2xl font-bold mb-1">{t("workOrder")}</h1>
-          <p className="text-lg text-primary font-medium">{invoice.invoiceId || invoice.workOrderId}</p>
-          <p className="text-muted-foreground">
+          <MoenLogo className="mx-auto w-auto" style={{ height: "10mm", marginBottom: "1mm" }} />
+          <h1 style={{ fontSize: "16pt", fontWeight: "bold", margin: "1mm 0" }}>{t("workOrder")}</h1>
+          <p style={{ fontSize: "14pt", margin: "1mm 0", color: "#333" }}>{orderNumber}</p>
+          <p style={{ fontSize: "10pt", margin: "1mm 0", color: "#666" }}>
             {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
           </p>
-          <div className="text-sm text-center mt-2">
-            <p>{storeInfo.address}</p>
-            <p>{t("phone")}: {storeInfo.phone}</p>
+          <div style={{ fontSize: "9pt", textAlign: "center", marginTop: "1mm" }}>
+            <p style={{ margin: "0" }}>{storeInfo.address}</p>
+            <p style={{ margin: "0" }}>{t("phone")}: {storeInfo.phone}</p>
           </div>
         </div>
 
-        <div className="grid gap-4 mb-4">
-          <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
-            <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
-              <User className="w-4 h-4" />
-              {t("patientInformation")} {language === 'ar' && '(معلومات المريض)'}
-            </h3>
-            <div className="space-y-1 text-sm">
-              <div className="flex">
-                <span className="font-semibold w-16">{t("name")}:</span>
-                <span>{name}</span>
-              </div>
-              <div className="flex">
-                <span className="font-semibold w-16">{t("phone")}:</span>
-                <span>{phone}</span>
-              </div>
-              {invoice.patientId && (
-                <div className="flex">
-                  <span className="font-semibold w-16">{t("patientId")}:</span>
-                  <span>{invoice.patientId}</span>
-                </div>
-              )}
-            </div>
+        <div className="section-heading">
+          <User style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+          <span>{t("patientInformation")} {language === 'ar' && '(معلومات المريض)'}</span>
+        </div>
+        
+        <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+          <div className="data-row">
+            <span className="data-label">{t("name")}:</span>
+            <span className="data-value">{name}</span>
           </div>
-
-          {!isContactLens && frameData && (
-            <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
-              <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
-                <Glasses className="w-4 h-4" />
-                {t("frameDetails")} {language === 'ar' && '(تفاصيل الإطار)'}
-              </h3>
-              <div className="space-y-1 text-sm">
-                <div className="flex">
-                  <span className="font-semibold w-16">{t("brand")}:</span>
-                  <span>{frameData.brand}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-16">{t("model")}:</span>
-                  <span>{frameData.model}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-16">{t("color")}:</span>
-                  <span>{frameData.color}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-16">{t("size")}:</span>
-                  <span>{frameData.size || "-"}</span>
-                </div>
-              </div>
+          <div className="data-row">
+            <span className="data-label">{t("phone")}:</span>
+            <span className="data-value">{phone}</span>
+          </div>
+          {invoice.patientId && (
+            <div className="data-row">
+              <span className="data-label">{t("patientId")}:</span>
+              <span className="data-value">{invoice.patientId}</span>
             </div>
           )}
-          
-          {isContactLens && (
-            <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
-              <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
-                <Contact className="w-4 h-4" />
-                {t("contactLensDetails")} {language === 'ar' && '(تفاصيل العدسات اللاصقة)'}
-              </h3>
-              <div className="space-y-1 text-sm">
-                {contactLenses.map((lens, idx) => (
-                  <div key={idx} className="space-y-0.5 border-b pb-1 border-dashed border-gray-200 last:border-0 text-xs">
-                    <div className="flex">
-                      <span className="font-semibold w-16">{t("lens")} {idx + 1}:</span>
-                      <span>{lens.brand} {lens.type}</span>
-                    </div>
-                    <div className="flex">
-                      <span className="font-semibold w-16">{t("power")}:</span>
-                      <span>{lens.power}</span>
-                    </div>
+        </div>
+
+        {!isContactLens && frameData && (
+          <>
+            <div className="section-heading">
+              <Glasses style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("frameDetails")} {language === 'ar' && '(تفاصيل الإطار)'}</span>
+            </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+              <div className="data-row">
+                <span className="data-label">{t("brand")}:</span>
+                <span className="data-value">{frameData.brand}</span>
+              </div>
+              <div className="data-row">
+                <span className="data-label">{t("model")}:</span>
+                <span className="data-value">{frameData.model}</span>
+              </div>
+              <div className="data-row">
+                <span className="data-label">{t("color")}:</span>
+                <span className="data-value">{frameData.color}</span>
+              </div>
+              <div className="data-row">
+                <span className="data-label">{t("size")}:</span>
+                <span className="data-value">{frameData.size || "-"}</span>
+              </div>
+            </div>
+          </>
+        )}
+        
+        {isContactLens && (
+          <>
+            <div className="section-heading">
+              <Contact style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("contactLensDetails")} {language === 'ar' && '(تفاصيل العدسات اللاصقة)'}</span>
+            </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+              {contactLenses.map((lens, idx) => (
+                <div key={idx} style={{ marginBottom: "2mm", borderBottom: idx < contactLenses.length - 1 ? "0.2mm dashed #ccc" : "none", paddingBottom: "1mm" }}>
+                  <div className="data-row">
+                    <span className="data-label">{t("lens")} {idx + 1}:</span>
+                    <span className="data-value">{lens.brand} {lens.type}</span>
                   </div>
-                ))}
-              </div>
+                  <div className="data-row">
+                    <span className="data-label">{t("power")}:</span>
+                    <span className="data-value">{lens.power}</span>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
+          </>
+        )}
 
         {!isContactLens && rx && (
-          <div className="mb-4 bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
-            <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
-              <Eye className="w-4 h-4" />
-              {t("prescriptionDetails")} {language === 'ar' && '(تفاصيل الوصفة الطبية)'}
-            </h3>
-            <table className="w-full border-collapse bg-white text-xs">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="border p-1 text-center">{t("eye")}</th>
-                  <th className="border p-1 text-center">SPH</th>
-                  <th className="border p-1 text-center">CYL</th>
-                  <th className="border p-1 text-center">AXIS</th>
-                  <th className="border p-1 text-center">ADD</th>
-                  <th className="border p-1 text-center">PD</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border p-1 font-medium text-center">OD {language === 'ar' && '(يمين)'}</td>
-                  <td className="border p-1 text-center">{rx?.sphereOD || "_____"}</td>
-                  <td className="border p-1 text-center">{rx?.cylOD || "_____"}</td>
-                  <td className="border p-1 text-center">{rx?.axisOD || "_____"}</td>
-                  <td className="border p-1 text-center">{rx?.addOD || "_____"}</td>
-                  <td className="border p-1 text-center">{rx?.pdRight || "_____"}</td>
-                </tr>
-                <tr>
-                  <td className="border p-1 font-medium text-center">OS {language === 'ar' && '(يسار)'}</td>
-                  <td className="border p-1 text-center">{rx?.sphereOS || "_____"}</td>
-                  <td className="border p-1 text-center">{rx?.cylOS || "_____"}</td>
-                  <td className="border p-1 text-center">{rx?.axisOS || "_____"}</td>
-                  <td className="border p-1 text-center">{rx?.addOS || "_____"}</td>
-                  <td className="border p-1 text-center">{rx?.pdLeft || "_____"}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <>
+            <div className="section-heading">
+              <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("prescriptionDetails")} {language === 'ar' && '(تفاصيل الوصفة الطبية)'}</span>
+            </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: "center" }}>{t("eye")}</th>
+                    <th style={{ textAlign: "center" }}>SPH</th>
+                    <th style={{ textAlign: "center" }}>CYL</th>
+                    <th style={{ textAlign: "center" }}>AXIS</th>
+                    <th style={{ textAlign: "center" }}>ADD</th>
+                    <th style={{ textAlign: "center" }}>PD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.sphereOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.cylOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.axisOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.addOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.pdRight || rx?.pd || "_____"}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.sphereOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.cylOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.axisOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.addOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.pdLeft || rx?.pd || "_____"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
         
         {isContactLens && contactLensRx && (
-          <div className="mb-4 bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
-            <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
-              <Eye className="w-4 h-4" />
-              {t("contactLensPrescription")} {language === 'ar' && '(وصفة العدسات اللاصقة)'}
-            </h3>
-            <table className="w-full border-collapse bg-white text-xs">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="border p-1 text-center">{t("eye")}</th>
-                  <th className="border p-1 text-center">Sphere</th>
-                  <th className="border p-1 text-center">Cylinder</th>
-                  <th className="border p-1 text-center">Axis</th>
-                  <th className="border p-1 text-center">BC</th>
-                  <th className="border p-1 text-center">Dia</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border p-1 font-medium text-center">OD {language === 'ar' && '(يمين)'}</td>
-                  <td className="border p-1 text-center">{contactLensRx.rightEye.sphere || "_____"}</td>
-                  <td className="border p-1 text-center">{contactLensRx.rightEye.cylinder || "_____"}</td>
-                  <td className="border p-1 text-center">{contactLensRx.rightEye.axis || "_____"}</td>
-                  <td className="border p-1 text-center">{contactLensRx.rightEye.bc || "_____"}</td>
-                  <td className="border p-1 text-center">{contactLensRx.rightEye.dia || "_____"}</td>
-                </tr>
-                <tr>
-                  <td className="border p-1 font-medium text-center">OS {language === 'ar' && '(يسار)'}</td>
-                  <td className="border p-1 text-center">{contactLensRx.leftEye.sphere || "_____"}</td>
-                  <td className="border p-1 text-center">{contactLensRx.leftEye.cylinder || "_____"}</td>
-                  <td className="border p-1 text-center">{contactLensRx.leftEye.axis || "_____"}</td>
-                  <td className="border p-1 text-center">{contactLensRx.leftEye.bc || "_____"}</td>
-                  <td className="border p-1 text-center">{contactLensRx.leftEye.dia || "_____"}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <>
+            <div className="section-heading">
+              <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("contactLensPrescription")} {language === 'ar' && '(وصفة العدسات اللاصقة)'}</span>
+            </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: "center" }}>{t("eye")}</th>
+                    <th style={{ textAlign: "center" }}>SPH</th>
+                    <th style={{ textAlign: "center" }}>CYL</th>
+                    <th style={{ textAlign: "center" }}>AXIS</th>
+                    <th style={{ textAlign: "center" }}>BC</th>
+                    <th style={{ textAlign: "center" }}>DIA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.dia || "_____"}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.dia || "_____"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {!isContactLens && (
-          <div className="space-y-3">
-            <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none">
-              <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
-                <Ruler className="w-4 h-4" />
-                {t("lensDetails")} {language === 'ar' && '(تفاصيل العدسات)'}
-              </h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="space-y-1">
-                  <div className="flex">
-                    <span className="font-semibold w-16">{t("type")}:</span>
-                    <span>{lensTypeValue}</span>
-                  </div>
-                  {coatingValue && (
-                    <div className="flex">
-                      <span className="font-semibold w-16">{t("coating")}:</span>
-                      <span>{coatingValue}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <div className="flex">
-                    <span className="font-semibold w-16">{t("price")}:</span>
-                    <span>{invoice.lensPrice.toFixed(2)} KWD</span>
-                  </div>
-                  {coatingValue && (
-                    <div className="flex">
-                      <span className="font-semibold w-16">{t("coatingPrice")}:</span>
-                      <span>{invoice.coatingPrice.toFixed(2)} KWD</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+          <>
+            <div className="section-heading">
+              <Ruler style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("lensDetails")} {language === 'ar' && '(تفاصيل العدسات)'}</span>
             </div>
-          </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+              <div className="data-row">
+                <span className="data-label">{t("type")}:</span>
+                <span className="data-value">{lensTypeValue}</span>
+              </div>
+              {coatingValue && (
+                <div className="data-row">
+                  <span className="data-label">{t("coating")}:</span>
+                  <span className="data-value">{coatingValue}</span>
+                </div>
+              )}
+              <div className="data-row">
+                <span className="data-label">{t("price")}:</span>
+                <span className="data-value">{invoice.lensPrice.toFixed(3)} KWD</span>
+              </div>
+              {coatingValue && (
+                <div className="data-row">
+                  <span className="data-label">{t("coatingPrice")}:</span>
+                  <span className="data-value">{invoice.coatingPrice.toFixed(3)} KWD</span>
+                </div>
+              )}
+            </div>
+          </>
         )}
 
-        <div className="bg-muted/10 p-3 print:!p-0 rounded-lg border print:!border-none mt-4">
-          <h3 className="font-semibold mb-2 flex items-center gap-1 text-primary text-sm">
-            <CircleDot className="w-4 h-4" />
-            {t("additionalNotes")} {language === 'ar' && '(ملاحظات إضافية)'}
-          </h3>
-          <div className="border rounded p-2 min-h-[50px] bg-white"></div>
+        <div className="section-heading">
+          <CircleDot style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+          <span>{t("additionalNotes")} {language === 'ar' && '(ملاحظات إضافية)'}</span>
+        </div>
+        <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+          <div style={{ border: "0.2mm solid #000", minHeight: "15mm", backgroundColor: "#fff", width: "100%" }}></div>
         </div>
 
-        <div className="mt-6 pt-3 border-t grid gap-4">
-          <div>
-            <p className="font-semibold text-primary text-sm">{t("technicianSignature")} {language === 'ar' && '(توقيع الفني)'}</p>
-            <div className="mt-4 border-b w-32 h-6"></div>
-            <div className="mt-1 text-xs text-muted-foreground">{t("date")}: ___ / ___ / _____</div>
+        <div style={{ marginTop: "5mm", paddingTop: "2mm", borderTop: "0.3mm solid #000" }}>
+          <div style={{ marginBottom: "5mm" }}>
+            <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm" }}>
+              {t("technicianSignature")} {language === 'ar' && '(توقيع الفني)'}
+            </p>
+            <div className="signature-line"></div>
+            <div className="date-line">{t("date")}: ___ / ___ / _____</div>
           </div>
+          
           <div>
-            <p className="font-semibold text-primary text-sm">{t("qualityConfirmation")} {language === 'ar' && '(تأكيد الجودة)'}</p>
-            <div className="flex items-center mt-4 gap-1">
-              <BadgeCheck className="w-4 h-4 text-primary" />
-              <div className="border-b w-28 h-6"></div>
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">{t("date")}: ___ / ___ / _____</div>
+            <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm", display: "flex", alignItems: "center" }}>
+              <BadgeCheck style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              {t("qualityConfirmation")} {language === 'ar' && '(تأكيد الجودة)'}
+            </p>
+            <div className="signature-line"></div>
+            <div className="date-line">{t("date")}: ___ / ___ / _____</div>
           </div>
         </div>
       </div>

@@ -405,7 +405,7 @@ export const PrintService = {
             window.print();
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 1000);
+            }, 500);
           }, 1000);
         </script>
       </body>
@@ -613,8 +613,8 @@ export const PrintService = {
             -webkit-print-color-adjust: exact !important;
             color-adjust: exact !important;
             print-color-adjust: exact !important;
-            font-size: 10px !important;
-            line-height: 1.1 !important;
+            font-size: 12px !important;
+            line-height: 1.2 !important;
           }
           
           /* Ensure Arabic displays correctly */
@@ -638,8 +638,8 @@ export const PrintService = {
           
           /* Ensure content is properly contained */
           .workorder-container {
-            width: 74mm !important;
-            padding: 3mm !important;
+            width: 76mm !important;
+            padding: 2mm !important;
             margin: 0 !important;
             page-break-after: always !important;
             page-break-inside: avoid !important;
@@ -653,13 +653,13 @@ export const PrintService = {
           
           .order-logo {
             max-width: 60mm !important;
-            max-height: 8mm !important;
+            max-height: 10mm !important;
             margin: 0 auto !important;
             display: block !important;
           }
           
           .order-title {
-            font-size: 11pt !important;
+            font-size: 16pt !important;
             font-weight: bold !important;
             margin: 2mm 0 !important;
             text-align: center !important;
@@ -673,11 +673,16 @@ export const PrintService = {
             display: flex !important;
             justify-content: space-between !important;
             margin-bottom: 1mm !important;
-            font-size: 8pt !important;
+            font-size: 11pt !important;
           }
           
           .order-label {
             font-weight: bold !important;
+            min-width: 30mm !important;
+          }
+          
+          .order-value {
+            flex: 1 !important;
           }
           
           .order-divider {
@@ -686,14 +691,40 @@ export const PrintService = {
           }
           
           .order-signature {
-            margin-top: 3mm !important;
+            margin-top: 4mm !important;
             text-align: center !important;
-            font-size: 8pt !important;
+            font-size: 10pt !important;
+          }
+          
+          .section-heading {
+            font-size: 12pt !important;
+            font-weight: bold !important;
+            margin: 4mm 0 2mm 0 !important;
+            border-bottom: 0.3mm solid #000 !important;
+            padding-bottom: 1mm !important;
+          }
+          
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            direction: ltr !important;
+          }
+          
+          td, th {
+            border: 0.2mm solid black !important;
+            padding: 1mm !important;
+            text-align: center !important;
+            font-size: 10pt !important;
+          }
+          
+          th {
+            font-weight: bold !important;
+            background-color: #f0f0f0 !important;
           }
           
           /* Compact styles */
           h1, h2, h3, p {
-            margin: 1px 0 !important;
+            margin: 1mm 0 !important;
           }
           
           /* Fix for print dialog */
@@ -704,13 +735,14 @@ export const PrintService = {
               margin: 0 !important;
               padding: 0 !important;
               overflow: visible !important;
-              font-size: 10px !important;
+              font-size: 12px !important;
+              line-height: 1.2 !important;
             }
             
             .workorder-container {
-              width: 74mm !important;
+              width: 76mm !important;
               margin: 0 !important;
-              padding: 3mm !important;
+              padding: 2mm !important;
             }
             
             /* Ensure only one copy prints */
