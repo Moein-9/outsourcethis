@@ -223,12 +223,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
-                  <span className="text-right">
+                  <div className="text-right">
                     <div className="flex flex-col items-end">
                       <span className="font-semibold">{getLensTypeArabic(lensType)}</span>
-                      <span className="text-xs text-muted-foreground">{lensType}</span>
+                      <span className="border rounded px-1 bg-slate-50 text-xs text-blue-500">{lensType}</span>
                     </div>
-                  </span>
+                  </div>
                 </div>
                 {lensPrice > 0 && (
                   <div className="flex justify-between">
@@ -249,12 +249,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
-                  <span className="text-right">
+                  <div className="text-right">
                     <div className="flex flex-col items-end">
                       <span className="font-semibold">{getCoatingArabic(coating)}</span>
-                      <span className="text-xs text-muted-foreground">{coating}</span>
+                      <span className="border rounded px-1 bg-slate-50 text-xs text-blue-500">{coating}</span>
                     </div>
-                  </span>
+                  </div>
                 </div>
                 {coatingPrice > 0 && (
                   <div className="flex justify-between">
