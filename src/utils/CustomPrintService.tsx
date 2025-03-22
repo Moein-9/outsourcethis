@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 import { toast } from '@/hooks/use-toast';
 import { useLanguageStore } from '@/store/languageStore';
-import { InventoryStoreProvider } from '@/store/inventoryStore';
+import { useInventoryStore } from '@/store/inventoryStore';
 
 export const CustomPrintService = {
   printWorkOrder: (workOrder: any, invoice?: any, patient?: any) => {
@@ -138,8 +138,8 @@ export const CustomPrintService = {
     // Render the receipt
     const { language, t } = useLanguageStore.getState();
     
-    // Get the store state directly
-    const inventoryStore = require('@/store/inventoryStore').useInventoryStore.getState();
+    // Get the inventory store state directly
+    const inventoryStoreState = useInventoryStore.getState();
     
     createRoot(container).render(
       <CustomWorkOrderReceipt
