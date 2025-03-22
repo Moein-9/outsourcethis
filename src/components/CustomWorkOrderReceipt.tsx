@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { MoenLogo, storeInfo } from "@/assets/logo";
@@ -380,10 +379,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         
         <div className="border rounded p-2 min-h-16">
-          <div className="border-b border-dashed mb-2"></div>
-          <div className="border-b border-dashed mb-2"></div>
-          <div className="border-b border-dashed mb-2"></div>
-          <div className="border-b border-dashed mb-2"></div>
+          
         </div>
       </div>
 
