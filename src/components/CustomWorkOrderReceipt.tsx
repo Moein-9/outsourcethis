@@ -11,13 +11,15 @@ interface CustomWorkOrderReceiptProps {
   invoice?: any;
   patient?: any;
   isPrintable?: boolean;
+  isInvoice?: boolean;
 }
 
 export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   workOrder,
   invoice,
   patient,
-  isPrintable = false
+  isPrintable = false,
+  isInvoice = false
 }) => {
   const { language, t } = useLanguageStore();
   const { lensTypes, lensCoatings } = useInventoryStore();
@@ -95,7 +97,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
 
       <div className="text-center mb-1">
         <h3 className="font-bold text-lg mb-0">
-          {isRtl ? "أمر عمل" : "WORK ORDER"}
+          {isInvoice 
+            ? (isRtl ? "فاتورة" : "INVOICE") 
+            : (isRtl ? "أمر عمل" : "WORK ORDER")}
         </h3>
         <p className="text-xs mb-0">
           {isRtl ? "ORDER #: " : "رقم الطلب: "}
