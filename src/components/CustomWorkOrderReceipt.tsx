@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { MoenLogo, storeInfo } from "@/assets/logo";
@@ -58,77 +59,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const invoiceNumber = invoice?.invoiceId || invoice?.workOrderId || workOrder?.id || `WO${Date.now().toString().slice(-6)}`;
   
-  // Function to get both Arabic and English names for lens types (based on the screenshot)
-  const getBilingualLensType = (type: string) => {
-    // This is a simple mapping - you might want to enhance this with more accurate translations
-    const lensTypeMap: Record<string, { ar: string, en: string }> = {
-      'reading': { ar: 'نظارات طبية للقراءة', en: 'reading' },
-      'distance': { ar: 'نظارات للنظر البعيد', en: 'distance' },
-      'bifocal': { ar: 'عدسات ثنائية', en: 'bifocal' },
-      'progressive': { ar: 'عدسات تقدمية', en: 'progressive' },
-      'sunglasses': { ar: 'عدسات شمسية', en: 'sunglasses' },
-      // Add more mappings as needed
-    };
-    
-    // Find the exact match or closest match
-    const exactMatch = Object.entries(lensTypeMap).find(([key]) => 
-      key.toLowerCase() === type.toLowerCase()
-    );
-    
-    if (exactMatch) {
-      return exactMatch[1];
-    }
-    
-    // If no exact match, find if the type contains any of the keys
-    const partialMatch = Object.entries(lensTypeMap).find(([key]) => 
-      type.toLowerCase().includes(key.toLowerCase())
-    );
-    
-    if (partialMatch) {
-      return partialMatch[1];
-    }
-    
-    // Default fallback
-    return { ar: type, en: type };
-  };
-  
-  // Function to get both Arabic and English names for coating
-  const getBilingualCoating = (coatingType: string) => {
-    // This is a simple mapping - you might want to enhance this with more accurate translations
-    const coatingMap: Record<string, { ar: string, en: string }> = {
-      'anti-reflective': { ar: 'طلاء مضاد للانعكاس', en: 'anti-reflective' },
-      'blue light': { ar: 'طلاء مضاد للضوء الأزرق', en: 'blue light' },
-      'photochromic': { ar: 'طلاء متغير اللون', en: 'photochromic' },
-      'scratch resistant': { ar: 'طلاء مقاوم للخدوش', en: 'scratch resistant' },
-      // Add more mappings as needed
-    };
-    
-    // Find the exact match or closest match
-    const exactMatch = Object.entries(coatingMap).find(([key]) => 
-      key.toLowerCase() === coatingType.toLowerCase()
-    );
-    
-    if (exactMatch) {
-      return exactMatch[1];
-    }
-    
-    // If no exact match, find if the type contains any of the keys
-    const partialMatch = Object.entries(coatingMap).find(([key]) => 
-      coatingType.toLowerCase().includes(key.toLowerCase())
-    );
-    
-    if (partialMatch) {
-      return partialMatch[1];
-    }
-    
-    // Default fallback
-    return { ar: coatingType, en: coatingType };
-  };
-  
-  // Get bilingual descriptions for lens type and coating
-  const lensTypeInfo = lensType ? getBilingualLensType(lensType) : null;
-  const coatingInfo = coating ? getBilingualCoating(coating) : null;
-  
   return (
     <div 
       className={`${dirClass} print-receipt`} 
@@ -139,50 +69,46 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         maxWidth: '80mm',
         margin: '0 auto',
         backgroundColor: 'white',
-        padding: '2mm',
-        fontSize: '10px',
+        padding: '3mm',
+        fontSize: '11px',
         border: isPrintable ? 'none' : '1px solid #ddd',
         borderRadius: isPrintable ? '0' : '5px',
         boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
-        fontFamily: 'Cairo, sans-serif',
-        lineHeight: '1.1'
+        fontFamily: isRtl ? 'Cairo, sans-serif' : 'Cairo, sans-serif'
       }}
     >
-      {/* Header Section with Logo - Reduced spacing */}
-      <div className="text-center border-b pb-1 mb-1">
-        <div className="flex justify-center mb-0.5">
-          <MoenLogo className="w-auto h-10 mb-0.5" />
+      {/* Header Section with Logo */}
+      <div className="text-center border-b pb-2 mb-2">
+        <div className="flex justify-center mb-1">
+          <MoenLogo className="w-auto h-14 mb-1" />
         </div>
-        <h2 className="font-bold text-base mb-0">
-          {storeInfo.name}
-        </h2>
-        <p className="text-[9px] text-muted-foreground">{storeInfo.address}</p>
-        <p className="text-[9px] text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
+        <h2 className="font-bold text-lg mb-0.5">{storeInfo.name}</h2>
+        <p className="text-xs text-muted-foreground">{storeInfo.address}</p>
+        <p className="text-xs text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      {/* Work Order Header - Reduced spacing */}
-      <div className="text-center mb-1">
-        <h3 className="font-bold text-base">
+      {/* Work Order Header */}
+      <div className="text-center mb-3">
+        <h3 className="font-bold text-lg">
           {isRtl ? "أمر عمل" : "WORK ORDER"}
-          {!isRtl && " - أمر عمل"}
         </h3>
-        <p className="text-[9px]">
+        <p className="text-xs">
           {isRtl ? "ORDER #: " : "رقم الطلب: "}
           {invoiceNumber}
         </p>
-        <p className="text-[9px]">
+        <p className="text-xs">
           {format(new Date(), 'yyyy-MM-dd HH:mm')}
         </p>
       </div>
 
-      {/* Patient Information - Reduced spacing */}
-      <div className="mb-1">
-        <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
+      {/* Patient Information */}
+      <div className="mb-3">
+        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl ? "معلومات المريض" : "PATIENT INFORMATION"}
           {!isRtl && " - معلومات المريض"}
         </div>
         
-        <div className="space-y-0.5 text-[9px]">
+        <div className="space-y-1 text-xs">
           <div className="flex justify-between">
             <span className="font-semibold">{t("customer")}:</span>
             <span>{patientName}</span>
@@ -197,59 +123,63 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Prescription Information - Keep LTR format for RX table */}
+      {/* Prescription Information */}
       {rx && (
-        <div className="mb-1">
-          <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
+        <div className="mb-3">
+          <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
             {isRtl ? "تفاصيل الوصفة الطبية" : "PRESCRIPTION DETAILS"}
             {!isRtl && " - تفاصيل الوصفة الطبية"}
           </div>
           
-          <table className="w-full border-collapse text-[8px]" style={{ direction: 'ltr' }}>
+          <table className="w-full border-collapse text-xs">
             <thead>
               <tr className="bg-muted/50">
-                <th className="p-0.5 border text-center">Eye</th>
-                <th className="p-0.5 border text-center">SPH</th>
-                <th className="p-0.5 border text-center">CYL</th>
-                <th className="p-0.5 border text-center">AXIS</th>
-                <th className="p-0.5 border text-center">ADD</th>
-                <th className="p-0.5 border text-center">PD</th>
+                <th className="p-1 border text-center">{t('eye')}</th>
+                <th className="p-1 border text-center">{t('sphere')}</th>
+                <th className="p-1 border text-center">{t('cylinder')}</th>
+                <th className="p-1 border text-center">{t('axis')}</th>
+                <th className="p-1 border text-center">{t('addition')}</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="p-0.5 border font-bold text-center">OD (R)</td>
-                <td className="p-0.5 border text-center">{rx.sphereOD || "—"}</td>
-                <td className="p-0.5 border text-center">{rx.cylOD || "—"}</td>
-                <td className="p-0.5 border text-center">{rx.axisOD || "—"}</td>
-                <td className="p-0.5 border text-center">{rx.addOD || rx.add || "—"}</td>
-                <td className="p-0.5 border text-center">{rx.pdOD || rx.pdRight || rx.pd || "—"}</td>
+                <td className="p-1 border font-bold text-center">{t('rightEyeAbbr')}</td>
+                <td className="p-1 border text-center">{rx.sphereOD || "—"}</td>
+                <td className="p-1 border text-center">{rx.cylOD || "—"}</td>
+                <td className="p-1 border text-center">{rx.axisOD || "—"}</td>
+                <td className="p-1 border text-center">{rx.addOD || rx.add || "—"}</td>
               </tr>
               <tr>
-                <td className="p-0.5 border font-bold text-center">OS (L)</td>
-                <td className="p-0.5 border text-center">{rx.sphereOS || "—"}</td>
-                <td className="p-0.5 border text-center">{rx.cylOS || "—"}</td>
-                <td className="p-0.5 border text-center">{rx.axisOS || "—"}</td>
-                <td className="p-0.5 border text-center">{rx.addOS || rx.add || "—"}</td>
-                <td className="p-0.5 border text-center">{rx.pdOS || rx.pdLeft || rx.pd || "—"}</td>
+                <td className="p-1 border font-bold text-center">{t('leftEyeAbbr')}</td>
+                <td className="p-1 border text-center">{rx.sphereOS || "—"}</td>
+                <td className="p-1 border text-center">{rx.cylOS || "—"}</td>
+                <td className="p-1 border text-center">{rx.axisOS || "—"}</td>
+                <td className="p-1 border text-center">{rx.addOS || rx.add || "—"}</td>
               </tr>
             </tbody>
           </table>
+          
+          <div className="flex justify-between mt-1 text-xs">
+            <div className="flex gap-1">
+              <span className="font-semibold">{t('pd')}:</span>
+              <span>{rx.pdRight || rx.pdOD || rx.pd || "-"} / {rx.pdLeft || rx.pdOS || rx.pd || "-"}</span>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Product Information - Reduced spacing */}
-      <div className="mb-1">
-        <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
+      {/* Product Information */}
+      <div className="mb-3">
+        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl ? "تفاصيل المنتج" : "PRODUCT DETAILS"}
           {!isRtl && " - تفاصيل المنتج"}
         </div>
         
-        <div className="space-y-0.5 text-[9px]">
+        <div className="space-y-1.5 text-xs">
           {/* Frame section */}
           {frameData.brand && (
-            <div className="mb-1">
-              <div className="font-semibold border-b pb-0.5 mb-0.5">
+            <div className="mb-2">
+              <div className="font-semibold border-b pb-0.5 mb-1">
                 {isRtl ? "الإطار (Frame)" : "Frame (الإطار)"}:
               </div>
               <div className="px-1 space-y-0.5">
@@ -285,19 +215,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </div>
           )}
           
-          {/* Lens section - Updated with bilingual display */}
+          {/* Lens section */}
           {lensType && (
-            <div className="mb-1">
-              <div className="font-semibold border-b pb-0.5 mb-0.5">
+            <div className="mb-2">
+              <div className="font-semibold border-b pb-0.5 mb-1">
                 {isRtl ? "العدسات (Lenses)" : "Lenses (العدسات)"}:
               </div>
               <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
-                  <div className="text-right">
-                    <div className="font-semibold">{lensTypeInfo?.ar || lensType}</div>
-                    <div className="text-[8px] text-muted-foreground">{lensTypeInfo?.en || ""}</div>
-                  </div>
+                  <span>{lensType}</span>
                 </div>
                 {lensPrice > 0 && (
                   <div className="flex justify-between">
@@ -309,19 +236,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </div>
           )}
           
-          {/* Coating section - Updated with bilingual display */}
+          {/* Coating section */}
           {coating && (
-            <div className="mb-1">
-              <div className="font-semibold border-b pb-0.5 mb-0.5">
+            <div className="mb-2">
+              <div className="font-semibold border-b pb-0.5 mb-1">
                 {isRtl ? "الطلاء (Coating)" : "Coating (الطلاء)"}:
               </div>
               <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
-                  <div className="text-right">
-                    <div className="font-semibold">{coatingInfo?.ar || coating}</div>
-                    <div className="text-[8px] text-muted-foreground">{coatingInfo?.en || ""}</div>
-                  </div>
+                  <span>{coating}</span>
                 </div>
                 {coatingPrice > 0 && (
                   <div className="flex justify-between">
@@ -335,14 +259,14 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Payment Information - Reduced spacing */}
-      <div className="mb-1">
-        <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
+      {/* Payment Information */}
+      <div className="mb-3">
+        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl ? "معلومات الدفع" : "PAYMENT INFORMATION"}
           {!isRtl && " - معلومات الدفع"}
         </div>
         
-        <div className="space-y-0.5 text-[9px]">
+        <div className="space-y-1 text-xs">
           <div className="flex justify-between">
             <span className="font-semibold">{t("subtotal")}:</span>
             <span>{subtotal.toFixed(3)} KWD</span>
@@ -365,67 +289,65 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             <span>{amountPaid.toFixed(3)} KWD</span>
           </div>
           
-          {/* Payment Status Section - More compact */}
+          {/* Payment Status Section */}
           {isPaid ? (
-            <div className="mt-1 p-1 bg-green-100 rounded border border-green-300 text-center">
-              <div className="flex items-center justify-center gap-1 text-green-700 font-bold text-[10px]">
-                <CheckCircle2 className="w-3 h-3" />
+            <div className="mt-2 p-2 bg-green-100 rounded border border-green-300 text-center">
+              <div className="flex items-center justify-center gap-1 text-green-700 font-bold">
+                <CheckCircle2 className="w-4 h-4" />
                 <span>{isRtl ? "تم الدفع بالكامل" : "PAID IN FULL"}</span>
               </div>
-              {!isRtl ? <div className="text-green-600 text-[8px]">تم الدفع بالكامل</div> : 
-                       <div className="text-green-600 text-[8px]">PAID IN FULL</div>}
+              {!isRtl ? <div className="text-green-600 text-xs">تم الدفع بالكامل</div> : 
+                       <div className="text-green-600 text-xs">PAID IN FULL</div>}
             </div>
           ) : (
-            <div className="mt-1">
-              <div className="p-1 bg-red-100 rounded border border-red-300 text-center">
-                <div className="font-bold text-red-700 text-[10px]">
+            <div className="mt-2">
+              <div className="p-2 bg-red-100 rounded border border-red-300 text-center">
+                <div className="font-bold text-red-700 text-base">
                   {isRtl ? "المبلغ المتبقي" : "REMAINING AMOUNT"}
                 </div>
-                <div className="text-base font-bold text-red-600">
+                <div className="text-lg font-bold text-red-600 mt-1">
                   {remaining.toFixed(3)} KWD
                 </div>
-                {!isRtl ? <div className="text-red-600 text-[8px]">المبلغ المتبقي</div> : 
-                         <div className="text-red-600 text-[8px]">REMAINING AMOUNT</div>}
+                {!isRtl ? <div className="text-red-600 text-xs">المبلغ المتبقي</div> : 
+                         <div className="text-red-600 text-xs">REMAINING AMOUNT</div>}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Quality Confirmation - Reduced spacing */}
-      <div className="mb-1">
-        <div className="text-center bg-muted py-0.5 mb-1 font-bold text-[10px] border-y">
+      {/* Quality Confirmation */}
+      <div className="mb-3">
+        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl ? "تأكيد الجودة" : "QUALITY CONFIRMATION"}
           {!isRtl && " - تأكيد الجودة"}
         </div>
         
-        <div className="flex gap-1 text-[8px] mb-0.5">
-          <div className="border rounded p-0.5 flex-1">
-            <div className="font-semibold mb-0.5 text-center border-b pb-0.5">
+        <div className="flex gap-2 text-xs mb-1">
+          <div className="border rounded p-1 flex-1">
+            <div className="font-semibold mb-1 text-center border-b pb-1">
               {isRtl ? "توقيع الفني" : "Technician Signature"}
             </div>
-            <div className="h-7"></div>
+            <div className="h-10"></div>
           </div>
           
-          <div className="border rounded p-0.5 flex-1">
-            <div className="font-semibold mb-0.5 text-center border-b pb-0.5">
+          <div className="border rounded p-1 flex-1">
+            <div className="font-semibold mb-1 text-center border-b pb-1">
               {isRtl ? "توقيع المدير" : "Manager Signature"}
             </div>
-            <div className="h-7"></div>
+            <div className="h-10"></div>
           </div>
         </div>
       </div>
 
-      {/* Footer - Keep the Arabic text as requested */}
-      <div className="text-center border-t pt-1 text-[9px]">
-        <p className="font-semibold mb-0.5">
+      {/* Footer */}
+      <div className="text-center border-t pt-2 text-xs">
+        <p className="font-semibold">
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
-          {!isRtl && " - شكراً لاختياركم نظارات المعين"}
         </p>
-        <p className="text-[8px] text-muted-foreground">
+        <p className="text-[9px] text-muted-foreground mt-1">
           {isRtl ? "هذا الإيصال يعتبر إثبات للطلب فقط وليس إيصال دفع" : 
                   "This receipt is proof of order only and not a payment receipt"}
-          {!isRtl && " - هذا الإيصال يعتبر إثبات للطلب فقط وليس إيصال دفع"}
         </p>
       </div>
     </div>

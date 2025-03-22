@@ -25,8 +25,8 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   const { t } = useLanguageStore();
   
   const handlePrint = () => {
-    console.log("CustomPrintWorkOrderButton: Previewing work order", { workOrder, invoice, patient });
-    CustomPrintService.previewWorkOrder(workOrder, invoice, patient);
+    console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
+    CustomPrintService.printWorkOrder(workOrder, invoice, patient);
   };
   
   return (
