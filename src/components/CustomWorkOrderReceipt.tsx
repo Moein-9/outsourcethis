@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
 import { CheckCircle2 } from "lucide-react";
+import { useInventoryStore } from "@/store/inventoryStore";
 
 interface CustomWorkOrderReceiptProps {
   workOrder: any;
@@ -19,6 +20,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   isPrintable = false
 }) => {
   const { language, t } = useLanguageStore();
+  const { lensTypes, lensCoatings } = useInventoryStore();
   const isRtl = language === 'ar';
   const dirClass = isRtl ? "rtl" : "ltr";
   
@@ -42,9 +44,15 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const lensType = workOrder?.lensType || invoice?.lensType || "";
   const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
   
+  // Find the actual lens name from store
+  const lensName = lensTypes.find(lt => lt.type === lensType?.toLowerCase())?.name || getLensTypeArabic(lensType);
+  
   // Extract coating data
   const coating = workOrder?.coating || invoice?.coating || "";
   const coatingPrice = workOrder?.coatingPrice || invoice?.coatingPrice || 0;
+  
+  // Find the actual coating name from store
+  const coatingName = lensCoatings.find(c => c.name.includes(coating) || c.description?.includes(coating))?.name || getCoatingArabic(coating);
   
   // Payment data
   const total = invoice?.total || workOrder?.total || 0;
@@ -225,7 +233,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
                   <div className="text-right">
                     <div className="flex flex-col items-end">
-                      <span className="font-semibold">{getLensTypeArabic(lensType)}</span>
+                      <span className="font-semibold">{lensName}</span>
                       <span className="border rounded px-1 bg-slate-50 text-xs text-blue-500">{lensType}</span>
                     </div>
                   </div>
@@ -251,7 +259,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
                   <div className="text-right">
                     <div className="flex flex-col items-end">
-                      <span className="font-semibold">{getCoatingArabic(coating)}</span>
+                      <span className="font-semibold">{coatingName}</span>
                       <span className="border rounded px-1 bg-slate-50 text-xs text-blue-500">{coating}</span>
                     </div>
                   </div>
@@ -366,6 +374,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
 };
 
 // Helper functions to map lens types and coatings to their Arabic equivalents
+// These are kept as fallbacks in case the store doesn't have the data
 const getLensTypeArabic = (lensType: string): string => {
   const lensTypeMap: Record<string, string> = {
     "Single Vision": "نظارات للنظر",
