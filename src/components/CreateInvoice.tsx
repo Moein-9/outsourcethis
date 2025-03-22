@@ -525,6 +525,13 @@ const CreateInvoice: React.FC = () => {
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   
+  const handleWorkflowComplete = () => {
+    resetForm();
+    toast({
+      description: t("workOrderCompleted"),
+    });
+  };
+  
   return (
     <div className="py-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">

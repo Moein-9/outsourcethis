@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -59,15 +60,16 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   
   const handleTriggerClick = () => {
     if (thermalOnly) {
-      handlePrint("thermal");
+      handlePrint();
     } else {
       setIsDialogOpen(true);
     }
   };
   
-  const handlePrint = (type: "thermal" | "standard") => {
+  const handlePrint = (event?: React.MouseEvent) => {
     if (!selectedFormat || printingInProgress) return;
     
+    const printType = thermalOnly ? "thermal" : "standard";
     setPrintingInProgress(true);
     
     try {
@@ -274,4 +276,3 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     </>
   );
 };
-
