@@ -1,221 +1,317 @@
 
-import React from 'react';
-import { useLanguageStore } from '@/store/languageStore';
+import React from "react";
+import { format } from "date-fns";
+import { MoenLogo, storeInfo } from "@/assets/logo";
+import { useLanguageStore } from "@/store/languageStore";
+import { CheckCircle2 } from "lucide-react";
 
-interface WorkOrderReceiptProps {
+interface CustomWorkOrderReceiptProps {
   workOrder: any;
   invoice?: any;
   patient?: any;
+  isPrintable?: boolean;
 }
 
-export const CustomWorkOrderReceipt: React.FC<WorkOrderReceiptProps> = ({ 
-  workOrder, 
-  invoice, 
-  patient 
+export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
+  workOrder,
+  invoice,
+  patient,
+  isPrintable = false
 }) => {
-  const { language } = useLanguageStore();
-  const isRTL = language === 'ar';
+  const { language, t } = useLanguageStore();
+  const isRtl = language === 'ar';
+  const dirClass = isRtl ? "rtl" : "ltr";
   
-  // Determine payment status
-  const isPaid = invoice?.isPaid;
-  const remainingAmount = invoice?.remaining || 0;
+  // Get data from either workOrder, invoice, or directly provided patient
+  const patientName = patient?.name || invoice?.patientName || workOrder?.patientName || "Customer";
+  const patientPhone = patient?.phone || invoice?.patientPhone || workOrder?.patientPhone;
+  
+  // Extract prescription data
+  const rx = patient?.rx || workOrder?.rx;
+  
+  // Extract frame data
+  const frameData = {
+    brand: workOrder?.frameBrand || invoice?.frameBrand || "",
+    model: workOrder?.frameModel || invoice?.frameModel || "",
+    color: workOrder?.frameColor || invoice?.frameColor || "",
+    size: workOrder?.frameSize || invoice?.frameSize || "",
+    price: workOrder?.framePrice || invoice?.framePrice || 0
+  };
+  
+  // Extract lens data
+  const lensType = workOrder?.lensType || invoice?.lensType || "";
+  const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
+  
+  // Extract coating data
+  const coating = workOrder?.coating || invoice?.coating || "";
+  const coatingPrice = workOrder?.coatingPrice || invoice?.coatingPrice || 0;
+  
+  // Payment data
+  const total = invoice?.total || workOrder?.total || 0;
+  const deposit = invoice?.deposit || workOrder?.deposit || 0;
+  const remaining = invoice?.remaining || workOrder?.remaining || 0;
+  const isPaid = remaining <= 0;
   
   return (
     <div 
-      className="thermal-print print-container" 
-      dir={isRTL ? "rtl" : "ltr"}
+      className={`${dirClass} print-receipt`} 
+      id="work-order-receipt"
+      dir={isRtl ? "rtl" : "ltr"}
       style={{ 
         width: '80mm', 
         maxWidth: '80mm',
         margin: '0 auto',
-        padding: '0.5rem',
-        fontSize: '12px'
+        backgroundColor: 'white',
+        padding: '3mm',
+        fontSize: '11px',
+        border: isPrintable ? 'none' : '1px solid #ddd',
+        borderRadius: isPrintable ? '0' : '5px',
+        boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
+        fontFamily: isRtl ? 'Cairo, sans-serif' : 'Cairo, sans-serif'
       }}
     >
-      <div className="p-2 text-center">
-        <img 
-          src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" 
-          alt="Logo" 
-          className="mx-auto mb-2"
-          style={{ height: '80px' }}
-        />
-        <h1 className="text-xl font-bold">WORK ORDER</h1>
-        <h2 className="text-lg">أمر عمل</h2>
-        <div className="text-xs mb-2">{new Date().toLocaleDateString()}</div>
+      {/* Header Section with Logo */}
+      <div className="text-center border-b pb-2 mb-2">
+        <div className="flex justify-center mb-1">
+          <MoenLogo className="w-auto h-14 mb-1" />
+        </div>
+        <h2 className="font-bold text-lg mb-0.5">{storeInfo.name}</h2>
+        <p className="text-xs text-muted-foreground">{storeInfo.address}</p>
+        <p className="text-xs text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      <div className="border-b border-dashed pb-2 mb-2">
-        <h3 className="font-bold">
-          {isRTL ? "معلومات المريض (Patient Information)" : "Patient Information (معلومات المريض)"}
+      {/* Work Order Header */}
+      <div className="text-center mb-3">
+        <h3 className="font-bold text-lg">
+          {isRtl ? "أمر عمل" : "WORK ORDER"}
         </h3>
-        <div className="grid grid-cols-2 gap-1 text-xs">
-          <div>Name:</div>
-          <div className="font-bold">{patient?.name || workOrder?.patientName || "-"}</div>
-          <div>Phone:</div>
-          <div className="font-bold">{patient?.phone || workOrder?.patientPhone || "-"}</div>
-          <div>Order ID:</div>
-          <div className="font-bold">{workOrder?.id || "-"}</div>
+        <p className="text-xs">
+          {isRtl ? "ORDER #: " : "رقم الطلب: "}
+          {workOrder?.id || invoice?.workOrderId || `WO${Date.now().toString().slice(-6)}`}
+        </p>
+        <p className="text-xs">
+          {format(new Date(), 'yyyy-MM-dd HH:mm')}
+        </p>
+      </div>
+
+      {/* Patient Information */}
+      <div className="mb-3">
+        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+          {isRtl ? "معلومات المريض" : "PATIENT INFORMATION"}
+          {!isRtl && " - معلومات المريض"}
+        </div>
+        
+        <div className="space-y-1 text-xs">
+          <div className="flex justify-between">
+            <span className="font-semibold">{t("customer")}:</span>
+            <span>{patientName}</span>
+          </div>
+          
+          {patientPhone && (
+            <div className="flex justify-between">
+              <span className="font-semibold">{t("phone")}:</span>
+              <span>{patientPhone}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="border-b border-dashed pb-2 mb-2">
-        <h3 className="font-bold">
-          {isRTL ? "تفاصيل الوصفة (Prescription Details)" : "Prescription Details (تفاصيل الوصفة)"}
-        </h3>
-        {workOrder?.prescription && (
-          <div className="flex flex-col space-y-1">
-            <div className="grid grid-cols-8 gap-x-1 text-xs text-center">
-              <div></div>
-              <div>SPH</div>
-              <div>CYL</div>
-              <div>AXIS</div>
-              <div>ADD</div>
-              <div>PD</div>
-              <div>VA</div>
-              <div>PRISM</div>
-            </div>
-            <div className="grid grid-cols-8 gap-x-1 text-xs text-center">
-              <div className="font-bold">R</div>
-              <div>{workOrder.prescription.rSph || "-"}</div>
-              <div>{workOrder.prescription.rCyl || "-"}</div>
-              <div>{workOrder.prescription.rAxis || "-"}</div>
-              <div>{workOrder.prescription.rAdd || "-"}</div>
-              <div>{workOrder.prescription.rPd || "-"}</div>
-              <div>{workOrder.prescription.rVa || "-"}</div>
-              <div>{workOrder.prescription.rPrism || "-"}</div>
-            </div>
-            <div className="grid grid-cols-8 gap-x-1 text-xs text-center">
-              <div className="font-bold">L</div>
-              <div>{workOrder.prescription.lSph || "-"}</div>
-              <div>{workOrder.prescription.lCyl || "-"}</div>
-              <div>{workOrder.prescription.lAxis || "-"}</div>
-              <div>{workOrder.prescription.lAdd || "-"}</div>
-              <div>{workOrder.prescription.lPd || "-"}</div>
-              <div>{workOrder.prescription.lVa || "-"}</div>
-              <div>{workOrder.prescription.lPrism || "-"}</div>
+      {/* Prescription Information */}
+      {rx && (
+        <div className="mb-3">
+          <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+            {isRtl ? "تفاصيل الوصفة الطبية" : "PRESCRIPTION DETAILS"}
+            {!isRtl && " - تفاصيل الوصفة الطبية"}
+          </div>
+          
+          <table className="w-full border-collapse text-xs">
+            <thead>
+              <tr className="bg-muted/50">
+                <th className="p-1 border text-center">{t('eye')}</th>
+                <th className="p-1 border text-center">{t('sphere')}</th>
+                <th className="p-1 border text-center">{t('cylinder')}</th>
+                <th className="p-1 border text-center">{t('axis')}</th>
+                <th className="p-1 border text-center">{t('addition')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="p-1 border font-bold text-center">{t('rightEyeAbbr')}</td>
+                <td className="p-1 border text-center">{rx.sphereOD || "—"}</td>
+                <td className="p-1 border text-center">{rx.cylOD || "—"}</td>
+                <td className="p-1 border text-center">{rx.axisOD || "—"}</td>
+                <td className="p-1 border text-center">{rx.addOD || "—"}</td>
+              </tr>
+              <tr>
+                <td className="p-1 border font-bold text-center">{t('leftEyeAbbr')}</td>
+                <td className="p-1 border text-center">{rx.sphereOS || "—"}</td>
+                <td className="p-1 border text-center">{rx.cylOS || "—"}</td>
+                <td className="p-1 border text-center">{rx.axisOS || "—"}</td>
+                <td className="p-1 border text-center">{rx.addOS || "—"}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div className="flex justify-between mt-1 text-xs">
+            <div className="flex space-x-1">
+              <span className="font-semibold">{t('pd')}:</span>
+              <span>{rx.pdRight || "-"} / {rx.pdLeft || "-"}</span>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="border-b border-dashed pb-2 mb-2">
-        <h3 className="font-bold">
-          {isRTL ? "تفاصيل المنتج (Product Details)" : "Product Details (تفاصيل المنتج)"}
-        </h3>
+      {/* Product Information */}
+      <div className="mb-3">
+        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+          {isRtl ? "تفاصيل المنتج" : "PRODUCT DETAILS"}
+          {!isRtl && " - تفاصيل المنتج"}
+        </div>
         
-        {/* Frame Section */}
-        {workOrder?.frame && (
-          <div className="mb-2">
-            <div className="text-xs font-bold">
-              {isRTL ? "الإطار (Frame)" : "Frame (الإطار)"}:
+        <div className="space-y-1.5 text-xs">
+          {/* Frame section */}
+          {frameData.brand && (
+            <div className="mb-2">
+              <div className="font-semibold border-b pb-0.5 mb-1">
+                {isRtl ? "الإطار (Frame)" : "Frame (الإطار)"}:
+              </div>
+              <div className="px-1 space-y-0.5">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{isRtl ? "الماركة (Brand)" : "Brand (الماركة)"}:</span>
+                  <span>{frameData.brand}</span>
+                </div>
+                {frameData.model && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isRtl ? "الموديل (Model)" : "Model (الموديل)"}:</span>
+                    <span>{frameData.model}</span>
+                  </div>
+                )}
+                {frameData.color && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isRtl ? "اللون (Color)" : "Color (اللون)"}:</span>
+                    <span>{frameData.color}</span>
+                  </div>
+                )}
+                {frameData.size && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isRtl ? "المقاس (Size)" : "Size (المقاس)"}:</span>
+                    <span>{frameData.size}</span>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="pl-2 text-xs">
-              <div><span className="text-blue-500">{isRTL ? "النوع (Brand)" : "Brand (النوع)"}:</span> {workOrder.frame.brand} {workOrder.frame.model}</div>
-              <div><span className="text-blue-500">{isRTL ? "اللون (Color)" : "Color (اللون)"}:</span> {workOrder.frame.color}</div>
-              <div><span className="text-blue-500">{isRTL ? "الحجم (Size)" : "Size (الحجم)"}:</span> {workOrder.frame.size || "-"}</div>
+          )}
+          
+          {/* Lens section */}
+          {lensType && (
+            <div className="mb-2">
+              <div className="font-semibold border-b pb-0.5 mb-1">
+                {isRtl ? "العدسات (Lenses)" : "Lenses (العدسات)"}:
+              </div>
+              <div className="px-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
+                  <span>{lensType}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-        
-        {/* Lens Section */}
-        {workOrder?.lens && (
-          <div className="mb-2">
-            <div className="text-xs font-bold">
-              {isRTL ? "العدسات (Lenses)" : "Lenses (العدسات)"}:
+          )}
+          
+          {/* Coating section */}
+          {coating && (
+            <div className="mb-2">
+              <div className="font-semibold border-b pb-0.5 mb-1">
+                {isRtl ? "الطلاء (Coating)" : "Coating (الطلاء)"}:
+              </div>
+              <div className="px-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
+                  <span>{coating}</span>
+                </div>
+              </div>
             </div>
-            <div className="pl-2 text-xs">
-              <div><span className="text-blue-500">{isRTL ? "النوع (Type)" : "Type (النوع)"}:</span> {workOrder.lens.type}</div>
-              <div><span className="text-blue-500">{isRTL ? "الشركة المصنعة (Brand)" : "Brand (الشركة المصنعة)"}:</span> {workOrder.lens.brand || "-"}</div>
-              <div><span className="text-blue-500">{isRTL ? "المؤشر (Index)" : "Index (المؤشر)"}:</span> {workOrder.lens.index || "-"}</div>
-            </div>
-          </div>
-        )}
-        
-        {/* Coating Section */}
-        {workOrder?.coating && workOrder.coating.length > 0 && (
-          <div className="mb-2">
-            <div className="text-xs font-bold">
-              {isRTL ? "الطلاء (Coatings)" : "Coatings (الطلاء)"}:
-            </div>
-            <div className="pl-2 text-xs">
-              {workOrder.coating.map((coat: any, index: number) => (
-                <div key={index}>{coat.name}</div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Contact Lens Section */}
-        {workOrder?.contactLens && (
-          <div className="mb-2">
-            <div className="text-xs font-bold">
-              {isRTL ? "عدسات لاصقة (Contact Lenses)" : "Contact Lenses (عدسات لاصقة)"}:
-            </div>
-            <div className="pl-2 text-xs">
-              <div><span className="text-blue-500">{isRTL ? "النوع (Type)" : "Type (النوع)"}:</span> {workOrder.contactLens.type}</div>
-              <div><span className="text-blue-500">{isRTL ? "الشركة المصنعة (Brand)" : "Brand (الشركة المصنعة)"}:</span> {workOrder.contactLens.brand || "-"}</div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Payment Status Section - Enhanced */}
-      <div className="border-b border-dashed pb-2 mb-3">
-        <h3 className="font-bold">
-          {isRTL ? "معلومات الدفع (Payment Information)" : "Payment Information (معلومات الدفع)"}
-        </h3>
-        
-        {isPaid ? (
-          <div className="py-2 px-1 rounded bg-green-100 border border-green-300 text-center my-1">
-            <div className="font-bold text-green-700">
-              {isRTL ? "تم الدفع بالكامل" : "PAID IN FULL"}
-            </div>
-            {!isRTL && <div className="text-xs text-green-600 font-semibold">تم الدفع بالكامل</div>}
-            {isRTL && <div className="text-xs text-green-600 font-semibold">PAID IN FULL</div>}
-          </div>
-        ) : (
-          <div className="py-2 px-1 rounded bg-red-100 border border-red-300 text-center my-1">
-            <div className="font-bold text-red-700 text-lg">
-              {isRTL ? "المبلغ المتبقي" : "REMAINING PAYMENT"}
-            </div>
-            {!isRTL && <div className="text-xs text-red-600 font-semibold">المبلغ المتبقي</div>}
-            {isRTL && <div className="text-xs text-red-600 font-semibold">REMAINING PAYMENT</div>}
-            <div className="text-xl font-bold text-red-700 mt-1">
-              {remainingAmount.toFixed(3)} KWD
-            </div>
-          </div>
-        )}
-        
-        <div className="text-xs mt-2">
-          <div><span className="text-blue-500">{isRTL ? "المبلغ الإجمالي (Total)" : "Total (المبلغ الإجمالي)"}:</span> {invoice?.total?.toFixed(3) || "-"} KWD</div>
-          <div><span className="text-blue-500">{isRTL ? "المدفوع (Paid)" : "Paid (المدفوع)"}:</span> {invoice?.deposit?.toFixed(3) || "-"} KWD</div>
-          <div><span className="text-blue-500">{isRTL ? "المتبقي (Remaining)" : "Remaining (المتبقي)"}:</span> {invoice?.remaining?.toFixed(3) || "-"} KWD</div>
+          )}
         </div>
       </div>
-      
+
+      {/* Payment Information */}
+      <div className="mb-3">
+        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+          {isRtl ? "معلومات الدفع" : "PAYMENT INFORMATION"}
+          {!isRtl && " - معلومات الدفع"}
+        </div>
+        
+        <div className="space-y-1 text-xs">
+          <div className="flex justify-between">
+            <span className="font-semibold">{t("total")}:</span>
+            <span>{total.toFixed(3)} KWD</span>
+          </div>
+          
+          <div className="flex justify-between">
+            <span className="font-semibold">{t("deposit")}:</span>
+            <span>{deposit.toFixed(3)} KWD</span>
+          </div>
+          
+          {/* Payment Status Section */}
+          {isPaid ? (
+            <div className="mt-2 p-2 bg-green-100 rounded border border-green-300 text-center">
+              <div className="flex items-center justify-center gap-1 text-green-700 font-bold">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>{isRtl ? "تم الدفع بالكامل" : "PAID IN FULL"}</span>
+              </div>
+              {!isRtl ? <div className="text-green-600 text-xs">تم الدفع بالكامل</div> : 
+                       <div className="text-green-600 text-xs">PAID IN FULL</div>}
+            </div>
+          ) : (
+            <div className="mt-2">
+              <div className="p-2 bg-red-100 rounded border border-red-300 text-center">
+                <div className="font-bold text-red-700 text-base">
+                  {isRtl ? "المبلغ المتبقي" : "REMAINING AMOUNT"}
+                </div>
+                <div className="text-lg font-bold text-red-600 mt-1">
+                  {remaining.toFixed(3)} KWD
+                </div>
+                {!isRtl ? <div className="text-red-600 text-xs">المبلغ المتبقي</div> : 
+                         <div className="text-red-600 text-xs">REMAINING AMOUNT</div>}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Quality Confirmation */}
-      <div className="border-b border-dashed pb-2 mb-2">
-        <h3 className="font-bold">
-          {isRTL ? "تأكيد الجودة (Quality Confirmation)" : "Quality Confirmation (تأكيد الجودة)"}
-        </h3>
-        <div className="flex justify-between items-center mt-1">
-          <div className="text-xs">□ Passed</div>
-          <div className="text-xs">□ Rejected</div>
-          <div className="text-xs">□ Needs Adjustment</div>
+      <div className="mb-3">
+        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
+          {isRtl ? "تأكيد الجودة" : "QUALITY CONFIRMATION"}
+          {!isRtl && " - تأكيد الجودة"}
+        </div>
+        
+        <div className="flex gap-2 text-xs mb-1">
+          <div className="border rounded p-1 flex-1">
+            <div className="font-semibold mb-1 text-center border-b pb-1">
+              {isRtl ? "توقيع الفني" : "Technician Signature"}
+            </div>
+            <div className="h-10"></div>
+          </div>
+          
+          <div className="border rounded p-1 flex-1">
+            <div className="font-semibold mb-1 text-center border-b pb-1">
+              {isRtl ? "توقيع المدير" : "Manager Signature"}
+            </div>
+            <div className="h-10"></div>
+          </div>
         </div>
       </div>
-      
-      {/* Technician Signature */}
-      <div className="mb-2">
-        <div className="text-xs font-bold mb-1">
-          {isRTL ? "توقيع الفني (Technician Signature)" : "Technician Signature (توقيع الفني)"}:
-        </div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      
-      <div className="text-center text-xs mt-4">
-        <div>Thank you for your business!</div>
-        <div>شكراً لثقتكم بنا</div>
+
+      {/* Footer */}
+      <div className="text-center border-t pt-2 text-xs">
+        <p className="font-semibold">
+          {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
+        </p>
+        <p className="text-[9px] text-muted-foreground mt-1">
+          {isRtl ? "هذا الإيصال يعتبر إثبات للطلب فقط وليس إيصال دفع" : 
+                  "This receipt is proof of order only and not a payment receipt"}
+        </p>
       </div>
     </div>
   );

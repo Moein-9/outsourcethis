@@ -10,25 +10,30 @@ interface PrintWorkOrderButtonProps {
   invoice?: any;
   patient?: any;
   className?: string;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
 }
 
 export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   workOrder,
   invoice,
   patient,
-  className = ''
+  className = '',
+  variant = "outline",
+  size = "sm"
 }) => {
   const { t } = useLanguageStore();
   
   const handlePrint = () => {
+    console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
     CustomPrintService.printWorkOrder(workOrder, invoice, patient);
   };
   
   return (
     <Button 
       onClick={handlePrint} 
-      variant="outline" 
-      size="sm"
+      variant={variant}
+      size={size}
       className={`gap-1 ${className}`}
     >
       <Printer className="h-4 w-4" />

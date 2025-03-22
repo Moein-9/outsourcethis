@@ -657,7 +657,7 @@ const CreateInvoice: React.FC = () => {
                             <tbody>
                               <tr>
                                 <td className="p-2 border font-bold text-center">{t('rightEyeAbbr')}</td>
-                                <td className="p-2 border text-center">{currentPatient.rx.sphereOD || "—"}</td>
+                                <td className="p-2 border text-center">{currentPatient.rx.sphereOD || "���"}</td>
                                 <td className="p-2 border text-center">{currentPatient.rx.cylOD || "—"}</td>
                                 <td className="p-2 border text-center">{currentPatient.rx.axisOD || "—"}</td>
                                 <td className="p-2 border text-center">{currentPatient.rx.addOD || "—"}</td>
@@ -1077,14 +1077,12 @@ const CreateInvoice: React.FC = () => {
             )}
             
             <div className="mt-8 flex justify-between">
-              <Button 
-                variant="outline" 
+              <CustomPrintWorkOrderButton 
+                workOrder={previewInvoice}
+                invoice={previewInvoice}
+                patient={currentPatient || { name: manualName, phone: manualPhone }}
                 className="flex items-center gap-2"
-                onClick={handlePrintWorkOrder}
-              >
-                <Printer className="w-4 h-4" />
-                {t('printWorkOrder')}
-              </Button>
+              />
               
               <div className={`${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
                 <Button 
@@ -1260,7 +1258,7 @@ const CreateInvoice: React.FC = () => {
         <SheetContent className="w-full sm:max-w-md overflow-y-auto print:w-full print:max-w-none">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
-              <Receipt className="w-5 h-5" />
+              <Receipt className="w-5 h-4" />
               {t('invoice')}
             </SheetTitle>
             <SheetDescription>
