@@ -244,6 +244,7 @@ export const WorkOrderWorkflow: React.FC<WorkOrderWorkflowProps> = ({
                   className="w-full gap-2"
                   size="lg"
                   variant="default"
+                  onPrintComplete={handlePrintWorkOrderComplete}
                 />
               ) : (
                 <PrintWorkOrderButton
