@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -6,6 +5,7 @@ import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
+import { WorkOrderWorkflow } from "./WorkOrderWorkflow";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -29,6 +29,7 @@ interface PrintWorkOrderButtonProps {
   thermalOnly?: boolean;
   isNewInvoice?: boolean;
   onInvoiceSaved?: (invoiceId: string) => void;
+  useWorkflow?: boolean;
 }
 
 export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -47,10 +48,30 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   thermalOnly = false,
   isNewInvoice = false,
   onInvoiceSaved,
+  useWorkflow = false
 }) => {
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
   const { addInvoice, addExistingInvoice } = useInvoiceStore();
+  
+  // If using the workflow UI, render that instead of the buttons
+  if (useWorkflow) {
+    return (
+      <WorkOrderWorkflow
+        invoice={invoice}
+        patientName={patientName}
+        patientPhone={patientPhone}
+        rx={rx}
+        lensType={lensType}
+        coating={coating}
+        frame={frame}
+        contactLenses={contactLenses}
+        contactLensRx={contactLensRx}
+        isNewInvoice={isNewInvoice}
+        onInvoiceSaved={onInvoiceSaved}
+      />
+    );
+  }
   
   const handlePrint = () => {
     // If it's a new invoice, save it first to generate an invoice ID

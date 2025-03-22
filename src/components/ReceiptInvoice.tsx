@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -108,14 +107,14 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         <p className="text-xs font-medium">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      <div className="mb-2">
+      <div className="mb-2 px-2">
         <div className="inline-flex items-center justify-center gap-1 border-2 border-black px-2 py-0.5 rounded">
           <Receipt className="w-4 h-4" />
           <span className="font-bold text-base">{t("invoice")}</span>
         </div>
       </div>
 
-      <div className="mb-2 border-2 border-black rounded p-1.5">
+      <div className="mb-2 px-2 border-2 border-black rounded p-1.5">
         <div className="mb-1 border-b border-gray-400 pb-1">
           <div className="flex items-center justify-center gap-1">
             <User className="w-4 h-4" />
@@ -146,7 +145,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      <div className="mb-2 border-2 border-black rounded p-1.5">
+      <div className="mb-2 px-2 border-2 border-black rounded p-1.5">
         <div className="mb-1 border-b border-gray-400 pb-1">
           <div className="flex items-center justify-center gap-1">
             <Receipt className="w-4 h-4" />
@@ -165,7 +164,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      <div className="mb-2">
+      <div className="mb-2 px-2">
         <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded">
           {isRtl ? "المنتجات | Products" : "Products | المنتجات"}
         </div>
@@ -217,7 +216,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      <div className="mb-2 border-2 border-black rounded p-1.5">
+      <div className="mb-2 px-2 border-2 border-black rounded p-1.5">
         <div className="space-y-1 px-2">
           <div className="flex justify-between text-sm">
             <span className="font-bold">{t("subtotal")}:</span>
@@ -236,7 +235,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      <div className="mb-2">
+      <div className="mb-2 px-2">
         <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded">
           {isRtl ? "الدفع | Payment" : "Payment | الدفع"}
         </div>
@@ -286,7 +285,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      <div className="mt-3 pt-1 border-t-2 border-black">
+      <div className="mt-3 pt-1 px-2 border-t-2 border-black">
         {isRtl ? (
           <p className="font-bold text-sm mb-0">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
         ) : (
