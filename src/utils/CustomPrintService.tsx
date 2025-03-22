@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
@@ -114,6 +115,8 @@ export const CustomPrintService = {
       .w-full { width: 100%; }
       .bg-green-100 { background-color: #dcfce7; }
       .bg-red-100 { background-color: #fee2e2; }
+      .bg-blue-100 { background-color: #dbeafe; }
+      .bg-blue-500 { background-color: #3b82f6; }
       .bg-muted { background-color: #f3f4f6; }
       .bg-muted\\/50 { background-color: rgba(243, 244, 246, 0.5); }
       .text-muted-foreground { color: #6b7280; }
@@ -122,6 +125,8 @@ export const CustomPrintService = {
       .text-green-700 { color: #15803d; }
       .text-red-600 { color: #dc2626; }
       .text-red-700 { color: #b91c1c; }
+      .text-blue-600 { color: #2563eb; }
+      .text-blue-700 { color: #1d4ed8; }
       .text-base { font-size: 1rem; line-height: 1.5rem; }
       .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
       .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
@@ -133,6 +138,32 @@ export const CustomPrintService = {
       .ltr { direction: ltr; }
       .text-right { text-align: right; }
       .bg-slate-50 { background-color: #f8fafc; }
+      
+      /* Invoice specific styles */
+      .invoice-header {
+        background-color: #3b82f6 !important; /* Blue for invoices */
+        color: white !important;
+      }
+      
+      .workorder-header {
+        background-color: #000000 !important; /* Black for work orders */
+        color: white !important;
+      }
+      
+      .invoice-watermark {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 48px;
+        color: rgba(59, 130, 246, 0.07);
+        transform: rotate(-45deg);
+        transform-origin: center;
+        z-index: 0;
+        pointer-events: none;
+        font-weight: bold;
+      }
     `;
     printWindow.document.head.appendChild(style);
 
@@ -235,7 +266,7 @@ export const CustomPrintService = {
     container.className = 'print-container';
     printWindow.document.body.appendChild(container);
 
-    // Add necessary styles - reuse the same styles as work order
+    // Add necessary styles - reuse the same styles as work order but with invoice-specific additions
     const style = document.createElement('style');
     style.textContent = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -247,6 +278,7 @@ export const CustomPrintService = {
       .print-container {
         width: 80mm;
         margin: 0 auto;
+        position: relative;
       }
       @media print {
         @page {
@@ -273,6 +305,7 @@ export const CustomPrintService = {
       .border-black { border-color: black; }
       .border-green-300 { border-color: #86efac; }
       .border-red-300 { border-color: #fca5a5; }
+      .border-blue-300 { border-color: #93c5fd; }
       .rounded { border-radius: 0.25rem; }
       .mb-1 { margin-bottom: 0.25rem; }
       .mb-2 { margin-bottom: 0.5rem; }
@@ -322,6 +355,8 @@ export const CustomPrintService = {
       .w-full { width: 100%; }
       .bg-green-100 { background-color: #dcfce7; }
       .bg-red-100 { background-color: #fee2e2; }
+      .bg-blue-100 { background-color: #dbeafe; }
+      .bg-blue-500 { background-color: #3b82f6; }
       .bg-muted { background-color: #f3f4f6; }
       .bg-muted\\/50 { background-color: rgba(243, 244, 246, 0.5); }
       .text-muted-foreground { color: #6b7280; }
@@ -330,6 +365,8 @@ export const CustomPrintService = {
       .text-green-700 { color: #15803d; }
       .text-red-600 { color: #dc2626; }
       .text-red-700 { color: #b91c1c; }
+      .text-blue-600 { color: #2563eb; }
+      .text-blue-700 { color: #1d4ed8; }
       .text-base { font-size: 1rem; line-height: 1.5rem; }
       .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
       .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
@@ -341,6 +378,32 @@ export const CustomPrintService = {
       .ltr { direction: ltr; }
       .text-right { text-align: right; }
       .bg-slate-50 { background-color: #f8fafc; }
+      
+      /* Invoice specific styles */
+      .invoice-header {
+        background-color: #3b82f6 !important; /* Blue for invoices */
+        color: white !important;
+      }
+      
+      .workorder-header {
+        background-color: #000000 !important; /* Black for work orders */
+        color: white !important;
+      }
+      
+      .invoice-watermark {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 48px;
+        color: rgba(59, 130, 246, 0.07);
+        transform: rotate(-45deg);
+        transform-origin: center;
+        z-index: 0;
+        pointer-events: none;
+        font-weight: bold;
+      }
     `;
     printWindow.document.head.appendChild(style);
 

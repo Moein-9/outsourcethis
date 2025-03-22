@@ -66,6 +66,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const invoiceNumber = invoice?.invoiceId || invoice?.workOrderId || workOrder?.id || `WO${Date.now().toString().slice(-6)}`;
   
+  // Header classes based on document type
+  const headerClass = isInvoice ? "invoice-header" : "workorder-header";
+  
   return (
     <div 
       className={`${dirClass} print-receipt`} 
@@ -83,9 +86,17 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         boxShadow: isPrintable ? 'none' : '0 1px 2px rgba(0,0,0,0.05)',
         fontFamily: isRtl ? 'Cairo, sans-serif' : 'Cairo, sans-serif',
         pageBreakInside: 'avoid',
-        pageBreakAfter: 'always'
+        pageBreakAfter: 'always',
+        position: 'relative'
       }}
     >
+      {/* Add watermark for invoices */}
+      {isInvoice && (
+        <div className="invoice-watermark">
+          {isRtl ? "فاتورة" : "INVOICE"}
+        </div>
+      )}
+      
       <div className="text-center border-b pb-1 mb-1">
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-10" />
@@ -96,12 +107,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="text-center mb-1">
-        <h3 className="font-bold text-lg mb-0">
+        <h3 className={`font-bold text-lg mb-0 py-1 ${isInvoice ? 'bg-blue-500' : 'bg-black'} text-white rounded`}>
           {isInvoice 
             ? (isRtl ? "فاتورة" : "INVOICE") 
             : (isRtl ? "أمر عمل" : "WORK ORDER")}
         </h3>
-        <p className="text-xs mb-0">
+        <p className="text-xs mb-0 mt-1">
           {isRtl ? "ORDER #: " : "رقم الطلب: "}
           {invoiceNumber}
         </p>
@@ -111,7 +122,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base border-y">
+        <div className={`text-center ${headerClass} py-0.5 mb-1 font-bold text-base border-y`}>
           {isRtl 
             ? "معلومات المريض | Patient Information" 
             : "Patient Information | معلومات المريض"}
@@ -134,7 +145,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
 
       {rx && (
         <div className="mb-2">
-          <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
+          <div className={`text-center ${headerClass} py-0.5 mb-1 font-bold text-base`}>
             {isRtl 
               ? "تفاصيل الوصفة الطبية | Prescription Details" 
               : "Prescription Details | تفاصيل الوصفة الطبية"}
@@ -174,7 +185,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       )}
 
       <div className="mb-2">
-        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
+        <div className={`text-center ${headerClass} py-0.5 mb-1 font-bold text-base`}>
           {isRtl 
             ? "تفاصيل المنتج | Product Details" 
             : "Product Details | تفاصيل المنتج"}
@@ -262,7 +273,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
+        <div className={`text-center ${headerClass} py-0.5 mb-1 font-bold text-base`}>
           {isRtl 
             ? "معلومات الدفع | Payment Information" 
             : "Payment Information | معلومات الدفع"}
@@ -302,47 +313,49 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </div>
           ) : (
             <div className="mt-1">
-              <div className="p-1 bg-red-100 rounded border border-red-300 text-center">
-                <div className="font-bold text-red-700 text-sm">
+              <div className={`p-1 ${isInvoice ? 'bg-blue-100 border-blue-300' : 'bg-red-100 border-red-300'} rounded border text-center`}>
+                <div className={`font-bold ${isInvoice ? 'text-blue-700' : 'text-red-700'} text-sm`}>
                   {isRtl ? "المبلغ المتبقي" : "REMAINING AMOUNT"}
                 </div>
-                <div className="text-base font-bold text-red-600">
+                <div className={`text-base font-bold ${isInvoice ? 'text-blue-600' : 'text-red-600'}`}>
                   {remaining.toFixed(3)} KWD
                 </div>
-                {!isRtl ? <div className="text-red-600 text-xs">المبلغ المتبقي</div> : 
-                         <div className="text-red-600 text-xs">REMAINING AMOUNT</div>}
+                {!isRtl ? <div className={isInvoice ? 'text-blue-600 text-xs' : 'text-red-600 text-xs'}>المبلغ المتبقي</div> : 
+                         <div className={isInvoice ? 'text-blue-600 text-xs' : 'text-red-600 text-xs'}>REMAINING AMOUNT</div>}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <div className="mb-2">
-        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
-          {isRtl 
-            ? "تأكيد الجودة | Quality Confirmation" 
-            : "Quality Confirmation | تأكيد الجودة"}
-        </div>
-        
-        <div className="flex gap-1 text-xs mb-1 px-1">
-          <div className="border rounded p-0.5 flex-1">
-            <div className="font-bold mb-0.5 text-center border-b pb-0.5">
-              {isRtl ? "توقيع الفني" : "Technician Signature"}
-            </div>
-            <div className="h-6"></div>
+      {!isInvoice && (
+        <div className="mb-2">
+          <div className={`text-center ${headerClass} py-0.5 mb-1 font-bold text-base`}>
+            {isRtl 
+              ? "تأكيد الجودة | Quality Confirmation" 
+              : "Quality Confirmation | تأكيد الجودة"}
           </div>
           
-          <div className="border rounded p-0.5 flex-1">
-            <div className="font-bold mb-0.5 text-center border-b pb-0.5">
-              {isRtl ? "توقيع المدير" : "Manager Signature"}
+          <div className="flex gap-1 text-xs mb-1 px-1">
+            <div className="border rounded p-0.5 flex-1">
+              <div className="font-bold mb-0.5 text-center border-b pb-0.5">
+                {isRtl ? "توقيع الفني" : "Technician Signature"}
+              </div>
+              <div className="h-6"></div>
             </div>
-            <div className="h-6"></div>
+            
+            <div className="border rounded p-0.5 flex-1">
+              <div className="font-bold mb-0.5 text-center border-b pb-0.5">
+                {isRtl ? "توقيع المدير" : "Manager Signature"}
+              </div>
+              <div className="h-6"></div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="mb-2">
-        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
+        <div className={`text-center ${headerClass} py-0.5 mb-1 font-bold text-base`}>
           {isRtl 
             ? "ملاحظات | Notes" 
             : "Notes | ملاحظات"}
@@ -358,8 +371,10 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
         </p>
         <p className="text-[9px] mt-0.5">
-          {isRtl ? "هذا الإيصال يعتبر إثبات للطلب فقط وليس إيصال دفع" : 
-                  "This receipt is proof of order only and not a payment receipt"}
+          {isInvoice 
+            ? (isRtl ? "هذا الإيصال يعتبر إثبات دفع صالح" : "This receipt is a valid proof of payment") 
+            : (isRtl ? "هذا الإيصال يعتبر إثبات للطلب فقط وليس إيصال دفع" : 
+                      "This receipt is proof of order only and not a payment receipt")}
         </p>
       </div>
       
@@ -441,6 +456,28 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                 min-height: fit-content !important;
                 max-height: fit-content !important;
               }
+            }
+            
+            /* Make invoice watermark visible in print */
+            .invoice-watermark {
+              display: block !important;
+              visibility: visible !important;
+              opacity: 0.07 !important;
+            }
+            
+            /* Ensure invoice specific colors print correctly */
+            .invoice-header {
+              background-color: #3b82f6 !important;
+              color: white !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            
+            .workorder-header {
+              background-color: #000000 !important;
+              color: white !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
           }
         `}
