@@ -85,28 +85,34 @@ export const usePrintLabel = () => {
             <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" />
           </div>
           <div class="qr-code">
-            ${renderQRCodeToString(frame.frameId)}
+            <div id="qr-code-${frame.frameId}"></div>
+            <script>
+              var qrContainer = document.getElementById('qr-code-${frame.frameId}');
+              var qrSvg = '${generateQRCodeSVG(frame.frameId)}';
+              qrContainer.innerHTML = qrSvg;
+            </script>
           </div>
         </div>
         <div class="right-section">
           <div class="brand-name">${frame.brand} ${frame.model}</div>
           <div class="detail-info">Color: ${frame.color || '-'}</div>
           <div class="detail-info">Size: ${frame.size || '-'}</div>
-          <div class="price">${frame.price.toFixed(2)} KWD</div>
+          <div class="price">${frame.price.toFixed(3)} KWD</div>
         </div>
       </div>
     `;
   };
   
-  // Helper function to render QR code as a string
-  const renderQRCodeToString = (value: string) => {
-    // Since we can't directly render React components to string, we'll create a simple SVG
-    return `
+  // Generate QR code SVG string
+  const generateQRCodeSVG = (value: string) => {
+    // Create a simple QR code SVG string
+    const svgString = `
       <svg viewBox="0 0 40 40" width="40" height="40">
         <rect width="40" height="40" fill="white" />
-        <text x="20" y="20" text-anchor="middle" font-size="5">${value.substring(0, 8)}</text>
+        <text x="20" y="23" text-anchor="middle" font-size="6" fill="black">${value.substring(0, 8)}</text>
       </svg>
     `;
+    return svgString.replace(/"/g, '\'').replace(/\s+/g, ' ').trim();
   };
   
   return { printSingleLabel, printMultipleLabels };
@@ -175,7 +181,7 @@ export const FrameLabelTemplate: React.FC = () => {
                 <div className="text-xs text-gray-500">
                   {frame.color}, {frame.size || '-'}
                 </div>
-                <div className="text-xs font-medium">{frame.price.toFixed(2)} KWD</div>
+                <div className="text-xs font-medium">{frame.price.toFixed(3)} KWD</div>
               </div>
               {selectedFrames.includes(frame.frameId) && (
                 <Check className="h-4 w-4 text-blue-500" />

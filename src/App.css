@@ -146,7 +146,7 @@ table th, table td {
     padding: 0 !important;
     height: auto !important;
     width: auto !important;
-    font-size: 10px !important;
+    font-size: 9px !important;
     line-height: 1.1 !important;
   }
   
@@ -163,8 +163,8 @@ table th, table td {
   
   /* Compact spacing for all elements */
   h1, h2, h3, h4, p, div, span, td, th {
-    margin: 1px 0 !important;
-    padding: 1px !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
   /* Receipt-specific print styling */
@@ -172,11 +172,11 @@ table th, table td {
     width: 80mm !important;
     max-width: 80mm !important;
     margin: 0 !important;
-    padding: 3mm !important;
+    padding: 2mm !important;
     page-break-after: always !important;
     page-break-inside: avoid !important;
     visibility: visible !important;
-    font-size: 10px !important;
+    font-size: 9px !important;
   }
   
   /* Ensure page break behavior */
@@ -189,8 +189,8 @@ table th, table td {
   /* QR code size control */
   [id^="qr-code-"] svg,
   .qr-code svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: 20px !important;
+    height: 20px !important;
   }
   
   /* Ensure all content is visible and fits in the safe zone */
@@ -277,20 +277,43 @@ table th, table td {
   
   table th, table td {
     padding: 1px !important;
-    font-size: 8px !important;
+    font-size: 7px !important;
   }
   
   /* Reduce margins and paddings for all elements */
   * {
-    margin: 1px !important;
-    padding: 1px !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
   /* Compress vertical spacing */
   .print-receipt > div, 
   #receipt-invoice > div, 
   #work-order-receipt > div {
-    margin-bottom: 2px !important;
+    margin-bottom: 1px !important;
+    padding: 0 !important;
+  }
+  
+  /* Ensure text is legible even at small sizes */
+  p, span, div, td, th {
+    line-height: 1.1 !important;
+  }
+  
+  /* Make headings more compact */
+  h1, h2, h3 {
+    line-height: 1.2 !important;
+    margin: 1px 0 !important;
+  }
+  
+  /* Keep spacing between sections minimal but clear */
+  hr, .divider, div[style*="border-top"] {
+    margin: 1px 0 !important;
+  }
+  
+  /* Improve legibility of the QR code */
+  svg[viewBox] {
+    width: 30px !important;
+    height: 30px !important;
   }
 }
 
@@ -302,15 +325,17 @@ table th, table td {
   justify-content: space-between;
   font-family: 'Yrsa', serif;
   overflow: hidden;
-  border-radius: 8mm;
+  border-radius: 2mm;
   position: relative;
+  padding: 0;
+  margin: 0 0 1mm 0;
 }
 
 /* Right section - brand info */
 .right-section {
   width: 45mm;
   height: 100%;
-  padding: 1mm 2mm;
+  padding: 1mm;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -330,8 +355,8 @@ table th, table td {
 /* Brand name styling */
 .brand-name {
   font-weight: bold;
-  font-size: 9pt;
-  margin-bottom: 1mm;
+  font-size: 8pt;
+  margin-bottom: 0.5mm;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -339,15 +364,15 @@ table th, table td {
 
 /* Detail information styling */
 .detail-info {
-  font-size: 7pt;
-  margin-bottom: 1mm;
+  font-size: 6pt;
+  margin-bottom: 0.5mm;
   line-height: 1.1;
 }
 
 /* Price styling */
 .price {
   font-weight: bold;
-  font-size: 9pt;
+  font-size: 8pt;
 }
 
 /* Store logo styling */
@@ -355,11 +380,11 @@ table th, table td {
   display: flex;
   justify-content: center;
   width: 100%;
-  margin-bottom: 1mm;
+  margin-bottom: 0.5mm;
 }
 
 .store-logo img {
-  max-height: 4mm;
+  max-height: 3mm;
   width: auto;
 }
 
@@ -371,21 +396,32 @@ table th, table td {
 
 .qr-code img,
 .qr-code svg {
-  height: 22px;
-  width: 22px;
+  height: 20px;
+  width: 20px;
 }
 
 /* Compact receipt styles */
 #receipt-invoice, #work-order-receipt {
-  font-size: 10px;
-  line-height: 1.2;
+  font-size: 9px;
+  line-height: 1.1;
 }
 
 #receipt-invoice h1, #receipt-invoice h2, #receipt-invoice h3,
 #work-order-receipt h1, #work-order-receipt h2, #work-order-receipt h3 {
-  margin: 2px 0;
+  margin: 1px 0;
 }
 
 #receipt-invoice p, #work-order-receipt p {
+  margin: 0;
+}
+
+/* Make tables more compact */
+#receipt-invoice table, #work-order-receipt table {
   margin: 1px 0;
+}
+
+#receipt-invoice th, #receipt-invoice td,
+#work-order-receipt th, #work-order-receipt td {
+  padding: 1px;
+  font-size: 7px;
 }
