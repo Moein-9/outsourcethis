@@ -20,8 +20,6 @@ interface PrintWorkOrderButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
-  onPrintComplete?: () => void;
-  isInvoice?: boolean;
 }
 
 export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -30,36 +28,20 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   patient,
   className = '',
   variant = "outline",
-  size = "sm",
-  onPrintComplete,
-  isInvoice = false
+  size = "sm"
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
   
   const handlePrint = () => {
-    console.log(`CustomPrintWorkOrderButton: Printing ${isInvoice ? 'invoice' : 'work order'}`, { workOrder, invoice, patient });
+    console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
     setOpen(false); // Close dialog before printing
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      if (isInvoice && invoice) {
-        CustomPrintService.printInvoice(workOrder, invoice, patient);
-      } else {
-        CustomPrintService.printWorkOrder(workOrder, invoice, patient);
-      }
-      
-      // Call onPrintComplete callback if provided
-      if (onPrintComplete) {
-        setTimeout(() => {
-          onPrintComplete();
-        }, 500);
-      }
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
     }, 300);
   };
-  
-  const buttonText = isInvoice ? t('printInvoice') : t('printWorkOrder');
-  const previewTitle = isInvoice ? t('invoicePreview') : t('workOrderPreview');
   
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -70,12 +52,12 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
           className={`gap-1 ${className}`}
         >
           <Printer className="h-4 w-4" />
-          {buttonText}
+          {t('printWorkOrder')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto p-0">
         <div className="p-6 flex flex-col items-center">
-          <DialogTitle className="sr-only">{previewTitle}</DialogTitle>
+          <DialogTitle className="sr-only">{t('workOrderPreview')}</DialogTitle>
           <DialogDescription className="sr-only">
             {t('previewBeforePrinting')}
           </DialogDescription>
@@ -86,7 +68,6 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               invoice={invoice} 
               patient={patient}
               isPrintable={false}
-              isInvoice={isInvoice}
             />
           </div>
           <Button onClick={handlePrint} className="mt-4 gap-2">
