@@ -269,42 +269,69 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
   
   const htmlContent = `
     <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; text-align: ${isRtl ? 'right' : 'left'};">
-      <div style="text-align: center; margin-bottom: 10px;">
-        <h1 style="font-size: 14px; font-weight: bold;">${t("workOrder")}</h1>
-        <p style="font-size: 12px;">${invoice.invoiceId}</p>
-        <p style="font-size: 10px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
+      <div style="text-align: center; margin-bottom: 8px;">
+        <h1 style="font-size: 14px; font-weight: bold; margin: 4px 0;">${t("workOrder")}</h1>
+        <p style="font-size: 12px; margin: 2px 0;">${invoice.invoiceId}</p>
+        <p style="font-size: 10px; margin: 2px 0;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
       </div>
       
-      <div style="margin-bottom: 10px; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 5px 0;">
-        <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName}</p>
-        <p><strong>${t("phone")}:</strong> ${props.patientPhone || invoice.patientPhone}</p>
+      <div style="margin-bottom: 8px; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 0;">
+        <p style="margin: 2px 0; font-size: 12px;"><strong>${t("name")}:</strong> ${patientName || invoice.patientName || t("notSpecified")}</p>
+        <p style="margin: 2px 0; font-size: 12px;"><strong>${t("phone")}:</strong> ${props.patientPhone || invoice.patientPhone || t("notSpecified")}</p>
       </div>
+      
+      ${rx ? `
+      <div style="margin-bottom: 8px;">
+        <h2 style="font-size: 12px; font-weight: bold; margin: 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px;">${t("prescription")}</h2>
+        <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
+          <tr>
+            <th style="border: 1px solid #000; padding: 2px;"></th>
+            <th style="border: 1px solid #000; padding: 2px;">SPH</th>
+            <th style="border: 1px solid #000; padding: 2px;">CYL</th>
+            <th style="border: 1px solid #000; padding: 2px;">AXIS</th>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold;">${t("rightEye")}</td>
+            <td style="border: 1px solid #000; padding: 2px;">${rx.sphereOD || "-"}</td>
+            <td style="border: 1px solid #000; padding: 2px;">${rx.cylOD || "-"}</td>
+            <td style="border: 1px solid #000; padding: 2px;">${rx.axisOD || "-"}</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold;">${t("leftEye")}</td>
+            <td style="border: 1px solid #000; padding: 2px;">${rx.sphereOS || "-"}</td>
+            <td style="border: 1px solid #000; padding: 2px;">${rx.cylOS || "-"}</td>
+            <td style="border: 1px solid #000; padding: 2px;">${rx.axisOS || "-"}</td>
+          </tr>
+        </table>
+      </div>
+      ` : ''}
       
       ${frame ? `
-      <div style="margin-bottom: 10px;">
-        <h2 style="font-size: 12px; font-weight: bold;">${t("frame")}</h2>
-        <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
-        <p><strong>${t("model")}:</strong> ${frame.model}</p>
-        <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} ${t("currency")}</p>
+      <div style="margin-bottom: 8px;">
+        <h2 style="font-size: 12px; font-weight: bold; margin: 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px;">${t("frame")}</h2>
+        <p style="margin: 2px 0; font-size: 10px;"><strong>${t("brand")}:</strong> ${frame.brand}</p>
+        <p style="margin: 2px 0; font-size: 10px;"><strong>${t("model")}:</strong> ${frame.model}</p>
+        <p style="margin: 2px 0; font-size: 10px;"><strong>${t("color")}:</strong> ${frame.color}</p>
+        <p style="margin: 2px 0; font-size: 10px;"><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} ${t("currency")}</p>
       </div>
       ` : ''}
       
       ${lensType ? `
-      <div style="margin-bottom: 10px;">
-        <h2 style="font-size: 12px; font-weight: bold;">${t("lensType")}</h2>
-        <p><strong>${t("type")}:</strong> ${lensType}</p>
-        <p><strong>${t("price")}:</strong> ${invoice.lensPrice.toFixed(3)} ${t("currency")}</p>
+      <div style="margin-bottom: 8px;">
+        <h2 style="font-size: 12px; font-weight: bold; margin: 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px;">${t("lensType")}</h2>
+        <p style="margin: 2px 0; font-size: 10px;"><strong>${t("type")}:</strong> ${lensType}</p>
+        <p style="margin: 2px 0; font-size: 10px;"><strong>${t("price")}:</strong> ${invoice.lensPrice.toFixed(3)} ${t("currency")}</p>
       </div>
       ` : ''}
       
-      <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px;">
-        <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} ${t("currency")}</p>
-        <p><strong>${t("paid")}:</strong> ${invoice.deposit.toFixed(3)} ${t("currency")}</p>
-        <p><strong>${t("remaining")}:</strong> ${(invoice.total - invoice.deposit).toFixed(3)} ${t("currency")}</p>
+      <div style="margin-top: 8px; border-top: 1px dashed #000; padding-top: 4px;">
+        <p style="margin: 2px 0; font-size: 10px;"><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} ${t("currency")}</p>
+        <p style="margin: 2px 0; font-size: 10px;"><strong>${t("paid")}:</strong> ${invoice.deposit.toFixed(3)} ${t("currency")}</p>
+        <p style="margin: 2px 0; font-size: 10px;"><strong>${t("remaining")}:</strong> ${(invoice.total - invoice.deposit).toFixed(3)} ${t("currency")}</p>
       </div>
       
-      <div style="text-align: center; margin-top: 20px; font-size: 10px;">
-        <p>${t("thankYouForYourPurchase")}</p>
+      <div style="text-align: center; margin-top: 8px; font-size: 10px;">
+        <p style="margin: 2px 0;">${t("thankYouForYourPurchase")}</p>
       </div>
     </div>
   `;

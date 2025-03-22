@@ -25,6 +25,7 @@ interface PrintWorkOrderButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
+  thermalOnly?: boolean;
 }
 
 export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -40,6 +41,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   className,
   variant = "outline",
   size = "sm",
+  thermalOnly = false,
 }) => {
   const { t } = useLanguageStore();
 
@@ -54,6 +56,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       frame={frame}
       contactLenses={contactLenses}
       contactLensRx={contactLensRx}
+      thermalOnly={thermalOnly}
       trigger={
         <Button variant={variant} size={size} className={className}>
           <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}

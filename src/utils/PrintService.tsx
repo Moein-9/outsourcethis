@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { toast } from 'sonner';
 
@@ -16,6 +15,7 @@ export const PrintService = {
     iframe.style.visibility = 'hidden';
     iframe.style.width = '0';
     iframe.style.height = '0';
+    iframe.style.border = 'none';
     document.body.appendChild(iframe);
     return iframe;
   },
@@ -52,20 +52,18 @@ export const PrintService = {
         iframe.contentWindow.document.write(htmlContent);
         iframe.contentWindow.document.close();
         
-        // Focus and print after a slight delay to ensure content is loaded
-        // DISABLE SET TIMEOUT< this causing multiple print modal displayed
-        // setTimeout(() => {
-        //   if (iframe.contentWindow) {
-        //     iframe.contentWindow.focus();
-        //     // Use printImmediately for a more direct approach
-        //     iframe.contentWindow.print();
-            
-        //     // Signal completion after printing
-        //     setTimeout(() => {
-        //       window.postMessage('print-complete', '*');
-        //     }, 1000); // Increased timeout for better reliability
-        //   }
-        // }, 800); // Increased delay to ensure content is fully loaded
+        // Focus iframe and trigger print immediately
+        iframe.contentWindow.onload = function() {
+          setTimeout(() => {
+            if (iframe.contentWindow) {
+              iframe.contentWindow.focus();
+              iframe.contentWindow.print();
+              
+              // Signal completion after printing
+              window.postMessage('print-complete', '*');
+            }
+          }, 200);
+        };
       } else {
         toast.error("Failed to create print frame");
         if (onComplete) onComplete();
@@ -114,38 +112,39 @@ export const PrintService = {
           }
           
           body {
-            margin: 0;
-            padding: 0;
-            width: 80mm;
-            font-family: 'Yrsa', serif;
-            direction: initial;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 80mm !important;
+            font-family: 'Yrsa', serif !important;
+            direction: initial !important;
           }
           
           /* Ensure Arabic displays correctly */
           [dir="rtl"] {
-            direction: rtl;
-            text-align: right;
-            font-family: 'Zain', sans-serif;
+            direction: rtl !important;
+            text-align: right !important;
+            font-family: 'Zain', sans-serif !important;
           }
           
           .arabic {
-            font-family: 'Zain', sans-serif;
-            direction: rtl;
-            text-align: right;
+            font-family: 'Zain', sans-serif !important;
+            direction: rtl !important;
+            text-align: right !important;
           }
           
           /* Force single page printing */
           html, body {
-            height: auto;
+            height: auto !important;
+            width: 80mm !important;
           }
           
           /* Ensure content is properly contained */
           .receipt-container {
-            width: 72mm;
-            padding: 4mm;
-            margin: 0;
-            page-break-after: always;
-            page-break-inside: avoid;
+            width: 72mm !important;
+            padding: 4mm !important;
+            margin: 0 !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
           }
           
           /* Fix for print dialog appearing but not working - RED FLAG #1 */
@@ -155,12 +154,23 @@ export const PrintService = {
               height: auto !important;
               margin: 0 !important;
               padding: 0 !important;
+              overflow: visible !important;
             }
             
             .receipt-container {
               width: 72mm !important;
               margin: 0 !important;
               padding: 4mm !important;
+            }
+            
+            /* Ensure only one copy prints */
+            @page {
+              size: 80mm auto !important;
+              margin: 0mm !important;
+              margin-left: 0mm !important;
+              margin-right: 0mm !important;
+              margin-top: 0mm !important;
+              margin-bottom: 0mm !important;
             }
           }
         </style>
@@ -169,14 +179,14 @@ export const PrintService = {
         <div class="receipt-container">${content}</div>
         <script>
           document.addEventListener('DOMContentLoaded', function() {
-            // Force printing after a delay to ensure everything is loaded
+            // Force printing after content is loaded
             setTimeout(function() {
               window.focus();
               window.print();
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
-              }, 1000);
-            }, 500);
+              }, 500);
+            }, 200);
           });
         </script>
       </body>
@@ -473,106 +483,123 @@ export const PrintService = {
           @font-face {
             font-family: 'Zain';
             src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+            font-weight: normal;
+            font-style: normal;
           }
           
           @font-face {
             font-family: 'Yrsa';
             src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
+            font-weight: normal;
+            font-style: normal;
           }
           
           body {
-            margin: 0;
-            padding: 0;
-            width: 80mm;
-            font-family: 'Yrsa', serif;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 80mm !important;
+            font-family: 'Yrsa', serif !important;
+            direction: initial !important;
           }
           
           /* Ensure Arabic displays correctly */
           [dir="rtl"] {
-            direction: rtl;
-            text-align: right;
-            font-family: 'Zain', sans-serif;
+            direction: rtl !important;
+            text-align: right !important;
+            font-family: 'Zain', sans-serif !important;
           }
           
           .arabic {
-            font-family: 'Zain', sans-serif;
-            direction: rtl;
-            text-align: right;
+            font-family: 'Zain', sans-serif !important;
+            direction: rtl !important;
+            text-align: right !important;
           }
           
           /* Force single page printing */
           html, body {
-            height: auto;
+            height: auto !important;
+            width: 80mm !important;
           }
           
           /* Ensure content is properly contained */
           .workorder-container {
-            width: 72mm;
-            padding: 4mm;
-            margin: 0;
-            page-break-after: always;
-            page-break-inside: avoid;
+            width: 72mm !important;
+            padding: 4mm !important;
+            margin: 0 !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
           }
           
           /* WorkOrder specific styles */
           .order-header {
-            text-align: center;
-            margin-bottom: 5mm;
+            text-align: center !important;
+            margin-bottom: 5mm !important;
           }
           
           .order-logo {
-            max-width: 60mm;
-            max-height: 10mm;
-            margin: 0 auto;
-            display: block;
+            max-width: 60mm !important;
+            max-height: 10mm !important;
+            margin: 0 auto !important;
+            display: block !important;
           }
           
           .order-title {
-            font-size: 12pt;
-            font-weight: bold;
-            margin: 3mm 0;
-            text-align: center;
+            font-size: 12pt !important;
+            font-weight: bold !important;
+            margin: 3mm 0 !important;
+            text-align: center !important;
           }
           
           .order-section {
-            margin-bottom: 4mm;
+            margin-bottom: 4mm !important;
           }
           
           .order-field {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 2mm;
-            font-size: 8pt;
+            display: flex !important;
+            justify-content: space-between !important;
+            margin-bottom: 2mm !important;
+            font-size: 8pt !important;
           }
           
           .order-label {
-            font-weight: bold;
+            font-weight: bold !important;
           }
           
           .order-divider {
-            border-top: 1px dashed #000;
-            margin: 3mm 0;
+            border-top: 1px dashed #000 !important;
+            margin: 3mm 0 !important;
           }
           
           .order-signature {
-            margin-top: 5mm;
-            text-align: center;
-            font-size: 8pt;
+            margin-top: 5mm !important;
+            text-align: center !important;
+            font-size: 8pt !important;
           }
           
-          /* Fix for print dialog */
+          /* Fix for print dialog - RED FLAG #1 */
           @media print {
             body {
               width: 80mm !important;
               height: auto !important;
               margin: 0 !important;
               padding: 0 !important;
+              overflow: visible !important;
             }
             
             .workorder-container {
               width: 72mm !important;
               margin: 0 !important;
               padding: 4mm !important;
+            }
+            
+            /* Ensure only one copy prints */
+            @page {
+              size: 80mm auto !important;
+              margin: 0mm !important;
+              margin-left: 0mm !important;
+              margin-right: 0mm !important;
+              margin-top: 0mm !important;
+              margin-bottom: 0mm !important;
             }
           }
         </style>
@@ -581,13 +608,14 @@ export const PrintService = {
         <div class="workorder-container">${content}</div>
         <script>
           document.addEventListener('DOMContentLoaded', function() {
+            // Force printing after content is loaded
             setTimeout(function() {
               window.focus();
               window.print();
               setTimeout(function() {
                 window.parent.postMessage('print-complete', '*');
-              }, 1000);
-            }, 500);
+              }, 500);
+            }, 200);
           });
         </script>
       </body>
@@ -642,15 +670,15 @@ export const PrintService = {
           
           /* Ensure Arabic displays correctly */
           [dir="rtl"] {
-            direction: rtl;
-            text-align: right;
-            font-family: 'Zain', sans-serif;
+            direction: rtl !important;
+            text-align: right !important;
+            font-family: 'Zain', sans-serif !important;
           }
           
           .arabic {
-            font-family: 'Zain', sans-serif;
-            direction: rtl;
-            text-align: right;
+            font-family: 'Zain', sans-serif !important;
+            direction: rtl !important;
+            text-align: right !important;
           }
           
           /* Fix for print dialog */
@@ -688,3 +716,4 @@ export const PrintService = {
     `;
   }
 };
+

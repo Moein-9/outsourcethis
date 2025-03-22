@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -34,6 +33,7 @@ interface WorkOrderPrintSelectorProps {
   contactLenses?: any[];
   contactLensRx?: any;
   trigger?: React.ReactNode;
+  thermalOnly?: boolean;
 }
 
 export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
@@ -46,13 +46,22 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   frame,
   contactLenses,
   contactLensRx,
-  trigger
+  trigger,
+  thermalOnly = false
 }) => {
   const { t, language } = useLanguageStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState<"a4" | "receipt" | null>(null);
+  const [selectedFormat, setSelectedFormat] = useState<"a4" | "receipt" | null>(thermalOnly ? "receipt" : null);
   const [printingInProgress, setPrintingInProgress] = useState(false);
   const isRtl = language === 'ar';
+  
+  const handleTriggerClick = () => {
+    if (thermalOnly) {
+      handlePrint();
+    } else {
+      setIsDialogOpen(true);
+    }
+  };
   
   const handlePrint = () => {
     if (!selectedFormat || printingInProgress) return;
@@ -61,7 +70,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     
     try {
       if (selectedFormat === "receipt") {
-        // Use the helper function to print work order receipt
         printWorkOrderReceipt({
           invoice,
           patientName,
@@ -80,9 +88,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           toast.success(t("printingCompleted"));
         }, 1000);
       } else {
-        // A4 format - generate HTML for A4 printing
         const a4Content = `
-          <div style="font-family: Arial, sans-serif; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
+          <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
             <div style="text-align: center; margin-bottom: 10mm;">
               <h1 style="font-size: 24px; margin-bottom: 5mm;">${t("workOrder")}</h1>
               <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.invoiceId}</p>
@@ -175,7 +182,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           </div>
         `;
         
-        // Use PrintService to handle the printing
         const htmlContent = PrintService.prepareA4Document(a4Content, t("workOrder"));
         PrintService.printHtml(htmlContent, 'a4', () => {
           setPrintingInProgress(false);
@@ -192,64 +198,66 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   
   return (
     <>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
+      <Dialog open={isDialogOpen && !thermalOnly} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild onClick={handleTriggerClick}>
           {trigger || (
             <Button variant="outline" size="sm" className="gap-1">
               <PrinterIcon className="h-4 w-4" /> {t("printWorkOrder")}
             </Button>
           )}
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("selectPrintFormat")}</DialogTitle>
-            <DialogDescription>
-              {t("choosePrintFormatDescription")}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div 
-              className={`flex flex-col items-center gap-2 p-4 border rounded-lg cursor-pointer transition-all ${
-                selectedFormat === "a4" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-              }`}
-              onClick={() => setSelectedFormat("a4")}
-            >
-              <FileText className={`h-8 w-8 ${selectedFormat === "a4" ? "text-primary" : "text-muted-foreground"}`} />
-              <span className="font-medium">A4 {t("paper")}</span>
-              <span className="text-xs text-center text-muted-foreground">{t("standardFormat")}</span>
+        {!thermalOnly && (
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t("selectPrintFormat")}</DialogTitle>
+              <DialogDescription>
+                {t("choosePrintFormatDescription")}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <div 
+                className={`flex flex-col items-center gap-2 p-4 border rounded-lg cursor-pointer transition-all ${
+                  selectedFormat === "a4" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                }`}
+                onClick={() => setSelectedFormat("a4")}
+              >
+                <FileText className={`h-8 w-8 ${selectedFormat === "a4" ? "text-primary" : "text-muted-foreground"}`} />
+                <span className="font-medium">A4 {t("paper")}</span>
+                <span className="text-xs text-center text-muted-foreground">{t("standardFormat")}</span>
+              </div>
+              
+              <div 
+                className={`flex flex-col items-center gap-2 p-4 border rounded-lg cursor-pointer transition-all ${
+                  selectedFormat === "receipt" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                }`}
+                onClick={() => setSelectedFormat("receipt")}
+              >
+                <Newspaper className={`h-8 w-8 ${selectedFormat === "receipt" ? "text-primary" : "text-muted-foreground"}`} />
+                <span className="font-medium">{t("receiptFormat")}</span>
+                <span className="text-xs text-center text-muted-foreground">{t("compactFormat")}</span>
+              </div>
             </div>
             
-            <div 
-              className={`flex flex-col items-center gap-2 p-4 border rounded-lg cursor-pointer transition-all ${
-                selectedFormat === "receipt" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-              }`}
-              onClick={() => setSelectedFormat("receipt")}
-            >
-              <Newspaper className={`h-8 w-8 ${selectedFormat === "receipt" ? "text-primary" : "text-muted-foreground"}`} />
-              <span className="font-medium">{t("receiptFormat")}</span>
-              <span className="text-xs text-center text-muted-foreground">{t("compactFormat")}</span>
-            </div>
-          </div>
-          
-          <DialogFooter className="sm:justify-between">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsDialogOpen(false)}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="button"
-              onClick={handlePrint}
-              disabled={!selectedFormat || printingInProgress}
-            >
-              <PrinterIcon className="h-4 w-4 mr-2" />
-              {printingInProgress ? t("printing") : t("print")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+            <DialogFooter className="sm:justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="button"
+                onClick={handlePrint}
+                disabled={!selectedFormat || printingInProgress}
+              >
+                <PrinterIcon className="h-4 w-4 mr-2" />
+                {printingInProgress ? t("printing") : t("print")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        )}
       </Dialog>
     </>
   );

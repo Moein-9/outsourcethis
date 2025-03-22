@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;500;600;700&display=swap');
@@ -74,9 +73,9 @@
 /* Improved print styling for all documents */
 @media print {
   @page {
-    margin: 0;
-    padding: 0;
-    size: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    size: auto !important;
   }
   
   html, body {
@@ -119,6 +118,16 @@
   body.printing * {
     visibility: visible !important;
   }
+  
+  /* Ensure only one copy prints */
+  @page {
+    size: 80mm auto !important;
+    margin: 0mm !important;
+    margin-left: 0mm !important;
+    margin-right: 0mm !important;
+    margin-top: 0mm !important;
+    margin-bottom: 0mm !important;
+  }
 }
 
 /* Frame label printing styles */
@@ -155,5 +164,47 @@
   
   .ltr, [dir="ltr"] {
     font-family: 'Yrsa', serif !important;
+  }
+}
+
+/* Receipt print styles specifically for thermal printers */
+.thermal-print {
+  width: 80mm !important;
+  font-family: 'Yrsa', serif !important;
+}
+
+.thermal-print[dir="rtl"] {
+  font-family: 'Zain', sans-serif !important;
+}
+
+/* Thermal printer specific styles */
+@media print {
+  /* Ensure proper dimensions for thermal receipts */
+  .print-receipt {
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    padding: 4mm !important;
+    font-family: 'Yrsa', serif !important;
+  }
+  
+  /* RTL thermal printing */
+  .print-receipt[dir="rtl"] {
+    font-family: 'Zain', sans-serif !important;
+  }
+  
+  /* Force single page per receipt */
+  .print-receipt, #work-order-receipt {
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+  }
+  
+  /* Critical fix for ensuring only one copy prints - RED FLAG #1 */
+  #receipt-invoice, #work-order-receipt {
+    width: 80mm !important;
+    max-width: 80mm !important;
+    page-break-after: always !important;
+    visibility: visible !important;
+    position: relative !important;
   }
 }
