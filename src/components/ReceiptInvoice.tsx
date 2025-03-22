@@ -90,7 +90,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         maxWidth: '80mm',
         margin: '0 auto',
         backgroundColor: 'white',
-        padding: '3mm',
+        padding: '2mm',
         fontSize: '12px',
         border: isPrintable ? 'none' : '1px solid #ddd',
         borderRadius: isPrintable ? '0' : '4px',
@@ -100,77 +100,67 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         pageBreakAfter: 'always'
       }}
     >
-      {/* Header Section - Bolder and bigger fonts */}
-      <div className="text-center border-b-2 border-black pb-3 mb-3">
-        <div className="flex justify-center mb-2">
-          <MoenLogo className="w-auto h-12" />
+      {/* Header Section - More compact with less vertical spacing */}
+      <div className="text-center border-b-2 border-black pb-1 mb-2">
+        <div className="flex justify-center mb-1">
+          <MoenLogo className="w-auto h-10" />
         </div>
-        <h2 className="font-bold text-xl mb-1">{storeInfo.name}</h2>
-        <p className="text-[11px] font-medium">{storeInfo.address}</p>
-        <p className="text-[11px] font-medium">{t("phone")}: {storeInfo.phone}</p>
+        <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
+        <p className="text-xs font-medium mb-0">{storeInfo.address}</p>
+        <p className="text-xs font-medium">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      {/* Receipt Title - More prominent */}
-      <div className="mb-3 text-center">
-        <div className="inline-flex items-center justify-center gap-1.5 border-2 border-black px-3 py-1 rounded">
+      {/* Receipt Title - Compact and centered */}
+      <div className="mb-2 text-center">
+        <div className="inline-flex items-center justify-center gap-1 border-2 border-black px-2 py-0.5 rounded">
           <Receipt className="w-4 h-4" />
           <span className="font-bold text-base">{t("invoice")}</span>
         </div>
       </div>
 
-      {/* Customer Information Card - Redesigned for better readability */}
-      <div className="mb-3 border-2 border-black rounded p-2.5">
-        <div className="text-center border-b border-gray-400 mb-2 pb-1">
-          <span className="font-bold text-base uppercase tracking-wide">{t("customerInfo")}</span>
+      {/* Customer Information Card - More compact design */}
+      <div className="mb-2 border-2 border-black rounded p-1.5">
+        <div className="flex items-center justify-between mb-1 border-b border-gray-400 pb-1">
+          <span className="font-bold text-base">{t("customerInfo")}</span>
+          <div className="flex items-center gap-0.5">
+            <User className="w-4 h-4" />
+            <span className="font-bold text-sm">{name}</span>
+          </div>
         </div>
         
-        <div className="grid grid-cols-1 gap-y-1.5">
-          <div className="flex items-center gap-2 border-b border-gray-200 pb-1.5">
-            <User className="w-5 h-5" />
-            <div className="flex flex-col">
-              <span className="font-bold text-[11px]">{t("customer")}:</span>
-              <span className="font-semibold text-[13px]">{name}</span>
+        {phone && (
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-sm">{t("phone")}:</span>
+            <div className="flex items-center gap-0.5">
+              <Phone className="w-3.5 h-3.5" />
+              <span className="font-semibold text-sm">{phone}</span>
             </div>
           </div>
-          
-          {phone && (
-            <div className="flex items-center gap-2">
-              <Phone className="w-5 h-5" />
-              <div className="flex flex-col">
-                <span className="font-bold text-[11px]">{t("phone")}:</span>
-                <span className="font-semibold text-[13px]">{phone}</span>
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Invoice Details - Simplified and bolder */}
-      <div className="mb-3 border-2 border-black rounded p-2.5">
-        <div className="text-center border-b border-gray-400 mb-2 pb-1">
-          <span className="font-bold text-base uppercase tracking-wide">{t("invoiceDetails")}</span>
-        </div>
-        
-        <div className="flex justify-between items-center mb-1.5">
-          <div className="flex items-center gap-2">
-            <Receipt className="w-5 h-5" />
-            <span className="font-bold text-[12px]">{t("invoiceNumber")}:</span>
+      {/* Invoice Details - Compact horizontal layout */}
+      <div className="mb-2 border-2 border-black rounded p-1.5">
+        <div className="flex items-center justify-between mb-1 border-b border-gray-400 pb-1">
+          <span className="font-bold text-base">{t("invoiceDetails")}</span>
+          <div className="flex items-center gap-0.5">
+            <Receipt className="w-4 h-4" />
+            <span className="font-bold text-sm">#{invoice.invoiceId}</span>
           </div>
-          <span className="font-semibold text-[13px]">{invoice.invoiceId}</span>
         </div>
         
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            <span className="font-bold text-[12px]">{t("date")}:</span>
+          <span className="font-semibold text-sm">{t("date")}:</span>
+          <div className="flex items-center gap-0.5">
+            <Calendar className="w-3.5 h-3.5" />
+            <span className="font-semibold text-sm">{format(new Date(invoice.createdAt), 'dd/MM/yyyy')}</span>
           </div>
-          <span className="font-semibold text-[13px]">{format(new Date(invoice.createdAt), 'dd/MM/yyyy')}</span>
         </div>
       </div>
 
-      {/* Products Section - Bolder headers, larger product text */}
-      <div className="mb-3">
-        <div className="text-center py-1 bg-black text-white mb-2.5 font-bold text-base uppercase tracking-wide rounded">
+      {/* Products Section - More compact with less padding */}
+      <div className="mb-2">
+        <div className="text-center py-0.5 bg-black text-white mb-1 font-bold text-base rounded">
           {t("products")}
         </div>
         
@@ -178,44 +168,44 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           {isContactLens && contactLenses && contactLenses.length > 0 ? (
             // Contact lens specific rendering
             contactLenses.map((lens, idx) => (
-              <div key={idx} className="flex justify-between mb-2 border-b-2 border-gray-300 pb-2">
+              <div key={idx} className="flex justify-between mb-1 border-b border-gray-300 pb-1">
                 <div>
-                  <div className="font-bold text-[14px]">{lens.brand} {lens.type}</div>
-                  <div className="text-[12px] font-medium">{lens.power}</div>
+                  <div className="font-bold text-sm">{lens.brand} {lens.type}</div>
+                  <div className="text-xs font-medium">{lens.power}</div>
                 </div>
-                <span className="font-bold text-[14px]">{lens.price.toFixed(3)} KWD</span>
+                <span className="font-bold text-sm">{lens.price.toFixed(3)} KWD</span>
               </div>
             ))
           ) : (
             // Normal glasses rendering
             <>
               {lens && (
-                <div className="flex justify-between mb-2 border-b-2 border-gray-300 pb-2">
+                <div className="flex justify-between mb-1 border-b border-gray-300 pb-1">
                   <div>
-                    <div className="font-bold text-[14px]">{t("lenses")}</div>
-                    <div className="text-[12px] font-medium">{lens}</div>
+                    <div className="font-bold text-sm">{t("lenses")}</div>
+                    <div className="text-xs font-medium">{lens}</div>
                   </div>
-                  <span className="font-bold text-[14px]">{lensP.toFixed(3)} KWD</span>
+                  <span className="font-bold text-sm">{lensP.toFixed(3)} KWD</span>
                 </div>
               )}
               
               {coat && (
-                <div className="flex justify-between mb-2 border-b-2 border-gray-300 pb-2">
+                <div className="flex justify-between mb-1 border-b border-gray-300 pb-1">
                   <div>
-                    <div className="font-bold text-[14px]">{t("coating")}</div>
-                    <div className="text-[12px] font-medium">{coat}</div>
+                    <div className="font-bold text-sm">{t("coating")}</div>
+                    <div className="text-xs font-medium">{coat}</div>
                   </div>
-                  <span className="font-bold text-[14px]">{coatP.toFixed(3)} KWD</span>
+                  <span className="font-bold text-sm">{coatP.toFixed(3)} KWD</span>
                 </div>
               )}
               
               {frameBrand && (
-                <div className="flex justify-between mb-2 border-b-2 border-gray-300 pb-2">
+                <div className="flex justify-between mb-1 border-b border-gray-300 pb-1">
                   <div>
-                    <div className="font-bold text-[14px]">{t("frame")}</div>
-                    <div className="text-[12px] font-medium">{frameBrand} {frameModel}</div>
+                    <div className="font-bold text-sm">{t("frame")}</div>
+                    <div className="text-xs font-medium">{frameBrand} {frameModel}</div>
                   </div>
-                  <span className="font-bold text-[14px]">{frameP.toFixed(3)} KWD</span>
+                  <span className="font-bold text-sm">{frameP.toFixed(3)} KWD</span>
                 </div>
               )}
             </>
@@ -223,90 +213,90 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      {/* Totals Section - Bolder with stronger borders */}
-      <div className="mb-3 border-2 border-black rounded p-2.5">
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-[13px]">
+      {/* Totals Section - More compact with less padding */}
+      <div className="mb-2 border-2 border-black rounded p-1.5">
+        <div className="space-y-1">
+          <div className="flex justify-between text-sm">
             <span className="font-bold">{t("subtotal")}:</span>
             <span className="font-semibold">{(tot + disc).toFixed(3)} KWD</span>
           </div>
           {disc > 0 && (
-            <div className="flex justify-between text-[13px]">
+            <div className="flex justify-between text-sm">
               <span className="font-bold">{t("discount")}:</span>
               <span className="font-semibold">-{disc.toFixed(3)} KWD</span>
             </div>
           )}
-          <div className="flex justify-between pt-1 mt-1 border-t-2 border-black">
-            <span className="font-bold text-[15px]">{t("total")}:</span>
-            <span className="font-bold text-[15px]">{tot.toFixed(3)} KWD</span>
+          <div className="flex justify-between pt-0.5 mt-0.5 border-t-2 border-black">
+            <span className="font-bold text-base">{t("total")}:</span>
+            <span className="font-bold text-base">{tot.toFixed(3)} KWD</span>
           </div>
         </div>
       </div>
 
-      {/* Payment Section - Enhanced with bigger and bolder text */}
-      <div className="mb-3">
-        <div className="text-center py-1 bg-black text-white mb-2.5 font-bold text-base uppercase tracking-wide rounded">
+      {/* Payment Section - More compact display */}
+      <div className="mb-2">
+        <div className="text-center py-0.5 bg-black text-white mb-1 font-bold text-base rounded">
           {t("payments")}
         </div>
         
         <div>
           {invoice.payments?.map((payment, index) => (
-            <div key={index} className="flex justify-between mb-2 pb-2 border-b-2 border-gray-300">
+            <div key={index} className="flex justify-between mb-1 pb-1 border-b border-gray-300">
               <div>
-                <div className="font-bold text-[14px]">
+                <div className="font-bold text-sm">
                   {format(new Date(payment.date), 'dd/MM/yyyy')}
                 </div>
-                <div className="text-[12px] font-medium flex items-center gap-1">
-                  <CreditCard className="w-4 h-4" />
+                <div className="text-xs font-medium flex items-center gap-0.5">
+                  <CreditCard className="w-3.5 h-3.5" />
                   {payment.method}
                   {payment.authNumber && <span> - {payment.authNumber}</span>}
                 </div>
               </div>
-              <span className="font-bold text-[14px]">{payment.amount.toFixed(3)} KWD</span>
+              <span className="font-bold text-sm">{payment.amount.toFixed(3)} KWD</span>
             </div>
           )) || (
-            <div className="flex justify-between mb-2 pb-2 border-b-2 border-gray-300">
+            <div className="flex justify-between mb-1 pb-1 border-b border-gray-300">
               <div>
-                <div className="font-bold text-[14px]">
+                <div className="font-bold text-sm">
                   {format(new Date(invoice.createdAt), 'dd/MM/yyyy')}
                 </div>
-                <div className="text-[12px] font-medium flex items-center gap-1">
-                  <CreditCard className="w-4 h-4" />
+                <div className="text-xs font-medium flex items-center gap-0.5">
+                  <CreditCard className="w-3.5 h-3.5" />
                   {payMethod}
                   {auth && <span> - {auth}</span>}
                 </div>
               </div>
-              <span className="font-bold text-[14px]">{dep.toFixed(3)} KWD</span>
+              <span className="font-bold text-sm">{dep.toFixed(3)} KWD</span>
             </div>
           )}
           
           {rem > 0 ? (
-            <div className="flex justify-between font-bold mt-1.5 pt-1.5 border-t-2 border-black">
-              <span className="text-[15px]">{t("remaining")}:</span>
-              <span className="text-[15px]">{rem.toFixed(3)} KWD</span>
+            <div className="flex justify-between font-bold mt-1 pt-1 border-t-2 border-black">
+              <span className="text-base">{t("remaining")}:</span>
+              <span className="text-base">{rem.toFixed(3)} KWD</span>
             </div>
           ) : (
-            <div className="flex items-center justify-center gap-2 mt-2 font-bold border-2 border-black py-1.5 rounded">
-              <CheckCircle2 className="w-5 h-5" />
-              <span className="text-[14px]">{t("paidInFull")}</span>
+            <div className="flex items-center justify-center gap-1 mt-1 font-bold border-2 border-black py-1 rounded">
+              <CheckCircle2 className="w-4 h-4" />
+              <span className="text-sm">{t("paidInFull")}</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Footer Section - Enhanced fonts */}
-      <div className="text-center mt-3 pt-2 border-t-2 border-black">
+      {/* Footer Section - Compact footer */}
+      <div className="text-center mt-2 pt-1 border-t-2 border-black">
         {isRtl ? (
-          <p className="font-bold text-[13px]">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
+          <p className="font-bold text-sm mb-0">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
         ) : (
-          <p className="font-bold text-[13px]">Thank you for choosing Moein Optical. We're always delighted to serve you!</p>
+          <p className="font-bold text-sm mb-0">Thank you for choosing Moein Optical. We're always delighted to serve you!</p>
         )}
-        <div className="mt-1 text-[10px] font-medium">
+        <div className="text-xs font-medium">
           {format(new Date(), 'yyyy-MM-dd')}
         </div>
       </div>
       
-      {/* Updated Print-specific styles - Improved for better dynamic height */}
+      {/* Updated Print-specific styles for more compact printing */}
       <style>
         {`
           @media print {
@@ -324,8 +314,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             }
             
             #receipt-invoice {
-              width: 74mm !important; /* 80mm - 6mm for padding */
-              max-width: 74mm !important;
+              width: 76mm !important; /* 80mm - 4mm for padding */
+              max-width: 76mm !important;
               page-break-after: always !important;
               page-break-inside: avoid !important;
               position: absolute !important;
@@ -333,7 +323,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               top: 0 !important;
               border: none !important;
               box-shadow: none !important;
-              padding: 3mm !important;
+              padding: 2mm !important;
               margin: 0 !important;
               background: white !important;
               height: auto !important;
@@ -344,6 +334,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             /* Force content to be visible */
             .print-receipt * {
               visibility: visible !important;
+              opacity: 1 !important;
             }
             
             /* Improve dynamic sizing */
@@ -359,6 +350,13 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               -webkit-print-color-adjust: exact !important;
               color-adjust: exact !important;
               print-color-adjust: exact !important;
+            }
+            
+            /* Dynamic height adjustment */
+            .print-receipt {
+              height: fit-content !important;
+              min-height: fit-content !important;
+              max-height: fit-content !important;
             }
             
             /* Ensure proper page breaks and avoid blank pages */
