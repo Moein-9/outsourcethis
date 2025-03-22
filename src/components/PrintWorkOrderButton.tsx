@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -30,6 +31,7 @@ interface PrintWorkOrderButtonProps {
   isNewInvoice?: boolean;
   onInvoiceSaved?: (invoiceId: string) => void;
   useWorkflow?: boolean;
+  onComplete?: () => void;
 }
 
 export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -48,7 +50,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   thermalOnly = false,
   isNewInvoice = false,
   onInvoiceSaved,
-  useWorkflow = false
+  useWorkflow = false,
+  onComplete
 }) => {
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
@@ -69,6 +72,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         contactLensRx={contactLensRx}
         isNewInvoice={isNewInvoice}
         onInvoiceSaved={onInvoiceSaved}
+        onComplete={onComplete}
       />
     );
   }

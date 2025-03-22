@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -33,9 +32,9 @@ interface WorkOrderPrintSelectorProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
-  trigger?: React.ReactNode;
   thermalOnly?: boolean;
   onCompletePrinting?: () => void;
+  trigger?: React.ReactNode;
 }
 
 export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
@@ -60,13 +59,13 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   
   const handleTriggerClick = () => {
     if (thermalOnly) {
-      handlePrint();
+      handlePrint("thermal");
     } else {
       setIsDialogOpen(true);
     }
   };
   
-  const handlePrint = () => {
+  const handlePrint = (type: "thermal" | "standard") => {
     if (!selectedFormat || printingInProgress) return;
     
     setPrintingInProgress(true);
@@ -275,3 +274,4 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     </>
   );
 };
+

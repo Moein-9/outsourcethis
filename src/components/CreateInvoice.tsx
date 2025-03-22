@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
@@ -17,6 +16,7 @@ import { LensSelector } from "@/components/LensSelector";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
+import { PrintWorkOrderButton } from "@/components/PrintWorkOrderButton";
 import { 
   User, Glasses, Package, FileText, CreditCard, Eye, Search, 
   Banknote, Plus, PackageCheck, EyeOff, ExternalLink,
@@ -95,6 +95,8 @@ const CreateInvoice: React.FC = () => {
   const [remaining, setRemaining] = useState(0);
   
   const [showMissingRxWarning, setShowMissingRxWarning] = useState(false);
+  
+  const [useWorkflow, setUseWorkflow] = useState(true);
   
   useEffect(() => {
     if (invoiceType === "glasses") {
@@ -434,7 +436,11 @@ const CreateInvoice: React.FC = () => {
       description: `${t('invoiceSavedSuccess')} ${invoiceId}.`,
     });
     
-    resetForm();
+    if (!useWorkflow) {
+      resetForm();
+    }
+    
+    return invoiceId;
   };
   
   const resetForm = () => {
@@ -1078,32 +1084,57 @@ const CreateInvoice: React.FC = () => {
               </div>
             )}
             
-            <div className="mt-8 flex justify-between">
-              <CustomPrintWorkOrderButton 
-                workOrder={previewInvoice}
-                invoice={previewInvoice}
-                patient={currentPatient || { name: manualName, phone: manualPhone }}
-                className="flex items-center gap-2"
-              />
-              
-              <div className={`${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  onClick={() => setInvoicePrintOpen(true)}
-                >
-                  <Receipt className="w-4 h-4" />
-                  {t('previewInvoice')}
-                </Button>
-                
-                <Button 
-                  className="flex items-center gap-2"
-                  onClick={handleSaveInvoice}
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  {t('saveAndPrint')}
-                </Button>
-              </div>
+            <div className="mt-8">
+              {useWorkflow ? (
+                <PrintWorkOrderButton 
+                  invoice={previewInvoice}
+                  patientName={currentPatient?.name || manualName}
+                  patientPhone={currentPatient?.phone || manualPhone}
+                  rx={currentPatient?.rx}
+                  lensType={selectedLensType?.name || ""}
+                  coating={selectedCoating?.name || ""}
+                  frame={!skipFrame ? selectedFrame : undefined}
+                  contactLenses={contactLensItems}
+                  contactLensRx={contactLensRx}
+                  isNewInvoice={true}
+                  onInvoiceSaved={(id) => {
+                    if (id) {
+                      previewInvoice.invoiceId = id;
+                    }
+                  }}
+                  useWorkflow={true}
+                  onComplete={handleWorkflowComplete}
+                  className="w-full"
+                />
+              ) : (
+                <div className={`flex justify-between ${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
+                  <CustomPrintWorkOrderButton 
+                    workOrder={previewInvoice}
+                    invoice={previewInvoice}
+                    patient={currentPatient || { name: manualName, phone: manualPhone }}
+                    className="flex items-center gap-2"
+                  />
+                  
+                  <div className={`${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center gap-2"
+                      onClick={() => setInvoicePrintOpen(true)}
+                    >
+                      <Receipt className="w-4 h-4" />
+                      {t('previewInvoice')}
+                    </Button>
+                    
+                    <Button 
+                      className="flex items-center gap-2"
+                      onClick={handleSaveInvoice}
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      {t('saveAndPrint')}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -8,7 +9,7 @@ import {
   RefreshCw 
 } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
-import { Invoice } from "@/store/invoiceStore";
+import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { ReceiptInvoice } from "./ReceiptInvoice";
@@ -54,6 +55,7 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const [saving, setSaving] = useState(false);
   const [invoicePrinted, setInvoicePrinted] = useState(false);
   const [workOrderPrinted, setWorkOrderPrinted] = useState(false);
+  const { addInvoice } = useInvoiceStore();
   
   // Current step properties
   const steps = [
@@ -70,7 +72,34 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     setSaving(true);
     try {
       // Use the callback to save the invoice and get the ID
-      const savedInvoiceId = await addInvoiceAndGetId();
+      let savedInvoiceId;
+      
+      if (isNewInvoice) {
+        // Extract the relevant fields from the invoice for saving
+        savedInvoiceId = addInvoice({
+          patientId: invoice.patientId,
+          patientName: invoice.patientName,
+          patientPhone: invoice.patientPhone,
+          lensType: invoice.lensType,
+          lensPrice: invoice.lensPrice,
+          coating: invoice.coating,
+          coatingPrice: invoice.coatingPrice,
+          frameBrand: invoice.frameBrand,
+          frameModel: invoice.frameModel,
+          frameColor: invoice.frameColor,
+          frameSize: invoice.frameSize,
+          framePrice: invoice.framePrice,
+          discount: invoice.discount,
+          deposit: invoice.deposit,
+          total: invoice.total,
+          paymentMethod: invoice.paymentMethod,
+          authNumber: invoice.authNumber,
+          workOrderId: invoice.workOrderId,
+        });
+      } else {
+        // If it already has an ID, use that
+        savedInvoiceId = invoice.invoiceId;
+      }
       
       // Save the invoice ID for display
       setInvoiceId(savedInvoiceId);
@@ -99,23 +128,6 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }
   };
 
-  // This is a placeholder - in the actual implementation, 
-  // you would use the addInvoice function from useInvoiceStore
-  const addInvoiceAndGetId = async (): Promise<string> => {
-    // This simulates the async operation that would occur when saving to a store
-    return new Promise((resolve) => {
-      // If the invoice already has an ID, use that
-      if (invoice.invoiceId) {
-        resolve(invoice.invoiceId);
-      } else {
-        // Otherwise generate a new ID (this is just a placeholder, the actual implementation 
-        // would use the logic from useInvoiceStore)
-        const newId = `INV${Date.now()}`;
-        resolve(newId);
-      }
-    });
-  };
-
   // Handle printing the invoice
   const handlePrintInvoice = () => {
     // Create a popup window for the invoice
@@ -129,11 +141,14 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             <style>
               @media print {
                 body { margin: 0; padding: 0; }
+                * { text-align: center; }
               }
+              body { font-family: Arial, sans-serif; }
+              .print-content { text-align: center; }
             </style>
           </head>
           <body>
-            <div id="print-content"></div>
+            <div id="print-content" class="print-content"></div>
             <script>
               window.onload = function() {
                 window.print();
@@ -195,12 +210,12 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   };
 
   return (
-    <div className="border rounded-lg p-4">
-      <h3 className="text-lg font-semibold mb-4">{t("workOrderWorkflow")}</h3>
+    <div className="border rounded-lg p-4 bg-card">
+      <h3 className="text-lg font-semibold mb-4 text-center">{t("workOrderWorkflow")}</h3>
       
       {/* Steps indicator */}
-      <div className="flex items-center justify-between mb-6">
-        {steps.map((step) => (
+      <div className="flex items-center justify-between mb-6 relative">
+        {steps.map((step, index) => (
           <div 
             key={step.id} 
             className={`flex flex-col items-center ${
@@ -221,22 +236,20 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               {step.id < currentStep ? (
                 <CheckCircle className="h-5 w-5" />
               ) : (
-                <div>{step.id}</div>
+                step.icon
               )}
             </div>
             <span className="text-xs text-center">{step.label}</span>
-            
-            {/* Connecting line */}
-            {step.id < steps.length && (
-              <div className="h-0.5 w-16 bg-gray-300 absolute left-[calc(100%/8)] translate-x-[calc(100%*0.75*{step.id})]" />
-            )}
           </div>
         ))}
+        
+        {/* Connecting lines between steps */}
+        <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 -z-10"></div>
       </div>
       
       {/* Display invoice ID if available */}
       {invoiceId && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-center">
           <p className="font-semibold">{t("generatedIds")}:</p>
           <p>{t("invoiceNumber")}: <span className="font-bold">{invoiceId}</span></p>
         </div>
@@ -301,7 +314,7 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             className="w-full"
             variant="secondary"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <CheckCircle className="h-4 w-4 mr-2" />
             {t("finishAndReset")}
           </Button>
         )}
