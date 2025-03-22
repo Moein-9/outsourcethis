@@ -107,18 +107,18 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         fontFamily: isRtl ? 'Cairo, sans-serif' : 'Cairo, sans-serif'
       }}
     >
-      {/* Header Section with Logo - REDUCED SPACING */}
-      <div className="text-center border-b pb-1 mb-1">
-        <div className="flex justify-center mb-0.5">
-          <MoenLogo className="w-auto h-12 mb-0.5" />
+      {/* Header Section with Logo */}
+      <div className="text-center border-b pb-2 mb-2">
+        <div className="flex justify-center mb-1">
+          <MoenLogo className="w-auto h-14 mb-1" />
         </div>
-        <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
+        <h2 className="font-bold text-lg mb-0.5">{storeInfo.name}</h2>
         <p className="text-xs text-muted-foreground">{storeInfo.address}</p>
         <p className="text-xs text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      {/* Work Order Header - REDUCED SPACING */}
-      <div className="text-center mb-2">
+      {/* Work Order Header */}
+      <div className="text-center mb-3">
         <h3 className="font-bold text-lg">
           {isRtl ? "أمر عمل" : "WORK ORDER"}
         </h3>
@@ -131,7 +131,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </p>
       </div>
 
-      {/* Patient Information - ADJUSTED PADDING */}
+      {/* Patient Information */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl 
@@ -139,16 +139,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Patient Information | معلومات المريض"}
         </div>
         
-        <div className="space-y-1 text-xs px-3">
+        <div className="space-y-1 text-xs px-2">
           <div className="flex justify-between">
-            <span className="font-semibold pl-1">{t("customer")}:</span>
-            <span className="pr-1">{patientName}</span>
+            <span className="font-semibold">{t("customer")}:</span>
+            <span>{patientName}</span>
           </div>
           
           {patientPhone && (
             <div className="flex justify-between">
-              <span className="font-semibold pl-1">{t("phone")}:</span>
-              <span className="pr-1">{patientPhone}</span>
+              <span className="font-semibold">{t("phone")}:</span>
+              <span>{patientPhone}</span>
             </div>
           )}
         </div>
@@ -204,7 +204,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Product Details | تفاصيل المنتج"}
         </div>
         
-        <div className="space-y-1.5 text-xs px-3">
+        <div className="space-y-1.5 text-xs px-2">
           {/* Frame section */}
           {frameData.brand && (
             <div className="mb-2">
@@ -288,7 +288,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Payment Information - ADJUSTED PADDING */}
+      {/* Payment Information */}
       <div className="mb-3">
         <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
           {isRtl 
@@ -296,32 +296,32 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Payment Information | معلومات الدفع"}
         </div>
         
-        <div className="space-y-1 text-xs px-3">
+        <div className="space-y-1 text-xs px-2">
           <div className="flex justify-between">
-            <span className="font-semibold pl-1">{t("subtotal")}:</span>
-            <span className="pr-1">{subtotal.toFixed(3)} KWD</span>
+            <span className="font-semibold">{t("subtotal")}:</span>
+            <span>{subtotal.toFixed(3)} KWD</span>
           </div>
           
           {discount > 0 && (
             <div className="flex justify-between">
-              <span className="font-semibold pl-1">{t("discount")}:</span>
-              <span className="pr-1">-{discount.toFixed(3)} KWD</span>
+              <span className="font-semibold">{t("discount")}:</span>
+              <span>-{discount.toFixed(3)} KWD</span>
             </div>
           )}
           
           <div className="flex justify-between">
-            <span className="font-semibold pl-1">{t("total")}:</span>
-            <span className="pr-1">{total.toFixed(3)} KWD</span>
+            <span className="font-semibold">{t("total")}:</span>
+            <span>{total.toFixed(3)} KWD</span>
           </div>
           
           <div className="flex justify-between">
-            <span className="font-semibold pl-1">{t("paid")}:</span>
-            <span className="pr-1">{amountPaid.toFixed(3)} KWD</span>
+            <span className="font-semibold">{t("paid")}:</span>
+            <span>{amountPaid.toFixed(3)} KWD</span>
           </div>
           
-          {/* Payment Status Section - ADJUSTED PADDING */}
+          {/* Payment Status Section */}
           {isPaid ? (
-            <div className="mt-2 p-2 bg-green-100 rounded border border-green-300 text-center mx-1">
+            <div className="mt-2 p-2 bg-green-100 rounded border border-green-300 text-center">
               <div className="flex items-center justify-center gap-1 text-green-700 font-bold">
                 <CheckCircle2 className="w-4 h-4" />
                 <span>{isRtl ? "تم الدفع بالكامل" : "PAID IN FULL"}</span>
@@ -330,7 +330,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                        <div className="text-green-600 text-xs">PAID IN FULL</div>}
             </div>
           ) : (
-            <div className="mt-2 mx-1">
+            <div className="mt-2">
               <div className="p-2 bg-red-100 rounded border border-red-300 text-center">
                 <div className="font-bold text-red-700 text-base">
                   {isRtl ? "المبلغ المتبقي" : "REMAINING AMOUNT"}
@@ -367,21 +367,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               {isRtl ? "توقيع المدير" : "Manager Signature"}
             </div>
             <div className="h-10"></div>
-          </div>
-        </div>
-      </div>
-
-      {/* NEW: Notes Section */}
-      <div className="mb-2">
-        <div className="text-center bg-muted py-1 mb-2 font-bold text-sm border-y">
-          {isRtl 
-            ? "ملاحظات | Notes" 
-            : "Notes | ملاحظات"}
-        </div>
-        
-        <div className="border rounded p-1">
-          <div className="h-16 border-dashed border border-gray-300 p-1">
-            {/* Empty space for handwritten notes */}
           </div>
         </div>
       </div>
