@@ -35,7 +35,12 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   
   const handlePrint = () => {
     console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
-    CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+    setOpen(false); // Close dialog before printing
+    
+    // Small delay to ensure dialog is fully closed
+    setTimeout(() => {
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+    }, 100);
   };
   
   return (

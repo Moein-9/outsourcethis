@@ -120,7 +120,6 @@ export const CustomPrintService = {
       .text-green-700 { color: #15803d; }
       .text-red-600 { color: #dc2626; }
       .text-red-700 { color: #b91c1c; }
-      .text-blue-500 { color: #3b82f6; }
       .text-base { font-size: 1rem; line-height: 1.5rem; }
       .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
       .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
@@ -154,7 +153,13 @@ export const CustomPrintService = {
     printWindow.onload = function() {
       setTimeout(() => {
         try {
-          printWindow.print();
+          // Force Chrome's print dialog instead of browser's default print dialog
+          if (printWindow.document.execCommand) {
+            printWindow.document.execCommand('print', false, null);
+          } else {
+            printWindow.print();
+          }
+          
           // Notify success
           toast({
             title: t("printJobSent"),

@@ -139,7 +139,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Patient Information | معلومات المريض"}
         </div>
         
-        <div className="space-y-1 text-xs">
+        <div className="space-y-1 text-xs px-2">
           <div className="flex justify-between">
             <span className="font-semibold">{t("customer")}:</span>
             <span>{patientName}</span>
@@ -204,7 +204,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Product Details | تفاصيل المنتج"}
         </div>
         
-        <div className="space-y-1.5 text-xs">
+        <div className="space-y-1.5 text-xs px-2">
           {/* Frame section */}
           {frameData.brand && (
             <div className="mb-2">
@@ -253,12 +253,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
-                  <div className="text-right">
-                    <div className="flex flex-col items-end">
-                      <span className="font-semibold">{lensName}</span>
-                      <span className="border rounded px-1 bg-slate-50 text-xs text-blue-500">{lensType}</span>
-                    </div>
-                  </div>
+                  <span className="font-semibold">{lensName}</span>
                 </div>
                 {lensPrice > 0 && (
                   <div className="flex justify-between">
@@ -279,12 +274,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <div className="px-1 space-y-0.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRtl ? "النوع (Type)" : "Type (النوع)"}:</span>
-                  <div className="text-right">
-                    <div className="flex flex-col items-end">
-                      <span className="font-semibold">{coatingName}</span>
-                      <span className="border rounded px-1 bg-slate-50 text-xs text-blue-500">{coating}</span>
-                    </div>
-                  </div>
+                  <span className="font-semibold">{coatingName}</span>
                 </div>
                 {coatingPrice > 0 && (
                   <div className="flex justify-between">
@@ -306,7 +296,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Payment Information | معلومات الدفع"}
         </div>
         
-        <div className="space-y-1 text-xs">
+        <div className="space-y-1 text-xs px-2">
           <div className="flex justify-between">
             <span className="font-semibold">{t("subtotal")}:</span>
             <span>{subtotal.toFixed(3)} KWD</span>
@@ -364,7 +354,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Quality Confirmation | تأكيد الجودة"}
         </div>
         
-        <div className="flex gap-2 text-xs mb-1">
+        <div className="flex gap-2 text-xs mb-1 px-2">
           <div className="border rounded p-1 flex-1">
             <div className="font-semibold mb-1 text-center border-b pb-1">
               {isRtl ? "توقيع الفني" : "Technician Signature"}
