@@ -69,7 +69,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   const handlePrint = (event?: React.MouseEvent) => {
     if (!selectedFormat || printingInProgress) return;
     
-    const printType = thermalOnly ? "thermal" : "standard";
     setPrintingInProgress(true);
     
     try {
@@ -98,7 +97,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
         }, 1000);
       } else {
         const a4Content = `
-          <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
+          <div style="font-family: ${isRtl ? 'Cairo, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
             <div style="text-align: center; margin-bottom: 10mm;">
               <h1 style="font-size: 24px; margin-bottom: 5mm;">${t("workOrder")}</h1>
               <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.invoiceId}</p>

@@ -5,14 +5,13 @@ import {
   Save, 
   Printer, 
   FileCheck, 
-  CheckCircle,
-  RefreshCw 
+  CheckCircle
 } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
-import { ReceiptInvoice } from "./ReceiptInvoice";
+import { PrintService } from "@/utils/PrintService";
 
 interface WorkflowStepperProps {
   invoice: Invoice;
@@ -49,13 +48,14 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   onComplete,
   isNewInvoice = true
 }) => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [invoicePrinted, setInvoicePrinted] = useState(false);
   const [workOrderPrinted, setWorkOrderPrinted] = useState(false);
   const { addInvoice } = useInvoiceStore();
+  const isRtl = language === 'ar';
   
   // Current step properties
   const steps = [
@@ -130,59 +130,106 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
   // Handle printing the invoice
   const handlePrintInvoice = () => {
-    // Create a popup window for the invoice
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    // Create invoice content
+    const invoiceContent = `
+      <div style="font-family: ${isRtl ? 'Cairo, sans-serif' : 'Yrsa, serif'}; direction: ${isRtl ? 'rtl' : 'ltr'}; text-align: ${isRtl ? 'right' : 'left'}; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h1 style="font-size: 24px; margin-bottom: 5px;">${t("invoice")}</h1>
+          <p style="font-size: 18px; margin-bottom: 5px;">${t("invoiceNumber")}: ${invoiceId || invoice.invoiceId}</p>
+          <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
+        </div>
+        
+        <div style="margin-bottom: 20px; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+          <h2 style="font-size: 18px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("customerInformation")}</h2>
+          <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
+          <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
+        </div>
+        
+        <div style="margin-bottom: 20px; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+          <h2 style="font-size: 18px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("invoiceDetails")}</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: ${isRtl ? 'right' : 'left'};">${t("item")}</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("price")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${frame ? `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: ${isRtl ? 'right' : 'left'};">${t("frame")}: ${frame.brand} ${frame.model} (${frame.color})</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${frame.price.toFixed(3)} KWD</td>
+              </tr>
+              ` : ''}
+              
+              ${lensType ? `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: ${isRtl ? 'right' : 'left'};">${t("lenses")}: ${lensType}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${invoice.lensPrice.toFixed(3)} KWD</td>
+              </tr>
+              ` : ''}
+              
+              ${coating ? `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: ${isRtl ? 'right' : 'left'};">${t("coating")}: ${coating}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${invoice.coatingPrice.toFixed(3)} KWD</td>
+              </tr>
+              ` : ''}
+              
+              ${contactLenses && contactLenses.length > 0 ? contactLenses.map((lens, idx) => `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: ${isRtl ? 'right' : 'left'};">${t("contactLens")} ${idx + 1}: ${lens.brand} ${lens.type}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${lens.price.toFixed(3)} KWD</td>
+              </tr>
+              `).join('') : ''}
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="margin-bottom: 20px; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+          <h2 style="font-size: 18px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("paymentSummary")}</h2>
+          <table style="width: 100%;">
+            <tr>
+              <td style="padding: 5px 0; text-align: ${isRtl ? 'right' : 'left'}; font-weight: bold;">${t("subtotal")}:</td>
+              <td style="padding: 5px 0; text-align: ${isRtl ? 'left' : 'right'};">${(invoice.total + invoice.discount).toFixed(3)} KWD</td>
+            </tr>
+            ${invoice.discount > 0 ? `
+            <tr>
+              <td style="padding: 5px 0; text-align: ${isRtl ? 'right' : 'left'}; font-weight: bold;">${t("discount")}:</td>
+              <td style="padding: 5px 0; text-align: ${isRtl ? 'left' : 'right'};">-${invoice.discount.toFixed(3)} KWD</td>
+            </tr>
+            ` : ''}
+            <tr>
+              <td style="padding: 5px 0; text-align: ${isRtl ? 'right' : 'left'}; font-weight: bold;">${t("total")}:</td>
+              <td style="padding: 5px 0; text-align: ${isRtl ? 'left' : 'right'};">${invoice.total.toFixed(3)} KWD</td>
+            </tr>
+            <tr>
+              <td style="padding: 5px 0; text-align: ${isRtl ? 'right' : 'left'}; font-weight: bold;">${t("paid")}:</td>
+              <td style="padding: 5px 0; text-align: ${isRtl ? 'left' : 'right'};">${invoice.deposit.toFixed(3)} KWD</td>
+            </tr>
+            <tr>
+              <td style="padding: 5px 0; text-align: ${isRtl ? 'right' : 'left'}; font-weight: bold; font-size: 16px;">${t("remaining")}:</td>
+              <td style="padding: 5px 0; text-align: ${isRtl ? 'left' : 'right'}; font-size: 16px; ${(invoice.total - invoice.deposit) > 0 ? 'color: #e53e3e;' : 'color: #38a169;'}">${(invoice.total - invoice.deposit).toFixed(3)} KWD</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #666;">
+          <p>${t("thankYouMessage")}</p>
+        </div>
+      </div>
+    `;
     
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>${t("invoice")}</title>
-            <style>
-              @media print {
-                body { margin: 0; padding: 0; }
-                * { text-align: center; }
-              }
-              body { font-family: Arial, sans-serif; }
-              .print-content { text-align: center; }
-            </style>
-          </head>
-          <body>
-            <div id="print-content" class="print-content"></div>
-            <script>
-              window.onload = function() {
-                window.print();
-                setTimeout(function() { window.close(); }, 500);
-              };
-            </script>
-          </body>
-        </html>
-      `);
-      
-      // Render the ReceiptInvoice in the popup
-      const ReactDOM = require('react-dom');
-      const React = require('react');
-      
-      const invoiceElement = React.createElement(ReceiptInvoice, {
-        invoice: { ...invoice, invoiceId: invoiceId || invoice.invoiceId },
-        isPrintable: true,
-        patientName,
-        patientPhone,
-        lensType,
-        coating,
-        frame,
-        contactLenses,
+    try {
+      const htmlContent = PrintService.prepareA4Document(invoiceContent, t("invoice"));
+      PrintService.printHtml(htmlContent, 'a4', () => {
+        // Move to the next step
+        setInvoicePrinted(true);
+        setCurrentStep(3);
+        toast.success(t("invoicePrinted"));
       });
-      
-      ReactDOM.render(
-        invoiceElement,
-        printWindow.document.getElementById('print-content')
-      );
-      
-      // Mark this step as completed
-      setInvoicePrinted(true);
-      setCurrentStep(3);
-    } else {
+    } catch (error) {
+      console.error("Error printing invoice:", error);
       toast({
         title: t("error"),
         description: t("errorPrintingInvoice"),
