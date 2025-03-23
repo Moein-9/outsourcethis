@@ -5,7 +5,6 @@ import { RxData } from "@/store/patientStore";
 import { Eye } from "lucide-react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-import { PrintService } from "@/utils/PrintService";
 import { toast } from "@/hooks/use-toast";
 
 interface RxReceiptPrintProps {
@@ -171,7 +170,7 @@ export const RxLanguageDialog: React.FC<{
   );
 };
 
-// Completely rewritten printing function
+// COMPLETELY REWRITTEN PRINTING FUNCTION
 export const printRxReceipt = (props: RxReceiptPrintProps) => {
   const { patientName, patientPhone, rx, notes, forcedLanguage } = props;
   const { language: appLanguage, t } = useLanguageStore.getState();
@@ -181,7 +180,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   console.log("Preparing to print RX receipt", { language, isRtl });
   
   try {
-    // Create a much simpler HTML structure focused on printing
+    // Direct HTML printing without using any external services
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -196,7 +195,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
           body {
             margin: 0;
             padding: 8px;
-            width: 74mm;
+            width: 80mm;
             font-family: ${isRtl ? 'sans-serif' : 'serif'};
             font-size: 12px;
             direction: ${isRtl ? 'rtl' : 'ltr'};
@@ -211,6 +210,8 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
           .logo {
             text-align: center;
             margin-bottom: 8px;
+            font-size: 20px;
+            font-weight: bold;
           }
           .store-name {
             font-weight: bold;
@@ -314,13 +315,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       </head>
       <body>
         <div class="header">
-          <div class="logo">
-            <svg width="80" height="30" viewBox="0 0 200 80">
-              <rect x="40" y="30" width="120" height="20" fill="#3B82F6" />
-              <text x="100" y="45" text-anchor="middle" font-family="Arial" font-size="16" fill="white">${storeInfo.name}</text>
-            </svg>
-          </div>
-          <div class="store-name">${storeInfo.name}</div>
+          <div class="logo">${storeInfo.name}</div>
           <div class="store-info">${storeInfo.address}</div>
           <div class="store-info">${t("phone")}: ${storeInfo.phone}</div>
         </div>
@@ -358,7 +353,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
             </thead>
             <tbody>
               <tr class="eye-row">
-                <td style="background-color: #f0f7ff;">${t("rightEye")} (OD)</td>
+                <td>${t("rightEye")} (OD)</td>
                 <td>${rx.sphereOD || "-"}</td>
                 <td>${rx.cylOD || "-"}</td>
                 <td>${rx.axisOD || "-"}</td>
@@ -366,7 +361,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
                 <td>${rx.pdRight || "-"}</td>
               </tr>
               <tr class="eye-row">
-                <td style="background-color: #fff0f3;">${t("leftEye")} (OS)</td>
+                <td>${t("leftEye")} (OS)</td>
                 <td>${rx.sphereOS || "-"}</td>
                 <td>${rx.cylOS || "-"}</td>
                 <td>${rx.axisOS || "-"}</td>
@@ -404,11 +399,11 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     
     console.log("Generated HTML content for printing");
     
-    // Use PrintService directly with content from above
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    // Direct printing approach
+    const printWindow = window.open('', '_blank');
     
     if (!printWindow) {
-      console.error("Failed to open print window");
+      console.error("Failed to open print window - popup may be blocked");
       toast({
         title: t("error"),
         description: t("printWindowBlocked"),
@@ -419,23 +414,18 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     
     console.log("Print window opened successfully");
     
-    // Create a fully standalone HTML document for printing
-    const finalHtml = PrintService.prepareReceiptDocument(htmlContent, t("glassesPrescription"));
-    console.log("Final HTML prepared for printing:", finalHtml.substring(0, 100) + "...");
-    
     printWindow.document.open();
-    printWindow.document.write(finalHtml);
+    printWindow.document.write(htmlContent);
     printWindow.document.close();
     
-    // Wait for content to load before printing
     printWindow.onload = () => {
-      console.log("Print window content loaded, printing...");
+      console.log("Print window loaded, printing in 500ms...");
       
+      // Slight delay to ensure content is fully rendered
       setTimeout(() => {
-        console.log("Triggering print dialog...");
         printWindow.print();
         
-        // Close the window after print dialog is closed (or after a timeout)
+        // Close the window after printing
         setTimeout(() => {
           printWindow.close();
         }, 1000);
