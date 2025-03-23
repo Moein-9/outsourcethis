@@ -171,126 +171,276 @@ export const RxLanguageDialog: React.FC<{
   );
 };
 
+// Completely rewritten printing function
 export const printRxReceipt = (props: RxReceiptPrintProps) => {
   const { patientName, patientPhone, rx, notes, forcedLanguage } = props;
   const { language: appLanguage, t } = useLanguageStore.getState();
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
   
+  console.log("Preparing to print RX receipt", { language, isRtl });
+  
   try {
-    console.log("Preparing to print RX receipt");
-    
-    const logoSvg = `<div style="text-align: center; margin-bottom: 10px;">
-      <svg width="100" height="40" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-        <path d="M40 30 L160 30 L160 50 L40 50 Z" fill="#3B82F6" />
-        <text x="100" y="45" text-anchor="middle" font-family="Arial" font-size="16" fill="white">
-          ${storeInfo.name}
-        </text>
-      </svg>
-    </div>`;
-    
+    // Create a much simpler HTML structure focused on printing
     const htmlContent = `
-      <div class="${isRtl ? 'rtl' : 'ltr'}" style="
-        font-family: ${isRtl ? 'Zain, Arial, sans-serif' : 'Yrsa, serif'};
-        direction: ${isRtl ? 'rtl' : 'ltr'};
-        text-align: ${isRtl ? 'right' : 'left'};
-        width: 74mm;
-        padding: 3mm;
-      ">
-        <div style="text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 8px;">
-          ${logoSvg}
-          <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">${storeInfo.name}</div>
-          <div style="font-size: 12px; color: #666;">${storeInfo.address}</div>
-          <div style="font-size: 12px; color: #666;">${t("phone")}: ${storeInfo.phone}</div>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>${t("glassesPrescription")}</title>
+        <style>
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+          body {
+            margin: 0;
+            padding: 8px;
+            width: 74mm;
+            font-family: ${isRtl ? 'sans-serif' : 'serif'};
+            font-size: 12px;
+            direction: ${isRtl ? 'rtl' : 'ltr'};
+            text-align: ${isRtl ? 'right' : 'left'};
+          }
+          .header {
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+          }
+          .logo {
+            text-align: center;
+            margin-bottom: 8px;
+          }
+          .store-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 4px;
+          }
+          .store-info {
+            font-size: 12px;
+            color: #666;
+          }
+          .patient-info {
+            margin-bottom: 12px;
+          }
+          .info-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+            font-size: 12px;
+          }
+          .info-label {
+            font-weight: bold;
+          }
+          .rx-section {
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            padding: 8px 0;
+            margin-bottom: 8px;
+          }
+          .rx-title {
+            text-align: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            direction: ltr;
+          }
+          th, td {
+            border: 1px solid #ddd;
+            padding: 4px;
+            font-size: 10px;
+            text-align: center;
+          }
+          th {
+            background-color: #f5f5f5;
+          }
+          .eye-row {
+            font-weight: 500;
+          }
+          .notes {
+            margin-bottom: 8px;
+            font-size: 11px;
+          }
+          .notes-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+          }
+          .notes-content {
+            font-size: 10px;
+          }
+          .care-tips {
+            margin-bottom: 8px;
+            font-size: 10px;
+          }
+          .care-title {
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+          }
+          .tips-list {
+            list-style-type: disc;
+            padding-left: ${isRtl ? '0' : '20px'};
+            padding-right: ${isRtl ? '20px' : '0'};
+            margin: 4px 0;
+          }
+          .tip-item {
+            margin-bottom: 2px;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+          }
+          .thank-you {
+            font-weight: bold;
+            font-size: 12px;
+          }
+          .dots {
+            margin-top: 8px;
+            font-size: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo">
+            <svg width="80" height="30" viewBox="0 0 200 80">
+              <rect x="40" y="30" width="120" height="20" fill="#3B82F6" />
+              <text x="100" y="45" text-anchor="middle" font-family="Arial" font-size="16" fill="white">${storeInfo.name}</text>
+            </svg>
+          </div>
+          <div class="store-name">${storeInfo.name}</div>
+          <div class="store-info">${storeInfo.address}</div>
+          <div class="store-info">${t("phone")}: ${storeInfo.phone}</div>
         </div>
 
-        <div style="margin-bottom: 12px; font-size: 12px;">
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 4px;">
-            <span style="font-weight: bold;">${t("date")}:</span>
+        <div class="patient-info">
+          <div class="info-row">
+            <span class="info-label">${t("date")}:</span>
             <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
           </div>
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 4px;">
-            <span style="font-weight: bold;">${t("patient")}:</span>
+          <div class="info-row">
+            <span class="info-label">${t("patient")}:</span>
             <span>${patientName}</span>
           </div>
           ${patientPhone ? `
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 4px;">
-            <span style="font-weight: bold;">${t("phone")}:</span>
+          <div class="info-row">
+            <span class="info-label">${t("phone")}:</span>
             <span>${patientPhone}</span>
           </div>
           ` : ''}
         </div>
 
-        <div style="border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 8px 0; margin-bottom: 8px;">
-          <div style="text-align: center; margin-bottom: 6px; font-weight: bold; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">
-            👁 ${t("glassesPrescription")}
-          </div>
+        <div class="rx-section">
+          <div class="rx-title">👁 ${t("glassesPrescription")}</div>
           
-          <table style="width: 100%; border-collapse: collapse; margin-top: 6px; direction: ltr;">
+          <table>
             <thead>
               <tr>
-                <th style="border: 1px solid #ccc; padding: 4px; font-size: 10px;"></th>
-                <th style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">SPH</th>
-                <th style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">CYL</th>
-                <th style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">AXIS</th>
-                <th style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">ADD</th>
-                <th style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">PD</th>
+                <th></th>
+                <th>SPH</th>
+                <th>CYL</th>
+                <th>AXIS</th>
+                <th>ADD</th>
+                <th>PD</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px; font-weight: 500; background-color: #f0f7ff;">${t("rightEye")} (OD)</td>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">${rx.sphereOD || "-"}</td>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">${rx.cylOD || "-"}</td>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">${rx.axisOD || "-"}</td>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">${rx.addOD || "-"}</td>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">${rx.pdRight || "-"}</td>
+              <tr class="eye-row">
+                <td style="background-color: #f0f7ff;">${t("rightEye")} (OD)</td>
+                <td>${rx.sphereOD || "-"}</td>
+                <td>${rx.cylOD || "-"}</td>
+                <td>${rx.axisOD || "-"}</td>
+                <td>${rx.addOD || "-"}</td>
+                <td>${rx.pdRight || "-"}</td>
               </tr>
-              <tr>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px; font-weight: 500; background-color: #fff0f3;">${t("leftEye")} (OS)</td>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">${rx.sphereOS || "-"}</td>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">${rx.cylOS || "-"}</td>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">${rx.axisOS || "-"}</td>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">${rx.addOS || "-"}</td>
-                <td style="border: 1px solid #ccc; padding: 4px; font-size: 10px;">${rx.pdLeft || "-"}</td>
+              <tr class="eye-row">
+                <td style="background-color: #fff0f3;">${t("leftEye")} (OS)</td>
+                <td>${rx.sphereOS || "-"}</td>
+                <td>${rx.cylOS || "-"}</td>
+                <td>${rx.axisOS || "-"}</td>
+                <td>${rx.addOS || "-"}</td>
+                <td>${rx.pdLeft || "-"}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         ${notes ? `
-        <div style="margin-bottom: 8px; font-size: 11px;">
-          <div style="font-weight: bold; margin-bottom: 4px;">${t("notes")}:</div>
-          <p style="font-size: 10px;">${notes}</p>
+        <div class="notes">
+          <div class="notes-title">${t("notes")}:</div>
+          <p class="notes-content">${notes}</p>
         </div>
         ` : ''}
 
-        <div style="margin-bottom: 8px; font-size: 10px;">
-          <div style="text-align: center; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 4px;">
-            ${t("glassesCareTips")}
-          </div>
-          <ul style="list-style-type: disc; padding-left: ${isRtl ? '0' : '20px'}; padding-right: ${isRtl ? '20px' : '0'}; margin: 4px 0;">
-            <li style="margin-bottom: 2px;">${t("tip1")}</li>
-            <li style="margin-bottom: 2px;">${t("tip2")}</li>
-            <li style="margin-bottom: 2px;">${t("tip3")}</li>
-            <li style="margin-bottom: 2px;">${t("tip4")}</li>
+        <div class="care-tips">
+          <div class="care-title">${t("glassesCareTips")}</div>
+          <ul class="tips-list">
+            <li class="tip-item">${t("tip1")}</li>
+            <li class="tip-item">${t("tip2")}</li>
+            <li class="tip-item">${t("tip3")}</li>
+            <li class="tip-item">${t("tip4")}</li>
           </ul>
         </div>
 
-        <div style="text-align: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #ccc;">
-          <p style="font-weight: bold; font-size: 12px;">${t("thankYou")}</p>
-          <div style="margin-top: 8px; font-size: 10px;">${'•'.repeat(15)}</div>
+        <div class="footer">
+          <p class="thank-you">${t("thankYou")}</p>
+          <div class="dots">${'•'.repeat(15)}</div>
         </div>
-      </div>
+      </body>
+      </html>
     `;
     
-    // Use the custom print service with the proper paper type
-    const formattedHtml = PrintService.prepareReceiptDocument(htmlContent, t("glassesPrescription"));
-    console.log("Formatted HTML for printing:", formattedHtml.substring(0, 200) + "...");
+    console.log("Generated HTML content for printing");
     
-    PrintService.printHtml(formattedHtml, 'receipt', () => {
-      console.log("RX receipt printing completed");
-    });
+    // Use PrintService directly with content from above
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    
+    if (!printWindow) {
+      console.error("Failed to open print window");
+      toast({
+        title: t("error"),
+        description: t("printWindowBlocked"),
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log("Print window opened successfully");
+    
+    // Create a fully standalone HTML document for printing
+    const finalHtml = PrintService.prepareReceiptDocument(htmlContent, t("glassesPrescription"));
+    console.log("Final HTML prepared for printing:", finalHtml.substring(0, 100) + "...");
+    
+    printWindow.document.open();
+    printWindow.document.write(finalHtml);
+    printWindow.document.close();
+    
+    // Wait for content to load before printing
+    printWindow.onload = () => {
+      console.log("Print window content loaded, printing...");
+      
+      setTimeout(() => {
+        console.log("Triggering print dialog...");
+        printWindow.print();
+        
+        // Close the window after print dialog is closed (or after a timeout)
+        setTimeout(() => {
+          printWindow.close();
+        }, 1000);
+      }, 500);
+    };
     
     toast({
       title: t("success"),
