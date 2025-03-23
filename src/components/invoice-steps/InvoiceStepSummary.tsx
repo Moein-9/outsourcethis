@@ -5,7 +5,8 @@ import { useInvoiceForm } from "./InvoiceFormContext";
 import { Button } from "@/components/ui/button";
 import { 
   ClipboardCheck, Printer, Receipt, ExternalLink,
-  Check, ChevronRight
+  Check, ChevronRight, Sparkles, FileText, PartyPopper,
+  CreditCard, User, Phone, Calendar
 } from "lucide-react";
 import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
 
@@ -53,81 +54,138 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="p-5 border rounded-lg bg-green-50 border-green-200">
+      <div className="p-5 rounded-lg bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-200 shadow-sm">
         <div className="flex items-center mb-4">
-          <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-            <Check className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center shadow-md">
+            <PartyPopper className="w-6 h-6 text-white" />
           </div>
-          <h3 className="ml-3 text-xl font-semibold text-green-800">
-            {t('invoiceCreated')}
-          </h3>
+          <div className="ml-3">
+            <h3 className="text-xl font-semibold text-green-800">
+              {t('invoiceCreated')}
+            </h3>
+            <p className="text-green-700 text-sm">
+              {t('invoiceSuccessMessage')}
+            </p>
+          </div>
         </div>
         
-        <p className="text-green-700 mb-4">
-          {t('invoiceSuccessMessage')}
-        </p>
-        
-        <div className="bg-white p-4 rounded-lg border border-green-200 mb-4">
-          <div className={`flex justify-between ${textAlignClass}`}>
-            <span className="text-gray-600">{t('workOrderNumber')}:</span>
-            <span className="font-bold">{invoice.workOrderId}</span>
-          </div>
-          
-          <div className={`flex justify-between ${textAlignClass}`}>
-            <span className="text-gray-600">{t('clientName')}:</span>
-            <span>{invoice.patientName || t('anonymous')}</span>
-          </div>
-          
-          <div className={`flex justify-between ${textAlignClass}`}>
-            <span className="text-gray-600">{t('totalAmount')}:</span>
-            <span>{invoice.total.toFixed(2)} {t('kwd')}</span>
-          </div>
-          
-          <div className={`flex justify-between ${textAlignClass}`}>
-            <span className="text-gray-600">{t('paymentStatus')}:</span>
-            <span className={invoice.isPaid ? "text-green-600 font-medium" : "text-amber-600 font-medium"}>
-              {invoice.isPaid ? t('paid') : t('partiallyPaid')}
-            </span>
+        <div className="bg-white p-5 rounded-lg border border-green-200 mb-4 shadow-sm">
+          <div className="flex flex-col space-y-3">
+            <div className={`flex justify-between items-center pb-3 border-b border-dashed border-green-200 ${textAlignClass}`}>
+              <div className="flex items-center">
+                <FileText className="w-5 h-5 text-primary mr-2" />
+                <span className="text-gray-600 font-medium">{t('workOrderNumber')}:</span>
+              </div>
+              <span className="font-bold text-lg text-primary">{invoice.workOrderId}</span>
+            </div>
+            
+            <div className={`flex justify-between items-center ${textAlignClass}`}>
+              <div className="flex items-center">
+                <User className="w-5 h-5 text-blue-500 mr-2" />
+                <span className="text-gray-600 font-medium">{t('clientName')}:</span>
+              </div>
+              <span className="font-medium">{invoice.patientName || t('anonymous')}</span>
+            </div>
+            
+            {invoice.patientPhone && (
+              <div className={`flex justify-between items-center ${textAlignClass}`}>
+                <div className="flex items-center">
+                  <Phone className="w-5 h-5 text-blue-400 mr-2" />
+                  <span className="text-gray-600 font-medium">{t('phoneNumber')}:</span>
+                </div>
+                <span>{invoice.patientPhone}</span>
+              </div>
+            )}
+            
+            <div className={`flex justify-between items-center ${textAlignClass}`}>
+              <div className="flex items-center">
+                <Calendar className="w-5 h-5 text-amber-500 mr-2" />
+                <span className="text-gray-600 font-medium">{t('date')}:</span>
+              </div>
+              <span>{new Date().toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}</span>
+            </div>
+            
+            <div className="my-2 border-t border-dashed border-green-200"></div>
+            
+            <div className={`flex justify-between items-center ${textAlignClass}`}>
+              <div className="flex items-center">
+                <Receipt className="w-5 h-5 text-purple-500 mr-2" />
+                <span className="text-gray-600 font-medium">{t('totalAmount')}:</span>
+              </div>
+              <span className="font-bold text-lg">{invoice.total.toFixed(2)} {t('kwd')}</span>
+            </div>
+            
+            <div className={`flex justify-between items-center ${textAlignClass}`}>
+              <div className="flex items-center">
+                <CreditCard className="w-5 h-5 text-orange-500 mr-2" />
+                <span className="text-gray-600 font-medium">{t('paymentStatus')}:</span>
+              </div>
+              <div className={`px-3 py-1 rounded-full ${invoice.isPaid ? "bg-green-100 text-green-600" : "bg-amber-100 text-amber-600"} font-medium text-sm`}>
+                {invoice.isPaid ? t('paid') : t('partiallyPaid')}
+              </div>
+            </div>
           </div>
         </div>
       </div>
       
-      <div className="p-5 border rounded-lg">
-        <h3 className={`text-lg font-semibold text-primary pb-3 border-b ${textAlignClass}`}>
+      <div className="p-5 border-2 border-primary/20 rounded-lg bg-primary/5 shadow-sm">
+        <h3 className={`text-lg font-semibold text-primary pb-3 border-b border-primary/20 flex items-center ${textAlignClass}`}>
+          <Sparkles className="w-5 h-5 mr-2 text-primary" />
           {t('nextSteps')}
         </h3>
         
-        <div className="mt-4 space-y-3">
+        <div className="mt-5 space-y-3">
           <Button 
             variant="outline"
-            className="w-full justify-between"
+            className="w-full justify-between group hover:border-primary hover:text-primary transition-all duration-300 hover:shadow-sm"
             onClick={() => setWorkOrderPrintOpen(true)}
           >
             <div className="flex items-center">
-              <ClipboardCheck className="w-5 h-5 mr-2 text-primary" />
-              {t('printWorkOrder')}
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
+                <ClipboardCheck className="w-5 h-5 text-blue-600" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">{t('printWorkOrder')}</div>
+                <div className="text-xs text-muted-foreground">{t('printWorkOrderDescription')}</div>
+              </div>
             </div>
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
           </Button>
           
           <Button 
             variant="outline"
-            className="w-full justify-between"
+            className="w-full justify-between group hover:border-primary hover:text-primary transition-all duration-300 hover:shadow-sm"
             onClick={() => setInvoicePrintOpen(true)}
           >
             <div className="flex items-center">
-              <Receipt className="w-5 h-5 mr-2 text-primary" />
-              {t('printInvoice')}
+              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3 group-hover:bg-purple-200 transition-colors">
+                <Receipt className="w-5 h-5 text-purple-600" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">{t('printInvoice')}</div>
+                <div className="text-xs text-muted-foreground">{t('printInvoiceDescription')}</div>
+              </div>
             </div>
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
           </Button>
           
           <CustomPrintWorkOrderButton 
             workOrder={invoice}
             invoice={invoice}
             patient={patient}
-            className="w-full justify-between"
-          />
+            className="w-full justify-between group hover:border-primary hover:text-primary transition-all duration-300 hover:shadow-sm"
+          >
+            <div className="flex items-center">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3 group-hover:bg-amber-200 transition-colors">
+                <Printer className="w-5 h-5 text-amber-600" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">{t('printCustomWorkOrder')}</div>
+                <div className="text-xs text-muted-foreground">{t('printCustomWorkOrderDescription')}</div>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+          </CustomPrintWorkOrderButton>
         </div>
       </div>
     </div>
