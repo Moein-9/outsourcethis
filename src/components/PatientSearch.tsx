@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -47,7 +46,6 @@ export const PatientSearch: React.FC = () => {
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
     
-    // Additional filtering logic could be implemented here
     return patients;
   };
   
