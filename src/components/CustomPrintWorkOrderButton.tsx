@@ -32,15 +32,21 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   
   const handlePrint = () => {
     console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
-    setOpen(false); // Close dialog before printing
+    setIsPrinting(true);
     
-    // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
-    }, 300);
+      setOpen(false); // Close dialog before printing
+      
+      // Slightly longer delay to ensure dialog is fully closed and DOM is updated
+      setTimeout(() => {
+        CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+        setIsPrinting(false);
+      }, 300);
+    }, 100);
   };
   
   return (
@@ -49,7 +55,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
         <Button 
           variant={variant}
           size={size}
-          className={`gap-1 ${className}`}
+          className={`gap-1.5 ${className}`}
         >
           <Printer className="h-4 w-4" />
           {t('printWorkOrder')}
@@ -57,8 +63,8 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto p-0">
         <div className="p-6 flex flex-col items-center">
-          <DialogTitle className="sr-only">{t('workOrderPreview')}</DialogTitle>
-          <DialogDescription className="sr-only">
+          <DialogTitle className="text-xl font-bold mb-4">{t('workOrderPreview')}</DialogTitle>
+          <DialogDescription className="text-center mb-4">
             {t('previewBeforePrinting')}
           </DialogDescription>
           
@@ -70,9 +76,13 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               isPrintable={false}
             />
           </div>
-          <Button onClick={handlePrint} className="mt-4 gap-2 bg-indigo-600 hover:bg-indigo-700">
+          <Button 
+            onClick={handlePrint} 
+            className="mt-4 gap-2 bg-indigo-600 hover:bg-indigo-700"
+            disabled={isPrinting}
+          >
             <Printer className="h-4 w-4" />
-            {t('print')}
+            {isPrinting ? t('printing') : t('print')}
           </Button>
         </div>
       </DialogContent>

@@ -2,15 +2,6 @@
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { PrinterIcon } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "sonner";
@@ -32,7 +23,6 @@ interface WorkOrderPrintSelectorProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
-  thermalOnly?: boolean;
   onCompletePrinting?: () => void;
   trigger?: React.ReactNode;
 }
@@ -48,11 +38,9 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
-  thermalOnly = false,
   onCompletePrinting
 }) => {
   const { t } = useLanguageStore();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [printingInProgress, setPrintingInProgress] = useState(false);
   
   const handleTriggerClick = () => {
@@ -81,7 +69,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
       
       setTimeout(() => {
         setPrintingInProgress(false);
-        setIsDialogOpen(false);
         toast.success(t("printingCompleted"));
         
         // Call the callback if provided
@@ -98,13 +85,14 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   
   return (
     <>
-      <DialogTrigger asChild onClick={handleTriggerClick}>
+      <div onClick={handleTriggerClick}>
         {trigger || (
-          <Button variant="outline" size="sm" className="gap-1">
-            <PrinterIcon className="h-4 w-4" /> {t("printWorkOrder")}
+          <Button variant="outline" size="sm" className="gap-1" disabled={printingInProgress}>
+            <PrinterIcon className="h-4 w-4" /> 
+            {printingInProgress ? t("printing") : t("printWorkOrder")}
           </Button>
         )}
-      </DialogTrigger>
+      </div>
     </>
   );
 };
