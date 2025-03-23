@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { RxData } from "@/store/patientStore";
@@ -175,8 +176,109 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
   
+  // Create a new window for printing
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    console.error('Failed to open print window');
+    return;
+  }
+  
+  // Add necessary styles for printing
+  const style = document.createElement('style');
+  style.textContent = `
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: ${isRtl ? 'Cairo' : 'Arial'}, sans-serif;
+      background-color: white;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .print-container {
+      width: 100%;
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 10mm;
+      background-color: white;
+      box-sizing: border-box;
+    }
+    
+    .rx-content {
+      width: 80mm;
+      margin: 0 auto;
+      background-color: white;
+      padding: 5mm;
+      border: 1px solid #eee;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    @media print {
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      
+      .print-container {
+        width: 100%;
+        height: 100%;
+        padding: 10mm;
+        margin: 0;
+        box-shadow: none;
+        border: none;
+      }
+      
+      .rx-content {
+        width: 80mm;
+        margin: 0 auto;
+        box-shadow: none;
+        border: none;
+      }
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    
+    th, td {
+      border: 1px solid #ccc;
+      padding: 4px;
+      text-align: center;
+    }
+    
+    th {
+      background-color: #f5f5f5;
+    }
+  `;
+  printWindow.document.head.appendChild(style);
+  
+  // Add title
+  const title = document.createElement('title');
+  title.textContent = t("glassesPrescription");
+  printWindow.document.head.appendChild(title);
+  
+  // Create container
+  const container = document.createElement('div');
+  container.className = 'print-container';
+  printWindow.document.body.appendChild(container);
+  
+  // Create content wrapper
+  const contentWrapper = document.createElement('div');
+  contentWrapper.className = 'rx-content';
+  container.appendChild(contentWrapper);
+  
+  // Add HTML content
   const htmlContent = `
-    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; padding: 4mm; text-align: ${isRtl ? 'right' : 'left'};">
+    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="text-align: ${isRtl ? 'right' : 'left'};">
       <div style="text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 10px;">
         <h1 style="font-size: 16px; font-weight: bold; margin: 5px 0;">${storeInfo.name}</h1>
         <p style="font-size: 12px; margin: 2px 0;">${storeInfo.address}</p>
@@ -244,12 +346,37 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       </div>
       ` : ''}
 
+      <div style="margin-bottom: 15px; font-size: 12px;">
+        <div style="font-weight: bold; text-align: center; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 3px;">
+          ${t("glassesCareTips")}
+        </div>
+        <ul style="padding-left: ${isRtl ? '0' : '20px'}; padding-right: ${isRtl ? '20px' : '0'}; margin: 5px 0;">
+          <li style="margin-bottom: 3px;">${t("tip1")}</li>
+          <li style="margin-bottom: 3px;">${t("tip2")}</li>
+          <li style="margin-bottom: 3px;">${t("tip3")}</li>
+          <li style="margin-bottom: 3px;">${t("tip4")}</li>
+        </ul>
+      </div>
+
       <div style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #ccc;">
         <p style="font-weight: bold; font-size: 12px;">${t("thankYou")}</p>
       </div>
     </div>
   `;
   
-  const printDoc = PrintService.prepareReceiptDocument(htmlContent, t("glassesPrescription"));
-  PrintService.printHtml(printDoc, 'receipt');
+  contentWrapper.innerHTML = htmlContent;
+  
+  // Add print script
+  const script = document.createElement('script');
+  script.innerHTML = `
+    // Wait for content and images to load
+    window.onload = function() {
+      setTimeout(function() {
+        window.focus();
+        window.print();
+      }, 500);
+    };
+  `;
+  printWindow.document.body.appendChild(script);
 };
+

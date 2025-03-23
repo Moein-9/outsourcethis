@@ -77,14 +77,16 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   const [isViewRxOpen, setIsViewRxOpen] = useState(false);
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   
-  // Local state to hold the latest patient data including updated Rx
   const [localCurrentRx, setLocalCurrentRx] = useState(currentRx);
   const [localRxHistory, setLocalRxHistory] = useState(rxHistory);
   
-  // Update local state whenever props change
   useEffect(() => {
-    setLocalCurrentRx(currentRx);
-    setLocalRxHistory(rxHistory);
+    if (currentRx !== localCurrentRx) {
+      setLocalCurrentRx(currentRx);
+    }
+    if (rxHistory !== localRxHistory) {
+      setLocalRxHistory(rxHistory);
+    }
   }, [currentRx, rxHistory]);
 
   const handleRxInputChange = (eye: "OD" | "OS", field: "sphere" | "cyl" | "axis" | "add", value: string) => {
@@ -124,23 +126,18 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
       return;
     }
 
-    // Add timestamp to the new RX
     const timestampedNewRx = {
       ...newRx,
       createdAt: new Date().toISOString()
     };
 
-    // Update the global store
     updatePatientRx(patientId, timestampedNewRx);
     
-    // Update local state for immediate UI reflection
-    // Move current Rx to history
     setLocalRxHistory(prev => [
       { ...localCurrentRx, createdAt: localCurrentRx.createdAt || new Date().toISOString() },
       ...prev
     ]);
     
-    // Set new Rx as current
     setLocalCurrentRx(timestampedNewRx);
 
     toast({
@@ -150,7 +147,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
 
     setIsNewRxOpen(false);
     
-    // Reset form
     setNewRx({
       sphereOD: "",
       cylOD: "",
@@ -177,7 +173,13 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
 
   const handleLanguageSelection = (selectedLanguage: 'en' | 'ar') => {
     setIsLanguageDialogOpen(false);
-    onRxPrintRequest(selectedLanguage);
+    printRxReceipt({
+      patientName,
+      patientPhone,
+      rx: localCurrentRx,
+      notes,
+      forcedLanguage: selectedLanguage
+    });
   };
 
   const formatDate = (dateString?: string) => {
@@ -289,7 +291,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
               </Badge>
             </div>
             <div className="overflow-x-auto bg-white rounded-md shadow-sm">
-              {/* Always left-to-right table regardless of language */}
               <Table className="ltr">
                 <TableHeader className="bg-blue-100">
                   <TableRow>
@@ -432,7 +433,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
         </div>
       </CardContent>
 
-      {/* New RX Dialog */}
       <Dialog open={isNewRxOpen} onOpenChange={setIsNewRxOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -613,7 +613,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* View RX Dialog */}
       <Dialog open={isViewRxOpen} onOpenChange={setIsViewRxOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -681,7 +680,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* Language selection dialog */}
       <RxLanguageDialog
         isOpen={isLanguageDialogOpen}
         onClose={() => setIsLanguageDialogOpen(false)}

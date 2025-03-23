@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -183,6 +182,21 @@ export const PatientSearch: React.FC = () => {
 
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  
+  const handlePrintRxReceipt = (selectedLanguage?: 'en' | 'ar') => {
+    if (selectedPatient) {
+      setShowRxPrintPreview(false); // Close the preview dialog
+      
+      // Call the improved printRxReceipt function with the selected language
+      printRxReceipt({
+        patientName: selectedPatient.name,
+        patientPhone: selectedPatient.phone,
+        rx: selectedPatient.rx,
+        notes: selectedPatient.notes,
+        forcedLanguage: selectedLanguage
+      });
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -692,9 +706,7 @@ export const PatientSearch: React.FC = () => {
                 <Button variant="outline" onClick={() => setShowRxPrintPreview(false)}>
                   {t('close')}
                 </Button>
-                <Button onClick={() => {
-                  window.print();
-                }}>
+                <Button onClick={() => handlePrintRxReceipt()}>
                   <Printer className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                   {language === 'ar' ? "طباعة الوصفة" : "Print Prescription"}
                 </Button>

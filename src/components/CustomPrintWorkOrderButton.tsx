@@ -43,12 +43,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
       return;
     }
 
-    // Create a container for the receipt
-    const container = document.createElement('div');
-    container.className = 'print-container';
-    printWindow.document.body.appendChild(container);
-
-    // Add necessary styles for thermal paper
+    // Add necessary styles for printing
     const style = document.createElement('style');
     style.textContent = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -57,13 +52,13 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
         margin: 0;
         padding: 0;
         font-family: 'Cairo', sans-serif;
-        width: 80mm;
         background-color: white;
       }
       
       .print-container {
         width: 80mm;
         margin: 0 auto;
+        padding: 5mm;
         background-color: white;
       }
       
@@ -82,97 +77,27 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
         .print-container {
           width: 80mm;
           margin: 0;
+          padding: 5mm;
         }
       }
     `;
     printWindow.document.head.appendChild(style);
 
-    // Clone the receipt component directly to the print window
-    const receiptElement = document.createElement('div');
-    receiptElement.className = 'receipt-content';
-    container.appendChild(receiptElement);
-    
     // Add title for the print job
     const title = document.createElement('title');
     title.textContent = t('workOrderReceipt');
     printWindow.document.head.appendChild(title);
 
-    // Render the component
-    const renderReceiptContent = () => {
-      const receiptHtml = `
-        <div style="width: 80mm; background-color: white; padding: 5px;">
-          ${document.getElementById('work-order-receipt')?.outerHTML || ''}
-        </div>
-      `;
-      receiptElement.innerHTML = receiptHtml;
-      
-      // Add print script
-      const script = document.createElement('script');
-      script.innerHTML = `
-        // Wait for content and images to load
-        window.onload = function() {
-          setTimeout(function() {
-            window.focus();
-            window.print();
-            // Don't close the window automatically to allow user to see preview
-          }, 500);
-        };
-      `;
-      printWindow.document.body.appendChild(script);
-    };
-
-    // Delay to ensure dialog is fully closed
-    setTimeout(() => {
-      // Create a temporary element to render the receipt
-      const tempElement = document.createElement('div');
-      document.body.appendChild(tempElement);
-      
-      // Render temporarily to the DOM to capture HTML
-      const tempComponent = document.createElement('div');
-      tempComponent.id = 'temp-work-order-receipt';
-      tempElement.appendChild(tempComponent);
-      
-      const content = document.createElement('div');
-      content.innerHTML = `
-        <div id="work-order-receipt" class="print-content" style="width: 80mm; background-color: white;">
-          ${renderCustomWorkOrderReceipt()}
-        </div>
-      `;
-      tempComponent.appendChild(content);
-      
-      // Extract the generated HTML
-      const receiptHtml = document.getElementById('work-order-receipt')?.outerHTML || '';
-      
-      // Remove the temporary element
-      document.body.removeChild(tempElement);
-      
-      // Add the HTML to the print window
-      receiptElement.innerHTML = receiptHtml;
-      
-      // Add print script
-      const script = document.createElement('script');
-      script.innerHTML = `
-        // Wait for content and images to load
-        window.onload = function() {
-          setTimeout(function() {
-            window.focus();
-            window.print();
-          }, 500);
-        };
-      `;
-      printWindow.document.body.appendChild(script);
-    }, 300);
-  };
-  
-  // Function to generate receipt content as HTML string
-  const renderCustomWorkOrderReceipt = () => {
-    // Create a representation of the receipt as HTML
+    // Create container
+    const container = document.createElement('div');
+    container.className = 'print-container';
+    printWindow.document.body.appendChild(container);
+    
+    // Get receipt HTML content
     const { language } = useLanguageStore.getState();
     const isRtl = language === 'ar';
     
-    // This is a simplified representation of the receipt
-    // You may need to enhance this based on your specific receipt design
-    return `
+    const receiptHtml = `
       <div dir="${isRtl ? 'rtl' : 'ltr'}" class="receipt-content" style="font-family: ${isRtl ? 'Cairo' : 'Arial'}, sans-serif; width: 80mm; padding: 8px; background-color: white;">
         <div style="text-align: center; margin-bottom: 10px;">
           <h1 style="font-size: 16px; margin: 0;">${workOrder.title || 'Work Order Receipt'}</h1>
@@ -205,6 +130,22 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
         </div>
       </div>
     `;
+    
+    container.innerHTML = receiptHtml;
+    
+    // Add print script
+    const script = document.createElement('script');
+    script.innerHTML = `
+      // Wait for content and images to load
+      window.onload = function() {
+        setTimeout(function() {
+          window.focus();
+          window.print();
+          // Don't close the window automatically to allow the user to see the preview
+        }, 500);
+      };
+    `;
+    printWindow.document.body.appendChild(script);
   };
   
   return (
