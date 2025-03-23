@@ -368,14 +368,11 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   <script>
     window.onload = function() {
       // Print immediately when loaded
-      setTimeout(function() {
-        window.print();
-        
-        // Add delay before focusing to avoid issues
-        setTimeout(function() {
-          window.focus();
-        }, 500);
-      }, 300);
+      window.print();
+      // Close after printing (may not work in all browsers due to security)
+      window.onafterprint = function() {
+        window.close();
+      };
     };
   </script>
 </body>
@@ -396,16 +393,6 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     printWindow.document.open();
     printWindow.document.write(htmlContent);
     printWindow.document.close();
-    
-    // Extra force print after a delay as backup
-    setTimeout(() => {
-      try {
-        printWindow.print();
-      } catch (error) {
-        console.error("Backup print attempt failed:", error);
-      }
-    }, 800);
-    
   } catch (error) {
     console.error("Error printing prescription:", error);
     alert(isRtl ? 'حدث خطأ أثناء الطباعة' : 'Error during printing');

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -68,7 +67,7 @@ import {
 } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 import { ReceiptInvoice } from "./ReceiptInvoice";
-import { RxReceiptPrint } from "./RxReceiptPrint";
+import { RxReceiptPrint, printRxReceipt } from "./RxReceiptPrint";
 import { PatientRxManager } from "./PatientRxManager";
 import { useLanguageStore } from "@/store/languageStore";
 
@@ -98,6 +97,7 @@ export const PatientSearch: React.FC = () => {
   const [patientWorkOrders, setPatientWorkOrders] = useState<WorkOrder[]>([]);
   
   const [activeTransactionTab, setActiveTransactionTab] = useState<"active" | "completed">("active");
+  const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
@@ -183,6 +183,26 @@ export const PatientSearch: React.FC = () => {
 
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+
+    const handleDirectPrint = (language?: 'en' | 'ar') => {
+    if (!selectedPatient) return;
+    
+    const printLang = language || useLanguageStore.getState().language;
+    
+    // Call the print function directly
+    printRxReceipt({
+      patientName: selectedPatient.name,
+      patientPhone: selectedPatient.phone,
+      rx: selectedPatient.rx,
+      notes: selectedPatient.notes,
+      forcedLanguage: printLang
+    });
+  };
+  
+  const handleLanguageSelection = (selectedLanguage: 'en' | 'ar') => {
+    setIsLanguageDialogOpen(false);
+    handleDirectPrint(selectedLanguage);
+  };
   
   return (
     <div className="space-y-6">
@@ -393,7 +413,11 @@ export const PatientSearch: React.FC = () => {
                           <FileBarChart className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'} text-amber-500`} />
                           {language === 'ar' ? "تقرير العميل" : "Client Report"}
                         </Button>
-                        <Button variant="outline" className="w-full justify-start" onClick={() => setShowRxPrintPreview(true)}>
+                        <Button 
+                          variant="outline" 
+                          className="w-full justify-start" 
+                          onClick={() => setIsLanguageDialogOpen(true)}
+                        >
                           <Receipt className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'} text-blue-500`} />
                           {language === 'ar' ? "طباعة الوصفة الطبية" : "Print Prescription"}
                         </Button>
@@ -643,7 +667,7 @@ export const PatientSearch: React.FC = () => {
                       currentRx={selectedPatient.rx}
                       rxHistory={selectedPatient.rxHistory}
                       notes={selectedPatient.notes}
-                      onRxPrintRequest={() => setShowRxPrintPreview(true)}
+                      onRxPrintRequest={handleDirectPrint}
                     />
                   )}
                 </div>
@@ -651,58 +675,4 @@ export const PatientSearch: React.FC = () => {
               
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsProfileOpen(false)}>
-                  {t('close')}
-                </Button>
-                <Button>
-                  <Printer className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
-                  {language === 'ar' ? "طباعة ملف العميل" : "Print Client File"}
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={showRxPrintPreview} onOpenChange={setShowRxPrintPreview}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          {selectedPatient && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-lg">
-                  {language === 'ar' ? "معاينة الوصفة الطبية" : "Prescription Preview"}
-                </DialogTitle>
-                <DialogDescription>
-                  {language === 'ar' ? "معاينة قبل الطباعة" : "Preview before printing"}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="py-4">
-                <div className="print:w-[80mm]">
-                  <RxReceiptPrint
-                    patientName={selectedPatient.name}
-                    patientPhone={selectedPatient.phone}
-                    rx={selectedPatient.rx}
-                    notes={selectedPatient.notes}
-                    isPrintable={true}
-                  />
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowRxPrintPreview(false)}>
-                  {t('close')}
-                </Button>
-                <Button onClick={() => {
-                  window.print();
-                }}>
-                  <Printer className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
-                  {language === 'ar' ? "طباعة الوصفة" : "Print Prescription"}
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
+                  {t('
