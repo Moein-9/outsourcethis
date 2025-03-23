@@ -49,6 +49,8 @@ export interface WorkOrder {
     name: string;
     price: number;
   };
+  status?: 'active' | 'completed'; // Added status field
+  pickedUpAt?: string; // Added timestamp for pickup
   // Add other work order fields as needed
 }
 

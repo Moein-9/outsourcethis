@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Plus, Check, ArrowRight } from "lucide-react";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
@@ -28,6 +29,7 @@ interface PatientWithMeta extends Patient {
 }
 
 export const PatientSearch: React.FC = () => {
+  const navigate = useNavigate();
   const { patients, searchPatients } = usePatientStore();
   const { 
     invoices, 
@@ -116,8 +118,33 @@ export const PatientSearch: React.FC = () => {
   };
   
   const handleEditWorkOrder = (workOrder: WorkOrder) => {
-    setCurrentWorkOrder(workOrder);
-    setEditWorkOrderDialogOpen(true);
+    if (selectedPatient) {
+      navigate(`/invoice?patientId=${selectedPatient.patientId}&workOrderId=${workOrder.id}`);
+      setIsProfileOpen(false);
+    }
+  };
+  
+  const handleMarkAsPickedUp = (workOrder: WorkOrder) => {
+    try {
+      const updatedWorkOrder = {
+        ...workOrder,
+        status: 'completed',
+        pickedUpAt: new Date().toISOString()
+      };
+      
+      // Update the work order in the store
+      updateWorkOrder(updatedWorkOrder);
+      
+      // Refresh patient data to see the changes
+      if (selectedPatient) {
+        refreshPatientData(selectedPatient.patientId);
+      }
+      
+      toast.success(language === 'ar' ? "تم تحديث حالة الطلب إلى: استلمه العميل" : "Order status updated to: Picked up by customer");
+    } catch (error) {
+      console.error("Error updating work order status:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء تحديث حالة الطلب" : "Error updating order status");
+    }
   };
   
   const handleSaveWorkOrder = (updatedWorkOrder: WorkOrder) => {
@@ -137,6 +164,13 @@ export const PatientSearch: React.FC = () => {
     }
     
     setEditWorkOrderDialogOpen(false);
+  };
+  
+  const handleAddNewRx = () => {
+    if (selectedPatient) {
+      navigate(`/rx-manager?patientId=${selectedPatient.patientId}`);
+      setIsProfileOpen(false);
+    }
   };
   
   const handleDirectPrint = (printLanguage?: 'en' | 'ar') => {
@@ -192,16 +226,27 @@ export const PatientSearch: React.FC = () => {
                 </div>
                 
                 <div className="md:col-span-2">
-                  <PatientPrescriptionDisplay 
-                    rx={selectedPatient.rx}
-                    rxHistory={selectedPatient.rxHistory}
-                    onPrintPrescription={() => setIsLanguageDialogOpen(true)}
-                  />
+                  <div className="flex justify-between items-center mb-2">
+                    <PatientPrescriptionDisplay 
+                      rx={selectedPatient.rx}
+                      rxHistory={selectedPatient.rxHistory}
+                      onPrintPrescription={() => setIsLanguageDialogOpen(true)}
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="h-8 gap-1 absolute top-4 right-4"
+                      onClick={handleAddNewRx}
+                    >
+                      <Plus className="h-4 w-4" />
+                      {language === 'ar' ? "وصفة طبية جديدة" : "New RX"}
+                    </Button>
+                  </div>
                   
                   <PatientTransactions 
                     workOrders={patientWorkOrders}
                     invoices={patientInvoices}
                     onEditWorkOrder={handleEditWorkOrder}
+                    onMarkAsPickedUp={handleMarkAsPickedUp}
                   />
                 </div>
               </div>
@@ -223,11 +268,11 @@ export const PatientSearch: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
-            <Button variant="outline" onClick={() => handleLanguageSelection('en')}>
+            <Button variant="outline" onClick={() => handleDirectPrint('en')}>
               <img src="/placeholdr.svg" alt="" className="w-5 h-5 mr-2" />
               English
             </Button>
-            <Button variant="outline" onClick={() => handleLanguageSelection('ar')}>
+            <Button variant="outline" onClick={() => handleDirectPrint('ar')}>
               <img src="/placeholdr.svg" alt="" className="w-5 h-5 ml-2" />
               العربية
             </Button>

@@ -28,19 +28,23 @@ import {
   FileText, 
   Eye, 
   Printer, 
-  Edit 
+  Edit,
+  Check,
+  Clock
 } from "lucide-react";
 
 interface PatientTransactionsProps {
   workOrders: WorkOrder[];
   invoices: Invoice[];
   onEditWorkOrder: (workOrder: WorkOrder) => void;
+  onMarkAsPickedUp: (workOrder: WorkOrder) => void;
 }
 
 export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   workOrders,
   invoices,
-  onEditWorkOrder
+  onEditWorkOrder,
+  onMarkAsPickedUp
 }) => {
   const { language, t } = useLanguageStore();
   const [activeTab, setActiveTab] = React.useState<"active" | "completed">("active");
@@ -54,18 +58,21 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     }
   };
   
+  const formatTime = (dateString?: string) => {
+    if (!dateString) return "";
+    try {
+      return format(parseISO(dateString), "hh:mm a", { locale: language === 'ar' ? ar : enUS });
+    } catch (error) {
+      return "";
+    }
+  };
+  
   const getActiveWorkOrders = (workOrders: WorkOrder[]) => {
-    return workOrders.filter(wo => {
-      const invoice = invoices.find(inv => inv.workOrderId === wo.id);
-      return !invoice || !invoice.isPaid;
-    });
+    return workOrders.filter(wo => !wo.status || wo.status !== 'completed');
   };
   
   const getCompletedWorkOrders = (workOrders: WorkOrder[]) => {
-    return workOrders.filter(wo => {
-      const invoice = invoices.find(inv => inv.workOrderId === wo.id);
-      return invoice && invoice.isPaid;
-    });
+    return workOrders.filter(wo => wo.status === 'completed');
   };
   
   return (
@@ -103,12 +110,13 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
               </h3>
               
               {getActiveWorkOrders(workOrders).length > 0 ? (
-                <div className="rounded-md border overflow-hidden shadow-sm">
+                <div className="rounded-md border overflow-hidden shadow-sm overflow-x-visible">
                   <Table>
                     <TableHeader className="bg-amber-50">
                       <TableRow>
                         <TableHead className="w-12">#</TableHead>
                         <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                        <TableHead>{language === 'ar' ? "رقم الفاتورة" : "Invoice No."}</TableHead>
                         <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
                         <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
                         <TableHead>{t('status')}</TableHead>
@@ -131,6 +139,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                           <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-amber-50/30' : ''}>
                             <TableCell className="font-medium">{index + 1}</TableCell>
                             <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
+                            <TableCell>{invoice ? `INV-${invoice.invoiceId.substring(0, 8)}` : '-'}</TableCell>
                             <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
                             <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
                             <TableCell>
@@ -146,6 +155,15 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                                 >
                                   <Edit className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
                                   {t('edit')}
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="border-green-200 hover:bg-green-50"
+                                  onClick={() => onMarkAsPickedUp(workOrder)}
+                                >
+                                  <Check className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
+                                  {language === 'ar' ? "تم الاستلام" : "Picked Up"}
                                 </Button>
                                 <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
                                   <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
@@ -183,7 +201,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
               </h3>
               
               {invoices.filter(inv => inv.isPaid).length > 0 ? (
-                <div className="rounded-md border overflow-hidden shadow-sm">
+                <div className="rounded-md border overflow-hidden shadow-sm overflow-x-visible">
                   <Table>
                     <TableHeader className="bg-green-50">
                       <TableRow>
@@ -246,38 +264,50 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
               </h3>
               
               {getCompletedWorkOrders(workOrders).length > 0 ? (
-                <div className="rounded-md border overflow-hidden shadow-sm">
+                <div className="rounded-md border overflow-hidden shadow-sm overflow-x-visible">
                   <Table>
                     <TableHeader className="bg-blue-50">
                       <TableRow>
                         <TableHead className="w-12">#</TableHead>
                         <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                        <TableHead>{language === 'ar' ? "رقم الفاتورة" : "Invoice No."}</TableHead>
                         <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
                         <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
+                        <TableHead>{language === 'ar' ? "وقت الاستلام" : "Pickup Time"}</TableHead>
                         <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {getCompletedWorkOrders(workOrders).map((workOrder, index) => (
-                        <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30' : ''}>
-                          <TableCell className="font-medium">{index + 1}</TableCell>
-                          <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
-                          <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
-                          <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
-                                <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
-                                {t('view')}
-                              </Button>
-                              <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
-                                <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
-                                {t('print')}
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {getCompletedWorkOrders(workOrders).map((workOrder, index) => {
+                        const invoice = invoices.find(inv => inv.workOrderId === workOrder.id);
+                        return (
+                          <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30' : ''}>
+                            <TableCell className="font-medium">{index + 1}</TableCell>
+                            <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
+                            <TableCell>{invoice ? `INV-${invoice.invoiceId.substring(0, 8)}` : '-'}</TableCell>
+                            <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
+                            <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              <div className="flex items-center">
+                                <Clock className="h-3.5 w-3.5 text-blue-500 mr-1.5" />
+                                {formatTime(workOrder.pickedUpAt)}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
+                                  <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                  {t('view')}
+                                </Button>
+                                <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
+                                  <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                  {t('print')}
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
