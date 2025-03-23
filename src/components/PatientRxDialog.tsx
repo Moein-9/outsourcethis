@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { RxData } from "@/store/patientStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -40,8 +39,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
   onSave,
   initialRx,
 }) => {
-  const { language } = useLanguageStore();
-  const isRtl = language === 'ar';
+  const { language, t } = useLanguageStore();
   
   const [rx, setRx] = useState<RxData>(initialRx || {
     sphereOD: "",
@@ -145,23 +143,23 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
         <div className="space-y-6 py-4">
           <Card className="border-indigo-200 shadow-md bg-gradient-to-r from-indigo-50/50 to-purple-50/50 overflow-hidden">
             <CardContent className="p-4">
-              {/* Compact RX Table Layout */}
+              {/* Compact RX Table Layout - Always kept in English format (LTR) */}
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
+                <table className="w-full border-collapse ltr">
                   <thead>
                     <tr>
-                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200"></th>
-                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200">SPH</th>
-                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200">CYL</th>
-                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200">AXIS</th>
-                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200">ADD</th>
-                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200">PD</th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200 text-left"></th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200 text-left">SPH</th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200 text-left">CYL</th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200 text-left">AXIS</th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200 text-left">ADD</th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200 text-left">PD</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Right Eye (OD) Row */}
+                    {/* Right Eye (OD) Row - Keeping consistent eye icon, translating text only */}
                     <tr>
-                      <td className="p-2 bg-indigo-50 text-indigo-800 font-medium border border-indigo-200">
+                      <td className="p-2 bg-indigo-50 text-indigo-800 font-medium border border-indigo-200 text-left">
                         <div className="flex items-center gap-1">
                           <Eye className="h-4 w-4 text-indigo-600" />
                           {language === 'ar' ? "العين اليمنى (OD)" : "Right Eye (OD)"}
@@ -237,11 +235,11 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                       </td>
                     </tr>
                     
-                    {/* Left Eye (OS) Row */}
+                    {/* Left Eye (OS) Row - Same eye icon, only translating text */}
                     <tr>
-                      <td className="p-2 bg-purple-50 text-purple-800 font-medium border border-purple-200">
+                      <td className="p-2 bg-purple-50 text-purple-800 font-medium border border-purple-200 text-left">
                         <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4 text-purple-600" />
+                          <Eye className="h-4 w-4 text-indigo-600" />
                           {language === 'ar' ? "العين اليسرى (OS)" : "Left Eye (OS)"}
                         </div>
                       </td>
@@ -318,7 +316,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                 </table>
               </div>
               
-              {/* Educational Information */}
+              {/* Educational Information - Text translates based on language */}
               <div className="mt-4 bg-amber-50 p-3 rounded-lg border border-amber-200 text-sm">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
