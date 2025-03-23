@@ -58,6 +58,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const { language, t } = useLanguageStore();
   const isRtl = language === 'ar';
   const dirClass = isRtl ? 'rtl' : 'ltr';
+  const textAlign = isRtl ? 'text-right' : 'text-left';
   
   const name = patientName || invoice.patientName;
   const phone = patientPhone || invoice.patientPhone;
@@ -95,11 +96,10 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         boxShadow: isPrintable ? 'none' : '0 1px 2px rgba(0,0,0,0.05)',
         fontFamily: isRtl ? 'Zain, sans-serif' : 'Yrsa, serif',
         pageBreakInside: 'avoid',
-        pageBreakAfter: 'always',
-        textAlign: 'center' // Center all content in the receipt
+        pageBreakAfter: 'always'
       }}
     >
-      <div className="border-b-2 border-black pb-1 mb-2">
+      <div className="border-b-2 border-black pb-1 mb-2 text-center">
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-10" />
         </div>
@@ -108,7 +108,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         <p className="text-xs font-medium">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      <div className="mb-2">
+      <div className="mb-2 text-center">
         <div className="inline-flex items-center justify-center gap-1 border-2 border-black px-2 py-0.5 rounded">
           <Receipt className="w-4 h-4" />
           <span className="font-bold text-base">{t("invoice")}</span>
@@ -116,7 +116,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       </div>
 
       <div className="mb-2 border-2 border-black rounded p-1.5">
-        <div className="mb-1 border-b border-gray-400 pb-1">
+        <div className="mb-1 border-b border-gray-400 pb-1 text-center">
           <div className="flex items-center justify-center gap-1">
             <User className="w-4 h-4" />
             <span className="font-bold text-base">
@@ -125,7 +125,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           </div>
         </div>
         
-        <div className="space-y-1">
+        <div className={`space-y-1 ${textAlign}`}>
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-1">
               <UserCircle2 className="w-3.5 h-3.5" />
@@ -147,7 +147,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       </div>
 
       <div className="mb-2 border-2 border-black rounded p-1.5">
-        <div className="mb-1 border-b border-gray-400 pb-1">
+        <div className="mb-1 border-b border-gray-400 pb-1 text-center">
           <div className="flex items-center justify-center gap-1">
             <Receipt className="w-4 h-4" />
             <span className="font-bold text-base">
@@ -166,50 +166,50 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded">
+        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded text-center">
           {isRtl ? "المنتجات | Products" : "Products | المنتجات"}
         </div>
         
         <div className="space-y-2 px-1">
           {isContactLens && contactLenses && contactLenses.length > 0 ? (
             contactLenses.map((lens, idx) => (
-              <div key={idx} className="p-1.5 border border-gray-300 rounded">
+              <div key={idx} className={`p-1.5 border border-gray-300 rounded ${textAlign}`}>
                 <div className="flex justify-between px-2 mb-1">
                   <div className="font-bold text-sm">{lens.brand} {lens.type}</div>
                   <span className="font-bold text-sm">{lens.price.toFixed(3)} KWD</span>
                 </div>
-                <div className="text-xs font-medium text-center">{lens.power}</div>
+                <div className="text-xs font-medium">{lens.power}</div>
               </div>
             ))
           ) : (
             <div className="space-y-2">
               {frameBrand && (
-                <div className="p-1.5 border border-gray-300 rounded">
+                <div className={`p-1.5 border border-gray-300 rounded ${textAlign}`}>
                   <div className="flex justify-between px-2 mb-1">
                     <div className="font-bold text-sm">{isRtl ? "الإطار | Frame" : "Frame | الإطار"}</div>
                     <span className="font-bold text-sm">{frameP.toFixed(3)} KWD</span>
                   </div>
-                  <div className="text-xs font-medium text-center">{frameBrand} {frameModel}</div>
+                  <div className="text-xs font-medium">{frameBrand} {frameModel}</div>
                 </div>
               )}
               
               {lens && (
-                <div className="p-1.5 border border-gray-300 rounded">
+                <div className={`p-1.5 border border-gray-300 rounded ${textAlign}`}>
                   <div className="flex justify-between px-2 mb-1">
                     <div className="font-bold text-sm">{isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}</div>
                     <span className="font-bold text-sm">{lensP.toFixed(3)} KWD</span>
                   </div>
-                  <div className="text-xs font-medium text-center">{lens}</div>
+                  <div className="text-xs font-medium">{lens}</div>
                 </div>
               )}
               
               {coat && (
-                <div className="p-1.5 border border-gray-300 rounded">
+                <div className={`p-1.5 border border-gray-300 rounded ${textAlign}`}>
                   <div className="flex justify-between px-2 mb-1">
                     <div className="font-bold text-sm">{isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}</div>
                     <span className="font-bold text-sm">{coatP.toFixed(3)} KWD</span>
                   </div>
-                  <div className="text-xs font-medium text-center">{coat}</div>
+                  <div className="text-xs font-medium">{coat}</div>
                 </div>
               )}
             </div>
@@ -218,7 +218,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       </div>
 
       <div className="mb-2 border-2 border-black rounded p-1.5">
-        <div className="space-y-1 px-2">
+        <div className={`space-y-1 px-2 ${textAlign}`}>
           <div className="flex justify-between text-sm">
             <span className="font-bold">{t("subtotal")}:</span>
             <span className="font-semibold">{(tot + disc).toFixed(3)} KWD</span>
@@ -237,13 +237,13 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded">
+        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded text-center">
           {isRtl ? "الدفع | Payment" : "Payment | الدفع"}
         </div>
         
         <div className="space-y-2">
           {invoice.payments?.map((payment, index) => (
-            <div key={index} className="p-1.5 border border-gray-300 rounded">
+            <div key={index} className={`p-1.5 border border-gray-300 rounded ${textAlign}`}>
               <div className="flex justify-between px-2 mb-1">
                 <div className="font-bold text-sm">
                   {format(new Date(payment.date), 'dd/MM/yyyy')}
@@ -257,7 +257,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               </div>
             </div>
           )) || (
-            <div className="p-1.5 border border-gray-300 rounded">
+            <div className={`p-1.5 border border-gray-300 rounded ${textAlign}`}>
               <div className="flex justify-between px-2 mb-1">
                 <div className="font-bold text-sm">
                   {format(new Date(invoice.createdAt), 'dd/MM/yyyy')}
@@ -273,12 +273,12 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           )}
           
           {rem > 0 ? (
-            <div className="flex justify-between font-bold mt-2 pt-1 border-t-2 border-black px-2">
+            <div className={`flex justify-between font-bold mt-2 pt-1 border-t-2 border-black px-2 ${textAlign}`}>
               <span className="text-base">{t("remaining")}:</span>
               <span className="text-base">{rem.toFixed(3)} KWD</span>
             </div>
           ) : (
-            <div className="flex items-center justify-center gap-1 mt-2 font-bold border-2 border-black py-1 rounded">
+            <div className="flex items-center justify-center gap-1 mt-2 font-bold border-2 border-black py-1 rounded text-center">
               <CheckCircle2 className="w-4 h-4" />
               <span className="text-sm">{t("paidInFull")}</span>
             </div>
@@ -286,7 +286,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      <div className="mt-3 pt-1 border-t-2 border-black">
+      <div className="mt-3 pt-1 border-t-2 border-black text-center">
         {isRtl ? (
           <p className="font-bold text-sm mb-0">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
         ) : (
@@ -329,7 +329,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               height: auto !important;
               min-height: 0 !important;
               max-height: none !important;
-              text-align: center !important;
             }
             
             .print-receipt * {
