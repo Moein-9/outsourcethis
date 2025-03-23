@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { format } from "date-fns";
@@ -288,7 +287,7 @@ export class CustomPrintService {
       // Format data for the work order
       const formattedWorkOrder = {
         invoiceId: workOrder.invoiceId || workOrder.id || "NEW",
-        workOrderId: workOrder.workOrderId || workOrder.id || "NEW",
+        workOrderId: workOrder.workOrderId || "WO" + (workOrder.invoiceId?.replace(/^IN/, '') || workOrder.id || "NEW"),
         patientName: patient?.name || workOrder.patientName || "",
         patientPhone: patient?.phone || workOrder.patientPhone || "",
         lensType: workOrder.lensType || "",
@@ -325,15 +324,20 @@ export class CustomPrintService {
         const remaining = total - deposit;
         const isPaid = remaining <= 0;
         
+        // Use Work Order number instead of invoice number
+        const orderNumber = formattedWorkOrder.workOrderId.startsWith("WO") 
+          ? formattedWorkOrder.workOrderId 
+          : "WO" + (formattedWorkOrder.invoiceId?.replace(/^IN/, '') || "NEW");
+        
         return `
           <div class="print-receipt ${dirClass}" ${dirAttr} style="width: 80mm; max-width: 80mm; margin: 0 auto; background-color: white; padding: 2mm; font-size: 12px; font-family: 'Cairo', sans-serif;">
             <div class="text-center border-b pb-1 mb-1">
               <div class="flex justify-center mb-1">
-                <svg width="100" height="40" viewBox="0 0 240 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <!-- SVG path for MoenLogo - simplified for print -->
-                  <path d="M42.5 48C42.5 53.799 40.1884 59.3704 36.0754 63.4835C31.9623 67.5965 26.3909 69.9081 20.592 69.9081C14.793 69.9081 9.22165 67.5965 5.10857 63.4835C0.995498 59.3704 -1.31613 53.799 -1.31613 48C-1.31613 42.2011 0.995498 36.6296 5.10857 32.5166C9.22165 28.4035 14.793 26.0919 20.592 26.0919C26.3909 26.0919 31.9623 28.4035 36.0754 32.5166C40.1884 36.6296 42.5 42.2011 42.5 48ZM87.3558 26.0919H100.174V69.9081H87.3558V60.6247C84.8012 64.2189 81.4159 67.0911 77.5181 69.0037C73.6203 70.9163 69.3196 71.8081 64.9833 71.5838C60.647 71.3595 56.4434 70.027 52.7599 67.7097C49.0764 65.3925 46.0303 62.1617 43.9384 58.3286C41.8464 54.4955 40.777 50.2024 40.824 45.8456C40.871 41.4888 42.0328 37.2235 44.2067 33.4382C46.3805 29.6528 49.4963 26.494 53.2309 24.2649C56.9655 22.0358 61.1998 20.7963 65.5461 20.6671C69.8924 20.5379 74.1926 21.523 77.9805 23.5194C81.7683 25.5159 85.0255 28.4611 87.4433 32.102L87.3558 26.0919Z" fill="#FEB727"/>
-                  <path d="M228.908 26.0919H240V69.9081H228.908V26.0919ZM137.485 26.0919H149.79V69.9081H137.485V26.0919ZM178.213 48.0001C178.192 44.4264 176.958 40.9962 174.71 38.32C172.462 35.6438 169.347 33.9119 165.95 33.4591C162.553 33.0063 159.133 33.8648 156.339 35.8685C153.544 37.8723 151.569 40.8707 150.752 44.3081C149.935 47.7455 150.327 51.3662 151.849 54.4956C153.372 57.625 155.925 60.0383 158.992 61.267C162.059 62.4957 165.425 62.4553 168.464 61.1539C171.503 59.8525 174.002 57.3848 175.457 54.2244L190.081 62.1826C186.95 66.5536 182.563 69.7915 177.508 71.4517C172.454 73.1119 167.003 73.1057 162.021 71.5339C157.039 69.9621 152.752 66.8408 149.724 62.7238C146.696 58.6068 144.975 53.6942 144.762 48.5842C144.548 43.4742 145.85 38.441 148.505 34.1067C151.161 29.7724 155.054 26.3472 159.701 24.2947C164.348 22.2422 169.508 21.661 174.499 22.6335C179.49 23.606 184.067 26.0825 187.638 29.7296L178.213 48.0001ZM204.358 58.2488L195.158 50.9338C195.158 50.9338 202.958 39.6001 215.108 39.6001V69.9081H204.358V58.2488Z" fill="#1E2F8C"/>
-                </svg>
+                <img 
+                  src="/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png" 
+                  alt="Moen Optician" 
+                  style="height: 24px; margin: 0 auto;"
+                />
               </div>
               <h2 class="font-bold text-lg mb-0">${storeInfo.name}</h2>
               <p class="text-xs font-medium mb-0">${storeInfo.address}</p>
@@ -346,7 +350,7 @@ export class CustomPrintService {
               </h3>
               <p class="text-xs mb-0">
                 ${isRtl ? "ORDER #: " : "رقم الطلب: "}
-                ${formattedWorkOrder.invoiceId}
+                ${orderNumber}
               </p>
               <p class="text-xs">
                 ${format(new Date(formattedWorkOrder.createdAt), 'yyyy-MM-dd HH:mm')}
@@ -594,16 +598,6 @@ export class CustomPrintService {
               <div class="border rounded p-1 min-h-16">
                 
               </div>
-            </div>
-
-            <div class="text-center border-t pt-1 text-xs">
-              <p class="font-bold text-sm mb-0">
-                ${isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
-              </p>
-              <p class="text-[9px] mt-0.5">
-                ${isRtl ? "هذا الإيصال يعتبر إثبات للطلب فقط وليس إيصال دفع" : 
-                        "This receipt is proof of order only and not a payment receipt"}
-              </p>
             </div>
           </div>
         `;

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -51,7 +50,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   
   const generateQRData = () => {
     return JSON.stringify({
-      invoiceId: invoice.invoiceId,
+      workOrderId: invoice.workOrderId || ("WO" + invoice.invoiceId?.replace(/^IN/, '')),
       patientName,
       total: invoice.total,
       date: invoice.createdAt,
@@ -67,7 +66,9 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   const remaining = invoice.total - amountPaid;
   const isPaid = remaining <= 0;
 
-  const invoiceNumber = invoice.invoiceId || invoice.workOrderId || "";
+  // Convert invoice number to work order number if needed
+  const workOrderNumber = invoice.workOrderId || 
+    (invoice.invoiceId ? "WO" + invoice.invoiceId.replace(/^IN/, '') : "");
 
   return (
     <div 
@@ -102,7 +103,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       <div style={{ marginBottom: "4px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{isRtl ? "رقم أمر العمل" : "Work Order Number"}:</span> 
-          <span>{invoiceNumber}</span>
+          <span>{workOrderNumber}</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{isRtl ? "التاريخ" : "Date"}:</span>
@@ -125,11 +126,11 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           {isRtl ? (
             <>
               <span>معلومات المريض</span>
-              <span style={{ fontSize: "10px" }}>patient Information</span>
+              <span style={{ fontSize: "10px" }}>Patient Information</span>
             </>
           ) : (
             <>
-              <span>patient Information</span>
+              <span>Patient Information</span>
               <span style={{ fontSize: "10px" }}>معلومات المريض</span>
             </>
           )}
@@ -250,7 +251,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             <>
               <span>product Details</span>
               <span style={{ fontSize: "10px" }}>تفاصيل المنتج</span>
-            </>
+              </>
           )}
         </h2>
         
@@ -442,11 +443,11 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             {isRtl ? (
               <>
                 <span>تأكيد الجودة</span>
-                <span style={{ fontSize: "10px" }}>quality Confirmation</span>
+                <span style={{ fontSize: "10px" }}>Quality Confirmation</span>
               </>
             ) : (
               <>
-                <span>quality Confirmation</span>
+                <span>Quality Confirmation</span>
                 <span style={{ fontSize: "10px" }}>تأكيد الجودة</span>
               </>
             )}
@@ -462,11 +463,11 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             {isRtl ? (
               <>
                 <span>توقيع الفني</span>
-                <span style={{ fontSize: "10px" }}>technician Signature</span>
+                <span style={{ fontSize: "10px" }}>Technician Signature</span>
               </>
             ) : (
               <>
-                <span>technician Signature</span>
+                <span>Technician Signature</span>
                 <span style={{ fontSize: "10px" }}>توقيع الفني</span>
               </>
             )}
@@ -481,11 +482,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       <div style={{ borderTop: "1px dashed #000", margin: "2px 0", paddingTop: "2px" }}></div>
       
       <div style={{ textAlign: "center", marginBottom: "1px", fontSize: "8px" }}>
-        {isRtl ? (
-          <p style={{ margin: "0" }}>شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
-        ) : (
-          <p style={{ margin: "0" }}>Thank you for choosing Moein Optical. We're always delighted to serve you!</p>
-        )}
         <div style={{ margin: "2px auto", width: "32px", height: "32px" }}>
           <QRCodeSVG value={generateQRData()} size={32} />
         </div>
@@ -503,13 +499,15 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
   const isRtl = language === 'ar';
   
   const { invoice, patientName, rx, frame, lensType, coating } = props;
-  const invoiceNumber = invoice.invoiceId || invoice.workOrderId || "";
+  // Use work order number instead of invoice number
+  const workOrderNumber = invoice.workOrderId || 
+    (invoice.invoiceId ? "WO" + invoice.invoiceId.replace(/^IN/, '') : "");
   
   const htmlContent = `
     <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; text-align: ${isRtl ? 'right' : 'left'}; font-size: 9px; line-height: 1.1;">
       <div style="text-align: center; margin-bottom: 3px;">
         <h1 style="font-size: 12px; font-weight: bold; margin: 1px 0;">${t("workOrder")}</h1>
-        <p style="font-size: 10px; margin: 1px 0;">${invoiceNumber}</p>
+        <p style="font-size: 10px; margin: 1px 0;">${workOrderNumber}</p>
         <p style="font-size: 8px; margin: 1px 0;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
       </div>
       
@@ -581,10 +579,6 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
       </div>
       
       <div style="text-align: center; margin-top: 2px; font-size: 7px;">
-        ${isRtl 
-          ? '<p style="margin: 0;">شكراً لاختياركم نظارات المعين</p>' 
-          : '<p style="margin: 0;">Thank you for choosing Moein Optical</p>'
-        }
       </div>
     </div>
   `;
