@@ -113,74 +113,76 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
           <TabsContent value="active">
             {activeWorkOrders.length > 0 ? (
               <ScrollArea className="max-h-[400px]">
-                <Table>
-                  <TableHeader className="bg-primary/5 sticky top-0">
-                    <TableRow>
-                      <TableHead>{t("date")}</TableHead>
-                      <TableHead>{t("details")}</TableHead>
-                      <TableHead>{t("status")}</TableHead>
-                      <TableHead className="text-right">{t("actions")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {activeWorkOrders.map((workOrder) => {
-                      const relatedInvoice = findInvoiceForWorkOrder(workOrder.id);
-                      return (
-                        <TableRow key={workOrder.id}>
-                          <TableCell className="whitespace-nowrap">
-                            {formatDate(workOrder.createdAt)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <div className="font-medium flex items-center gap-1.5">
-                                <Clock className="h-3.5 w-3.5 text-orange-500" />
-                                {t("workOrderNumber")}: {workOrder.id}
-                              </div>
-                              {relatedInvoice && (
-                                <div className="text-sm flex items-center gap-1.5">
-                                  <Receipt className="h-3.5 w-3.5 text-green-500" />
-                                  {t("invoiceNumber")}: {relatedInvoice.invoiceId}
+                <div className="w-full">
+                  <Table>
+                    <TableHeader className="bg-primary/5 sticky top-0">
+                      <TableRow>
+                        <TableHead>{t("date")}</TableHead>
+                        <TableHead>{t("details")}</TableHead>
+                        <TableHead>{t("status")}</TableHead>
+                        <TableHead className="text-right">{t("actions")}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {activeWorkOrders.map((workOrder) => {
+                        const relatedInvoice = findInvoiceForWorkOrder(workOrder.id);
+                        return (
+                          <TableRow key={workOrder.id}>
+                            <TableCell className="whitespace-nowrap">
+                              {formatDate(workOrder.createdAt)}
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="font-medium flex items-center gap-1.5">
+                                  <Clock className="h-3.5 w-3.5 text-orange-500" />
+                                  {t("workOrderNumber")}: {workOrder.id}
                                 </div>
-                              )}
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {workOrder.lensType && (
-                                  <span className="inline-block mr-2">{workOrder.lensType.name}</span>
+                                {relatedInvoice && (
+                                  <div className="text-sm flex items-center gap-1.5">
+                                    <Receipt className="h-3.5 w-3.5 text-green-500" />
+                                    {t("invoiceNumber")}: {relatedInvoice.invoiceId}
+                                  </div>
                                 )}
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {workOrder.lensType && (
+                                    <span className="inline-block mr-2">{workOrder.lensType.name}</span>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200">
-                              {t("inProgress")}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="h-8 border-blue-200 hover:bg-blue-50 text-blue-700"
-                                onClick={() => onEditWorkOrder(workOrder)}
-                              >
-                                <Edit className="h-3.5 w-3.5 mr-1" />
-                                {t("edit")}
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="h-8 border-green-200 hover:bg-green-50 text-green-700"
-                                onClick={() => onMarkAsPickedUp(workOrder)}
-                              >
-                                <Check className="h-3.5 w-3.5 mr-1" />
-                                {t("customerPickedUp")}
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200">
+                                {t("inProgress")}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8 border-blue-200 hover:bg-blue-50 text-blue-700"
+                                  onClick={() => onEditWorkOrder(workOrder)}
+                                >
+                                  <Edit className="h-3.5 w-3.5 mr-1" />
+                                  {t("edit")}
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8 border-green-200 hover:bg-green-50 text-green-700"
+                                  onClick={() => onMarkAsPickedUp(workOrder)}
+                                >
+                                  <Check className="h-3.5 w-3.5 mr-1" />
+                                  {t("customerPickedUp")}
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
               </ScrollArea>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-muted-foreground text-center">
@@ -195,63 +197,65 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
           <TabsContent value="completed">
             {completedWorkOrders.length > 0 ? (
               <ScrollArea className="max-h-[400px]">
-                <Table>
-                  <TableHeader className="bg-primary/5 sticky top-0">
-                    <TableRow>
-                      <TableHead>{t("date")}</TableHead>
-                      <TableHead>{t("details")}</TableHead>
-                      <TableHead>{t("pickedUpAt")}</TableHead>
-                      <TableHead className="text-right">{t("actions")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {completedWorkOrders.map((workOrder) => {
-                      const relatedInvoice = findInvoiceForWorkOrder(workOrder.id);
-                      return (
-                        <TableRow key={workOrder.id}>
-                          <TableCell className="whitespace-nowrap">
-                            {formatDate(workOrder.createdAt)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <div className="font-medium flex items-center gap-1.5">
-                                <Clock className="h-3.5 w-3.5 text-green-500" />
-                                {t("workOrderNumber")}: {workOrder.id}
-                              </div>
-                              {relatedInvoice && (
-                                <div className="text-sm flex items-center gap-1.5">
-                                  <Receipt className="h-3.5 w-3.5 text-green-500" />
-                                  {t("invoiceNumber")}: {relatedInvoice.invoiceId}
+                <div className="w-full">
+                  <Table>
+                    <TableHeader className="bg-primary/5 sticky top-0">
+                      <TableRow>
+                        <TableHead>{t("date")}</TableHead>
+                        <TableHead>{t("details")}</TableHead>
+                        <TableHead>{t("pickedUpAt")}</TableHead>
+                        <TableHead className="text-right">{t("actions")}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {completedWorkOrders.map((workOrder) => {
+                        const relatedInvoice = findInvoiceForWorkOrder(workOrder.id);
+                        return (
+                          <TableRow key={workOrder.id}>
+                            <TableCell className="whitespace-nowrap">
+                              {formatDate(workOrder.createdAt)}
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="font-medium flex items-center gap-1.5">
+                                  <Clock className="h-3.5 w-3.5 text-green-500" />
+                                  {t("workOrderNumber")}: {workOrder.id}
                                 </div>
-                              )}
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {workOrder.lensType && (
-                                  <span className="inline-block mr-2">{workOrder.lensType.name}</span>
+                                {relatedInvoice && (
+                                  <div className="text-sm flex items-center gap-1.5">
+                                    <Receipt className="h-3.5 w-3.5 text-green-500" />
+                                    {t("invoiceNumber")}: {relatedInvoice.invoiceId}
+                                  </div>
                                 )}
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {workOrder.lensType && (
+                                    <span className="inline-block mr-2">{workOrder.lensType.name}</span>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-100 border-green-200">
-                              {formatDate(workOrder.pickedUpAt)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-8"
-                              onClick={() => onEditWorkOrder(workOrder)}
-                            >
-                              <Eye className="h-3.5 w-3.5 mr-1" />
-                              {t("view")}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-100 border-green-200">
+                                {formatDate(workOrder.pickedUpAt)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="h-8"
+                                onClick={() => onEditWorkOrder(workOrder)}
+                              >
+                                <Eye className="h-3.5 w-3.5 mr-1" />
+                                {t("view")}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
               </ScrollArea>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-muted-foreground text-center">

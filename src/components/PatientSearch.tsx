@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatientStore, Patient } from "@/store/patientStore";
@@ -168,6 +167,10 @@ export const PatientSearch: React.FC = () => {
       rx: selectedPatient.rx,
       forcedLanguage: langToPrint
     });
+  };
+  
+  const handlePrintRequest = () => {
+    setIsLanguageDialogOpen(true);
   };
   
   return (
