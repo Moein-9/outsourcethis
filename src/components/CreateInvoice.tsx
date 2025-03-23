@@ -279,8 +279,12 @@ const CreateInvoice: React.FC = () => {
   };
   
   const handleContactLensSelection = (selection: ContactLensSelection) => {
-    if (selection) {
-      setContactLensRx(selection);
+    if (selection.items) {
+      setContactLensItems(selection.items);
+    }
+    
+    if (selection.rxData) {
+      setContactLensRx(selection.rxData);
     }
   };
   
@@ -991,8 +995,8 @@ const CreateInvoice: React.FC = () => {
               </div>
               
               <ContactLensSelector
-                onSelectionChange={handleContactLensSelection}
-                rxData={contactLensRx}
+                onSelect={handleContactLensSelection}
+                initialRxData={contactLensRx}
               />
             </div>
           )}
@@ -1307,4 +1311,3 @@ const CreateInvoice: React.FC = () => {
 };
 
 export default CreateInvoice;
-
