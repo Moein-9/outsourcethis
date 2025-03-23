@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { MoenLogo, storeInfo } from "@/assets/logo";
@@ -109,7 +108,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base border-y">
+        <div className="text-center bg-black/75 text-white py-0.5 mb-1 font-bold text-base border-y">
           {isRtl 
             ? "معلومات المريض | Patient Information" 
             : "Patient Information | معلومات المريض"}
@@ -132,7 +131,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
 
       {rx && (
         <div className="mb-2">
-          <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
+          <div className="text-center bg-black/75 text-white py-0.5 mb-1 font-bold text-base">
             {isRtl 
               ? "تفاصيل الوصفة الطبية | Prescription Details" 
               : "Prescription Details | تفاصيل الوصفة الطبية"}
@@ -172,7 +171,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       )}
 
       <div className="mb-2">
-        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
+        <div className="text-center bg-black/75 text-white py-0.5 mb-1 font-bold text-base">
           {isRtl 
             ? "تفاصيل المنتج | Product Details" 
             : "Product Details | تفاصيل المنتج"}
@@ -260,7 +259,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
+        <div className="text-center bg-black/75 text-white py-0.5 mb-1 font-bold text-base">
           {isRtl 
             ? "معلومات الدفع | Payment Information" 
             : "Payment Information | معلومات الدفع"}
@@ -316,7 +315,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
+        <div className="text-center bg-black/75 text-white py-0.5 mb-1 font-bold text-base">
           {isRtl 
             ? "تأكيد الجودة | Quality Confirmation" 
             : "Quality Confirmation | تأكيد الجودة"}
@@ -340,7 +339,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
+        <div className="text-center bg-black/75 text-white py-0.5 mb-1 font-bold text-base">
           {isRtl 
             ? "ملاحظات | Notes" 
             : "Notes | ملاحظات"}
