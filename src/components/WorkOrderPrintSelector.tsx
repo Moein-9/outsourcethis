@@ -127,7 +127,10 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
         setTimeout(() => {
           setPrintingInProgress(false);
           onOpenChange(false);
-          toast.success(t("printingCompleted"));
+          toast({
+            title: t("success"),
+            description: t("printingCompleted"),
+          });
         }, 1000);
       } else if (selectedFormat === "receipt") {
         // Use the existing receipt printer
@@ -146,7 +149,10 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
         setTimeout(() => {
           setPrintingInProgress(false);
           onOpenChange(false);
-          toast.success(t("printingCompleted"));
+          toast({
+            title: t("success"),
+            description: t("printingCompleted"),
+          });
         }, 1000);
       } else {
         // Use A4 format
@@ -248,13 +254,20 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
         PrintService.printHtml(htmlContent, 'a4', () => {
           setPrintingInProgress(false);
           onOpenChange(false);
-          toast.success(t("printingCompleted"));
+          toast({
+            title: t("success"),
+            description: t("printingCompleted"),
+          });
         });
       }
     } catch (error) {
       console.error('Printing error:', error);
       setPrintingInProgress(false);
-      toast.error(t("printingFailed"));
+      toast({
+        title: t("error"),
+        description: t("printingFailed"),
+        variant: "destructive",
+      });
     }
   };
   
