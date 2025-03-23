@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -28,7 +29,13 @@ interface PatientWithMeta extends Patient {
 
 export const PatientSearch: React.FC = () => {
   const { patients, searchPatients } = usePatientStore();
-  const { invoices, workOrders, getInvoicesByPatientId, getWorkOrdersByPatientId } = useInvoiceStore();
+  const { 
+    invoices, 
+    workOrders, 
+    getInvoicesByPatientId, 
+    getWorkOrdersByPatientId,
+    updateWorkOrder 
+  } = useInvoiceStore();
   const { language } = useLanguageStore();
   
   const [searchResults, setSearchResults] = useState<PatientWithMeta[]>([]);
@@ -42,6 +49,21 @@ export const PatientSearch: React.FC = () => {
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   const [editWorkOrderDialogOpen, setEditWorkOrderDialogOpen] = useState(false);
   const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder | null>(null);
+  
+  // Effect to refresh data when profile is open
+  useEffect(() => {
+    if (isProfileOpen && selectedPatient) {
+      refreshPatientData(selectedPatient.patientId);
+    }
+  }, [isProfileOpen, invoices, workOrders]);
+  
+  const refreshPatientData = (patientId: string) => {
+    const updatedInvoices = getInvoicesByPatientId(patientId);
+    const updatedWorkOrders = getWorkOrdersByPatientId(patientId);
+    
+    setPatientInvoices(updatedInvoices);
+    setPatientWorkOrders(updatedWorkOrders);
+  };
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
@@ -83,6 +105,7 @@ export const PatientSearch: React.FC = () => {
   const handlePatientSelect = (patient: PatientWithMeta) => {
     setSelectedPatient(patient);
     
+    // Fetch fresh data from the store
     const patientInvoices = getInvoicesByPatientId(patient.patientId);
     const patientWorkOrders = getWorkOrdersByPatientId(patient.patientId);
     
@@ -98,7 +121,21 @@ export const PatientSearch: React.FC = () => {
   };
   
   const handleSaveWorkOrder = (updatedWorkOrder: WorkOrder) => {
-    toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
+    try {
+      // Update the work order in the store
+      updateWorkOrder(updatedWorkOrder);
+      
+      // Refresh patient data to see the changes
+      if (selectedPatient) {
+        refreshPatientData(selectedPatient.patientId);
+      }
+      
+      toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
+    } catch (error) {
+      console.error("Error updating work order:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء تحديث أمر العمل" : "Error updating work order");
+    }
+    
     setEditWorkOrderDialogOpen(false);
   };
   
