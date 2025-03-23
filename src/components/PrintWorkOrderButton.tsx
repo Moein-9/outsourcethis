@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -5,7 +6,6 @@ import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
-import { CustomPrintService } from "@/utils/CustomPrintService";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -29,7 +29,6 @@ interface PrintWorkOrderButtonProps {
   thermalOnly?: boolean;
   isNewInvoice?: boolean;
   onInvoiceSaved?: (invoiceId: string) => void;
-  showButtonLabel?: boolean;
 }
 
 export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -48,7 +47,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   thermalOnly = false,
   isNewInvoice = false,
   onInvoiceSaved,
-  showButtonLabel = true,
 }) => {
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
@@ -113,41 +111,12 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   };
   
   const showPrintSelector = (invoiceToUse: Invoice) => {
-    // Create a temporary container for the work order receipt
-    const tempContainer = document.createElement('div');
-    tempContainer.id = 'work-order-receipt';
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.top = '-9999px';
-    tempContainer.style.left = '-9999px';
-    document.body.appendChild(tempContainer);
-
-    // Render the work order content
-    const workOrderData = {
-      invoice: invoiceToUse,
-      patientName: patientName || invoiceToUse.patientName,
-      patientPhone: patientPhone || invoiceToUse.patientPhone,
-      rx,
-      lensType,
-      coating,
-      frame,
-      contactLenses,
-      contactLensRx,
-      thermalOnly
-    };
-
-    // If direct print is requested, print without showing selector
-    if (thermalOnly) {
-      // Directly print using CustomPrintService
-      CustomPrintService.printWorkOrder(workOrderData, invoiceToUse);
-      return;
-    }
-
-    // Otherwise, show the print selector dialog
+    // Create the print selector with proper styling for printing
     const selectorContainer = document.createElement('div');
     selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars
     document.body.appendChild(selectorContainer);
     
-    return (
+    const selector = (
       <WorkOrderPrintSelector
         invoice={invoiceToUse}
         patientName={patientName}
@@ -161,6 +130,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         thermalOnly={thermalOnly}
       />
     );
+    
+    return selector;
   };
 
   return (
@@ -173,7 +144,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         disabled={loading}
       >
         <Printer className="h-4 w-4 mr-1" /> 
-        {loading ? t("saving") : (showButtonLabel ? t("printWorkOrder") : "")}
+        {loading ? t("saving") : t("printWorkOrder")}
       </Button>
       
       {!isNewInvoice && (
@@ -190,7 +161,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           thermalOnly={thermalOnly}
           trigger={
             <Button variant={variant} size={size} className={className}>
-              <Printer className="h-4 w-4 mr-1" /> {showButtonLabel ? t("printWorkOrder") : ""}
+              <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
             </Button>
           }
         />

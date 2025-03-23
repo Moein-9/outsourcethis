@@ -1,20 +1,12 @@
 
 import { toast } from "@/hooks/use-toast";
 import { useLanguageStore } from "@/store/languageStore";
-import { printWorkOrderReceipt } from "@/components/WorkOrderReceiptPrint";
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
     console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
     
     try {
-      // First approach: Try to print via printWorkOrderReceipt function
-      if (typeof printWorkOrderReceipt === 'function') {
-        printWorkOrderReceipt(workOrder);
-        return;
-      }
-      
-      // Backup approach: Create and print manually
       // Create a new window for printing
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
@@ -143,30 +135,15 @@ export class CustomPrintService {
             printWindow.document.close();
             printWindow.focus();
             printWindow.print();
+            
+            // Close the window after printing (or allow user to close it)
+            // printWindow.close();
           }, 500);
-        } else {
-          printWindow.document.write("<p>Unable to locate content container. Please try again.</p>");
-          printWindow.document.close();
         }
       } else {
-        // Try another approach - import required components or functions if needed
-        printWindow.document.write(`
-          <div style="padding: 20px; text-align: center;">
-            <h2>Loading work order content...</h2>
-            <p>If printing doesn't start automatically, please use the browser print button.</p>
-          </div>
-        `);
-        
-        // Modified: Don't try to call printWorkOrderReceipt again here
-        // Instead, display a more helpful message and close the window
-        if (workOrder.invoice) {
-          printWindow.document.write("<p>Work order content is ready but cannot be automatically printed.</p>");
-          printWindow.document.write("<p>Please use your browser's print function (Ctrl+P / Cmd+P).</p>");
-          printWindow.document.close();
-        } else {
-          printWindow.document.write("<p>Work order data incomplete. Please try again.</p>");
-          printWindow.document.close();
-        }
+        // Handle the case where the element doesn't exist
+        printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
+        printWindow.document.close();
       }
     } catch (error) {
       console.error("Error printing work order:", error);

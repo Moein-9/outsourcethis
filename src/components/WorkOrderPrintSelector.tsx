@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +15,6 @@ import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "sonner";
 import { PrintService } from "@/utils/PrintService";
 import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
-import { CustomPrintService } from "@/utils/CustomPrintService";
 
 interface WorkOrderPrintSelectorProps {
   invoice: Invoice;
@@ -36,7 +34,6 @@ interface WorkOrderPrintSelectorProps {
   contactLensRx?: any;
   trigger?: React.ReactNode;
   thermalOnly?: boolean;
-  onPrintComplete?: () => void;
 }
 
 export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
@@ -50,8 +47,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
-  thermalOnly = false,
-  onPrintComplete
+  thermalOnly = false
 }) => {
   const { t, language } = useLanguageStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -59,53 +55,11 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   const [printingInProgress, setPrintingInProgress] = useState(false);
   const isRtl = language === 'ar';
   
-  // Create a reference to the print data
-  const printData = {
-    invoice,
-    patientName,
-    patientPhone,
-    rx,
-    lensType,
-    coating,
-    frame,
-    contactLenses,
-    contactLensRx
-  };
-  
-  // If thermalOnly is true, print automatically on mount
-  useEffect(() => {
-    if (thermalOnly && invoice?.invoiceId) {
-      setTimeout(() => {
-        handleDirectPrint();
-      }, 300);
-    }
-  }, [thermalOnly, invoice?.invoiceId]);
-  
   const handleTriggerClick = () => {
     if (thermalOnly) {
-      handleDirectPrint();
+      handlePrint();
     } else {
       setIsDialogOpen(true);
-    }
-  };
-  
-  const handleDirectPrint = () => {
-    setPrintingInProgress(true);
-    
-    try {
-      CustomPrintService.printWorkOrder(printData, invoice);
-      
-      setTimeout(() => {
-        setPrintingInProgress(false);
-        if (onPrintComplete) {
-          onPrintComplete();
-        }
-        toast.success(t("printingCompleted"));
-      }, 1000);
-    } catch (error) {
-      console.error('Direct printing error:', error);
-      setPrintingInProgress(false);
-      toast.error(t("printingFailed"));
     }
   };
   
@@ -116,14 +70,21 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     
     try {
       if (selectedFormat === "receipt") {
-        printWorkOrderReceipt(printData);
+        printWorkOrderReceipt({
+          invoice,
+          patientName,
+          patientPhone,
+          rx,
+          lensType,
+          coating,
+          frame,
+          contactLenses,
+          contactLensRx
+        });
         
         setTimeout(() => {
           setPrintingInProgress(false);
           setIsDialogOpen(false);
-          if (onPrintComplete) {
-            onPrintComplete();
-          }
           toast.success(t("printingCompleted"));
         }, 1000);
       } else {
@@ -225,9 +186,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
         PrintService.printHtml(htmlContent, 'a4', () => {
           setPrintingInProgress(false);
           setIsDialogOpen(false);
-          if (onPrintComplete) {
-            onPrintComplete();
-          }
           toast.success(t("printingCompleted"));
         });
       }
