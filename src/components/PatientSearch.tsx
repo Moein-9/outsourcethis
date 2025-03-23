@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore, Patient, PatientNote } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -783,11 +782,7 @@ export const PatientSearch: React.FC = () => {
               
               {selectedPatient && (
                 <div className="mt-6">
-                  <PatientNotes 
-                    patientId={selectedPatient.patientId}
-                    patientNotes={selectedPatient.patientNotes || []}
-                    onAddNote={handleAddNote}
-                  />
+                  <PatientNotes patientId={selectedPatient.patientId} />
                 </div>
               )}
             </>
