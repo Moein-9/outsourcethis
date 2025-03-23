@@ -32,6 +32,7 @@ interface WorkOrderPrintSelectorProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
+  notes?: string;
   trigger?: React.ReactNode;
   thermalOnly?: boolean;
 }
@@ -46,6 +47,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   frame,
   contactLenses,
   contactLensRx,
+  notes,
   trigger,
   thermalOnly = false
 }) => {
@@ -79,7 +81,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           coating,
           frame,
           contactLenses,
-          contactLensRx
+          contactLensRx,
+          notes
         });
         
         setTimeout(() => {
@@ -88,6 +91,13 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           toast.success(t("printingCompleted"));
         }, 1000);
       } else {
+        const notesSection = notes ? `
+        <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+          <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("notes")}</h2>
+          <p>${notes.replace(/\n/g, '<br>')}</p>
+        </div>
+        ` : '';
+        
         const a4Content = `
           <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
             <div style="text-align: center; margin-bottom: 10mm;">
@@ -157,6 +167,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
               ${coating ? `<p><strong>${t("coatingPrice")}:</strong> ${invoice.coatingPrice.toFixed(3)} ${t("currency")}</p>` : ''}
             </div>
             ` : ''}
+            
+            ${notesSection}
             
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
               <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("paymentInformation")}</h2>
