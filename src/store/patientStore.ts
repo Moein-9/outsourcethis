@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -175,7 +174,6 @@ export const usePatientStore = create<PatientState>()(
         });
       },
       
-      // New method for updating contact lens RX
       updateContactLensRx: (patientId, newContactLensRx) => {
         set((state) => {
           const patient = state.patients.find(p => p.patientId === patientId);
