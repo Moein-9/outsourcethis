@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout';
+import { Layout } from './components/Layout';
 import Index from './pages/Index';
 import ReportPage from './pages/ReportPage';
 import NotFound from './pages/NotFound';

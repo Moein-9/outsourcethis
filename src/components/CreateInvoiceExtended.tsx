@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { CreateInvoice } from "@/components/CreateInvoice";
+import CreateInvoice from "@/components/CreateInvoice";
 import { InvoiceWorkOrderActions } from "@/components/InvoiceWorkOrderActions";
 
 export const CreateInvoiceExtended: React.FC = () => {

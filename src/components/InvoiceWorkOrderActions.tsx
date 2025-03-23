@@ -9,7 +9,8 @@ import {
   DialogTrigger,
   DialogTitle,
   DialogDescription,
-  DialogFooter
+  DialogFooter,
+  DialogHeader
 } from "@/components/ui/dialog";
 import { ReceiptInvoice } from "./ReceiptInvoice";
 import { CustomPrintWorkOrderButton } from "./CustomPrintWorkOrderButton";
