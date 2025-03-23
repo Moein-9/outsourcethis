@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -37,10 +38,6 @@ export interface Invoice {
   isPaid: boolean;
   authNumber?: string; // Added for authorization numbers
   workOrderId?: string; // Reference to the work order
-  
-  // Add missing properties that are being used
-  rx?: any; // Prescription data
-  contactLenses?: any[]; // Contact lenses
 }
 
 // Define WorkOrder interface

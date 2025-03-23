@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { useInvoiceStore } from "@/store/invoiceStore";
 import { usePatientStore } from "@/store/patientStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 interface EditWorkOrderDialogProps {
   open: boolean;
@@ -25,14 +24,12 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   const { t, language } = useLanguageStore();
   const { updateInvoice } = useInvoiceStore();
   const { editWorkOrder } = usePatientStore();
-  const { toast } = useToast();
   const isRtl = language === 'ar';
   
   const [editData, setEditData] = useState({
     frameBrand: workOrder.frameBrand || '',
     frameModel: workOrder.frameModel || '',
     frameColor: workOrder.frameColor || '',
-    frameSize: workOrder.frameSize || '',
     framePrice: workOrder.framePrice || 0,
     lensType: workOrder.lensType || '',
     lensPrice: workOrder.lensPrice || 0,
@@ -60,22 +57,16 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   
   const handleSave = () => {
     try {
-      // Update the invoice in the store
-      const updatedInvoice = {
+      updateInvoice({
         ...workOrder,
         ...editData
-      };
+      });
       
-      updateInvoice(updatedInvoice);
-      
-      // Update any patient-related data if needed
-      if (editWorkOrder) {
-        editWorkOrder({
-          patientId,
-          workOrderId: workOrder.invoiceId || workOrder.workOrderId,
-          updatedData: editData
-        });
-      }
+      editWorkOrder({
+        patientId,
+        workOrderId: workOrder.invoiceId || workOrder.workOrderId,
+        updatedData: editData
+      });
       
       toast({
         title: t("success"),
@@ -95,12 +86,12 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${isRtl ? 'rtl' : 'ltr'} sm:max-w-[525px]`}>
+      <DialogContent className={`${isRtl ? 'rtl' : 'ltr'} sm:max-w-[425px]`}>
         <DialogHeader>
           <DialogTitle>{t("editWorkOrder")}</DialogTitle>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+        <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="frameBrand" className="text-right">{t("frameBrand")}</Label>
             <Input
@@ -129,17 +120,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
               id="frameColor"
               name="frameColor"
               value={editData.frameColor}
-              onChange={handleChange}
-              className="col-span-3"
-            />
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="frameSize" className="text-right">{t("frameSize")}</Label>
-            <Input
-              id="frameSize"
-              name="frameSize"
-              value={editData.frameSize}
               onChange={handleChange}
               className="col-span-3"
             />
