@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/card";
 import {
   Eye,
-  EyeOff,
   AlertCircle,
 } from "lucide-react";
 import {
@@ -138,42 +137,42 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-blue-700">
+          <DialogTitle className="text-xl font-bold text-indigo-700">
             {language === 'ar' ? "وصفة طبية جديدة" : "New Prescription"}
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
-          <Card className="border-blue-200 shadow-md bg-gradient-to-r from-blue-50/50 to-indigo-50/50 overflow-hidden">
+          <Card className="border-indigo-200 shadow-md bg-gradient-to-r from-indigo-50/50 to-purple-50/50 overflow-hidden">
             <CardContent className="p-4">
               {/* Compact RX Table Layout */}
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
-                      <th className="p-2 bg-blue-100 text-blue-700 font-semibold border border-blue-200"></th>
-                      <th className="p-2 bg-blue-100 text-blue-700 font-semibold border border-blue-200">SPH</th>
-                      <th className="p-2 bg-blue-100 text-blue-700 font-semibold border border-blue-200">CYL</th>
-                      <th className="p-2 bg-blue-100 text-blue-700 font-semibold border border-blue-200">AXIS</th>
-                      <th className="p-2 bg-blue-100 text-blue-700 font-semibold border border-blue-200">ADD</th>
-                      <th className="p-2 bg-blue-100 text-blue-700 font-semibold border border-blue-200">PD</th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200"></th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200">SPH</th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200">CYL</th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200">AXIS</th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200">ADD</th>
+                      <th className="p-2 bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200">PD</th>
                     </tr>
                   </thead>
                   <tbody>
                     {/* Right Eye (OD) Row */}
                     <tr>
-                      <td className="p-2 bg-blue-50 text-blue-800 font-medium border border-blue-200">
+                      <td className="p-2 bg-indigo-50 text-indigo-800 font-medium border border-indigo-200">
                         <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4 text-blue-600" />
+                          <Eye className="h-4 w-4 text-indigo-600" />
                           {language === 'ar' ? "العين اليمنى (OD)" : "Right Eye (OD)"}
                         </div>
                       </td>
-                      <td className="p-1 border border-blue-200">
+                      <td className="p-1 border border-indigo-200">
                         <Select
                           value={rx.sphereOD || "none"}
                           onValueChange={(value) => handleChange("sphereOD", value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-blue-300">
+                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-indigo-300">
                             <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
@@ -182,12 +181,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="p-1 border border-blue-200">
+                      <td className="p-1 border border-indigo-200">
                         <Select
                           value={rx.cylOD || "none"}
                           onValueChange={(value) => handleChange("cylOD", value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-blue-300">
+                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-indigo-300">
                             <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
@@ -196,12 +195,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="p-1 border border-blue-200">
+                      <td className="p-1 border border-indigo-200">
                         <Select
                           value={rx.axisOD || "none"}
                           onValueChange={(value) => handleChange("axisOD", value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-blue-300">
+                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-indigo-300">
                             <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
@@ -210,12 +209,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="p-1 border border-blue-200">
+                      <td className="p-1 border border-indigo-200">
                         <Select
                           value={rx.addOD || "none"}
                           onValueChange={(value) => handleChange("addOD", value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-blue-300">
+                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-indigo-300">
                             <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
@@ -223,12 +222,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="p-1 border border-blue-200">
+                      <td className="p-1 border border-indigo-200">
                         <Select
                           value={rx.pdRight || "none"}
                           onValueChange={(value) => handleChange("pdRight", value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-blue-300">
+                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-indigo-300">
                             <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
@@ -240,18 +239,18 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                     
                     {/* Left Eye (OS) Row */}
                     <tr>
-                      <td className="p-2 bg-rose-50 text-rose-800 font-medium border border-rose-200">
+                      <td className="p-2 bg-purple-50 text-purple-800 font-medium border border-purple-200">
                         <div className="flex items-center gap-1">
-                          <EyeOff className="h-4 w-4 text-rose-600" />
+                          <Eye className="h-4 w-4 text-purple-600" />
                           {language === 'ar' ? "العين اليسرى (OS)" : "Left Eye (OS)"}
                         </div>
                       </td>
-                      <td className="p-1 border border-rose-200">
+                      <td className="p-1 border border-purple-200">
                         <Select
                           value={rx.sphereOS || "none"}
                           onValueChange={(value) => handleChange("sphereOS", value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-rose-300">
+                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-purple-300">
                             <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
@@ -260,12 +259,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="p-1 border border-rose-200">
+                      <td className="p-1 border border-purple-200">
                         <Select
                           value={rx.cylOS || "none"}
                           onValueChange={(value) => handleChange("cylOS", value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-rose-300">
+                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-purple-300">
                             <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
@@ -274,12 +273,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="p-1 border border-rose-200">
+                      <td className="p-1 border border-purple-200">
                         <Select
                           value={rx.axisOS || "none"}
                           onValueChange={(value) => handleChange("axisOS", value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-rose-300">
+                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-purple-300">
                             <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
@@ -288,12 +287,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="p-1 border border-rose-200">
+                      <td className="p-1 border border-purple-200">
                         <Select
                           value={rx.addOS || "none"}
                           onValueChange={(value) => handleChange("addOS", value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-rose-300">
+                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-purple-300">
                             <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
@@ -301,12 +300,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="p-1 border border-rose-200">
+                      <td className="p-1 border border-purple-200">
                         <Select
                           value={rx.pdLeft || "none"}
                           onValueChange={(value) => handleChange("pdLeft", value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-rose-300">
+                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-purple-300">
                             <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
@@ -343,7 +342,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
           <Button variant="outline" onClick={onClose} className="border-gray-300">
             {language === 'ar' ? "إلغاء" : "Cancel"}
           </Button>
-          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={handleSave} className="bg-indigo-600 hover:bg-indigo-700">
             {language === 'ar' ? "حفظ" : "Save"}
           </Button>
         </DialogFooter>
