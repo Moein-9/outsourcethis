@@ -16,6 +16,7 @@ import { LensSelector } from "@/components/LensSelector";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { CustomPrintService } from "@/utils/CustomPrintService";
+import { PrintWorkOrderButton } from "@/components/PrintWorkOrderButton";
 import { 
   User, Glasses, Package, FileText, CreditCard, Eye, Search, 
   Banknote, Plus, PackageCheck, EyeOff, ExternalLink,
@@ -271,6 +272,16 @@ const CreateInvoice: React.FC = () => {
   
   const handlePayInFull = () => {
     setDeposit(total);
+  };
+  
+  const handleContactLensRxChange = (rxData: typeof contactLensRx) => {
+    setContactLensRx(rxData);
+  };
+  
+  const handleContactLensSelection = (selection: ContactLensSelection) => {
+    if (selection) {
+      setContactLensRx(selection);
+    }
   };
   
   const handleSaveInvoice = () => {
@@ -888,4 +899,412 @@ const CreateInvoice: React.FC = () => {
                     {showManualFrame && (
                       <div className="p-4 border rounded-lg mt-2 bg-muted/10">
                         <h4 className={`font-semibold mb-3 text-primary ${textAlignClass}`}>{t('newFrameDetails')}</h4>
-                        <div
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label htmlFor="newBrand" className={`text-muted-foreground block ${textAlignClass}`}>{t('brand')}*:</Label>
+                            <Input
+                              id="newBrand"
+                              value={newBrand}
+                              onChange={(e) => setNewBrand(e.target.value)}
+                              className={textAlignClass}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="newModel" className={`text-muted-foreground block ${textAlignClass}`}>{t('model')}*:</Label>
+                            <Input
+                              id="newModel"
+                              value={newModel}
+                              onChange={(e) => setNewModel(e.target.value)}
+                              className={textAlignClass}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="newColor" className={`text-muted-foreground block ${textAlignClass}`}>{t('color')}*:</Label>
+                            <Input
+                              id="newColor"
+                              value={newColor}
+                              onChange={(e) => setNewColor(e.target.value)}
+                              className={textAlignClass}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="newSize" className={`text-muted-foreground block ${textAlignClass}`}>{t('size')}:</Label>
+                            <Input
+                              id="newSize"
+                              value={newSize}
+                              onChange={(e) => setNewSize(e.target.value)}
+                              className={textAlignClass}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="newPrice" className={`text-muted-foreground block ${textAlignClass}`}>{t('price')}*:</Label>
+                            <Input
+                              id="newPrice"
+                              value={newPrice}
+                              onChange={(e) => setNewPrice(e.target.value)}
+                              type="number"
+                              min="0"
+                              step="0.001"
+                              className={textAlignClass}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="newQty" className={`text-muted-foreground block ${textAlignClass}`}>{t('quantity')}*:</Label>
+                            <Input
+                              id="newQty"
+                              value={newQty}
+                              onChange={(e) => setNewQty(e.target.value)}
+                              type="number"
+                              min="1"
+                              step="1"
+                              className={textAlignClass}
+                            />
+                          </div>
+                        </div>
+                        
+                        <Button 
+                          onClick={handleAddNewFrame}
+                          className="mt-4 w-full"
+                        >
+                          <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                          {t('addToInventory')}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="bg-white rounded-lg p-6 border shadow-sm">
+              <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
+                <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
+                  <Eye className="w-5 h-5" />
+                  {t('contactLensSection')}
+                </h3>
+              </div>
+              
+              <ContactLensSelector
+                onSelectionChange={handleContactLensSelection}
+                rxData={contactLensRx}
+              />
+            </div>
+          )}
+          
+          {/* Payment Section */}
+          <div className="bg-white rounded-lg p-6 border shadow-sm">
+            <div className="border-b border-primary/30 pb-3 mb-4">
+              <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
+                <CreditCard className="w-5 h-5" />
+                {t('paymentSection')}
+              </h3>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="discount" className={`text-muted-foreground block ${textAlignClass}`}>{t('discount')}:</Label>
+                  <Input
+                    id="discount"
+                    value={discount}
+                    onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                    type="number"
+                    min="0"
+                    step="0.001"
+                    className={textAlignClass}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="deposit" className={`text-muted-foreground block ${textAlignClass}`}>{t('deposit')}:</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      id="deposit"
+                      value={deposit}
+                      onChange={(e) => setDeposit(parseFloat(e.target.value) || 0)}
+                      type="number"
+                      min="0"
+                      step="0.001"
+                      className="flex-grow"
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={handlePayInFull}
+                      size="sm"
+                      className="whitespace-nowrap"
+                    >
+                      {t('payInFull')}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="paymentMethod" className={`block ${textAlignClass}`}>{t('paymentMethod')}*:</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {["Cash", "Visa", "MasterCard", "KNET", "كي نت"].map((method) => (
+                    <Button
+                      key={method}
+                      type="button"
+                      variant={paymentMethod === method ? "default" : "outline"}
+                      className={`${textAlignClass} ${
+                        paymentMethod === method 
+                          ? "bg-primary text-white border-primary" 
+                          : "hover:border-primary/50"
+                      }`}
+                      onClick={() => setPaymentMethod(method)}
+                    >
+                      {method === "Cash" && <Banknote className={`w-4 h-4 ${language === 'ar' ? 'ml-1.5' : 'mr-1.5'}`} />}
+                      {(method === "Visa" || method === "MasterCard" || method === "KNET" || method === "كي نت") && (
+                        <CardIcon className={`w-4 h-4 ${language === 'ar' ? 'ml-1.5' : 'mr-1.5'}`} />
+                      )}
+                      {method}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              
+              {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "KNET" || paymentMethod === "كي نت") && (
+                <div className="space-y-2">
+                  <Label htmlFor="authNumber" className={`text-muted-foreground block ${textAlignClass}`}>{t('authNumber')}:</Label>
+                  <Input
+                    id="authNumber"
+                    value={authNumber}
+                    onChange={(e) => setAuthNumber(e.target.value)}
+                    className={textAlignClass}
+                  />
+                </div>
+              )}
+              
+              <div className="grid grid-cols-1 gap-3 border rounded-lg p-4 bg-muted/10">
+                <div className={`flex justify-between items-center ${textAlignClass}`}>
+                  <span className="font-medium">{t('subtotal')}:</span>
+                  <span>{(total + discount).toFixed(3)} {t('kwd')}</span>
+                </div>
+                
+                <div className={`flex justify-between items-center ${textAlignClass}`}>
+                  <span className="font-medium">{t('discount')}:</span>
+                  <span>{discount.toFixed(3)} {t('kwd')}</span>
+                </div>
+                
+                <div className={`flex justify-between items-center text-lg font-bold border-t pt-2 ${textAlignClass}`}>
+                  <span>{t('total')}:</span>
+                  <span>{total.toFixed(3)} {t('kwd')}</span>
+                </div>
+                
+                <div className={`flex justify-between items-center ${textAlignClass}`}>
+                  <span className="font-medium">{t('deposit')}:</span>
+                  <span>{deposit.toFixed(3)} {t('kwd')}</span>
+                </div>
+                
+                <div className={`flex justify-between items-center text-lg font-bold border-t pt-2 text-primary ${textAlignClass}`}>
+                  <span>{t('remaining')}:</span>
+                  <span>{remaining.toFixed(3)} {t('kwd')}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Invoice Workflow UI */}
+            <div className="mt-6 space-y-4">
+              {!showSavedDetails ? (
+                <Button 
+                  onClick={handleSaveInvoice}
+                  className="w-full py-6 text-lg bg-primary"
+                >
+                  <Save className={`w-5 h-5 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                  {t('saveInvoiceAndWorkOrder')}
+                </Button>
+              ) : (
+                <div className="border-2 border-green-500 rounded-lg p-4 bg-green-50">
+                  <div className="flex items-center justify-center mb-2 text-green-600">
+                    <Check className="w-6 h-6 mr-2" />
+                    <span className="text-lg font-medium">{t('invoiceSaved')}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    <div className="border rounded p-3 bg-white">
+                      <div className="text-sm text-gray-500">{t('invoiceNumber')}</div>
+                      <div className="text-lg font-bold text-primary">{savedInvoiceId}</div>
+                    </div>
+                    <div className="border rounded p-3 bg-white">
+                      <div className="text-sm text-gray-500">{t('workOrderNumber')}</div>
+                      <div className="text-lg font-bold text-primary">{savedWorkOrderId}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Button
+                      onClick={handlePrintInvoice}
+                      variant="outline"
+                      className="py-5"
+                    >
+                      <Printer className={`w-5 h-5 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                      {t('printInvoice')}
+                    </Button>
+                    
+                    <PrintWorkOrderButton
+                      invoice={previewInvoice}
+                      patientName={currentPatient?.name || manualName}
+                      patientPhone={currentPatient?.phone || manualPhone}
+                      rx={currentPatient?.rx}
+                      lensType={selectedLensType?.name}
+                      coating={selectedCoating?.name}
+                      frame={!skipFrame ? selectedFrame : undefined}
+                      className="py-5"
+                      variant="outline"
+                      size="default"
+                    />
+                  </div>
+                  
+                  <Button
+                    onClick={handleCompleteTransaction}
+                    variant="default"
+                    className="w-full mt-4 py-4 bg-green-600 hover:bg-green-700"
+                  >
+                    <Check className={`w-5 h-5 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                    {t('completeTransaction')}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* Preview Section */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg p-5 border shadow-sm sticky top-20">
+            <h3 className={`text-lg font-semibold mb-4 flex items-center justify-between ${textAlignClass}`}>
+              <span className="flex items-center">
+                <Receipt className="w-5 h-5 text-primary mr-2" />
+                {t('preview')}
+              </span>
+            </h3>
+            
+            <div className="border rounded-lg p-4 max-h-[600px] overflow-y-auto">
+              <div className="border-b pb-2 mb-3">
+                <div className={`text-sm text-muted-foreground mb-1 ${textAlignClass}`}>{t('invoiceNumber')}: {previewInvoice.invoiceId}</div>
+                <div className={`text-sm text-muted-foreground ${textAlignClass}`}>{t('workOrderNumber')}: {previewInvoice.workOrderId}</div>
+              </div>
+              
+              <h4 className={`font-medium mb-2 ${textAlignClass}`}>{t('client')}</h4>
+              <div className={`text-sm mb-3 ${textAlignClass}`}>
+                <div>{previewInvoice.patientName}</div>
+                {previewInvoice.patientPhone && <div>{previewInvoice.patientPhone}</div>}
+              </div>
+              
+              {invoiceType === "glasses" ? (
+                <>
+                  {/* Lens Information */}
+                  {previewInvoice.lensType && (
+                    <>
+                      <h4 className={`font-medium mb-2 ${textAlignClass}`}>{t('lensType')}</h4>
+                      <div className={`text-sm mb-1 flex justify-between ${textAlignClass}`}>
+                        <span>{previewInvoice.lensType}</span>
+                        <span>{previewInvoice.lensPrice.toFixed(3)} {t('kwd')}</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {/* Coating Information */}
+                  {previewInvoice.coating && (
+                    <>
+                      <h4 className={`font-medium mb-2 mt-3 ${textAlignClass}`}>{t('coating')}</h4>
+                      <div className={`text-sm mb-1 flex justify-between ${textAlignClass}`}>
+                        <span>{previewInvoice.coating}</span>
+                        <span>{previewInvoice.coatingPrice.toFixed(3)} {t('kwd')}</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {/* Frame Information */}
+                  {previewInvoice.frameBrand && (
+                    <>
+                      <h4 className={`font-medium mb-2 mt-3 ${textAlignClass}`}>{t('frame')}</h4>
+                      <div className={`text-sm ${textAlignClass}`}>
+                        <div className="flex justify-between mb-1">
+                          <span>{previewInvoice.frameBrand} {previewInvoice.frameModel}</span>
+                          <span>{previewInvoice.framePrice.toFixed(3)} {t('kwd')}</span>
+                        </div>
+                        {previewInvoice.frameColor && <div>{t('color')}: {previewInvoice.frameColor}</div>}
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* Contact Lens Information */}
+                  {previewInvoice.lensType && (
+                    <>
+                      <h4 className={`font-medium mb-2 ${textAlignClass}`}>{t('contactLenses')}</h4>
+                      <div className={`text-sm mb-1 flex justify-between ${textAlignClass}`}>
+                        <span>{previewInvoice.lensType}</span>
+                        <span>{previewInvoice.lensPrice.toFixed(3)} {t('kwd')}</span>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+              
+              {/* Payment Information */}
+              <div className="border-t mt-3 pt-3">
+                <div className={`flex justify-between mb-1 ${textAlignClass}`}>
+                  <span>{t('discount')}:</span>
+                  <span>{previewInvoice.discount.toFixed(3)} {t('kwd')}</span>
+                </div>
+                <div className={`flex justify-between mb-1 font-medium ${textAlignClass}`}>
+                  <span>{t('total')}:</span>
+                  <span>{previewInvoice.total.toFixed(3)} {t('kwd')}</span>
+                </div>
+                <div className={`flex justify-between mb-1 ${textAlignClass}`}>
+                  <span>{t('deposit')}:</span>
+                  <span>{previewInvoice.deposit.toFixed(3)} {t('kwd')}</span>
+                </div>
+                <div className={`flex justify-between font-bold text-primary ${textAlignClass}`}>
+                  <span>{t('remaining')}:</span>
+                  <span>{previewInvoice.remaining.toFixed(3)} {t('kwd')}</span>
+                </div>
+                
+                {previewInvoice.paymentMethod && (
+                  <div className={`mt-2 text-sm ${textAlignClass}`}>
+                    <span className="font-medium">{t('paymentMethod')}: </span>
+                    <span>{previewInvoice.paymentMethod}</span>
+                    {previewInvoice.authNumber && (
+                      <span> ({t('authNumber')}: {previewInvoice.authNumber})</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Print Dialogs */}
+      {invoicePrintOpen && (
+        <div className="hidden print:block">
+          <ReceiptInvoice invoice={previewInvoice} />
+        </div>
+      )}
+      
+      {workOrderPrintOpen && (
+        <div className="hidden print:block">
+          <WorkOrderPrint 
+            invoice={previewInvoice}
+            patientName={currentPatient?.name || manualName}
+            patientPhone={currentPatient?.phone || manualPhone}
+            rx={currentPatient?.rx}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CreateInvoice;
+

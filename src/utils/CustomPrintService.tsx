@@ -1,6 +1,5 @@
 
 import { toast } from "@/hooks/use-toast";
-import { useLanguageStore } from "@/store/languageStore";
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
@@ -108,14 +107,7 @@ export class CustomPrintService {
         </html>
       `);
       
-      // Create a temporary div to render the work order
-      const tempDiv = document.createElement('div');
-      tempDiv.id = 'work-order-receipt';
-      tempDiv.style.display = 'none';
-      document.body.appendChild(tempDiv);
-      
       // Get the content from CustomWorkOrderReceipt by rendering it
-      // We'll use React to render the component to a string
       const getWorkOrderContent = () => {
         // Use workOrder data to create the content
         const { invoiceId, workOrderId, patientName, patientPhone, lensType, coating, frameBrand, frameModel, total } = workOrder;
@@ -139,13 +131,10 @@ export class CustomPrintService {
         `;
       };
       
-      // Set the content of the temporary div
-      tempDiv.innerHTML = getWorkOrderContent();
-      
-      // Copy the content to the print window
+      // Set the content directly in the print window
       const contentContainer = printWindow.document.getElementById('custom-work-order-content');
       if (contentContainer) {
-        contentContainer.innerHTML = tempDiv.innerHTML;
+        contentContainer.innerHTML = getWorkOrderContent();
         
         // Wait for content to load, then print
         setTimeout(() => {
@@ -153,16 +142,12 @@ export class CustomPrintService {
           printWindow.focus();
           printWindow.print();
           
-          // Remove the temporary div
-          document.body.removeChild(tempDiv);
-          
-          // Close the window after printing (or allow user to close it)
+          // Close the window after printing (optional)
           // printWindow.close();
         }, 500);
       } else {
         printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
         printWindow.document.close();
-        document.body.removeChild(tempDiv);
       }
     } catch (error) {
       console.error("Error printing work order:", error);
