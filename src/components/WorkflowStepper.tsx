@@ -5,7 +5,8 @@ import {
   Save, 
   Printer, 
   FileCheck, 
-  CheckCircle,
+  CheckCircle2,
+  ArrowRight,
   RefreshCw 
 } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
@@ -13,6 +14,7 @@ import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { ReceiptInvoice } from "./ReceiptInvoice";
+import { Badge } from "@/components/ui/badge";
 
 interface WorkflowStepperProps {
   invoice: Invoice;
@@ -62,7 +64,7 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     { id: 1, label: t("saveWorkOrder"), icon: <Save className="h-4 w-4" /> },
     { id: 2, label: t("printInvoice"), icon: <Printer className="h-4 w-4" /> },
     { id: 3, label: t("printWorkOrder"), icon: <FileCheck className="h-4 w-4" /> },
-    { id: 4, label: t("finish"), icon: <CheckCircle className="h-4 w-4" /> }
+    { id: 4, label: t("finish"), icon: <CheckCircle2 className="h-4 w-4" /> }
   ];
 
   // Handle saving the work order
@@ -210,62 +212,98 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   };
 
   return (
-    <div className="border rounded-lg p-4 bg-card">
-      <h3 className="text-lg font-semibold mb-4 text-center">{t("workOrderWorkflow")}</h3>
-      
-      {/* Steps indicator */}
-      <div className="flex items-center justify-between mb-6 relative">
-        {steps.map((step, index) => (
-          <div 
-            key={step.id} 
-            className={`flex flex-col items-center ${
-              step.id === currentStep 
-                ? "text-primary" 
-                : step.id < currentStep 
-                  ? "text-green-500" 
-                  : "text-gray-400"
-            }`}
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
-              step.id === currentStep 
-                ? "bg-primary text-white" 
-                : step.id < currentStep 
-                  ? "bg-green-500 text-white" 
-                  : "bg-gray-200 text-gray-500"
-            }`}>
-              {step.id < currentStep ? (
-                <CheckCircle className="h-5 w-5" />
-              ) : (
-                step.icon
-              )}
+    <div className="space-y-6">
+      {/* Visual step progress indicator */}
+      <div className="relative">
+        <div className="flex items-center justify-between mb-2">
+          {steps.map((step, index) => (
+            <div 
+              key={step.id} 
+              className="flex flex-col items-center z-10"
+            >
+              <div 
+                className={`relative flex items-center justify-center w-10 h-10 rounded-full 
+                ${step.id === currentStep 
+                  ? "bg-indigo-500 text-white ring-4 ring-indigo-100" 
+                  : step.id < currentStep 
+                    ? "bg-green-500 text-white" 
+                    : "bg-slate-100 text-slate-400"
+                } transition-all duration-200`}
+              >
+                {step.id < currentStep ? (
+                  <CheckCircle2 className="w-5 h-5" />
+                ) : (
+                  step.icon
+                )}
+                
+                {/* Step indicator badge */}
+                {step.id === currentStep && (
+                  <Badge 
+                    className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-indigo-600 text-[10px] border-2 border-white"
+                  >
+                    {step.id}
+                  </Badge>
+                )}
+              </div>
+              <span className={`mt-2 text-xs font-medium ${
+                step.id === currentStep 
+                  ? "text-indigo-700" 
+                  : step.id < currentStep 
+                    ? "text-green-600" 
+                    : "text-slate-400"
+              }`}>
+                {step.label}
+              </span>
             </div>
-            <span className="text-xs text-center">{step.label}</span>
-          </div>
-        ))}
+          ))}
+        </div>
         
-        {/* Connecting lines between steps */}
-        <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 -z-10"></div>
+        {/* Progress bar connecting steps */}
+        <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-100 -z-0">
+          <div 
+            className="h-full bg-green-500 transition-all duration-300"
+            style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
+          ></div>
+        </div>
       </div>
       
-      {/* Display invoice ID if available */}
+      {/* Invoice ID display */}
       {invoiceId && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-center">
-          <p className="font-semibold">{t("generatedIds")}:</p>
-          <p>{t("invoiceNumber")}: <span className="font-bold">{invoiceId}</span></p>
+        <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-md">
+          <div className="flex flex-col items-center text-center">
+            <span className="text-sm text-indigo-600 font-semibold mb-1">{t("generatedIds")}</span>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="px-3 py-1 border-indigo-200 bg-white">
+                {t("invoiceNumber")}: <span className="font-bold ml-1">{invoiceId}</span>
+              </Badge>
+            </div>
+          </div>
         </div>
       )}
       
-      {/* Action buttons */}
+      {/* Action buttons based on current step */}
       <div className="space-y-3">
         {/* Step 1: Save Work Order */}
         {currentStep === 1 && (
           <Button 
             onClick={handleSaveWorkOrder} 
-            className="w-full" 
+            className="w-full relative overflow-hidden group bg-indigo-600 hover:bg-indigo-700"
+            size="lg"
             disabled={saving}
           >
+            <span className="absolute right-full top-0 h-full w-12 bg-gradient-to-r from-indigo-600 to-indigo-500 opacity-30 transform skew-x-[-20deg] group-hover:animate-shine"></span>
             <Save className="h-4 w-4 mr-2" />
-            {saving ? t("saving") : t("saveWorkOrder")}
+            {saving ? (
+              <div className="flex items-center">
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                {t("saving")}
+              </div>
+            ) : (
+              <div className="flex items-center">
+                {t("saveWorkOrder")}
+                <ArrowRight className="h-4 w-4 ml-1 opacity-70" />
+              </div>
+            )}
           </Button>
         )}
         
@@ -273,11 +311,14 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         {currentStep === 2 && (
           <Button 
             onClick={handlePrintInvoice} 
-            className="w-full"
-            variant="outline"
+            className="w-full bg-indigo-600 hover:bg-indigo-700"
+            size="lg"
           >
             <Printer className="h-4 w-4 mr-2" />
-            {t("printInvoice")}
+            <div className="flex items-center">
+              {t("printInvoice")}
+              <ArrowRight className="h-4 w-4 ml-1 opacity-70" />
+            </div>
           </Button>
         )}
         
@@ -293,15 +334,18 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             frame={frame}
             contactLenses={contactLenses}
             contactLensRx={contactLensRx}
-            thermalOnly={false}
+            thermalOnly={true}
             onCompletePrinting={printWorkOrder}
             trigger={
               <Button 
-                className="w-full"
-                variant="outline"
+                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                size="lg"
               >
                 <FileCheck className="h-4 w-4 mr-2" />
-                {t("printWorkOrder")}
+                <div className="flex items-center">
+                  {t("printWorkOrder")}
+                  <ArrowRight className="h-4 w-4 ml-1 opacity-70" />
+                </div>
               </Button>
             }
           />
@@ -311,10 +355,10 @@ export const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         {currentStep === 4 && (
           <Button 
             onClick={handleFinish} 
-            className="w-full"
-            variant="secondary"
+            className="w-full bg-green-600 hover:bg-green-700"
+            size="lg"
           >
-            <CheckCircle className="h-4 w-4 mr-2" />
+            <CheckCircle2 className="h-4 w-4 mr-2" />
             {t("finishAndReset")}
           </Button>
         )}

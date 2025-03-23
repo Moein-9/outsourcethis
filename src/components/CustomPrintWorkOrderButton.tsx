@@ -70,7 +70,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               isPrintable={false}
             />
           </div>
-          <Button onClick={handlePrint} className="mt-4 gap-2">
+          <Button onClick={handlePrint} className="mt-4 gap-2 bg-indigo-600 hover:bg-indigo-700">
             <Printer className="h-4 w-4" />
             {t('print')}
           </Button>
