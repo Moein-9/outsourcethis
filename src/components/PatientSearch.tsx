@@ -570,14 +570,14 @@ export const PatientSearch: React.FC = () => {
                         
                         <TabsContent value="current" className="mt-0">
                           <div className="rounded-md border overflow-hidden shadow-sm">
-                            <Table>
+                            <Table forceDirection="ltr">
                               <TableHeader className="bg-blue-50">
                                 <TableRow>
                                   <TableHead></TableHead>
-                                  <TableHead>{language === 'ar' ? "قوة العدسة" : "SPH"}</TableHead>
-                                  <TableHead>{language === 'ar' ? "الاسطوانة" : "CYL"}</TableHead>
-                                  <TableHead>{language === 'ar' ? "المحور" : "AXIS"}</TableHead>
-                                  <TableHead>{language === 'ar' ? "إضافة" : "ADD"}</TableHead>
+                                  <TableHead>SPH</TableHead>
+                                  <TableHead>CYL</TableHead>
+                                  <TableHead>AXIS</TableHead>
+                                  <TableHead>ADD</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
@@ -643,14 +643,14 @@ export const PatientSearch: React.FC = () => {
                                       <Printer className="h-4 w-4" />
                                     </Button>
                                   </div>
-                                  <Table>
+                                  <Table forceDirection="ltr">
                                     <TableHeader className="bg-indigo-50/50">
                                       <TableRow>
                                         <TableHead></TableHead>
-                                        <TableHead>{language === 'ar' ? "قوة العدسة" : "SPH"}</TableHead>
-                                        <TableHead>{language === 'ar' ? "الاسطوانة" : "CYL"}</TableHead>
-                                        <TableHead>{language === 'ar' ? "المحور" : "AXIS"}</TableHead>
-                                        <TableHead>{language === 'ar' ? "إضافة" : "ADD"}</TableHead>
+                                        <TableHead>SPH</TableHead>
+                                        <TableHead>CYL</TableHead>
+                                        <TableHead>AXIS</TableHead>
+                                        <TableHead>ADD</TableHead>
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
