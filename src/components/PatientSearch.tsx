@@ -242,25 +242,27 @@ export const PatientSearch: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <RxLanguageDialog 
-        isOpen={isLanguageDialogOpen} 
-        onClose={() => setIsLanguageDialogOpen(false)} 
-        onSelect={handleLanguageSelection} 
-      />
+      <div className="relative z-50">
+        <RxLanguageDialog 
+          isOpen={isLanguageDialogOpen} 
+          onClose={() => setIsLanguageDialogOpen(false)} 
+          onSelect={handleLanguageSelection} 
+        />
 
-      <EditWorkOrderDialog
-        isOpen={editWorkOrderDialogOpen}
-        onClose={() => setEditWorkOrderDialogOpen(false)}
-        workOrder={currentWorkOrder || {} as WorkOrder}
-        onSave={handleSaveWorkOrder}
-      />
-      
-      <PatientRxDialog
-        isOpen={isAddRxDialogOpen}
-        onClose={() => setIsAddRxDialogOpen(false)}
-        onSave={handleSaveRx}
-        initialRx={newRx}
-      />
+        <EditWorkOrderDialog
+          isOpen={editWorkOrderDialogOpen}
+          onClose={() => setEditWorkOrderDialogOpen(false)}
+          workOrder={currentWorkOrder || {} as WorkOrder}
+          onSave={handleSaveWorkOrder}
+        />
+        
+        <PatientRxDialog
+          isOpen={isAddRxDialogOpen}
+          onClose={() => setIsAddRxDialogOpen(false)}
+          onSave={handleSaveRx}
+          initialRx={newRx}
+        />
+      </div>
     </div>
   );
 };
