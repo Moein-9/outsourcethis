@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePatientStore, PatientNote } from '@/store/patientStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { useLanguageStore } from '@/store/languageStore';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { MessageSquare, PlusCircle, X, Edit, Save } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 
 interface PatientNotesProps {
@@ -16,34 +16,49 @@ interface PatientNotesProps {
   notes?: PatientNote[];
 }
 
-export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId, notes = [] }) => {
+export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId }) => {
   const { t, language } = useLanguageStore();
-  const { addPatientNote, deletePatientNote, getPatientById, updatePatient } = usePatientStore();
+  const { addPatientNote, deletePatientNote, getPatientById, updatePatient, patients } = usePatientStore();
   const [newNote, setNewNote] = useState('');
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editedNoteText, setEditedNoteText] = useState('');
   const isRtl = language === 'ar';
   
-  // Get the current patient's notes from the store
+  // Get the current patient's notes
   const patient = getPatientById(patientId);
-  const patientNotes = notes.length > 0 ? notes : (patient?.patientNotes || []);
+  const notes = patient?.patientNotes || [];
+  
+  // Setup real-time update whenever patient notes change
+  useEffect(() => {
+    // This will re-render component when notes change
+  }, [patientId, patients]);
   
   const handleAddNote = () => {
     if (!newNote.trim()) {
-      toast.error(t("noteEmpty"));
+      toast({
+        title: t("error"),
+        description: t("noteEmpty"),
+        variant: "destructive",
+      });
       return;
     }
     
     addPatientNote(patientId, newNote);
     setNewNote('');
     
-    toast.success(t("noteAdded"));
+    toast({
+      title: t("success"),
+      description: t("noteAdded"),
+    });
   };
   
   const handleDeleteNote = (noteId: string) => {
     deletePatientNote(patientId, noteId);
     
-    toast.success(t("noteDeleted"));
+    toast({
+      title: t("success"),
+      description: t("noteDeleted"),
+    });
   };
   
   const startEditingNote = (note: PatientNote) => {
@@ -58,7 +73,11 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId, notes = [
   
   const saveEditedNote = (noteId: string) => {
     if (!editedNoteText.trim()) {
-      toast.error(t("noteEmpty"));
+      toast({
+        title: t("error"),
+        description: t("noteEmpty"),
+        variant: "destructive",
+      });
       return;
     }
     
@@ -75,7 +94,10 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId, notes = [
       
       setEditingNoteId(null);
       
-      toast.success(t("noteUpdated"));
+      toast({
+        title: t("success"),
+        description: t("noteUpdated"),
+      });
     }
   };
   
@@ -96,27 +118,9 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId, notes = [
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">
-        <div className="mt-6 space-y-2">
-          <Textarea
-            placeholder={t("addNoteHere")}
-            value={newNote}
-            onChange={(e) => setNewNote(e.target.value)}
-            dir="auto"
-            className="resize-none"
-            onKeyPress={(e) => e.key === 'Enter' && e.ctrlKey && handleAddNote()}
-          />
-          <Button 
-            onClick={handleAddNote}
-            className="w-full sm:w-auto gap-1"
-          >
-            <PlusCircle className="h-4 w-4" />
-            {t("addNote")}
-          </Button>
-        </div>
-        
-        {patientNotes.length > 0 ? (
-          <div className="space-y-3 mt-4">
-            {[...patientNotes].reverse().map((note) => (
+        {notes.length > 0 ? (
+          <div className="space-y-3">
+            {[...notes].reverse().map((note) => (
               <div 
                 key={note.id} 
                 className={`p-3 border rounded-md bg-card shadow-sm relative ${isRtl ? 'text-right' : 'text-left'}`}
@@ -175,7 +179,7 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId, notes = [
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 mt-4">
+          <div className="text-center py-8">
             <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
               <MessageSquare className="h-6 w-6 text-muted-foreground" />
             </div>
@@ -185,6 +189,24 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId, notes = [
             </p>
           </div>
         )}
+        
+        <div className="mt-6 space-y-2">
+          <Textarea
+            placeholder={t("addNoteHere")}
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            dir="auto"
+            className="resize-none"
+            onKeyPress={(e) => e.key === 'Enter' && e.ctrlKey && handleAddNote()}
+          />
+          <Button 
+            onClick={handleAddNote}
+            className="w-full sm:w-auto gap-1"
+          >
+            <PlusCircle className="h-4 w-4" />
+            {t("addNote")}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
