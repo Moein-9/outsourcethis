@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -37,6 +38,7 @@ export interface Invoice {
   isPaid: boolean;
   authNumber?: string; // Added for authorization numbers
   workOrderId?: string; // Reference to the work order
+  notes?: string; // Added for special instructions
 }
 
 // Define WorkOrder interface
@@ -48,6 +50,7 @@ export interface WorkOrder {
     name: string;
     price: number;
   };
+  notes?: string; // Added for special instructions
   // Add other work order fields as needed
 }
 
@@ -73,13 +76,18 @@ export const useInvoiceStore = create<InvoiceState>()(
       workOrders: [], 
       
       addInvoice: (invoice) => {
+        console.log("addInvoice called with:", invoice);
+        
         const invoiceId = `INV${Date.now()}`;
         const createdAt = new Date().toISOString();
         const remaining = Math.max(0, invoice.total - invoice.deposit);
         const isPaid = remaining === 0;
         
-        // Extract auth number if it exists
-        const { authNumber, ...restInvoice } = invoice as (typeof invoice & { authNumber?: string });
+        // Extract auth number and notes if they exist
+        const { authNumber, notes, ...restInvoice } = invoice as (typeof invoice & { 
+          authNumber?: string;
+          notes?: string;
+        });
         
         const initialPayment: Payment = {
           amount: invoice.deposit,
@@ -90,18 +98,23 @@ export const useInvoiceStore = create<InvoiceState>()(
         
         const payments = invoice.deposit > 0 ? [initialPayment] : [];
         
+        const newInvoice = { 
+          ...restInvoice, 
+          invoiceId, 
+          createdAt, 
+          remaining,
+          isPaid,
+          payments,
+          authNumber, // Store auth number at invoice level
+          notes // Store notes at invoice level
+        };
+        
+        console.log("Creating new invoice:", newInvoice);
+        
         set((state) => ({
           invoices: [
             ...state.invoices,
-            { 
-              ...restInvoice, 
-              invoiceId, 
-              createdAt, 
-              remaining,
-              isPaid,
-              payments,
-              authNumber // Store auth number at invoice level too
-            }
+            newInvoice
           ]
         }));
         
@@ -218,6 +231,8 @@ export const useInvoiceStore = create<InvoiceState>()(
       addWorkOrder: (workOrder) => {
         const id = `WO${Date.now()}`;
         const createdAt = new Date().toISOString();
+        
+        console.log("Adding work order:", { ...workOrder, id, createdAt });
         
         set((state) => ({
           workOrders: [

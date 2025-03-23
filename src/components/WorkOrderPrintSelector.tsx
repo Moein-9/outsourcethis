@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, forwardRef, useImperativeHandle } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,9 +34,13 @@ interface WorkOrderPrintSelectorProps {
   contactLensRx?: any;
   trigger?: React.ReactNode;
   thermalOnly?: boolean;
+  notes?: string;
 }
 
-export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
+export const WorkOrderPrintSelector = forwardRef<
+  { print: (format: "a4" | "receipt", invoice: Invoice) => void },
+  WorkOrderPrintSelectorProps
+>(({
   invoice,
   patientName,
   patientPhone,
@@ -47,31 +51,45 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
-  thermalOnly = false
-}) => {
+  thermalOnly = false,
+  notes
+}, ref) => {
   const { t, language } = useLanguageStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<"a4" | "receipt" | null>(thermalOnly ? "receipt" : null);
   const [printingInProgress, setPrintingInProgress] = useState(false);
   const isRtl = language === 'ar';
   
+  useImperativeHandle(ref, () => ({
+    print: (format: "a4" | "receipt", updatedInvoice?: Invoice) => {
+      setSelectedFormat(format);
+      handlePrint(format, updatedInvoice);
+    }
+  }));
+  
   const handleTriggerClick = () => {
     if (thermalOnly) {
-      handlePrint();
+      handlePrint("receipt");
     } else {
       setIsDialogOpen(true);
     }
   };
   
-  const handlePrint = () => {
-    if (!selectedFormat || printingInProgress) return;
+  const handlePrint = (format?: "a4" | "receipt", updatedInvoice?: Invoice) => {
+    const printFormat = format || selectedFormat;
+    if (!printFormat || printingInProgress) return;
+    
+    console.log("Printing with format:", printFormat, "and invoice:", updatedInvoice || invoice);
+    console.log("Notes included:", notes);
     
     setPrintingInProgress(true);
     
+    const invoiceToUse = updatedInvoice || invoice;
+    
     try {
-      if (selectedFormat === "receipt") {
+      if (printFormat === "receipt") {
         printWorkOrderReceipt({
-          invoice,
+          invoice: invoiceToUse,
           patientName,
           patientPhone,
           rx,
@@ -79,7 +97,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           coating,
           frame,
           contactLenses,
-          contactLensRx
+          contactLensRx,
+          notes
         });
         
         setTimeout(() => {
@@ -92,15 +111,22 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
             <div style="text-align: center; margin-bottom: 10mm;">
               <h1 style="font-size: 24px; margin-bottom: 5mm;">${t("workOrder")}</h1>
-              <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.invoiceId}</p>
-              <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
+              <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoiceToUse.invoiceId}</p>
+              <p style="font-size: 14px;">${new Date(invoiceToUse.createdAt).toLocaleDateString()}</p>
             </div>
             
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
               <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("patientInformation")}</h2>
-              <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
-              <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
+              <p><strong>${t("name")}:</strong> ${patientName || invoiceToUse.patientName || "-"}</p>
+              <p><strong>${t("phone")}:</strong> ${patientPhone || invoiceToUse.patientPhone || "-"}</p>
             </div>
+            
+            ${notes ? `
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("specialInstructions")}</h2>
+              <p>${notes}</p>
+            </div>
+            ` : ''}
             
             ${frame ? `
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
@@ -152,19 +178,19 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
               <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("lensDetails")}</h2>
               <p><strong>${t("type")}:</strong> ${lensType}</p>
-              <p><strong>${t("price")}:</strong> ${invoice.lensPrice.toFixed(3)} ${t("currency")}</p>
+              <p><strong>${t("price")}:</strong> ${invoiceToUse.lensPrice.toFixed(3)} ${t("currency")}</p>
               ${coating ? `<p><strong>${t("coating")}:</strong> ${coating}</p>` : ''}
-              ${coating ? `<p><strong>${t("coatingPrice")}:</strong> ${invoice.coatingPrice.toFixed(3)} ${t("currency")}</p>` : ''}
+              ${coating ? `<p><strong>${t("coatingPrice")}:</strong> ${invoiceToUse.coatingPrice.toFixed(3)} ${t("currency")}</p>` : ''}
             </div>
             ` : ''}
             
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
               <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("paymentInformation")}</h2>
-              <p><strong>${t("subtotal")}:</strong> ${(invoice.total + invoice.discount).toFixed(3)} ${t("currency")}</p>
-              ${invoice.discount > 0 ? `<p><strong>${t("discount")}:</strong> -${invoice.discount.toFixed(3)} ${t("currency")}</p>` : ''}
-              <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} ${t("currency")}</p>
-              <p><strong>${t("paid")}:</strong> ${invoice.deposit.toFixed(3)} ${t("currency")}</p>
-              <p><strong>${t("remaining")}:</strong> ${(invoice.total - invoice.deposit).toFixed(3)} ${t("currency")}</p>
+              <p><strong>${t("subtotal")}:</strong> ${(invoiceToUse.total + invoiceToUse.discount).toFixed(3)} ${t("currency")}</p>
+              ${invoiceToUse.discount > 0 ? `<p><strong>${t("discount")}:</strong> -${invoiceToUse.discount.toFixed(3)} ${t("currency")}</p>` : ''}
+              <p><strong>${t("total")}:</strong> ${invoiceToUse.total.toFixed(3)} ${t("currency")}</p>
+              <p><strong>${t("paid")}:</strong> ${invoiceToUse.deposit.toFixed(3)} ${t("currency")}</p>
+              <p><strong>${t("remaining")}:</strong> ${(invoiceToUse.total - invoiceToUse.deposit).toFixed(3)} ${t("currency")}</p>
             </div>
             
             <div style="margin-top: 20mm; display: flex; justify-content: space-between;">
@@ -249,7 +275,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
               </Button>
               <Button
                 type="button"
-                onClick={handlePrint}
+                onClick={() => handlePrint()}
                 disabled={!selectedFormat || printingInProgress}
               >
                 <PrinterIcon className="h-4 w-4 mr-2" />
@@ -261,4 +287,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
       </Dialog>
     </>
   );
-};
+});
+
+WorkOrderPrintSelector.displayName = "WorkOrderPrintSelector";

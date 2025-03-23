@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -27,6 +26,7 @@ interface WorkOrderReceiptPrintProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
+  notes?: string;
 }
 
 export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
@@ -39,6 +39,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   frame,
   contactLenses,
   contactLensRx,
+  notes
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
@@ -147,6 +148,44 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           )}
         </div>
       </div>
+      
+      {notes && (
+        <div style={{ marginBottom: "4px", fontSize: "10px" }}>
+          <h2 style={{ 
+            fontSize: "12px", 
+            fontWeight: "bold", 
+            margin: "2px 0", 
+            borderBottom: "1px solid #ccc", 
+            paddingBottom: "2px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "4px"
+          }}>
+            {isRtl ? (
+              <>
+                <span>تعليمات خاصة</span>
+                <span style={{ fontSize: "10px" }}>Special Instructions</span>
+              </>
+            ) : (
+              <>
+                <span>Special Instructions</span>
+                <span style={{ fontSize: "10px" }}>تعليمات خاصة</span>
+              </>
+            )}
+          </h2>
+          <div style={{ 
+            marginTop: "2px",
+            marginLeft: "2px", 
+            padding: "3px",
+            border: "1px dashed #ccc",
+            borderRadius: "2px",
+            backgroundColor: "#f9f9f9"
+          }}>
+            <p style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{notes}</p>
+          </div>
+        </div>
+      )}
       
       {rx && (
         <div style={{ marginBottom: "4px", fontSize: "10px" }}>
@@ -502,7 +541,7 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
   const { language, t } = useLanguageStore.getState();
   const isRtl = language === 'ar';
   
-  const { invoice, patientName, rx, frame, lensType, coating } = props;
+  const { invoice, patientName, rx, frame, lensType, coating, notes } = props;
   const invoiceNumber = invoice.invoiceId || invoice.workOrderId || "";
   
   const htmlContent = `
@@ -517,6 +556,13 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
         <p style="margin: 0; font-size: 9px;"><strong>${t("name")}:</strong> ${patientName || invoice.patientName || t("notSpecified")}</p>
         <p style="margin: 0; font-size: 9px;"><strong>${t("phone")}:</strong> ${props.patientPhone || invoice.patientPhone || t("notSpecified")}</p>
       </div>
+      
+      ${notes ? `
+      <div style="margin-bottom: 3px; padding: 2px; border: 1px dashed #ccc; background-color: #f9f9f9;">
+        <h2 style="font-size: 10px; font-weight: bold; margin: 1px 0; border-bottom: 1px solid #eee; padding-bottom: 1px;">${t("specialInstructions")}</h2>
+        <p style="margin: 0; font-size: 8px; white-space: pre-wrap;">${notes}</p>
+      </div>
+      ` : ''}
       
       ${rx ? `
       <div style="margin-bottom: 3px;">
