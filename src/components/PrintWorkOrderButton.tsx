@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -5,7 +6,6 @@ import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
-import { CustomPrintService } from "@/utils/CustomPrintService";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -51,19 +51,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
   const { addInvoice, addExistingInvoice } = useInvoiceStore();
-  const [showSelector, setShowSelector] = useState(false);
   
   const handlePrint = () => {
-    if (thermalOnly) {
-      // If it's thermal only, print directly with CustomPrintService
-      handleThermalPrint();
-    } else {
-      // Otherwise show the selector
-      setShowSelector(true);
-    }
-  };
-  
-  const handleThermalPrint = () => {
     // If it's a new invoice, save it first to generate an invoice ID
     if (isNewInvoice && !invoice.invoiceId) {
       setLoading(true);
@@ -103,12 +92,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           description: t("invoiceNumber") + ": " + invoiceId,
         });
         
-        // Print the work order directly using CustomPrintService
-        CustomPrintService.printWorkOrder(updatedInvoice, updatedInvoice, {
-          name: patientName,
-          phone: patientPhone,
-          rx: rx
-        });
+        // Show the print selector with the updated invoice that has an ID
+        showPrintSelector(updatedInvoice);
       } catch (error) {
         console.error("Error saving invoice:", error);
         toast({
@@ -120,13 +105,33 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         setLoading(false);
       }
     } else {
-      // If already has an ID, just print
-      CustomPrintService.printWorkOrder(invoice, invoice, {
-        name: patientName,
-        phone: patientPhone,
-        rx: rx
-      });
+      // If already has an ID, just show the print selector
+      showPrintSelector(invoice);
     }
+  };
+  
+  const showPrintSelector = (invoiceToUse: Invoice) => {
+    // Create the print selector with proper styling for printing
+    const selectorContainer = document.createElement('div');
+    selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars
+    document.body.appendChild(selectorContainer);
+    
+    const selector = (
+      <WorkOrderPrintSelector
+        invoice={invoiceToUse}
+        patientName={patientName}
+        patientPhone={patientPhone}
+        rx={rx}
+        lensType={lensType}
+        coating={coating}
+        frame={frame}
+        contactLenses={contactLenses}
+        contactLensRx={contactLensRx}
+        thermalOnly={thermalOnly}
+      />
+    );
+    
+    return selector;
   };
 
   return (
@@ -142,10 +147,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         {loading ? t("saving") : t("printWorkOrder")}
       </Button>
       
-      {!thermalOnly && (
+      {!isNewInvoice && (
         <WorkOrderPrintSelector
-          isOpen={showSelector}
-          onOpenChange={setShowSelector}
           invoice={invoice}
           patientName={patientName}
           patientPhone={patientPhone}
@@ -155,8 +158,12 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           frame={frame}
           contactLenses={contactLenses}
           contactLensRx={contactLensRx}
-          isNewInvoice={isNewInvoice}
-          onInvoiceSaved={onInvoiceSaved}
+          thermalOnly={thermalOnly}
+          trigger={
+            <Button variant={variant} size={size} className={className}>
+              <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
+            </Button>
+          }
         />
       )}
     </>
