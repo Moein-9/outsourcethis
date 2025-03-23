@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer, Save, FileCheck, ClipboardCheck } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
@@ -65,13 +65,18 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   const [workOrderNote, setWorkOrderNote] = useState("");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [printOption, setPrintOption] = useState<"invoice" | "workOrder" | null>(null);
+  const [printType, setPrintType] = useState<"invoice" | "workOrder" | null>(null);
+  
+  // Create refs for the print components
+  const workOrderPrintRef = useRef<HTMLDivElement>(null);
   
   // Handle saving the invoice
   const handleSave = async () => {
     if (isNewInvoice && !invoice.invoiceId) {
       setLoading(true);
       try {
+        console.log("Saving new invoice with note:", workOrderNote);
+        
         // Create a new invoice with the note
         const invoiceId = addInvoice({
           patientId: invoice.patientId,
@@ -92,15 +97,17 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           paymentMethod: invoice.paymentMethod,
           authNumber: invoice.authNumber,
           workOrderId: invoice.workOrderId,
-          // Add note to the invoice
-          note: workOrderNote,
+          note: workOrderNote, // Add note to the invoice
         });
+        
+        console.log("Invoice saved with ID:", invoiceId);
         
         // Update the invoice with the new ID and note
         const updatedInvoice = { 
           ...invoice, 
           invoiceId, 
-          note: workOrderNote 
+          note: workOrderNote,
+          createdAt: new Date().toISOString() // Ensure createdAt is set
         };
         
         // Store for success dialog
@@ -115,6 +122,11 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         setShowSaveDialog(false);
         setShowSuccessDialog(true);
         
+        toast({
+          title: t("success"),
+          description: t("invoiceSavedSuccessfully"),
+        });
+        
       } catch (error) {
         console.error("Error saving invoice:", error);
         toast({
@@ -125,8 +137,9 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       } finally {
         setLoading(false);
       }
-    } else {
+    } else if (invoice.invoiceId) {
       // If already has an ID, just show the updated invoice with note
+      console.log("Using existing invoice with ID:", invoice.invoiceId);
       const updatedInvoice = { 
         ...invoice, 
         note: workOrderNote 
@@ -136,52 +149,74 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       // Close the save dialog and show success
       setShowSaveDialog(false);
       setShowSuccessDialog(true);
-    }
-  };
-  
-  // Handle print selection after success
-  const handlePrintSelection = (type: "invoice" | "workOrder") => {
-    setPrintOption(type);
-  };
-  
-  // Print the selected option
-  const handlePrintNow = () => {
-    if (!savedInvoice || !printOption) return;
-    
-    // Create the appropriate print selector
-    if (printOption === "workOrder") {
-      return (
-        <WorkOrderPrintSelector
-          invoice={savedInvoice}
-          patientName={patientName || savedInvoice.patientName}
-          patientPhone={patientPhone || savedInvoice.patientPhone}
-          rx={rx}
-          lensType={lensType || savedInvoice.lensType}
-          coating={coating || savedInvoice.coating}
-          frame={frame}
-          contactLenses={contactLenses}
-          contactLensRx={contactLensRx}
-          thermalOnly={thermalOnly}
-          note={savedInvoice.note}
-        />
-      );
-    } else {
-      // Here you would add code to print invoice
+      
       toast({
-        title: t("info"),
-        description: t("printingInvoice"),
+        title: t("success"),
+        description: t("workOrderUpdated"),
       });
     }
-    
-    // Reset the print option
-    setPrintOption(null);
   };
   
-  // Return null for work order if modal is closed
-  if (!showSuccessDialog && printOption === "workOrder" && savedInvoice) {
-    setPrintOption(null);
-    return null;
-  }
+  // Handle printing the work order
+  const handlePrintWorkOrder = () => {
+    console.log("Printing work order");
+    if (!savedInvoice) {
+      console.error("No saved invoice to print");
+      return;
+    }
+    
+    setPrintType("workOrder");
+    
+    // Use setTimeout to ensure the component renders before printing
+    setTimeout(() => {
+      if (workOrderPrintRef.current) {
+        console.log("Work order print component ready, printing...");
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write('<html><head><title>Print</title>');
+          printWindow.document.write('<style>body { font-family: Arial, sans-serif; }</style>');
+          printWindow.document.write('</head><body>');
+          printWindow.document.write(workOrderPrintRef.current.innerHTML);
+          printWindow.document.write('</body></html>');
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+        } else {
+          toast({
+            title: t("error"),
+            description: t("popupBlocked"),
+            variant: "destructive",
+          });
+        }
+      } else {
+        console.error("Print ref not available");
+        toast({
+          title: t("error"),
+          description: t("printComponentNotReady"),
+          variant: "destructive",
+        });
+      }
+    }, 500);
+  };
+  
+  // Handle printing the invoice
+  const handlePrintInvoice = () => {
+    console.log("Printing invoice (placeholder)");
+    toast({
+      title: t("info"),
+      description: t("printingInvoice"),
+    });
+    
+    // TODO: Implement invoice printing
+    setPrintType("invoice");
+  };
+  
+  // Close success dialog and reset print type
+  const handleDone = () => {
+    setShowSuccessDialog(false);
+    setPrintType(null);
+  };
 
   return (
     <>
@@ -240,7 +275,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       </Dialog>
       
       {/* Success Dialog with Print Options */}
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+      <Dialog open={showSuccessDialog} onOpenChange={handleDone}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -271,7 +306,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
             <Button 
               variant="outline" 
               className="flex flex-col h-auto py-4 gap-2" 
-              onClick={() => handlePrintSelection("invoice")}
+              onClick={handlePrintInvoice}
             >
               <Printer className="h-5 w-5" />
               <span className="font-medium">{t("printInvoice")}</span>
@@ -280,7 +315,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
             <Button 
               variant="outline" 
               className="flex flex-col h-auto py-4 gap-2"
-              onClick={() => handlePrintSelection("workOrder")}
+              onClick={handlePrintWorkOrder}
             >
               <ClipboardCheck className="h-5 w-5" />
               <span className="font-medium">{t("printWorkOrder")}</span>
@@ -290,7 +325,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           <DialogFooter>
             <Button
               type="button"
-              onClick={() => setShowSuccessDialog(false)}
+              onClick={handleDone}
             >
               {t("done")}
             </Button>
@@ -298,24 +333,26 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         </DialogContent>
       </Dialog>
       
-      {/* Render the print component when ready */}
-      {printOption === "workOrder" && savedInvoice && (
-        <div style={{ display: "none" }}>
-          <WorkOrderPrintSelector
-            invoice={savedInvoice}
-            patientName={patientName || savedInvoice.patientName}
-            patientPhone={patientPhone || savedInvoice.patientPhone}
-            rx={rx}
-            lensType={lensType || savedInvoice.lensType}
-            coating={coating || savedInvoice.coating}
-            frame={frame}
-            contactLenses={contactLenses}
-            contactLensRx={contactLensRx}
-            thermalOnly={true}
-            note={savedInvoice.note}
-          />
+      {/* Hidden print components */}
+      <div style={{ display: "none" }}>
+        <div ref={workOrderPrintRef}>
+          {printType === "workOrder" && savedInvoice && (
+            <WorkOrderPrintSelector
+              invoice={savedInvoice}
+              patientName={patientName || savedInvoice.patientName}
+              patientPhone={patientPhone || savedInvoice.patientPhone}
+              rx={rx}
+              lensType={lensType || savedInvoice.lensType}
+              coating={coating || savedInvoice.coating}
+              frame={frame}
+              contactLenses={contactLenses}
+              contactLensRx={contactLensRx}
+              thermalOnly={true}
+              note={savedInvoice.note || workOrderNote}
+            />
+          )}
         </div>
-      )}
+      </div>
     </>
   );
 };
