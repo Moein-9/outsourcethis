@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -14,15 +15,14 @@ import { InvoiceStepPatient } from "@/components/invoice-steps/InvoiceStepPatien
 import { InvoiceStepProducts } from "@/components/invoice-steps/InvoiceStepProducts";
 import { InvoiceStepPayment } from "@/components/invoice-steps/InvoiceStepPayment";
 import { InvoiceStepSummary } from "@/components/invoice-steps/InvoiceStepSummary";
-import { InvoiceFormProvider, useInvoiceForm } from "@/components/invoice-steps/InvoiceFormContext";
+import { InvoiceFormProvider } from "@/components/invoice-steps/InvoiceFormContext";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Printer } from "lucide-react";
 
-const CreateInvoice: React.FC = () => {
+const CreateInvoiceContent: React.FC = () => {
   const { t, language } = useLanguageStore();
-  const invoiceForm = useInvoiceForm();
   const [currentStep, setCurrentStep] = useState(0);
   const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts">("glasses");
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
@@ -91,31 +91,34 @@ const CreateInvoice: React.FC = () => {
     }, 500);
   };
 
+  // We need to use useInvoiceForm here to access the form context
+  const { getValues } = useInvoiceForm();
+
   const previewInvoice = {
-    invoiceId: invoiceForm.getValues("workOrderId") || "PREVIEW",
+    invoiceId: getValues("workOrderId") || "PREVIEW",
     createdAt: new Date().toISOString(),
-    patientName: invoiceForm.getValues("patientName") || "Customer Name",
-    patientPhone: invoiceForm.getValues("patientPhone") || "",
-    patientId: invoiceForm.getValues("patientId"),
-    lensType: invoiceForm.getValues("lensType") || "",
-    lensPrice: invoiceForm.getValues("lensPrice") || 0,
-    coating: invoiceForm.getValues("coating") || "",
-    coatingPrice: invoiceForm.getValues("coatingPrice") || 0,
-    frameBrand: invoiceForm.getValues("frameBrand") || "",
-    frameModel: invoiceForm.getValues("frameModel") || "",
-    frameColor: invoiceForm.getValues("frameColor") || "",
-    framePrice: invoiceForm.getValues("framePrice") || 0,
-    discount: invoiceForm.getValues("discount") || 0,
-    deposit: invoiceForm.getValues("deposit") || 0,
-    total: invoiceForm.getValues("total") || 0,
-    remaining: invoiceForm.getValues("remaining") || 0,
-    paymentMethod: invoiceForm.getValues("paymentMethod") || "Cash",
-    isPaid: (invoiceForm.getValues("remaining") || 0) <= 0,
-    authNumber: invoiceForm.getValues("authNumber") || ""
+    patientName: getValues("patientName") || "Customer Name",
+    patientPhone: getValues("patientPhone") || "",
+    patientId: getValues("patientId"),
+    lensType: getValues("lensType") || "",
+    lensPrice: getValues("lensPrice") || 0,
+    coating: getValues("coating") || "",
+    coatingPrice: getValues("coatingPrice") || 0,
+    frameBrand: getValues("frameBrand") || "",
+    frameModel: getValues("frameModel") || "",
+    frameColor: getValues("frameColor") || "",
+    framePrice: getValues("framePrice") || 0,
+    discount: getValues("discount") || 0,
+    deposit: getValues("deposit") || 0,
+    total: getValues("total") || 0,
+    remaining: getValues("remaining") || 0,
+    paymentMethod: getValues("paymentMethod") || "Cash",
+    isPaid: (getValues("remaining") || 0) <= 0,
+    authNumber: getValues("authNumber") || ""
   };
 
   const handleSaveInvoice = () => {
-    const formData = invoiceForm.getValues();
+    const formData = getValues();
     const invoiceData = {
       patientId: formData.patientId,
       patientName: formData.patientName,
@@ -141,7 +144,7 @@ const CreateInvoice: React.FC = () => {
     };
     
     const invoiceId = addInvoice(invoiceData);
-    invoiceForm.setValue("workOrderId", invoiceId);
+    getValues("workOrderId", invoiceId);
     
     toast({
       title: t('success'),
@@ -155,120 +158,118 @@ const CreateInvoice: React.FC = () => {
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
 
   return (
-    <InvoiceFormProvider value={invoiceForm}>
-      <div className="py-6 max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className={`text-2xl font-bold flex items-center gap-2 ${textAlignClass}`}>
-            <FileText className="w-6 h-6 text-primary" />
-            {t('invoiceTitle')}
-          </h2>
-        </div>
+    <div className="py-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className={`text-2xl font-bold flex items-center gap-2 ${textAlignClass}`}>
+          <FileText className="w-6 h-6 text-primary" />
+          {t('invoiceTitle')}
+        </h2>
+      </div>
 
-        <div className="mb-8">
-          <div className="flex justify-between">
-            {steps.map((step, idx) => (
+      <div className="mb-8">
+        <div className="flex justify-between">
+          {steps.map((step, idx) => (
+            <div 
+              key={idx} 
+              className={`relative flex flex-col items-center ${idx === currentStep ? 'text-primary' : 'text-muted-foreground'}`}
+            >
               <div 
-                key={idx} 
-                className={`relative flex flex-col items-center ${idx === currentStep ? 'text-primary' : 'text-muted-foreground'}`}
+                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
+                ${idx === currentStep ? 'border-primary bg-primary text-white' : 
+                  idx < currentStep ? 'border-primary bg-primary/10 text-primary' : 'border-muted-foreground'}`}
               >
-                <div 
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
-                  ${idx === currentStep ? 'border-primary bg-primary text-white' : 
-                    idx < currentStep ? 'border-primary bg-primary/10 text-primary' : 'border-muted-foreground'}`}
-                >
-                  {idx < currentStep ? (
-                    <Check className="w-5 h-5" />
-                  ) : (
-                    <span>{idx + 1}</span>
-                  )}
-                </div>
-                <span className="mt-2 text-sm font-medium">{step.title}</span>
-                {idx < steps.length - 1 && (
-                  <div 
-                    className={`absolute top-5 left-10 w-[calc(100%-20px)] h-0.5 
-                    ${idx < currentStep ? 'bg-primary' : 'bg-muted-foreground/30'}`}
-                  />
+                {idx < currentStep ? (
+                  <Check className="w-5 h-5" />
+                ) : (
+                  <span>{idx + 1}</span>
                 )}
               </div>
-            ))}
-          </div>
-        </div>
-
-        <Card className="border border-muted-foreground/10 shadow-md">
-          <CardHeader className="bg-muted/30 border-b">
-            <CardTitle className="text-primary">
-              {steps[currentStep].title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <AnimatePresence custom={direction} mode="wait">
-              <motion.div
-                key={currentStep}
-                custom={direction}
-                variants={variants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="min-h-[400px]"
-              >
-                {currentStep === 0 && (
-                  <InvoiceStepPatient 
-                    invoiceType={invoiceType} 
-                    onInvoiceTypeChange={setInvoiceType} 
-                  />
-                )}
-
-                {currentStep === 1 && (
-                  <InvoiceStepProducts invoiceType={invoiceType} />
-                )}
-
-                {currentStep === 2 && (
-                  <InvoiceStepPayment />
-                )}
-
-                {currentStep === 3 && (
-                  <InvoiceStepSummary 
-                    setInvoicePrintOpen={setInvoicePrintOpen}
-                    setWorkOrderPrintOpen={setWorkOrderPrintOpen}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
-
-            <div className="flex justify-between mt-8 pt-4 border-t">
-              <Button 
-                variant="outline" 
-                onClick={prevStep} 
-                disabled={currentStep === 0}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                {t('previous')}
-              </Button>
-
-              {currentStep < steps.length - 1 ? (
-                <Button 
-                  onClick={nextStep} 
-                  className="flex items-center gap-2"
-                >
-                  {t('next')}
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              ) : (
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setCurrentStep(0)}
-                    className="flex items-center gap-2"
-                  >
-                    {t('newInvoice')}
-                  </Button>
-                </div>
+              <span className="mt-2 text-sm font-medium">{step.title}</span>
+              {idx < steps.length - 1 && (
+                <div 
+                  className={`absolute top-5 left-10 w-[calc(100%-20px)] h-0.5 
+                  ${idx < currentStep ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                />
               )}
             </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
       </div>
+
+      <Card className="border border-muted-foreground/10 shadow-md">
+        <CardHeader className="bg-muted/30 border-b">
+          <CardTitle className="text-primary">
+            {steps[currentStep].title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <AnimatePresence custom={direction} mode="wait">
+            <motion.div
+              key={currentStep}
+              custom={direction}
+              variants={variants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="min-h-[400px]"
+            >
+              {currentStep === 0 && (
+                <InvoiceStepPatient 
+                  invoiceType={invoiceType} 
+                  onInvoiceTypeChange={setInvoiceType} 
+                />
+              )}
+
+              {currentStep === 1 && (
+                <InvoiceStepProducts invoiceType={invoiceType} />
+              )}
+
+              {currentStep === 2 && (
+                <InvoiceStepPayment />
+              )}
+
+              {currentStep === 3 && (
+                <InvoiceStepSummary 
+                  setInvoicePrintOpen={setInvoicePrintOpen}
+                  setWorkOrderPrintOpen={setWorkOrderPrintOpen}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="flex justify-between mt-8 pt-4 border-t">
+            <Button 
+              variant="outline" 
+              onClick={prevStep} 
+              disabled={currentStep === 0}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {t('previous')}
+            </Button>
+
+            {currentStep < steps.length - 1 ? (
+              <Button 
+                onClick={nextStep} 
+                className="flex items-center gap-2"
+              >
+                {t('next')}
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCurrentStep(0)}
+                  className="flex items-center gap-2"
+                >
+                  {t('newInvoice')}
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <Sheet open={invoicePrintOpen} onOpenChange={setInvoicePrintOpen}>
         <SheetContent className="w-full sm:max-w-md overflow-y-auto print:w-full print:max-w-none">
@@ -313,17 +314,17 @@ const CreateInvoice: React.FC = () => {
           <div className="mt-6 print:mt-0">
             <WorkOrderPrint 
               invoice={previewInvoice}
-              patientName={invoiceForm.getValues("patientName") || ""}
-              patientPhone={invoiceForm.getValues("patientPhone") || ""}
-              rx={invoiceForm.getValues("rx")}
-              lensType={invoiceForm.getValues("lensType") || ""}
-              coating={invoiceForm.getValues("coating") || ""}
-              frame={invoiceForm.getValues("skipFrame") ? undefined : {
-                brand: invoiceForm.getValues("frameBrand") || "",
-                model: invoiceForm.getValues("frameModel") || "",
-                color: invoiceForm.getValues("frameColor") || "",
-                size: invoiceForm.getValues("frameSize") || "",
-                price: invoiceForm.getValues("framePrice") || 0
+              patientName={getValues("patientName") || ""}
+              patientPhone={getValues("patientPhone") || ""}
+              rx={getValues("rx")}
+              lensType={getValues("lensType") || ""}
+              coating={getValues("coating") || ""}
+              frame={getValues("skipFrame") ? undefined : {
+                brand: getValues("frameBrand") || "",
+                model: getValues("frameModel") || "",
+                color: getValues("frameColor") || "",
+                size: getValues("frameSize") || "",
+                price: getValues("framePrice") || 0
               }}
             />
           </div>
@@ -332,9 +333,17 @@ const CreateInvoice: React.FC = () => {
           </SheetFooter>
         </SheetContent>
       </Sheet>
+    </div>
+  );
+};
+
+// This is the main component that wraps the content with InvoiceFormProvider
+const CreateInvoice: React.FC = () => {
+  return (
+    <InvoiceFormProvider>
+      <CreateInvoiceContent />
     </InvoiceFormProvider>
   );
 };
 
 export default CreateInvoice;
-
