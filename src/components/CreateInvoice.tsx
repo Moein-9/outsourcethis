@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
@@ -15,7 +16,7 @@ import { ContactLensForm } from "@/components/ContactLensForm";
 import { LensSelector } from "@/components/LensSelector";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
-import { WorkOrderConfirmation } from "@/components/WorkOrderConfirmation";
+import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
 import { 
   User, Glasses, Package, FileText, CreditCard, Eye, Search, 
   Banknote, Plus, PackageCheck, EyeOff, ExternalLink,
@@ -94,11 +95,6 @@ const CreateInvoice: React.FC = () => {
   const [remaining, setRemaining] = useState(0);
   
   const [showMissingRxWarning, setShowMissingRxWarning] = useState(false);
-  
-  const [notes, setNotes] = useState("");
-  const [invoiceCreated, setInvoiceCreated] = useState(false);
-  const [createdInvoiceId, setCreatedInvoiceId] = useState<string | undefined>(undefined);
-  const [createdWorkOrderId, setCreatedWorkOrderId] = useState<string | undefined>(undefined);
   
   useEffect(() => {
     if (invoiceType === "glasses") {
@@ -311,8 +307,6 @@ const CreateInvoice: React.FC = () => {
   };
   
   const handleSaveInvoice = () => {
-    console.log("Saving invoice with notes:", notes);
-    
     let patientName = "";
     let patientPhone = "";
     let patientId = undefined;
@@ -399,7 +393,6 @@ const CreateInvoice: React.FC = () => {
         total,
         
         paymentMethod,
-        notes,
         ...paymentDetails
       };
     } else {
@@ -430,36 +423,18 @@ const CreateInvoice: React.FC = () => {
         total,
         
         paymentMethod,
-        notes,
         ...paymentDetails
       };
     }
     
-    console.log("Creating invoice with data:", invoiceData);
-    
     const invoiceId = addInvoice(invoiceData);
-    console.log("Invoice created with ID:", invoiceId);
-    
-    let workOrderId;
-    if (patientId) {
-      const workOrderData = {
-        patientId,
-        lensType: invoiceType === "glasses" ? selectedLensType : undefined,
-        notes,
-      };
-      
-      workOrderId = useInvoiceStore.getState().addWorkOrder?.(workOrderData);
-      console.log("Work order created with ID:", workOrderId);
-    }
-    
-    setCreatedInvoiceId(invoiceId);
-    setCreatedWorkOrderId(workOrderId);
-    setInvoiceCreated(true);
     
     toast({
       title: t('success'),
       description: `${t('invoiceSavedSuccess')} ${invoiceId}.`,
     });
+    
+    resetForm();
   };
   
   const resetForm = () => {
@@ -543,11 +518,6 @@ const CreateInvoice: React.FC = () => {
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
-  
-  const handleNotesChange = (value: string) => {
-    console.log("Notes changed:", value);
-    setNotes(value);
-  };
   
   return (
     <div className="py-6 max-w-7xl mx-auto">
@@ -1108,20 +1078,32 @@ const CreateInvoice: React.FC = () => {
               </div>
             )}
             
-            <div className="mt-8">
-              <WorkOrderConfirmation
-                previewInvoice={previewInvoice}
-                currentPatient={currentPatient}
-                manualName={manualName}
-                manualPhone={manualPhone}
-                handleSaveInvoice={handleSaveInvoice}
-                handlePrintInvoice={() => setInvoicePrintOpen(true)}
-                invoiceCreated={invoiceCreated}
-                createdInvoiceId={createdInvoiceId}
-                createdWorkOrderId={createdWorkOrderId}
-                onNotesChange={handleNotesChange}
-                notes={notes}
+            <div className="mt-8 flex justify-between">
+              <CustomPrintWorkOrderButton 
+                workOrder={previewInvoice}
+                invoice={previewInvoice}
+                patient={currentPatient || { name: manualName, phone: manualPhone }}
+                className="flex items-center gap-2"
               />
+              
+              <div className={`${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={() => setInvoicePrintOpen(true)}
+                >
+                  <Receipt className="w-4 h-4" />
+                  {t('previewInvoice')}
+                </Button>
+                
+                <Button 
+                  className="flex items-center gap-2"
+                  onClick={handleSaveInvoice}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  {t('saveAndPrint')}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -1259,14 +1241,13 @@ const CreateInvoice: React.FC = () => {
           </SheetHeader>
           <div className="mt-6 print:mt-0">
             <WorkOrderPrint 
-              invoice={{...previewInvoice, notes}}
+              invoice={previewInvoice}
               patientName={currentPatient?.name || manualName}
               patientPhone={currentPatient?.phone || manualPhone}
               rx={currentPatient?.rx}
               lensType={selectedLensType?.name || ""}
               coating={selectedCoating?.name || ""}
               frame={!skipFrame ? selectedFrame : undefined}
-              notes={notes}
             />
           </div>
           <SheetFooter className="print:hidden mt-4">
@@ -1291,7 +1272,7 @@ const CreateInvoice: React.FC = () => {
           </SheetHeader>
           <div className="mt-6 print:mt-0">
             <ReceiptInvoice 
-              invoice={{...previewInvoice, notes}}
+              invoice={previewInvoice}
               isPrintable={true}
             />
           </div>

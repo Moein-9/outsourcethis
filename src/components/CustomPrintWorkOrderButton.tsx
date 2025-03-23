@@ -1,7 +1,7 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer, FileText, Save } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
 import { 
@@ -9,13 +9,9 @@ import {
   DialogContent, 
   DialogTrigger,
   DialogTitle,
-  DialogDescription,
-  DialogFooter
+  DialogDescription
 } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
-import { toast } from '@/components/ui/use-toast';
-import { Invoice } from '@/store/invoiceStore';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -36,38 +32,14 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
-  const [notes, setNotes] = useState(workOrder?.notes || "");
-  const receiptRef = useRef<HTMLDivElement>(null);
-  
-  console.log("CustomPrintWorkOrderButton: Initial render with workOrder", { 
-    workOrderId: workOrder?.id,
-    workOrderNotes: workOrder?.notes,
-    passedNotes: notes
-  });
   
   const handlePrint = () => {
-    console.log("CustomPrintWorkOrderButton: Printing work order", { 
-      workOrderId: workOrder?.id, 
-      invoiceId: invoice?.invoiceId, 
-      patientName: patient?.name,
-      notes
-    });
-    
+    console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
     setOpen(false); // Close dialog before printing
-    
-    // Add notes to the workOrder object
-    const workOrderWithNotes = {
-      ...workOrder,
-      notes
-    };
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrderWithNotes, invoice, patient);
-      toast({
-        title: t('success'),
-        description: t('workOrderPrinted'),
-      });
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
     }, 300);
   };
   
@@ -79,48 +51,29 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
           size={size}
           className={`gap-1 ${className}`}
         >
-          <FileText className="h-4 w-4" />
+          <Printer className="h-4 w-4" />
           {t('printWorkOrder')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto p-4">
-        <div className="p-4 flex flex-col items-center">
-          <DialogTitle className="text-xl mb-2">{t('workOrderPreview')}</DialogTitle>
-          <DialogDescription className="mb-4 text-center">
+      <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto p-0">
+        <div className="p-6 flex flex-col items-center">
+          <DialogTitle className="sr-only">{t('workOrderPreview')}</DialogTitle>
+          <DialogDescription className="sr-only">
             {t('previewBeforePrinting')}
           </DialogDescription>
           
-          <div className="w-full max-w-md mb-4">
-            <label htmlFor="notes" className="text-sm font-medium mb-2 block">
-              {t("specialInstructions")}:
-            </label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder={t("enterSpecialInstructions")}
-              className="resize-none min-h-[100px] mb-4"
-            />
-          </div>
-          
-          <div className="w-full max-w-[80mm] bg-white p-0 border rounded shadow-sm mb-4" ref={receiptRef}>
+          <div className="w-full max-w-[80mm] bg-white p-0 border rounded shadow-sm mb-4">
             <CustomWorkOrderReceipt 
-              workOrder={{...workOrder, notes}} 
+              workOrder={workOrder} 
               invoice={invoice} 
               patient={patient}
               isPrintable={false}
             />
           </div>
-          
-          <DialogFooter className="w-full flex flex-wrap justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)} className="mt-2">
-              {t('cancel')}
-            </Button>
-            <Button onClick={handlePrint} className="mt-2 gap-2">
-              <Printer className="h-4 w-4" />
-              {t('print')}
-            </Button>
-          </DialogFooter>
+          <Button onClick={handlePrint} className="mt-4 gap-2">
+            <Printer className="h-4 w-4" />
+            {t('print')}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

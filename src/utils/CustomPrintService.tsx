@@ -7,7 +7,7 @@ import { useLanguageStore } from '@/store/languageStore';
 import { useInventoryStore } from '@/store/inventoryStore';
 
 export const CustomPrintService = {
-  printWorkOrder: (workOrder: any, invoice?: any, patient?: any): boolean => {
+  printWorkOrder: (workOrder: any, invoice?: any, patient?: any) => {
     console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
     
     // Create a new window for printing
@@ -19,7 +19,7 @@ export const CustomPrintService = {
         description: "Failed to open print window. Please check your browser settings.",
         variant: "destructive"
       });
-      return false;
+      return;
     }
 
     // Create a container for the receipt
@@ -212,7 +212,5 @@ export const CustomPrintService = {
         description: t("printJobSentDescription"),
       });
     }, 2000);
-    
-    return true;
   }
 };
