@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
@@ -528,7 +529,7 @@ const CreateInvoice: React.FC = () => {
         axis: "-",
         bc: "-",
         dia: "14.2"
-      },
+      }
     });
     
     setShowMissingRxWarning(false);
@@ -885,3 +886,283 @@ const CreateInvoice: React.FC = () => {
                             </tr>
                           </tbody>
                         </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="bg-white rounded-lg p-6 border shadow-sm">
+              <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
+                <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
+                  <Eye className="w-5 h-5" />
+                  {t('contactLensesSection')}
+                </h3>
+              </div>
+              
+              <ContactLensSelector
+                rxData={contactLensRx}
+                onSelection={handleContactLensSelection}
+              />
+              
+              {contactLensItems.length > 0 && (
+                <div className="mt-4 p-3 border rounded-lg bg-primary/5 border-primary/20">
+                  <h4 className={`font-medium text-primary mb-2 flex items-center ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
+                    <PackageCheck className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                    {t('selectedContactLenses')}
+                  </h4>
+                  <div className="space-y-2">
+                    {contactLensItems.map((lens, index) => (
+                      <div key={index} className="flex justify-between p-2 border-b last:border-0">
+                        <div className="font-medium">
+                          {lens.brand} {lens.type} {lens.power} {lens.color && `(${lens.color})`}
+                        </div>
+                        <div className="text-right">{lens.price.toFixed(2)} {t('kwd')}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <div className="bg-white rounded-lg p-6 border shadow-sm">
+            <div className="border-b border-primary/30 pb-3 mb-4">
+              <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
+                <CreditCard className="w-5 h-5" />
+                {t('paymentInformation')}
+              </h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="discount" className={`text-muted-foreground block ${textAlignClass}`}>{t('discount')} ({t('kwd')})</Label>
+                  <div className="flex items-center">
+                    <Input
+                      id="discount"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={discount}
+                      onChange={(e) => setDiscount(Number(e.target.value))}
+                      className={textAlignClass}
+                    />
+                    <BadgePercent className="w-4 h-4 text-muted-foreground ml-2" />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="deposit" className={`text-muted-foreground block ${textAlignClass}`}>{t('deposit')} ({t('kwd')})</Label>
+                  <div className="flex items-center">
+                    <Input
+                      id="deposit"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={deposit}
+                      onChange={(e) => setDeposit(Number(e.target.value))}
+                      className={textAlignClass}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handlePayInFull}
+                      className={`ml-2 text-xs ${language === 'ar' ? 'mr-2' : ''}`}
+                    >
+                      {t('payFull')}
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="paymentMethod" className={`text-muted-foreground block ${textAlignClass}`}>{t('paymentMethod')}</Label>
+                  <div>
+                    <select
+                      id="paymentMethod"
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className={`w-full p-2 rounded-md border border-input ${textAlignClass}`}
+                    >
+                      <option value="">{t('selectPaymentMethod')}</option>
+                      <option value="Cash">{t('cash')}</option>
+                      <option value="Visa">Visa</option>
+                      <option value="MasterCard">MasterCard</option>
+                      <option value="KNET">KNET</option>
+                      <option value="كي نت">كي نت</option>
+                    </select>
+                  </div>
+                </div>
+                
+                {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت" || paymentMethod === "KNET") && (
+                  <div className="space-y-2">
+                    <Label htmlFor="authNumber" className={`text-muted-foreground block ${textAlignClass}`}>{t('authNumber')}</Label>
+                    <Input
+                      id="authNumber"
+                      value={authNumber}
+                      onChange={(e) => setAuthNumber(e.target.value)}
+                      className={textAlignClass}
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-4">
+                <div className="bg-muted/20 rounded-lg p-4 border">
+                  <h4 className={`font-medium text-primary mb-3 ${textAlignClass}`}>{t('orderSummary')}</h4>
+                  
+                  <div className="space-y-2">
+                    {invoiceType === "glasses" && (
+                      <>
+                        {selectedLensType && (
+                          <div className="flex justify-between text-sm">
+                            <span>{t('lenses')}: {selectedLensType.name}</span>
+                            <span>{selectedLensType.price.toFixed(2)} {t('kwd')}</span>
+                          </div>
+                        )}
+                        
+                        {selectedCoating && (
+                          <div className="flex justify-between text-sm">
+                            <span>{t('coating')}: {selectedCoating.name}</span>
+                            <span>{selectedCoating.price.toFixed(2)} {t('kwd')}</span>
+                          </div>
+                        )}
+                        
+                        {!skipFrame && selectedFrame.brand && (
+                          <div className="flex justify-between text-sm">
+                            <span>{t('frame')}: {selectedFrame.brand} {selectedFrame.model}</span>
+                            <span>{frameTotal.toFixed(2)} {t('kwd')}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    
+                    {invoiceType === "contacts" && contactLensItems.length > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>{t('contactLenses')}: {contactLensItems.length} {t('items')}</span>
+                        <span>{contactLensItems.reduce((sum, lens) => sum + lens.price, 0).toFixed(2)} {t('kwd')}</span>
+                      </div>
+                    )}
+                    
+                    {discount > 0 && (
+                      <div className="flex justify-between text-sm text-destructive">
+                        <span>{t('discount')}</span>
+                        <span>-{discount.toFixed(2)} {t('kwd')}</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between border-t pt-2 font-medium">
+                      <span>{t('total')}</span>
+                      <span>{total.toFixed(2)} {t('kwd')}</span>
+                    </div>
+                    
+                    {deposit > 0 && (
+                      <div className="flex justify-between text-primary">
+                        <span>{t('deposit')}</span>
+                        <span>{deposit.toFixed(2)} {t('kwd')}</span>
+                      </div>
+                    )}
+                    
+                    <div className={`flex justify-between border-t pt-2 font-bold ${remaining > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      <span>{t('remaining')}</span>
+                      <span>{remaining.toFixed(2)} {t('kwd')}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  {!showSavedDetails ? (
+                    <Button 
+                      type="button" 
+                      className="w-full gap-2" 
+                      onClick={handleSaveInvoice}
+                    >
+                      <Receipt className="w-5 h-5" />
+                      {t('saveInvoice')}
+                    </Button>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="bg-primary/10 border border-primary/20 rounded-md p-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-semibold">{t('invoiceNumber')}:</span>
+                          <span className="text-primary font-bold">{savedInvoiceId}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-semibold">{t('workOrderNumber')}:</span>
+                          <span className="text-primary font-bold">{savedWorkOrderId}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          className="gap-1" 
+                          onClick={handlePrintInvoice}
+                        >
+                          <Printer className="w-4 h-4" />
+                          {t('printInvoice')}
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          className="gap-1" 
+                          onClick={handlePrintWorkOrder}
+                        >
+                          <Printer className="w-4 h-4" />
+                          {t('printWorkOrder')}
+                        </Button>
+                      </div>
+                      
+                      <Button 
+                        type="button" 
+                        className="w-full gap-2" 
+                        onClick={handleCompleteTransaction}
+                      >
+                        <ClipboardCheck className="w-5 h-5" />
+                        {t('completeTransaction')}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="lg:col-span-1">
+          <div className="sticky top-6">
+            <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+              <div className="bg-primary text-primary-foreground p-4">
+                <h3 className={`text-lg font-semibold flex items-center gap-2 ${textAlignClass}`}>
+                  <Receipt className="w-5 h-5" />
+                  {t('invoicePreview')}
+                </h3>
+              </div>
+              
+              <div className="p-4 max-h-[calc(100vh-12rem)] overflow-y-auto">
+                <ReceiptInvoice invoice={previewInvoice} isPreview={true} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {invoicePrintOpen && (
+        <div className="hidden print:block">
+          <ReceiptInvoice invoice={{...previewInvoice, invoiceId: savedInvoiceId || ""}} />
+        </div>
+      )}
+      
+      {workOrderPrintOpen && (
+        <div className="hidden print:block">
+          <WorkOrderPrint workOrder={{...previewInvoice, workOrderId: savedWorkOrderId || ""}} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CreateInvoice;
