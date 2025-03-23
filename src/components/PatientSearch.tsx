@@ -733,7 +733,12 @@ export const PatientSearch: React.FC = () => {
                       <CardContent>
                         <PatientRxManager
                           patientId={selectedPatient.patientId}
-                          patientRx={selectedPatient.rx}
+                          patientName={selectedPatient.name}
+                          patientPhone={selectedPatient.phone}
+                          currentRx={selectedPatient.rx}
+                          rxHistory={selectedPatient.rxHistory}
+                          patientNotes={selectedPatient.patientNotes}
+                          onRxPrintRequest={handleDirectPrint}
                         />
                       </CardContent>
                     </Card>
