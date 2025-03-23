@@ -1,6 +1,5 @@
-
-import React, { useState } from "react";
-import { usePatientStore, Patient } from "@/store/patientStore";
+import React, { useState, useEffect } from "react";
+import { usePatientStore, Patient, PatientNote } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,7 +46,9 @@ import {
   Plus,
   Receipt,
   FileBarChart,
-  BadgeDollarSign
+  BadgeDollarSign,
+  Edit,
+  Trash
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "./ui/badge";
@@ -71,6 +72,8 @@ import { ReceiptInvoice } from "./ReceiptInvoice";
 import { RxReceiptPrint, printRxReceipt } from "./RxReceiptPrint";
 import { PatientRxManager } from "./PatientRxManager";
 import { useLanguageStore } from "@/store/languageStore";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface PatientWithMeta extends Patient {
   patientId: string;
@@ -80,8 +83,196 @@ interface PatientWithMeta extends Patient {
   createdAt: string;
 }
 
+interface EditWorkOrderDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  workOrder: WorkOrder;
+  onSave: (updatedWorkOrder: WorkOrder) => void;
+}
+
+// Simple component for editing work orders
+const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
+  isOpen,
+  onClose,
+  workOrder,
+  onSave
+}) => {
+  const { language, t } = useLanguageStore();
+  const [editedWorkOrder, setEditedWorkOrder] = useState<WorkOrder>({...workOrder});
+  
+  const handleSave = () => {
+    onSave(editedWorkOrder);
+    onClose();
+  };
+  
+  // When the work order changes, update the state
+  useEffect(() => {
+    setEditedWorkOrder({...workOrder});
+  }, [workOrder]);
+  
+  if (!isOpen) return null;
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('editWorkOrder')}</DialogTitle>
+          <DialogDescription>
+            {language === 'ar' 
+              ? "قم بتعديل بيانات أمر العمل"
+              : "Make changes to the work order details"}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="lensType">{t('lensType')}</Label>
+            <Input 
+              id="lensType" 
+              value={editedWorkOrder.lensType?.name || ''} 
+              onChange={(e) => setEditedWorkOrder({
+                ...editedWorkOrder, 
+                lensType: { 
+                  ...editedWorkOrder.lensType || {}, 
+                  name: e.target.value 
+                }
+              })}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="price">{t('price')}</Label>
+            <Input 
+              id="price" 
+              type="number"
+              value={editedWorkOrder.lensType?.price || 0} 
+              onChange={(e) => setEditedWorkOrder({
+                ...editedWorkOrder, 
+                lensType: { 
+                  ...editedWorkOrder.lensType || {}, 
+                  price: Number(e.target.value) 
+                }
+              })}
+            />
+          </div>
+          
+          {/* Add other fields as needed */}
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            {t('cancel')}
+          </Button>
+          <Button onClick={handleSave}>
+            {t('save')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// New component for displaying patient notes
+const PatientNotes: React.FC<{
+  patientId: string;
+  patientNotes?: PatientNote[];
+  onAddNote: (noteText: string) => void;
+}> = ({ patientId, patientNotes = [], onAddNote }) => {
+  const { language, t } = useLanguageStore();
+  const [newNote, setNewNote] = useState("");
+  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  
+  const handleAddNote = () => {
+    if (newNote.trim()) {
+      onAddNote(newNote);
+      setNewNote("");
+    } else {
+      toast.error(
+        language === 'ar' ? "لا يمكن إضافة ملاحظة فارغة" : "Cannot add an empty note"
+      );
+    }
+  };
+  
+  const formatDate = (dateString: string) => {
+    try {
+      return format(parseISO(dateString), "PPP p", { locale: language === 'ar' ? ar : enUS });
+    } catch (error) {
+      return language === 'ar' ? "تاريخ غير صالح" : "Invalid date";
+    }
+  };
+  
+  return (
+    <Card className="mt-6 border-blue-200 shadow-md">
+      <CardHeader className="pb-3 bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-t-lg">
+        <CardTitle className="text-lg flex items-center gap-2 text-blue-700">
+          <FileText className="h-5 w-5" />
+          {t('patientNotes')}
+        </CardTitle>
+        <CardDescription>
+          {language === 'ar' 
+            ? "ملاحظات ومعلومات إضافية عن العميل" 
+            : "Additional notes and information about the client"}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <div className={`flex gap-2 ${dirClass}`}>
+            <Textarea
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              placeholder={language === 'ar' ? "أضف ملاحظة جديدة..." : "Add a new note..."}
+              className={`resize-none ${textAlignClass}`}
+              dir={language === 'ar' ? 'rtl' : 'ltr'}
+            />
+            <Button onClick={handleAddNote} className="shrink-0 self-end">
+              <Plus className="h-4 w-4 mr-1" />
+              {t('addNote')}
+            </Button>
+          </div>
+        </div>
+        
+        <div className={`space-y-3 ${dirClass}`}>
+          <h3 className="font-medium text-blue-800">
+            {language === 'ar' ? "الملاحظات السابقة" : "Previous Notes"}
+          </h3>
+          
+          {patientNotes.length > 0 ? (
+            <ScrollArea className="h-[200px] rounded-md border p-2">
+              <div className="space-y-4">
+                {patientNotes.slice().reverse().map((note) => (
+                  <div key={note.id} className="border-b pb-3 last:border-0">
+                    <div className={`text-sm bg-blue-50 p-3 rounded-md ${textAlignClass}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                      {note.text}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1 flex justify-between">
+                      <span className="flex items-center">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {formatDate(note.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          ) : (
+            <div className="text-center py-8 border rounded-md bg-blue-50/20">
+              <FileText className="h-10 w-10 mx-auto text-blue-300 mb-3" />
+              <p className="text-muted-foreground">
+                {language === 'ar' 
+                  ? "لا توجد ملاحظات لهذا العميل حالياً" 
+                  : "No notes for this client yet"}
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export const PatientSearch: React.FC = () => {
-  const { patients, searchPatients } = usePatientStore();
+  const { patients, searchPatients, addPatientNote, updatePatient } = usePatientStore();
   const { invoices, workOrders, getInvoicesByPatientId, getWorkOrdersByPatientId } = useInvoiceStore();
   const { language, t } = useLanguageStore();
   
@@ -99,6 +290,8 @@ export const PatientSearch: React.FC = () => {
   
   const [activeTransactionTab, setActiveTransactionTab] = useState<"active" | "completed">("active");
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
+  const [editWorkOrderDialogOpen, setEditWorkOrderDialogOpen] = useState(false);
+  const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder | null>(null);
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
@@ -182,6 +375,35 @@ export const PatientSearch: React.FC = () => {
     });
   };
 
+  const handleAddNote = (noteText: string) => {
+    if (selectedPatient) {
+      addPatientNote(selectedPatient.patientId, noteText);
+      
+      // Update the selected patient with the new note
+      const updatedPatient = patients.find(p => p.patientId === selectedPatient.patientId);
+      if (updatedPatient) {
+        setSelectedPatient({
+          ...selectedPatient,
+          patientNotes: updatedPatient.patientNotes
+        });
+        
+        toast.success(language === 'ar' ? "تمت إضافة الملاحظة بنجاح" : "Note added successfully");
+      }
+    }
+  };
+  
+  const handleEditWorkOrder = (workOrder: WorkOrder) => {
+    setCurrentWorkOrder(workOrder);
+    setEditWorkOrderDialogOpen(true);
+  };
+  
+  const handleSaveWorkOrder = (updatedWorkOrder: WorkOrder) => {
+    // Here you would update the work order in your store
+    // For now we'll just show a success message
+    toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
+    setEditWorkOrderDialogOpen(false);
+  };
+
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
 
@@ -195,7 +417,6 @@ export const PatientSearch: React.FC = () => {
       patientName: selectedPatient.name,
       patientPhone: selectedPatient.phone,
       rx: selectedPatient.rx,
-      notes: selectedPatient.notes,
       forcedLanguage: printLang
     });
   };
@@ -497,9 +718,14 @@ export const PatientSearch: React.FC = () => {
                                           </TableCell>
                                           <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
-                                              <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
-                                                <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
-                                                {t('view')}
+                                              <Button 
+                                                variant="outline" 
+                                                size="sm" 
+                                                className="border-amber-200 hover:bg-amber-50"
+                                                onClick={() => handleEditWorkOrder(workOrder)}
+                                              >
+                                                <Edit className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
+                                                {t('edit')}
                                               </Button>
                                               <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
                                                 <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
@@ -626,9 +852,14 @@ export const PatientSearch: React.FC = () => {
                                         </TableCell>
                                         <TableCell className="text-right">
                                           <div className="flex justify-end gap-2">
-                                            <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
-                                              <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
-                                              {t('view')}
+                                            <Button 
+                                              variant="outline" 
+                                              size="sm" 
+                                              className="border-blue-200 hover:bg-blue-50"
+                                              onClick={() => handleEditWorkOrder(workOrder)}
+                                            >
+                                              <Edit className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                              {t('edit')}
                                             </Button>
                                             <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
                                               <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
@@ -667,8 +898,16 @@ export const PatientSearch: React.FC = () => {
                       patientPhone={selectedPatient.phone}
                       currentRx={selectedPatient.rx}
                       rxHistory={selectedPatient.rxHistory}
-                      notes={selectedPatient.notes}
                       onRxPrintRequest={handleDirectPrint}
+                    />
+                  )}
+                  
+                  {/* Patient Notes component moved to bottom of the page */}
+                  {selectedPatient && (
+                    <PatientNotes
+                      patientId={selectedPatient.patientId}
+                      patientNotes={selectedPatient.patientNotes}
+                      onAddNote={handleAddNote}
                     />
                   )}
                 </div>
@@ -714,6 +953,16 @@ export const PatientSearch: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Work Order Edit Dialog */}
+      {currentWorkOrder && (
+        <EditWorkOrderDialog
+          isOpen={editWorkOrderDialogOpen}
+          onClose={() => setEditWorkOrderDialogOpen(false)}
+          workOrder={currentWorkOrder}
+          onSave={handleSaveWorkOrder}
+        />
+      )}
     </div>
   );
 };

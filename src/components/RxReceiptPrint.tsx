@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { RxData } from "@/store/patientStore";
@@ -32,7 +33,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   
   const dirClass = isRtl ? 'rtl text-right' : 'ltr text-left';
 
-  // Format the prescription date from the RX object
+  // Format the prescription date from the RX object - using original RX date
   const formattedRxDate = rx.createdAt 
     ? format(parseISO(rx.createdAt), 'dd/MM/yyyy HH:mm')
     : format(new Date(), 'dd/MM/yyyy HH:mm');
@@ -130,7 +131,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
         <div className="bg-gray-800 text-white py-0.5 px-1 font-semibold text-[12px] mb-1 text-center print:bg-black print:text-white">
           {t("glassesCareTips")}
         </div>
-        <ul className={`list-disc px-6 space-y-0.5 text-[11px] font-bold ${dirClass}`}>
+        <ul className={`list-disc px-6 space-y-0.5 text-[12px] font-bold ${dirClass}`}>
           <li>{t("tip1")}</li>
           <li>{t("tip2")}</li>
           <li>{t("tip3")}</li>
@@ -192,12 +193,12 @@ export const RxLanguageDialog: React.FC<{
 };
 
 export const printRxReceipt = (props: RxReceiptPrintProps) => {
-  const { patientName, patientPhone, rx, notes, forcedLanguage } = props;
+  const { patientName, patientPhone, rx, forcedLanguage } = props;
   const { language: appLanguage, t } = useLanguageStore.getState();
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
   
-  // Format the prescription date from the RX object
+  // Format the prescription date from the RX object - using original RX date
   const formattedRxDate = rx.createdAt 
     ? format(parseISO(rx.createdAt), 'dd/MM/yyyy HH:mm')
     : format(new Date(), 'dd/MM/yyyy HH:mm');
@@ -254,7 +255,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       justify-content: space-between;
       border-bottom: 1px solid #ddd;
       padding: 1mm 0;
-      font-size: 11px;
+      font-size: 12px;
       margin: 0 7mm; /* Added more margin for better safety zone */
     }
     .field-label {
@@ -328,11 +329,11 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     .tips-list {
       padding-${isRtl ? 'right' : 'left'}: 5mm;
       margin: 1mm 8mm;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
     }
     .tips-list li {
-      margin-bottom: 1mm;
+      margin-bottom: 1.5mm;
     }
     .footer {
       text-align: center;
@@ -352,7 +353,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     }
     /* Print-specific styles to handle background colors */
     @media print {
-      .rx-title {
+      .rx-title, .tips-title {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         color-adjust: exact !important;
@@ -370,13 +371,6 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
         print-color-adjust: exact !important;
         color-adjust: exact !important;
         background-color: #eee !important;
-      }
-      .tips-title {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-        background-color: #000 !important;
-        color: white !important;
       }
     }
   </style>

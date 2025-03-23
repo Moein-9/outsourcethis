@@ -82,6 +82,16 @@ export const usePatientStore = create<PatientState>()(
         const patientId = `PT${Date.now()}`;
         const createdAt = new Date().toISOString();
         
+        // Convert notes from the text field to a PatientNote entry if provided
+        const patientNotes: PatientNote[] = [];
+        if (patient.notes && patient.notes.trim() !== '') {
+          patientNotes.push({
+            id: `note-${Date.now()}`,
+            text: patient.notes,
+            createdAt
+          });
+        }
+        
         set((state) => ({
           patients: [
             ...state.patients,
@@ -89,15 +99,15 @@ export const usePatientStore = create<PatientState>()(
               ...patient, 
               patientId, 
               createdAt,
-              patientNotes: patient.patientNotes || [],
+              patientNotes: [...(patient.patientNotes || []), ...patientNotes],
               rx: {
                 ...patient.rx,
-                createdAt: patient.rx.createdAt || new Date().toISOString() // Add creation date to initial RX
+                createdAt: patient.rx.createdAt || createdAt // Add creation date to initial RX
               },
               // Initialize contact lens RX if provided
               contactLensRx: patient.contactLensRx ? {
                 ...patient.contactLensRx,
-                createdAt: patient.contactLensRx.createdAt || new Date().toISOString()
+                createdAt: patient.contactLensRx.createdAt || createdAt
               } : undefined,
             }
           ]
