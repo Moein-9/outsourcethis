@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatientStore, Patient } from "@/store/patientStore";
@@ -19,8 +20,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardContent,
+  CardFooter 
+} from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plus, Check, ArrowRight } from "lucide-react";
+import { Plus, Check, ArrowRight, Edit, CheckCircle2 } from "lucide-react";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
@@ -126,7 +134,7 @@ export const PatientSearch: React.FC = () => {
     try {
       const updatedWorkOrder: WorkOrder = {
         ...workOrder,
-        status: 'completed',
+        status: 'completed' as 'completed',
         pickedUpAt: new Date().toISOString()
       };
       
@@ -220,28 +228,46 @@ export const PatientSearch: React.FC = () => {
                 </div>
                 
                 <div className="md:col-span-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <PatientPrescriptionDisplay 
-                      rx={selectedPatient.rx}
-                      rxHistory={selectedPatient.rxHistory}
-                      onPrintPrescription={() => setIsLanguageDialogOpen(true)}
-                    />
-                    <Button 
-                      variant="outline" 
-                      className="h-8 gap-1 absolute top-4 right-4"
-                      onClick={handleAddNewRx}
-                    >
-                      <Plus className="h-4 w-4" />
-                      {language === 'ar' ? "وصفة طبية جديدة" : "New RX"}
-                    </Button>
-                  </div>
+                  <Card className="mb-6">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-lg">
+                          {language === 'ar' ? "وصفة طبية" : "Prescription"}
+                        </CardTitle>
+                        <Button 
+                          variant="outline" 
+                          className="h-8 gap-1"
+                          onClick={handleAddNewRx}
+                        >
+                          <Plus className="h-4 w-4" />
+                          {language === 'ar' ? "وصفة طبية جديدة" : "New RX"}
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <PatientPrescriptionDisplay 
+                        rx={selectedPatient.rx}
+                        rxHistory={selectedPatient.rxHistory}
+                        onPrintPrescription={() => setIsLanguageDialogOpen(true)}
+                      />
+                    </CardContent>
+                  </Card>
                   
-                  <PatientTransactions 
-                    workOrders={patientWorkOrders}
-                    invoices={patientInvoices}
-                    onEditWorkOrder={handleEditWorkOrder}
-                    onMarkAsPickedUp={handleMarkAsPickedUp}
-                  />
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">
+                        {language === 'ar' ? "سجل المعاملات" : "Transaction History"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="overflow-x-hidden">
+                      <PatientTransactions 
+                        workOrders={patientWorkOrders}
+                        invoices={patientInvoices}
+                        onEditWorkOrder={handleEditWorkOrder}
+                        onMarkAsPickedUp={handleMarkAsPickedUp}
+                      />
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
               
