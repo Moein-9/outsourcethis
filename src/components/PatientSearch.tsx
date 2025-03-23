@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatientStore, Patient } from "@/store/patientStore";
@@ -44,7 +43,8 @@ export const PatientSearch: React.FC = () => {
     workOrders, 
     getInvoicesByPatientId, 
     getWorkOrdersByPatientId,
-    updateWorkOrder 
+    updateWorkOrder,
+    addWorkOrder
   } = useInvoiceStore();
   const { language } = useLanguageStore();
   
@@ -82,7 +82,7 @@ export const PatientSearch: React.FC = () => {
   
   const handleSearch = (searchTerm: string, visitDateFilter: string) => {
     if (!searchTerm.trim()) {
-      toast.error(language === 'ar' ? "الرجاء إدخال مصطلح البحث" : "Please enter a search term");
+      toast.error(language === 'ar' ? "الرجا�� إدخال مصطلح البحث" : "Please enter a search term");
       return;
     }
     

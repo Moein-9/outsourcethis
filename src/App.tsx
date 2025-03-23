@@ -1,32 +1,39 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "./components/theme-provider";
+import { Toaster } from "./components/ui/toaster";
+import { useLanguageStore } from "./store/languageStore";
+import { Layout } from "./components/Layout";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import ReportPage from "./pages/ReportPage";
-import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
+import RxManager from "./pages/RxManager";
 
-const queryClient = new QueryClient();
+function App() {
+  const { language, setLanguage } = useLanguageStore();
+  const [dir, setDir] = useState<"ltr" | "rtl">("ltr");
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/reports" element={<ReportPage />} />
-          <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  useEffect(() => {
+    setDir(language === "ar" ? "rtl" : "ltr");
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = language;
+  }, [language]);
+
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <div dir={dir} className={language === "ar" ? "font-cairo" : "font-inter"}>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Index />} />
+              <Route path="/rx-manager" element={<RxManager />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </Router>
+        <Toaster />
+      </div>
+    </ThemeProvider>
+  );
+}
 
 export default App;
