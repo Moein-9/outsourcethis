@@ -103,7 +103,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
           <div className="mb-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
             <div className="flex items-center gap-2 mb-2 text-indigo-700">
               <FileSymlink className="h-5 w-5" />
-              <span className="font-medium">{t("prescriptionInfo")}</span>
+              <span className="font-medium">{language === 'ar' ? "وصفة طبية جديدة" : "New Prescription"}</span>
             </div>
             <p className="text-sm text-slate-600">
               {language === 'ar' 
@@ -113,254 +113,234 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
           </div>
 
           <div className="grid grid-cols-1 gap-8">
-            {/* Eye Sections */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Right Eye (OD) */}
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <div className="flex items-center gap-2 mb-4 text-indigo-700">
-                  <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                    <span className="font-bold">OD</span>
-                  </div>
-                  <h3 className="font-medium text-lg">
-                    {language === 'ar' ? "العين اليمنى" : "Right Eye"}
-                  </h3>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">SPH</Label>
-                    <div className="col-span-4">
-                      <Select
-                        value={rx.sphereOD || "none"}
-                        onValueChange={(value) => setRx({ ...rx, sphereOD: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger className="border-slate-300 focus:ring-indigo-500">
-                          <SelectValue placeholder="Select SPH" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t("choose")}</SelectItem>
-                          {generateDiopterOptions().map((value) => (
-                            <SelectItem key={`sph-od-${value}`} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">CYL</Label>
-                    <div className="col-span-4">
-                      <Select
-                        value={rx.cylOD || "none"}
-                        onValueChange={(value) => setRx({ ...rx, cylOD: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger className="border-slate-300 focus:ring-indigo-500">
-                          <SelectValue placeholder="Select CYL" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t("choose")}</SelectItem>
-                          {generateDiopterOptions().map((value) => (
-                            <SelectItem key={`cyl-od-${value}`} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">AXIS</Label>
-                    <div className="col-span-4">
-                      <Select
-                        value={rx.axisOD || "none"}
-                        onValueChange={(value) => setRx({ ...rx, axisOD: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger className="border-slate-300 focus:ring-indigo-500">
-                          <SelectValue placeholder="Select AXIS" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t("choose")}</SelectItem>
-                          {generateAxisOptions().map((value) => (
-                            <SelectItem key={`axis-od-${value}`} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">ADD</Label>
-                    <div className="col-span-4">
-                      <Select
-                        value={rx.addOD || "none"}
-                        onValueChange={(value) => setRx({ ...rx, addOD: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger className="border-slate-300 focus:ring-indigo-500">
-                          <SelectValue placeholder="Select ADD" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t("none")}</SelectItem>
-                          {generateAddOptions().filter(v => v !== "none").map((value) => (
-                            <SelectItem key={`add-od-${value}`} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">PD</Label>
-                    <div className="col-span-4">
-                      <Select
-                        value={rx.pdRight || "none"}
-                        onValueChange={(value) => setRx({ ...rx, pdRight: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger className="border-slate-300 focus:ring-indigo-500">
-                          <SelectValue placeholder="Select PD" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t("choose")}</SelectItem>
-                          {generatePdOptions().map((value) => (
-                            <SelectItem key={`pd-od-${value}`} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Left Eye (OS) */}
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <div className="flex items-center gap-2 mb-4 text-purple-700">
-                  <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-                    <span className="font-bold">OS</span>
-                  </div>
-                  <h3 className="font-medium text-lg">
-                    {language === 'ar' ? "العين اليسرى" : "Left Eye"}
-                  </h3>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">SPH</Label>
-                    <div className="col-span-4">
-                      <Select
-                        value={rx.sphereOS || "none"}
-                        onValueChange={(value) => setRx({ ...rx, sphereOS: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger className="border-slate-300 focus:ring-purple-500">
-                          <SelectValue placeholder="Select SPH" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t("choose")}</SelectItem>
-                          {generateDiopterOptions().map((value) => (
-                            <SelectItem key={`sph-os-${value}`} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">CYL</Label>
-                    <div className="col-span-4">
-                      <Select
-                        value={rx.cylOS || "none"}
-                        onValueChange={(value) => setRx({ ...rx, cylOS: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger className="border-slate-300 focus:ring-purple-500">
-                          <SelectValue placeholder="Select CYL" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t("choose")}</SelectItem>
-                          {generateDiopterOptions().map((value) => (
-                            <SelectItem key={`cyl-os-${value}`} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">AXIS</Label>
-                    <div className="col-span-4">
-                      <Select
-                        value={rx.axisOS || "none"}
-                        onValueChange={(value) => setRx({ ...rx, axisOS: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger className="border-slate-300 focus:ring-purple-500">
-                          <SelectValue placeholder="Select AXIS" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t("choose")}</SelectItem>
-                          {generateAxisOptions().map((value) => (
-                            <SelectItem key={`axis-os-${value}`} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">ADD</Label>
-                    <div className="col-span-4">
-                      <Select
-                        value={rx.addOS || "none"}
-                        onValueChange={(value) => setRx({ ...rx, addOS: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger className="border-slate-300 focus:ring-purple-500">
-                          <SelectValue placeholder="Select ADD" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t("none")}</SelectItem>
-                          {generateAddOptions().filter(v => v !== "none").map((value) => (
-                            <SelectItem key={`add-os-${value}`} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">PD</Label>
-                    <div className="col-span-4">
-                      <Select
-                        value={rx.pdLeft || "none"}
-                        onValueChange={(value) => setRx({ ...rx, pdLeft: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger className="border-slate-300 focus:ring-purple-500">
-                          <SelectValue placeholder="Select PD" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t("choose")}</SelectItem>
-                          {generatePdOptions().map((value) => (
-                            <SelectItem key={`pd-os-${value}`} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
+            {/* Horizontal Table Layout */}
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse ltr">
+                  <thead>
+                    <tr className="bg-slate-50">
+                      <th className="border border-slate-200 p-2 text-sm font-medium text-slate-700"></th>
+                      <th className="border border-slate-200 p-2 text-sm font-medium text-slate-700">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <div className="h-3 w-3 rounded-full bg-indigo-500"></div>
+                          <span>{t("rightEye")} (OD)</span>
+                        </div>
+                      </th>
+                      <th className="border border-slate-200 p-2 text-sm font-medium text-slate-700">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <div className="h-3 w-3 rounded-full bg-rose-500"></div>
+                          <span>{t("leftEye")} (OS)</span>
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* SPH Row */}
+                    <tr>
+                      <td className="border border-slate-200 p-2 font-medium text-slate-700 bg-slate-50">SPH</td>
+                      <td className="border border-slate-200 p-2">
+                        <Select
+                          value={rx.sphereOD || "none"}
+                          onValueChange={(value) => setRx({ ...rx, sphereOD: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger className="border-slate-300 focus:ring-indigo-500">
+                            <SelectValue placeholder="Select SPH" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("choose")}</SelectItem>
+                            {generateDiopterOptions().map((value) => (
+                              <SelectItem key={`sph-od-${value}`} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="border border-slate-200 p-2">
+                        <Select
+                          value={rx.sphereOS || "none"}
+                          onValueChange={(value) => setRx({ ...rx, sphereOS: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger className="border-slate-300 focus:ring-rose-500">
+                            <SelectValue placeholder="Select SPH" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("choose")}</SelectItem>
+                            {generateDiopterOptions().map((value) => (
+                              <SelectItem key={`sph-os-${value}`} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                    </tr>
+                    
+                    {/* CYL Row */}
+                    <tr>
+                      <td className="border border-slate-200 p-2 font-medium text-slate-700 bg-slate-50">CYL</td>
+                      <td className="border border-slate-200 p-2">
+                        <Select
+                          value={rx.cylOD || "none"}
+                          onValueChange={(value) => setRx({ ...rx, cylOD: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger className="border-slate-300 focus:ring-indigo-500">
+                            <SelectValue placeholder="Select CYL" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("choose")}</SelectItem>
+                            {generateDiopterOptions().map((value) => (
+                              <SelectItem key={`cyl-od-${value}`} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="border border-slate-200 p-2">
+                        <Select
+                          value={rx.cylOS || "none"}
+                          onValueChange={(value) => setRx({ ...rx, cylOS: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger className="border-slate-300 focus:ring-rose-500">
+                            <SelectValue placeholder="Select CYL" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("choose")}</SelectItem>
+                            {generateDiopterOptions().map((value) => (
+                              <SelectItem key={`cyl-os-${value}`} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                    </tr>
+                    
+                    {/* AXIS Row */}
+                    <tr>
+                      <td className="border border-slate-200 p-2 font-medium text-slate-700 bg-slate-50">AXIS</td>
+                      <td className="border border-slate-200 p-2">
+                        <Select
+                          value={rx.axisOD || "none"}
+                          onValueChange={(value) => setRx({ ...rx, axisOD: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger className="border-slate-300 focus:ring-indigo-500">
+                            <SelectValue placeholder="Select AXIS" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("choose")}</SelectItem>
+                            {generateAxisOptions().map((value) => (
+                              <SelectItem key={`axis-od-${value}`} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="border border-slate-200 p-2">
+                        <Select
+                          value={rx.axisOS || "none"}
+                          onValueChange={(value) => setRx({ ...rx, axisOS: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger className="border-slate-300 focus:ring-rose-500">
+                            <SelectValue placeholder="Select AXIS" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("choose")}</SelectItem>
+                            {generateAxisOptions().map((value) => (
+                              <SelectItem key={`axis-os-${value}`} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                    </tr>
+                    
+                    {/* ADD Row */}
+                    <tr>
+                      <td className="border border-slate-200 p-2 font-medium text-slate-700 bg-slate-50">ADD</td>
+                      <td className="border border-slate-200 p-2">
+                        <Select
+                          value={rx.addOD || "none"}
+                          onValueChange={(value) => setRx({ ...rx, addOD: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger className="border-slate-300 focus:ring-indigo-500">
+                            <SelectValue placeholder="Select ADD" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("none")}</SelectItem>
+                            {generateAddOptions().filter(v => v !== "none").map((value) => (
+                              <SelectItem key={`add-od-${value}`} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="border border-slate-200 p-2">
+                        <Select
+                          value={rx.addOS || "none"}
+                          onValueChange={(value) => setRx({ ...rx, addOS: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger className="border-slate-300 focus:ring-rose-500">
+                            <SelectValue placeholder="Select ADD" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("none")}</SelectItem>
+                            {generateAddOptions().filter(v => v !== "none").map((value) => (
+                              <SelectItem key={`add-os-${value}`} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                    </tr>
+                    
+                    {/* PD Row */}
+                    <tr>
+                      <td className="border border-slate-200 p-2 font-medium text-slate-700 bg-slate-50">PD</td>
+                      <td className="border border-slate-200 p-2">
+                        <Select
+                          value={rx.pdRight || "none"}
+                          onValueChange={(value) => setRx({ ...rx, pdRight: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger className="border-slate-300 focus:ring-indigo-500">
+                            <SelectValue placeholder="Select PD" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("choose")}</SelectItem>
+                            {generatePdOptions().map((value) => (
+                              <SelectItem key={`pd-od-${value}`} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="border border-slate-200 p-2">
+                        <Select
+                          value={rx.pdLeft || "none"}
+                          onValueChange={(value) => setRx({ ...rx, pdLeft: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger className="border-slate-300 focus:ring-rose-500">
+                            <SelectValue placeholder="Select PD" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("choose")}</SelectItem>
+                            {generatePdOptions().map((value) => (
+                              <SelectItem key={`pd-os-${value}`} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
