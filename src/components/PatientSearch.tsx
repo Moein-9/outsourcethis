@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -184,7 +185,7 @@ export const PatientSearch: React.FC = () => {
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
 
-    const handleDirectPrint = (language?: 'en' | 'ar') => {
+  const handleDirectPrint = (language?: 'en' | 'ar') => {
     if (!selectedPatient) return;
     
     const printLang = language || useLanguageStore.getState().language;
@@ -675,4 +676,44 @@ export const PatientSearch: React.FC = () => {
               
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsProfileOpen(false)}>
-                  {t('
+                  {t('close')}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isLanguageDialogOpen} onOpenChange={setIsLanguageDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'ar' ? "اختر لغة الطباعة" : "Select Print Language"}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? "اختر لغة للطباعة الوصفة الطبية" : "Choose a language for printing the prescription"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2" 
+              onClick={() => handleLanguageSelection('ar')}
+            >
+              <span className="text-2xl">🇰🇼</span>
+              <span>عربي</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2" 
+              onClick={() => handleLanguageSelection('en')}
+            >
+              <span className="text-2xl">🇬🇧</span>
+              <span>English</span>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
