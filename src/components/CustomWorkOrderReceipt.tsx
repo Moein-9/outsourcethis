@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { MoenLogo, storeInfo } from "@/assets/logo";
@@ -11,6 +12,7 @@ interface CustomWorkOrderReceiptProps {
   patient?: any;
   isPrintable?: boolean;
   isInvoice?: boolean;
+  notes?: string;
 }
 
 export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
@@ -18,7 +20,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   invoice,
   patient,
   isPrintable = false,
-  isInvoice = false
+  isInvoice = false,
+  notes = ""
 }) => {
   const { language, t } = useLanguageStore();
   const { lensTypes, lensCoatings } = useInventoryStore();
@@ -346,7 +349,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         
         <div className="border rounded p-1 min-h-16">
-          
+          {notes ? (
+            <p className="text-xs whitespace-pre-wrap">{notes}</p>
+          ) : null}
         </div>
       </div>
 

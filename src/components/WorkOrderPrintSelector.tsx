@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,9 @@ interface WorkOrderPrintSelectorProps {
   contactLensRx?: any;
   trigger?: React.ReactNode;
   thermalOnly?: boolean;
+  notes?: string;
+  isInvoice?: boolean;
+  onPrintComplete?: () => void;
 }
 
 export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
@@ -47,7 +51,10 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
-  thermalOnly = false
+  thermalOnly = false,
+  notes = "",
+  isInvoice = false,
+  onPrintComplete
 }) => {
   const { t, language } = useLanguageStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -79,19 +86,26 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           coating,
           frame,
           contactLenses,
-          contactLensRx
+          contactLensRx,
+          notes,
+          isInvoice
         });
         
         setTimeout(() => {
           setPrintingInProgress(false);
           setIsDialogOpen(false);
           toast.success(t("printingCompleted"));
+          
+          // Call the onPrintComplete callback if provided
+          if (onPrintComplete) {
+            onPrintComplete();
+          }
         }, 1000);
       } else {
         const a4Content = `
           <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
             <div style="text-align: center; margin-bottom: 10mm;">
-              <h1 style="font-size: 24px; margin-bottom: 5mm;">${t("workOrder")}</h1>
+              <h1 style="font-size: 24px; margin-bottom: 5mm;">${isInvoice ? t("invoice") : t("workOrder")}</h1>
               <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.invoiceId}</p>
               <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
             </div>
@@ -167,6 +181,13 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
               <p><strong>${t("remaining")}:</strong> ${(invoice.total - invoice.deposit).toFixed(3)} ${t("currency")}</p>
             </div>
             
+            ${notes ? `
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("notes")}</h2>
+              <p style="white-space: pre-wrap;">${notes}</p>
+            </div>
+            ` : ''}
+            
             <div style="margin-top: 20mm; display: flex; justify-content: space-between;">
               <div>
                 <p style="font-weight: bold; margin-bottom: 30px;">${t("technicianSignature")}</p>
@@ -182,11 +203,16 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           </div>
         `;
         
-        const htmlContent = PrintService.prepareA4Document(a4Content, t("workOrder"));
+        const htmlContent = PrintService.prepareA4Document(a4Content, isInvoice ? t("invoice") : t("workOrder"));
         PrintService.printHtml(htmlContent, 'a4', () => {
           setPrintingInProgress(false);
           setIsDialogOpen(false);
           toast.success(t("printingCompleted"));
+          
+          // Call the onPrintComplete callback if provided
+          if (onPrintComplete) {
+            onPrintComplete();
+          }
         });
       }
     } catch (error) {
@@ -195,6 +221,18 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
       toast.error(t("printingFailed"));
     }
   };
+  
+  // If this component is being used within the workflow, trigger print immediately
+  React.useEffect(() => {
+    if (onPrintComplete) {
+      // Auto-select receipt format if not already selected
+      if (!selectedFormat) {
+        setSelectedFormat('receipt');
+      }
+      // Initiate printing
+      handlePrint();
+    }
+  }, []);
   
   return (
     <>
