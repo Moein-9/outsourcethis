@@ -547,6 +547,154 @@ export const PatientSearch: React.FC = () => {
                 </div>
                 
                 <div className="md:col-span-2">
+                  <Card className="border-blue-200 shadow-md mb-6">
+                    <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
+                      <CardTitle className="text-lg flex items-center gap-2 text-blue-700">
+                        <Receipt className="h-5 w-5" />
+                        {language === 'ar' ? "الوصفة الطبية" : "Prescription Information"}
+                      </CardTitle>
+                      <CardDescription>
+                        {language === 'ar' ? "بيانات الوصفة الطبية للنظارات" : "Glasses prescription information"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Tabs defaultValue="current" className="w-full">
+                        <TabsList className="w-full mb-4 grid grid-cols-2 bg-blue-100/50">
+                          <TabsTrigger value="current" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
+                            {language === 'ar' ? "الوصفة الحالية" : "Current Prescription"}
+                          </TabsTrigger>
+                          <TabsTrigger value="history" className="data-[state=active]:bg-indigo-500 data-[state=active]:text-white">
+                            {language === 'ar' ? "سجل الوصفات" : "Prescription History"}
+                          </TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="current" className="mt-0">
+                          <div className="rounded-md border overflow-hidden shadow-sm">
+                            <Table>
+                              <TableHeader className="bg-blue-50">
+                                <TableRow>
+                                  <TableHead></TableHead>
+                                  <TableHead>{language === 'ar' ? "قوة العدسة" : "SPH"}</TableHead>
+                                  <TableHead>{language === 'ar' ? "الاسطوانة" : "CYL"}</TableHead>
+                                  <TableHead>{language === 'ar' ? "المحور" : "AXIS"}</TableHead>
+                                  <TableHead>{language === 'ar' ? "إضافة" : "ADD"}</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow className="bg-blue-50/30">
+                                  <TableCell className="font-medium">
+                                    {language === 'ar' ? "العين اليمنى (OD)" : "Right Eye (OD)"}
+                                  </TableCell>
+                                  <TableCell>{selectedPatient.rx.sphereOD || '-'}</TableCell>
+                                  <TableCell>{selectedPatient.rx.cylOD || '-'}</TableCell>
+                                  <TableCell>{selectedPatient.rx.axisOD || '-'}</TableCell>
+                                  <TableCell>{selectedPatient.rx.addOD || '-'}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="font-medium">
+                                    {language === 'ar' ? "العين اليسرى (OS)" : "Left Eye (OS)"}
+                                  </TableCell>
+                                  <TableCell>{selectedPatient.rx.sphereOS || '-'}</TableCell>
+                                  <TableCell>{selectedPatient.rx.cylOS || '-'}</TableCell>
+                                  <TableCell>{selectedPatient.rx.axisOS || '-'}</TableCell>
+                                  <TableCell>{selectedPatient.rx.addOS || '-'}</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mt-4">
+                            <div className="space-y-1">
+                              <Label>
+                                {language === 'ar' ? "المسافة بين حدقتي العين (PD)" : "Pupillary Distance (PD)"}
+                              </Label>
+                              <div className="flex items-center gap-1">
+                                <div className="text-sm font-medium">{language === 'ar' ? "يمين:" : "Right:"}</div>
+                                <div>{selectedPatient.rx.pdRight || '-'}</div>
+                                <div className="text-sm font-medium mx-2">{language === 'ar' ? "يسار:" : "Left:"}</div>
+                                <div>{selectedPatient.rx.pdLeft || '-'}</div>
+                              </div>
+                            </div>
+                            
+                            <div className="text-right">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="mt-2 border-blue-200 hover:bg-blue-50"
+                                onClick={() => setIsLanguageDialogOpen(true)}
+                              >
+                                <Printer className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'} text-blue-600`} />
+                                {language === 'ar' ? "طباعة الوصفة" : "Print Prescription"}
+                              </Button>
+                            </div>
+                          </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="history" className="mt-0">
+                          {selectedPatient.rxHistory && selectedPatient.rxHistory.length > 0 ? (
+                            <div className="space-y-4">
+                              {selectedPatient.rxHistory.map((historyItem, index) => (
+                                <div key={index} className="border rounded-md overflow-hidden shadow-sm">
+                                  <div className="bg-indigo-50 px-4 py-2 flex justify-between items-center">
+                                    <div className="font-medium text-indigo-700">
+                                      {language === 'ar' ? "تاريخ:" : "Date:"} {formatDate(historyItem.createdAt)}
+                                    </div>
+                                    <Button variant="ghost" size="sm" className="text-indigo-600 hover:bg-indigo-100">
+                                      <Printer className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                  <Table>
+                                    <TableHeader className="bg-indigo-50/50">
+                                      <TableRow>
+                                        <TableHead></TableHead>
+                                        <TableHead>{language === 'ar' ? "قوة العدسة" : "SPH"}</TableHead>
+                                        <TableHead>{language === 'ar' ? "الاسطوانة" : "CYL"}</TableHead>
+                                        <TableHead>{language === 'ar' ? "المحور" : "AXIS"}</TableHead>
+                                        <TableHead>{language === 'ar' ? "إضافة" : "ADD"}</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      <TableRow className="bg-indigo-50/30">
+                                        <TableCell className="font-medium">
+                                          {language === 'ar' ? "العين اليمنى (OD)" : "Right Eye (OD)"}
+                                        </TableCell>
+                                        <TableCell>{historyItem.sphereOD || '-'}</TableCell>
+                                        <TableCell>{historyItem.cylOD || '-'}</TableCell>
+                                        <TableCell>{historyItem.axisOD || '-'}</TableCell>
+                                        <TableCell>{historyItem.addOD || '-'}</TableCell>
+                                      </TableRow>
+                                      <TableRow>
+                                        <TableCell className="font-medium">
+                                          {language === 'ar' ? "العين اليسرى (OS)" : "Left Eye (OS)"}
+                                        </TableCell>
+                                        <TableCell>{historyItem.sphereOS || '-'}</TableCell>
+                                        <TableCell>{historyItem.cylOS || '-'}</TableCell>
+                                        <TableCell>{historyItem.axisOS || '-'}</TableCell>
+                                        <TableCell>{historyItem.addOS || '-'}</TableCell>
+                                      </TableRow>
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-6 border rounded-md bg-indigo-50/20">
+                              <FileText className="h-10 w-10 mx-auto text-indigo-300 mb-3" />
+                              <h3 className="text-lg font-medium mb-1 text-indigo-700">
+                                {language === 'ar' ? "لا يوجد سجل وصفات سابقة" : "No Prescription History"}
+                              </h3>
+                              <p className="text-muted-foreground max-w-md mx-auto">
+                                {language === 'ar' 
+                                  ? "لا يوجد سجل وصفات طبية سابقة لهذا العميل."
+                                  : "There is no prescription history for this client."}
+                              </p>
+                            </div>
+                          )}
+                        </TabsContent>
+                      </Tabs>
+                    </CardContent>
+                  </Card>
+                  
                   <Card className="border-amber-200 shadow-md">
                     <CardHeader className="pb-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-t-lg">
                       <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
