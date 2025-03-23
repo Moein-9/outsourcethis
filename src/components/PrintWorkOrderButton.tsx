@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -52,8 +51,19 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
   const { addInvoice, addExistingInvoice } = useInvoiceStore();
+  const [showSelector, setShowSelector] = useState(false);
   
   const handlePrint = () => {
+    if (thermalOnly) {
+      // If it's thermal only, print directly with CustomPrintService
+      handleThermalPrint();
+    } else {
+      // Otherwise show the selector
+      setShowSelector(true);
+    }
+  };
+  
+  const handleThermalPrint = () => {
     // If it's a new invoice, save it first to generate an invoice ID
     if (isNewInvoice && !invoice.invoiceId) {
       setLoading(true);
@@ -120,15 +130,35 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   };
 
   return (
-    <Button 
-      variant={variant} 
-      size={size} 
-      className={className}
-      onClick={handlePrint}
-      disabled={loading}
-    >
-      <Printer className="h-4 w-4 mr-1" /> 
-      {loading ? t("saving") : t("printWorkOrder")}
-    </Button>
+    <>
+      <Button 
+        variant={variant} 
+        size={size} 
+        className={className}
+        onClick={handlePrint}
+        disabled={loading}
+      >
+        <Printer className="h-4 w-4 mr-1" /> 
+        {loading ? t("saving") : t("printWorkOrder")}
+      </Button>
+      
+      {!thermalOnly && (
+        <WorkOrderPrintSelector
+          isOpen={showSelector}
+          onOpenChange={setShowSelector}
+          invoice={invoice}
+          patientName={patientName}
+          patientPhone={patientPhone}
+          rx={rx}
+          lensType={lensType}
+          coating={coating}
+          frame={frame}
+          contactLenses={contactLenses}
+          contactLensRx={contactLensRx}
+          isNewInvoice={isNewInvoice}
+          onInvoiceSaved={onInvoiceSaved}
+        />
+      )}
+    </>
   );
 };
