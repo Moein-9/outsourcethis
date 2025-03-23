@@ -5,7 +5,6 @@ import { RxData } from "@/store/patientStore";
 import { Eye } from "lucide-react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-import { PrintService } from "@/utils/PrintService";
 
 interface RxReceiptPrintProps {
   patientName: string;
@@ -176,269 +175,239 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
   
-  console.log("Starting to print RX receipt:", {
-    patientName,
-    language,
-    isRtl,
-    rx
-  });
-  
-  // Create a complete standalone HTML document for printing
+  // HARDCODED HTML CONTENT - EVERYTHING INLINE
   const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>${t("glassesPrescription")}</title>
-      <style>
-        @page {
-          size: 80mm auto !important;
-          margin: 0mm !important;
-        }
-        body {
-          font-family: ${isRtl ? "'Arial', sans-serif" : "'Times New Roman', serif"};
-          margin: 0;
-          padding: 0;
-          width: 80mm;
-          direction: ${isRtl ? 'rtl' : 'ltr'};
-          background-color: #ffffff;
-        }
-        .container {
-          padding: 5mm;
-          text-align: ${isRtl ? 'right' : 'left'};
-        }
-        .header {
-          text-align: center;
-          border-bottom: 1px solid #ccc;
-          padding-bottom: 3mm;
-          margin-bottom: 3mm;
-        }
-        .store-name {
-          font-weight: bold;
-          font-size: 14pt;
-          margin: 3mm 0;
-        }
-        .info {
-          font-size: 9pt;
-          margin: 1mm 0;
-          color: #555;
-        }
-        .section {
-          margin-bottom: 4mm;
-          font-size: 10pt;
-        }
-        .field {
-          display: flex;
-          justify-content: space-between;
-          border-bottom: 1px solid #eee;
-          padding-bottom: 1mm;
-          margin-bottom: 1mm;
-        }
-        .field-label {
-          font-weight: bold;
-        }
-        .table-container {
-          margin: 3mm 0;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          direction: ltr; /* Tables are always LTR for clarity */
-        }
-        table th, table td {
-          border: 1px solid #ccc;
-          padding: 1mm;
-          text-align: center;
-          font-size: 8pt;
-        }
-        table th {
-          background-color: #f0f0f0;
-        }
-        .prescription-title {
-          text-align: center;
-          font-weight: bold;
-          margin: 2mm 0;
-          font-size: 10pt;
-          text-transform: uppercase;
-          border-bottom: 1px solid #eee;
-          padding-bottom: 1mm;
-        }
-        .notes {
-          margin: 3mm 0;
-          font-size: 9pt;
-        }
-        .notes-title {
-          font-weight: bold;
-          margin-bottom: 1mm;
-        }
-        .tips {
-          margin: 3mm 0;
-          font-size: 9pt;
-        }
-        .tips-title {
-          text-align: center;
-          font-weight: bold;
-          border-bottom: 1px solid #eee;
-          padding-bottom: 1mm;
-          margin-bottom: 2mm;
-        }
-        .tips-list {
-          padding-left: ${isRtl ? '0' : '15px'};
-          padding-right: ${isRtl ? '15px' : '0'};
-          margin: 0;
-        }
-        .tips-list li {
-          margin-bottom: 1mm;
-        }
-        .footer {
-          text-align: center;
-          margin-top: 3mm;
-          padding-top: 3mm;
-          border-top: 1px solid #ccc;
-          font-size: 9pt;
-        }
-        .thank-you {
-          font-weight: bold;
-          margin-bottom: 2mm;
-        }
-        .dots {
-          letter-spacing: 2px;
-          color: #aaa;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <div class="store-name">${storeInfo.name}</div>
-          <div class="info">${storeInfo.address}</div>
-          <div class="info">${t("phone")}: ${storeInfo.phone}</div>
-        </div>
-        
-        <div class="section">
-          <div class="field">
-            <span class="field-label">${t("date")}:</span>
-            <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
-          </div>
-          <div class="field">
-            <span class="field-label">${t("patient")}:</span>
-            <span>${patientName}</span>
-          </div>
-          ${patientPhone ? `
-          <div class="field">
-            <span class="field-label">${t("phone")}:</span>
-            <span>${patientPhone}</span>
-          </div>
-          ` : ''}
-        </div>
-        
-        <div class="prescription-title">
-          ${t("glassesPrescription")}
-        </div>
-        
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th></th>
-                <th>SPH</th>
-                <th>CYL</th>
-                <th>AXIS</th>
-                <th>ADD</th>
-                <th>PD</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="font-weight: bold;">${t("rightEye")} (OD)</td>
-                <td>${rx.sphereOD || "-"}</td>
-                <td>${rx.cylOD || "-"}</td>
-                <td>${rx.axisOD || "-"}</td>
-                <td>${rx.addOD || "-"}</td>
-                <td>${rx.pdRight || "-"}</td>
-              </tr>
-              <tr>
-                <td style="font-weight: bold;">${t("leftEye")} (OS)</td>
-                <td>${rx.sphereOS || "-"}</td>
-                <td>${rx.cylOS || "-"}</td>
-                <td>${rx.axisOS || "-"}</td>
-                <td>${rx.addOS || "-"}</td>
-                <td>${rx.pdLeft || "-"}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        ${notes ? `
-        <div class="notes">
-          <div class="notes-title">${t("notes")}:</div>
-          <div>${notes}</div>
-        </div>
-        ` : ''}
-        
-        <div class="tips">
-          <div class="tips-title">${t("glassesCareTips")}</div>
-          <ul class="tips-list">
-            <li>${t("tip1")}</li>
-            <li>${t("tip2")}</li>
-            <li>${t("tip3")}</li>
-            <li>${t("tip4")}</li>
-          </ul>
-        </div>
-        
-        <div class="footer">
-          <div class="thank-you">${t("thankYou")}</div>
-          <div class="dots">•••••••••••••••</div>
-        </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${isRtl ? 'وصفة النظارات' : 'Glasses Prescription'}</title>
+  <style>
+    @page {
+      size: 80mm auto;
+      margin: 0;
+    }
+    body {
+      font-family: ${isRtl ? 'Arial, sans-serif' : 'Times New Roman, serif'};
+      margin: 0;
+      padding: 0;
+      width: 80mm;
+      direction: ${isRtl ? 'rtl' : 'ltr'};
+      text-align: ${isRtl ? 'right' : 'left'};
+    }
+    .container {
+      padding: 10px;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+    .store-name {
+      font-weight: bold;
+      font-size: 18px;
+      margin: 5px 0;
+    }
+    .store-info {
+      font-size: 12px;
+      color: #555;
+    }
+    .field {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+      padding: 3px 0;
+      font-size: 12px;
+    }
+    .field-label {
+      font-weight: bold;
+    }
+    .rx-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+      margin: 10px 0;
+      text-transform: uppercase;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      direction: ltr;
+      font-size: 11px;
+      margin: 10px 0;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 3px;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+      font-size: 11px;
+    }
+    .notes {
+      margin: 10px 0;
+      font-size: 12px;
+    }
+    .notes-title {
+      font-weight: bold;
+    }
+    .tips-title {
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+    .tips-list {
+      padding-${isRtl ? 'right' : 'left'}: 15px;
+      margin: 5px 0;
+      font-size: 11px;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      font-size: 12px;
+    }
+    .thank-you {
+      font-weight: bold;
+    }
+    .dots {
+      margin-top: 5px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="store-name">${storeInfo.name}</div>
+      <div class="store-info">${storeInfo.address}</div>
+      <div class="store-info">${isRtl ? 'الهاتف' : 'Phone'}: ${storeInfo.phone}</div>
+    </div>
+    
+    <div class="patient-info">
+      <div class="field">
+        <span class="field-label">${isRtl ? 'التاريخ' : 'Date'}:</span>
+        <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
       </div>
-      
-      <script>
-        // Print immediately when loaded
-        window.onload = function() {
-          console.log("Document loaded, printing...");
-          setTimeout(function() {
-            window.print();
-            console.log("Print command executed");
-          }, 500);
-        };
-      </script>
-    </body>
-    </html>
+      <div class="field">
+        <span class="field-label">${isRtl ? 'المريض' : 'Patient'}:</span>
+        <span>${patientName}</span>
+      </div>
+      ${patientPhone ? `
+      <div class="field">
+        <span class="field-label">${isRtl ? 'الهاتف' : 'Phone'}:</span>
+        <span>${patientPhone}</span>
+      </div>
+      ` : ''}
+    </div>
+    
+    <div class="rx-title">
+      ${isRtl ? 'وصفة النظارات' : 'Glasses Prescription'}
+    </div>
+    
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>SPH</th>
+          <th>CYL</th>
+          <th>AXIS</th>
+          <th>ADD</th>
+          <th>PD</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: bold;">${isRtl ? 'العين اليمنى' : 'Right Eye'} (OD)</td>
+          <td>${rx.sphereOD || "-"}</td>
+          <td>${rx.cylOD || "-"}</td>
+          <td>${rx.axisOD || "-"}</td>
+          <td>${rx.addOD || "-"}</td>
+          <td>${rx.pdRight || "-"}</td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;">${isRtl ? 'العين اليسرى' : 'Left Eye'} (OS)</td>
+          <td>${rx.sphereOS || "-"}</td>
+          <td>${rx.cylOS || "-"}</td>
+          <td>${rx.axisOS || "-"}</td>
+          <td>${rx.addOS || "-"}</td>
+          <td>${rx.pdLeft || "-"}</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    ${notes ? `
+    <div class="notes">
+      <div class="notes-title">${isRtl ? 'ملاحظات' : 'Notes'}:</div>
+      <div>${notes}</div>
+    </div>
+    ` : ''}
+    
+    <div class="tips">
+      <div class="tips-title">${isRtl ? 'نصائح للعناية بالنظارات' : 'Glasses Care Tips'}</div>
+      <ul class="tips-list">
+        <li>${isRtl ? 'استخدم دائماً كلتا اليدين عند وضع النظارات أو إزالتها' : 'Always use both hands to put on or remove your glasses'}</li>
+        <li>${isRtl ? 'نظف العدسات بقطعة قماش نظيفة وناعمة وبمنظف مناسب للعدسات' : 'Clean lenses with a clean, soft cloth and proper lens cleaner'}</li>
+        <li>${isRtl ? 'احفظ النظارات في علبتها عندما لا تكون قيد الاستعمال' : 'Store your glasses in their case when not in use'}</li>
+        <li>${isRtl ? 'تجنب وضع النظارات على الوجه المقلوب على الأسطح' : 'Avoid placing your glasses face down on surfaces'}</li>
+      </ul>
+    </div>
+    
+    <div class="footer">
+      <div class="thank-you">${isRtl ? 'شكراً لكم' : 'Thank You'}</div>
+      <div class="dots">•••••••••••••••</div>
+    </div>
+  </div>
+  
+  <script>
+    window.onload = function() {
+      // Print immediately when loaded
+      setTimeout(function() {
+        window.print();
+        
+        // Add delay before focusing to avoid issues
+        setTimeout(function() {
+          window.focus();
+        }, 500);
+      }, 300);
+    };
+  </script>
+</body>
+</html>
   `;
   
-  console.log("HTML content generated for printing", htmlContent.substring(0, 200) + "...");
-  
   try {
-    // Create a new window with the content for printing
+    // Create a new window for printing
     const printWindow = window.open('', '_blank');
     
     if (!printWindow) {
-      console.error("Failed to open print window - popup might be blocked");
-      alert(t("printWindowBlocked"));
+      alert(isRtl ? 'تم منع النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة لطباعة الوصفة.' : 
+        'Popup blocked. Please allow popups to print prescription.');
       return;
     }
     
-    // Write the HTML content to the new window
+    // Write the content to the new window
+    printWindow.document.open();
     printWindow.document.write(htmlContent);
     printWindow.document.close();
     
-    // Log success
-    console.log("Print window created and populated with content");
-    
-    // Focus the window to bring it to front
-    printWindow.focus();
-    
-    // Also print directly in case onload doesn't fire
+    // Extra force print after a delay as backup
     setTimeout(() => {
       try {
-        console.log("Triggering print via timeout");
         printWindow.print();
       } catch (error) {
-        console.error("Error during delayed print:", error);
+        console.error("Backup print attempt failed:", error);
       }
-    }, 1000);
+    }, 800);
+    
   } catch (error) {
-    console.error("Error during prescription printing:", error);
-    alert(t("printError"));
+    console.error("Error printing prescription:", error);
+    alert(isRtl ? 'حدث خطأ أثناء الطباعة' : 'Error during printing');
   }
 };
