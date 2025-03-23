@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { RxData } from "@/store/patientStore";
@@ -175,7 +174,6 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
   
-  // HARDCODED HTML CONTENT - EVERYTHING INLINE
   const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -191,40 +189,42 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       font-family: ${isRtl ? 'Arial, sans-serif' : 'Times New Roman, serif'};
       margin: 0;
       padding: 0;
-      width: 80mm;
+      width: 76mm;
       direction: ${isRtl ? 'rtl' : 'ltr'};
       text-align: ${isRtl ? 'right' : 'left'};
     }
     .container {
-      padding: 10px;
+      padding: 5px;
+      max-width: 76mm;
+      margin: 0 auto;
     }
     .header {
       text-align: center;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
-      margin-bottom: 10px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 5px;
+      margin-bottom: 5px;
     }
     .logo {
-      max-width: 100%;
+      max-width: 60mm;
       height: auto;
-      margin: 0 auto 5px;
+      margin: 0 auto 2px;
       display: block;
     }
     .store-name {
       font-weight: bold;
-      font-size: 18px;
-      margin: 5px 0;
+      font-size: 16px;
+      margin: 2px 0;
     }
     .store-info {
-      font-size: 12px;
-      color: #555;
+      font-size: 10px;
+      color: #333;
     }
     .field {
       display: flex;
       justify-content: space-between;
-      border-bottom: 1px solid #eee;
-      padding: 3px 0;
-      font-size: 12px;
+      border-bottom: 1px solid #ddd;
+      padding: 2px 0;
+      font-size: 10px;
     }
     .field-label {
       font-weight: bold;
@@ -232,29 +232,29 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     .rx-title {
       text-align: center;
       font-weight: bold;
-      font-size: 14px;
-      margin: 10px 0;
+      font-size: 12px;
+      margin: 5px 0;
       text-transform: uppercase;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       direction: ltr;
-      font-size: 11px;
-      margin: 10px 0;
+      font-size: 9px;
+      margin: 5px 0;
     }
     th, td {
-      border: 1px solid #ccc;
-      padding: 3px;
+      border: 1px solid #333;
+      padding: 2px;
       text-align: center;
     }
     th {
-      background-color: #f0f0f0;
-      font-size: 11px;
+      background-color: #eee;
+      font-size: 9px;
     }
     .notes {
-      margin: 10px 0;
-      font-size: 12px;
+      margin: 5px 0;
+      font-size: 10px;
     }
     .notes-title {
       font-weight: bold;
@@ -262,58 +262,60 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     .tips-title {
       text-align: center;
       font-weight: bold;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 5px;
-      margin-bottom: 5px;
-      font-size: 12px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 2px;
+      margin-bottom: 2px;
+      font-size: 10px;
     }
     .tips-list {
-      padding-${isRtl ? 'right' : 'left'}: 15px;
-      margin: 5px 0;
-      font-size: 11px;
+      padding-${isRtl ? 'right' : 'left'}: 10px;
+      margin: 2px 0;
+      font-size: 9px;
     }
     .footer {
       text-align: center;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid #ccc;
-      font-size: 12px;
+      margin-top: 5px;
+      padding-top: 5px;
+      border-top: 1px solid #333;
+      font-size: 10px;
     }
     .thank-you {
       font-weight: bold;
+      font-size: 10px;
+      margin-bottom: 2px;
+    }
+    .thank-you-secondary {
+      font-size: 9px;
+      margin-top: 2px;
     }
     .dots {
-      margin-top: 5px;
-      font-size: 14px;
+      margin-top: 3px;
+      font-size: 12px;
     }
     
-    /* Add fancy styling for the prescription box */
     .prescription-box {
-      border: 2px solid #007bff;
-      border-radius: 5px;
-      margin: 10px 0;
-      padding: 5px;
-      background-color: #f8f9fa;
+      border: 1px solid #333;
+      margin: 5px 0;
+      padding: 3px;
+      background-color: #f9f9f9;
     }
     
     .rx-header {
-      background-color: #007bff;
-      color: white;
+      background-color: #ddd;
       text-align: center;
-      padding: 3px 0;
+      padding: 2px 0;
       font-weight: bold;
-      border-radius: 3px;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
+      font-size: 11px;
     }
     
-    /* Make the table more elegant */
     th {
-      background-color: #e9ecef;
-      color: #495057;
+      background-color: #eee;
+      color: #000;
     }
     
     td, th {
-      border: 1px solid #dee2e6;
+      border: 1px solid #333;
     }
     
     tr:nth-child(even) {
@@ -402,16 +404,14 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     </div>
     
     <div class="footer">
-      <div class="thank-you">${isRtl ? 'شكراً لكم' : 'Thank You'}</div>
-      <div class="dots">•••••••••••••••</div>
+      <div class="thank-you">${isRtl ? 'شكرًا على دعمكم، ونشوفكم على خير قريبًا!' : 'Thank you so much for your support—we look forward to seeing you again soon!'}</div>
+      <div class="dots">•••••••••••••</div>
     </div>
   </div>
   
   <script>
     window.onload = function() {
-      // Print immediately when loaded
       window.print();
-      // Close after printing (may not work in all browsers due to security)
       window.onafterprint = function() {
         window.close();
       };
@@ -422,7 +422,6 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   `;
   
   try {
-    // Create a new window for printing
     const printWindow = window.open('', '_blank');
     
     if (!printWindow) {
@@ -431,7 +430,6 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       return;
     }
     
-    // Write the content to the new window
     printWindow.document.open();
     printWindow.document.write(htmlContent);
     printWindow.document.close();
