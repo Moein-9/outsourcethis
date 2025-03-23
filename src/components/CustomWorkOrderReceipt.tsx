@@ -10,7 +10,6 @@ interface CustomWorkOrderReceiptProps {
   workOrder: any;
   invoice?: any;
   patient?: any;
-  notes?: string;
   isPrintable?: boolean;
 }
 
@@ -18,7 +17,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   workOrder,
   invoice,
   patient,
-  notes,
   isPrintable = false
 }) => {
   const { language, t } = useLanguageStore();
@@ -347,7 +345,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         
         <div className="border rounded p-1 min-h-16">
-          {notes && <p className="text-xs">{notes}</p>}
+          
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer, Save } from "lucide-react";
+import { Printer } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
@@ -23,7 +23,6 @@ interface PrintWorkOrderButtonProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
-  notes?: string;
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
@@ -42,7 +41,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   frame,
   contactLenses,
   contactLensRx,
-  notes,
   className,
   variant = "outline",
   size = "sm",
@@ -60,7 +58,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       setLoading(true);
       try {
         // Save the invoice to get an ID
-        const invoiceData = {
+        const invoiceId = addInvoice({
           patientId: invoice.patientId,
           patientName: invoice.patientName,
           patientPhone: invoice.patientPhone,
@@ -79,13 +77,10 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           paymentMethod: invoice.paymentMethod,
           authNumber: invoice.authNumber,
           workOrderId: invoice.workOrderId,
-          notes: notes,
-        };
-        
-        const invoiceId = addInvoice(invoiceData);
+        });
         
         // Update the invoice with the new ID
-        const updatedInvoice = { ...invoice, invoiceId, notes };
+        const updatedInvoice = { ...invoice, invoiceId };
         
         // If callback provided, call it with the new ID
         if (onInvoiceSaved) {
@@ -132,7 +127,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         frame={frame}
         contactLenses={contactLenses}
         contactLensRx={contactLensRx}
-        notes={notes}
         thermalOnly={thermalOnly}
       />
     );
@@ -149,17 +143,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         onClick={handlePrint}
         disabled={loading}
       >
-        {isNewInvoice ? (
-          <>
-            <Save className="h-4 w-4 mr-1" /> 
-            {loading ? t("saving") : t("saveWorkOrder")}
-          </>
-        ) : (
-          <>
-            <Printer className="h-4 w-4 mr-1" /> 
-            {t("printWorkOrder")}
-          </>
-        )}
+        <Printer className="h-4 w-4 mr-1" /> 
+        {loading ? t("saving") : t("printWorkOrder")}
       </Button>
       
       {!isNewInvoice && (
@@ -173,7 +158,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           frame={frame}
           contactLenses={contactLenses}
           contactLensRx={contactLensRx}
-          notes={notes}
           thermalOnly={thermalOnly}
           trigger={
             <Button variant={variant} size={size} className={className}>

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -13,7 +14,6 @@ interface WorkOrderPrintProps {
   rx?: any;
   lensType?: string;
   coating?: string;
-  notes?: string;
   frame?: {
     brand: string;
     model: string;
@@ -49,8 +49,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   coating,
   frame,
   contactLenses,
-  contactLensRx,
-  notes
+  contactLensRx
 }) => {
   const { language, t } = useLanguageStore();
   const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
@@ -69,7 +68,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   
   const isContactLens = contactLenses && contactLenses.length > 0;
   const orderNumber = invoice.invoiceId || invoice.workOrderId || "NEW ORDER";
-  const notesValue = notes || invoice.notes;
 
   return (
     <div className="print-wrapper">
@@ -396,11 +394,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <span>{t("additionalNotes")} {language === 'ar' && '(ملاحظات إضافية)'}</span>
         </div>
         <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
-          <div style={{ border: "0.2mm solid #000", minHeight: "15mm", backgroundColor: "#fff", width: "100%", padding: "2mm" }}>
-            {notesValue ? (
-              <div style={{ fontSize: "9pt" }}>{notesValue}</div>
-            ) : null}
-          </div>
+          <div style={{ border: "0.2mm solid #000", minHeight: "15mm", backgroundColor: "#fff", width: "100%" }}></div>
         </div>
 
         <div style={{ marginTop: "5mm", paddingTop: "2mm", borderTop: "0.3mm solid #000" }}>

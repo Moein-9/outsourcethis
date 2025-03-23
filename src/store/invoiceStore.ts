@@ -37,7 +37,6 @@ export interface Invoice {
   isPaid: boolean;
   authNumber?: string; // Added for authorization numbers
   workOrderId?: string; // Reference to the work order
-  notes?: string; // Added for work order notes
 }
 
 // Define WorkOrder interface
@@ -49,7 +48,6 @@ export interface WorkOrder {
     name: string;
     price: number;
   };
-  notes?: string; // Added for work order notes
   // Add other work order fields as needed
 }
 
@@ -80,11 +78,8 @@ export const useInvoiceStore = create<InvoiceState>()(
         const remaining = Math.max(0, invoice.total - invoice.deposit);
         const isPaid = remaining === 0;
         
-        // Extract auth number and notes if they exist
-        const { authNumber, notes, ...restInvoice } = invoice as (typeof invoice & { 
-          authNumber?: string;
-          notes?: string;
-        });
+        // Extract auth number if it exists
+        const { authNumber, ...restInvoice } = invoice as (typeof invoice & { authNumber?: string });
         
         const initialPayment: Payment = {
           amount: invoice.deposit,
@@ -105,8 +100,7 @@ export const useInvoiceStore = create<InvoiceState>()(
               remaining,
               isPaid,
               payments,
-              authNumber, // Store auth number at invoice level too
-              notes // Store notes
+              authNumber // Store auth number at invoice level too
             }
           ]
         }));

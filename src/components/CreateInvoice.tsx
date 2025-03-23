@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
@@ -16,12 +17,11 @@ import { LensSelector } from "@/components/LensSelector";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
-import { WorkOrderNotes } from "@/components/WorkOrderNotes";
-import { WorkOrderConfirmation } from "@/components/WorkOrderConfirmation";
-import { User, Glasses, Package, FileText, CreditCard, Eye, Search, 
+import { 
+  User, Glasses, Package, FileText, CreditCard, Eye, Search, 
   Banknote, Plus, PackageCheck, EyeOff, ExternalLink,
   ClipboardCheck, BadgePercent, Printer, CreditCard as CardIcon,
-  Receipt, Save
+  Receipt
 } from "lucide-react";
 
 const CreateInvoice: React.FC = () => {
@@ -67,10 +67,6 @@ const CreateInvoice: React.FC = () => {
   const [deposit, setDeposit] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [authNumber, setAuthNumber] = useState("");
-  
-  const [workOrderNotes, setWorkOrderNotes] = useState("");
-  const [savedInvoiceId, setSavedInvoiceId] = useState<string | null>(null);
-  const [showConfirmation, setShowConfirmation] = useState(false);
   
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
@@ -397,8 +393,7 @@ const CreateInvoice: React.FC = () => {
         total,
         
         paymentMethod,
-        ...paymentDetails,
-        notes: workOrderNotes
+        ...paymentDetails
       };
     } else {
       const mainLens = contactLensItems[0];
@@ -428,8 +423,7 @@ const CreateInvoice: React.FC = () => {
         total,
         
         paymentMethod,
-        ...paymentDetails,
-        notes: workOrderNotes
+        ...paymentDetails
       };
     }
     
@@ -440,8 +434,7 @@ const CreateInvoice: React.FC = () => {
       description: `${t('invoiceSavedSuccess')} ${invoiceId}.`,
     });
     
-    setSavedInvoiceId(invoiceId);
-    setShowConfirmation(true);
+    resetForm();
   };
   
   const resetForm = () => {
@@ -495,7 +488,7 @@ const CreateInvoice: React.FC = () => {
   };
   
   const previewInvoice = {
-    invoiceId: savedInvoiceId || "PREVIEW",
+    invoiceId: "PREVIEW",
     createdAt: new Date().toISOString(),
     patientName: currentPatient?.name || manualName || "Customer Name",
     patientPhone: currentPatient?.phone || manualPhone || "",
@@ -520,8 +513,7 @@ const CreateInvoice: React.FC = () => {
     remaining: remaining,
     paymentMethod: paymentMethod || "Cash",
     isPaid: remaining <= 0,
-    authNumber: authNumber,
-    notes: workOrderNotes
+    authNumber: authNumber
   };
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
@@ -1091,7 +1083,6 @@ const CreateInvoice: React.FC = () => {
                 workOrder={previewInvoice}
                 invoice={previewInvoice}
                 patient={currentPatient || { name: manualName, phone: manualPhone }}
-                notes={workOrderNotes}
                 className="flex items-center gap-2"
               />
               
@@ -1109,8 +1100,8 @@ const CreateInvoice: React.FC = () => {
                   className="flex items-center gap-2"
                   onClick={handleSaveInvoice}
                 >
-                  <Save className="w-4 h-4" />
-                  {t('saveWorkOrder')}
+                  <ExternalLink className="w-4 h-4" />
+                  {t('saveAndPrint')}
                 </Button>
               </div>
             </div>
@@ -1257,7 +1248,6 @@ const CreateInvoice: React.FC = () => {
               lensType={selectedLensType?.name || ""}
               coating={selectedCoating?.name || ""}
               frame={!skipFrame ? selectedFrame : undefined}
-              notes={workOrderNotes}
             />
           </div>
           <SheetFooter className="print:hidden mt-4">

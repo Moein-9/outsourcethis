@@ -17,7 +17,6 @@ interface PrintWorkOrderButtonProps {
   workOrder: any;
   invoice?: any;
   patient?: any;
-  notes?: string;
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
@@ -27,7 +26,6 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   workOrder,
   invoice,
   patient,
-  notes,
   className = '',
   variant = "outline",
   size = "sm"
@@ -36,12 +34,12 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   const [open, setOpen] = useState(false);
   
   const handlePrint = () => {
-    console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient, notes });
+    console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
     setOpen(false); // Close dialog before printing
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient, notes);
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
     }, 300);
   };
   
@@ -69,7 +67,6 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               workOrder={workOrder} 
               invoice={invoice} 
               patient={patient}
-              notes={notes}
               isPrintable={false}
             />
           </div>
