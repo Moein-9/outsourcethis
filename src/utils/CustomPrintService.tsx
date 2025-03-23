@@ -38,7 +38,7 @@ export class CustomPrintService {
                   background: white !important;
                 }
                 
-                #work-order-receipt {
+                #custom-work-order-content {
                   width: 76mm !important;
                   max-width: 76mm !important;
                   page-break-after: always !important;
@@ -108,42 +108,61 @@ export class CustomPrintService {
         </html>
       `);
       
-      // Get the content of the custom work order
-      const workOrderElement = document.getElementById('work-order-receipt');
+      // Create a temporary div to render the work order
+      const tempDiv = document.createElement('div');
+      tempDiv.id = 'work-order-receipt';
+      tempDiv.style.display = 'none';
+      document.body.appendChild(tempDiv);
       
-      // If the element exists, copy its innerHTML to the print window
-      if (workOrderElement) {
-        const contentContainer = printWindow.document.getElementById('custom-work-order-content');
-        if (contentContainer) {
-          contentContainer.innerHTML = workOrderElement.innerHTML;
+      // Get the content from CustomWorkOrderReceipt by rendering it
+      // We'll use React to render the component to a string
+      const getWorkOrderContent = () => {
+        // Use workOrder data to create the content
+        const { invoiceId, workOrderId, patientName, patientPhone, lensType, coating, frameBrand, frameModel, total } = workOrder;
+        
+        // Create a simple HTML structure similar to the CustomWorkOrderReceipt component
+        return `
+          <div class="print-receipt">
+            <h2 style="text-align:center; margin-bottom: 10px; font-size: 16px;">Work Order Receipt</h2>
+            <div style="border-bottom: 1px dashed #ccc; margin-bottom: 10px;"></div>
+            <div style="margin-bottom: 5px;"><strong>Invoice ID:</strong> ${invoiceId}</div>
+            <div style="margin-bottom: 5px;"><strong>Work Order ID:</strong> ${workOrderId}</div>
+            <div style="margin-bottom: 5px;"><strong>Patient:</strong> ${patientName}</div>
+            ${patientPhone ? `<div style="margin-bottom: 5px;"><strong>Phone:</strong> ${patientPhone}</div>` : ''}
+            ${lensType ? `<div style="margin-bottom: 5px;"><strong>Lens:</strong> ${lensType}</div>` : ''}
+            ${coating ? `<div style="margin-bottom: 5px;"><strong>Coating:</strong> ${coating}</div>` : ''}
+            ${frameBrand ? `<div style="margin-bottom: 5px;"><strong>Frame:</strong> ${frameBrand} ${frameModel || ''}</div>` : ''}
+            <div style="border-bottom: 1px dashed #ccc; margin: 10px 0;"></div>
+            <div style="margin-bottom: 5px;"><strong>Total:</strong> ${total.toFixed(3)} KWD</div>
+            <div style="margin-top: 15px; text-align: center; font-size: 12px;">Thank you for your business!</div>
+          </div>
+        `;
+      };
+      
+      // Set the content of the temporary div
+      tempDiv.innerHTML = getWorkOrderContent();
+      
+      // Copy the content to the print window
+      const contentContainer = printWindow.document.getElementById('custom-work-order-content');
+      if (contentContainer) {
+        contentContainer.innerHTML = tempDiv.innerHTML;
+        
+        // Wait for content to load, then print
+        setTimeout(() => {
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
           
-          // Ensure timestamps are showing original creation dates
-          if (invoice?.rx?.createdAt || workOrder?.rx?.createdAt) {
-            // Use the original RX creation date rather than printing date
-            const rxCreationDate = invoice?.rx?.createdAt || workOrder?.rx?.createdAt;
-            const dateElements = printWindow.document.querySelectorAll('.rx-creation-date');
-            
-            dateElements.forEach(element => {
-              if (element instanceof HTMLElement) {
-                element.textContent = new Date(rxCreationDate).toLocaleString();
-              }
-            });
-          }
+          // Remove the temporary div
+          document.body.removeChild(tempDiv);
           
-          // Wait for content to load, then print
-          setTimeout(() => {
-            printWindow.document.close();
-            printWindow.focus();
-            printWindow.print();
-            
-            // Close the window after printing (or allow user to close it)
-            // printWindow.close();
-          }, 500);
-        }
+          // Close the window after printing (or allow user to close it)
+          // printWindow.close();
+        }, 500);
       } else {
-        // Handle the case where the element doesn't exist
         printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
         printWindow.document.close();
+        document.body.removeChild(tempDiv);
       }
     } catch (error) {
       console.error("Error printing work order:", error);
