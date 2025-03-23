@@ -25,6 +25,7 @@ interface WorkOrderPrintSelectorProps {
   contactLensRx?: any;
   onCompletePrinting?: () => void;
   trigger?: React.ReactNode;
+  thermalOnly?: boolean; // Added the missing property
 }
 
 export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
@@ -38,7 +39,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
-  onCompletePrinting
+  onCompletePrinting,
+  thermalOnly = true // Default to true since we're only using thermal paper now
 }) => {
   const { t } = useLanguageStore();
   const [printingInProgress, setPrintingInProgress] = useState(false);
