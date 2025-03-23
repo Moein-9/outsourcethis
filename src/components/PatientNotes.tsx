@@ -126,7 +126,12 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId }) => {
                       onChange={(e) => setEditedNoteText(e.target.value)}
                       dir="auto"
                       className="w-full"
-                      onKeyDown={(e) => e.key === 'Enter' && e.ctrlKey && saveEditedNote(note.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && e.ctrlKey) {
+                          e.preventDefault();
+                          saveEditedNote(note.id);
+                        }
+                      }}
                     />
                     <div className="flex justify-end gap-2 mt-2">
                       <Button
@@ -190,7 +195,12 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId }) => {
             onChange={(e) => setNewNote(e.target.value)}
             dir="auto"
             className="resize-none"
-            onKeyDown={(e) => e.key === 'Enter' && e.ctrlKey && handleAddNote()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && e.ctrlKey) {
+                e.preventDefault();
+                handleAddNote();
+              }
+            }}
           />
           <Button 
             onClick={handleAddNote}
