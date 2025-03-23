@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer, FileText } from 'lucide-react';
+import { Printer, FileText, Save } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
 import { 
@@ -15,6 +15,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
 import { toast } from '@/components/ui/use-toast';
+import { Invoice } from '@/store/invoiceStore';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -111,8 +112,11 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
             />
           </div>
           
-          <DialogFooter className="w-full flex justify-end">
-            <Button onClick={handlePrint} className="mt-4 gap-2">
+          <DialogFooter className="w-full flex flex-wrap justify-end gap-2">
+            <Button variant="outline" onClick={() => setOpen(false)} className="mt-2">
+              {t('cancel')}
+            </Button>
+            <Button onClick={handlePrint} className="mt-2 gap-2">
               <Printer className="h-4 w-4" />
               {t('print')}
             </Button>
