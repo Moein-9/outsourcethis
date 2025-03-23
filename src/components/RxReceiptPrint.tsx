@@ -175,293 +175,99 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
   
-  const htmlContent = `
-    <!DOCTYPE html>
-    <html lang="${isRtl ? 'ar' : 'en'}">
-    <head>
-      <title>${t("glassesPrescription")}</title>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>
-        @media print {
-          @page {
-            size: 80mm auto;
-            margin: 0;
-          }
-          
-          body {
-            width: 80mm;
-            margin: 0;
-            padding: 0;
-            font-family: ${isRtl ? 'Arial, sans-serif' : 'Arial, serif'};
-            font-size: 10px;
-            line-height: 1.2;
-            -webkit-print-color-adjust: exact;
-            color-adjust: exact;
-            print-color-adjust: exact;
-          }
-        }
-        
-        body {
-          width: 80mm;
-          margin: 0;
-          padding: 0;
-          font-family: ${isRtl ? 'Arial, sans-serif' : 'Arial, serif'};
-          font-size: 10px;
-          line-height: 1.2;
-          background-color: white;
-          overflow-x: hidden;
-        }
-        
-        .receipt-container {
-          width: 76mm;
-          padding: 2mm;
-          background-color: white;
-        }
-        
-        .header {
-          text-align: center;
-          border-bottom: 1px solid #ccc;
-          padding-bottom: 5px;
-          margin-bottom: 5px;
-        }
-        
-        .logo {
-          max-width: 60%;
-          height: auto;
-          margin: 0 auto 5px auto;
-          display: block;
-        }
-        
-        .store-name {
-          font-weight: bold;
-          font-size: 14px;
-          margin: 3px 0;
-        }
-        
-        .store-info {
-          font-size: 10px;
-          margin: 2px 0;
-          color: #444;
-        }
-        
-        .patient-info {
-          margin-bottom: 8px;
-          font-size: 10px;
-        }
-        
-        .info-row {
-          display: flex;
-          justify-content: space-between;
-          border-bottom: 1px dotted #eee;
-          padding-bottom: 2px;
-          margin-bottom: 2px;
-        }
-        
-        .label {
-          font-weight: bold;
-        }
-        
-        .rx-section {
-          border-top: 1px solid #ccc;
-          border-bottom: 1px solid #ccc;
-          padding: 5px 0;
-          margin-bottom: 6px;
-        }
-        
-        .rx-title {
-          text-align: center;
-          font-weight: bold;
-          font-size: 10px;
-          text-transform: uppercase;
-          margin-bottom: 5px;
-        }
-        
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 9px;
-        }
-        
-        table th, table td {
-          border: 1px solid #ccc;
-          padding: 2px;
-          text-align: center;
-        }
-        
-        table th {
-          background-color: #f5f5f5;
-        }
-        
-        .eye-row td:first-child {
-          font-weight: bold;
-        }
-        
-        .notes {
-          margin-bottom: 6px;
-          font-size: 9px;
-        }
-        
-        .notes-title {
-          font-weight: bold;
-          margin-bottom: 2px;
-        }
-        
-        .notes-content {
-          font-size: 9px;
-        }
-        
-        .care-tips {
-          margin-bottom: 6px;
-        }
-        
-        .care-title {
-          text-align: center;
-          font-weight: bold;
-          border-bottom: 1px dotted #ccc;
-          padding-bottom: 2px;
-          margin-bottom: 3px;
-          font-size: 10px;
-        }
-        
-        ul {
-          padding-left: ${isRtl ? '0' : '15px'};
-          padding-right: ${isRtl ? '15px' : '0'};
-          margin: 3px 0;
-          font-size: 9px;
-        }
-        
-        li {
-          margin-bottom: 1px;
-        }
-        
-        .footer {
-          text-align: center;
-          margin-top: 6px;
-          padding-top: 4px;
-          border-top: 1px solid #ccc;
-        }
-        
-        .thank-you {
-          font-weight: bold;
-          font-size: 10px;
-        }
-        
-        .dots {
-          margin-top: 5px;
-          font-size: 8px;
-          letter-spacing: 2px;
-        }
-        
-        /* RTL Specific */
-        .rtl {
-          direction: rtl;
-          text-align: right;
-        }
-        
-        .ltr {
-          direction: ltr;
-          text-align: left;
-        }
-      </style>
-    </head>
-    <body dir="${isRtl ? 'rtl' : 'ltr'}">
-      <div class="receipt-container ${isRtl ? 'rtl' : 'ltr'}">
-        <div class="header">
-          <svg width="150" height="45" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 5px auto; display: block;">
-            <text x="150" y="40" font-family="Arial" font-size="28" font-weight="bold" text-anchor="middle" fill="#000">
-              ${storeInfo.name}
-            </text>
-          </svg>
-          <div class="store-name">${storeInfo.name}</div>
-          <div class="store-info">${storeInfo.address}</div>
-          <div class="store-info">${t("phone")}: ${storeInfo.phone}</div>
-        </div>
+  const content = `
+    <div class="${isRtl ? 'rtl' : 'ltr'}">
+      <div class="header">
+        <div class="store-name">${storeInfo.name}</div>
+        <div class="store-info">${storeInfo.address}</div>
+        <div class="store-info">${t("phone")}: ${storeInfo.phone}</div>
+      </div>
 
-        <div class="patient-info">
-          <div class="info-row">
-            <span class="label">${t("date")}:</span>
-            <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">${t("patient")}:</span>
-            <span>${patientName}</span>
-          </div>
-          ${patientPhone ? `
-          <div class="info-row">
-            <span class="label">${t("phone")}:</span>
-            <span>${patientPhone}</span>
-          </div>
-          ` : ''}
+      <div class="patient-info">
+        <div class="info-row">
+          <span class="label">${t("date")}:</span>
+          <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
         </div>
-
-        <div class="rx-section">
-          <div class="rx-title">
-            <span style="display: inline-block; margin-right: 3px; vertical-align: middle;">👁️</span> ${t("glassesPrescription")}
-          </div>
-          
-          <table>
-            <thead>
-              <tr>
-                <th></th>
-                <th>SPH</th>
-                <th>CYL</th>
-                <th>AXIS</th>
-                <th>ADD</th>
-                <th>PD</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="eye-row">
-                <td>${t("rightEye")} (OD)</td>
-                <td>${rx.sphereOD || "-"}</td>
-                <td>${rx.cylOD || "-"}</td>
-                <td>${rx.axisOD || "-"}</td>
-                <td>${rx.addOD || "-"}</td>
-                <td>${rx.pdRight || "-"}</td>
-              </tr>
-              <tr class="eye-row">
-                <td>${t("leftEye")} (OS)</td>
-                <td>${rx.sphereOS || "-"}</td>
-                <td>${rx.cylOS || "-"}</td>
-                <td>${rx.axisOS || "-"}</td>
-                <td>${rx.addOS || "-"}</td>
-                <td>${rx.pdLeft || "-"}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="info-row">
+          <span class="label">${t("patient")}:</span>
+          <span>${patientName}</span>
         </div>
-
-        ${notes ? `
-        <div class="notes">
-          <div class="notes-title">${t("notes")}:</div>
-          <div class="notes-content">${notes}</div>
+        ${patientPhone ? `
+        <div class="info-row">
+          <span class="label">${t("phone")}:</span>
+          <span>${patientPhone}</span>
         </div>
         ` : ''}
-
-        <div class="care-tips">
-          <div class="care-title">
-            ${t("glassesCareTips")}
-          </div>
-          <ul>
-            <li>${t("tip1")}</li>
-            <li>${t("tip2")}</li>
-            <li>${t("tip3")}</li>
-            <li>${t("tip4")}</li>
-          </ul>
-        </div>
-
-        <div class="footer">
-          <div class="thank-you">${t("thankYou")}</div>
-          <div class="dots">• • • • • • • • • • • • • • •</div>
-        </div>
       </div>
-    </body>
-    </html>
+
+      <div class="rx-section">
+        <div class="rx-title">
+          <span style="display: inline-block; margin-right: 3px; vertical-align: middle;">👁️</span> ${t("glassesPrescription")}
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>SPH</th>
+              <th>CYL</th>
+              <th>AXIS</th>
+              <th>ADD</th>
+              <th>PD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="eye-row">
+              <td>${t("rightEye")} (OD)</td>
+              <td>${rx.sphereOD || "-"}</td>
+              <td>${rx.cylOD || "-"}</td>
+              <td>${rx.axisOD || "-"}</td>
+              <td>${rx.addOD || "-"}</td>
+              <td>${rx.pdRight || "-"}</td>
+            </tr>
+            <tr class="eye-row">
+              <td>${t("leftEye")} (OS)</td>
+              <td>${rx.sphereOS || "-"}</td>
+              <td>${rx.cylOS || "-"}</td>
+              <td>${rx.axisOS || "-"}</td>
+              <td>${rx.addOS || "-"}</td>
+              <td>${rx.pdLeft || "-"}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      ${notes ? `
+      <div class="notes">
+        <div class="notes-title">${t("notes")}:</div>
+        <div class="notes-content">${notes}</div>
+      </div>
+      ` : ''}
+
+      <div class="care-tips">
+        <div class="care-title">
+          ${t("glassesCareTips")}
+        </div>
+        <ul>
+          <li>${t("tip1")}</li>
+          <li>${t("tip2")}</li>
+          <li>${t("tip3")}</li>
+          <li>${t("tip4")}</li>
+        </ul>
+      </div>
+
+      <div class="footer">
+        <div class="thank-you">${t("thankYou")}</div>
+        <div class="dots">• • • • • • • • • • • • • • •</div>
+      </div>
+    </div>
   `;
   
+  const htmlDocument = PrintService.prepareReceiptDocument(content, t("glassesPrescription"));
+  
   try {
-    PrintService.printHtml(htmlContent, 'receipt');
+    console.log("Printing RX receipt with content:", htmlDocument.substring(0, 500) + "...");
+    PrintService.printHtml(htmlDocument, 'receipt');
   } catch (error) {
     console.error('Error printing RX receipt:', error);
   }
