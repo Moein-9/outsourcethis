@@ -1,32 +1,28 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import Index from './pages/Index';
+import ReportPage from './pages/ReportPage';
+import NotFound from './pages/NotFound';
+import { Toaster } from 'sonner';
+import { CreateInvoiceExtended } from './components/CreateInvoiceExtended';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import ReportPage from "./pages/ReportPage";
-import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+function App() {
+  return (
+    <div className="app">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/reports" element={<ReportPage />} />
-          <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Index />} />
+            <Route path="reports" element={<ReportPage />} />
+            <Route path="create-invoice" element={<CreateInvoiceExtended />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
         </Routes>
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      <Toaster />
+    </div>
+  );
+}
 
 export default App;
