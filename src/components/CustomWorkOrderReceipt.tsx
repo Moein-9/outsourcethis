@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { MoenLogo, storeInfo } from "@/assets/logo";
@@ -359,7 +358,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </p>
       </div>
       
-      {/* Print-specific styles for more compact printing */}
       <style>
         {`
           @media print {
@@ -394,13 +392,11 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               max-height: none !important;
             }
             
-            /* Force content to be visible */
             .print-receipt * {
               visibility: visible !important;
               opacity: 1 !important;
             }
             
-            /* Improve dynamic sizing */
             html, body {
               height: auto !important;
               min-height: 0 !important;
@@ -408,21 +404,18 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               overflow: visible !important;
             }
             
-            /* Fix Chrome printing issues */
             body {
               -webkit-print-color-adjust: exact !important;
               color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
             
-            /* Dynamic height adjustment */
             .print-receipt {
               height: fit-content !important;
               min-height: fit-content !important;
               max-height: fit-content !important;
             }
             
-            /* Ensure proper page breaks and avoid blank pages */
             .print-receipt {
               break-inside: avoid !important;
               break-after: avoid-page !important;
@@ -430,7 +423,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               page-break-after: avoid !important;
             }
             
-            /* Fix for Google Cloud Print */
             @supports (-webkit-appearance:none) {
               body, html, #work-order-receipt {
                 height: fit-content !important;

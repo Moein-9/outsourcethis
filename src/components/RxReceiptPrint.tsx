@@ -83,7 +83,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
         )}
       </div>
 
-      {/* Prescription table - Adjusted inward by adding more padding */}
+      {/* Prescription table - Always in LTR format with English headers */}
       <div className="px-5 mb-3">
         <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "62mm" }}>
           <thead>
@@ -502,3 +502,4 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     alert(isRtl ? 'حدث خطأ أثناء الطباعة' : 'Error during printing');
   }
 };
+
