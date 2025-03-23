@@ -62,13 +62,11 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      const result = CustomPrintService.printWorkOrder(workOrderWithNotes, invoice, patient);
-      if (result) {
-        toast({
-          title: t('success'),
-          description: t('workOrderPrinted'),
-        });
-      }
+      CustomPrintService.printWorkOrder(workOrderWithNotes, invoice, patient);
+      toast({
+        title: t('success'),
+        description: t('workOrderPrinted'),
+      });
     }, 300);
   };
   
