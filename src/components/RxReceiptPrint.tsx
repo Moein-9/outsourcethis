@@ -160,8 +160,8 @@ export const RxLanguageDialog: React.FC<{
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center" style={{ position: 'fixed', zIndex: 9999 }}>
-      <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-auto shadow-xl">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-auto">
         <h3 className="text-lg font-medium mb-4 text-center">{t("selectLanguageForPrinting")}</h3>
         <div className="flex gap-4 justify-center">
           <button
