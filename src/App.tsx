@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./components/theme-provider";
@@ -11,6 +12,7 @@ import RxManager from "./pages/RxManager";
 function App() {
   const { language, setLanguage } = useLanguageStore();
   const [dir, setDir] = useState<"ltr" | "rtl">("ltr");
+  const [activeSection, setActiveSection] = useState("dashboard");
 
   useEffect(() => {
     setDir(language === "ar" ? "rtl" : "ltr");
@@ -18,16 +20,48 @@ function App() {
     document.documentElement.lang = language;
   }, [language]);
 
+  const handleNavigate = (section: string) => {
+    setActiveSection(section);
+  };
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div dir={dir} className={language === "ar" ? "font-cairo" : "font-inter"}>
         <Router>
           <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Index />} />
-              <Route path="/rx-manager" element={<RxManager />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
+            <Route 
+              path="/" 
+              element={
+                <Layout 
+                  activeSection={activeSection} 
+                  onNavigate={handleNavigate}
+                >
+                  <Index />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/rx-manager" 
+              element={
+                <Layout 
+                  activeSection={activeSection} 
+                  onNavigate={handleNavigate}
+                >
+                  <RxManager />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="*" 
+              element={
+                <Layout 
+                  activeSection={activeSection} 
+                  onNavigate={handleNavigate}
+                >
+                  <NotFound />
+                </Layout>
+              } 
+            />
           </Routes>
         </Router>
         <Toaster />
