@@ -58,23 +58,23 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
       </div>
 
       {/* Patient info - Adjusted inward by adding more padding */}
-      <div className="px-4 mb-2 text-[10px]">
+      <div className="px-6 mb-2 text-[11px]">
         <div className="flex justify-between border-b pb-0.5 mb-0.5">
           <span className="font-semibold flex items-center">
-            <Calendar className="h-3 w-3 mr-1" /> {t("date")}:
+            <Calendar className="h-3.5 w-3.5 mr-1" /> {t("date")}:
           </span>
           <span>{format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
         </div>
         <div className="flex justify-between border-b pb-0.5 mb-0.5">
           <span className="font-semibold flex items-center">
-            <User className="h-3 w-3 mr-1" /> {t("patient")}:
+            <User className="h-3.5 w-3.5 mr-1" /> {t("patient")}:
           </span>
           <span>{patientName}</span>
         </div>
         {patientPhone && (
           <div className="flex justify-between border-b pb-0.5 mb-0.5">
             <span className="font-semibold flex items-center">
-              <Phone className="h-3 w-3 mr-1" /> {t("phone")}:
+              <Phone className="h-3.5 w-3.5 mr-1" /> {t("phone")}:
             </span>
             <span>{patientPhone}</span>
           </div>
@@ -82,8 +82,8 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
       </div>
 
       {/* Prescription table - Adjusted inward by adding more padding */}
-      <div className="px-4 mb-3">
-        <table className="w-full border-collapse text-[9px] ltr" style={{ maxWidth: "64mm" }}>
+      <div className="px-5 mb-3">
+        <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "62mm" }}>
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-gray-400 p-0.5 text-center"></th>
@@ -113,7 +113,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
             </tr>
           </tbody>
         </table>
-        <div className="mt-1 text-[8px] flex justify-between px-2">
+        <div className="mt-1 text-[9px] flex justify-between px-2 font-medium">
           <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
           <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
         </div>
@@ -121,7 +121,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
 
       {/* Notes section */}
       {notes && (
-        <div className="px-4 mb-2">
+        <div className="px-5 mb-2">
           <div className="bg-gray-200 py-0.5 px-1 font-semibold text-[10px] mb-1">
             {t("notes")}:
           </div>
@@ -130,11 +130,11 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
       )}
 
       {/* Care tips */}
-      <div className="px-4 mb-2">
-        <div className="bg-gray-200 py-0.5 px-1 font-semibold text-[10px] mb-1 text-center">
+      <div className="px-5 mb-2">
+        <div className="bg-gray-800 text-white py-0.5 px-1 font-semibold text-[11px] mb-1 text-center print:bg-black print:text-white">
           {t("glassesCareTips")}
         </div>
-        <ul className={`list-disc px-5 space-y-0.5 text-[8px] ${dirClass}`}>
+        <ul className={`list-disc px-6 space-y-0.5 text-[9px] font-semibold ${dirClass}`}>
           <li>{t("tip1")}</li>
           <li>{t("tip2")}</li>
           <li>{t("tip3")}</li>
@@ -253,8 +253,8 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       justify-content: space-between;
       border-bottom: 1px solid #ddd;
       padding: 1mm 0;
-      font-size: 10px;
-      margin: 0 6mm; /* Added more margin for better safety zone */
+      font-size: 11px;
+      margin: 0 7mm; /* Added more margin for better safety zone */
     }
     .field-label {
       font-weight: bold;
@@ -263,8 +263,8 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     }
     .field-icon {
       margin-right: 1mm;
-      width: 2.5mm;
-      height: 2.5mm;
+      width: 3mm;
+      height: 3mm;
     }
     .rx-title {
       text-align: center;
@@ -280,10 +280,10 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       margin-right: 5mm;
     }
     table {
-      width: calc(100% - 12mm); /* Reduced width for safety */
+      width: calc(100% - 14mm); /* Reduced width for safety */
       border-collapse: collapse;
       direction: ltr;
-      font-size: 9px;
+      font-size: 10px;
       margin: 2mm auto;
     }
     th, td {
@@ -293,12 +293,13 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     }
     th {
       background-color: #eee;
-      font-size: 9px;
+      font-size: 10px;
     }
     .eye-legend {
       display: flex;
       justify-content: space-between;
-      font-size: 8px;
+      font-size: 9px;
+      font-weight: 600;
       margin-top: 1mm;
       padding: 0 8mm;
     }
@@ -317,15 +318,17 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     .tips-title {
       text-align: center;
       font-weight: bold;
-      background-color: #eee;
+      background-color: #000;
+      color: white;
       padding: 1mm;
       margin: 2mm 6mm 1mm 6mm;
-      font-size: 10px;
+      font-size: 11px;
     }
     .tips-list {
       padding-${isRtl ? 'right' : 'left'}: 5mm;
       margin: 1mm 8mm;
-      font-size: 8px;
+      font-size: 9px;
+      font-weight: 600;
     }
     .tips-list li {
       margin-bottom: 1mm;
@@ -361,11 +364,18 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
         color-adjust: exact !important;
         background-color: #eee !important;
       }
-      .section-title, .tips-title {
+      .section-title {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         color-adjust: exact !important;
         background-color: #eee !important;
+      }
+      .tips-title {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        background-color: #000 !important;
+        color: white !important;
       }
     }
   </style>
@@ -476,6 +486,10 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   
   <script>
     window.onload = function() {
+      // Force background colors to print properly
+      document.body.style.webkitPrintColorAdjust = 'exact';
+      document.body.style.printColorAdjust = 'exact';
+      
       window.print();
       window.onafterprint = function() {
         window.close();
