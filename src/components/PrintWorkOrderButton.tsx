@@ -50,7 +50,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
 }) => {
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
-  const { addInvoice, addExistingInvoice, addWorkOrder } = useInvoiceStore();
+  const { addInvoice, addExistingInvoice } = useInvoiceStore();
   
   const handlePrint = () => {
     // If it's a new invoice, save it first to generate an invoice ID
@@ -79,53 +79,21 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           workOrderId: invoice.workOrderId,
         });
         
-        // Create a work order for this invoice if it doesn't exist
-        let workOrderId = invoice.workOrderId;
-        if (!workOrderId && addWorkOrder) {
-          workOrderId = addWorkOrder({
-            patientId: invoice.patientId || '',
-            status: 'active' as 'active',
-            lensType: {
-              name: invoice.lensType,
-              price: invoice.lensPrice
-            }
-          });
-          
-          // Update the invoice with the new work order ID
-          const updatedInvoice = { 
-            ...invoice, 
-            invoiceId, 
-            workOrderId 
-          };
-          
-          if (onInvoiceSaved) {
-            onInvoiceSaved(invoiceId);
-          }
-          
-          toast({
-            title: t("invoiceSaved"),
-            description: t("invoiceNumber") + ": " + invoiceId + " - " + t("workOrderNumber") + ": " + workOrderId,
-          });
-          
-          // Show the print selector with the updated invoice that has an ID
-          showPrintSelector(updatedInvoice);
-        } else {
-          // Update the invoice with the new ID
-          const updatedInvoice = { ...invoice, invoiceId };
-          
-          // If callback provided, call it with the new ID
-          if (onInvoiceSaved) {
-            onInvoiceSaved(invoiceId);
-          }
-          
-          toast({
-            title: t("invoiceSaved"),
-            description: t("invoiceNumber") + ": " + invoiceId,
-          });
-          
-          // Show the print selector with the updated invoice that has an ID
-          showPrintSelector(updatedInvoice);
+        // Update the invoice with the new ID
+        const updatedInvoice = { ...invoice, invoiceId };
+        
+        // If callback provided, call it with the new ID
+        if (onInvoiceSaved) {
+          onInvoiceSaved(invoiceId);
         }
+        
+        toast({
+          title: t("invoiceSaved"),
+          description: t("invoiceNumber") + ": " + invoiceId,
+        });
+        
+        // Show the print selector with the updated invoice that has an ID
+        showPrintSelector(updatedInvoice);
       } catch (error) {
         console.error("Error saving invoice:", error);
         toast({

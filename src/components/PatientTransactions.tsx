@@ -28,24 +28,19 @@ import {
   FileText, 
   Eye, 
   Printer, 
-  Edit,
-  Check,
-  Clock
+  Edit 
 } from "lucide-react";
-import { ScrollArea } from "./ui/scroll-area";
 
 interface PatientTransactionsProps {
   workOrders: WorkOrder[];
   invoices: Invoice[];
   onEditWorkOrder: (workOrder: WorkOrder) => void;
-  onMarkAsPickedUp: (workOrder: WorkOrder) => void;
 }
 
 export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   workOrders,
   invoices,
-  onEditWorkOrder,
-  onMarkAsPickedUp
+  onEditWorkOrder
 }) => {
   const { language, t } = useLanguageStore();
   const [activeTab, setActiveTab] = React.useState<"active" | "completed">("active");
@@ -59,121 +54,102 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     }
   };
   
-  const formatTime = (dateString?: string) => {
-    if (!dateString) return "";
-    try {
-      return format(parseISO(dateString), "hh:mm a", { locale: language === 'ar' ? ar : enUS });
-    } catch (error) {
-      return "";
-    }
+  const getActiveWorkOrders = (workOrders: WorkOrder[]) => {
+    return workOrders.filter(wo => {
+      const invoice = invoices.find(inv => inv.workOrderId === wo.id);
+      return !invoice || !invoice.isPaid;
+    });
   };
   
-  const getActiveWorkOrders = () => {
-    return workOrders.filter(wo => !wo.status || wo.status !== 'completed');
-  };
-  
-  const getCompletedWorkOrders = () => {
-    return workOrders.filter(wo => wo.status === 'completed');
-  };
-  
-  const activeWorkOrders = getActiveWorkOrders();
-  const completedWorkOrders = getCompletedWorkOrders();
-  
-  const findInvoiceForWorkOrder = (workOrderId?: string) => {
-    if (!workOrderId) return null;
-    return invoices.find(inv => inv.workOrderId === workOrderId);
+  const getCompletedWorkOrders = (workOrders: WorkOrder[]) => {
+    return workOrders.filter(wo => {
+      const invoice = invoices.find(inv => inv.workOrderId === wo.id);
+      return invoice && invoice.isPaid;
+    });
   };
   
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle>{t("transactionHistory")}</CardTitle>
-        <CardDescription>{t("workOrderAndInvoiceHistory")}</CardDescription>
+    <Card className="border-amber-200 shadow-md">
+      <CardHeader className="pb-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-t-lg">
+        <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
+          <Receipt className="h-5 w-5" />
+          {language === 'ar' ? "سجل المعاملات" : "Transaction History"}
+        </CardTitle>
+        <CardDescription>
+          {language === 'ar' ? "أوامر العمل والفواتير الخاصة بالعميل" : "Work orders and invoices for the client"}
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="active" onValueChange={(value) => setActiveTab(value as "active" | "completed")}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="active" className="flex gap-2 items-center">
-              <Clock className="h-4 w-4" />
-              <span>{t("activeWorkOrders")}</span>
-              <Badge variant="secondary" className="ml-1">
-                {activeWorkOrders.length}
-              </Badge>
+        <Tabs 
+          defaultValue="active" 
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as "active" | "completed")}
+          className="w-full"
+        >
+          <TabsList className="w-full mb-4 grid grid-cols-2 bg-amber-100/50">
+            <TabsTrigger value="active" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white">
+              {language === 'ar' ? "أوامر عمل نشطة" : "Active Work Orders"}
             </TabsTrigger>
-            <TabsTrigger value="completed" className="flex gap-2 items-center">
-              <Check className="h-4 w-4" />
-              <span>{t("completedWorkOrders")}</span>
-              <Badge variant="secondary" className="ml-1">
-                {completedWorkOrders.length}
-              </Badge>
+            <TabsTrigger value="completed" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
+              {language === 'ar' ? "المعاملات المكتملة" : "Completed Transactions"}
             </TabsTrigger>
           </TabsList>
           
-          {/* Active Work Orders */}
-          <TabsContent value="active">
-            {activeWorkOrders.length > 0 ? (
-              <ScrollArea className="max-h-[400px]">
-                <div className="w-full">
+          <TabsContent value="active" className="mt-0 space-y-4">
+            <div>
+              <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-amber-700">
+                <AlertCircle className="h-4 w-4 text-amber-500" />
+                {language === 'ar' ? "أوامر العمل قيد التنفيذ" : "Work Orders in Progress"}
+              </h3>
+              
+              {getActiveWorkOrders(workOrders).length > 0 ? (
+                <div className="rounded-md border overflow-hidden shadow-sm">
                   <Table>
-                    <TableHeader className="bg-primary/5 sticky top-0">
+                    <TableHeader className="bg-amber-50">
                       <TableRow>
-                        <TableHead>{t("date")}</TableHead>
-                        <TableHead>{t("details")}</TableHead>
-                        <TableHead>{t("status")}</TableHead>
-                        <TableHead className="text-right">{t("actions")}</TableHead>
+                        <TableHead className="w-12">#</TableHead>
+                        <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                        <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
+                        <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
+                        <TableHead>{t('status')}</TableHead>
+                        <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {activeWorkOrders.map((workOrder) => {
-                        const relatedInvoice = findInvoiceForWorkOrder(workOrder.id);
+                      {getActiveWorkOrders(workOrders).map((workOrder, index) => {
+                        const invoice = invoices.find(inv => inv.workOrderId === workOrder.id);
+                        const status = !invoice ? (language === 'ar' ? "قيد التنفيذ" : "In Progress") : 
+                          invoice.isPaid ? (language === 'ar' ? "مدفوعة" : "Paid") : 
+                          invoice.deposit > 0 ? (language === 'ar' ? "مدفوعة جزئيًا" : "Partially Paid") : 
+                          (language === 'ar' ? "غير مدفوعة" : "Unpaid");
+                        
+                        const statusColor = !invoice ? "bg-amber-500" : 
+                          invoice.isPaid ? "bg-green-500" : 
+                          invoice.deposit > 0 ? "bg-amber-500" : "bg-red-500";
+                        
                         return (
-                          <TableRow key={workOrder.id}>
-                            <TableCell className="whitespace-nowrap">
-                              {formatDate(workOrder.createdAt)}
-                            </TableCell>
+                          <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-amber-50/30' : ''}>
+                            <TableCell className="font-medium">{index + 1}</TableCell>
+                            <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
+                            <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
+                            <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
                             <TableCell>
-                              <div className="space-y-1">
-                                <div className="font-medium flex items-center gap-1.5">
-                                  <Clock className="h-3.5 w-3.5 text-orange-500" />
-                                  {t("workOrderNumber")}: {workOrder.id}
-                                </div>
-                                {relatedInvoice && (
-                                  <div className="text-sm flex items-center gap-1.5">
-                                    <Receipt className="h-3.5 w-3.5 text-green-500" />
-                                    {t("invoiceNumber")}: {relatedInvoice.invoiceId}
-                                  </div>
-                                )}
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {workOrder.lensType && (
-                                    <span className="inline-block mr-2">{workOrder.lensType.name}</span>
-                                  )}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200">
-                                {t("inProgress")}
-                              </Badge>
+                              <Badge className={statusColor}>{status}</Badge>
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
-                                  className="h-8 border-blue-200 hover:bg-blue-50 text-blue-700"
+                                  className="border-amber-200 hover:bg-amber-50"
                                   onClick={() => onEditWorkOrder(workOrder)}
                                 >
-                                  <Edit className="h-3.5 w-3.5 mr-1" />
-                                  {t("edit")}
+                                  <Edit className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
+                                  {t('edit')}
                                 </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-8 border-green-200 hover:bg-green-50 text-green-700"
-                                  onClick={() => onMarkAsPickedUp(workOrder)}
-                                >
-                                  <Check className="h-3.5 w-3.5 mr-1" />
-                                  {t("customerPickedUp")}
+                                <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
+                                  <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
+                                  {t('print')}
                                 </Button>
                               </div>
                             </TableCell>
@@ -183,87 +159,142 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                     </TableBody>
                   </Table>
                 </div>
-              </ScrollArea>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground text-center">
-                <FileText className="h-12 w-12 mb-3 text-muted-foreground/50" />
-                <h3 className="text-lg font-medium">{t("noActiveWorkOrders")}</h3>
-                <p className="max-w-md mt-2">{t("allWorkOrdersCompleted")}</p>
-              </div>
-            )}
+              ) : (
+                <div className="text-center py-6 border rounded-md bg-amber-50/20">
+                  <FileText className="h-10 w-10 mx-auto text-amber-300 mb-3" />
+                  <h3 className="text-lg font-medium mb-1 text-amber-700">
+                    {language === 'ar' ? "لا توجد أوامر عمل نشطة" : "No Active Work Orders"}
+                  </h3>
+                  <p className="text-muted-foreground max-w-md mx-auto">
+                    {language === 'ar' 
+                      ? "لا يوجد أوامر عمل نشطة لهذا العميل حالياً."
+                      : "There are no active work orders for this client at the moment."}
+                  </p>
+                </div>
+              )}
+            </div>
           </TabsContent>
           
-          {/* Completed Work Orders */}
-          <TabsContent value="completed">
-            {completedWorkOrders.length > 0 ? (
-              <ScrollArea className="max-h-[400px]">
-                <div className="w-full">
+          <TabsContent value="completed" className="mt-0 space-y-8">
+            <div>
+              <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-green-700">
+                <AlertCircle className="h-4 w-4 text-green-500" />
+                {language === 'ar' ? "الفواتير المكتملة" : "Completed Invoices"}
+              </h3>
+              
+              {invoices.filter(inv => inv.isPaid).length > 0 ? (
+                <div className="rounded-md border overflow-hidden shadow-sm">
                   <Table>
-                    <TableHeader className="bg-primary/5 sticky top-0">
+                    <TableHeader className="bg-green-50">
                       <TableRow>
-                        <TableHead>{t("date")}</TableHead>
-                        <TableHead>{t("details")}</TableHead>
-                        <TableHead>{t("pickedUpAt")}</TableHead>
-                        <TableHead className="text-right">{t("actions")}</TableHead>
+                        <TableHead className="w-12">#</TableHead>
+                        <TableHead>{language === 'ar' ? "رقم الفاتورة" : "Invoice No."}</TableHead>
+                        <TableHead>{language === 'ar' ? "المبلغ" : "Amount"}</TableHead>
+                        <TableHead>{language === 'ar' ? "تاريخ الفاتورة" : "Invoice Date"}</TableHead>
+                        <TableHead>{t('status')}</TableHead>
+                        <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {completedWorkOrders.map((workOrder) => {
-                        const relatedInvoice = findInvoiceForWorkOrder(workOrder.id);
-                        return (
-                          <TableRow key={workOrder.id}>
-                            <TableCell className="whitespace-nowrap">
-                              {formatDate(workOrder.createdAt)}
-                            </TableCell>
-                            <TableCell>
-                              <div className="space-y-1">
-                                <div className="font-medium flex items-center gap-1.5">
-                                  <Clock className="h-3.5 w-3.5 text-green-500" />
-                                  {t("workOrderNumber")}: {workOrder.id}
-                                </div>
-                                {relatedInvoice && (
-                                  <div className="text-sm flex items-center gap-1.5">
-                                    <Receipt className="h-3.5 w-3.5 text-green-500" />
-                                    {t("invoiceNumber")}: {relatedInvoice.invoiceId}
-                                  </div>
-                                )}
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {workOrder.lensType && (
-                                    <span className="inline-block mr-2">{workOrder.lensType.name}</span>
-                                  )}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-100 border-green-200">
-                                {formatDate(workOrder.pickedUpAt)}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="h-8"
-                                onClick={() => onEditWorkOrder(workOrder)}
-                              >
-                                <Eye className="h-3.5 w-3.5 mr-1" />
-                                {t("view")}
+                      {invoices.filter(inv => inv.isPaid).map((invoice, index) => (
+                        <TableRow key={invoice.invoiceId} className={index % 2 === 0 ? 'bg-green-50/30' : ''}>
+                          <TableCell className="font-medium">{index + 1}</TableCell>
+                          <TableCell>INV-{invoice.invoiceId.substring(0, 8)}</TableCell>
+                          <TableCell>{invoice.total.toFixed(3)} {t('kwd')}</TableCell>
+                          <TableCell>{formatDate(invoice.createdAt)}</TableCell>
+                          <TableCell>
+                            <Badge className="bg-green-500">
+                              {language === 'ar' ? "مدفوعة" : "Paid"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
+                                <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
+                                {t('view')}
                               </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
+                              <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
+                                <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
+                                {t('print')}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
-              </ScrollArea>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground text-center">
-                <FileText className="h-12 w-12 mb-3 text-muted-foreground/50" />
-                <h3 className="text-lg font-medium">{t("noCompletedWorkOrders")}</h3>
-                <p className="max-w-md mt-2">{t("noCompletedWorkOrdersDescription")}</p>
-              </div>
-            )}
+              ) : (
+                <div className="text-center py-6 border rounded-md bg-green-50/20">
+                  <FileText className="h-10 w-10 mx-auto text-green-300 mb-3" />
+                  <h3 className="text-lg font-medium mb-1 text-green-700">
+                    {language === 'ar' ? "لا توجد فواتير مكتملة" : "No Completed Invoices"}
+                  </h3>
+                  <p className="text-muted-foreground max-w-md mx-auto">
+                    {language === 'ar' 
+                      ? "لا يوجد فواتير مكتملة لهذا العميل حالياً."
+                      : "There are no completed invoices for this client at the moment."}
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <div>
+              <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-blue-700">
+                <AlertCircle className="h-4 w-4 text-blue-500" />
+                {language === 'ar' ? "أوامر العمل المكتملة" : "Completed Work Orders"}
+              </h3>
+              
+              {getCompletedWorkOrders(workOrders).length > 0 ? (
+                <div className="rounded-md border overflow-hidden shadow-sm">
+                  <Table>
+                    <TableHeader className="bg-blue-50">
+                      <TableRow>
+                        <TableHead className="w-12">#</TableHead>
+                        <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                        <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
+                        <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
+                        <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {getCompletedWorkOrders(workOrders).map((workOrder, index) => (
+                        <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30' : ''}>
+                          <TableCell className="font-medium">{index + 1}</TableCell>
+                          <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
+                          <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
+                          <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
+                                <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                {t('view')}
+                              </Button>
+                              <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
+                                <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                {t('print')}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-6 border rounded-md bg-blue-50/20">
+                  <FileText className="h-10 w-10 mx-auto text-blue-300 mb-3" />
+                  <h3 className="text-lg font-medium mb-1 text-blue-700">
+                    {language === 'ar' ? "لا توجد أوامر عمل مكتملة" : "No Completed Work Orders"}
+                  </h3>
+                  <p className="text-muted-foreground max-w-md mx-auto">
+                    {language === 'ar' 
+                      ? "لا يوجد أوامر عمل مكتملة لهذا العميل حالياً."
+                      : "There are no completed work orders for this client at the moment."}
+                  </p>
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </CardContent>
