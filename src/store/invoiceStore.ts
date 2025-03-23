@@ -37,10 +37,10 @@ export interface Invoice {
   isPaid: boolean;
   authNumber?: string; // Added for authorization numbers
   workOrderId?: string; // Reference to the work order
-  notes?: string; // Added notes field for work orders
 }
 
-interface WorkOrder {
+// Define WorkOrder interface
+export interface WorkOrder {
   id: string;
   patientId: string;
   createdAt: string;
@@ -48,6 +48,7 @@ interface WorkOrder {
     name: string;
     price: number;
   };
+  // Add other work order fields as needed
 }
 
 interface InvoiceState {
