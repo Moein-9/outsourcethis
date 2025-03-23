@@ -62,6 +62,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   const [invoiceId, setInvoiceId] = useState<string>("");
   const [notes, setNotes] = useState<string>(invoice.notes || "");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [printType, setPrintType] = useState<"none" | "invoice" | "workOrder">("none");
   const { addInvoice, addExistingInvoice } = useInvoiceStore();
   
   // When the dialog opens, initialize notes from the invoice
@@ -75,6 +76,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     if (isNewInvoice && !invoice.invoiceId) {
       setLoading(true);
       try {
+        console.log("Saving invoice with notes:", notes);
+        
         // Include notes in the invoice data
         const invoiceWithNotes = {
           ...invoice,
@@ -103,6 +106,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           workOrderId: invoiceWithNotes.workOrderId,
           notes: notes
         });
+        
+        console.log("Invoice saved with ID:", newInvoiceId);
         
         // Update the invoice with the new ID
         const updatedInvoice = { ...invoiceWithNotes, invoiceId: newInvoiceId };
@@ -135,7 +140,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     }
   };
   
-  const handlePrintInvoice = () => {
+  const handlePrint = (type: "invoice" | "workOrder") => {
     if (!savedInvoice && !invoice.invoiceId) {
       toast({
         title: t("error"),
@@ -145,54 +150,58 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       return;
     }
     
-    const invoiceToPrint = savedInvoice || invoice;
-    // Create the print selector
-    const invoiceSelector = (
-      <WorkOrderPrintSelector
-        invoice={invoiceToPrint}
-        patientName={patientName}
-        patientPhone={patientPhone}
-        rx={rx}
-        lensType={lensType}
-        coating={coating}
-        frame={frame}
-        contactLenses={contactLenses}
-        contactLensRx={contactLensRx}
-        thermalOnly={true}
-      />
-    );
+    setPrintType(type);
     
-    return invoiceSelector;
+    // Use setTimeout to ensure the state is updated before the print operation
+    setTimeout(() => {
+      if (type === "invoice") {
+        window.print();
+      } else if (type === "workOrder") {
+        window.print();
+      }
+      
+      // Reset print type after printing
+      setPrintType("none");
+    }, 100);
   };
-  
-  const handlePrintWorkOrder = () => {
-    if (!savedInvoice && !invoice.invoiceId) {
-      toast({
-        title: t("error"),
-        description: t("pleaseCreateInvoiceFirst"),
-        variant: "destructive",
-      });
-      return;
+
+  // Determine which component to render for printing
+  const getPrintComponent = () => {
+    const invoiceToPrint = savedInvoice || invoice;
+    
+    if (printType === "invoice") {
+      return (
+        <WorkOrderPrintSelector
+          invoice={invoiceToPrint}
+          patientName={patientName}
+          patientPhone={patientPhone}
+          rx={rx}
+          lensType={lensType}
+          coating={coating}
+          frame={frame}
+          contactLenses={contactLenses}
+          contactLensRx={contactLensRx}
+          thermalOnly={true}
+        />
+      );
+    } else if (printType === "workOrder") {
+      return (
+        <WorkOrderPrintSelector
+          invoice={invoiceToPrint}
+          patientName={patientName}
+          patientPhone={patientPhone}
+          rx={rx}
+          lensType={lensType}
+          coating={coating}
+          frame={frame}
+          contactLenses={contactLenses}
+          contactLensRx={contactLensRx}
+          thermalOnly={thermalOnly}
+        />
+      );
     }
     
-    const invoiceToPrint = savedInvoice || invoice;
-    // Create the print selector
-    const selector = (
-      <WorkOrderPrintSelector
-        invoice={invoiceToPrint}
-        patientName={patientName}
-        patientPhone={patientPhone}
-        rx={rx}
-        lensType={lensType}
-        coating={coating}
-        frame={frame}
-        contactLenses={contactLenses}
-        contactLensRx={contactLensRx}
-        thermalOnly={thermalOnly}
-      />
-    );
-    
-    return selector;
+    return null;
   };
 
   return (
@@ -258,7 +267,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={handlePrintInvoice}
+                    onClick={() => handlePrint("invoice")}
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     {t("printInvoice")}
@@ -267,7 +276,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
                   <Button 
                     variant="default" 
                     className="w-full"
-                    onClick={handlePrintWorkOrder}
+                    onClick={() => handlePrint("workOrder")}
                   >
                     <Printer className="h-4 w-4 mr-2" />
                     {t("printWorkOrder")}
@@ -298,7 +307,13 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         </DialogContent>
       </Dialog>
       
-      {!isNewInvoice && (
+      {/* Render the print component when needed */}
+      <div style={{ display: printType !== "none" ? "block" : "none", position: "absolute", left: "-9999px" }}>
+        {getPrintComponent()}
+      </div>
+      
+      {/* Maintain backward compatibility for non-new invoices */}
+      {!isNewInvoice && !dialogOpen && (
         <WorkOrderPrintSelector
           invoice={invoice}
           patientName={patientName}
@@ -311,7 +326,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           contactLensRx={contactLensRx}
           thermalOnly={thermalOnly}
           trigger={
-            <Button variant={variant} size={size} className={className}>
+            <Button variant={variant} size={size} className={className + " hidden"}>
               <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
             </Button>
           }
