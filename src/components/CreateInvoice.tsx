@@ -875,4 +875,305 @@ const CreateInvoice: React.FC = () => {
                               <Input
                                 id="newModel"
                                 value={newModel}
-                                onChange={(e) =>
+                                onChange={(e) => setNewModel(e.target.value)}
+                                className={textAlignClass}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <Label htmlFor="newColor" className="text-muted-foreground">{t('color')}:</Label>
+                              <Input
+                                id="newColor"
+                                value={newColor}
+                                onChange={(e) => setNewColor(e.target.value)}
+                                className={textAlignClass}
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <Label htmlFor="newSize" className="text-muted-foreground">{t('size')}:</Label>
+                              <Input
+                                id="newSize"
+                                value={newSize}
+                                onChange={(e) => setNewSize(e.target.value)}
+                                className={textAlignClass}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <Label htmlFor="newPrice" className="text-muted-foreground">{t('price')}:</Label>
+                              <Input
+                                id="newPrice"
+                                value={newPrice}
+                                onChange={(e) => setNewPrice(e.target.value)}
+                                className={textAlignClass}
+                                type="number"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <Label htmlFor="newQty" className="text-muted-foreground">{t('quantity')}:</Label>
+                              <Input
+                                id="newQty"
+                                value={newQty}
+                                onChange={(e) => setNewQty(e.target.value)}
+                                className={textAlignClass}
+                                type="number"
+                              />
+                            </div>
+                          </div>
+                          <Button
+                            onClick={handleAddNewFrame}
+                            className="w-full mt-2"
+                          >
+                            {t('addFrame')}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="bg-white rounded-lg p-6 border shadow-sm">
+              <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
+                <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
+                  <Eye className="w-5 h-5" />
+                  {t('contactLensesSection')}
+                </h3>
+              </div>
+              
+              <ContactLensSelector 
+                onSelection={handleContactLensSelection}
+                patientRx={contactLensRx}
+              />
+            </div>
+          )}
+          
+          <div className="bg-white rounded-lg p-6 border shadow-sm sticky top-6">
+            <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
+              <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
+                <ClipboardCheck className="w-5 h-5" />
+                {t('notes')}
+              </h3>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="invoiceNotes" className={`text-muted-foreground block ${textAlignClass}`}>
+                {t('additionalNotes')}:
+              </Label>
+              <Textarea
+                id="invoiceNotes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder={t('notesPlaceholder')}
+                className={textAlignClass}
+                rows={3}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg p-6 border shadow-sm sticky top-6">
+            <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
+              <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
+                <CreditCard className="w-5 h-5" />
+                {t('paymentSection')}
+              </h3>
+            </div>
+            
+            <div className="mt-10 space-y-6">
+              <div className="rounded-lg border p-3">
+                <h4 className={`font-semibold mb-3 text-primary flex items-center gap-1 ${textAlignClass}`}>
+                  <Receipt className="w-4 h-4" />
+                  {t('invoiceSummary')}
+                </h4>
+                <div className="space-y-2">
+                  <div className={`flex justify-between text-sm ${textAlignClass}`}>
+                    <span className="text-muted-foreground">{t('lensPrice')}:</span>
+                    <span>{invoiceType === "glasses" ? (selectedLensType?.price || 0).toFixed(2) : contactLensItems.reduce((sum, lens) => sum + lens.price, 0).toFixed(2)} {t('kwd')}</span>
+                  </div>
+                  
+                  {invoiceType === "glasses" && selectedCoating && (
+                    <div className={`flex justify-between text-sm ${textAlignClass}`}>
+                      <span className="text-muted-foreground">{t('coatingPrice')}:</span>
+                      <span>{selectedCoating.price.toFixed(2)} {t('kwd')}</span>
+                    </div>
+                  )}
+                  
+                  {invoiceType === "glasses" && !skipFrame && selectedFrame.brand && (
+                    <div className={`flex justify-between text-sm ${textAlignClass}`}>
+                      <span className="text-muted-foreground">{t('framePrice')}:</span>
+                      <span>{selectedFrame.price.toFixed(2)} {t('kwd')}</span>
+                    </div>
+                  )}
+                  
+                  <div className={`flex justify-between text-sm ${textAlignClass}`}>
+                    <span className="text-muted-foreground">{t('subtotal')}:</span>
+                    <span>{(total + discount).toFixed(2)} {t('kwd')}</span>
+                  </div>
+                  
+                  <div className={`flex justify-between text-sm ${textAlignClass}`}>
+                    <span className="text-muted-foreground">{t('discount')}:</span>
+                    <span>{discount.toFixed(2)} {t('kwd')}</span>
+                  </div>
+                  
+                  <div className="border-t pt-2 mt-2">
+                    <div className={`flex justify-between font-bold ${textAlignClass}`}>
+                      <span>{t('total')}:</span>
+                      <span>{total.toFixed(2)} {t('kwd')}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="discount" className={`text-muted-foreground block ${textAlignClass}`}>{t('discount')} ({t('kwd')}):</Label>
+                    <Input
+                      id="discount"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={discount}
+                      onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                      className={textAlignClass}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="deposit" className={`text-muted-foreground block ${textAlignClass}`}>
+                      {t('deposit')} ({t('kwd')}):
+                    </Label>
+                    <div className="flex space-x-2">
+                      <Input
+                        id="deposit"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        value={deposit}
+                        onChange={(e) => setDeposit(parseFloat(e.target.value) || 0)}
+                        className={textAlignClass}
+                      />
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={handlePayInFull}
+                        className="whitespace-nowrap gap-1"
+                      >
+                        <BadgePercent className="w-4 h-4" />
+                        {t('payFull')}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className={`text-muted-foreground block ${textAlignClass}`}>{t('paymentMethod')}:</Label>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                    <Button
+                      variant={paymentMethod === "Cash" ? "default" : "outline"}
+                      className="gap-1 justify-start px-3"
+                      onClick={() => {
+                        setPaymentMethod("Cash");
+                        setAuthNumber("");
+                      }}
+                    >
+                      <Banknote className="w-4 h-4" />
+                      {t('cash')}
+                    </Button>
+                    <Button
+                      variant={paymentMethod === "KNET" ? "default" : "outline"}
+                      className="gap-1 justify-start px-3"
+                      onClick={() => setPaymentMethod("KNET")}
+                    >
+                      <CardIcon className="w-4 h-4" />
+                      {t('knet')}
+                    </Button>
+                    <Button
+                      variant={paymentMethod === "Visa" ? "default" : "outline"}
+                      className="gap-1 justify-start px-3"
+                      onClick={() => setPaymentMethod("Visa")}
+                    >
+                      <CardIcon className="w-4 h-4" />
+                      Visa
+                    </Button>
+                    <Button
+                      variant={paymentMethod === "MasterCard" ? "default" : "outline"}
+                      className="gap-1 justify-start px-3"
+                      onClick={() => setPaymentMethod("MasterCard")}
+                    >
+                      <CardIcon className="w-4 h-4" />
+                      Master
+                    </Button>
+                  </div>
+                </div>
+                
+                {(paymentMethod === "KNET" || paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت") && (
+                  <div className="space-y-2">
+                    <Label htmlFor="authNumber" className={`text-muted-foreground block ${textAlignClass}`}>{t('authNumber')}:</Label>
+                    <Input
+                      id="authNumber"
+                      value={authNumber}
+                      onChange={(e) => setAuthNumber(e.target.value)}
+                      className={textAlignClass}
+                    />
+                  </div>
+                )}
+                
+                <div className="space-y-2 mt-6">
+                  <div className={`flex justify-between text-sm mb-1 ${textAlignClass}`}>
+                    <span className="font-semibold">{t('remaining')}:</span>
+                    <span className={`font-bold ${remaining > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                      {remaining.toFixed(2)} {t('kwd')}
+                    </span>
+                  </div>
+                  
+                  <Button 
+                    className="w-full gap-2 text-base py-6"
+                    onClick={handleSaveInvoice}
+                    disabled={!paymentMethod}
+                  >
+                    <CreditCard className="w-5 h-5" />
+                    {t('saveInvoice')}
+                  </Button>
+                  
+                  <div className={`flex ${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'} mt-2`}>
+                    <Button 
+                      variant="outline" 
+                      className="w-full gap-1"
+                      onClick={handlePrintInvoice}
+                    >
+                      <Printer className="w-4 h-4" />
+                      {t('printInvoice')}
+                    </Button>
+                    
+                    <PrintWorkOrderButton 
+                      invoice={previewInvoice}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {invoicePrintOpen && (
+        <div className="hidden print:block">
+          <ReceiptInvoice invoice={previewInvoice} />
+        </div>
+      )}
+      
+      {workOrderPrintOpen && (
+        <div className="hidden print:block">
+          <WorkOrderPrint invoice={previewInvoice} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CreateInvoice;
