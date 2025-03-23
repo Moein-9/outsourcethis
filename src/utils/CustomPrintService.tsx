@@ -142,8 +142,16 @@ export class CustomPrintService {
         }
       } else {
         // Handle the case where the element doesn't exist
-        printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
+        console.error("Cannot find work order receipt element. Ensure it exists with id='work-order-receipt'");
+        printWindow.document.write("<p>Unable to find work order content.</p>");
+        printWindow.document.write("<p>Please use the built-in print button on the preview dialog instead.</p>");
         printWindow.document.close();
+        
+        toast({
+          title: "Print Error",
+          description: "Unable to find work order content. Please use the built-in print button in the preview.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error printing work order:", error);
