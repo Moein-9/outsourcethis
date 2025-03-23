@@ -149,7 +149,7 @@ export class CustomPrintService {
           printWindow.document.close();
         }
       } else {
-        // Try another approach - call WorkOrderReceiptPrint directly
+        // Try another approach - import required components or functions if needed
         printWindow.document.write(`
           <div style="padding: 20px; text-align: center;">
             <h2>Loading work order content...</h2>
@@ -157,9 +157,11 @@ export class CustomPrintService {
           </div>
         `);
         
-        // Manually generate content based on workOrder data
+        // Modified: Don't try to call printWorkOrderReceipt again here
+        // Instead, display a more helpful message and close the window
         if (workOrder.invoice) {
-          printWorkOrderReceipt(workOrder);
+          printWindow.document.write("<p>Work order content is ready but cannot be automatically printed.</p>");
+          printWindow.document.write("<p>Please use your browser's print function (Ctrl+P / Cmd+P).</p>");
           printWindow.document.close();
         } else {
           printWindow.document.write("<p>Work order data incomplete. Please try again.</p>");
