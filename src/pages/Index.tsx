@@ -1,18 +1,18 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Dashboard } from "@/components/Dashboard";
 import { CreateClient } from "@/components/CreateClient";
 import CreateInvoice from "@/components/CreateInvoice";
-import { Inventory } from "@/components/Inventory";
 import { InventoryTabs } from "@/components/InventoryTabs";
 import { RemainingPayments } from "@/components/RemainingPayments";
 import { PatientSearch } from "@/components/PatientSearch";
 import { useLocation } from "react-router-dom";
 import { useLanguageStore } from "@/store/languageStore";
+import { AnimatedAppWrapper } from "@/components/ui/AnimatedAppWrapper";
 
 const Index = () => {
-  const [activeSection, setActiveSection] = React.useState("dashboard");
+  const [activeSection, setActiveSection] = useState("dashboard");
   const location = useLocation();
   const { language, setLanguage } = useLanguageStore();
   
@@ -39,22 +39,24 @@ const Index = () => {
   }, [language]);
 
   return (
-    <Layout
-      activeSection={activeSection}
-      onNavigate={setActiveSection}
-    >
-      {activeSection === "dashboard" && <Dashboard />}
-      {activeSection === "createClient" && <CreateClient />}
-      {activeSection === "createInvoice" && <CreateInvoice />}
-      {activeSection === "inventory" && <InventoryTabs />}
-      {activeSection === "remainingPayments" && 
-        <RemainingPayments 
-          // @ts-ignore - Handle this correctly in the RemainingPayments component
-          selectedInvoiceId={location.state?.selectedInvoice} 
-        />
-      }
-      {activeSection === "patientSearch" && <PatientSearch />}
-    </Layout>
+    <AnimatedAppWrapper>
+      <Layout
+        activeSection={activeSection}
+        onNavigate={setActiveSection}
+      >
+        {activeSection === "dashboard" && <Dashboard />}
+        {activeSection === "createClient" && <CreateClient />}
+        {activeSection === "createInvoice" && <CreateInvoice />}
+        {activeSection === "inventory" && <InventoryTabs />}
+        {activeSection === "remainingPayments" && 
+          <RemainingPayments 
+            // @ts-ignore - Handle this correctly in the RemainingPayments component
+            selectedInvoiceId={location.state?.selectedInvoice} 
+          />
+        }
+        {activeSection === "patientSearch" && <PatientSearch />}
+      </Layout>
+    </AnimatedAppWrapper>
   );
 };
 

@@ -13,8 +13,6 @@ import {
 import { PrinterIcon, CheckCircle } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "@/hooks/use-toast";
-import { PrintService } from "@/utils/PrintService";
-import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
 import { CustomPrintService } from "@/utils/CustomPrintService";
 
 interface WorkOrderPrintSelectorProps {
@@ -117,7 +115,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
         }
       }
 
-      // Always use thermal printing by default
+      // Use thermal printing automatically without popup
       CustomPrintService.printWorkOrder(currentInvoice, currentInvoice, {
         name: patientName,
         phone: patientPhone,
