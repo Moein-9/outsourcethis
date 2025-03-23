@@ -163,7 +163,7 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: Pa
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">---</SelectItem>
+                      <SelectItem value="none">---</SelectItem>
                       {generateSphOptions()}
                     </SelectContent>
                   </Select>
@@ -180,7 +180,7 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: Pa
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">---</SelectItem>
+                      <SelectItem value="none">---</SelectItem>
                       {generateCylOptions()}
                     </SelectContent>
                   </Select>
@@ -197,7 +197,7 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: Pa
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">---</SelectItem>
+                      <SelectItem value="none">---</SelectItem>
                       {generateAxisOptions()}
                     </SelectContent>
                   </Select>
@@ -214,7 +214,7 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: Pa
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">---</SelectItem>
+                      <SelectItem value="none">---</SelectItem>
                       {generateAddOptions()}
                     </SelectContent>
                   </Select>
@@ -240,7 +240,7 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: Pa
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">---</SelectItem>
+                      <SelectItem value="none">---</SelectItem>
                       {generateSphOptions()}
                     </SelectContent>
                   </Select>
@@ -257,7 +257,7 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: Pa
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">---</SelectItem>
+                      <SelectItem value="none">---</SelectItem>
                       {generateCylOptions()}
                     </SelectContent>
                   </Select>
@@ -274,7 +274,7 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: Pa
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">---</SelectItem>
+                      <SelectItem value="none">---</SelectItem>
                       {generateAxisOptions()}
                     </SelectContent>
                   </Select>
@@ -291,7 +291,7 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: Pa
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">---</SelectItem>
+                      <SelectItem value="none">---</SelectItem>
                       {generateAddOptions()}
                     </SelectContent>
                   </Select>
@@ -317,7 +317,7 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: Pa
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">---</SelectItem>
+                      <SelectItem value="none">---</SelectItem>
                       {generatePdOptions()}
                     </SelectContent>
                   </Select>
@@ -334,7 +334,7 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: Pa
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">---</SelectItem>
+                      <SelectItem value="none">---</SelectItem>
                       {generatePdOptions()}
                     </SelectContent>
                   </Select>
