@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { RxData } from "@/store/patientStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -48,11 +49,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
     pdLeft: "",
   });
   
-  // Generate options for select elements
+  // Generate options for select elements with updated ranges
   const generateSphOptions = () => {
     const options = [];
     options.push(<option key="sph-none" value="">-</option>);
-    for (let i = 20; i >= -30; i -= 0.25) {
+    // Starting from negative as requested (-30.00 to +20.00)
+    for (let i = -30; i <= 20; i += 0.25) {
       const formatted = i >= 0 ? `+${i.toFixed(2)}` : i.toFixed(2);
       options.push(
         <option key={`sph-${i}`} value={formatted}>
@@ -80,7 +82,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
   const generateAxisOptions = () => {
     const options = [];
     options.push(<option key="axis-none" value="">-</option>);
-    for (let i = 0; i <= 180; i += 5) {
+    // Increment by 1 as requested
+    for (let i = 0; i <= 180; i += 1) {
       options.push(
         <option key={`axis-${i}`} value={i.toString()}>
           {i}
@@ -93,6 +96,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
   const generateAddOptions = () => {
     const options = [];
     options.push(<option key="add-none" value="">-</option>);
+    // Up to 4 as requested
     for (let i = 0.25; i <= 4; i += 0.25) {
       const formatted = `+${i.toFixed(2)}`;
       options.push(
@@ -107,7 +111,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
   const generatePdOptions = () => {
     const options = [];
     options.push(<option key="pd-none" value="">-</option>);
-    for (let i = 50; i <= 80; i += 0.5) {
+    // Start from 15 to 60 as requested
+    for (let i = 15; i <= 60; i += 1) {
       options.push(
         <option key={`pd-${i}`} value={i.toString()}>
           {i}
