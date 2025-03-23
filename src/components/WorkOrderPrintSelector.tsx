@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -96,7 +95,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           setIsDialogOpen(false);
           toast.success(t("printingCompleted"));
           
-          // Call the onPrintComplete callback if provided
           if (onPrintComplete) {
             onPrintComplete();
           }
@@ -209,7 +207,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           setIsDialogOpen(false);
           toast.success(t("printingCompleted"));
           
-          // Call the onPrintComplete callback if provided
           if (onPrintComplete) {
             onPrintComplete();
           }
@@ -222,14 +219,11 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     }
   };
   
-  // If this component is being used within the workflow, trigger print immediately
   React.useEffect(() => {
     if (onPrintComplete) {
-      // Auto-select receipt format if not already selected
       if (!selectedFormat) {
         setSelectedFormat('receipt');
       }
-      // Initiate printing
       handlePrint();
     }
   }, []);

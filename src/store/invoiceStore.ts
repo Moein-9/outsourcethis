@@ -37,6 +37,7 @@ export interface Invoice {
   isPaid: boolean;
   authNumber?: string; // Added for authorization numbers
   workOrderId?: string; // Reference to the work order
+  notes?: string; // Added notes field for work orders
 }
 
 // Define WorkOrder interface

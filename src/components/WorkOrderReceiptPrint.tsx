@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -27,6 +26,8 @@ interface WorkOrderReceiptPrintProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
+  notes?: string;
+  isInvoice?: boolean;
 }
 
 export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
@@ -39,6 +40,8 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   frame,
   contactLenses,
   contactLensRx,
+  notes,
+  isInvoice,
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
@@ -421,7 +424,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             borderRadius: "4px",
             margin: "4px 0 1px 0",
             fontWeight: "bold",
-            fontSize: "15px", /* Increased from 13px to 15px to make it more prominent */
+            fontSize: "15px",
             border: "1px solid #FECACA",
             color: "#B91C1C"
           }}>
@@ -502,7 +505,7 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
   const { language, t } = useLanguageStore.getState();
   const isRtl = language === 'ar';
   
-  const { invoice, patientName, rx, frame, lensType, coating } = props;
+  const { invoice, patientName, rx, frame, lensType, coating, notes } = props;
   const invoiceNumber = invoice.invoiceId || invoice.workOrderId || "";
   
   const htmlContent = `
@@ -579,6 +582,13 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
         <p style="margin: 0; font-size: 8px;"><strong>${t("paid")}:</strong> ${invoice.deposit.toFixed(3)} KWD</p>
         <p style="margin: 0; font-size: 8px;"><strong>${t("remaining")}:</strong> ${(invoice.total - invoice.deposit).toFixed(3)} KWD</p>
       </div>
+      
+      ${notes ? `
+      <div style="margin-bottom: 3px;">
+        <h2 style="font-size: 10px; font-weight: bold; margin: 1px 0; border-bottom: 1px solid #ccc; padding-bottom: 1px;">${t("notes")}</h2>
+        <p style="margin: 0; font-size: 8px; white-space: pre-wrap;">${notes}</p>
+      </div>
+      ` : ''}
       
       <div style="text-align: center; margin-top: 2px; font-size: 7px;">
         ${isRtl 

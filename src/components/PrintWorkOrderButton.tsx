@@ -92,7 +92,11 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       
       // Update state with the new invoice ID
       setInvoiceId(newInvoiceId);
-      setSavedInvoice({...invoice, invoiceId: newInvoiceId, notes});
+      setSavedInvoice({
+        ...invoice, 
+        invoiceId: newInvoiceId, 
+        notes: notes
+      });
       setWorkflowStep('saved');
       
       // Call onInvoiceSaved callback if provided
