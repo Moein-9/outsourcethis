@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -46,7 +45,6 @@ export const PatientSearch: React.FC = () => {
   const [editWorkOrderDialogOpen, setEditWorkOrderDialogOpen] = useState(false);
   const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder | null>(null);
   
-  // New state for Add New RX dialog
   const [isAddRxDialogOpen, setIsAddRxDialogOpen] = useState(false);
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
@@ -126,13 +124,11 @@ export const PatientSearch: React.FC = () => {
     handleDirectPrint(selectedLanguage);
   };
   
-  // New handler for saving RX data
   const handleSaveRx = (rxData: RxData) => {
     if (!selectedPatient) return;
     
     updatePatientRx(selectedPatient.patientId, rxData);
     
-    // Update the local selected patient with new RX data
     setSelectedPatient(prev => {
       if (!prev) return null;
       return {
@@ -183,16 +179,16 @@ export const PatientSearch: React.FC = () => {
                 </div>
                 
                 <div className="md:col-span-2">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium text-blue-800">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-base font-medium text-indigo-700">
                       {language === 'ar' ? "الوصفة الطبية" : "Prescription"}
                     </h3>
                     <Button 
                       onClick={() => setIsAddRxDialogOpen(true)}
-                      className="bg-green-500 hover:bg-green-600 text-white"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
                       size="sm"
                     >
-                      <PlusCircle className="h-4 w-4 mr-2" />
+                      <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
                       {language === 'ar' ? "إضافة وصفة جديدة" : "Add New RX"}
                     </Button>
                   </div>
@@ -247,7 +243,6 @@ export const PatientSearch: React.FC = () => {
         onSave={handleSaveWorkOrder}
       />
       
-      {/* Add New RX Dialog */}
       {selectedPatient && (
         <AddRxDialog 
           isOpen={isAddRxDialogOpen}
