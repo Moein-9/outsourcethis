@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore, ContactLensRx } from "@/store/patientStore";
 import { toast } from "@/components/ui/use-toast";
@@ -183,12 +184,20 @@ export const CreateClient: React.FC = () => {
       dob = `${dobDay}/${dobMonth}/${dobYear}`;
     }
     
+    // Create patient notes array if notes exist
+    const patientNotes = notes.trim() ? [{
+      id: `note-${Date.now()}`,
+      text: notes.trim(),
+      createdAt: new Date().toISOString()
+    }] : [];
+    
     if (activeTab === "glasses") {
       const patientData = {
         name,
         phone,
         dob,
-        notes,
+        notes: "",  // Keep the original notes field empty, we now use patientNotes array
+        patientNotes, // Add the new patientNotes array
         rx: {
           sphereOD: sphOD,
           cylOD,
@@ -211,7 +220,8 @@ export const CreateClient: React.FC = () => {
         name,
         phone,
         dob,
-        notes,
+        notes: "",  // Keep the original notes field empty, we now use patientNotes array
+        patientNotes, // Add the new patientNotes array
         rx: {
           sphereOD: "-",
           cylOD: "-",
@@ -364,7 +374,7 @@ export const CreateClient: React.FC = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="notes" className={textAlignClass}>{t("notes")}</Label>
+                <Label htmlFor="notes" className={textAlignClass}>{t("patientNotes")}</Label>
                 <Textarea
                   id="notes"
                   value={notes}

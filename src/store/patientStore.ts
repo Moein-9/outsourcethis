@@ -89,7 +89,7 @@ export const usePatientStore = create<PatientState>()(
               ...patient, 
               patientId, 
               createdAt,
-              patientNotes: [],
+              patientNotes: patient.patientNotes || [],
               rx: {
                 ...patient.rx,
                 createdAt: patient.rx.createdAt || new Date().toISOString() // Add creation date to initial RX
