@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -27,6 +26,7 @@ interface WorkOrderReceiptPrintProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
+  notes?: string;
 }
 
 export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
@@ -39,6 +39,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   frame,
   contactLenses,
   contactLensRx,
+  notes
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
@@ -502,8 +503,15 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
   const { language, t } = useLanguageStore.getState();
   const isRtl = language === 'ar';
   
-  const { invoice, patientName, rx, frame, lensType, coating } = props;
+  const { invoice, patientName, rx, frame, lensType, coating, notes } = props;
   const invoiceNumber = invoice.invoiceId || invoice.workOrderId || "";
+  
+  const notesSection = notes ? `
+  <div style="margin-bottom: 3px;">
+    <h2 style="font-size: 10px; font-weight: bold; margin: 1px 0; border-bottom: 1px solid #ccc; padding-bottom: 1px;">${t("notes")}</h2>
+    <p style="margin: 0; font-size: 8px; white-space: pre-wrap;">${notes}</p>
+  </div>
+  ` : '';
   
   const htmlContent = `
     <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; text-align: ${isRtl ? 'right' : 'left'}; font-size: 9px; line-height: 1.1;">
@@ -573,6 +581,8 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
         <p style="margin: 0; font-size: 8px;"><strong>${t("price")}:</strong> ${invoice.coatingPrice.toFixed(3)} KWD</p>
       </div>
       ` : ''}
+      
+      ${notesSection}
       
       <div style="margin-top: 2px; border-top: 1px dashed #000; padding-top: 1px;">
         <p style="margin: 0; font-size: 8px;"><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} KWD</p>

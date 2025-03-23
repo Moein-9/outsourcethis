@@ -7,8 +7,8 @@ import { useLanguageStore } from '@/store/languageStore';
 import { useInventoryStore } from '@/store/inventoryStore';
 
 export const CustomPrintService = {
-  printWorkOrder: (workOrder: any, invoice?: any, patient?: any) => {
-    console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
+  printWorkOrder: (workOrder: any, invoice?: any, patient?: any, notes?: string) => {
+    console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient, notes });
     
     // Create a new window for printing
     const printWindow = window.open('', '_blank');
@@ -147,6 +147,7 @@ export const CustomPrintService = {
         workOrder={workOrder}
         invoice={invoice}
         patient={patient}
+        notes={notes}
         isPrintable={true}
       />
     );
