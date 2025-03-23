@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
@@ -24,7 +23,12 @@ import {
   Receipt
 } from "lucide-react";
 
-const CreateInvoice: React.FC = () => {
+interface CreateInvoiceProps {
+  onInvoiceSave?: (invoice: any, patientData: any) => void;
+  hideActionButtons?: boolean;
+}
+
+const CreateInvoice: React.FC<CreateInvoiceProps> = ({ onInvoiceSave, hideActionButtons = false }) => {
   const { t, language } = useLanguageStore();
   const searchPatients = usePatientStore((state) => state.searchPatients);
   const searchFrames = useInventoryStore((state) => state.searchFrames);
@@ -434,7 +438,13 @@ const CreateInvoice: React.FC = () => {
       description: `${t('invoiceSavedSuccess')} ${invoiceId}.`,
     });
     
-    resetForm();
+    if (onInvoiceSave) {
+      onInvoiceSave(invoiceData, currentPatient || { name: manualName, phone: manualPhone });
+    }
+    
+    if (!onInvoiceSave) {
+      resetForm();
+    }
   };
   
   const resetForm = () => {
