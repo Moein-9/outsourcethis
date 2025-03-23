@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore, Patient, PatientNote } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -732,9 +731,13 @@ export const PatientSearch: React.FC = () => {
                   </Card>
 
                   <PatientRxManager
-                    className="mt-6"
                     patientId={selectedPatient.patientId}
-                    patientRx={selectedPatient.rx}
+                    patientName={selectedPatient.name}
+                    patientPhone={selectedPatient.phone}
+                    currentRx={selectedPatient.rx}
+                    rxHistory={selectedPatient.rxHistory}
+                    patientNotes={selectedPatient.patientNotes}
+                    onRxPrintRequest={handleDirectPrint}
                   />
                 </div>
               </div>
