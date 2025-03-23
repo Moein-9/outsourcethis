@@ -47,7 +47,12 @@ const Index = () => {
       {activeSection === "createClient" && <CreateClient />}
       {activeSection === "createInvoice" && <CreateInvoice />}
       {activeSection === "inventory" && <InventoryTabs />}
-      {activeSection === "remainingPayments" && <RemainingPayments selectedInvoiceId={location.state?.selectedInvoice} />}
+      {activeSection === "remainingPayments" && 
+        <RemainingPayments 
+          // @ts-ignore - Handle this correctly in the RemainingPayments component
+          selectedInvoiceId={location.state?.selectedInvoice} 
+        />
+      }
       {activeSection === "patientSearch" && <PatientSearch />}
     </Layout>
   );

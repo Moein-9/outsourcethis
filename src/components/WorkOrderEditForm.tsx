@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -64,7 +63,6 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
       [name]: value
     });
     
-    // Auto-update prices based on selection
     if (name === 'lensType') {
       const selectedLens = lensTypes.find(lens => lens.type === value);
       if (selectedLens) {
@@ -82,7 +80,6 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
         }));
       }
     } else if (name === 'frameBrand') {
-      // Reset model and color when brand changes
       setEditData(prev => ({
         ...prev,
         frameModel: '',
@@ -93,7 +90,6 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
   
   const handleSaveChanges = () => {
     try {
-      // Calculate the new total
       const subtotal = editData.framePrice + editData.lensPrice + editData.coatingPrice;
       const newTotal = subtotal - editData.discount;
       
@@ -103,10 +99,8 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
         total: newTotal
       };
       
-      // Update the invoice in the store
       updateInvoice(updatedWorkOrder);
       
-      // Update patient data if needed
       if (workOrder.patientId) {
         editWorkOrder({
           patientId: workOrder.patientId,
@@ -131,7 +125,6 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
     }
   };
   
-  // Get available frame brands, models, and colors
   const availableBrands = [...new Set(frames.map(frame => frame.brand))];
   
   const availableModels = frames

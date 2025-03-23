@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -64,6 +65,8 @@ interface InvoiceState {
   clearInvoices?: () => void;
   addExistingInvoice?: (invoice: Invoice) => void;
   addWorkOrder?: (workOrder: Omit<WorkOrder, "id" | "createdAt">) => string;
+  updateInvoice: (updatedInvoice: Invoice) => void; // Added updateInvoice function
+  updateWorkOrder?: (workOrder: WorkOrder) => void; // Added updateWorkOrder function
 }
 
 export const useInvoiceStore = create<InvoiceState>()(
@@ -231,6 +234,24 @@ export const useInvoiceStore = create<InvoiceState>()(
         }));
         
         return id;
+      },
+      
+      // Add the updateInvoice function
+      updateInvoice: (updatedInvoice) => {
+        set((state) => ({
+          invoices: state.invoices.map((invoice) => 
+            invoice.invoiceId === updatedInvoice.invoiceId ? updatedInvoice : invoice
+          )
+        }));
+      },
+      
+      // Add the updateWorkOrder function
+      updateWorkOrder: (updatedWorkOrder) => {
+        set((state) => ({
+          workOrders: state.workOrders.map((workOrder) => 
+            workOrder.id === updatedWorkOrder.id ? updatedWorkOrder : workOrder
+          )
+        }));
       }
     }),
     {

@@ -134,7 +134,8 @@ const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                 ...editedWorkOrder, 
                 lensType: { 
                   ...editedWorkOrder.lensType || {}, 
-                  name: e.target.value 
+                  name: e.target.value,
+                  price: editedWorkOrder.lensType?.price || 0 // Ensure price always has a value
                 }
               })}
             />
@@ -150,6 +151,7 @@ const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                 ...editedWorkOrder, 
                 lensType: { 
                   ...editedWorkOrder.lensType || {}, 
+                  name: editedWorkOrder.lensType?.name || '', // Ensure name always has a value
                   price: Number(e.target.value) 
                 }
               })}
