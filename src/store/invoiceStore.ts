@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -37,6 +38,7 @@ export interface Invoice {
   isPaid: boolean;
   authNumber?: string; // Added for authorization numbers
   workOrderId?: string; // Reference to the work order
+  note?: string; // Added for special instructions
 }
 
 // Define WorkOrder interface
@@ -48,6 +50,7 @@ export interface WorkOrder {
     name: string;
     price: number;
   };
+  note?: string; // Added for special instructions
   // Add other work order fields as needed
 }
 
@@ -78,8 +81,11 @@ export const useInvoiceStore = create<InvoiceState>()(
         const remaining = Math.max(0, invoice.total - invoice.deposit);
         const isPaid = remaining === 0;
         
-        // Extract auth number if it exists
-        const { authNumber, ...restInvoice } = invoice as (typeof invoice & { authNumber?: string });
+        // Extract auth number and note if they exist
+        const { authNumber, note, ...restInvoice } = invoice as (typeof invoice & { 
+          authNumber?: string;
+          note?: string;
+        });
         
         const initialPayment: Payment = {
           amount: invoice.deposit,
@@ -100,7 +106,8 @@ export const useInvoiceStore = create<InvoiceState>()(
               remaining,
               isPaid,
               payments,
-              authNumber // Store auth number at invoice level too
+              authNumber, // Store auth number at invoice level too
+              note // Store note if provided
             }
           ]
         }));

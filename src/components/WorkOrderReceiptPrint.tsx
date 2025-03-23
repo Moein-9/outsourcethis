@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -27,6 +26,7 @@ interface WorkOrderReceiptPrintProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
+  note?: string;
 }
 
 export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
@@ -39,6 +39,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   frame,
   contactLenses,
   contactLensRx,
+  note
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
@@ -502,7 +503,7 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
   const { language, t } = useLanguageStore.getState();
   const isRtl = language === 'ar';
   
-  const { invoice, patientName, rx, frame, lensType, coating } = props;
+  const { invoice, patientName, rx, frame, lensType, coating, note } = props;
   const invoiceNumber = invoice.invoiceId || invoice.workOrderId || "";
   
   const htmlContent = `
@@ -517,6 +518,13 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
         <p style="margin: 0; font-size: 9px;"><strong>${t("name")}:</strong> ${patientName || invoice.patientName || t("notSpecified")}</p>
         <p style="margin: 0; font-size: 9px;"><strong>${t("phone")}:</strong> ${props.patientPhone || invoice.patientPhone || t("notSpecified")}</p>
       </div>
+      
+      ${note ? `
+      <div style="margin-bottom: 3px; background-color: #FFFBEA; padding: 2px; border-radius: 2px;">
+        <h2 style="font-size: 10px; font-weight: bold; margin: 1px 0; border-bottom: 1px solid #FFE7A5; padding-bottom: 1px;">${t("specialInstructions")}</h2>
+        <p style="margin: 0; font-size: 8px; white-space: pre-line;">${note}</p>
+      </div>
+      ` : ''}
       
       ${rx ? `
       <div style="margin-bottom: 3px;">

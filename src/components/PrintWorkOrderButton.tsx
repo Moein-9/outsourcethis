@@ -1,11 +1,21 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { Printer, Save, FileCheck, ClipboardCheck } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -51,13 +61,18 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
   const { addInvoice, addExistingInvoice } = useInvoiceStore();
+  const [savedInvoice, setSavedInvoice] = useState<Invoice | null>(null);
+  const [workOrderNote, setWorkOrderNote] = useState("");
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [printOption, setPrintOption] = useState<"invoice" | "workOrder" | null>(null);
   
-  const handlePrint = () => {
-    // If it's a new invoice, save it first to generate an invoice ID
+  // Handle saving the invoice
+  const handleSave = async () => {
     if (isNewInvoice && !invoice.invoiceId) {
       setLoading(true);
       try {
-        // Save the invoice to get an ID
+        // Create a new invoice with the note
         const invoiceId = addInvoice({
           patientId: invoice.patientId,
           patientName: invoice.patientName,
@@ -77,23 +92,29 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           paymentMethod: invoice.paymentMethod,
           authNumber: invoice.authNumber,
           workOrderId: invoice.workOrderId,
+          // Add note to the invoice
+          note: workOrderNote,
         });
         
-        // Update the invoice with the new ID
-        const updatedInvoice = { ...invoice, invoiceId };
+        // Update the invoice with the new ID and note
+        const updatedInvoice = { 
+          ...invoice, 
+          invoiceId, 
+          note: workOrderNote 
+        };
+        
+        // Store for success dialog
+        setSavedInvoice(updatedInvoice);
         
         // If callback provided, call it with the new ID
         if (onInvoiceSaved) {
           onInvoiceSaved(invoiceId);
         }
         
-        toast({
-          title: t("invoiceSaved"),
-          description: t("invoiceNumber") + ": " + invoiceId,
-        });
+        // Close the save dialog and show success
+        setShowSaveDialog(false);
+        setShowSuccessDialog(true);
         
-        // Show the print selector with the updated invoice that has an ID
-        showPrintSelector(updatedInvoice);
       } catch (error) {
         console.error("Error saving invoice:", error);
         toast({
@@ -105,66 +126,195 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         setLoading(false);
       }
     } else {
-      // If already has an ID, just show the print selector
-      showPrintSelector(invoice);
+      // If already has an ID, just show the updated invoice with note
+      const updatedInvoice = { 
+        ...invoice, 
+        note: workOrderNote 
+      };
+      setSavedInvoice(updatedInvoice);
+      
+      // Close the save dialog and show success
+      setShowSaveDialog(false);
+      setShowSuccessDialog(true);
     }
   };
   
-  const showPrintSelector = (invoiceToUse: Invoice) => {
-    // Create the print selector with proper styling for printing
-    const selectorContainer = document.createElement('div');
-    selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars
-    document.body.appendChild(selectorContainer);
-    
-    const selector = (
-      <WorkOrderPrintSelector
-        invoice={invoiceToUse}
-        patientName={patientName}
-        patientPhone={patientPhone}
-        rx={rx}
-        lensType={lensType}
-        coating={coating}
-        frame={frame}
-        contactLenses={contactLenses}
-        contactLensRx={contactLensRx}
-        thermalOnly={thermalOnly}
-      />
-    );
-    
-    return selector;
+  // Handle print selection after success
+  const handlePrintSelection = (type: "invoice" | "workOrder") => {
+    setPrintOption(type);
   };
-
-  return (
-    <>
-      <Button 
-        variant={variant} 
-        size={size} 
-        className={className}
-        onClick={handlePrint}
-        disabled={loading}
-      >
-        <Printer className="h-4 w-4 mr-1" /> 
-        {loading ? t("saving") : t("printWorkOrder")}
-      </Button>
-      
-      {!isNewInvoice && (
+  
+  // Print the selected option
+  const handlePrintNow = () => {
+    if (!savedInvoice || !printOption) return;
+    
+    // Create the appropriate print selector
+    if (printOption === "workOrder") {
+      return (
         <WorkOrderPrintSelector
-          invoice={invoice}
-          patientName={patientName}
-          patientPhone={patientPhone}
+          invoice={savedInvoice}
+          patientName={patientName || savedInvoice.patientName}
+          patientPhone={patientPhone || savedInvoice.patientPhone}
           rx={rx}
-          lensType={lensType}
-          coating={coating}
+          lensType={lensType || savedInvoice.lensType}
+          coating={coating || savedInvoice.coating}
           frame={frame}
           contactLenses={contactLenses}
           contactLensRx={contactLensRx}
           thermalOnly={thermalOnly}
-          trigger={
-            <Button variant={variant} size={size} className={className}>
-              <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
-            </Button>
-          }
+          note={savedInvoice.note}
         />
+      );
+    } else {
+      // Here you would add code to print invoice
+      toast({
+        title: t("info"),
+        description: t("printingInvoice"),
+      });
+    }
+    
+    // Reset the print option
+    setPrintOption(null);
+  };
+  
+  // Return null for work order if modal is closed
+  if (!showSuccessDialog && printOption === "workOrder" && savedInvoice) {
+    setPrintOption(null);
+    return null;
+  }
+
+  return (
+    <>
+      {/* Save and Print Button */}
+      <Button 
+        variant={variant} 
+        size={size} 
+        className={className}
+        onClick={() => setShowSaveDialog(true)}
+        disabled={loading}
+      >
+        <Save className="h-4 w-4 mr-1" /> 
+        {loading ? t("saving") : t("saveAndPrint")}
+      </Button>
+      
+      {/* Save Dialog with Notes Field */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("saveWorkOrder")}</DialogTitle>
+            <DialogDescription>
+              {t("addNotesToWorkOrder")}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="workOrderNote">{t("specialInstructions")}</Label>
+              <Textarea
+                id="workOrderNote"
+                placeholder={t("enterSpecialInstructions")}
+                value={workOrderNote}
+                onChange={(e) => setWorkOrderNote(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowSaveDialog(false)}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={loading}
+            >
+              {loading ? t("saving") : t("saveWorkOrder")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Success Dialog with Print Options */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileCheck className="h-5 w-5 text-green-500" />
+              {t("workOrderSaved")}
+            </DialogTitle>
+            <DialogDescription>
+              {savedInvoice && (
+                <div className="mt-2 space-y-2">
+                  <div className="bg-muted p-3 rounded-md">
+                    <p className="font-medium">{t("invoiceNumber")}: <span className="text-primary">{savedInvoice.invoiceId}</span></p>
+                    {savedInvoice.workOrderId && (
+                      <p className="font-medium">{t("workOrderNumber")}: <span className="text-primary">{savedInvoice.workOrderId}</span></p>
+                    )}
+                  </div>
+                  {workOrderNote && (
+                    <div className="bg-muted/50 p-3 rounded-md border">
+                      <p className="font-medium text-sm">{t("note")}:</p>
+                      <p className="text-sm mt-1">{workOrderNote}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <Button 
+              variant="outline" 
+              className="flex flex-col h-auto py-4 gap-2" 
+              onClick={() => handlePrintSelection("invoice")}
+            >
+              <Printer className="h-5 w-5" />
+              <span className="font-medium">{t("printInvoice")}</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="flex flex-col h-auto py-4 gap-2"
+              onClick={() => handlePrintSelection("workOrder")}
+            >
+              <ClipboardCheck className="h-5 w-5" />
+              <span className="font-medium">{t("printWorkOrder")}</span>
+            </Button>
+          </div>
+          
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() => setShowSuccessDialog(false)}
+            >
+              {t("done")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Render the print component when ready */}
+      {printOption === "workOrder" && savedInvoice && (
+        <div style={{ display: "none" }}>
+          <WorkOrderPrintSelector
+            invoice={savedInvoice}
+            patientName={patientName || savedInvoice.patientName}
+            patientPhone={patientPhone || savedInvoice.patientPhone}
+            rx={rx}
+            lensType={lensType || savedInvoice.lensType}
+            coating={coating || savedInvoice.coating}
+            frame={frame}
+            contactLenses={contactLenses}
+            contactLensRx={contactLensRx}
+            thermalOnly={true}
+            note={savedInvoice.note}
+          />
+        </div>
       )}
     </>
   );

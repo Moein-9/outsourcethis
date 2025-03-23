@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +35,7 @@ interface WorkOrderPrintSelectorProps {
   contactLensRx?: any;
   trigger?: React.ReactNode;
   thermalOnly?: boolean;
+  note?: string;
 }
 
 export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
@@ -47,13 +49,22 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
-  thermalOnly = false
+  thermalOnly = false,
+  note
 }) => {
   const { t, language } = useLanguageStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<"a4" | "receipt" | null>(thermalOnly ? "receipt" : null);
   const [printingInProgress, setPrintingInProgress] = useState(false);
   const isRtl = language === 'ar';
+  
+  // Automatically trigger printing if thermalOnly is true
+  useEffect(() => {
+    if (thermalOnly && !printingInProgress) {
+      setSelectedFormat("receipt");
+      handlePrint();
+    }
+  }, [thermalOnly]);
   
   const handleTriggerClick = () => {
     if (thermalOnly) {
@@ -79,7 +90,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           coating,
           frame,
           contactLenses,
-          contactLensRx
+          contactLensRx,
+          note
         });
         
         setTimeout(() => {
@@ -101,6 +113,13 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
               <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
               <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
             </div>
+            
+            ${note ? `
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px; background-color: #fffbea;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("specialInstructions")}</h2>
+              <p style="white-space: pre-line;">${note}</p>
+            </div>
+            ` : ''}
             
             ${frame ? `
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
