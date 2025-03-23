@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,8 +26,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   
   // Filter invoices for this patient - ensure we're getting ALL invoices for this patient
   const patientInvoices = invoices.filter(invoice => 
-    invoice.patientId === patientId || 
-    invoice.patient?.patientId === patientId
+    invoice.patientId === patientId
   );
   
   const formatDate = (dateString: string) => {
