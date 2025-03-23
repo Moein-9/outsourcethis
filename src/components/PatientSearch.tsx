@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatientStore, Patient } from "@/store/patientStore";
@@ -10,7 +11,7 @@ import { PatientSearchResults } from "./PatientSearchResults";
 import { PatientProfileInfo } from "./PatientProfileInfo";
 import { PatientPrescriptionDisplay } from "./PatientPrescriptionDisplay";
 import { PatientTransactions } from "./PatientTransactions";
-import { EditWorkOrderDialog } from "./EditWorkOrderDialog";
+import { PatientRxDialog } from "./PatientRxDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,8 +27,16 @@ import {
   CardContent,
   CardFooter 
 } from "@/components/ui/card";
-import { toast } from "sonner";
-import { Plus, Check, ArrowRight, Edit, CheckCircle2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { 
+  Plus, 
+  Check, 
+  ArrowRight, 
+  Edit, 
+  CheckCircle2, 
+  Printer,
+  User
+} from "lucide-react";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
@@ -46,7 +55,7 @@ export const PatientSearch: React.FC = () => {
     updateWorkOrder,
     addWorkOrder
   } = useInvoiceStore();
-  const { language } = useLanguageStore();
+  const { language, t } = useLanguageStore();
   
   const [searchResults, setSearchResults] = useState<PatientWithMeta[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -57,8 +66,7 @@ export const PatientSearch: React.FC = () => {
   const [patientWorkOrders, setPatientWorkOrders] = useState<WorkOrder[]>([]);
   
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
-  const [editWorkOrderDialogOpen, setEditWorkOrderDialogOpen] = useState(false);
-  const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder | null>(null);
+  const [isRxDialogOpen, setIsRxDialogOpen] = useState(false);
   
   useEffect(() => {
     if (isProfileOpen && selectedPatient) {
@@ -82,7 +90,11 @@ export const PatientSearch: React.FC = () => {
   
   const handleSearch = (searchTerm: string, visitDateFilter: string) => {
     if (!searchTerm.trim()) {
-      toast.error(language === 'ar' ? "الرجا�� إدخال مصطلح البحث" : "Please enter a search term");
+      toast({
+        title: t("error"),
+        description: t("pleaseEnterSearchTerm"),
+        variant: "destructive"
+      });
       return;
     }
     
@@ -102,7 +114,10 @@ export const PatientSearch: React.FC = () => {
     setShowResults(true);
     
     if (filteredResults.length === 0) {
-      toast.info(language === 'ar' ? "لم يتم العثور على نتائج مطابقة" : "No matching results found");
+      toast({
+        title: t("info"),
+        description: t("noResultsFound")
+      });
     }
   };
   
@@ -144,41 +159,30 @@ export const PatientSearch: React.FC = () => {
         refreshPatientData(selectedPatient.patientId);
       }
       
-      toast.success(language === 'ar' ? "تم تحديث حالة الطلب إلى: استلمه العميل" : "Order status updated to: Picked up by customer");
+      toast({
+        title: t("success"),
+        description: t("orderMarkedAsPickedUp")
+      });
     } catch (error) {
       console.error("Error updating work order status:", error);
-      toast.error(language === 'ar' ? "حدث خطأ أثناء تحديث حالة الطلب" : "Error updating order status");
+      toast({
+        title: t("error"),
+        description: t("errorUpdatingOrderStatus"),
+        variant: "destructive"
+      });
     }
-  };
-  
-  const handleSaveWorkOrder = (updatedWorkOrder: WorkOrder) => {
-    try {
-      updateWorkOrder(updatedWorkOrder);
-      
-      if (selectedPatient) {
-        refreshPatientData(selectedPatient.patientId);
-      }
-      
-      toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
-    } catch (error) {
-      console.error("Error updating work order:", error);
-      toast.error(language === 'ar' ? "حدث خطأ أثناء تحديث أمر العمل" : "Error updating work order");
-    }
-    
-    setEditWorkOrderDialogOpen(false);
   };
   
   const handleAddNewRx = () => {
     if (selectedPatient) {
-      navigate(`/rx-manager?patientId=${selectedPatient.patientId}`);
-      setIsProfileOpen(false);
+      setIsRxDialogOpen(true);
     }
   };
   
-  const handleDirectPrint = (printLanguage?: 'en' | 'ar') => {
+  const handleRxPrintRequest = (language?: 'en' | 'ar') => {
     if (!selectedPatient) return;
     
-    const langToPrint = printLanguage || useLanguageStore.getState().language;
+    const langToPrint = language || useLanguageStore.getState().language;
     
     printRxReceipt({
       patientName: selectedPatient.name,
@@ -188,9 +192,18 @@ export const PatientSearch: React.FC = () => {
     });
   };
   
-  const handleLanguageSelection = (selectedLanguage: 'en' | 'ar') => {
-    setIsLanguageDialogOpen(false);
-    handleDirectPrint(selectedLanguage);
+  const handlePatientDataRefresh = () => {
+    if (selectedPatient) {
+      // Refresh the patient data to reflect RX changes
+      const refreshedPatient = searchPatients(selectedPatient.patientId, true)[0];
+      if (refreshedPatient) {
+        setSelectedPatient({
+          ...refreshedPatient,
+          dateOfBirth: refreshedPatient.dob,
+          lastVisit: selectedPatient.lastVisit,
+        } as PatientWithMeta);
+      }
+    }
   };
   
   return (
@@ -212,9 +225,12 @@ export const PatientSearch: React.FC = () => {
           {selectedPatient && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-xl">{language === 'ar' ? "ملف العميل" : "Client Profile"}</DialogTitle>
+                <DialogTitle className="text-xl flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  {selectedPatient.name}
+                </DialogTitle>
                 <DialogDescription>
-                  {language === 'ar' ? "تفاصيل بيانات العميل وسجل المعاملات" : "Client details and transaction history"}
+                  {t("patientProfileAndHistory")}
                 </DialogDescription>
               </DialogHeader>
               
@@ -223,7 +239,7 @@ export const PatientSearch: React.FC = () => {
                   <PatientProfileInfo 
                     patient={selectedPatient} 
                     invoices={patientInvoices}
-                    onPrintPrescription={() => setIsLanguageDialogOpen(true)}
+                    onPrintPrescription={() => handleRxPrintRequest()}
                   />
                 </div>
                 
@@ -232,7 +248,7 @@ export const PatientSearch: React.FC = () => {
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
                         <CardTitle className="text-lg">
-                          {language === 'ar' ? "وصفة طبية" : "Prescription"}
+                          {t("prescription")}
                         </CardTitle>
                         <Button 
                           variant="outline" 
@@ -240,7 +256,7 @@ export const PatientSearch: React.FC = () => {
                           onClick={handleAddNewRx}
                         >
                           <Plus className="h-4 w-4" />
-                          {language === 'ar' ? "وصفة طبية جديدة" : "New RX"}
+                          {t("newRx")}
                         </Button>
                       </div>
                     </CardHeader>
@@ -248,26 +264,17 @@ export const PatientSearch: React.FC = () => {
                       <PatientPrescriptionDisplay 
                         rx={selectedPatient.rx}
                         rxHistory={selectedPatient.rxHistory}
-                        onPrintPrescription={() => setIsLanguageDialogOpen(true)}
+                        onPrintPrescription={() => handleRxPrintRequest()}
                       />
                     </CardContent>
                   </Card>
                   
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">
-                        {language === 'ar' ? "سجل المعاملات" : "Transaction History"}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="overflow-x-hidden">
-                      <PatientTransactions 
-                        workOrders={patientWorkOrders}
-                        invoices={patientInvoices}
-                        onEditWorkOrder={handleEditWorkOrder}
-                        onMarkAsPickedUp={handleMarkAsPickedUp}
-                      />
-                    </CardContent>
-                  </Card>
+                  <PatientTransactions 
+                    workOrders={patientWorkOrders}
+                    invoices={patientInvoices}
+                    onEditWorkOrder={handleEditWorkOrder}
+                    onMarkAsPickedUp={handleMarkAsPickedUp}
+                  />
                 </div>
               </div>
               
@@ -279,33 +286,15 @@ export const PatientSearch: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isLanguageDialogOpen} onOpenChange={setIsLanguageDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{language === 'ar' ? "اختر لغة الطباعة" : "Select Print Language"}</DialogTitle>
-            <DialogDescription>
-              {language === 'ar' ? "الرجاء اختيار لغة طباعة الوصفة الطبية" : "Please select the language for printing the prescription"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <Button variant="outline" onClick={() => handleDirectPrint('en')}>
-              <img src="/placeholdr.svg" alt="" className="w-5 h-5 mr-2" />
-              English
-            </Button>
-            <Button variant="outline" onClick={() => handleDirectPrint('ar')}>
-              <img src="/placeholdr.svg" alt="" className="w-5 h-5 ml-2" />
-              العربية
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <EditWorkOrderDialog
-        isOpen={editWorkOrderDialogOpen}
-        onClose={() => setEditWorkOrderDialogOpen(false)}
-        workOrder={currentWorkOrder || {} as WorkOrder}
-        onSave={handleSaveWorkOrder}
-      />
+      {selectedPatient && (
+        <PatientRxDialog
+          open={isRxDialogOpen}
+          onOpenChange={setIsRxDialogOpen}
+          patientId={selectedPatient.patientId}
+          currentRx={selectedPatient.rx}
+          onRxSaved={handlePatientDataRefresh}
+        />
+      )}
     </div>
   );
 };
