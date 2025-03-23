@@ -204,6 +204,12 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       padding-bottom: 10px;
       margin-bottom: 10px;
     }
+    .logo {
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto 5px;
+      display: block;
+    }
     .store-name {
       font-weight: bold;
       font-size: 18px;
@@ -280,11 +286,45 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       margin-top: 5px;
       font-size: 14px;
     }
+    
+    /* Add fancy styling for the prescription box */
+    .prescription-box {
+      border: 2px solid #007bff;
+      border-radius: 5px;
+      margin: 10px 0;
+      padding: 5px;
+      background-color: #f8f9fa;
+    }
+    
+    .rx-header {
+      background-color: #007bff;
+      color: white;
+      text-align: center;
+      padding: 3px 0;
+      font-weight: bold;
+      border-radius: 3px;
+      margin-bottom: 5px;
+    }
+    
+    /* Make the table more elegant */
+    th {
+      background-color: #e9ecef;
+      color: #495057;
+    }
+    
+    td, th {
+      border: 1px solid #dee2e6;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
+      <img class="logo" src="/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png" alt="Moen Optician Logo">
       <div class="store-name">${storeInfo.name}</div>
       <div class="store-info">${storeInfo.address}</div>
       <div class="store-info">${isRtl ? 'الهاتف' : 'Phone'}: ${storeInfo.phone}</div>
@@ -307,40 +347,42 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       ` : ''}
     </div>
     
-    <div class="rx-title">
-      ${isRtl ? 'وصفة النظارات' : 'Glasses Prescription'}
+    <div class="prescription-box">
+      <div class="rx-header">
+        ${isRtl ? 'وصفة النظارات' : 'GLASSES PRESCRIPTION'}
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>SPH</th>
+            <th>CYL</th>
+            <th>AXIS</th>
+            <th>ADD</th>
+            <th>PD</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight: bold;">${isRtl ? 'العين اليمنى' : 'Right Eye'} (OD)</td>
+            <td>${rx.sphereOD || "-"}</td>
+            <td>${rx.cylOD || "-"}</td>
+            <td>${rx.axisOD || "-"}</td>
+            <td>${rx.addOD || "-"}</td>
+            <td>${rx.pdRight || "-"}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold;">${isRtl ? 'العين اليسرى' : 'Left Eye'} (OS)</td>
+            <td>${rx.sphereOS || "-"}</td>
+            <td>${rx.cylOS || "-"}</td>
+            <td>${rx.axisOS || "-"}</td>
+            <td>${rx.addOS || "-"}</td>
+            <td>${rx.pdLeft || "-"}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th>SPH</th>
-          <th>CYL</th>
-          <th>AXIS</th>
-          <th>ADD</th>
-          <th>PD</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style="font-weight: bold;">${isRtl ? 'العين اليمنى' : 'Right Eye'} (OD)</td>
-          <td>${rx.sphereOD || "-"}</td>
-          <td>${rx.cylOD || "-"}</td>
-          <td>${rx.axisOD || "-"}</td>
-          <td>${rx.addOD || "-"}</td>
-          <td>${rx.pdRight || "-"}</td>
-        </tr>
-        <tr>
-          <td style="font-weight: bold;">${isRtl ? 'العين اليسرى' : 'Left Eye'} (OS)</td>
-          <td>${rx.sphereOS || "-"}</td>
-          <td>${rx.cylOS || "-"}</td>
-          <td>${rx.axisOS || "-"}</td>
-          <td>${rx.addOS || "-"}</td>
-          <td>${rx.pdLeft || "-"}</td>
-        </tr>
-      </tbody>
-    </table>
     
     ${notes ? `
     <div class="notes">
