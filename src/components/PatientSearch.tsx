@@ -52,7 +52,6 @@ export const PatientSearch: React.FC = () => {
   const [editWorkOrderDialogOpen, setEditWorkOrderDialogOpen] = useState(false);
   const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder | null>(null);
   
-  // Effect to refresh data when profile is open
   useEffect(() => {
     if (isProfileOpen && selectedPatient) {
       refreshPatientData(selectedPatient.patientId);
@@ -107,7 +106,6 @@ export const PatientSearch: React.FC = () => {
   const handlePatientSelect = (patient: PatientWithMeta) => {
     setSelectedPatient(patient);
     
-    // Fetch fresh data from the store
     const patientInvoices = getInvoicesByPatientId(patient.patientId);
     const patientWorkOrders = getWorkOrdersByPatientId(patient.patientId);
     
@@ -126,16 +124,14 @@ export const PatientSearch: React.FC = () => {
   
   const handleMarkAsPickedUp = (workOrder: WorkOrder) => {
     try {
-      const updatedWorkOrder = {
+      const updatedWorkOrder: WorkOrder = {
         ...workOrder,
         status: 'completed',
         pickedUpAt: new Date().toISOString()
       };
       
-      // Update the work order in the store
       updateWorkOrder(updatedWorkOrder);
       
-      // Refresh patient data to see the changes
       if (selectedPatient) {
         refreshPatientData(selectedPatient.patientId);
       }
@@ -149,10 +145,8 @@ export const PatientSearch: React.FC = () => {
   
   const handleSaveWorkOrder = (updatedWorkOrder: WorkOrder) => {
     try {
-      // Update the work order in the store
       updateWorkOrder(updatedWorkOrder);
       
-      // Refresh patient data to see the changes
       if (selectedPatient) {
         refreshPatientData(selectedPatient.patientId);
       }
