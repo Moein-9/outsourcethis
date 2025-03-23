@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 export const PatientNotes = () => {
   const { patientId } = useParams();
   const { t, language } = useLanguageStore();
-  const { addNote, getNotesByPatientId, deleteNote, updateNote } = usePatientStore();
+  const { addPatientNote, getPatientById, deletePatientNote, patients } = usePatientStore();
   const { toast } = useToast();
   const isRtl = language === 'ar';
   
@@ -25,25 +25,25 @@ export const PatientNotes = () => {
     if (patientId) {
       refreshNotes();
     }
-  }, [patientId]);
+  }, [patientId, patients]);
   
   const refreshNotes = () => {
     if (patientId) {
-      const patientNotes = getNotesByPatientId(patientId);
-      setNotes(patientNotes);
+      const patient = getPatientById(patientId);
+      if (patient && patient.patientNotes) {
+        setNotes([...patient.patientNotes].sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ));
+      } else {
+        setNotes([]);
+      }
     }
   };
   
   const handleAddNote = () => {
     if (!newNote.trim() || !patientId) return;
     
-    addNote({
-      patientId,
-      text: newNote
-    });
-    
-    // Immediately update the UI with the new note
-    refreshNotes();
+    addPatientNote(patientId, newNote);
     
     // Show success toast
     toast({
@@ -56,9 +56,9 @@ export const PatientNotes = () => {
   };
   
   const handleDeleteNote = (noteId: string) => {
-    deleteNote(noteId);
-    // Immediately update UI
-    refreshNotes();
+    if (!patientId) return;
+    
+    deletePatientNote(patientId, noteId);
     
     toast({
       title: t("noteDeleted"),
@@ -77,11 +77,24 @@ export const PatientNotes = () => {
   };
   
   const saveEdit = (noteId: string) => {
-    if (!editText.trim()) return;
+    if (!editText.trim() || !patientId) return;
     
-    updateNote(noteId, editText);
+    // Get current patient and notes
+    const patient = getPatientById(patientId);
+    if (!patient || !patient.patientNotes) return;
     
-    // Immediately update UI
+    // Create updated patient object with the edited note
+    const updatedPatient = {
+      ...patient,
+      patientNotes: patient.patientNotes.map(note => 
+        note.id === noteId ? { ...note, text: editText } : note
+      )
+    };
+    
+    // Update patient in store
+    usePatientStore.getState().updatePatient(updatedPatient);
+    
+    // Refresh notes display
     refreshNotes();
     
     toast({
@@ -162,7 +175,7 @@ export const PatientNotes = () => {
                         <CardContent className="p-4">
                           <div className="flex justify-between">
                             <div className="text-sm text-gray-500">
-                              {new Date(note.timestamp).toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US')}
+                              {new Date(note.createdAt).toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US')}
                             </div>
                             <div className="flex gap-1">
                               <Button
