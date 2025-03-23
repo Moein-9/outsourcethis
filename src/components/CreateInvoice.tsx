@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -15,7 +14,7 @@ import { InvoiceStepPatient } from "@/components/invoice-steps/InvoiceStepPatien
 import { InvoiceStepProducts } from "@/components/invoice-steps/InvoiceStepProducts";
 import { InvoiceStepPayment } from "@/components/invoice-steps/InvoiceStepPayment";
 import { InvoiceStepSummary } from "@/components/invoice-steps/InvoiceStepSummary";
-import { InvoiceFormProvider } from "@/components/invoice-steps/InvoiceFormContext";
+import { InvoiceFormProvider, useInvoiceForm } from "@/components/invoice-steps/InvoiceFormContext";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
@@ -28,6 +27,7 @@ const CreateInvoiceContent: React.FC = () => {
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   const addInvoice = useInvoiceStore((state) => state.addInvoice);
+  const { getValues, setValue } = useInvoiceForm();
   
   const steps = [
     { title: t('clientSection'), icon: "user" },
@@ -91,9 +91,6 @@ const CreateInvoiceContent: React.FC = () => {
     }, 500);
   };
 
-  // We need to use useInvoiceForm here to access the form context
-  const { getValues } = useInvoiceForm();
-
   const previewInvoice = {
     invoiceId: getValues("workOrderId") || "PREVIEW",
     createdAt: new Date().toISOString(),
@@ -144,7 +141,7 @@ const CreateInvoiceContent: React.FC = () => {
     };
     
     const invoiceId = addInvoice(invoiceData);
-    getValues("workOrderId", invoiceId);
+    setValue("workOrderId", invoiceId);
     
     toast({
       title: t('success'),
@@ -337,7 +334,6 @@ const CreateInvoiceContent: React.FC = () => {
   );
 };
 
-// This is the main component that wraps the content with InvoiceFormProvider
 const CreateInvoice: React.FC = () => {
   return (
     <InvoiceFormProvider>
