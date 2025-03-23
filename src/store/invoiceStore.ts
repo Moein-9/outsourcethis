@@ -89,6 +89,8 @@ export const useInvoiceStore = create<InvoiceState>()(
           notes?: string;
         });
         
+        console.log("Processing notes in addInvoice:", notes);
+        
         const initialPayment: Payment = {
           amount: invoice.deposit,
           method: invoice.paymentMethod,
@@ -109,7 +111,7 @@ export const useInvoiceStore = create<InvoiceState>()(
           notes // Store notes at invoice level
         };
         
-        console.log("Creating new invoice:", newInvoice);
+        console.log("Creating new invoice with notes:", newInvoice);
         
         set((state) => ({
           invoices: [
@@ -232,7 +234,12 @@ export const useInvoiceStore = create<InvoiceState>()(
         const id = `WO${Date.now()}`;
         const createdAt = new Date().toISOString();
         
-        console.log("Adding work order:", { ...workOrder, id, createdAt });
+        console.log("Adding work order with notes:", { 
+          ...workOrder, 
+          id, 
+          createdAt,
+          notesProvided: !!workOrder.notes 
+        });
         
         set((state) => ({
           workOrders: [
