@@ -461,7 +461,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   `;
   
   try {
-    PrintService.printHTML(htmlContent);
+    PrintService.printHtml(htmlContent, 'receipt');
   } catch (error) {
     console.error('Error printing RX receipt:', error);
   }
