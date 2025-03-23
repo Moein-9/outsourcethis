@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -32,8 +33,9 @@ interface WorkOrderPrintSelectorProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
-  trigger?: React.ReactNode;
   thermalOnly?: boolean;
+  onCompletePrinting?: () => void;
+  trigger?: React.ReactNode;
 }
 
 export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
@@ -47,7 +49,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
-  thermalOnly = false
+  thermalOnly = false,
+  onCompletePrinting
 }) => {
   const { t, language } = useLanguageStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -63,9 +66,10 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     }
   };
   
-  const handlePrint = () => {
+  const handlePrint = (event?: React.MouseEvent) => {
     if (!selectedFormat || printingInProgress) return;
     
+    const printType = thermalOnly ? "thermal" : "standard";
     setPrintingInProgress(true);
     
     try {
@@ -86,6 +90,11 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           setPrintingInProgress(false);
           setIsDialogOpen(false);
           toast.success(t("printingCompleted"));
+          
+          // Call the callback if provided
+          if (onCompletePrinting) {
+            onCompletePrinting();
+          }
         }, 1000);
       } else {
         const a4Content = `
@@ -187,6 +196,11 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           setPrintingInProgress(false);
           setIsDialogOpen(false);
           toast.success(t("printingCompleted"));
+          
+          // Call the callback if provided
+          if (onCompletePrinting) {
+            onCompletePrinting();
+          }
         });
       }
     } catch (error) {

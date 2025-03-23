@@ -4,13 +4,11 @@ import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 import { toast } from '@/hooks/use-toast';
 import { useLanguageStore } from '@/store/languageStore';
+import { useInventoryStore } from '@/store/inventoryStore';
 
 export const CustomPrintService = {
   printWorkOrder: (workOrder: any, invoice?: any, patient?: any) => {
     console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
-    
-    // Get translation function from the store
-    const { t } = useLanguageStore.getState();
     
     // Create a new window for printing
     const printWindow = window.open('', '_blank');
@@ -29,7 +27,7 @@ export const CustomPrintService = {
     container.className = 'print-container';
     printWindow.document.body.appendChild(container);
 
-    // Add necessary styles - same as preview
+    // Add necessary styles
     const style = document.createElement('style');
     style.textContent = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -134,14 +132,16 @@ export const CustomPrintService = {
       .rtl { direction: rtl; }
       .ltr { direction: ltr; }
       .text-right { text-align: right; }
-      .text-left { text-align: left; }
       .bg-slate-50 { background-color: #f8fafc; }
-      .bg-black { background-color: #000; }
-      .min-h-16 { min-height: 4rem; }
     `;
     printWindow.document.head.appendChild(style);
 
-    // Render the receipt with the exact same component as the preview
+    // Render the receipt
+    const { language, t } = useLanguageStore.getState();
+    
+    // Get the inventory store state directly
+    const inventoryStoreState = useInventoryStore.getState();
+    
     createRoot(container).render(
       <CustomWorkOrderReceipt
         workOrder={workOrder}
@@ -214,4 +214,3 @@ export const CustomPrintService = {
     }, 2000);
   }
 };
-

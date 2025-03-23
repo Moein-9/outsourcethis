@@ -20,7 +20,6 @@ interface PrintWorkOrderButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
-  onPrintComplete?: () => void;
 }
 
 export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -29,8 +28,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   patient,
   className = '',
   variant = "outline",
-  size = "sm",
-  onPrintComplete
+  size = "sm"
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
@@ -42,13 +40,6 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
       CustomPrintService.printWorkOrder(workOrder, invoice, patient);
-      
-      // Call the onPrintComplete callback if provided
-      if (onPrintComplete) {
-        setTimeout(() => {
-          onPrintComplete();
-        }, 500);
-      }
     }, 300);
   };
   

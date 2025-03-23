@@ -1,56 +1,32 @@
 
-import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
-import { Layout } from './components/Layout';
-import Index from './pages/Index';
-import ReportPage from './pages/ReportPage';
-import NotFound from './pages/NotFound';
-import { Toaster } from 'sonner';
-import { CreateInvoiceExtended } from './components/CreateInvoiceExtended';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import ReportPage from "./pages/ReportPage";
+import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 
-// Wrapper component to handle Layout props
-const LayoutWrapper = () => {
-  const [activeSection, setActiveSection] = useState("dashboard");
-  const location = useLocation();
+const queryClient = new QueryClient();
 
-  // Update active section based on route
-  React.useEffect(() => {
-    if (location.pathname === '/') {
-      setActiveSection("dashboard");
-    } else if (location.pathname === '/reports') {
-      setActiveSection("reports");
-    } else if (location.pathname === '/create-invoice') {
-      setActiveSection("createInvoice");
-    }
-  }, [location]);
-
-  const handleNavigate = (section: string) => {
-    setActiveSection(section);
-  };
-
-  return (
-    <Layout activeSection={activeSection} onNavigate={handleNavigate}>
-      <Outlet />
-    </Layout>
-  );
-};
-
-function App() {
-  return (
-    <div className="app">
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LayoutWrapper />}>
-            <Route index element={<Index />} />
-            <Route path="reports" element={<ReportPage />} />
-            <Route path="create-invoice" element={<CreateInvoiceExtended />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
+          <Route path="/" element={<Index />} />
+          <Route path="/reports" element={<ReportPage />} />
+          <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-      <Toaster />
-    </div>
-  );
-}
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
