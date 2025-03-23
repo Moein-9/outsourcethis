@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { format, parseISO } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 import { useLanguageStore } from "@/store/languageStore";
@@ -7,7 +7,6 @@ import { WorkOrder, Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Table, 
   TableBody, 
@@ -31,10 +30,9 @@ import {
   Printer, 
   Edit,
   Check,
-  Clock,
-  Archive,
-  Package
+  Clock
 } from "lucide-react";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface PatientTransactionsProps {
   workOrders: WorkOrder[];
@@ -50,14 +48,14 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   onMarkAsPickedUp
 }) => {
   const { language, t } = useLanguageStore();
-  const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
+  const [activeTab, setActiveTab] = React.useState<"active" | "completed">("active");
   
   const formatDate = (dateString?: string) => {
-    if (!dateString) return t("dateNotAvailable");
+    if (!dateString) return language === 'ar' ? "تاريخ غير متوفر" : "Date not available";
     try {
       return format(parseISO(dateString), "PPP", { locale: language === 'ar' ? ar : enUS });
     } catch (error) {
-      return t("invalidDate");
+      return language === 'ar' ? "تاريخ غير صالح" : "Invalid date";
     }
   };
   
@@ -96,14 +94,14 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
         <Tabs defaultValue="active" onValueChange={(value) => setActiveTab(value as "active" | "completed")}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="active" className="flex gap-2 items-center">
-              <Package className="h-4 w-4" />
+              <Clock className="h-4 w-4" />
               <span>{t("activeWorkOrders")}</span>
               <Badge variant="secondary" className="ml-1">
                 {activeWorkOrders.length}
               </Badge>
             </TabsTrigger>
             <TabsTrigger value="completed" className="flex gap-2 items-center">
-              <Archive className="h-4 w-4" />
+              <Check className="h-4 w-4" />
               <span>{t("completedWorkOrders")}</span>
               <Badge variant="secondary" className="ml-1">
                 {completedWorkOrders.length}
@@ -145,14 +143,8 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                                 </div>
                               )}
                               <div className="text-xs text-muted-foreground mt-1">
-                                {workOrder.lensType?.name && (
+                                {workOrder.lensType && (
                                   <span className="inline-block mr-2">{workOrder.lensType.name}</span>
-                                )}
-                                {workOrder.coating && (
-                                  <span className="inline-block mr-2">{workOrder.coating}</span>
-                                )}
-                                {workOrder.frameBrand && (
-                                  <span className="inline-block">{workOrder.frameBrand} {workOrder.frameModel}</span>
                                 )}
                               </div>
                             </div>
@@ -233,14 +225,8 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                                 </div>
                               )}
                               <div className="text-xs text-muted-foreground mt-1">
-                                {workOrder.lensType?.name && (
+                                {workOrder.lensType && (
                                   <span className="inline-block mr-2">{workOrder.lensType.name}</span>
-                                )}
-                                {workOrder.coating && (
-                                  <span className="inline-block mr-2">{workOrder.coating}</span>
-                                )}
-                                {workOrder.frameBrand && (
-                                  <span className="inline-block">{workOrder.frameBrand} {workOrder.frameModel}</span>
                                 )}
                               </div>
                             </div>

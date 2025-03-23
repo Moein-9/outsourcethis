@@ -11,19 +11,18 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface PatientRxDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   patientId: string;
   currentRx?: RxData;
-  onRxSaved?: () => void;
 }
 
-export function PatientRxDialog({ open, onOpenChange, patientId, currentRx, onRxSaved }: PatientRxDialogProps) {
+export function PatientRxDialog({ open, onOpenChange, patientId, currentRx }: PatientRxDialogProps) {
   const { t, language } = useLanguageStore();
   const { updatePatientRx } = usePatientStore();
   const isRtl = language === 'ar';
@@ -40,314 +39,186 @@ export function PatientRxDialog({ open, onOpenChange, patientId, currentRx, onRx
       addOS: "",
       pdRight: "",
       pdLeft: "",
-      createdAt: new Date().toISOString()
     }
   );
 
-  const handleChange = (field: keyof RxData, value: string) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setRx((prev) => ({
       ...prev,
-      [field]: value,
+      [name]: value,
     }));
   };
 
   const handleSave = () => {
     try {
-      if (!rx.sphereOD || !rx.sphereOS) {
-        toast({
-          title: t("error"),
-          description: t("pleaseFillRequiredFields"),
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const updatedRx = {
-        ...rx,
-        createdAt: new Date().toISOString()
-      };
-
-      updatePatientRx(patientId, updatedRx);
-      
-      toast({
-        title: t("success"),
-        description: t("rxUpdated"),
-      });
-      
-      if (onRxSaved) {
-        onRxSaved();
-      }
-      
+      updatePatientRx(patientId, rx);
+      toast.success(language === 'ar' ? "تم تحديث الوصفة الطبية بنجاح" : "Prescription updated successfully");
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating RX:", error);
-      toast({
-        title: t("error"),
-        description: t("errorUpdatingRx"),
-        variant: "destructive",
-      });
+      toast.error(language === 'ar' ? "حدث خطأ أثناء تحديث الوصفة الطبية" : "Error updating prescription");
     }
-  };
-
-  // Generate select options for different fields
-  const generateSphereOptions = () => {
-    const options = [];
-    for (let i = 10; i >= -10; i -= 0.25) {
-      const formatted = i >= 0 ? `+${i.toFixed(2)}` : i.toFixed(2);
-      options.push(
-        <SelectItem key={`sph-${i}`} value={formatted}>
-          {formatted}
-        </SelectItem>
-      );
-    }
-    return options;
-  };
-
-  const generateCylinderOptions = () => {
-    const options = [];
-    for (let i = 0; i >= -6; i -= 0.25) {
-      const formatted = i.toFixed(2);
-      options.push(
-        <SelectItem key={`cyl-${i}`} value={formatted}>
-          {formatted}
-        </SelectItem>
-      );
-    }
-    return options;
-  };
-
-  const generateAxisOptions = () => {
-    const options = [];
-    for (let i = 0; i <= 180; i += 1) {
-      options.push(
-        <SelectItem key={`axis-${i}`} value={i.toString()}>
-          {i}
-        </SelectItem>
-      );
-    }
-    return options;
-  };
-
-  const generateAddOptions = () => {
-    const options = [];
-    for (let i = 0; i <= 3; i += 0.25) {
-      const formatted = i === 0 ? "0.00" : `+${i.toFixed(2)}`;
-      options.push(
-        <SelectItem key={`add-${i}`} value={formatted}>
-          {formatted}
-        </SelectItem>
-      );
-    }
-    return options;
-  };
-
-  const generatePdOptions = () => {
-    const options = [];
-    for (let i = 40; i <= 80; i += 1) {
-      options.push(
-        <SelectItem key={`pd-${i}`} value={i.toString()}>
-          {i}
-        </SelectItem>
-      );
-    }
-    return options;
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto" dir={isRtl ? "rtl" : "ltr"}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t("newRx")}</DialogTitle>
+          <DialogTitle>{language === 'ar' ? "وصفة طبية جديدة" : "New Prescription"}</DialogTitle>
           <DialogDescription>
-            {t("enterRxDetailsForPatient")}
+            {language === 'ar' 
+              ? "أدخل بيانات الوصفة الطبية الجديدة للعميل"
+              : "Enter the new prescription details for the client"}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Right Eye (OD) */}
-          <div className="bg-blue-50/30 rounded-md border p-4">
-            <h3 className="text-md font-medium mb-3 text-blue-800">
-              {t("rightEye")} (OD)
-            </h3>
-            
-            <div className="grid grid-cols-5 gap-4">
-              <div>
-                <Label htmlFor="sphereOD" className="text-xs mb-1 block">
-                  {t("sphere")}
-                </Label>
-                <Select 
-                  value={rx.sphereOD} 
-                  onValueChange={(value) => handleChange("sphereOD", value)}
-                >
-                  <SelectTrigger id="sphereOD" className="w-full">
-                    <SelectValue placeholder={t("select")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateSphereOptions()}
-                  </SelectContent>
-                </Select>
-              </div>
+        <div className="grid gap-6 py-4">
+          <div className="grid grid-cols-1 gap-3">
+            <div className="rounded-md border p-4 bg-amber-50/30">
+              <h3 className="text-md font-medium mb-3 text-amber-800">
+                {language === 'ar' ? "العين اليمنى (OD)" : "Right Eye (OD)"}
+              </h3>
               
-              <div>
-                <Label htmlFor="cylOD" className="text-xs mb-1 block">
-                  {t("cylinder")}
-                </Label>
-                <Select 
-                  value={rx.cylOD} 
-                  onValueChange={(value) => handleChange("cylOD", value)}
-                >
-                  <SelectTrigger id="cylOD" className="w-full">
-                    <SelectValue placeholder={t("select")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateCylinderOptions()}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="axisOD" className="text-xs mb-1 block">
-                  {t("axis")}
-                </Label>
-                <Select 
-                  value={rx.axisOD} 
-                  onValueChange={(value) => handleChange("axisOD", value)}
-                >
-                  <SelectTrigger id="axisOD" className="w-full">
-                    <SelectValue placeholder={t("select")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateAxisOptions()}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="addOD" className="text-xs mb-1 block">
-                  {t("add")}
-                </Label>
-                <Select 
-                  value={rx.addOD} 
-                  onValueChange={(value) => handleChange("addOD", value)}
-                >
-                  <SelectTrigger id="addOD" className="w-full">
-                    <SelectValue placeholder={t("select")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateAddOptions()}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="pdRight" className="text-xs mb-1 block">
-                  {t("pd")}
-                </Label>
-                <Select 
-                  value={rx.pdRight} 
-                  onValueChange={(value) => handleChange("pdRight", value)}
-                >
-                  <SelectTrigger id="pdRight" className="w-full">
-                    <SelectValue placeholder={t("select")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generatePdOptions()}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-4 gap-3">
+                <div>
+                  <Label htmlFor="sphereOD" className="text-xs">
+                    {language === 'ar' ? "كروي" : "Sphere"}
+                  </Label>
+                  <Input
+                    id="sphereOD"
+                    name="sphereOD"
+                    value={rx.sphereOD}
+                    onChange={handleChange}
+                    className="h-9"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cylOD" className="text-xs">
+                    {language === 'ar' ? "اسطواني" : "Cylinder"}
+                  </Label>
+                  <Input
+                    id="cylOD"
+                    name="cylOD"
+                    value={rx.cylOD}
+                    onChange={handleChange}
+                    className="h-9"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="axisOD" className="text-xs">
+                    {language === 'ar' ? "محور" : "Axis"}
+                  </Label>
+                  <Input
+                    id="axisOD"
+                    name="axisOD"
+                    value={rx.axisOD}
+                    onChange={handleChange}
+                    className="h-9"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="addOD" className="text-xs">
+                    {language === 'ar' ? "إضافة" : "Add"}
+                  </Label>
+                  <Input
+                    id="addOD"
+                    name="addOD"
+                    value={rx.addOD}
+                    onChange={handleChange}
+                    className="h-9"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          
-          {/* Left Eye (OS) */}
-          <div className="bg-rose-50/30 rounded-md border p-4">
-            <h3 className="text-md font-medium mb-3 text-rose-800">
-              {t("leftEye")} (OS)
-            </h3>
-            
-            <div className="grid grid-cols-5 gap-4">
-              <div>
-                <Label htmlFor="sphereOS" className="text-xs mb-1 block">
-                  {t("sphere")}
-                </Label>
-                <Select 
-                  value={rx.sphereOS} 
-                  onValueChange={(value) => handleChange("sphereOS", value)}
-                >
-                  <SelectTrigger id="sphereOS" className="w-full">
-                    <SelectValue placeholder={t("select")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateSphereOptions()}
-                  </SelectContent>
-                </Select>
-              </div>
+
+            <div className="rounded-md border p-4 bg-blue-50/30">
+              <h3 className="text-md font-medium mb-3 text-blue-800">
+                {language === 'ar' ? "العين اليسرى (OS)" : "Left Eye (OS)"}
+              </h3>
               
-              <div>
-                <Label htmlFor="cylOS" className="text-xs mb-1 block">
-                  {t("cylinder")}
-                </Label>
-                <Select 
-                  value={rx.cylOS} 
-                  onValueChange={(value) => handleChange("cylOS", value)}
-                >
-                  <SelectTrigger id="cylOS" className="w-full">
-                    <SelectValue placeholder={t("select")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateCylinderOptions()}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-4 gap-3">
+                <div>
+                  <Label htmlFor="sphereOS" className="text-xs">
+                    {language === 'ar' ? "كروي" : "Sphere"}
+                  </Label>
+                  <Input
+                    id="sphereOS"
+                    name="sphereOS"
+                    value={rx.sphereOS}
+                    onChange={handleChange}
+                    className="h-9"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cylOS" className="text-xs">
+                    {language === 'ar' ? "اسطواني" : "Cylinder"}
+                  </Label>
+                  <Input
+                    id="cylOS"
+                    name="cylOS"
+                    value={rx.cylOS}
+                    onChange={handleChange}
+                    className="h-9"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="axisOS" className="text-xs">
+                    {language === 'ar' ? "محور" : "Axis"}
+                  </Label>
+                  <Input
+                    id="axisOS"
+                    name="axisOS"
+                    value={rx.axisOS}
+                    onChange={handleChange}
+                    className="h-9"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="addOS" className="text-xs">
+                    {language === 'ar' ? "إضافة" : "Add"}
+                  </Label>
+                  <Input
+                    id="addOS"
+                    name="addOS"
+                    value={rx.addOS}
+                    onChange={handleChange}
+                    className="h-9"
+                  />
+                </div>
               </div>
+            </div>
+
+            <div className="rounded-md border p-4 bg-green-50/30">
+              <h3 className="text-md font-medium mb-3 text-green-800">
+                {language === 'ar' ? "المسافة بين الحدقتين (PD)" : "Pupillary Distance (PD)"}
+              </h3>
               
-              <div>
-                <Label htmlFor="axisOS" className="text-xs mb-1 block">
-                  {t("axis")}
-                </Label>
-                <Select 
-                  value={rx.axisOS} 
-                  onValueChange={(value) => handleChange("axisOS", value)}
-                >
-                  <SelectTrigger id="axisOS" className="w-full">
-                    <SelectValue placeholder={t("select")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateAxisOptions()}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="addOS" className="text-xs mb-1 block">
-                  {t("add")}
-                </Label>
-                <Select 
-                  value={rx.addOS} 
-                  onValueChange={(value) => handleChange("addOS", value)}
-                >
-                  <SelectTrigger id="addOS" className="w-full">
-                    <SelectValue placeholder={t("select")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateAddOptions()}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="pdLeft" className="text-xs mb-1 block">
-                  {t("pd")}
-                </Label>
-                <Select 
-                  value={rx.pdLeft} 
-                  onValueChange={(value) => handleChange("pdLeft", value)}
-                >
-                  <SelectTrigger id="pdLeft" className="w-full">
-                    <SelectValue placeholder={t("select")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generatePdOptions()}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="pdRight" className="text-xs">
+                    {language === 'ar' ? "المسافة اليمنى" : "Right PD"}
+                  </Label>
+                  <Input
+                    id="pdRight"
+                    name="pdRight"
+                    value={rx.pdRight}
+                    onChange={handleChange}
+                    className="h-9"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="pdLeft" className="text-xs">
+                    {language === 'ar' ? "المسافة اليسرى" : "Left PD"}
+                  </Label>
+                  <Input
+                    id="pdLeft"
+                    name="pdLeft"
+                    value={rx.pdLeft}
+                    onChange={handleChange}
+                    className="h-9"
+                  />
+                </div>
               </div>
             </div>
           </div>

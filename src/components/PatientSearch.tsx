@@ -27,16 +27,8 @@ import {
   CardContent,
   CardFooter 
 } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
-import { 
-  Plus, 
-  Check, 
-  ArrowRight, 
-  Edit, 
-  CheckCircle2, 
-  Printer,
-  User
-} from "lucide-react";
+import { toast } from "sonner";
+import { Plus, Check, ArrowRight, Edit, CheckCircle2 } from "lucide-react";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
@@ -55,7 +47,7 @@ export const PatientSearch: React.FC = () => {
     updateWorkOrder,
     addWorkOrder
   } = useInvoiceStore();
-  const { language, t } = useLanguageStore();
+  const { language } = useLanguageStore();
   
   const [searchResults, setSearchResults] = useState<PatientWithMeta[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -90,11 +82,7 @@ export const PatientSearch: React.FC = () => {
   
   const handleSearch = (searchTerm: string, visitDateFilter: string) => {
     if (!searchTerm.trim()) {
-      toast({
-        title: t("error"),
-        description: t("pleaseEnterSearchTerm"),
-        variant: "destructive"
-      });
+      toast.error(language === 'ar' ? "الرجاء إدخال مصطلح البحث" : "Please enter a search term");
       return;
     }
     
@@ -114,10 +102,7 @@ export const PatientSearch: React.FC = () => {
     setShowResults(true);
     
     if (filteredResults.length === 0) {
-      toast({
-        title: t("info"),
-        description: t("noResultsFound")
-      });
+      toast.info(language === 'ar' ? "لم يتم العثور على نتائج مطابقة" : "No matching results found");
     }
   };
   
@@ -159,17 +144,10 @@ export const PatientSearch: React.FC = () => {
         refreshPatientData(selectedPatient.patientId);
       }
       
-      toast({
-        title: t("success"),
-        description: t("orderMarkedAsPickedUp")
-      });
+      toast.success(language === 'ar' ? "تم تحديث حالة الطلب إلى: استلمه العميل" : "Order status updated to: Picked up by customer");
     } catch (error) {
       console.error("Error updating work order status:", error);
-      toast({
-        title: t("error"),
-        description: t("errorUpdatingOrderStatus"),
-        variant: "destructive"
-      });
+      toast.error(language === 'ar' ? "حدث خطأ أثناء تحديث حالة الطلب" : "Error updating order status");
     }
   };
   
@@ -179,10 +157,10 @@ export const PatientSearch: React.FC = () => {
     }
   };
   
-  const handleRxPrintRequest = (language?: 'en' | 'ar') => {
+  const handleDirectPrint = (printLanguage?: 'en' | 'ar') => {
     if (!selectedPatient) return;
     
-    const langToPrint = language || useLanguageStore.getState().language;
+    const langToPrint = printLanguage || useLanguageStore.getState().language;
     
     printRxReceipt({
       patientName: selectedPatient.name,
@@ -190,20 +168,6 @@ export const PatientSearch: React.FC = () => {
       rx: selectedPatient.rx,
       forcedLanguage: langToPrint
     });
-  };
-  
-  const handlePatientDataRefresh = () => {
-    if (selectedPatient) {
-      // Refresh the patient data to reflect RX changes
-      const refreshedPatient = searchPatients(selectedPatient.patientId, true)[0];
-      if (refreshedPatient) {
-        setSelectedPatient({
-          ...refreshedPatient,
-          dateOfBirth: refreshedPatient.dob,
-          lastVisit: selectedPatient.lastVisit,
-        } as PatientWithMeta);
-      }
-    }
   };
   
   return (
@@ -225,12 +189,9 @@ export const PatientSearch: React.FC = () => {
           {selectedPatient && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-xl flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  {selectedPatient.name}
-                </DialogTitle>
+                <DialogTitle className="text-xl">{language === 'ar' ? "ملف العميل" : "Client Profile"}</DialogTitle>
                 <DialogDescription>
-                  {t("patientProfileAndHistory")}
+                  {language === 'ar' ? "تفاصيل بيانات العميل وسجل المعاملات" : "Client details and transaction history"}
                 </DialogDescription>
               </DialogHeader>
               
@@ -239,7 +200,7 @@ export const PatientSearch: React.FC = () => {
                   <PatientProfileInfo 
                     patient={selectedPatient} 
                     invoices={patientInvoices}
-                    onPrintPrescription={() => handleRxPrintRequest()}
+                    onPrintPrescription={handleDirectPrint}
                   />
                 </div>
                 
@@ -248,7 +209,7 @@ export const PatientSearch: React.FC = () => {
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
                         <CardTitle className="text-lg">
-                          {t("prescription")}
+                          {language === 'ar' ? "وصفة طبية" : "Prescription"}
                         </CardTitle>
                         <Button 
                           variant="outline" 
@@ -256,7 +217,7 @@ export const PatientSearch: React.FC = () => {
                           onClick={handleAddNewRx}
                         >
                           <Plus className="h-4 w-4" />
-                          {t("newRx")}
+                          {language === 'ar' ? "وصفة طبية جديدة" : "New RX"}
                         </Button>
                       </div>
                     </CardHeader>
@@ -264,7 +225,7 @@ export const PatientSearch: React.FC = () => {
                       <PatientPrescriptionDisplay 
                         rx={selectedPatient.rx}
                         rxHistory={selectedPatient.rxHistory}
-                        onPrintPrescription={() => handleRxPrintRequest()}
+                        onPrintPrescription={handleDirectPrint}
                       />
                     </CardContent>
                   </Card>
@@ -286,13 +247,33 @@ export const PatientSearch: React.FC = () => {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={isLanguageDialogOpen} onOpenChange={setIsLanguageDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? "اختر لغة الطباعة" : "Select Print Language"}</DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? "الرجاء اختيار لغة طباعة الوصفة الطبية" : "Please select the language for printing the prescription"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <Button variant="outline" onClick={() => handleDirectPrint('en')}>
+              <img src="/placeholdr.svg" alt="" className="w-5 h-5 mr-2" />
+              English
+            </Button>
+            <Button variant="outline" onClick={() => handleDirectPrint('ar')}>
+              <img src="/placeholdr.svg" alt="" className="w-5 h-5 ml-2" />
+              العربية
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {selectedPatient && (
         <PatientRxDialog
           open={isRxDialogOpen}
           onOpenChange={setIsRxDialogOpen}
           patientId={selectedPatient.patientId}
           currentRx={selectedPatient.rx}
-          onRxSaved={handlePatientDataRefresh}
         />
       )}
     </div>
