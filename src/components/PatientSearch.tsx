@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import { usePatientStore, Patient } from "@/store/patientStore";
+import { usePatientStore, Patient, RxData } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { printRxReceipt } from "./RxReceiptPrint";
@@ -17,8 +18,19 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Plus, Save } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
@@ -27,7 +39,7 @@ interface PatientWithMeta extends Patient {
 }
 
 export const PatientSearch: React.FC = () => {
-  const { patients, searchPatients } = usePatientStore();
+  const { patients, searchPatients, updatePatientRx } = usePatientStore();
   const { invoices, workOrders, getInvoicesByPatientId, getWorkOrdersByPatientId } = useInvoiceStore();
   const { language } = useLanguageStore();
   
@@ -42,6 +54,21 @@ export const PatientSearch: React.FC = () => {
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   const [editWorkOrderDialogOpen, setEditWorkOrderDialogOpen] = useState(false);
   const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder | null>(null);
+  
+  // Add New RX state
+  const [isAddRxDialogOpen, setIsAddRxDialogOpen] = useState(false);
+  const [newRx, setNewRx] = useState<RxData>({
+    sphereOD: "",
+    cylOD: "",
+    axisOD: "",
+    addOD: "",
+    sphereOS: "",
+    cylOS: "",
+    axisOS: "",
+    addOS: "",
+    pdRight: "",
+    pdLeft: "",
+  });
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
@@ -102,22 +129,115 @@ export const PatientSearch: React.FC = () => {
     setEditWorkOrderDialogOpen(false);
   };
   
-  const handleDirectPrint = (printLanguage?: 'en' | 'ar') => {
+  const handleDirectPrint = (printLanguage?: string) => {
     if (!selectedPatient) return;
     
-    const langToPrint = printLanguage || useLanguageStore.getState().language;
+    const langToPrint = printLanguage || language;
     
     printRxReceipt({
       patientName: selectedPatient.name,
       patientPhone: selectedPatient.phone,
       rx: selectedPatient.rx,
-      forcedLanguage: langToPrint
+      forcedLanguage: langToPrint as 'en' | 'ar'
     });
   };
   
   const handleLanguageSelection = (selectedLanguage: 'en' | 'ar') => {
     setIsLanguageDialogOpen(false);
     handleDirectPrint(selectedLanguage);
+  };
+  
+  // Add New RX handlers
+  const handleOpenAddRxDialog = () => {
+    if (!selectedPatient) return;
+    
+    // Initialize with current RX values
+    setNewRx({
+      sphereOD: selectedPatient.rx.sphereOD || "",
+      cylOD: selectedPatient.rx.cylOD || "",
+      axisOD: selectedPatient.rx.axisOD || "",
+      addOD: selectedPatient.rx.addOD || "",
+      sphereOS: selectedPatient.rx.sphereOS || "",
+      cylOS: selectedPatient.rx.cylOS || "",
+      axisOS: selectedPatient.rx.axisOS || "",
+      addOS: selectedPatient.rx.addOS || "",
+      pdRight: selectedPatient.rx.pdRight || "",
+      pdLeft: selectedPatient.rx.pdLeft || "",
+    });
+    
+    setIsAddRxDialogOpen(true);
+  };
+  
+  const handleSaveRx = () => {
+    if (!selectedPatient) return;
+    
+    // Update the patient's RX
+    updatePatientRx(selectedPatient.patientId, newRx);
+    
+    // Update local state to reflect changes immediately
+    setSelectedPatient({
+      ...selectedPatient,
+      rx: newRx,
+    });
+    
+    toast.success(language === 'ar' ? "تم تحديث الوصفة الطبية بنجاح" : "Prescription updated successfully");
+    setIsAddRxDialogOpen(false);
+  };
+  
+  // Helper for generating sphere/cylinder options
+  const generateDiopterOptions = () => {
+    const options = [];
+    
+    // Negative values from -10.00 to -0.25 in steps of 0.25
+    for (let i = -10; i < 0; i += 0.25) {
+      options.push(i.toFixed(2));
+    }
+    
+    // Zero
+    options.push("0.00");
+    
+    // Positive values from +0.25 to +10.00 in steps of 0.25
+    for (let i = 0.25; i <= 10; i += 0.25) {
+      options.push(`+${i.toFixed(2)}`);
+    }
+    
+    return options;
+  };
+  
+  // Helper for generating axis options
+  const generateAxisOptions = () => {
+    const options = [];
+    
+    // Axis from 1 to 180 in steps of 1
+    for (let i = 1; i <= 180; i++) {
+      options.push(i.toString());
+    }
+    
+    return options;
+  };
+  
+  // Helper for generating add options
+  const generateAddOptions = () => {
+    const options = ["none"];
+    
+    // Add from +0.25 to +4.00 in steps of 0.25
+    for (let i = 0.25; i <= 4; i += 0.25) {
+      options.push(`+${i.toFixed(2)}`);
+    }
+    
+    return options;
+  };
+  
+  // Helper for generating PD options
+  const generatePdOptions = () => {
+    const options = [];
+    
+    // PD from 50 to 80 in steps of 0.5
+    for (let i = 50; i <= 80; i += 0.5) {
+      options.push(i.toFixed(1));
+    }
+    
+    return options;
   };
   
   return (
@@ -155,6 +275,20 @@ export const PatientSearch: React.FC = () => {
                 </div>
                 
                 <div className="md:col-span-2">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">
+                      {language === 'ar' ? "الوصفة الطبية" : "Prescription"}
+                    </h3>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleOpenAddRxDialog}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      {language === 'ar' ? "وصفة طبية جديدة" : "Add New RX"}
+                    </Button>
+                  </div>
+                  
                   <PatientPrescriptionDisplay 
                     rx={selectedPatient.rx}
                     rxHistory={selectedPatient.rxHistory}
@@ -204,6 +338,260 @@ export const PatientSearch: React.FC = () => {
         workOrder={currentWorkOrder || {} as WorkOrder}
         onSave={handleSaveWorkOrder}
       />
+      
+      {/* Add New RX Dialog */}
+      <Dialog open={isAddRxDialogOpen} onOpenChange={setIsAddRxDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? "وصفة طبية جديدة" : "Add New RX"}</DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? "أدخل تفاصيل الوصفة الطبية الجديدة" : "Enter the new prescription details"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Right Eye (OD) */}
+              <div className="space-y-4">
+                <h3 className="font-medium">
+                  {language === 'ar' ? "العين اليمنى" : "Right Eye (OD)"}
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="grid grid-cols-4 gap-2 items-center">
+                    <Label className="text-right">SPH</Label>
+                    <div className="col-span-3">
+                      <Select
+                        value={newRx.sphereOD}
+                        onValueChange={(value) => setNewRx({ ...newRx, sphereOD: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateDiopterOptions().map((value) => (
+                            <SelectItem key={`sph-od-${value}`} value={value}>
+                              {value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 items-center">
+                    <Label className="text-right">CYL</Label>
+                    <div className="col-span-3">
+                      <Select
+                        value={newRx.cylOD}
+                        onValueChange={(value) => setNewRx({ ...newRx, cylOD: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateDiopterOptions().map((value) => (
+                            <SelectItem key={`cyl-od-${value}`} value={value}>
+                              {value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 items-center">
+                    <Label className="text-right">AXIS</Label>
+                    <div className="col-span-3">
+                      <Select
+                        value={newRx.axisOD}
+                        onValueChange={(value) => setNewRx({ ...newRx, axisOD: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateAxisOptions().map((value) => (
+                            <SelectItem key={`axis-od-${value}`} value={value}>
+                              {value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 items-center">
+                    <Label className="text-right">ADD</Label>
+                    <div className="col-span-3">
+                      <Select
+                        value={newRx.addOD || "none"}
+                        onValueChange={(value) => setNewRx({ ...newRx, addOD: value === "none" ? "" : value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateAddOptions().map((value) => (
+                            <SelectItem key={`add-od-${value}`} value={value}>
+                              {value === "none" ? "None" : value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 items-center">
+                    <Label className="text-right">PD</Label>
+                    <div className="col-span-3">
+                      <Select
+                        value={newRx.pdRight}
+                        onValueChange={(value) => setNewRx({ ...newRx, pdRight: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generatePdOptions().map((value) => (
+                            <SelectItem key={`pd-od-${value}`} value={value}>
+                              {value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Left Eye (OS) */}
+              <div className="space-y-4">
+                <h3 className="font-medium">
+                  {language === 'ar' ? "العين اليسرى" : "Left Eye (OS)"}
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="grid grid-cols-4 gap-2 items-center">
+                    <Label className="text-right">SPH</Label>
+                    <div className="col-span-3">
+                      <Select
+                        value={newRx.sphereOS}
+                        onValueChange={(value) => setNewRx({ ...newRx, sphereOS: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateDiopterOptions().map((value) => (
+                            <SelectItem key={`sph-os-${value}`} value={value}>
+                              {value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 items-center">
+                    <Label className="text-right">CYL</Label>
+                    <div className="col-span-3">
+                      <Select
+                        value={newRx.cylOS}
+                        onValueChange={(value) => setNewRx({ ...newRx, cylOS: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateDiopterOptions().map((value) => (
+                            <SelectItem key={`cyl-os-${value}`} value={value}>
+                              {value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 items-center">
+                    <Label className="text-right">AXIS</Label>
+                    <div className="col-span-3">
+                      <Select
+                        value={newRx.axisOS}
+                        onValueChange={(value) => setNewRx({ ...newRx, axisOS: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateAxisOptions().map((value) => (
+                            <SelectItem key={`axis-os-${value}`} value={value}>
+                              {value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 items-center">
+                    <Label className="text-right">ADD</Label>
+                    <div className="col-span-3">
+                      <Select
+                        value={newRx.addOS || "none"}
+                        onValueChange={(value) => setNewRx({ ...newRx, addOS: value === "none" ? "" : value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateAddOptions().map((value) => (
+                            <SelectItem key={`add-os-${value}`} value={value}>
+                              {value === "none" ? "None" : value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 items-center">
+                    <Label className="text-right">PD</Label>
+                    <div className="col-span-3">
+                      <Select
+                        value={newRx.pdLeft}
+                        onValueChange={(value) => setNewRx({ ...newRx, pdLeft: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generatePdOptions().map((value) => (
+                            <SelectItem key={`pd-os-${value}`} value={value}>
+                              {value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddRxDialogOpen(false)}>
+              {language === 'ar' ? "إلغاء" : "Cancel"}
+            </Button>
+            <Button onClick={handleSaveRx}>
+              <Save className="h-4 w-4 mr-1" />
+              {language === 'ar' ? "حفظ" : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
