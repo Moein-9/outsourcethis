@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { RxData } from "@/store/patientStore";
@@ -176,10 +175,9 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
   
-  // Create optimized HTML for 80mm thermal printer with 48 columns
   const htmlContent = `
     <!DOCTYPE html>
-    <html>
+    <html lang="${isRtl ? 'ar' : 'en'}">
     <head>
       <title>${t("glassesPrescription")}</title>
       <meta charset="UTF-8">
@@ -200,6 +198,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
             line-height: 1.2;
             -webkit-print-color-adjust: exact;
             color-adjust: exact;
+            print-color-adjust: exact;
           }
         }
         
@@ -211,6 +210,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
           font-size: 10px;
           line-height: 1.2;
           background-color: white;
+          overflow-x: hidden;
         }
         
         .receipt-container {
@@ -456,64 +456,12 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
           <div class="dots">• • • • • • • • • • • • • • •</div>
         </div>
       </div>
-
-      <script>
-        // Force the print dialog to open immediately
-        window.onload = function() {
-          setTimeout(function() {
-            window.print();
-            setTimeout(function() {
-              window.parent.postMessage('print-complete', '*');
-            }, 500);
-          }, 200);
-        };
-      </script>
     </body>
     </html>
   `;
   
   try {
-    // Use direct printing instead of preparing through PrintService to ensure proper content display
-    const printFrame = document.createElement('iframe');
-    printFrame.style.position = 'fixed';
-    printFrame.style.visibility = 'hidden';
-    printFrame.style.width = '0';
-    printFrame.style.height = '0';
-    printFrame.style.border = 'none';
-    printFrame.style.left = '0';
-    printFrame.style.top = '0';
-    printFrame.className = 'print-frame';
-    document.body.appendChild(printFrame);
-    
-    if (printFrame.contentWindow) {
-      printFrame.contentWindow.document.open();
-      printFrame.contentWindow.document.write(htmlContent);
-      printFrame.contentWindow.document.close();
-      
-      printFrame.onload = function() {
-        setTimeout(() => {
-          if (printFrame.contentWindow) {
-            printFrame.contentWindow.focus();
-            try {
-              printFrame.contentWindow.print();
-              
-              // Set a timeout to remove the frame after printing
-              setTimeout(() => {
-                if (document.body.contains(printFrame)) {
-                  document.body.removeChild(printFrame);
-                }
-              }, 2000);
-            } catch (printError) {
-              console.error('Print error:', printError);
-              document.body.removeChild(printFrame);
-            }
-          }
-        }, 300);
-      };
-    } else {
-      document.body.removeChild(printFrame);
-      console.error('Could not access print frame content window');
-    }
+    PrintService.printHTML(htmlContent);
   } catch (error) {
     console.error('Error printing RX receipt:', error);
   }
