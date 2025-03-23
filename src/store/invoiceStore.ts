@@ -40,8 +40,7 @@ export interface Invoice {
   notes?: string; // Added notes field for work orders
 }
 
-// Define WorkOrder interface
-export interface WorkOrder {
+interface WorkOrder {
   id: string;
   patientId: string;
   createdAt: string;
@@ -49,7 +48,6 @@ export interface WorkOrder {
     name: string;
     price: number;
   };
-  // Add other work order fields as needed
 }
 
 interface InvoiceState {
