@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { RxData } from "@/store/patientStore";
@@ -175,81 +176,269 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
   
+  console.log("Starting to print RX receipt:", {
+    patientName,
+    language,
+    isRtl,
+    rx
+  });
+  
+  // Create a complete standalone HTML document for printing
   const htmlContent = `
-    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; padding: 4mm; text-align: ${isRtl ? 'right' : 'left'};">
-      <div style="text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 10px;">
-        <h1 style="font-size: 16px; font-weight: bold; margin: 5px 0;">${storeInfo.name}</h1>
-        <p style="font-size: 12px; margin: 2px 0;">${storeInfo.address}</p>
-        <p style="font-size: 12px; margin: 2px 0;">${t("phone")}: ${storeInfo.phone}</p>
-      </div>
-
-      <div style="margin-bottom: 15px; font-size: 12px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 3px;">
-          <span style="font-weight: bold;">${t("date")}:</span>
-          <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>${t("glassesPrescription")}</title>
+      <style>
+        @page {
+          size: 80mm auto !important;
+          margin: 0mm !important;
+        }
+        body {
+          font-family: ${isRtl ? "'Arial', sans-serif" : "'Times New Roman', serif"};
+          margin: 0;
+          padding: 0;
+          width: 80mm;
+          direction: ${isRtl ? 'rtl' : 'ltr'};
+          background-color: #ffffff;
+        }
+        .container {
+          padding: 5mm;
+          text-align: ${isRtl ? 'right' : 'left'};
+        }
+        .header {
+          text-align: center;
+          border-bottom: 1px solid #ccc;
+          padding-bottom: 3mm;
+          margin-bottom: 3mm;
+        }
+        .store-name {
+          font-weight: bold;
+          font-size: 14pt;
+          margin: 3mm 0;
+        }
+        .info {
+          font-size: 9pt;
+          margin: 1mm 0;
+          color: #555;
+        }
+        .section {
+          margin-bottom: 4mm;
+          font-size: 10pt;
+        }
+        .field {
+          display: flex;
+          justify-content: space-between;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 1mm;
+          margin-bottom: 1mm;
+        }
+        .field-label {
+          font-weight: bold;
+        }
+        .table-container {
+          margin: 3mm 0;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          direction: ltr; /* Tables are always LTR for clarity */
+        }
+        table th, table td {
+          border: 1px solid #ccc;
+          padding: 1mm;
+          text-align: center;
+          font-size: 8pt;
+        }
+        table th {
+          background-color: #f0f0f0;
+        }
+        .prescription-title {
+          text-align: center;
+          font-weight: bold;
+          margin: 2mm 0;
+          font-size: 10pt;
+          text-transform: uppercase;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 1mm;
+        }
+        .notes {
+          margin: 3mm 0;
+          font-size: 9pt;
+        }
+        .notes-title {
+          font-weight: bold;
+          margin-bottom: 1mm;
+        }
+        .tips {
+          margin: 3mm 0;
+          font-size: 9pt;
+        }
+        .tips-title {
+          text-align: center;
+          font-weight: bold;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 1mm;
+          margin-bottom: 2mm;
+        }
+        .tips-list {
+          padding-left: ${isRtl ? '0' : '15px'};
+          padding-right: ${isRtl ? '15px' : '0'};
+          margin: 0;
+        }
+        .tips-list li {
+          margin-bottom: 1mm;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 3mm;
+          padding-top: 3mm;
+          border-top: 1px solid #ccc;
+          font-size: 9pt;
+        }
+        .thank-you {
+          font-weight: bold;
+          margin-bottom: 2mm;
+        }
+        .dots {
+          letter-spacing: 2px;
+          color: #aaa;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="store-name">${storeInfo.name}</div>
+          <div class="info">${storeInfo.address}</div>
+          <div class="info">${t("phone")}: ${storeInfo.phone}</div>
         </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 3px;">
-          <span style="font-weight: bold;">${t("patient")}:</span>
-          <span>${patientName}</span>
+        
+        <div class="section">
+          <div class="field">
+            <span class="field-label">${t("date")}:</span>
+            <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">${t("patient")}:</span>
+            <span>${patientName}</span>
+          </div>
+          ${patientPhone ? `
+          <div class="field">
+            <span class="field-label">${t("phone")}:</span>
+            <span>${patientPhone}</span>
+          </div>
+          ` : ''}
         </div>
-        ${patientPhone ? `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 3px;">
-          <span style="font-weight: bold;">${t("phone")}:</span>
-          <span>${patientPhone}</span>
-        </div>
-        ` : ''}
-      </div>
-
-      <div style="border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 10px 0; margin-bottom: 15px;">
-        <div style="text-align: center; margin-bottom: 10px; font-weight: bold; font-size: 12px; text-transform: uppercase;">
+        
+        <div class="prescription-title">
           ${t("glassesPrescription")}
         </div>
         
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-          <thead>
-            <tr>
-              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;"></th>
-              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">SPH</th>
-              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">CYL</th>
-              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">AXIS</th>
-              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">ADD</th>
-              <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">PD</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="border: 1px solid #ccc; padding: 4px; font-weight: bold; text-align: center;">${t("rightEye")} (OD)</td>
-              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.sphereOD}</td>
-              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.cylOD}</td>
-              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.axisOD}</td>
-              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.addOD}</td>
-              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.pdRight || "-"}</td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #ccc; padding: 4px; font-weight: bold; text-align: center;">${t("leftEye")} (OS)</td>
-              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.sphereOS}</td>
-              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.cylOS}</td>
-              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.axisOS}</td>
-              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.addOS}</td>
-              <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${rx.pdLeft || "-"}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>SPH</th>
+                <th>CYL</th>
+                <th>AXIS</th>
+                <th>ADD</th>
+                <th>PD</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: bold;">${t("rightEye")} (OD)</td>
+                <td>${rx.sphereOD || "-"}</td>
+                <td>${rx.cylOD || "-"}</td>
+                <td>${rx.axisOD || "-"}</td>
+                <td>${rx.addOD || "-"}</td>
+                <td>${rx.pdRight || "-"}</td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold;">${t("leftEye")} (OS)</td>
+                <td>${rx.sphereOS || "-"}</td>
+                <td>${rx.cylOS || "-"}</td>
+                <td>${rx.axisOS || "-"}</td>
+                <td>${rx.addOS || "-"}</td>
+                <td>${rx.pdLeft || "-"}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        ${notes ? `
+        <div class="notes">
+          <div class="notes-title">${t("notes")}:</div>
+          <div>${notes}</div>
+        </div>
+        ` : ''}
+        
+        <div class="tips">
+          <div class="tips-title">${t("glassesCareTips")}</div>
+          <ul class="tips-list">
+            <li>${t("tip1")}</li>
+            <li>${t("tip2")}</li>
+            <li>${t("tip3")}</li>
+            <li>${t("tip4")}</li>
+          </ul>
+        </div>
+        
+        <div class="footer">
+          <div class="thank-you">${t("thankYou")}</div>
+          <div class="dots">•••••••••••••••</div>
+        </div>
       </div>
-
-      ${notes ? `
-      <div style="margin-bottom: 15px; font-size: 12px;">
-        <div style="font-weight: bold; margin-bottom: 5px;">${t("notes")}:</div>
-        <p style="font-size: 11px;">${notes}</p>
-      </div>
-      ` : ''}
-
-      <div style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #ccc;">
-        <p style="font-weight: bold; font-size: 12px;">${t("thankYou")}</p>
-      </div>
-    </div>
+      
+      <script>
+        // Print immediately when loaded
+        window.onload = function() {
+          console.log("Document loaded, printing...");
+          setTimeout(function() {
+            window.print();
+            console.log("Print command executed");
+          }, 500);
+        };
+      </script>
+    </body>
+    </html>
   `;
   
-  const printDoc = PrintService.prepareReceiptDocument(htmlContent, t("glassesPrescription"));
-  PrintService.printHtml(printDoc, 'receipt');
+  console.log("HTML content generated for printing", htmlContent.substring(0, 200) + "...");
+  
+  try {
+    // Create a new window with the content for printing
+    const printWindow = window.open('', '_blank');
+    
+    if (!printWindow) {
+      console.error("Failed to open print window - popup might be blocked");
+      alert(t("printWindowBlocked"));
+      return;
+    }
+    
+    // Write the HTML content to the new window
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    
+    // Log success
+    console.log("Print window created and populated with content");
+    
+    // Focus the window to bring it to front
+    printWindow.focus();
+    
+    // Also print directly in case onload doesn't fire
+    setTimeout(() => {
+      try {
+        console.log("Triggering print via timeout");
+        printWindow.print();
+      } catch (error) {
+        console.error("Error during delayed print:", error);
+      }
+    }, 1000);
+  } catch (error) {
+    console.error("Error during prescription printing:", error);
+    alert(t("printError"));
+  }
 };
