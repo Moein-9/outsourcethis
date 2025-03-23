@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { RxData } from "@/store/patientStore";
@@ -85,7 +86,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
 
       {/* Prescription table - Always in LTR format with English headers */}
       <div className="px-5 mb-3">
-        <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "62mm" }}>
+        <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "62mm", direction: "ltr" }}>
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-gray-400 p-0.5 text-center"></th>
@@ -279,7 +280,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     table {
       width: calc(100% - 14mm); /* Reduced width for safety */
       border-collapse: collapse;
-      direction: ltr;
+      direction: ltr; /* Always LTR for the table */
       font-size: 10px;
       margin: 2mm auto;
     }
@@ -502,4 +503,3 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     alert(isRtl ? 'حدث خطأ أثناء الطباعة' : 'Error during printing');
   }
 };
-
