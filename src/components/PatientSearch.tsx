@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore, Patient, PatientNote } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -720,4 +721,107 @@ export const PatientSearch: React.FC = () => {
                           <div>
                             <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-blue-700">
                               <AlertCircle className="h-4 w-4 text-blue-500" />
-                              {language === 'ar' ? "أوامر العمل المكتملة" :
+                              {language === 'ar' ? "أوامر العمل المكتملة" : "Completed Work Orders"}
+                            </h3>
+                            
+                            {getCompletedWorkOrders(patientWorkOrders).length > 0 ? (
+                              <div className="rounded-md border overflow-hidden shadow-sm">
+                                <Table>
+                                  <TableHeader className="bg-blue-50">
+                                    <TableRow>
+                                      <TableHead className="w-12">#</TableHead>
+                                      <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                                      <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
+                                      <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
+                                      <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {getCompletedWorkOrders(patientWorkOrders).map((workOrder, index) => (
+                                      <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30' : ''}>
+                                        <TableCell className="font-medium">{index + 1}</TableCell>
+                                        <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
+                                        <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
+                                        <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
+                                        <TableCell className="text-right">
+                                          <div className="flex justify-end gap-2">
+                                            <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
+                                              <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                              {t('view')}
+                                            </Button>
+                                            <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
+                                              <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                              {t('print')}
+                                            </Button>
+                                          </div>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            ) : (
+                              <div className="text-center py-6 border rounded-md bg-blue-50/20">
+                                <FileText className="h-10 w-10 mx-auto text-blue-300 mb-3" />
+                                <h3 className="text-lg font-medium mb-1 text-blue-700">
+                                  {language === 'ar' ? "لا توجد أوامر عمل مكتملة" : "No Completed Work Orders"}
+                                </h3>
+                                <p className="text-muted-foreground max-w-md mx-auto">
+                                  {language === 'ar' 
+                                    ? "لا يوجد أوامر عمل مكتملة لهذا العميل حالياً."
+                                    : "There are no completed work orders for this client at the moment."}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+              
+              {selectedPatient && (
+                <div className="mt-6">
+                  <PatientNotes 
+                    patientId={selectedPatient.patientId}
+                    patientNotes={selectedPatient.patientNotes || []}
+                    onAddNote={handleAddNote}
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isLanguageDialogOpen} onOpenChange={setIsLanguageDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? "اختر لغة الطباعة" : "Select Print Language"}</DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? "الرجاء اختيار لغة طباعة الوصفة الطبية" : "Please select the language for printing the prescription"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <Button variant="outline" onClick={() => handleLanguageSelection('en')}>
+              <img src="/placeholdr.svg" alt="" className="w-5 h-5 mr-2" />
+              English
+            </Button>
+            <Button variant="outline" onClick={() => handleLanguageSelection('ar')}>
+              <img src="/placeholdr.svg" alt="" className="w-5 h-5 ml-2" />
+              العربية
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <EditWorkOrderDialog
+        isOpen={editWorkOrderDialogOpen}
+        onClose={() => setEditWorkOrderDialogOpen(false)}
+        workOrder={currentWorkOrder || {} as WorkOrder}
+        onSave={handleSaveWorkOrder}
+      />
+    </div>
+  );
+};
