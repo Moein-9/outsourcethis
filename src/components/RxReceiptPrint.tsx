@@ -178,98 +178,342 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
   
   // Create optimized HTML for 80mm thermal printer with 48 columns
   const htmlContent = `
-    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; padding: 3mm; text-align: ${isRtl ? 'right' : 'left'};">
-      <div style="text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 8px;">
-        <h1 style="font-size: 14px; font-weight: bold; margin: 4px 0;">${storeInfo.name}</h1>
-        <p style="font-size: 10px; margin: 2px 0;">${storeInfo.address}</p>
-        <p style="font-size: 10px; margin: 2px 0;">${t("phone")}: ${storeInfo.phone}</p>
-      </div>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${t("glassesPrescription")}</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        @media print {
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+          
+          body {
+            width: 80mm;
+            margin: 0;
+            padding: 0;
+            font-family: ${isRtl ? 'Arial, sans-serif' : 'Arial, serif'};
+            font-size: 10px;
+            line-height: 1.2;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+          }
+        }
+        
+        body {
+          width: 80mm;
+          margin: 0;
+          padding: 0;
+          font-family: ${isRtl ? 'Arial, sans-serif' : 'Arial, serif'};
+          font-size: 10px;
+          line-height: 1.2;
+          background-color: white;
+        }
+        
+        .receipt-container {
+          width: 76mm;
+          padding: 2mm;
+          background-color: white;
+        }
+        
+        .header {
+          text-align: center;
+          border-bottom: 1px solid #ccc;
+          padding-bottom: 5px;
+          margin-bottom: 5px;
+        }
+        
+        .logo {
+          max-width: 60%;
+          height: auto;
+          margin: 0 auto 5px auto;
+          display: block;
+        }
+        
+        .store-name {
+          font-weight: bold;
+          font-size: 14px;
+          margin: 3px 0;
+        }
+        
+        .store-info {
+          font-size: 10px;
+          margin: 2px 0;
+          color: #444;
+        }
+        
+        .patient-info {
+          margin-bottom: 8px;
+          font-size: 10px;
+        }
+        
+        .info-row {
+          display: flex;
+          justify-content: space-between;
+          border-bottom: 1px dotted #eee;
+          padding-bottom: 2px;
+          margin-bottom: 2px;
+        }
+        
+        .label {
+          font-weight: bold;
+        }
+        
+        .rx-section {
+          border-top: 1px solid #ccc;
+          border-bottom: 1px solid #ccc;
+          padding: 5px 0;
+          margin-bottom: 6px;
+        }
+        
+        .rx-title {
+          text-align: center;
+          font-weight: bold;
+          font-size: 10px;
+          text-transform: uppercase;
+          margin-bottom: 5px;
+        }
+        
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 9px;
+        }
+        
+        table th, table td {
+          border: 1px solid #ccc;
+          padding: 2px;
+          text-align: center;
+        }
+        
+        table th {
+          background-color: #f5f5f5;
+        }
+        
+        .eye-row td:first-child {
+          font-weight: bold;
+        }
+        
+        .notes {
+          margin-bottom: 6px;
+          font-size: 9px;
+        }
+        
+        .notes-title {
+          font-weight: bold;
+          margin-bottom: 2px;
+        }
+        
+        .notes-content {
+          font-size: 9px;
+        }
+        
+        .care-tips {
+          margin-bottom: 6px;
+        }
+        
+        .care-title {
+          text-align: center;
+          font-weight: bold;
+          border-bottom: 1px dotted #ccc;
+          padding-bottom: 2px;
+          margin-bottom: 3px;
+          font-size: 10px;
+        }
+        
+        ul {
+          padding-left: ${isRtl ? '0' : '15px'};
+          padding-right: ${isRtl ? '15px' : '0'};
+          margin: 3px 0;
+          font-size: 9px;
+        }
+        
+        li {
+          margin-bottom: 1px;
+        }
+        
+        .footer {
+          text-align: center;
+          margin-top: 6px;
+          padding-top: 4px;
+          border-top: 1px solid #ccc;
+        }
+        
+        .thank-you {
+          font-weight: bold;
+          font-size: 10px;
+        }
+        
+        .dots {
+          margin-top: 5px;
+          font-size: 8px;
+          letter-spacing: 2px;
+        }
+        
+        /* RTL Specific */
+        .rtl {
+          direction: rtl;
+          text-align: right;
+        }
+        
+        .ltr {
+          direction: ltr;
+          text-align: left;
+        }
+      </style>
+    </head>
+    <body dir="${isRtl ? 'rtl' : 'ltr'}">
+      <div class="receipt-container ${isRtl ? 'rtl' : 'ltr'}">
+        <div class="header">
+          <svg width="150" height="45" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 5px auto; display: block;">
+            <text x="150" y="40" font-family="Arial" font-size="28" font-weight="bold" text-anchor="middle" fill="#000">
+              ${storeInfo.name}
+            </text>
+          </svg>
+          <div class="store-name">${storeInfo.name}</div>
+          <div class="store-info">${storeInfo.address}</div>
+          <div class="store-info">${t("phone")}: ${storeInfo.phone}</div>
+        </div>
 
-      <div style="margin-bottom: 8px; font-size: 10px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 2px;">
-          <span style="font-weight: bold;">${t("date")}:</span>
-          <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
+        <div class="patient-info">
+          <div class="info-row">
+            <span class="label">${t("date")}:</span>
+            <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">${t("patient")}:</span>
+            <span>${patientName}</span>
+          </div>
+          ${patientPhone ? `
+          <div class="info-row">
+            <span class="label">${t("phone")}:</span>
+            <span>${patientPhone}</span>
+          </div>
+          ` : ''}
         </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 2px;">
-          <span style="font-weight: bold;">${t("patient")}:</span>
-          <span>${patientName}</span>
+
+        <div class="rx-section">
+          <div class="rx-title">
+            <span style="display: inline-block; margin-right: 3px; vertical-align: middle;">👁️</span> ${t("glassesPrescription")}
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>SPH</th>
+                <th>CYL</th>
+                <th>AXIS</th>
+                <th>ADD</th>
+                <th>PD</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="eye-row">
+                <td>${t("rightEye")} (OD)</td>
+                <td>${rx.sphereOD || "-"}</td>
+                <td>${rx.cylOD || "-"}</td>
+                <td>${rx.axisOD || "-"}</td>
+                <td>${rx.addOD || "-"}</td>
+                <td>${rx.pdRight || "-"}</td>
+              </tr>
+              <tr class="eye-row">
+                <td>${t("leftEye")} (OS)</td>
+                <td>${rx.sphereOS || "-"}</td>
+                <td>${rx.cylOS || "-"}</td>
+                <td>${rx.axisOS || "-"}</td>
+                <td>${rx.addOS || "-"}</td>
+                <td>${rx.pdLeft || "-"}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        ${patientPhone ? `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 2px;">
-          <span style="font-weight: bold;">${t("phone")}:</span>
-          <span>${patientPhone}</span>
+
+        ${notes ? `
+        <div class="notes">
+          <div class="notes-title">${t("notes")}:</div>
+          <div class="notes-content">${notes}</div>
         </div>
         ` : ''}
-      </div>
 
-      <div style="border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 6px 0; margin-bottom: 8px;">
-        <div style="text-align: center; margin-bottom: 6px; font-weight: bold; font-size: 10px; text-transform: uppercase;">
-          ${t("glassesPrescription")}
+        <div class="care-tips">
+          <div class="care-title">
+            ${t("glassesCareTips")}
+          </div>
+          <ul>
+            <li>${t("tip1")}</li>
+            <li>${t("tip2")}</li>
+            <li>${t("tip3")}</li>
+            <li>${t("tip4")}</li>
+          </ul>
         </div>
-        
-        <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
-          <thead>
-            <tr>
-              <th style="border: 1px solid #ccc; padding: 2px; text-align: center;"></th>
-              <th style="border: 1px solid #ccc; padding: 2px; text-align: center;">SPH</th>
-              <th style="border: 1px solid #ccc; padding: 2px; text-align: center;">CYL</th>
-              <th style="border: 1px solid #ccc; padding: 2px; text-align: center;">AXIS</th>
-              <th style="border: 1px solid #ccc; padding: 2px; text-align: center;">ADD</th>
-              <th style="border: 1px solid #ccc; padding: 2px; text-align: center;">PD</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="border: 1px solid #ccc; padding: 2px; font-weight: bold; text-align: center;">${t("rightEye")} (OD)</td>
-              <td style="border: 1px solid #ccc; padding: 2px; text-align: center;">${rx.sphereOD}</td>
-              <td style="border: 1px solid #ccc; padding: 2px; text-align: center;">${rx.cylOD}</td>
-              <td style="border: 1px solid #ccc; padding: 2px; text-align: center;">${rx.axisOD}</td>
-              <td style="border: 1px solid #ccc; padding: 2px; text-align: center;">${rx.addOD}</td>
-              <td style="border: 1px solid #ccc; padding: 2px; text-align: center;">${rx.pdRight || "-"}</td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #ccc; padding: 2px; font-weight: bold; text-align: center;">${t("leftEye")} (OS)</td>
-              <td style="border: 1px solid #ccc; padding: 2px; text-align: center;">${rx.sphereOS}</td>
-              <td style="border: 1px solid #ccc; padding: 2px; text-align: center;">${rx.cylOS}</td>
-              <td style="border: 1px solid #ccc; padding: 2px; text-align: center;">${rx.axisOS}</td>
-              <td style="border: 1px solid #ccc; padding: 2px; text-align: center;">${rx.addOS}</td>
-              <td style="border: 1px solid #ccc; padding: 2px; text-align: center;">${rx.pdLeft || "-"}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
 
-      ${notes ? `
-      <div style="margin-bottom: 8px; font-size: 10px;">
-        <div style="font-weight: bold; margin-bottom: 2px;">${t("notes")}:</div>
-        <p style="font-size: 9px;">${notes}</p>
-      </div>
-      ` : ''}
-
-      <div style="font-size: 9px; margin-bottom: 8px;">
-        <div style="text-align: center; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 2px; margin-bottom: 4px;">
-          ${t("glassesCareTips")}
+        <div class="footer">
+          <div class="thank-you">${t("thankYou")}</div>
+          <div class="dots">• • • • • • • • • • • • • • •</div>
         </div>
-        <ul style="padding-left: ${isRtl ? '0' : '15px'}; padding-right: ${isRtl ? '15px' : '0'}; margin: 4px 0;">
-          <li style="margin-bottom: 2px;">${t("tip1")}</li>
-          <li style="margin-bottom: 2px;">${t("tip2")}</li>
-          <li style="margin-bottom: 2px;">${t("tip3")}</li>
-          <li style="margin-bottom: 2px;">${t("tip4")}</li>
-        </ul>
       </div>
 
-      <div style="text-align: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid #ccc;">
-        <p style="font-weight: bold; font-size: 10px;">${t("thankYou")}</p>
-      </div>
-    </div>
+      <script>
+        // Force the print dialog to open immediately
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+            setTimeout(function() {
+              window.parent.postMessage('print-complete', '*');
+            }, 500);
+          }, 200);
+        };
+      </script>
+    </body>
+    </html>
   `;
   
-  // Use the PrintService utility with enhanced parameters for thermal receipt printers
   try {
-    const printDoc = PrintService.prepareReceiptDocument(htmlContent, t("glassesPrescription"));
-    PrintService.printHtml(printDoc, 'receipt', () => {
-      console.log('Printing completed');
-    });
+    // Use direct printing instead of preparing through PrintService to ensure proper content display
+    const printFrame = document.createElement('iframe');
+    printFrame.style.position = 'fixed';
+    printFrame.style.visibility = 'hidden';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = 'none';
+    printFrame.style.left = '0';
+    printFrame.style.top = '0';
+    printFrame.className = 'print-frame';
+    document.body.appendChild(printFrame);
+    
+    if (printFrame.contentWindow) {
+      printFrame.contentWindow.document.open();
+      printFrame.contentWindow.document.write(htmlContent);
+      printFrame.contentWindow.document.close();
+      
+      printFrame.onload = function() {
+        setTimeout(() => {
+          if (printFrame.contentWindow) {
+            printFrame.contentWindow.focus();
+            try {
+              printFrame.contentWindow.print();
+              
+              // Set a timeout to remove the frame after printing
+              setTimeout(() => {
+                if (document.body.contains(printFrame)) {
+                  document.body.removeChild(printFrame);
+                }
+              }, 2000);
+            } catch (printError) {
+              console.error('Print error:', printError);
+              document.body.removeChild(printFrame);
+            }
+          }
+        }, 300);
+      };
+    } else {
+      document.body.removeChild(printFrame);
+      console.error('Could not access print frame content window');
+    }
   } catch (error) {
     console.error('Error printing RX receipt:', error);
   }
