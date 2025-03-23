@@ -3,6 +3,12 @@ import React, { useState } from "react";
 import CreateInvoice from "@/components/CreateInvoice";
 import { InvoiceWorkOrderActions } from "@/components/InvoiceWorkOrderActions";
 
+// Define the props that CreateInvoice accepts
+interface CreateInvoiceProps {
+  onInvoiceSave?: (invoice: any, patientData: any) => void;
+  hideActionButtons?: boolean;
+}
+
 export const CreateInvoiceExtended: React.FC = () => {
   // State to track if work order has been printed
   const [workOrderPrinted, setWorkOrderPrinted] = useState(false);
@@ -48,7 +54,7 @@ const CreateInvoiceWrapper: React.FC<{
       {/* Render original CreateInvoice with onInvoiceSave prop */}
       <CreateInvoice 
         onInvoiceSave={handleInvoiceSave}
-        hideActionButtons={true} // Prop to hide the original buttons
+        hideActionButtons={true}
       />
       
       {/* Add our new InvoiceWorkOrderActions component */}
