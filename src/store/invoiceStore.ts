@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -40,7 +41,8 @@ export interface Invoice {
   notes?: string; // Added notes field
 }
 
-interface WorkOrder {
+// Export the WorkOrder interface so it can be imported in other files
+export interface WorkOrder {
   id: string;
   patientId: string;
   createdAt: string;
