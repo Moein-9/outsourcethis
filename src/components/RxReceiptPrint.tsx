@@ -2,7 +2,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { RxData } from "@/store/patientStore";
-import { Eye } from "lucide-react";
+import { Eye, Calendar, User, Phone } from "lucide-react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
 
@@ -28,7 +28,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   const isRtl = language === 'ar';
   
   const containerClass = isPrintable 
-    ? "w-[76mm] mx-auto bg-white p-2 text-[11px] border shadow-sm print:shadow-none" 
+    ? "w-[72mm] mx-auto bg-white p-2 text-[11px] border shadow-sm print:shadow-none" 
     : "w-full bg-white p-4 border rounded-lg shadow-sm";
   
   const dirClass = isRtl ? 'rtl text-right' : 'ltr text-left';
@@ -37,7 +37,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
     <div 
       className={`${containerClass} ${dirClass}`} 
       dir={isRtl ? "rtl" : "ltr"}
-      style={{ fontFamily: isRtl ? 'Cairo, sans-serif' : 'Cairo, sans-serif' }}
+      style={{ fontFamily: 'Cairo, sans-serif' }}
     >
       {/* Header with logo */}
       <div className="text-center border-b pb-2 mb-2">
@@ -50,34 +50,40 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
       </div>
 
       {/* Prescription title */}
-      <div className="bg-gray-800 text-white py-1 px-2 text-center font-bold text-sm mb-2 rounded-sm">
+      <div className="bg-gray-800 text-white py-1 px-2 text-center font-bold text-sm mb-2 rounded-sm print:bg-black print:text-white">
         <div className="flex items-center justify-center gap-1">
           <Eye className="h-3 w-3" /> 
           {isRtl ? "وصفة النظارات الطبية" : "GLASSES PRESCRIPTION"}
         </div>
       </div>
 
-      {/* Patient info */}
-      <div className="px-2 mb-2 text-[10px]">
+      {/* Patient info - Adjusted inward by adding more padding */}
+      <div className="px-4 mb-2 text-[10px]">
         <div className="flex justify-between border-b pb-0.5 mb-0.5">
-          <span className="font-semibold">{t("date")}:</span>
+          <span className="font-semibold flex items-center">
+            <Calendar className="h-3 w-3 mr-1" /> {t("date")}:
+          </span>
           <span>{format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
         </div>
         <div className="flex justify-between border-b pb-0.5 mb-0.5">
-          <span className="font-semibold">{t("patient")}:</span>
+          <span className="font-semibold flex items-center">
+            <User className="h-3 w-3 mr-1" /> {t("patient")}:
+          </span>
           <span>{patientName}</span>
         </div>
         {patientPhone && (
           <div className="flex justify-between border-b pb-0.5 mb-0.5">
-            <span className="font-semibold">{t("phone")}:</span>
+            <span className="font-semibold flex items-center">
+              <Phone className="h-3 w-3 mr-1" /> {t("phone")}:
+            </span>
             <span>{patientPhone}</span>
           </div>
         )}
       </div>
 
-      {/* Prescription table */}
-      <div className="px-2 mb-3">
-        <table className="w-full border-collapse text-[9px] ltr" style={{ maxWidth: "72mm" }}>
+      {/* Prescription table - Adjusted inward by adding more padding */}
+      <div className="px-4 mb-3">
+        <table className="w-full border-collapse text-[9px] ltr" style={{ maxWidth: "64mm" }}>
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-gray-400 p-0.5 text-center"></th>
@@ -107,7 +113,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
             </tr>
           </tbody>
         </table>
-        <div className="mt-1 text-[8px] flex justify-between px-1">
+        <div className="mt-1 text-[8px] flex justify-between px-2">
           <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
           <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
         </div>
@@ -115,7 +121,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
 
       {/* Notes section */}
       {notes && (
-        <div className="px-2 mb-2">
+        <div className="px-4 mb-2">
           <div className="bg-gray-200 py-0.5 px-1 font-semibold text-[10px] mb-1">
             {t("notes")}:
           </div>
@@ -124,11 +130,11 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
       )}
 
       {/* Care tips */}
-      <div className="px-2 mb-2">
+      <div className="px-4 mb-2">
         <div className="bg-gray-200 py-0.5 px-1 font-semibold text-[10px] mb-1 text-center">
           {t("glassesCareTips")}
         </div>
-        <ul className={`list-disc px-4 space-y-0.5 text-[8px] ${dirClass}`}>
+        <ul className={`list-disc px-5 space-y-0.5 text-[8px] ${dirClass}`}>
           <li>{t("tip1")}</li>
           <li>{t("tip2")}</li>
           <li>{t("tip3")}</li>
@@ -137,7 +143,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="text-center mt-2 pt-2 border-t">
+      <div className="text-center mt-2 pt-2 border-t px-3">
         <p className="font-semibold text-[10px]">
           {isRtl 
             ? "شكرًا على دعمكم، ونشوفكم على خير قريبًا!" 
@@ -248,9 +254,17 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       border-bottom: 1px solid #ddd;
       padding: 1mm 0;
       font-size: 10px;
+      margin: 0 6mm; /* Added more margin for better safety zone */
     }
     .field-label {
       font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+    .field-icon {
+      margin-right: 1mm;
+      width: 2.5mm;
+      height: 2.5mm;
     }
     .rx-title {
       text-align: center;
@@ -258,17 +272,19 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       font-size: 12px;
       margin: 2mm 0;
       text-transform: uppercase;
-      background-color: #333;
+      background-color: #000;
       color: white;
       padding: 1mm;
       border-radius: 1mm;
+      margin-left: 5mm;
+      margin-right: 5mm;
     }
     table {
-      width: 100%;
+      width: calc(100% - 12mm); /* Reduced width for safety */
       border-collapse: collapse;
       direction: ltr;
       font-size: 9px;
-      margin: 2mm 0;
+      margin: 2mm auto;
     }
     th, td {
       border: 1px solid #333;
@@ -284,32 +300,31 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       justify-content: space-between;
       font-size: 8px;
       margin-top: 1mm;
-      padding: 0 1mm;
+      padding: 0 8mm;
     }
     .section-title {
       font-weight: bold;
       font-size: 10px;
       background-color: #eee;
       padding: 1mm;
-      margin: 2mm 0 1mm 0;
+      margin: 2mm 6mm 1mm 6mm;
       text-align: ${isRtl ? 'right' : 'left'};
     }
     .notes {
-      margin: 2mm 0;
+      margin: 2mm 6mm;
       font-size: 9px;
-      padding: 0 1mm;
     }
     .tips-title {
       text-align: center;
       font-weight: bold;
       background-color: #eee;
       padding: 1mm;
-      margin: 2mm 0 1mm 0;
+      margin: 2mm 6mm 1mm 6mm;
       font-size: 10px;
     }
     .tips-list {
       padding-${isRtl ? 'right' : 'left'}: 5mm;
-      margin: 1mm;
+      margin: 1mm 8mm;
       font-size: 8px;
     }
     .tips-list li {
@@ -317,7 +332,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     }
     .footer {
       text-align: center;
-      margin-top: 2mm;
+      margin: 2mm 6mm 0;
       padding-top: 2mm;
       border-top: 1px solid #333;
       font-size: 10px;
@@ -330,6 +345,28 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     .dots {
       margin-top: 2mm;
       font-size: 12px;
+    }
+    /* Print-specific styles to handle background colors */
+    @media print {
+      .rx-title {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        background-color: #000 !important;
+        color: white !important;
+      }
+      th {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        background-color: #eee !important;
+      }
+      .section-title, .tips-title {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        background-color: #eee !important;
+      }
     }
   </style>
 </head>
@@ -348,16 +385,35 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     
     <div class="patient-info">
       <div class="field">
-        <span class="field-label">${isRtl ? 'التاريخ' : 'Date'}:</span>
+        <span class="field-label">
+          <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          ${isRtl ? 'التاريخ' : 'Date'}:
+        </span>
         <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
       </div>
       <div class="field">
-        <span class="field-label">${isRtl ? 'المريض' : 'Patient'}:</span>
+        <span class="field-label">
+          <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          ${isRtl ? 'المريض' : 'Patient'}:
+        </span>
         <span>${patientName}</span>
       </div>
       ${patientPhone ? `
       <div class="field">
-        <span class="field-label">${isRtl ? 'الهاتف' : 'Phone'}:</span>
+        <span class="field-label">
+          <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+          ${isRtl ? 'الهاتف' : 'Phone'}:
+        </span>
         <span>${patientPhone}</span>
       </div>
       ` : ''}
