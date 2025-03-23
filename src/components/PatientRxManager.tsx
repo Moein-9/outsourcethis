@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -83,15 +84,31 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   const [isViewRxOpen, setIsViewRxOpen] = useState(false);
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   
-  const [localCurrentRx, setLocalCurrentRx] = useState(currentRx);
-  const [localRxHistory, setLocalRxHistory] = useState(rxHistory);
-  const [localPatientNotes, setLocalPatientNotes] = useState(patientNotes);
+  // Initialize with default empty RX if currentRx is undefined
+  const defaultRx: RxData = {
+    sphereOD: "",
+    cylOD: "",
+    axisOD: "",
+    addOD: "",
+    sphereOS: "",
+    cylOS: "",
+    axisOS: "",
+    addOS: "",
+    pdRight: "",
+    pdLeft: "",
+    createdAt: new Date().toISOString()
+  };
+  
+  const [localCurrentRx, setLocalCurrentRx] = useState<RxData>(currentRx || defaultRx);
+  const [localRxHistory, setLocalRxHistory] = useState(rxHistory || []);
+  const [localPatientNotes, setLocalPatientNotes] = useState(patientNotes || []);
   const [newNote, setNewNote] = useState("");
   
   useEffect(() => {
-    setLocalCurrentRx(currentRx);
-    setLocalRxHistory(rxHistory);
-    setLocalPatientNotes(patientNotes);
+    // Safely update localCurrentRx with currentRx or defaultRx if undefined
+    setLocalCurrentRx(currentRx || defaultRx);
+    setLocalRxHistory(rxHistory || []);
+    setLocalPatientNotes(patientNotes || []);
   }, [currentRx, rxHistory, patientNotes]);
 
   const handleRxInputChange = (eye: "OD" | "OS", field: "sphere" | "cyl" | "axis" | "add", value: string) => {
@@ -315,7 +332,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
               </h4>
               <Badge className="bg-green-500">
                 <Calendar className="h-3 w-3 mr-1" />
-                {localCurrentRx.createdAt ? formatDate(localCurrentRx.createdAt) : language === 'ar' ? 'تاريخ غير متوفر' : 'Date not available'}
+                {localCurrentRx?.createdAt ? formatDate(localCurrentRx.createdAt) : (language === 'ar' ? 'تاريخ غير متوفر' : 'Date not available')}
               </Badge>
             </div>
             <div className="overflow-x-auto bg-white rounded-md shadow-sm">
