@@ -12,7 +12,6 @@ import { Textarea } from '@/components/ui/textarea';
 
 interface PatientNotesProps {
   patientId: string;
-  notes?: PatientNote[];
 }
 
 export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId }) => {
@@ -127,7 +126,7 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId }) => {
                       onChange={(e) => setEditedNoteText(e.target.value)}
                       dir="auto"
                       className="w-full"
-                      onKeyPress={(e) => e.key === 'Enter' && e.ctrlKey && saveEditedNote(note.id)}
+                      onKeyDown={(e) => e.key === 'Enter' && e.ctrlKey && saveEditedNote(note.id)}
                     />
                     <div className="flex justify-end gap-2 mt-2">
                       <Button
@@ -191,7 +190,7 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId }) => {
             onChange={(e) => setNewNote(e.target.value)}
             dir="auto"
             className="resize-none"
-            onKeyPress={(e) => e.key === 'Enter' && e.ctrlKey && handleAddNote()}
+            onKeyDown={(e) => e.key === 'Enter' && e.ctrlKey && handleAddNote()}
           />
           <Button 
             onClick={handleAddNote}

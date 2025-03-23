@@ -8,7 +8,7 @@ import { useLanguageStore } from '@/store/languageStore';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { EditWorkOrderDialog } from './EditWorkOrderDialog';
-import { Eye, Pencil, Receipt, FileText } from 'lucide-react';
+import { Eye, Pencil, Receipt } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PrintWorkOrderButton } from './PrintWorkOrderButton';
 
@@ -25,8 +25,11 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   const [editingWorkOrder, setEditingWorkOrder] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   
-  // Filter invoices for this patient
-  const patientInvoices = invoices.filter(invoice => invoice.patientId === patientId);
+  // Filter invoices for this patient - ensure we're getting ALL invoices for this patient
+  const patientInvoices = invoices.filter(invoice => 
+    invoice.patientId === patientId || 
+    invoice.patient?.patientId === patientId
+  );
   
   const formatDate = (dateString: string) => {
     try {
@@ -51,7 +54,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   };
   
   const viewInvoiceDetails = (invoice: any) => {
-    // Navigate to invoice details or create a modal to show details
+    // Navigate to invoice details in "Remaining Payments" section
     navigate('/', { state: { section: 'remainingPayments', selectedInvoice: invoice.invoiceId } });
   };
   

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { RxData } from "@/store/patientStore";
@@ -10,7 +9,6 @@ interface RxReceiptPrintProps {
   patientName: string;
   patientPhone?: string;
   rx: RxData;
-  notes?: string;
   isPrintable?: boolean;
   forcedLanguage?: 'en' | 'ar'; // For forced language printing
 }
@@ -19,7 +17,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   patientName,
   patientPhone,
   rx,
-  notes,
   isPrintable = false,
   forcedLanguage
 }) => {
@@ -123,8 +120,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
           <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
         </div>
       </div>
-
-      {/* Notes section - Removed from RX receipt as requested */}
 
       {/* Care tips */}
       <div className="px-5 mb-2">
