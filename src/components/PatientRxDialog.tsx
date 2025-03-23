@@ -146,29 +146,9 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
             <CardContent className="pt-6">
               {/* Horizontal RX Table Layout */}
               <div className="space-y-8">
-                {/* Column Headers */}
-                <div className="grid grid-cols-6 gap-2 mb-2">
-                  <div></div> {/* Empty cell for eye label */}
-                  <div>
-                    <Label className="text-center block mb-1">SPH</Label>
-                  </div>
-                  <div>
-                    <Label className="text-center block mb-1">CYL</Label>
-                  </div>
-                  <div>
-                    <Label className="text-center block mb-1">AXIS</Label>
-                  </div>
-                  <div>
-                    <Label className="text-center block mb-1">ADD</Label>
-                  </div>
-                  <div>
-                    <Label className="text-center block mb-1">PD</Label>
-                  </div>
-                </div>
-                
                 {/* Right Eye (OD) Row */}
                 <div className="border rounded-md overflow-hidden">
-                  <div className="bg-blue-50 px-4 py-2 flex items-center">
+                  <div className="bg-blue-50 px-4 py-2 flex items-center border-b">
                     <Eye className="h-5 w-5 text-blue-600 mr-2" />
                     <h3 className="font-medium">
                       {language === 'ar' ? "العين اليمنى (OD)" : "Right Eye (OD)"}
@@ -177,6 +157,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                   
                   <div className="grid grid-cols-5 gap-2 p-4">
                     <div>
+                      <Label className="text-center block mb-1">SPH</Label>
                       <Select
                         value={rx.sphereOD || "none"}
                         onValueChange={(value) => handleChange("sphereOD", value)}
@@ -184,7 +165,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-72">
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateSphOptions()}
                         </SelectContent>
@@ -192,6 +173,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                     </div>
                     
                     <div>
+                      <Label className="text-center block mb-1">CYL</Label>
                       <Select
                         value={rx.cylOD || "none"}
                         onValueChange={(value) => handleChange("cylOD", value)}
@@ -199,7 +181,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-72">
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateCylOptions()}
                         </SelectContent>
@@ -207,6 +189,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                     </div>
                     
                     <div>
+                      <Label className="text-center block mb-1">AXIS</Label>
                       <Select
                         value={rx.axisOD || "none"}
                         onValueChange={(value) => handleChange("axisOD", value)}
@@ -214,7 +197,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-72">
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateAxisOptions()}
                         </SelectContent>
@@ -222,6 +205,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                     </div>
                     
                     <div>
+                      <Label className="text-center block mb-1">ADD</Label>
                       <Select
                         value={rx.addOD || "none"}
                         onValueChange={(value) => handleChange("addOD", value)}
@@ -229,13 +213,14 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-72">
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           {generateAddOptions()}
                         </SelectContent>
                       </Select>
                     </div>
                     
                     <div>
+                      <Label className="text-center block mb-1">PD</Label>
                       <Select
                         value={rx.pdRight || "none"}
                         onValueChange={(value) => handleChange("pdRight", value)}
@@ -243,7 +228,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-72">
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           {generatePdOptions()}
                         </SelectContent>
                       </Select>
@@ -253,7 +238,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                 
                 {/* Left Eye (OS) Row */}
                 <div className="border rounded-md overflow-hidden">
-                  <div className="bg-indigo-50 px-4 py-2 flex items-center">
+                  <div className="bg-indigo-50 px-4 py-2 flex items-center border-b">
                     <Eye className="h-5 w-5 text-indigo-600 mr-2" />
                     <h3 className="font-medium">
                       {language === 'ar' ? "العين اليسرى (OS)" : "Left Eye (OS)"}
@@ -262,6 +247,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                   
                   <div className="grid grid-cols-5 gap-2 p-4">
                     <div>
+                      <Label className="text-center block mb-1">SPH</Label>
                       <Select
                         value={rx.sphereOS || "none"}
                         onValueChange={(value) => handleChange("sphereOS", value)}
@@ -269,7 +255,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-72">
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateSphOptions()}
                         </SelectContent>
@@ -277,6 +263,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                     </div>
                     
                     <div>
+                      <Label className="text-center block mb-1">CYL</Label>
                       <Select
                         value={rx.cylOS || "none"}
                         onValueChange={(value) => handleChange("cylOS", value)}
@@ -284,7 +271,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-72">
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateCylOptions()}
                         </SelectContent>
@@ -292,6 +279,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                     </div>
                     
                     <div>
+                      <Label className="text-center block mb-1">AXIS</Label>
                       <Select
                         value={rx.axisOS || "none"}
                         onValueChange={(value) => handleChange("axisOS", value)}
@@ -299,7 +287,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-72">
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateAxisOptions()}
                         </SelectContent>
@@ -307,6 +295,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                     </div>
                     
                     <div>
+                      <Label className="text-center block mb-1">ADD</Label>
                       <Select
                         value={rx.addOS || "none"}
                         onValueChange={(value) => handleChange("addOS", value)}
@@ -314,13 +303,14 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-72">
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           {generateAddOptions()}
                         </SelectContent>
                       </Select>
                     </div>
                     
                     <div>
+                      <Label className="text-center block mb-1">PD</Label>
                       <Select
                         value={rx.pdLeft || "none"}
                         onValueChange={(value) => handleChange("pdLeft", value)}
@@ -328,7 +318,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-72">
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           {generatePdOptions()}
                         </SelectContent>
                       </Select>
