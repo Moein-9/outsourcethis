@@ -4,11 +4,13 @@ import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 import { toast } from '@/hooks/use-toast';
 import { useLanguageStore } from '@/store/languageStore';
-import { useInventoryStore } from '@/store/inventoryStore';
 
 export const CustomPrintService = {
   printWorkOrder: (workOrder: any, invoice?: any, patient?: any) => {
     console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
+    
+    // Get translation function from the store
+    const { t } = useLanguageStore.getState();
     
     // Create a new window for printing
     const printWindow = window.open('', '_blank');
