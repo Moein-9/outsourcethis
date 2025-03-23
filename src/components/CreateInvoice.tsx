@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { usePatientStore } from "@/store/patientStore";
-import { useInventoryStore } from "@/store/inventoryStore";
+
+import React, { useState } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "@/components/ui/use-toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
-  FileText, Check, ArrowLeft, ArrowRight, Glasses, Eye, Receipt
+  FileText, Printer, Receipt, Save, User, PackageCheck, CreditCard, Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InvoiceStepPatient } from "@/components/invoice-steps/InvoiceStepPatient";
 import { InvoiceStepProducts } from "@/components/invoice-steps/InvoiceStepProducts";
 import { InvoiceStepPayment } from "@/components/invoice-steps/InvoiceStepPayment";
@@ -18,65 +18,16 @@ import { InvoiceFormProvider, useInvoiceForm } from "@/components/invoice-steps/
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
-import { Printer } from "lucide-react";
 
 const CreateInvoiceContent: React.FC = () => {
   const { t, language } = useLanguageStore();
-  const [currentStep, setCurrentStep] = useState(0);
   const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts">("glasses");
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("patient");
   const addInvoice = useInvoiceStore((state) => state.addInvoice);
   const { getValues, setValue } = useInvoiceForm();
   
-  const steps = [
-    { title: t('clientSection'), icon: "user" },
-    { title: t('productSection'), icon: invoiceType === "glasses" ? "glasses" : "eye" },
-    { title: t('paymentSection'), icon: "creditCard" },
-    { title: t('summarySection'), icon: "fileText" },
-  ];
-
-  const variants = {
-    hidden: (direction: number) => ({
-      x: direction > 0 ? 300 : -300,
-      opacity: 0
-    }),
-    visible: {
-      x: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 30
-      }
-    },
-    exit: (direction: number) => ({
-      x: direction > 0 ? -300 : 300,
-      opacity: 0,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 30
-      }
-    })
-  };
-
-  const [direction, setDirection] = useState(0);
-
-  const nextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setDirection(1);
-      setCurrentStep(prev => prev + 1);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setDirection(-1);
-      setCurrentStep(prev => prev - 1);
-    }
-  };
-
   const handlePrintWorkOrder = () => {
     setWorkOrderPrintOpen(true);
     setTimeout(() => {
@@ -114,6 +65,28 @@ const CreateInvoiceContent: React.FC = () => {
     authNumber: getValues("authNumber") || ""
   };
 
+  const calculateTotal = () => {
+    const lensPrice = getValues("lensPrice") || 0;
+    const coatingPrice = getValues("coatingPrice") || 0;
+    const framePrice = getValues("skipFrame") ? 0 : (getValues("framePrice") || 0);
+    const discount = getValues("discount") || 0;
+    
+    const contactLensItems = getValues("contactLensItems") || [];
+    const contactLensTotal = contactLensItems.reduce((sum, lens) => sum + (lens.price || 0), 0);
+    
+    if (invoiceType === "glasses") {
+      return Math.max(0, lensPrice + coatingPrice + framePrice - discount);
+    } else {
+      return Math.max(0, contactLensTotal - discount);
+    }
+  };
+
+  const calculateRemaining = () => {
+    const total = calculateTotal();
+    const deposit = getValues("deposit") || 0;
+    return Math.max(0, total - deposit);
+  };
+
   const handleSaveInvoice = () => {
     const formData = getValues();
     const invoiceData = {
@@ -148,125 +121,320 @@ const CreateInvoiceContent: React.FC = () => {
       description: `${t('invoiceSavedSuccess')} ${invoiceId}.`,
     });
     
-    setCurrentStep(3);
+    setActiveTab("summary");
   };
 
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
 
+  const total = calculateTotal();
+  const remaining = calculateRemaining();
+
   return (
     <div className="py-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6">
         <h2 className={`text-2xl font-bold flex items-center gap-2 ${textAlignClass}`}>
           <FileText className="w-6 h-6 text-primary" />
           {t('invoiceTitle')}
         </h2>
-      </div>
-
-      <div className="mb-8">
-        <div className="flex justify-between">
-          {steps.map((step, idx) => (
-            <div 
-              key={idx} 
-              className={`relative flex flex-col items-center ${idx === currentStep ? 'text-primary' : 'text-muted-foreground'}`}
-            >
-              <div 
-                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
-                ${idx === currentStep ? 'border-primary bg-primary text-white' : 
-                  idx < currentStep ? 'border-primary bg-primary/10 text-primary' : 'border-muted-foreground'}`}
-              >
-                {idx < currentStep ? (
-                  <Check className="w-5 h-5" />
-                ) : (
-                  <span>{idx + 1}</span>
-                )}
-              </div>
-              <span className="mt-2 text-sm font-medium">{step.title}</span>
-              {idx < steps.length - 1 && (
-                <div 
-                  className={`absolute top-5 left-10 w-[calc(100%-20px)] h-0.5 
-                  ${idx < currentStep ? 'bg-primary' : 'bg-muted-foreground/30'}`}
-                />
-              )}
-            </div>
-          ))}
+        
+        <div className="flex items-center space-x-3">
+          <Button onClick={handleSaveInvoice} variant="outline" className="flex items-center gap-2">
+            <Save className="w-4 h-4" />
+            {t('saveInvoice')}
+          </Button>
+          
+          <Button 
+            onClick={handlePrintInvoice} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <Receipt className="w-4 h-4" />
+            {t('printInvoice')}
+          </Button>
+          
+          <Button 
+            onClick={handlePrintWorkOrder} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <Printer className="w-4 h-4" />
+            {t('printWorkOrder')}
+          </Button>
         </div>
       </div>
 
-      <Card className="border border-muted-foreground/10 shadow-md">
-        <CardHeader className="bg-muted/30 border-b">
-          <CardTitle className="text-primary">
-            {steps[currentStep].title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <AnimatePresence custom={direction} mode="wait">
-            <motion.div
-              key={currentStep}
-              custom={direction}
-              variants={variants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="min-h-[400px]"
-            >
-              {currentStep === 0 && (
-                <InvoiceStepPatient 
-                  invoiceType={invoiceType} 
-                  onInvoiceTypeChange={setInvoiceType} 
-                />
-              )}
-
-              {currentStep === 1 && (
-                <InvoiceStepProducts invoiceType={invoiceType} />
-              )}
-
-              {currentStep === 2 && (
-                <InvoiceStepPayment />
-              )}
-
-              {currentStep === 3 && (
-                <InvoiceStepSummary 
-                  setInvoicePrintOpen={setInvoicePrintOpen}
-                  setWorkOrderPrintOpen={setWorkOrderPrintOpen}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="flex justify-between mt-8 pt-4 border-t">
-            <Button 
-              variant="outline" 
-              onClick={prevStep} 
-              disabled={currentStep === 0}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {t('previous')}
-            </Button>
-
-            {currentStep < steps.length - 1 ? (
-              <Button 
-                onClick={nextStep} 
-                className="flex items-center gap-2"
-              >
-                {t('next')}
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setCurrentStep(0)}
-                  className="flex items-center gap-2"
-                >
-                  {t('newInvoice')}
-                </Button>
+      <div className="grid grid-cols-3 gap-5">
+        <div className="col-span-2">
+          <Card className="border border-muted-foreground/10 shadow-md h-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid grid-cols-4 w-full rounded-none">
+                <TabsTrigger value="patient" className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  {t('clientSection')}
+                </TabsTrigger>
+                <TabsTrigger value="products" className="flex items-center gap-2">
+                  <PackageCheck className="w-4 h-4" />
+                  {t('productSection')}
+                </TabsTrigger>
+                <TabsTrigger value="payment" className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4" />
+                  {t('paymentSection')}
+                </TabsTrigger>
+                <TabsTrigger value="summary" className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  {t('summarySection')}
+                </TabsTrigger>
+              </TabsList>
+              
+              <CardContent className="p-6 min-h-[500px]">
+                <TabsContent value="patient" className="mt-0 space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <InvoiceStepPatient 
+                      invoiceType={invoiceType} 
+                      onInvoiceTypeChange={setInvoiceType} 
+                    />
+                    
+                    <div className="flex justify-end mt-4">
+                      <Button 
+                        onClick={() => setActiveTab("products")} 
+                        className="flex items-center gap-2"
+                      >
+                        {t('next')}
+                      </Button>
+                    </div>
+                  </motion.div>
+                </TabsContent>
+                
+                <TabsContent value="products" className="mt-0 space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <InvoiceStepProducts invoiceType={invoiceType} />
+                    
+                    <div className="flex justify-between mt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setActiveTab("patient")} 
+                        className="flex items-center gap-2"
+                      >
+                        {t('previous')}
+                      </Button>
+                      <Button 
+                        onClick={() => setActiveTab("payment")} 
+                        className="flex items-center gap-2"
+                      >
+                        {t('next')}
+                      </Button>
+                    </div>
+                  </motion.div>
+                </TabsContent>
+                
+                <TabsContent value="payment" className="mt-0 space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <InvoiceStepPayment />
+                    
+                    <div className="flex justify-between mt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setActiveTab("products")} 
+                        className="flex items-center gap-2"
+                      >
+                        {t('previous')}
+                      </Button>
+                      <Button 
+                        onClick={handleSaveInvoice} 
+                        className="flex items-center gap-2"
+                      >
+                        <Save className="w-4 h-4" />
+                        {t('saveInvoice')}
+                      </Button>
+                    </div>
+                  </motion.div>
+                </TabsContent>
+                
+                <TabsContent value="summary" className="mt-0 space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <InvoiceStepSummary 
+                      setInvoicePrintOpen={setInvoicePrintOpen}
+                      setWorkOrderPrintOpen={setWorkOrderPrintOpen}
+                    />
+                    
+                    <div className="flex justify-between mt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setActiveTab("payment")} 
+                        className="flex items-center gap-2"
+                      >
+                        {t('previous')}
+                      </Button>
+                      <Button 
+                        variant="default" 
+                        onClick={() => {
+                          // Reset form state and go back to patient step
+                          setActiveTab("patient");
+                        }} 
+                        className="flex items-center gap-2"
+                      >
+                        {t('newInvoice')}
+                      </Button>
+                    </div>
+                  </motion.div>
+                </TabsContent>
+              </CardContent>
+            </Tabs>
+          </Card>
+        </div>
+        
+        <div className="col-span-1">
+          <Card className="border border-muted-foreground/10 shadow-md h-full">
+            <CardContent className="p-4">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <Receipt className="w-5 h-5 text-primary" />
+                {t('invoiceSummary')}
+              </h3>
+              
+              <div className="space-y-4">
+                {/* Patient Information */}
+                <div className="p-3 bg-muted/30 rounded-md">
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5" />
+                    {t('clientInformation')}
+                  </h4>
+                  <p className="text-sm">{getValues("patientName") || t('noClientSelected')}</p>
+                  {getValues("patientPhone") && (
+                    <p className="text-sm text-muted-foreground">{getValues("patientPhone")}</p>
+                  )}
+                </div>
+                
+                {/* Products Information */}
+                <div className="p-3 bg-muted/30 rounded-md">
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
+                    <PackageCheck className="w-3.5 h-3.5" />
+                    {t('productsInformation')}
+                  </h4>
+                  
+                  {invoiceType === "glasses" ? (
+                    <div className="space-y-2 text-sm">
+                      {/* Frame Information */}
+                      {!getValues("skipFrame") && getValues("frameBrand") && (
+                        <div>
+                          <p className="font-medium">{t('frame')}</p>
+                          <p className="text-muted-foreground">
+                            {getValues("frameBrand")} {getValues("frameModel")}
+                          </p>
+                          <p className="font-medium text-right">{getValues("framePrice")?.toFixed(3)} KWD</p>
+                        </div>
+                      )}
+                      
+                      {/* Lens Information */}
+                      {getValues("lensType") && (
+                        <div>
+                          <p className="font-medium">{t('lensType')}</p>
+                          <p className="text-muted-foreground">{getValues("lensType")}</p>
+                          <p className="font-medium text-right">{getValues("lensPrice")?.toFixed(3)} KWD</p>
+                        </div>
+                      )}
+                      
+                      {/* Coating Information */}
+                      {getValues("coating") && (
+                        <div>
+                          <p className="font-medium">{t('coating')}</p>
+                          <p className="text-muted-foreground">{getValues("coating")}</p>
+                          <p className="font-medium text-right">{getValues("coatingPrice")?.toFixed(3)} KWD</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2 text-sm">
+                      {/* Contact Lens Information */}
+                      {(getValues("contactLensItems") || []).map((lens, index) => (
+                        <div key={index}>
+                          <p className="font-medium">{lens.brand} {lens.type}</p>
+                          <p className="text-muted-foreground">{lens.power}</p>
+                          <p className="font-medium text-right">{lens.price?.toFixed(3)} KWD</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Show message if no products selected */}
+                  {invoiceType === "glasses" && 
+                   !getValues("lensType") && 
+                   (getValues("skipFrame") || !getValues("frameBrand")) && (
+                    <p className="text-sm text-muted-foreground">{t('noProductsSelected')}</p>
+                  )}
+                  
+                  {invoiceType === "contacts" && 
+                   (!getValues("contactLensItems") || getValues("contactLensItems").length === 0) && (
+                    <p className="text-sm text-muted-foreground">{t('noProductsSelected')}</p>
+                  )}
+                </div>
+                
+                {/* Payment Information */}
+                <div className="p-3 bg-muted/30 rounded-md">
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5" />
+                    {t('paymentInformation')}
+                  </h4>
+                  
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span>{t('subtotal')}</span>
+                      <span>{(total + (getValues("discount") || 0)).toFixed(3)} KWD</span>
+                    </div>
+                    
+                    {(getValues("discount") || 0) > 0 && (
+                      <div className="flex justify-between">
+                        <span>{t('discount')}</span>
+                        <span>-{(getValues("discount") || 0).toFixed(3)} KWD</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between font-medium border-t pt-1 mt-1">
+                      <span>{t('total')}</span>
+                      <span>{total.toFixed(3)} KWD</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span>{t('deposit')}</span>
+                      <span>{(getValues("deposit") || 0).toFixed(3)} KWD</span>
+                    </div>
+                    
+                    <div className="flex justify-between font-medium border-t pt-1 mt-1">
+                      <span>{t('remaining')}</span>
+                      <span className={remaining <= 0 ? "text-green-600" : "text-amber-600"}>
+                        {remaining.toFixed(3)} KWD
+                      </span>
+                    </div>
+                    
+                    {remaining <= 0 && (
+                      <div className="flex items-center justify-center gap-1.5 bg-green-50 text-green-700 py-1 px-2 rounded-md mt-2">
+                        <Check className="w-3.5 h-3.5" />
+                        <span className="text-xs font-medium">{t('paidInFull')}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       <Sheet open={invoicePrintOpen} onOpenChange={setInvoicePrintOpen}>
         <SheetContent className="w-full sm:max-w-md overflow-y-auto print:w-full print:max-w-none">
