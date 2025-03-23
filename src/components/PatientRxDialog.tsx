@@ -103,7 +103,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
           <div className="mb-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
             <div className="flex items-center gap-2 mb-2 text-indigo-700">
               <FileSymlink className="h-5 w-5" />
-              <span className="font-medium">{t("prescriptionInfo")}</span>
+              <span className="font-medium">{language === 'ar' ? "وصفة طبية جديدة" : "New Prescription"}</span>
             </div>
             <p className="text-sm text-slate-600">
               {language === 'ar' 
@@ -113,8 +113,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
           </div>
 
           <div className="grid grid-cols-1 gap-8">
-            {/* Eye Sections */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Eye Sections - Horizontal Layout */}
+            <div className="grid grid-cols-1 gap-6">
               {/* Right Eye (OD) */}
               <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div className="flex items-center gap-2 mb-4 text-indigo-700">
@@ -126,10 +126,19 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                   </h3>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">SPH</Label>
-                    <div className="col-span-4">
+                <div className="grid grid-cols-5 gap-4">
+                  {/* Parameter labels row */}
+                  <div className="col-span-1">
+                    <Label className="block mb-2 font-medium text-slate-700">SPH</Label>
+                    <Label className="block mb-2 font-medium text-slate-700">CYL</Label>
+                    <Label className="block mb-2 font-medium text-slate-700">AXIS</Label>
+                    <Label className="block mb-2 font-medium text-slate-700">ADD</Label>
+                    <Label className="block mb-2 font-medium text-slate-700">PD</Label>
+                  </div>
+                  
+                  {/* Input fields row */}
+                  <div className="col-span-4">
+                    <div className="mb-2">
                       <Select
                         value={rx.sphereOD || "none"}
                         onValueChange={(value) => setRx({ ...rx, sphereOD: value === "none" ? "" : value })}
@@ -147,11 +156,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">CYL</Label>
-                    <div className="col-span-4">
+                    
+                    <div className="mb-2">
                       <Select
                         value={rx.cylOD || "none"}
                         onValueChange={(value) => setRx({ ...rx, cylOD: value === "none" ? "" : value })}
@@ -169,11 +175,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">AXIS</Label>
-                    <div className="col-span-4">
+                    
+                    <div className="mb-2">
                       <Select
                         value={rx.axisOD || "none"}
                         onValueChange={(value) => setRx({ ...rx, axisOD: value === "none" ? "" : value })}
@@ -191,11 +194,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">ADD</Label>
-                    <div className="col-span-4">
+                    
+                    <div className="mb-2">
                       <Select
                         value={rx.addOD || "none"}
                         onValueChange={(value) => setRx({ ...rx, addOD: value === "none" ? "" : value })}
@@ -213,11 +213,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">PD</Label>
-                    <div className="col-span-4">
+                    
+                    <div className="mb-2">
                       <Select
                         value={rx.pdRight || "none"}
                         onValueChange={(value) => setRx({ ...rx, pdRight: value === "none" ? "" : value })}
@@ -250,10 +247,19 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                   </h3>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">SPH</Label>
-                    <div className="col-span-4">
+                <div className="grid grid-cols-5 gap-4">
+                  {/* Parameter labels row */}
+                  <div className="col-span-1">
+                    <Label className="block mb-2 font-medium text-slate-700">SPH</Label>
+                    <Label className="block mb-2 font-medium text-slate-700">CYL</Label>
+                    <Label className="block mb-2 font-medium text-slate-700">AXIS</Label>
+                    <Label className="block mb-2 font-medium text-slate-700">ADD</Label>
+                    <Label className="block mb-2 font-medium text-slate-700">PD</Label>
+                  </div>
+                  
+                  {/* Input fields row */}
+                  <div className="col-span-4">
+                    <div className="mb-2">
                       <Select
                         value={rx.sphereOS || "none"}
                         onValueChange={(value) => setRx({ ...rx, sphereOS: value === "none" ? "" : value })}
@@ -271,11 +277,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">CYL</Label>
-                    <div className="col-span-4">
+                    
+                    <div className="mb-2">
                       <Select
                         value={rx.cylOS || "none"}
                         onValueChange={(value) => setRx({ ...rx, cylOS: value === "none" ? "" : value })}
@@ -293,11 +296,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">AXIS</Label>
-                    <div className="col-span-4">
+                    
+                    <div className="mb-2">
                       <Select
                         value={rx.axisOS || "none"}
                         onValueChange={(value) => setRx({ ...rx, axisOS: value === "none" ? "" : value })}
@@ -315,11 +315,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">ADD</Label>
-                    <div className="col-span-4">
+                    
+                    <div className="mb-2">
                       <Select
                         value={rx.addOS || "none"}
                         onValueChange={(value) => setRx({ ...rx, addOS: value === "none" ? "" : value })}
@@ -337,11 +334,8 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-3 items-center">
-                    <Label className="col-span-1 text-right font-medium text-slate-700">PD</Label>
-                    <div className="col-span-4">
+                    
+                    <div className="mb-2">
                       <Select
                         value={rx.pdLeft || "none"}
                         onValueChange={(value) => setRx({ ...rx, pdLeft: value === "none" ? "" : value })}
