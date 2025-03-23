@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { MoenLogo, storeInfo } from "@/assets/logo";
@@ -10,15 +11,13 @@ interface CustomWorkOrderReceiptProps {
   invoice?: any;
   patient?: any;
   isPrintable?: boolean;
-  isInvoice?: boolean;
 }
 
 export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   workOrder,
   invoice,
   patient,
-  isPrintable = false,
-  isInvoice = false
+  isPrintable = false
 }) => {
   const { language, t } = useLanguageStore();
   const { lensTypes, lensCoatings } = useInventoryStore();
@@ -96,7 +95,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
 
       <div className="text-center mb-1">
         <h3 className="font-bold text-lg mb-0">
-          {isRtl ? (isInvoice ? "فاتورة" : "أمر عمل") : (isInvoice ? "INVOICE" : "WORK ORDER")}
+          {isRtl ? "أمر عمل" : "WORK ORDER"}
         </h3>
         <p className="text-xs mb-0">
           {isRtl ? "ORDER #: " : "رقم الطلب: "}
@@ -108,7 +107,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="text-center bg-[#f8f6f2] text-black py-0.5 mb-1 font-bold text-base border-y">
+        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base border-y">
           {isRtl 
             ? "معلومات المريض | Patient Information" 
             : "Patient Information | معلومات المريض"}
@@ -131,7 +130,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
 
       {rx && (
         <div className="mb-2">
-          <div className="text-center bg-[#f8f6f2] text-black py-0.5 mb-1 font-bold text-base">
+          <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
             {isRtl 
               ? "تفاصيل الوصفة الطبية | Prescription Details" 
               : "Prescription Details | تفاصيل الوصفة الطبية"}
@@ -171,7 +170,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       )}
 
       <div className="mb-2">
-        <div className="text-center bg-[#f8f6f2] text-black py-0.5 mb-1 font-bold text-base">
+        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
           {isRtl 
             ? "تفاصيل المنتج | Product Details" 
             : "Product Details | تفاصيل المنتج"}
@@ -259,7 +258,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="text-center bg-[#f8f6f2] text-black py-0.5 mb-1 font-bold text-base">
+        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
           {isRtl 
             ? "معلومات الدفع | Payment Information" 
             : "Payment Information | معلومات الدفع"}
@@ -315,7 +314,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="text-center bg-[#f8f6f2] text-black py-0.5 mb-1 font-bold text-base">
+        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
           {isRtl 
             ? "تأكيد الجودة | Quality Confirmation" 
             : "Quality Confirmation | تأكيد الجودة"}
@@ -339,7 +338,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <div className="mb-2">
-        <div className="text-center bg-[#f8f6f2] text-black py-0.5 mb-1 font-bold text-base">
+        <div className="text-center bg-black text-white py-0.5 mb-1 font-bold text-base">
           {isRtl 
             ? "ملاحظات | Notes" 
             : "Notes | ملاحظات"}
@@ -360,6 +359,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </p>
       </div>
       
+      {/* Print-specific styles for more compact printing */}
       <style>
         {`
           @media print {
@@ -394,11 +394,13 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               max-height: none !important;
             }
             
+            /* Force content to be visible */
             .print-receipt * {
               visibility: visible !important;
               opacity: 1 !important;
             }
             
+            /* Improve dynamic sizing */
             html, body {
               height: auto !important;
               min-height: 0 !important;
@@ -406,18 +408,21 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               overflow: visible !important;
             }
             
+            /* Fix Chrome printing issues */
             body {
               -webkit-print-color-adjust: exact !important;
               color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
             
+            /* Dynamic height adjustment */
             .print-receipt {
               height: fit-content !important;
               min-height: fit-content !important;
               max-height: fit-content !important;
             }
             
+            /* Ensure proper page breaks and avoid blank pages */
             .print-receipt {
               break-inside: avoid !important;
               break-after: avoid-page !important;
@@ -425,6 +430,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               page-break-after: avoid !important;
             }
             
+            /* Fix for Google Cloud Print */
             @supports (-webkit-appearance:none) {
               body, html, #work-order-receipt {
                 height: fit-content !important;

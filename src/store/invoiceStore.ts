@@ -37,7 +37,6 @@ export interface Invoice {
   isPaid: boolean;
   authNumber?: string; // Added for authorization numbers
   workOrderId?: string; // Reference to the work order
-  note?: string; // Added for special instructions
 }
 
 // Define WorkOrder interface
@@ -49,7 +48,6 @@ export interface WorkOrder {
     name: string;
     price: number;
   };
-  note?: string; // Added for special instructions
   // Add other work order fields as needed
 }
 
@@ -80,50 +78,33 @@ export const useInvoiceStore = create<InvoiceState>()(
         const remaining = Math.max(0, invoice.total - invoice.deposit);
         const isPaid = remaining === 0;
         
-        console.log("Adding invoice with note:", invoice.note);
+        // Extract auth number if it exists
+        const { authNumber, ...restInvoice } = invoice as (typeof invoice & { authNumber?: string });
         
         const initialPayment: Payment = {
           amount: invoice.deposit,
           method: invoice.paymentMethod,
           date: createdAt,
-          authNumber: invoice.authNumber // Add auth number to payment
+          authNumber: authNumber // Add auth number to payment
         };
         
         const payments = invoice.deposit > 0 ? [initialPayment] : [];
         
-        // Create the new invoice object with all properties including note
-        const newInvoice: Invoice = {
-          invoiceId,
-          patientId: invoice.patientId,
-          patientName: invoice.patientName,
-          patientPhone: invoice.patientPhone,
-          lensType: invoice.lensType,
-          lensPrice: invoice.lensPrice,
-          coating: invoice.coating,
-          coatingPrice: invoice.coatingPrice,
-          frameBrand: invoice.frameBrand,
-          frameModel: invoice.frameModel,
-          frameColor: invoice.frameColor,
-          frameSize: invoice.frameSize,
-          framePrice: invoice.framePrice,
-          discount: invoice.discount,
-          deposit: invoice.deposit,
-          total: invoice.total,
-          remaining,
-          paymentMethod: invoice.paymentMethod,
-          createdAt,
-          isPaid,
-          payments,
-          authNumber: invoice.authNumber,
-          workOrderId: invoice.workOrderId,
-          note: invoice.note // Ensure note is included
-        };
-        
         set((state) => ({
-          invoices: [...state.invoices, newInvoice]
+          invoices: [
+            ...state.invoices,
+            { 
+              ...restInvoice, 
+              invoiceId, 
+              createdAt, 
+              remaining,
+              isPaid,
+              payments,
+              authNumber // Store auth number at invoice level too
+            }
+          ]
         }));
         
-        console.log("Invoice added with ID:", invoiceId);
         return invoiceId;
       },
       
@@ -220,7 +201,7 @@ export const useInvoiceStore = create<InvoiceState>()(
             amount: invoice.deposit,
             method: invoice.paymentMethod,
             date: invoice.createdAt,
-            authNumber: invoice.authNumber
+            authNumber: (invoice as any).authNumber // Add auth number if exists
           };
           
           invoiceToAdd = {
@@ -228,8 +209,6 @@ export const useInvoiceStore = create<InvoiceState>()(
             payments: invoice.deposit > 0 ? [initialPayment] : []
           };
         }
-        
-        console.log("Adding existing invoice:", invoiceToAdd);
         
         set((state) => ({
           invoices: [...state.invoices, invoiceToAdd]
@@ -239,8 +218,6 @@ export const useInvoiceStore = create<InvoiceState>()(
       addWorkOrder: (workOrder) => {
         const id = `WO${Date.now()}`;
         const createdAt = new Date().toISOString();
-        
-        console.log("Adding work order with note:", workOrder.note);
         
         set((state) => ({
           workOrders: [
@@ -253,7 +230,6 @@ export const useInvoiceStore = create<InvoiceState>()(
           ]
         }));
         
-        console.log("Work order added with ID:", id);
         return id;
       }
     }),
