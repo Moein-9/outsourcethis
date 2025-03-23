@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore, Patient, PatientNote } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -172,6 +171,149 @@ const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+};
+
+const PatientNotes: React.FC<{
+  patientId: string;
+  patientNotes?: PatientNote[];
+  onAddNote: (noteText: string) => void;
+}> = ({ patientId, patientNotes = [], onAddNote }) => {
+  const { language, t } = useLanguageStore();
+  const [newNote, setNewNote] = useState("");
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editedNoteText, setEditedNoteText] = useState("");
+  const isRtl = language === 'ar';
+  
+  const handleAddNote = () => {
+    if (newNote.trim()) {
+      onAddNote(newNote);
+      setNewNote("");
+    } else {
+      toast.error(
+        language === 'ar' ? "لا يمكن إضافة ملاحظة فارغة" : "Cannot add an empty note"
+      );
+    }
+  };
+  
+  const startEditingNote = (note: PatientNote) => {
+    setEditingNoteId(note.id);
+    setEditedNoteText(note.text);
+  };
+  
+  const cancelEditing = () => {
+    setEditingNoteId(null);
+    setEditedNoteText('');
+  };
+  
+  const formatDate = (dateString: string) => {
+    try {
+      return format(parseISO(dateString), "PPP p", { locale: language === 'ar' ? ar : enUS });
+    } catch (error) {
+      return language === 'ar' ? "تاريخ غير صالح" : "Invalid date";
+    }
+  };
+  
+  return (
+    <Card className="mt-6">
+      <CardHeader className="pb-3 bg-primary text-primary-foreground">
+        <CardTitle className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5" />
+          {t('patientNotes')}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-4">
+        <div className="space-y-2 mb-4">
+          <Textarea
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            placeholder={language === 'ar' ? "أضف ملاحظة جديدة..." : "Add a new note..."}
+            className="resize-none"
+            dir={isRtl ? 'rtl' : 'ltr'}
+            onKeyPress={(e) => e.key === 'Enter' && e.ctrlKey && handleAddNote()}
+          />
+          <Button 
+            onClick={handleAddNote} 
+            className="gap-1 w-full sm:w-auto"
+          >
+            <PlusCircle className="h-4 w-4" />
+            {t('addNote')}
+          </Button>
+        </div>
+        
+        {patientNotes.length > 0 ? (
+          <div className="space-y-3">
+            {[...patientNotes].reverse().map((note) => (
+              <div 
+                key={note.id} 
+                className={`p-3 border rounded-md bg-card shadow-sm relative ${isRtl ? 'text-right' : 'text-left'}`}
+                dir={isRtl ? 'rtl' : 'ltr'}
+              >
+                {editingNoteId === note.id ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={editedNoteText}
+                      onChange={(e) => setEditedNoteText(e.target.value)}
+                      dir="auto"
+                      className="w-full"
+                    />
+                    <div className="flex justify-end gap-2 mt-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={cancelEditing}
+                      >
+                        <X className="h-3 w-3 mr-1" /> {t("cancel")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          cancelEditing();
+                        }}
+                      >
+                        <Save className="h-3 w-3 mr-1" /> {t("save")}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex gap-1 absolute top-1 right-1">
+                      <Button
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 rounded-full hover:bg-primary hover:text-primary-foreground"
+                        onClick={() => startEditingNote(note)}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 rounded-full hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <p className="text-sm mb-2 whitespace-pre-wrap pr-12">{note.text}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(note.createdAt)}</p>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+              <MessageSquare className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="font-medium">{t("noNotesYet")}</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {t("addNoteBelow")}
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
@@ -638,32 +780,95 @@ export const PatientSearch: React.FC = () => {
                                 </Table>
                               </div>
                             ) : (
-                              <div className="text-center py-6 bg-amber-50/30 rounded-md border border-amber-100">
-                                <Receipt className="h-12 w-12 mx-auto text-amber-300 mb-3" />
-                                <h3 className="font-medium mb-1">
-                                  {language === 'ar' ? "لا توجد أوامر عمل قيد التنفيذ" : "No active work orders"}
+                              <div className="text-center py-6 border rounded-md bg-amber-50/20">
+                                <FileText className="h-10 w-10 mx-auto text-amber-300 mb-3" />
+                                <h3 className="text-lg font-medium mb-1 text-amber-700">
+                                  {language === 'ar' ? "لا توجد أوامر عمل نشطة" : "No Active Work Orders"}
                                 </h3>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-muted-foreground max-w-md mx-auto">
                                   {language === 'ar' 
-                                    ? "لا توجد أوامر عمل قيد التنفيذ لهذا العميل"
-                                    : "This client has no active work orders"}
+                                    ? "لا يوجد أوامر عمل نشطة لهذا العميل حالياً."
+                                    : "There are no active work orders for this client at the moment."}
                                 </p>
                               </div>
                             )}
                           </div>
                         </TabsContent>
                         
-                        <TabsContent value="completed">
+                        <TabsContent value="completed" className="mt-0 space-y-8">
                           <div>
                             <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-green-700">
-                              <Receipt className="h-4 w-4 text-green-500" />
+                              <AlertCircle className="h-4 w-4 text-green-500" />
+                              {language === 'ar' ? "الفواتير المكتملة" : "Completed Invoices"}
+                            </h3>
+                            
+                            {patientInvoices.filter(inv => inv.isPaid).length > 0 ? (
+                              <div className="rounded-md border overflow-hidden shadow-sm">
+                                <Table>
+                                  <TableHeader className="bg-green-50">
+                                    <TableRow>
+                                      <TableHead className="w-12">#</TableHead>
+                                      <TableHead>{language === 'ar' ? "رقم الفاتورة" : "Invoice No."}</TableHead>
+                                      <TableHead>{language === 'ar' ? "المبلغ" : "Amount"}</TableHead>
+                                      <TableHead>{language === 'ar' ? "تاريخ الفاتورة" : "Invoice Date"}</TableHead>
+                                      <TableHead>{t('status')}</TableHead>
+                                      <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {patientInvoices.filter(inv => inv.isPaid).map((invoice, index) => (
+                                      <TableRow key={invoice.invoiceId} className={index % 2 === 0 ? 'bg-green-50/30' : ''}>
+                                        <TableCell className="font-medium">{index + 1}</TableCell>
+                                        <TableCell>INV-{invoice.invoiceId.substring(0, 8)}</TableCell>
+                                        <TableCell>{invoice.total.toFixed(3)} {t('kwd')}</TableCell>
+                                        <TableCell>{formatDate(invoice.createdAt)}</TableCell>
+                                        <TableCell>
+                                          <Badge className="bg-green-500">
+                                            {language === 'ar' ? "مدفوعة" : "Paid"}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          <div className="flex justify-end gap-2">
+                                            <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
+                                              <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
+                                              {t('view')}
+                                            </Button>
+                                            <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
+                                              <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
+                                              {t('print')}
+                                            </Button>
+                                          </div>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            ) : (
+                              <div className="text-center py-6 border rounded-md bg-green-50/20">
+                                <FileText className="h-10 w-10 mx-auto text-green-300 mb-3" />
+                                <h3 className="text-lg font-medium mb-1 text-green-700">
+                                  {language === 'ar' ? "لا توجد فواتير مكتملة" : "No Completed Invoices"}
+                                </h3>
+                                <p className="text-muted-foreground max-w-md mx-auto">
+                                  {language === 'ar' 
+                                    ? "لا يوجد فواتير مكتملة لهذا العميل حالياً."
+                                    : "There are no completed invoices for this client at the moment."}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-blue-700">
+                              <AlertCircle className="h-4 w-4 text-blue-500" />
                               {language === 'ar' ? "أوامر العمل المكتملة" : "Completed Work Orders"}
                             </h3>
                             
                             {getCompletedWorkOrders(patientWorkOrders).length > 0 ? (
-                              <div className="rounded-md border overflow-hidden">
+                              <div className="rounded-md border overflow-hidden shadow-sm">
                                 <Table>
-                                  <TableHeader className="bg-green-50">
+                                  <TableHeader className="bg-blue-50">
                                     <TableRow>
                                       <TableHead className="w-12">#</TableHead>
                                       <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
@@ -674,45 +879,49 @@ export const PatientSearch: React.FC = () => {
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
-                                    {getCompletedWorkOrders(patientWorkOrders).map((workOrder, index) => {
-                                      const invoice = invoices.find(inv => inv.workOrderId === workOrder.id);
-                                      const status = invoice && invoice.isPaid 
-                                        ? (language === 'ar' ? "مدفوعة" : "Paid") 
-                                        : (language === 'ar' ? "غير مدفوعة" : "Unpaid");
-                                      
-                                      const statusColor = invoice && invoice.isPaid ? "bg-green-500" : "bg-red-500";
-                                      
-                                      return (
-                                        <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-green-50/30' : ''}>
-                                          <TableCell className="font-medium">{index + 1}</TableCell>
-                                          <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
-                                          <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
-                                          <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
-                                          <TableCell>
-                                            <Badge className={statusColor}>{status}</Badge>
-                                          </TableCell>
-                                          <TableCell className="text-right">
-                                            <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
-                                              <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
+                                    {getCompletedWorkOrders(patientWorkOrders).map((workOrder, index) => (
+                                      <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30' : ''}>
+                                        <TableCell className="font-medium">{index + 1}</TableCell>
+                                        <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
+                                        <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
+                                        <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
+                                        <TableCell>
+                                          <Badge className="bg-blue-500">
+                                            {language === 'ar' ? "مكتمل" : "Completed"}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          <div className="flex justify-end gap-2">
+                                            <Button 
+                                              variant="outline" 
+                                              size="sm" 
+                                              className="border-blue-200 hover:bg-blue-50"
+                                              onClick={() => handleEditWorkOrder(workOrder)}
+                                            >
+                                              <Edit className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                              {t('edit')}
+                                            </Button>
+                                            <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
+                                              <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
                                               {t('print')}
                                             </Button>
-                                          </TableCell>
-                                        </TableRow>
-                                      );
-                                    })}
+                                          </div>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
                                   </TableBody>
                                 </Table>
                               </div>
                             ) : (
-                              <div className="text-center py-6 bg-green-50/30 rounded-md border border-green-100">
-                                <FileText className="h-12 w-12 mx-auto text-green-300 mb-3" />
-                                <h3 className="font-medium mb-1">
-                                  {language === 'ar' ? "لا توجد معاملات مكتملة" : "No completed transactions"}
+                              <div className="text-center py-6 border rounded-md bg-blue-50/20">
+                                <FileText className="h-10 w-10 mx-auto text-blue-300 mb-3" />
+                                <h3 className="text-lg font-medium mb-1 text-blue-700">
+                                  {language === 'ar' ? "لا توجد أوامر عمل مكتملة" : "No Completed Work Orders"}
                                 </h3>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-muted-foreground max-w-md mx-auto">
                                   {language === 'ar' 
-                                    ? "لا توجد معاملات مكتملة لهذا العميل"
-                                    : "This client has no completed transactions"}
+                                    ? "لا يوجد أوامر عمل مكتملة لهذا العميل حالياً."
+                                    : "There are no completed work orders for this client at the moment."}
                                 </p>
                               </div>
                             )}
@@ -722,31 +931,65 @@ export const PatientSearch: React.FC = () => {
                     </CardContent>
                   </Card>
                   
-                  {selectedPatient && selectedPatient.rx && (
-                    <Card className="border-indigo-200 shadow-md mt-6">
-                      <CardHeader className="pb-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-t-lg">
-                        <CardTitle className="text-lg flex items-center gap-2 text-indigo-700">
-                          <FileText className="h-5 w-5" />
-                          {language === 'ar' ? "سجل الوصفات" : "Prescription History"}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <PatientRxManager
-                          patientId={selectedPatient.patientId}
-                          patientName={selectedPatient.name}
-                          patientPhone={selectedPatient.phone}
-                          currentRx={selectedPatient.rx}
-                          rxHistory={selectedPatient.rxHistory}
-                          patientNotes={selectedPatient.patientNotes}
-                          onRxPrintRequest={handleDirectPrint}
-                        />
-                      </CardContent>
-                    </Card>
+                  {selectedPatient && (
+                    <PatientRxManager
+                      patientId={selectedPatient.patientId}
+                      patientName={selectedPatient.name}
+                      patientPhone={selectedPatient.phone}
+                      currentRx={selectedPatient.rx}
+                      rxHistory={selectedPatient.rxHistory}
+                      onRxPrintRequest={handleDirectPrint}
+                    />
+                  )}
+                  
+                  {selectedPatient && (
+                    <PatientNotes
+                      patientId={selectedPatient.patientId}
+                      patientNotes={selectedPatient.patientNotes}
+                      onAddNote={handleAddNote}
+                    />
                   )}
                 </div>
               </div>
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsProfileOpen(false)}>
+                  {t('close')}
+                </Button>
+              </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isLanguageDialogOpen} onOpenChange={setIsLanguageDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'ar' ? "اختر لغة الطباعة" : "Select Print Language"}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? "اختر لغة للطباعة الوصفة الطبية" : "Choose a language for printing the prescription"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2" 
+              onClick={() => handleLanguageSelection('ar')}
+            >
+              <span className="text-2xl">🇰🇼</span>
+              <span>عربي</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2" 
+              onClick={() => handleLanguageSelection('en')}
+            >
+              <span className="text-2xl">🇬🇧</span>
+              <span>English</span>
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
       
