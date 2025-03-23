@@ -17,14 +17,8 @@ import {
   Eye,
   AlertCircle,
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface PatientRxDialogProps {
   isOpen: boolean;
@@ -57,12 +51,13 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
   // Generate options for select elements
   const generateSphOptions = () => {
     const options = [];
+    options.push(<option key="sph-none" value="">-</option>);
     for (let i = 20; i >= -30; i -= 0.25) {
       const formatted = i >= 0 ? `+${i.toFixed(2)}` : i.toFixed(2);
       options.push(
-        <SelectItem key={`sph-${i}`} value={formatted}>
+        <option key={`sph-${i}`} value={formatted}>
           {formatted}
-        </SelectItem>
+        </option>
       );
     }
     return options;
@@ -70,12 +65,13 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
   
   const generateCylOptions = () => {
     const options = [];
+    options.push(<option key="cyl-none" value="">-</option>);
     for (let i = 0; i >= -10; i -= 0.25) {
       const formatted = i === 0 ? "0.00" : i.toFixed(2);
       options.push(
-        <SelectItem key={`cyl-${i}`} value={formatted}>
+        <option key={`cyl-${i}`} value={formatted}>
           {formatted}
-        </SelectItem>
+        </option>
       );
     }
     return options;
@@ -83,11 +79,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
   
   const generateAxisOptions = () => {
     const options = [];
+    options.push(<option key="axis-none" value="">-</option>);
     for (let i = 0; i <= 180; i += 5) {
       options.push(
-        <SelectItem key={`axis-${i}`} value={i.toString()}>
+        <option key={`axis-${i}`} value={i.toString()}>
           {i}
-        </SelectItem>
+        </option>
       );
     }
     return options;
@@ -95,13 +92,13 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
   
   const generateAddOptions = () => {
     const options = [];
-    options.push(<SelectItem key="add-none" value="none">-</SelectItem>);
+    options.push(<option key="add-none" value="">-</option>);
     for (let i = 0.25; i <= 4; i += 0.25) {
       const formatted = `+${i.toFixed(2)}`;
       options.push(
-        <SelectItem key={`add-${i}`} value={formatted}>
+        <option key={`add-${i}`} value={formatted}>
           {formatted}
-        </SelectItem>
+        </option>
       );
     }
     return options;
@@ -109,12 +106,12 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
   
   const generatePdOptions = () => {
     const options = [];
-    options.push(<SelectItem key="pd-none" value="none">-</SelectItem>);
+    options.push(<option key="pd-none" value="">-</option>);
     for (let i = 50; i <= 80; i += 0.5) {
       options.push(
-        <SelectItem key={`pd-${i}`} value={i.toString()}>
+        <option key={`pd-${i}`} value={i.toString()}>
           {i}
-        </SelectItem>
+        </option>
       );
     }
     return options;
@@ -123,7 +120,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
   const handleChange = (field: keyof RxData, value: string) => {
     setRx(prev => ({
       ...prev,
-      [field]: value === "none" ? "" : value,
+      [field]: value,
     }));
   };
   
@@ -166,72 +163,49 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         </div>
                       </td>
                       <td className="p-1 border border-indigo-200">
-                        <Select
-                          value={rx.sphereOD || "none"}
-                          onValueChange={(value) => handleChange("sphereOD", value)}
+                        <select 
+                          className="w-full p-1.5 rounded border border-indigo-200 bg-white focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                          value={rx.sphereOD}
+                          onChange={(e) => handleChange("sphereOD", e.target.value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-indigo-300">
-                            <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            <SelectItem value="none">-</SelectItem>
-                            {generateSphOptions()}
-                          </SelectContent>
-                        </Select>
+                          {generateSphOptions()}
+                        </select>
                       </td>
                       <td className="p-1 border border-indigo-200">
-                        <Select
-                          value={rx.cylOD || "none"}
-                          onValueChange={(value) => handleChange("cylOD", value)}
+                        <select 
+                          className="w-full p-1.5 rounded border border-indigo-200 bg-white focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                          value={rx.cylOD}
+                          onChange={(e) => handleChange("cylOD", e.target.value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-indigo-300">
-                            <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            <SelectItem value="none">-</SelectItem>
-                            {generateCylOptions()}
-                          </SelectContent>
-                        </Select>
+                          {generateCylOptions()}
+                        </select>
                       </td>
                       <td className="p-1 border border-indigo-200">
-                        <Select
-                          value={rx.axisOD || "none"}
-                          onValueChange={(value) => handleChange("axisOD", value)}
+                        <select 
+                          className="w-full p-1.5 rounded border border-indigo-200 bg-white focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                          value={rx.axisOD}
+                          onChange={(e) => handleChange("axisOD", e.target.value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-indigo-300">
-                            <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            <SelectItem value="none">-</SelectItem>
-                            {generateAxisOptions()}
-                          </SelectContent>
-                        </Select>
+                          {generateAxisOptions()}
+                        </select>
                       </td>
                       <td className="p-1 border border-indigo-200">
-                        <Select
-                          value={rx.addOD || "none"}
-                          onValueChange={(value) => handleChange("addOD", value)}
+                        <select 
+                          className="w-full p-1.5 rounded border border-indigo-200 bg-white focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                          value={rx.addOD}
+                          onChange={(e) => handleChange("addOD", e.target.value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-indigo-300">
-                            <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            {generateAddOptions()}
-                          </SelectContent>
-                        </Select>
+                          {generateAddOptions()}
+                        </select>
                       </td>
                       <td className="p-1 border border-indigo-200">
-                        <Select
-                          value={rx.pdRight || "none"}
-                          onValueChange={(value) => handleChange("pdRight", value)}
+                        <select 
+                          className="w-full p-1.5 rounded border border-indigo-200 bg-white focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                          value={rx.pdRight}
+                          onChange={(e) => handleChange("pdRight", e.target.value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-indigo-300">
-                            <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            {generatePdOptions()}
-                          </SelectContent>
-                        </Select>
+                          {generatePdOptions()}
+                        </select>
                       </td>
                     </tr>
                     
@@ -244,72 +218,49 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         </div>
                       </td>
                       <td className="p-1 border border-purple-200">
-                        <Select
-                          value={rx.sphereOS || "none"}
-                          onValueChange={(value) => handleChange("sphereOS", value)}
+                        <select 
+                          className="w-full p-1.5 rounded border border-purple-200 bg-white focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
+                          value={rx.sphereOS}
+                          onChange={(e) => handleChange("sphereOS", e.target.value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-purple-300">
-                            <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            <SelectItem value="none">-</SelectItem>
-                            {generateSphOptions()}
-                          </SelectContent>
-                        </Select>
+                          {generateSphOptions()}
+                        </select>
                       </td>
                       <td className="p-1 border border-purple-200">
-                        <Select
-                          value={rx.cylOS || "none"}
-                          onValueChange={(value) => handleChange("cylOS", value)}
+                        <select 
+                          className="w-full p-1.5 rounded border border-purple-200 bg-white focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
+                          value={rx.cylOS}
+                          onChange={(e) => handleChange("cylOS", e.target.value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-purple-300">
-                            <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            <SelectItem value="none">-</SelectItem>
-                            {generateCylOptions()}
-                          </SelectContent>
-                        </Select>
+                          {generateCylOptions()}
+                        </select>
                       </td>
                       <td className="p-1 border border-purple-200">
-                        <Select
-                          value={rx.axisOS || "none"}
-                          onValueChange={(value) => handleChange("axisOS", value)}
+                        <select 
+                          className="w-full p-1.5 rounded border border-purple-200 bg-white focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
+                          value={rx.axisOS}
+                          onChange={(e) => handleChange("axisOS", e.target.value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-purple-300">
-                            <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            <SelectItem value="none">-</SelectItem>
-                            {generateAxisOptions()}
-                          </SelectContent>
-                        </Select>
+                          {generateAxisOptions()}
+                        </select>
                       </td>
                       <td className="p-1 border border-purple-200">
-                        <Select
-                          value={rx.addOS || "none"}
-                          onValueChange={(value) => handleChange("addOS", value)}
+                        <select 
+                          className="w-full p-1.5 rounded border border-purple-200 bg-white focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
+                          value={rx.addOS}
+                          onChange={(e) => handleChange("addOS", e.target.value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-purple-300">
-                            <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            {generateAddOptions()}
-                          </SelectContent>
-                        </Select>
+                          {generateAddOptions()}
+                        </select>
                       </td>
                       <td className="p-1 border border-purple-200">
-                        <Select
-                          value={rx.pdLeft || "none"}
-                          onValueChange={(value) => handleChange("pdLeft", value)}
+                        <select 
+                          className="w-full p-1.5 rounded border border-purple-200 bg-white focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
+                          value={rx.pdLeft}
+                          onChange={(e) => handleChange("pdLeft", e.target.value)}
                         >
-                          <SelectTrigger className="w-full h-9 bg-white focus:ring-1 focus:ring-purple-300">
-                            <SelectValue placeholder={language === 'ar' ? "اختر" : "Select"} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            {generatePdOptions()}
-                          </SelectContent>
-                        </Select>
+                          {generatePdOptions()}
+                        </select>
                       </td>
                     </tr>
                   </tbody>
