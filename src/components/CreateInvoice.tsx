@@ -528,7 +528,7 @@ const CreateInvoice: React.FC = () => {
         axis: "-",
         bc: "-",
         dia: "14.2"
-      }
+      },
     });
     
     setShowMissingRxWarning(false);
