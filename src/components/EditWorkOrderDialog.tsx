@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -57,11 +58,15 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   
   const handleSave = () => {
     try {
-      updateInvoice({
+      // Update the invoice in the store
+      const updatedInvoice = {
         ...workOrder,
         ...editData
-      });
+      };
       
+      updateInvoice(updatedInvoice);
+      
+      // Update any patient-related data if needed
       editWorkOrder({
         patientId,
         workOrderId: workOrder.invoiceId || workOrder.workOrderId,

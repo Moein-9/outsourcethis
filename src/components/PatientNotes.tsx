@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useLanguageStore } from '@/store/languageStore';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { X, MessageSquare } from 'lucide-react';
+import { X, MessageSquare, PlusCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface PatientNotesProps {
@@ -49,20 +49,20 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId, notes = [
   };
   
   return (
-    <Card className="mt-8">
-      <CardHeader className="bg-primary text-primary-foreground">
-        <CardTitle className="flex items-center gap-2">
+    <Card className="mt-8 w-full border-t-4 border-t-amber-400 shadow-md">
+      <CardHeader className="bg-amber-50 pb-2">
+        <CardTitle className="flex items-center gap-2 text-amber-800">
           <MessageSquare className="h-5 w-5" />
           {t("patientNotes")}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-4 max-h-80 overflow-y-auto">
         {notes.length > 0 ? (
           <div className="space-y-3">
             {[...notes].reverse().map((note) => (
               <div 
                 key={note.id} 
-                className={`p-3 border rounded-md shadow-sm relative ${isRtl ? 'text-right' : 'text-left'}`}
+                className={`p-3 border rounded-md shadow-sm relative ${isRtl ? 'text-right' : 'text-left'} bg-amber-50/50`}
                 dir={isRtl ? 'rtl' : 'ltr'}
               >
                 <Button
@@ -84,17 +84,21 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId, notes = [
           </p>
         )}
       </CardContent>
-      <CardFooter className="bg-muted p-4 flex gap-2 flex-wrap">
+      <CardFooter className="bg-amber-50 p-4 flex gap-2 flex-wrap">
         <Input
           placeholder={t("addNoteHere")}
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
           dir="auto"
-          className="flex-1"
+          className="flex-1 border-amber-200 focus-visible:ring-amber-400"
           onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
         />
-        <Button onClick={handleAddNote}>
-          {t("addNote")}
+        <Button 
+          onClick={handleAddNote}
+          className="bg-amber-500 hover:bg-amber-600 text-white"
+        >
+          <PlusCircle className="mr-1 h-4 w-4" />
+          {isRtl ? "إضافة ملاحظة" : "Add Note"}
         </Button>
       </CardFooter>
     </Card>
