@@ -48,7 +48,11 @@ import {
   FileBarChart,
   BadgeDollarSign,
   Edit,
-  Trash
+  Trash,
+  Save,
+  X,
+  MessageSquare,
+  PlusCircle 
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "./ui/badge";
@@ -90,7 +94,6 @@ interface EditWorkOrderDialogProps {
   onSave: (updatedWorkOrder: WorkOrder) => void;
 }
 
-// Simple component for editing work orders
 const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   isOpen,
   onClose,
@@ -105,7 +108,6 @@ const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     onClose();
   };
   
-  // When the work order changes, update the state
   useEffect(() => {
     setEditedWorkOrder({...workOrder});
   }, [workOrder]);
@@ -135,7 +137,7 @@ const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                 lensType: { 
                   ...editedWorkOrder.lensType || {}, 
                   name: e.target.value,
-                  price: editedWorkOrder.lensType?.price || 0 // Ensure price always has a value
+                  price: editedWorkOrder.lensType?.price || 0
                 }
               })}
             />
@@ -151,14 +153,12 @@ const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                 ...editedWorkOrder, 
                 lensType: { 
                   ...editedWorkOrder.lensType || {}, 
-                  name: editedWorkOrder.lensType?.name || '', // Ensure name always has a value
+                  name: editedWorkOrder.lensType?.name || '',
                   price: Number(e.target.value) 
                 }
               })}
             />
           </div>
-          
-          {/* Add other fields as needed */}
         </div>
         
         <DialogFooter>
@@ -174,7 +174,6 @@ const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   );
 };
 
-// New component for displaying patient notes
 const PatientNotes: React.FC<{
   patientId: string;
   patientNotes?: PatientNote[];
@@ -182,8 +181,9 @@ const PatientNotes: React.FC<{
 }> = ({ patientId, patientNotes = [], onAddNote }) => {
   const { language, t } = useLanguageStore();
   const [newNote, setNewNote] = useState("");
-  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
-  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editedNoteText, setEditedNoteText] = useState("");
+  const isRtl = language === 'ar';
   
   const handleAddNote = () => {
     if (newNote.trim()) {
@@ -196,6 +196,16 @@ const PatientNotes: React.FC<{
     }
   };
   
+  const startEditingNote = (note: PatientNote) => {
+    setEditingNoteId(note.id);
+    setEditedNoteText(note.text);
+  };
+  
+  const cancelEditing = () => {
+    setEditingNoteId(null);
+    setEditedNoteText('');
+  };
+  
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), "PPP p", { locale: language === 'ar' ? ar : enUS });
@@ -205,69 +215,103 @@ const PatientNotes: React.FC<{
   };
   
   return (
-    <Card className="mt-6 border-blue-200 shadow-md">
-      <CardHeader className="pb-3 bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-t-lg">
-        <CardTitle className="text-lg flex items-center gap-2 text-blue-700">
-          <FileText className="h-5 w-5" />
+    <Card className="mt-6">
+      <CardHeader className="pb-3 bg-primary text-primary-foreground">
+        <CardTitle className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5" />
           {t('patientNotes')}
         </CardTitle>
-        <CardDescription>
-          {language === 'ar' 
-            ? "ملاحظات ومعلومات إضافية عن العميل" 
-            : "Additional notes and information about the client"}
-        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className={`flex gap-2 ${dirClass}`}>
-            <Textarea
-              value={newNote}
-              onChange={(e) => setNewNote(e.target.value)}
-              placeholder={language === 'ar' ? "أضف ملاحظة جديدة..." : "Add a new note..."}
-              className={`resize-none ${textAlignClass}`}
-              dir={language === 'ar' ? 'rtl' : 'ltr'}
-            />
-            <Button onClick={handleAddNote} className="shrink-0 self-end">
-              <Plus className="h-4 w-4 mr-1" />
-              {t('addNote')}
-            </Button>
-          </div>
+      <CardContent className="p-4">
+        <div className="space-y-2 mb-4">
+          <Textarea
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            placeholder={language === 'ar' ? "أضف ملاحظة جديدة..." : "Add a new note..."}
+            className="resize-none"
+            dir={isRtl ? 'rtl' : 'ltr'}
+            onKeyPress={(e) => e.key === 'Enter' && e.ctrlKey && handleAddNote()}
+          />
+          <Button 
+            onClick={handleAddNote} 
+            className="gap-1 w-full sm:w-auto"
+          >
+            <PlusCircle className="h-4 w-4" />
+            {t('addNote')}
+          </Button>
         </div>
         
-        <div className={`space-y-3 ${dirClass}`}>
-          <h3 className="font-medium text-blue-800">
-            {language === 'ar' ? "الملاحظات السابقة" : "Previous Notes"}
-          </h3>
-          
-          {patientNotes.length > 0 ? (
-            <ScrollArea className="h-[200px] rounded-md border p-2">
-              <div className="space-y-4">
-                {patientNotes.slice().reverse().map((note) => (
-                  <div key={note.id} className="border-b pb-3 last:border-0">
-                    <div className={`text-sm bg-blue-50 p-3 rounded-md ${textAlignClass}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                      {note.text}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1 flex justify-between">
-                      <span className="flex items-center">
-                        <Clock className="h-3 w-3 mr-1" />
-                        {formatDate(note.createdAt)}
-                      </span>
+        {patientNotes.length > 0 ? (
+          <div className="space-y-3">
+            {[...patientNotes].reverse().map((note) => (
+              <div 
+                key={note.id} 
+                className={`p-3 border rounded-md bg-card shadow-sm relative ${isRtl ? 'text-right' : 'text-left'}`}
+                dir={isRtl ? 'rtl' : 'ltr'}
+              >
+                {editingNoteId === note.id ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={editedNoteText}
+                      onChange={(e) => setEditedNoteText(e.target.value)}
+                      dir="auto"
+                      className="w-full"
+                    />
+                    <div className="flex justify-end gap-2 mt-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={cancelEditing}
+                      >
+                        <X className="h-3 w-3 mr-1" /> {t("cancel")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          cancelEditing();
+                        }}
+                      >
+                        <Save className="h-3 w-3 mr-1" /> {t("save")}
+                      </Button>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <>
+                    <div className="flex gap-1 absolute top-1 right-1">
+                      <Button
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 rounded-full hover:bg-primary hover:text-primary-foreground"
+                        onClick={() => startEditingNote(note)}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 rounded-full hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <p className="text-sm mb-2 whitespace-pre-wrap pr-12">{note.text}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(note.createdAt)}</p>
+                  </>
+                )}
               </div>
-            </ScrollArea>
-          ) : (
-            <div className="text-center py-8 border rounded-md bg-blue-50/20">
-              <FileText className="h-10 w-10 mx-auto text-blue-300 mb-3" />
-              <p className="text-muted-foreground">
-                {language === 'ar' 
-                  ? "لا توجد ملاحظات لهذا العميل حالياً" 
-                  : "No notes for this client yet"}
-              </p>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+              <MessageSquare className="h-6 w-6 text-muted-foreground" />
             </div>
-          )}
-        </div>
+            <h3 className="font-medium">{t("noNotesYet")}</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {t("addNoteBelow")}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -362,7 +406,6 @@ export const PatientSearch: React.FC = () => {
   };
   
   const getActiveWorkOrders = (workOrders: WorkOrder[]) => {
-    // Filter work orders that are not fully paid
     return workOrders.filter(wo => {
       const invoice = invoices.find(inv => inv.workOrderId === wo.id);
       return !invoice || !invoice.isPaid;
@@ -370,7 +413,6 @@ export const PatientSearch: React.FC = () => {
   };
   
   const getCompletedWorkOrders = (workOrders: WorkOrder[]) => {
-    // Get work orders that are fully paid
     return workOrders.filter(wo => {
       const invoice = invoices.find(inv => inv.workOrderId === wo.id);
       return invoice && invoice.isPaid;
@@ -381,7 +423,6 @@ export const PatientSearch: React.FC = () => {
     if (selectedPatient) {
       addPatientNote(selectedPatient.patientId, noteText);
       
-      // Update the selected patient with the new note
       const updatedPatient = patients.find(p => p.patientId === selectedPatient.patientId);
       if (updatedPatient) {
         setSelectedPatient({
@@ -400,8 +441,6 @@ export const PatientSearch: React.FC = () => {
   };
   
   const handleSaveWorkOrder = (updatedWorkOrder: WorkOrder) => {
-    // Here you would update the work order in your store
-    // For now we'll just show a success message
     toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
     setEditWorkOrderDialogOpen(false);
   };
@@ -414,7 +453,6 @@ export const PatientSearch: React.FC = () => {
     
     const printLang = language || useLanguageStore.getState().language;
     
-    // Call the print function directly
     printRxReceipt({
       patientName: selectedPatient.name,
       patientPhone: selectedPatient.phone,
@@ -904,7 +942,6 @@ export const PatientSearch: React.FC = () => {
                     />
                   )}
                   
-                  {/* Patient Notes component moved to bottom of the page */}
                   {selectedPatient && (
                     <PatientNotes
                       patientId={selectedPatient.patientId}
@@ -956,7 +993,6 @@ export const PatientSearch: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Work Order Edit Dialog */}
       {currentWorkOrder && (
         <EditWorkOrderDialog
           isOpen={editWorkOrderDialogOpen}

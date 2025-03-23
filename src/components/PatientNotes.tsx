@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePatientStore, PatientNote } from '@/store/patientStore';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useLanguageStore } from '@/store/languageStore';
@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { MessageSquare, PlusCircle, X, Edit, Save } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
 
 interface PatientNotesProps {
   patientId: string;
@@ -127,12 +128,12 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId }) => {
               >
                 {editingNoteId === note.id ? (
                   <div className="space-y-2">
-                    <Input
+                    <Textarea
                       value={editedNoteText}
                       onChange={(e) => setEditedNoteText(e.target.value)}
                       dir="auto"
                       className="w-full"
-                      onKeyPress={(e) => e.key === 'Enter' && saveEditedNote(note.id)}
+                      onKeyPress={(e) => e.key === 'Enter' && e.ctrlKey && saveEditedNote(note.id)}
                     />
                     <div className="flex justify-end gap-2 mt-2">
                       <Button
@@ -188,24 +189,25 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId }) => {
             </p>
           </div>
         )}
+        
+        <div className="mt-6 space-y-2">
+          <Textarea
+            placeholder={t("addNoteHere")}
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            dir="auto"
+            className="resize-none"
+            onKeyPress={(e) => e.key === 'Enter' && e.ctrlKey && handleAddNote()}
+          />
+          <Button 
+            onClick={handleAddNote}
+            className="w-full sm:w-auto gap-1"
+          >
+            <PlusCircle className="h-4 w-4" />
+            {t("addNote")}
+          </Button>
+        </div>
       </CardContent>
-      <CardFooter className="bg-muted p-4 flex gap-2 flex-wrap">
-        <Input
-          placeholder={t("addNoteHere")}
-          value={newNote}
-          onChange={(e) => setNewNote(e.target.value)}
-          dir="auto"
-          className="flex-1"
-          onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
-        />
-        <Button 
-          onClick={handleAddNote}
-          className="gap-1"
-        >
-          <PlusCircle className="h-4 w-4" />
-          {t("addNote")}
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
