@@ -1,8 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { usePatientStore, PatientNote } from '@/store/patientStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useLanguageStore } from '@/store/languageStore';
 import { format } from 'date-fns';
@@ -18,7 +17,7 @@ interface PatientNotesProps {
 
 export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId }) => {
   const { t, language } = useLanguageStore();
-  const { addPatientNote, deletePatientNote, getPatientById, updatePatient, patients } = usePatientStore();
+  const { addPatientNote, deletePatientNote, getPatientById, updatePatient } = usePatientStore();
   const [newNote, setNewNote] = useState('');
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editedNoteText, setEditedNoteText] = useState('');
@@ -27,11 +26,6 @@ export const PatientNotes: React.FC<PatientNotesProps> = ({ patientId }) => {
   // Get the current patient's notes
   const patient = getPatientById(patientId);
   const notes = patient?.patientNotes || [];
-  
-  // Setup real-time update whenever patient notes change
-  useEffect(() => {
-    // This will re-render component when notes change
-  }, [patientId, patients]);
   
   const handleAddNote = () => {
     if (!newNote.trim()) {
