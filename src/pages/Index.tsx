@@ -7,7 +7,7 @@ import CreateInvoice from "@/components/CreateInvoice";
 import { Inventory } from "@/components/Inventory";
 import { InventoryTabs } from "@/components/InventoryTabs";
 import { RemainingPayments } from "@/components/RemainingPayments";
-import { PatientSearch } from "@/components/PatientSearch";
+import PatientSearch from "@/components/PatientSearch";
 import { useLocation } from "react-router-dom";
 import { useLanguageStore } from "@/store/languageStore";
 
