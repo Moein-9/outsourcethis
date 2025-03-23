@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -145,10 +146,13 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
       
       {editingWorkOrder && (
         <EditWorkOrderDialog
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
+          isOpen={editDialogOpen}
+          onClose={() => setEditDialogOpen(false)}
           workOrder={editingWorkOrder}
-          patientId={patientId}
+          onSave={(updatedWorkOrder) => {
+            // Handle the save operation here
+            setEditDialogOpen(false);
+          }}
         />
       )}
     </>

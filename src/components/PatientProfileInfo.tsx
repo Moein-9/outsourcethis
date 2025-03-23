@@ -60,7 +60,8 @@ export const PatientProfileInfo: React.FC<PatientProfileInfoProps> = ({
       <CardContent>
         <div className="flex flex-col items-center mb-4">
           <Avatar className="h-24 w-24 mb-3">
-            <AvatarImage src={patient.avatar} alt={patient.name} />
+            {/* Use optional chaining for avatar since it doesn't exist on Patient type */}
+            <AvatarImage src={(patient as any).avatar} alt={patient.name} />
             <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
               {patient.name.charAt(0)}
             </AvatarFallback>

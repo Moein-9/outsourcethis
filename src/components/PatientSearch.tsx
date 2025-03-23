@@ -11,6 +11,7 @@ import { PatientProfileInfo } from "./PatientProfileInfo";
 import { PatientPrescriptionDisplay } from "./PatientPrescriptionDisplay";
 import { PatientTransactions } from "./PatientTransactions";
 import { EditWorkOrderDialog } from "./EditWorkOrderDialog";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
