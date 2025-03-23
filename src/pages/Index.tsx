@@ -12,7 +12,6 @@ import { useLocation } from "react-router-dom";
 import { useLanguageStore } from "@/store/languageStore";
 
 const Index = () => {
-  console.log("Index page loading...");
   const [activeSection, setActiveSection] = React.useState("dashboard");
   const location = useLocation();
   const { language, setLanguage } = useLanguageStore();
@@ -22,8 +21,7 @@ const Index = () => {
     if (location.state?.section) {
       setActiveSection(location.state.section);
     }
-    console.log("Active section:", activeSection);
-  }, [location.state, activeSection]);
+  }, [location.state]);
 
   // Update document's direction based on language
   useEffect(() => {

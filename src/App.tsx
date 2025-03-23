@@ -9,29 +9,24 @@ import NotFound from "./pages/NotFound";
 import ReportPage from "./pages/ReportPage";
 import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 
-console.log("App component loading...");
-
 const queryClient = new QueryClient();
 
-const App = () => {
-  console.log("App component rendering...");
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/reports" element={<ReportPage />} />
-            <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
-};
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/reports" element={<ReportPage />} />
+          <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
