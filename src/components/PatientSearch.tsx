@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { usePatientStore, Patient } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -67,7 +68,7 @@ import {
 } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 import { ReceiptInvoice } from "./ReceiptInvoice";
-import { RxReceiptPrint } from "./RxReceiptPrint";
+import { RxReceiptPrint, printRxReceipt } from "./RxReceiptPrint";
 import { PatientRxManager } from "./PatientRxManager";
 import { useLanguageStore } from "@/store/languageStore";
 

@@ -36,7 +36,7 @@ import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { useLanguageStore } from "@/store/languageStore";
-import { RxLanguageDialog } from "./RxReceiptPrint";
+import { RxLanguageDialog, printRxReceipt } from "./RxReceiptPrint";
 
 interface PatientRxManagerProps {
   patientId: string;
@@ -688,3 +688,4 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     </Card>
   );
 };
+
