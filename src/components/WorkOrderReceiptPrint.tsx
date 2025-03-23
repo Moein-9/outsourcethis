@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -187,7 +186,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
                 <th style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>SPH</th>
                 <th style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>CYL</th>
                 <th style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>AX</th>
-                {(rx.pdOD || rx.pdOS || rx.pd) && <th style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>PD</th>}
+                {(rx.pdRight || rx.pdLeft || rx.pd) && <th style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>PD</th>}
               </tr>
             </thead>
             <tbody>
@@ -198,9 +197,9 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
                 <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.sphereOD || "-"}</td>
                 <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.cylOD || "-"}</td>
                 <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.axisOD || "-"}</td>
-                {(rx.pdOD || rx.pdOS || rx.pd) && (
+                {(rx.pdRight || rx.pdLeft || rx.pd) && (
                   <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>
-                    {rx.pdOD || rx.pd || "-"}
+                    {rx.pdRight || rx.pd || "-"}
                   </td>
                 )}
               </tr>
@@ -211,9 +210,9 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
                 <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.sphereOS || "-"}</td>
                 <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.cylOS || "-"}</td>
                 <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>{rx.axisOS || "-"}</td>
-                {(rx.pdOD || rx.pdOS || rx.pd) && (
+                {(rx.pdRight || rx.pdLeft || rx.pd) && (
                   <td style={{ border: "1px solid #ddd", padding: "2px", textAlign: "center" }}>
-                    {rx.pdOS || rx.pd || "-"}
+                    {rx.pdLeft || rx.pd || "-"}
                   </td>
                 )}
               </tr>
@@ -389,7 +388,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           <span>{amountPaid.toFixed(3)} KWD</span>
         </div>
         
-        {/* Enhanced payment status indicators */}
         {isPaid ? (
           <div className="payment-paid" style={{ 
             display: "flex", 
@@ -421,7 +419,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             borderRadius: "4px",
             margin: "4px 0 1px 0",
             fontWeight: "bold",
-            fontSize: "15px", /* Increased from 13px to 15px to make it more prominent */
+            fontSize: "15px",
             border: "1px solid #FECACA",
             color: "#B91C1C"
           }}>
@@ -435,7 +433,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         )}
       </div>
 
-      {/* Added quality confirmation section as shown in screenshot */}
       <div style={{ marginTop: "10px", borderTop: "1px dashed #000", paddingTop: "5px" }}>
         <div style={{ marginBottom: "8px" }}>
           <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -527,21 +524,21 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
             <th style="border: 1px solid #000; padding: 1px;">SPH</th>
             <th style="border: 1px solid #000; padding: 1px;">CYL</th>
             <th style="border: 1px solid #000; padding: 1px;">AX</th>
-            ${(rx.pdOD || rx.pdOS || rx.pd) ? `<th style="border: 1px solid #000; padding: 1px;">PD</th>` : ''}
+            ${(rx.pdRight || rx.pdLeft || rx.pd) ? `<th style="border: 1px solid #000; padding: 1px;">PD</th>` : ''}
           </tr>
           <tr>
-            <td style="border: 1px solid #000; padding: 1px; font-weight: bold;">OD ${isRtl ? '(يمين)' : ''}</td>
+            <td style="border: 1px solid #000; padding: 1px; font-weight: bold;">OD ${isRtl ? '(يمين)' : '(Right)'}</td>
             <td style="border: 1px solid #000; padding: 1px;">${rx.sphereOD || "-"}</td>
             <td style="border: 1px solid #000; padding: 1px;">${rx.cylOD || "-"}</td>
             <td style="border: 1px solid #000; padding: 1px;">${rx.axisOD || "-"}</td>
-            ${(rx.pdOD || rx.pdOS || rx.pd) ? `<td style="border: 1px solid #000; padding: 1px;">${rx.pdOD || rx.pd || "-"}</td>` : ''}
+            ${(rx.pdRight || rx.pdLeft || rx.pd) ? `<td style="border: 1px solid #000; padding: 1px;">${rx.pdRight || rx.pd || "-"}</td>` : ''}
           </tr>
           <tr>
-            <td style="border: 1px solid #000; padding: 1px; font-weight: bold;">OS ${isRtl ? '(يسار)' : ''}</td>
+            <td style="border: 1px solid #000; padding: 1px; font-weight: bold;">OS ${isRtl ? '(يسار)' : '(Left)'}</td>
             <td style="border: 1px solid #000; padding: 1px;">${rx.sphereOS || "-"}</td>
             <td style="border: 1px solid #000; padding: 1px;">${rx.cylOS || "-"}</td>
             <td style="border: 1px solid #000; padding: 1px;">${rx.axisOS || "-"}</td>
-            ${(rx.pdOD || rx.pdOS || rx.pd) ? `<td style="border: 1px solid #000; padding: 1px;">${rx.pdOS || rx.pd || "-"}</td>` : ''}
+            ${(rx.pdRight || rx.pdLeft || rx.pd) ? `<td style="border: 1px solid #000; padding: 1px;">${rx.pdLeft || rx.pd || "-"}</td>` : ''}
           </tr>
         </table>
         ${rx.add ? `<p style="margin: 1px 0; font-size: 8px;"><strong>ADD:</strong> ${rx.add}</p>` : ''}
