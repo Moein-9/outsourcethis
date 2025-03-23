@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore, Patient, PatientNote } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -720,4 +721,54 @@ const PatientSearch: React.FC = () => {
                           <div>
                             <h3 className="text-md font-medium mb-2 flex items-center gap-1.5 text-blue-700">
                               <AlertCircle className="h-4 w-4 text-blue-500" />
-                              {language === 'ar' ? "أوامر العمل المكتملة" : "
+                              {language === 'ar' ? "أوامر العمل المكتملة" : "Completed Work Orders"}
+                            </h3>
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    </CardContent>
+                  </Card>
+
+                  {/* Patient Notes using the component */}
+                  {selectedPatient && (
+                    <PatientNotes patientId={selectedPatient.patientId} notes={selectedPatient.patientNotes} />
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isLanguageDialogOpen} onOpenChange={setIsLanguageDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? "اختر لغة الطباعة" : "Choose Print Language"}</DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? "اختر اللغة التي تود طباعة الوصفة الطبية بها" : "Select the language to print the prescription"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center space-x-4 mt-4">
+            <Button onClick={() => handleLanguageSelection('ar')} className="flex-1">
+              {language === 'ar' ? "العربية" : "Arabic"}
+            </Button>
+            <Button onClick={() => handleLanguageSelection('en')} className="flex-1">
+              {language === 'ar' ? "الإنجليزية" : "English"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {editWorkOrderDialogOpen && currentWorkOrder && (
+        <EditWorkOrderDialog
+          isOpen={editWorkOrderDialogOpen}
+          onClose={() => setEditWorkOrderDialogOpen(false)}
+          workOrder={currentWorkOrder}
+          onSave={handleSaveWorkOrder}
+        />
+      )}
+    </div>
+  );
+};
+
+export default PatientSearch;
