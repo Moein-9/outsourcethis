@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { usePatientStore } from "@/store/patientStore";
+import { Patient } from "@/store/patientStore";
 
 interface InvoiceFormContextType {
   // Form state
@@ -9,10 +10,10 @@ interface InvoiceFormContextType {
   formState: Record<string, any>;
   
   // Patient state
-  patientSearchResults: ReturnType<typeof usePatientStore>['searchPatients'];
-  setPatientSearchResults: React.Dispatch<React.SetStateAction<ReturnType<typeof usePatientStore>['searchPatients']>>;
-  currentPatient: ReturnType<typeof usePatientStore>['searchPatients'][0] | null;
-  setCurrentPatient: React.Dispatch<React.SetStateAction<ReturnType<typeof usePatientStore>['searchPatients'][0] | null>>;
+  patientSearchResults: Patient[];
+  setPatientSearchResults: React.Dispatch<React.SetStateAction<Patient[]>>;
+  currentPatient: Patient | null;
+  setCurrentPatient: React.Dispatch<React.SetStateAction<Patient | null>>;
   
   // Navigation helpers
   validateCurrentStep: () => boolean;
@@ -75,8 +76,8 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     isPaid: false,
   });
   
-  const [patientSearchResults, setPatientSearchResults] = useState<ReturnType<typeof usePatientStore>['searchPatients']>([]);
-  const [currentPatient, setCurrentPatient] = useState<ReturnType<typeof usePatientStore>['searchPatients'][0] | null>(null);
+  const [patientSearchResults, setPatientSearchResults] = useState<Patient[]>([]);
+  const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
   
   // Form value getters and setters
   const getValues = <T = any>(key?: string): T => {

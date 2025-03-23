@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensType, LensCoating, useInventoryStore } from "@/store/inventoryStore";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +13,8 @@ interface LensSelectorProps {
   onSelectCoating: (coating: LensCoating | null) => void;
   skipLens?: boolean;
   onSkipLensChange?: (skip: boolean) => void;
+  initialLensType?: LensType | null;
+  initialCoating?: LensCoating | null;
 }
 
 export const LensSelector: React.FC<LensSelectorProps> = ({
@@ -20,13 +22,25 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   onSelectCoating,
   skipLens = false,
   onSkipLensChange,
+  initialLensType = null,
+  initialCoating = null,
 }) => {
   const { t, language } = useLanguageStore();
   const lensTypes = useInventoryStore((state) => state.lensTypes);
   const coatings = useInventoryStore((state) => state.lensCoatings);
   
-  const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
-  const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
+  const [selectedLensType, setSelectedLensType] = useState<LensType | null>(initialLensType);
+  const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(initialCoating);
+  
+  // Initialize from props if provided
+  useEffect(() => {
+    if (initialLensType) {
+      setSelectedLensType(initialLensType);
+    }
+    if (initialCoating) {
+      setSelectedCoating(initialCoating);
+    }
+  }, [initialLensType, initialCoating]);
   
   const handleLensTypeSelect = (lens: LensType) => {
     setSelectedLensType(lens);
