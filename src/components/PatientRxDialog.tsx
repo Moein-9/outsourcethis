@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/card";
 import {
   Eye,
-  EyeOff,
 } from "lucide-react";
 import {
   Select,
@@ -166,7 +165,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateSphOptions()}
                         </SelectContent>
@@ -182,7 +181,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateCylOptions()}
                         </SelectContent>
@@ -198,7 +197,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateAxisOptions()}
                         </SelectContent>
@@ -214,7 +213,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           {generateAddOptions()}
                         </SelectContent>
                       </Select>
@@ -229,7 +228,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           {generatePdOptions()}
                         </SelectContent>
                       </Select>
@@ -240,7 +239,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                 {/* Left Eye (OS) Row */}
                 <div className="border rounded-md overflow-hidden">
                   <div className="bg-indigo-50 px-4 py-2 flex items-center border-b">
-                    <EyeOff className="h-5 w-5 text-indigo-600 mr-2" />
+                    <Eye className="h-5 w-5 text-indigo-600 mr-2" />
                     <h3 className="font-medium">
                       {language === 'ar' ? "العين اليسرى (OS)" : "Left Eye (OS)"}
                     </h3>
@@ -256,7 +255,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateSphOptions()}
                         </SelectContent>
@@ -272,7 +271,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateCylOptions()}
                         </SelectContent>
@@ -288,7 +287,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           <SelectItem value="none">-</SelectItem>
                           {generateAxisOptions()}
                         </SelectContent>
@@ -304,7 +303,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           {generateAddOptions()}
                         </SelectContent>
                       </Select>
@@ -319,7 +318,7 @@ export const PatientRxDialog: React.FC<PatientRxDialogProps> = ({
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           {generatePdOptions()}
                         </SelectContent>
                       </Select>
