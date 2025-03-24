@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -29,9 +28,7 @@ interface WorkOrderReceiptPrintProps {
   contactLensRx?: any;
 }
 
-// Export the print function that will be used by WorkOrderPrintSelector
 export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
-  // Create a container for the receipt
   const container = document.createElement('div');
   container.style.position = 'fixed';
   container.style.top = '0';
@@ -42,13 +39,10 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
   container.style.opacity = '0';
   document.body.appendChild(container);
   
-  // Render the receipt component to a string
   try {
-    // Get language settings from the store
     const { language } = useLanguageStore.getState();
     const isRtl = language === "ar";
     
-    // Create the content for the receipt
     const content = `
       <div 
         id="work-order-receipt"
@@ -443,12 +437,10 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
       </div>
     `;
     
-    // Prepare the print CSS and content
     const printContent = PrintService.prepareReceiptDocument(content);
     PrintService.printHtml(printContent, 'receipt');
     
     setTimeout(() => {
-      // Clean up
       if (container && container.parentNode) {
         container.parentNode.removeChild(container);
       }
@@ -502,7 +494,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   const remaining = invoice.total - amountPaid;
   const isPaid = remaining <= 0;
 
-  // Use workOrderId for the work order receipt
   const orderNumber = invoice.workOrderId || "";
 
   return (
@@ -615,7 +606,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             borderCollapse: "collapse", 
             fontSize: "8px", 
             marginTop: "2px",
-            direction: "ltr" // Always LTR for RX table
+            direction: "ltr"
           }}>
             <thead>
               <tr>
@@ -928,4 +919,3 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     </div>
   );
 };
-
