@@ -8,7 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ReportPage from "./pages/ReportPage";
 
-// Create a new QueryClient instance with explicit configuration
+// Initialize QueryClient with explicit configuration to avoid undefined issues
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -19,7 +19,6 @@ const queryClient = new QueryClient({
   }
 });
 
-// Functional component without arrow function shorthand for clarity
 function App() {
   return (
     <QueryClientProvider client={queryClient}>

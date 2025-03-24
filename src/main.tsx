@@ -1,25 +1,23 @@
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-// Make sure the DOM is loaded before mounting
+// Simple and direct initialization approach to avoid potential issues
 const rootElement = document.getElementById('root');
+
+// Create root element if it doesn't exist
 if (!rootElement) {
   const rootDiv = document.createElement('div');
   rootDiv.id = 'root';
   document.body.appendChild(rootDiv);
 }
 
-// Create root with error handling
+// Use the newer ReactDOM.createRoot API with error handling
 try {
-  const root = createRoot(document.getElementById('root')!);
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
+  const root = ReactDOM.createRoot(document.getElementById('root')!);
+  root.render(<App />);
 } catch (error) {
   console.error('Error rendering application:', error);
   const rootEl = document.getElementById('root');
