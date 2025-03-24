@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -88,8 +89,6 @@ const translations: Record<string, Record<string, string>> = {
     invoiceCreation: 'Invoice Creation',
     clientDetails: 'Client Details',
     searchClient: 'Search Client',
-    clientName: 'Client Name',
-    clientPhone: 'Client Phone',
     lensDetails: 'Lens Details',
     lensType: 'Lens Type',
     selectLens: 'Select Lens',
@@ -124,7 +123,6 @@ const translations: Record<string, Record<string, string>> = {
     invoiceSuccessMessage: 'Your invoice has been successfully created and is ready for printing',
     workOrderNumber: 'Work Order Number',
     clientName: 'Client Name',
-    phoneNumber: 'Phone Number',
     date: 'Date',
     totalAmount: 'Total Amount',
     paymentStatus: 'Payment Status',
@@ -223,7 +221,6 @@ const translations: Record<string, Record<string, string>> = {
     patientDetails: 'Patient Details',
     invoiceHistory: 'Invoice History',
     prescriptionHistory: 'Prescription History',
-    date: 'Date',
     
     // Common Actions
     edit: 'Edit',
@@ -270,7 +267,6 @@ const translations: Record<string, Record<string, string>> = {
     payInFull: "Pay in Full",
     paymentSection: "5) Payment Method",
     approvalNumber: "Approval Number (Authorization No.):",
-    printWorkOrder: "Print Work Order",
     previewInvoice: "Preview Invoice",
     saveAndPrint: "Save and Print",
     invoiceSummary: "Invoice Summary",
@@ -427,8 +423,6 @@ const translations: Record<string, Record<string, string>> = {
     invoiceCreation: 'إنشاء فاتورة',
     clientDetails: 'تفاصيل العميل',
     searchClient: 'بحث عن عميل',
-    clientName: 'اسم العميل',
-    clientPhone: 'هاتف العميل',
     lensDetails: 'العدسات الطبية',
     lensType: 'نوع العدسة',
     selectLens: 'اختر العدسة',
@@ -464,7 +458,6 @@ const translations: Record<string, Record<string, string>> = {
     invoiceSuccessMessage: 'تم إنشاء الفاتورة بنجاح وهي جاهزة للطباعة',
     workOrderNumber: 'رقم أمر العمل',
     clientName: 'اسم العميل',
-    phoneNumber: 'رقم الهاتف',
     date: 'التاريخ',
     totalAmount: 'المبلغ الإجمالي',
     paymentStatus: 'حالة الدفع',
@@ -563,7 +556,6 @@ const translations: Record<string, Record<string, string>> = {
     patientDetails: 'تفاصيل المريض',
     invoiceHistory: 'تاريخ الفواتير',
     prescriptionHistory: 'تاريخ الوصفات الطبية',
-    date: 'التاريخ',
     
     // Common Actions
     edit: 'تعديل',
@@ -610,7 +602,6 @@ const translations: Record<string, Record<string, string>> = {
     payInFull: "دفع كامل",
     paymentSection: "٥) طريقة الدفع",
     approvalNumber: "رقم الموافقة (Authorization No.):",
-    printWorkOrder: "طباعة أمر العمل",
     previewInvoice: "معاينة الفاتورة",
     saveAndPrint: "حفظ وطباعة",
     invoiceSummary: "ملخص الفاتورة",
