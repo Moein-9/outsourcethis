@@ -6,6 +6,17 @@ export class CustomPrintService {
     console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
     
     try {
+      // Validate inputs to prevent undefined errors
+      if (!workOrder || typeof workOrder !== 'object') {
+        console.error("Invalid work order data:", workOrder);
+        toast({
+          title: "Error",
+          description: "Invalid work order data. Cannot print.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Create a new window for printing
       const printWindow = window.open('', '_blank');
       if (!printWindow) {

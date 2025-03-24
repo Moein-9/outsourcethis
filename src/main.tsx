@@ -1,16 +1,34 @@
 
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
 
-// A simpler initialization approach
-const root = document.getElementById("root");
-if (!root) {
-  const rootDiv = document.createElement("div");
-  rootDiv.id = "root";
+// Make sure the DOM is loaded before mounting
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  const rootDiv = document.createElement('div');
+  rootDiv.id = 'root';
   document.body.appendChild(rootDiv);
 }
 
-// Remove StrictMode temporarily to rule out double-rendering issues
-createRoot(document.getElementById("root")!).render(<App />);
+// Create root with error handling
+try {
+  const root = createRoot(document.getElementById('root')!);
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+} catch (error) {
+  console.error('Error rendering application:', error);
+  const rootEl = document.getElementById('root');
+  if (rootEl) {
+    rootEl.innerHTML = `
+      <div style="padding: 20px; text-align: center;">
+        <h2>Something went wrong</h2>
+        <p>The application couldn't be loaded. Please try refreshing the page.</p>
+      </div>
+    `;
+  }
+}
