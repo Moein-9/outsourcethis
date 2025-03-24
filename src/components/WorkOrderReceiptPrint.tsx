@@ -85,6 +85,7 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
     // Ensure content is fully rendered before printing
     setTimeout(() => {
       workOrderElement.style.visibility = 'visible';
+      workOrderElement.style.position = 'absolute';
       workOrderElement.style.zIndex = '9999'; // Bring it to the front for printing
       
       // Use a single print operation to prevent multiple popups

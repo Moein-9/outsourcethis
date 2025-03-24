@@ -6,6 +6,7 @@ import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
+import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -69,7 +70,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           frameBrand: invoice.frameBrand,
           frameModel: invoice.frameModel,
           frameColor: invoice.frameColor,
-          frameSize: invoice.frameSize,
+          frameSize: invoice.frameSize || "",
           framePrice: invoice.framePrice,
           discount: invoice.discount,
           deposit: invoice.deposit,
@@ -94,21 +95,15 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         
         setLoading(false);
         
-        // Now that we have an ID, we can render the print selector
-        return (
-          <WorkOrderPrintSelector
-            invoice={updatedInvoice}
-            patientName={patientName}
-            patientPhone={patientPhone}
-            rx={rx}
-            lensType={lensType}
-            coating={coating}
-            frame={frame}
-            contactLenses={contactLenses}
-            contactLensRx={contactLensRx}
-            thermalOnly={thermalOnly}
-          />
-        );
+        // Now print directly using the WorkOrderReceiptPrint method
+        printWorkOrderReceipt({
+          invoice: updatedInvoice,
+          patientName: patientName,
+          patientPhone: patientPhone,
+          rx: rx
+        });
+        
+        return;
       } catch (error) {
         console.error("Error saving invoice:", error);
         toast({
