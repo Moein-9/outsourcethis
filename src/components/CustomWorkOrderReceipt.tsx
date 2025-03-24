@@ -47,17 +47,26 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const lensType = workOrder?.lensType || invoice?.lensType || "";
   const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
   
-  const matchingLens = lensTypes.find(lt => lt.type?.toLowerCase() === lensType?.toLowerCase());
-  const lensName = matchingLens?.name || getLensTypeArabic(lensType);
+  const lensTypeString = typeof lensType === 'object' ? lensType?.type || '' : String(lensType);
+  const matchingLens = lensTypes.find(lt => {
+    const ltType = lt.type ? String(lt.type).toLowerCase() : '';
+    return ltType === lensTypeString.toLowerCase();
+  });
+  
+  const lensName = matchingLens?.name || getLensTypeArabic(lensTypeString);
   
   const coating = workOrder?.coating || invoice?.coating || "";
   const coatingPrice = workOrder?.coatingPrice || invoice?.coatingPrice || 0;
   
-  const matchingCoating = lensCoatings.find(c => 
-    (c.name && coating && c.name.toLowerCase().includes(coating.toLowerCase())) || 
-    (c.description && coating && c.description.toLowerCase().includes(coating.toLowerCase()))
-  );
-  const coatingName = matchingCoating?.name || getCoatingArabic(coating);
+  const coatingString = typeof coating === 'object' ? coating?.name || '' : String(coating);
+  const matchingCoating = lensCoatings.find(c => {
+    const cName = c.name ? String(c.name).toLowerCase() : '';
+    const cDesc = c.description ? String(c.description).toLowerCase() : '';
+    return (cName && coatingString && cName.includes(coatingString.toLowerCase())) || 
+           (cDesc && coatingString && cDesc.includes(coatingString.toLowerCase()));
+  });
+  
+  const coatingName = matchingCoating?.name || getCoatingArabic(coatingString);
   
   const total = invoice?.total || workOrder?.total || 0;
   const deposit = invoice?.deposit || workOrder?.deposit || 0;
@@ -580,4 +589,3 @@ const getCoatingArabic = (coating: string): string => {
   
   return coatingMap[coating] || coating;
 };
-
