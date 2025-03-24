@@ -28,7 +28,7 @@ interface PrintWorkOrderButtonProps {
   thermalOnly?: boolean;
   isNewInvoice?: boolean;
   onInvoiceSaved?: (invoiceId: string) => void;
-  children?: React.ReactNode; // Add children prop for CustomPrintWorkOrderButton
+  children?: React.ReactNode;
 }
 
 export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -51,13 +51,12 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
 }) => {
   const { t } = useLanguageStore();
   
-  // Ensure the invoice has a valid ID for display and tracking
+  // Create a new object for invoice data instead of trying to modify the original invoice
   const invoiceData = {
     ...invoice,
     invoiceId: invoice.invoiceId || `INV${Date.now().toString().slice(-6)}`,
-    workOrderId: invoice.workOrderId || invoice.invoiceId || `WO${Date.now().toString().slice(-6)}`,
-    // Add rx to the invoice data if it's provided as a prop
-    rx: rx || invoice.rx
+    workOrderId: invoice.workOrderId || invoice.invoiceId || `WO${Date.now().toString().slice(-6)}`
+    // Don't try to access rx directly from invoice since it doesn't exist on the Invoice type
   };
   
   return (
@@ -67,7 +66,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       patient={{
         name: patientName || invoiceData.patientName,
         phone: patientPhone || invoiceData.patientPhone,
-        rx: rx || invoiceData.rx
+        rx: rx // Use the rx prop directly instead of trying to get it from invoice
       }}
       className={className}
       variant={variant}
