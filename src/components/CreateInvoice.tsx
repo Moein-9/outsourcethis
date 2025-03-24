@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -27,6 +28,7 @@ const CreateInvoiceContent: React.FC = () => {
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("patient");
   const { getValues, setValue } = useInvoiceForm();
+  const { addWorkOrder, addInvoice } = useInvoiceStore();
   
   const handlePrintWorkOrder = () => {
     setWorkOrderPrintOpen(true);
@@ -40,6 +42,81 @@ const CreateInvoiceContent: React.FC = () => {
     setTimeout(() => {
       window.print();
     }, 500);
+  };
+  
+  // Adding the missing handleSaveInvoice function
+  const handleSaveInvoice = () => {
+    // Get payment method
+    const paymentMethod = getValues("paymentMethod") || "";
+    
+    if (!paymentMethod) {
+      toast({
+        title: t('error'),
+        description: t('paymentMethodError'),
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Get patient details
+    const patientId = getValues<string>('patientId') || 'anonymous';
+    
+    // Create a work order
+    const workOrder = {
+      patientId,
+      lensType: {
+        name: getValues<string>('lensType'),
+        price: getValues<number>('lensPrice')
+      }
+    };
+    
+    // Generate work order ID
+    const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
+    setValue('workOrderId', workOrderId);
+    
+    // Calculate totals
+    const total = calculateTotal();
+    const deposit = getValues<number>('deposit') || 0;
+    const remaining = Math.max(0, total - deposit);
+    
+    // Create invoice with unique ID (different from work order ID)
+    const invoiceData = {
+      patientId,
+      patientName: getValues<string>('patientName'),
+      patientPhone: getValues<string>('patientPhone'),
+      
+      lensType: getValues<string>('lensType'),
+      lensPrice: getValues<number>('lensPrice'),
+      
+      coating: getValues<string>('coating'),
+      coatingPrice: getValues<number>('coatingPrice'),
+      
+      frameBrand: getValues<string>('frameBrand'),
+      frameModel: getValues<string>('frameModel'),
+      frameColor: getValues<string>('frameColor'),
+      frameSize: getValues<string>('frameSize'),
+      framePrice: getValues<number>('framePrice'),
+      
+      discount: getValues<number>('discount') || 0,
+      deposit: deposit,
+      total: total,
+      remaining: remaining,
+      
+      paymentMethod: paymentMethod,
+      authNumber: getValues<string>('authNumber') || "",
+      workOrderId: workOrderId // Link invoice to work order
+    };
+    
+    const invoiceId = addInvoice(invoiceData);
+    setValue('invoiceId', invoiceId);
+    
+    // Move to the summary tab
+    setActiveTab("summary");
+    
+    toast({
+      title: t('success'),
+      description: `${t('orderSavedSuccess')} (${t('invoice')}: ${invoiceId}, ${t('workOrder')}: ${workOrderId})`,
+    });
   };
 
   const previewInvoice = {
