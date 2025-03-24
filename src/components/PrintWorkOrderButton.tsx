@@ -28,6 +28,7 @@ interface PrintWorkOrderButtonProps {
   thermalOnly?: boolean;
   isNewInvoice?: boolean;
   onInvoiceSaved?: (invoiceId: string) => void;
+  children?: React.ReactNode; // Add children prop for CustomPrintWorkOrderButton
 }
 
 export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -46,6 +47,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   thermalOnly = false,
   isNewInvoice = false,
   onInvoiceSaved,
+  children,
 }) => {
   const { t } = useLanguageStore();
   
@@ -53,7 +55,9 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   const invoiceData = {
     ...invoice,
     invoiceId: invoice.invoiceId || `INV${Date.now().toString().slice(-6)}`,
-    workOrderId: invoice.workOrderId || invoice.invoiceId || `WO${Date.now().toString().slice(-6)}`
+    workOrderId: invoice.workOrderId || invoice.invoiceId || `WO${Date.now().toString().slice(-6)}`,
+    // Add rx to the invoice data if it's provided as a prop
+    rx: rx || invoice.rx
   };
   
   return (
@@ -69,9 +73,11 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       variant={variant}
       size={size}
     >
-      <Button variant={variant} size={size} className={className}>
-        <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
-      </Button>
+      {children || (
+        <Button variant={variant} size={size} className={className}>
+          <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
+        </Button>
+      )}
     </CustomPrintWorkOrderButton>
   );
 };

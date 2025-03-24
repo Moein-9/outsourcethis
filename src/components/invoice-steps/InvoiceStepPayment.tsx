@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -30,7 +29,6 @@ export const InvoiceStepPayment: React.FC = () => {
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
   
-  // Update totals when dependencies change
   useEffect(() => {
     const newTotal = calculateTotal();
     const newRemaining = Math.max(0, newTotal - deposit);
@@ -38,7 +36,6 @@ export const InvoiceStepPayment: React.FC = () => {
     setTotal(newTotal);
     setRemaining(newRemaining);
     
-    // Update form values
     setValue('total', newTotal);
     setValue('remaining', newRemaining);
     setValue('isPaid', newRemaining <= 0);
@@ -84,10 +81,8 @@ export const InvoiceStepPayment: React.FC = () => {
     setLoading(true);
     
     try {
-      // Get patient details
       const patientId = getValues<string>('patientId') || 'anonymous';
       
-      // 1. Create a work order
       const workOrder = {
         patientId,
         lensType: {
@@ -99,7 +94,6 @@ export const InvoiceStepPayment: React.FC = () => {
       const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
       setValue('workOrderId', workOrderId);
       
-      // 2. Create the invoice and link it to the work order
       const invoiceData = {
         patientId: getValues<string>('patientId'),
         patientName: getValues<string>('patientName'),
@@ -118,7 +112,7 @@ export const InvoiceStepPayment: React.FC = () => {
         total: getValues<number>('total'),
         paymentMethod: getValues<string>('paymentMethod'),
         authNumber: getValues<string>('authNumber'),
-        workOrderId // Link to the work order
+        workOrderId
       };
       
       const invoiceId = addInvoice(invoiceData);
@@ -126,13 +120,11 @@ export const InvoiceStepPayment: React.FC = () => {
       
       setInvoiceCreated(true);
       
-      // Improved success message showing both IDs clearly
       toast({
         title: t('success'),
         description: `${t('orderCreated')}\n${t('workOrder')}: ${workOrderId}\n${t('invoice')}: ${invoiceId}`,
       });
       
-      // Immediately navigate to summary tab
       const summaryTab = document.querySelector('[value="summary"]');
       if (summaryTab instanceof HTMLElement) {
         summaryTab.click();
@@ -153,10 +145,8 @@ export const InvoiceStepPayment: React.FC = () => {
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
-  // Continue with the existing render logic...
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Discount Section */}
       <div className="border rounded-lg p-5 bg-card shadow-sm">
         <div className="border-b border-primary/30 pb-3 mb-4">
           <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
@@ -209,7 +199,6 @@ export const InvoiceStepPayment: React.FC = () => {
         </div>
       </div>
 
-      {/* Payment Section */}
       <div className="border rounded-lg p-5 bg-card shadow-sm">
         <div className="border-b border-primary/30 pb-3 mb-4">
           <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
@@ -362,7 +351,6 @@ export const InvoiceStepPayment: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Print Work Order button */}
               <PrintWorkOrderButton
                 invoice={getValues()}
                 patientName={getValues<string>('patientName')}
@@ -387,23 +375,19 @@ export const InvoiceStepPayment: React.FC = () => {
                 </Button>
               </PrintWorkOrderButton>
               
-              {/* Print Receipt button */}
               <Button 
                 variant="default" 
                 className="w-full gap-2" 
                 size="lg"
                 onClick={() => {
-                  // Create a hidden container to render the receipt
                   const container = document.createElement('div');
                   container.style.display = 'none';
                   document.body.appendChild(container);
                   
-                  // Add an ID for the receipt to be found
                   const receiptDiv = document.createElement('div');
                   receiptDiv.id = 'receipt-to-print';
                   container.appendChild(receiptDiv);
                   
-                  // Render the receipt in the hidden div
                   const ReactDOM = require('react-dom');
                   ReactDOM.render(
                     React.createElement(ReceiptInvoice, { 
@@ -414,7 +398,6 @@ export const InvoiceStepPayment: React.FC = () => {
                     }),
                     receiptDiv,
                     () => {
-                      // Open a new window for printing
                       const printWindow = window.open('', '_blank');
                       if (printWindow) {
                         printWindow.document.write(`
@@ -453,7 +436,6 @@ export const InvoiceStepPayment: React.FC = () => {
                         printWindow.document.close();
                       }
                       
-                      // Clean up
                       setTimeout(() => {
                         if (document.body.contains(container)) {
                           document.body.removeChild(container);
