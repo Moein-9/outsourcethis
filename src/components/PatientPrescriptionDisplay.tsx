@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -90,7 +91,6 @@ export const PatientPrescriptionDisplay: React.FC<PatientPrescriptionDisplayProp
                 <thead className="bg-indigo-600">
                   <tr>
                     <th className="text-white font-medium text-xs p-1.5 text-left"></th>
-                    {/* Keep these technical terms in English regardless of language */}
                     <th className="text-white font-medium text-xs p-1.5 text-left">SPH</th>
                     <th className="text-white font-medium text-xs p-1.5 text-left">CYL</th>
                     <th className="text-white font-medium text-xs p-1.5 text-left">AXIS</th>
@@ -161,7 +161,6 @@ export const PatientPrescriptionDisplay: React.FC<PatientPrescriptionDisplayProp
                       <thead className="bg-indigo-600">
                         <tr>
                           <th className="text-white font-medium p-1 text-left text-xs"></th>
-                          {/* Keep these technical terms in English regardless of language */}
                           <th className="text-white font-medium p-1 text-left text-xs">SPH</th>
                           <th className="text-white font-medium p-1 text-left text-xs">CYL</th>
                           <th className="text-white font-medium p-1 text-left text-xs">AXIS</th>

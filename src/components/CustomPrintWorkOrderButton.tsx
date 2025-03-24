@@ -2,17 +2,16 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
+import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
 import { 
-  Sheet, 
-  SheetContent, 
-  SheetTrigger,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from '@/components/ui/sheet';
+  Dialog, 
+  DialogContent, 
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
-import { CustomPrintService } from '@/utils/CustomPrintService';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -21,7 +20,7 @@ interface PrintWorkOrderButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
-  children?: React.ReactNode; 
+  children?: React.ReactNode; // This prop is used when passing custom trigger element
 }
 
 export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -31,58 +30,47 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   className = '',
   variant = "outline",
   size = "sm",
-  children
+  children // This prop holds any custom trigger element
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   
   const handlePrint = () => {
-    setIsLoading(true);
+    console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
+    setOpen(false); // Close dialog before printing
     
-    // Close the sheet before printing to avoid stacking dialogs
-    setOpen(false);
-    
-    // Add a delay before printing to ensure the sheet is fully closed
+    // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      try {
-        // Use our unified printing method
-        CustomPrintService.printWorkOrder(workOrder, invoice, patient);
-      } catch (error) {
-        console.error("Error printing work order:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
     }, 300);
   };
   
   // Create a default button if no children are provided or if children is not a valid element
   const defaultButton = (
     <Button 
-      variant={variant} 
-      size={size} 
+      variant={variant}
+      size={size}
       className={`gap-1 ${className}`}
-      disabled={isLoading}
     >
       <Printer className="h-4 w-4" />
-      {isLoading ? t('printing') : t('printWorkOrder')}
+      {t('printWorkOrder')}
     </Button>
   );
   
-  // Ensure we only pass a single valid element to SheetTrigger
+  // Ensure we only pass a single valid element to DialogTrigger
   const triggerElement = React.isValidElement(children) ? children : defaultButton;
   
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         {triggerElement}
-      </SheetTrigger>
-      <SheetContent side="right" className="sm:max-w-md p-0 overflow-y-auto">
+      </DialogTrigger>
+      <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto p-0">
         <div className="p-6 flex flex-col items-center">
-          <SheetTitle className="text-center">{t('workOrderPreview')}</SheetTitle>
-          <SheetDescription className="text-center mb-4">
+          <DialogTitle className="sr-only">{t('workOrderPreview')}</DialogTitle>
+          <DialogDescription className="sr-only">
             {t('previewBeforePrinting')}
-          </SheetDescription>
+          </DialogDescription>
           
           <div className="w-full max-w-[80mm] bg-white p-0 border rounded shadow-sm mb-4">
             <CustomWorkOrderReceipt 
@@ -92,20 +80,12 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               isPrintable={false}
             />
           </div>
-          
-          <SheetFooter className="w-full flex justify-center mt-4">
-            <Button 
-              onClick={handlePrint} 
-              className="gap-2"
-              disabled={isLoading}
-              size="lg"
-            >
-              <Printer className="h-4 w-4" />
-              {isLoading ? t('printing') : t('print')}
-            </Button>
-          </SheetFooter>
+          <Button onClick={handlePrint} className="mt-4 gap-2">
+            <Printer className="h-4 w-4" />
+            {t('print')}
+          </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 };

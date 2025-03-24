@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -205,7 +206,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
 
         <div className="section-heading">
           <User style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-          <span>{t("patientInformation")} {language === 'ar' && '(Patient Information)'}</span>
+          <span>{t("patientInformation")} {language === 'ar' && '(معلومات المريض)'}</span>
         </div>
         
         <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
@@ -229,7 +230,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <>
             <div className="section-heading">
               <Glasses style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-              <span>{t("frameDetails")} {language === 'ar' && '(Frame Details)'}</span>
+              <span>{t("frameDetails")} {language === 'ar' && '(تفاصيل الإطار)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
               <div className="data-row">
@@ -256,7 +257,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <>
             <div className="section-heading">
               <Contact style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-              <span>{t("contactLensDetails")} {language === 'ar' && '(Contact Lens Details)'}</span>
+              <span>{t("contactLensDetails")} {language === 'ar' && '(تفاصيل العدسات اللاصقة)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
               {contactLenses.map((lens, idx) => (
@@ -279,14 +280,13 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <>
             <div className="section-heading">
               <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-              <span>{t("prescriptionDetails")} {language === 'ar' && '(Prescription Details)'}</span>
+              <span>{t("prescriptionDetails")} {language === 'ar' && '(تفاصيل الوصفة الطبية)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
                     <th style={{ textAlign: "center" }}>{t("eye")}</th>
-                    {/* Always keep technical terms in English */}
                     <th style={{ textAlign: "center" }}>SPH</th>
                     <th style={{ textAlign: "center" }}>CYL</th>
                     <th style={{ textAlign: "center" }}>AXIS</th>
@@ -296,7 +296,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 </thead>
                 <tbody>
                   <tr>
-                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(Right)' : 'R'}</td>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
                     <td style={{ textAlign: "center" }}>{rx?.sphereOD || "_____"}</td>
                     <td style={{ textAlign: "center" }}>{rx?.cylOD || "_____"}</td>
                     <td style={{ textAlign: "center" }}>{rx?.axisOD || "_____"}</td>
@@ -304,7 +304,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                     <td style={{ textAlign: "center" }}>{rx?.pdRight || rx?.pd || "_____"}</td>
                   </tr>
                   <tr>
-                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(Left)' : 'L'}</td>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
                     <td style={{ textAlign: "center" }}>{rx?.sphereOS || "_____"}</td>
                     <td style={{ textAlign: "center" }}>{rx?.cylOS || "_____"}</td>
                     <td style={{ textAlign: "center" }}>{rx?.axisOS || "_____"}</td>
@@ -321,14 +321,13 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <>
             <div className="section-heading">
               <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-              <span>{t("contactLensPrescription")} {language === 'ar' && '(Contact Lens Prescription)'}</span>
+              <span>{t("contactLensPrescription")} {language === 'ar' && '(وصفة العدسات اللاصقة)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
                     <th style={{ textAlign: "center" }}>{t("eye")}</th>
-                    {/* Always keep technical terms in English */}
                     <th style={{ textAlign: "center" }}>SPH</th>
                     <th style={{ textAlign: "center" }}>CYL</th>
                     <th style={{ textAlign: "center" }}>AXIS</th>
@@ -338,7 +337,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 </thead>
                 <tbody>
                   <tr>
-                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(Right)' : 'R'}</td>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
                     <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.sphere || "_____"}</td>
                     <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.cylinder || "_____"}</td>
                     <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.axis || "_____"}</td>
@@ -346,7 +345,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                     <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.dia || "_____"}</td>
                   </tr>
                   <tr>
-                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(Left)' : 'L'}</td>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
                     <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.sphere || "_____"}</td>
                     <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.cylinder || "_____"}</td>
                     <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.axis || "_____"}</td>
@@ -363,7 +362,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <>
             <div className="section-heading">
               <Ruler style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-              <span>{t("lensDetails")} {language === 'ar' && '(Lens Details)'}</span>
+              <span>{t("lensDetails")} {language === 'ar' && '(تفاصيل العدسات)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
               <div className="data-row">
@@ -392,7 +391,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
 
         <div className="section-heading">
           <CircleDot style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-          <span>{t("additionalNotes")} {language === 'ar' && '(Additional Notes)'}</span>
+          <span>{t("additionalNotes")} {language === 'ar' && '(ملاحظات إضافية)'}</span>
         </div>
         <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
           <div style={{ border: "0.2mm solid #000", minHeight: "15mm", backgroundColor: "#fff", width: "100%" }}></div>
@@ -401,7 +400,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         <div style={{ marginTop: "5mm", paddingTop: "2mm", borderTop: "0.3mm solid #000" }}>
           <div style={{ marginBottom: "5mm" }}>
             <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm" }}>
-              {t("technicianSignature")} {language === 'ar' && '(Technician Signature)'}
+              {t("technicianSignature")} {language === 'ar' && '(توقيع الفني)'}
             </p>
             <div className="signature-line"></div>
             <div className="date-line">{t("date")}: ___ / ___ / _____</div>
@@ -410,7 +409,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <div>
             <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm", display: "flex", alignItems: "center" }}>
               <BadgeCheck style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-              {t("qualityConfirmation")} {language === 'ar' && '(Quality Confirmation)'}
+              {t("qualityConfirmation")} {language === 'ar' && '(تأكيد الجودة)'}
             </p>
             <div className="signature-line"></div>
             <div className="date-line">{t("date")}: ___ / ___ / _____</div>

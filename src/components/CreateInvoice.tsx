@@ -17,9 +17,8 @@ import { InvoiceStepPayment } from "@/components/invoice-steps/InvoiceStepPaymen
 import { InvoiceStepSummary } from "@/components/invoice-steps/InvoiceStepSummary";
 import { InvoiceFormProvider, useInvoiceForm } from "@/components/invoice-steps/InvoiceFormContext";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
-import { CustomWorkOrderReceipt } from "@/components/CustomWorkOrderReceipt";
+import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
-import { CustomPrintService } from "@/utils/CustomPrintService";
 
 const CreateInvoiceContent: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -31,29 +30,10 @@ const CreateInvoiceContent: React.FC = () => {
   const { getValues, setValue } = useInvoiceForm();
   
   const handlePrintWorkOrder = () => {
-    const workOrderData = {
-      patientName: getValues("patientName") || "",
-      patientPhone: getValues("patientPhone") || "",
-      rx: getValues("rx"),
-      lensType: getValues("lensType") || "",
-      lensPrice: getValues("lensPrice") || 0,
-      coating: getValues("coating") || "",
-      coatingPrice: getValues("coatingPrice") || 0,
-      frameBrand: getValues("frameBrand") || "",
-      frameModel: getValues("frameModel") || "",
-      frameColor: getValues("frameColor") || "",
-      frameSize: getValues("frameSize") || "",
-      framePrice: getValues("framePrice") || 0,
-      discount: getValues("discount") || 0,
-      deposit: getValues("deposit") || 0,
-      total: getValues("total") || 0,
-      workOrderId: getValues("workOrderId") || "PREVIEW"
-    };
-    
     setWorkOrderPrintOpen(true);
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrderData, previewInvoice);
-    }, 300);
+      window.print();
+    }, 500);
   };
   
   const handlePrintInvoice = () => {
@@ -560,21 +540,27 @@ const CreateInvoiceContent: React.FC = () => {
               {t('workOrder')}
             </SheetTitle>
             <SheetDescription>
-              <Button onClick={() => {
-                setTimeout(() => {
-                  CustomPrintService.printWorkOrder(previewInvoice, previewInvoice);
-                }, 100);
-              }} className="mt-2">
+              <Button onClick={handlePrintWorkOrder} className="mt-2">
                 <Printer className={`w-4 h-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                 {t('print')}
               </Button>
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6 print:mt-0">
-            <CustomWorkOrderReceipt 
-              workOrder={previewInvoice}
+            <WorkOrderPrint 
               invoice={previewInvoice}
-              isPrintable={true}
+              patientName={getValues("patientName") || ""}
+              patientPhone={getValues("patientPhone") || ""}
+              rx={getValues("rx")}
+              lensType={getValues("lensType") || ""}
+              coating={getValues("coating") || ""}
+              frame={getValues("skipFrame") ? undefined : {
+                brand: getValues("frameBrand") || "",
+                model: getValues("frameModel") || "",
+                color: getValues("frameColor") || "",
+                size: getValues("frameSize") || "",
+                price: getValues("framePrice") || 0
+              }}
             />
           </div>
           <SheetFooter className="print:hidden mt-4">
