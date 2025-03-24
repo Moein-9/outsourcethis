@@ -8,6 +8,7 @@ import {
   Check, ChevronRight, FileText, PartyPopper,
   CreditCard, User, Phone, Calendar, AlertTriangle
 } from "lucide-react";
+import { CustomPrintService } from "@/utils/CustomPrintService";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -26,7 +27,8 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
   const invoice = {
-    invoiceId: getValues<string>('workOrderId') || "",
+    invoiceId: getValues<string>('invoiceId') || "",
+    workOrderId: getValues<string>('workOrderId') || "",
     patientName: getValues<string>('patientName') || "",
     patientPhone: getValues<string>('patientPhone') || "",
     patientId: getValues<string>('patientId'),
@@ -45,7 +47,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     paymentMethod: getValues<string>('paymentMethod') || "",
     isPaid: getValues<boolean>('isPaid'),
     authNumber: getValues<string>('authNumber') || "",
-    workOrderId: getValues<string>('workOrderId') || "",
+    createdAt: new Date().toISOString(),
   };
   
   const patient = {
@@ -53,7 +55,31 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     phone: getValues<string>('patientPhone') || ""
   };
   
-  const hasInvoiceData = !!invoice.workOrderId;
+  const hasInvoiceData = !!invoice.invoiceId && !!invoice.workOrderId;
+  
+  const handlePrintWorkOrder = () => {
+    if (hasInvoiceData) {
+      const rx = getValues('rx');
+      const workOrder = {
+        id: invoice.workOrderId,
+        patientName: invoice.patientName,
+        patientPhone: invoice.patientPhone,
+        rx
+      };
+      
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+    } else {
+      setWorkOrderPrintOpen(true);
+    }
+  };
+  
+  const handlePrintInvoice = () => {
+    if (hasInvoiceData) {
+      CustomPrintService.printInvoice(invoice);
+    } else {
+      setInvoicePrintOpen(true);
+    }
+  };
   
   // If no invoice data is available, show a guidance message
   if (!hasInvoiceData) {
@@ -107,6 +133,14 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
         
         <div className="bg-white p-6 rounded-lg border border-green-200 mb-5 shadow-sm">
           <div className="flex flex-col space-y-4">
+            <div className={`flex justify-between items-center pb-3 border-b border-dashed border-green-200 ${textAlignClass}`}>
+              <div className="flex items-center">
+                <FileText className="w-5 h-5 text-primary mr-2" />
+                <span className="text-gray-600 font-medium">{t('invoiceNumber')}:</span>
+              </div>
+              <span className="font-bold text-lg text-primary">{invoice.invoiceId}</span>
+            </div>
+            
             <div className={`flex justify-between items-center pb-3 border-b border-dashed border-green-200 ${textAlignClass}`}>
               <div className="flex items-center">
                 <FileText className="w-5 h-5 text-primary mr-2" />
@@ -174,7 +208,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
           <Button 
             variant="outline"
             className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-            onClick={() => setWorkOrderPrintOpen(true)}
+            onClick={handlePrintWorkOrder}
           >
             <div className="flex items-center">
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
@@ -191,7 +225,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
           <Button 
             variant="outline"
             className="w-full justify-between group hover:border-purple-500 hover:bg-purple-50 hover:text-purple-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-            onClick={() => setInvoicePrintOpen(true)}
+            onClick={handlePrintInvoice}
           >
             <div className="flex items-center">
               <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-4 group-hover:bg-purple-200 transition-colors">

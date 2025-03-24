@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { 
   BadgePercent, Banknote, CreditCard, Check,
-  CreditCard as CardIcon
+  CreditCard as CardIcon, Save
 } from "lucide-react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/components/ui/use-toast";
@@ -16,13 +15,13 @@ import { toast } from "@/components/ui/use-toast";
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
   const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
-  const addWorkOrder = useInvoiceStore(state => state.addWorkOrder);
+  const { addWorkOrder, addInvoice } = useInvoiceStore();
   
   const [discount, setDiscount] = useState(getValues<number>('discount') || 0);
   const [deposit, setDeposit] = useState(getValues<number>('deposit') || 0);
   const [paymentMethod, setPaymentMethod] = useState(getValues<string>('paymentMethod') || "");
   const [authNumber, setAuthNumber] = useState(getValues<string>('authNumber') || "");
-  const [workOrderCreated, setWorkOrderCreated] = useState(!!getValues<string>('workOrderId'));
+  const [orderSaved, setOrderSaved] = useState(!!getValues<string>('invoiceId') && !!getValues<string>('workOrderId'));
   
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
@@ -68,7 +67,7 @@ export const InvoiceStepPayment: React.FC = () => {
     setValue('authNumber', e.target.value);
   };
 
-  const createWorkOrder = () => {
+  const saveOrder = () => {
     if (!paymentMethod) {
       toast({
         title: t('error'),
@@ -90,13 +89,44 @@ export const InvoiceStepPayment: React.FC = () => {
       }
     };
     
+    // Generate work order ID
     const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
     setValue('workOrderId', workOrderId);
-    setWorkOrderCreated(true);
+    
+    // Create invoice with unique ID (different from work order ID)
+    const invoiceData = {
+      patientId,
+      patientName: getValues<string>('patientName'),
+      patientPhone: getValues<string>('patientPhone'),
+      
+      lensType: getValues<string>('lensType'),
+      lensPrice: getValues<number>('lensPrice'),
+      
+      coating: getValues<string>('coating'),
+      coatingPrice: getValues<number>('coatingPrice'),
+      
+      frameBrand: getValues<string>('frameBrand'),
+      frameModel: getValues<string>('frameModel'),
+      frameColor: getValues<string>('frameColor'),
+      frameSize: getValues<string>('frameSize'),
+      framePrice: getValues<number>('framePrice'),
+      
+      discount: discount,
+      deposit: deposit,
+      total: total,
+      
+      paymentMethod: paymentMethod,
+      authNumber: authNumber,
+      workOrderId: workOrderId // Link invoice to work order
+    };
+    
+    const invoiceId = addInvoice(invoiceData);
+    setValue('invoiceId', invoiceId);
+    setOrderSaved(true);
     
     toast({
       title: t('success'),
-      description: `${t('workOrderCreated')} ${workOrderId}`,
+      description: `${t('orderSavedSuccess')} (${t('invoice')}: ${invoiceId}, ${t('workOrder')}: ${workOrderId})`,
     });
   };
   
@@ -269,14 +299,17 @@ export const InvoiceStepPayment: React.FC = () => {
           </div>
         </div>
         
-        {!workOrderCreated ? (
+        {!orderSaved ? (
           <motion.div className="mt-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Button 
               className="w-full" 
               size="lg"
-              onClick={createWorkOrder}
+              onClick={saveOrder}
             >
-              {t('createWorkOrder')}
+              <Save className="w-5 h-5 mr-2" />
+              <span>{language === 'ar' ? 'حفظ الطلب' : 'Save Order'}</span>
+              <span className="mx-1">|</span>
+              <span>{language === 'en' ? 'حفظ الطلب' : 'Save Order'}</span>
             </Button>
           </motion.div>
         ) : (
@@ -286,7 +319,13 @@ export const InvoiceStepPayment: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <Check className="w-5 h-5 mr-2" />
-            <span className="font-medium">{t('workOrderCreated')}: {getValues<string>('workOrderId')}</span>
+            <span className="font-medium">
+              {t('orderSaved')}:
+              <br />
+              {t('invoice')}: {getValues<string>('invoiceId')}
+              <br />
+              {t('workOrder')}: {getValues<string>('workOrderId')}
+            </span>
           </motion.div>
         )}
       </div>
