@@ -8,7 +8,7 @@ import { useLanguageStore } from '@/store/languageStore';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { EditWorkOrderDialog } from './EditWorkOrderDialog';
-import { Eye, Pencil, Receipt } from 'lucide-react';
+import { Eye, Pencil, Receipt, Calendar, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PrintWorkOrderButton } from './PrintWorkOrderButton';
 
@@ -60,7 +60,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   if (!patientInvoices.length) {
     return (
       <Card className="mt-8">
-        <CardHeader className="bg-primary text-primary-foreground">
+        <CardHeader className="bg-gradient-to-r from-primary/90 to-primary text-primary-foreground">
           <CardTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5" />
             {t("transactionHistory")}
@@ -77,8 +77,8 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   
   return (
     <>
-      <Card className="mt-8">
-        <CardHeader className="bg-primary text-primary-foreground">
+      <Card className="mt-8 overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-primary/90 to-primary text-primary-foreground">
           <CardTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5" />
             {t("transactionHistory")}
@@ -88,10 +88,20 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-muted/50">
                   <TableHead>{t("invoiceId")}</TableHead>
-                  <TableHead>{t("date")}</TableHead>
-                  <TableHead>{t("total")}</TableHead>
+                  <TableHead>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {t("date")}
+                    </div>
+                  </TableHead>
+                  <TableHead>
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="w-3.5 h-3.5" />
+                      {t("total")}
+                    </div>
+                  </TableHead>
                   <TableHead>{t("status")}</TableHead>
                   <TableHead className="text-right">{t("actions")}</TableHead>
                 </TableRow>
@@ -102,12 +112,16 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   const isPaid = remaining <= 0;
                   
                   return (
-                    <TableRow key={invoice.invoiceId}>
-                      <TableCell>{invoice.invoiceId}</TableCell>
+                    <TableRow key={invoice.invoiceId} className="hover:bg-accent/5 transition-colors">
+                      <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
                       <TableCell>{formatDate(invoice.createdAt)}</TableCell>
                       <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${isPaid ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          isPaid 
+                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200' 
+                            : 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200'
+                        }`}>
                           {isPaid ? t("paid") : t("partiallyPaid")}
                         </span>
                       </TableCell>
@@ -117,6 +131,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                           size="icon"
                           onClick={() => viewInvoiceDetails(invoice)}
                           title={t("view")}
+                          className="hover:bg-blue-100 hover:text-blue-700 transition-colors"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -125,6 +140,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                           size="icon"
                           onClick={() => handleEdit(invoice)}
                           title={t("edit")}
+                          className="hover:bg-amber-100 hover:text-amber-700 transition-colors"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -132,7 +148,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                           invoice={invoice}
                           variant="ghost"
                           size="icon"
-                          className="ml-1"
+                          className="ml-1 hover:bg-purple-100 hover:text-purple-700 transition-colors"
                         />
                       </TableCell>
                     </TableRow>

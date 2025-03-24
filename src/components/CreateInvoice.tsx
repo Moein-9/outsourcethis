@@ -5,10 +5,11 @@ import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { 
-  FileText, Printer, Receipt, Save, User, PackageCheck, CreditCard, Check
+  FileText, Printer, Receipt, Save, User, PackageCheck, CreditCard, Check,
+  Sparkles, PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InvoiceStepPatient } from "@/components/invoice-steps/InvoiceStepPatient";
 import { InvoiceStepProducts } from "@/components/invoice-steps/InvoiceStepProducts";
@@ -301,131 +302,198 @@ const CreateInvoiceContent: React.FC = () => {
         </div>
         
         <div className="col-span-1">
-          <Card className="border border-muted-foreground/10 shadow-md h-full">
-            <CardContent className="p-4">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-primary" />
+          <Card className="border border-primary-foreground/20 shadow-lg rounded-xl h-full overflow-hidden bg-gradient-to-b from-white to-slate-50">
+            <CardHeader className="bg-gradient-to-r from-primary/80 to-primary p-4 flex flex-row items-center justify-between">
+              <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
+                <Receipt className="w-5 h-5 text-white" />
                 {t('invoiceSummary')}
-              </h3>
-              
-              <div className="space-y-4">
+              </CardTitle>
+              <motion.div 
+                initial={{ rotate: 0 }}
+                animate={{ rotate: 15 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              >
+                <Sparkles className="w-5 h-5 text-yellow-300" />
+              </motion.div>
+            </CardHeader>
+            
+            <CardContent className="p-0">
+              <div className="divide-y divide-dashed">
                 {/* Patient Information */}
-                <div className="p-3 bg-muted/30 rounded-md">
-                  <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5" />
-                    {t('clientInformation')}
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <h4 className="text-sm font-medium mb-3 flex items-center gap-2 text-indigo-700">
+                    <User className="w-4 h-4 text-blue-500" />
+                    <span className="border-b-2 border-blue-200 pb-1 w-full">{t('clientInformation')}</span>
                   </h4>
-                  <p className="text-sm">{getValues("patientName") || t('noClientSelected')}</p>
-                  {getValues("patientPhone") && (
-                    <p className="text-sm text-muted-foreground">{getValues("patientPhone")}</p>
-                  )}
+                  <div className="p-3 bg-white rounded-lg shadow-sm">
+                    <p className="text-base font-semibold text-gray-800">{getValues("patientName") || t('noClientSelected')}</p>
+                    {getValues("patientPhone") && (
+                      <p className="text-sm text-indigo-600 mt-1 flex items-center gap-1">
+                        <Info className="w-3 h-3" /> 
+                        {getValues("patientPhone")}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 
                 {/* Products Information */}
-                <div className="p-3 bg-muted/30 rounded-md">
-                  <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-                    <PackageCheck className="w-3.5 h-3.5" />
-                    {t('productsInformation')}
+                <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50">
+                  <h4 className="text-sm font-medium mb-3 flex items-center gap-2 text-teal-700">
+                    <ShoppingBag className="w-4 h-4 text-emerald-500" />
+                    <span className="border-b-2 border-emerald-200 pb-1 w-full">{t('productsInformation')}</span>
                   </h4>
                   
-                  {invoiceType === "glasses" ? (
-                    <div className="space-y-2 text-sm">
-                      {/* Frame Information */}
-                      {!getValues("skipFrame") && getValues("frameBrand") && (
-                        <div>
-                          <p className="font-medium">{t('frame')}</p>
-                          <p className="text-muted-foreground">
-                            {getValues("frameBrand")} {getValues("frameModel")}
-                          </p>
-                          <p className="font-medium text-right">{getValues("framePrice")?.toFixed(3)} KWD</p>
-                        </div>
-                      )}
-                      
-                      {/* Lens Information */}
-                      {getValues("lensType") && (
-                        <div>
-                          <p className="font-medium">{t('lensType')}</p>
-                          <p className="text-muted-foreground">{getValues("lensType")}</p>
-                          <p className="font-medium text-right">{getValues("lensPrice")?.toFixed(3)} KWD</p>
-                        </div>
-                      )}
-                      
-                      {/* Coating Information */}
-                      {getValues("coating") && (
-                        <div>
-                          <p className="font-medium">{t('coating')}</p>
-                          <p className="text-muted-foreground">{getValues("coating")}</p>
-                          <p className="font-medium text-right">{getValues("coatingPrice")?.toFixed(3)} KWD</p>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-2 text-sm">
-                      {/* Contact Lens Information */}
-                      {(getValues("contactLensItems") || []).map((lens, index) => (
-                        <div key={index}>
-                          <p className="font-medium">{lens.brand} {lens.type}</p>
-                          <p className="text-muted-foreground">{lens.power}</p>
-                          <p className="font-medium text-right">{lens.price?.toFixed(3)} KWD</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Show message if no products selected */}
-                  {invoiceType === "glasses" && 
-                   !getValues("lensType") && 
-                   (getValues("skipFrame") || !getValues("frameBrand")) && (
-                    <p className="text-sm text-muted-foreground">{t('noProductsSelected')}</p>
-                  )}
-                  
-                  {invoiceType === "contacts" && 
-                   (!getValues("contactLensItems") || getValues("contactLensItems").length === 0) && (
-                    <p className="text-sm text-muted-foreground">{t('noProductsSelected')}</p>
-                  )}
-                </div>
-                
-                {/* Payment Information */}
-                <div className="p-3 bg-muted/30 rounded-md">
-                  <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-                    <CreditCard className="w-3.5 h-3.5" />
-                    {t('paymentInformation')}
-                  </h4>
-                  
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span>{t('subtotal')}</span>
-                      <span>{(total + (getValues("discount") || 0)).toFixed(3)} KWD</span>
-                    </div>
-                    
-                    {(getValues("discount") || 0) > 0 && (
-                      <div className="flex justify-between">
-                        <span>{t('discount')}</span>
-                        <span>-{(getValues("discount") || 0).toFixed(3)} KWD</span>
+                  <div className="space-y-3">
+                    {invoiceType === "glasses" ? (
+                      <div>
+                        {/* Frame Information */}
+                        {!getValues("skipFrame") && getValues("frameBrand") && (
+                          <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-amber-100 rounded-bl-full opacity-20"></div>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-amber-700 flex items-center gap-1">
+                                  <Tag className="w-3 h-3" /> {t('frame')}
+                                </p>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {getValues("frameBrand")} {getValues("frameModel")}
+                                </p>
+                              </div>
+                              <p className="font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-md text-sm">
+                                {getValues("framePrice")?.toFixed(3)} KWD
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Lens Information */}
+                        {getValues("lensType") && (
+                          <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full opacity-20"></div>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-blue-700 flex items-center gap-1">
+                                  <Tag className="w-3 h-3" /> {t('lensType')}
+                                </p>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {getValues("lensType")}
+                                </p>
+                              </div>
+                              <p className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-sm">
+                                {getValues("lensPrice")?.toFixed(3)} KWD
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Coating Information */}
+                        {getValues("coating") && (
+                          <div className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 rounded-bl-full opacity-20"></div>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-purple-700 flex items-center gap-1">
+                                  <Tag className="w-3 h-3" /> {t('coating')}
+                                </p>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {getValues("coating")}
+                                </p>
+                              </div>
+                              <p className="font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-md text-sm">
+                                {getValues("coatingPrice")?.toFixed(3)} KWD
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {/* Contact Lens Information */}
+                        {(getValues("contactLensItems") || []).map((lens, index) => (
+                          <div key={index} className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-bl-full opacity-20"></div>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-green-700 flex items-center gap-1">
+                                  <Tag className="w-3 h-3" /> {lens.brand} {lens.type}
+                                </p>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {lens.power}
+                                </p>
+                              </div>
+                              <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md text-sm">
+                                {lens.price?.toFixed(3)} KWD
+                              </p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                     
-                    <div className="flex justify-between font-medium border-t pt-1 mt-1">
-                      <span>{t('total')}</span>
-                      <span>{total.toFixed(3)} KWD</span>
+                    {/* Show message if no products selected */}
+                    {invoiceType === "glasses" && 
+                     !getValues("lensType") && 
+                     (getValues("skipFrame") || !getValues("frameBrand")) && (
+                      <div className="p-3 bg-white/80 rounded-lg text-center">
+                        <ShoppingBag className="w-5 h-5 text-gray-400 mx-auto mb-1" />
+                        <p className="text-sm text-gray-500">{t('noProductsSelected')}</p>
+                      </div>
+                    )}
+                    
+                    {invoiceType === "contacts" && 
+                     (!getValues("contactLensItems") || getValues("contactLensItems").length === 0) && (
+                      <div className="p-3 bg-white/80 rounded-lg text-center">
+                        <ShoppingBag className="w-5 h-5 text-gray-400 mx-auto mb-1" />
+                        <p className="text-sm text-gray-500">{t('noProductsSelected')}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Payment Information */}
+                <div className="p-4 bg-gradient-to-r from-orange-50 to-amber-50">
+                  <h4 className="text-sm font-medium mb-3 flex items-center gap-2 text-amber-700">
+                    <DollarSign className="w-4 h-4 text-orange-500" />
+                    <span className="border-b-2 border-amber-200 pb-1 w-full">{t('paymentInformation')}</span>
+                  </h4>
+                  
+                  <div className="p-3 bg-white rounded-lg shadow-sm space-y-2">
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-sm text-gray-600">{t('subtotal')}</span>
+                      <span className="font-medium">{(total + (getValues("discount") || 0)).toFixed(3)} KWD</span>
                     </div>
                     
-                    <div className="flex justify-between">
-                      <span>{t('deposit')}</span>
-                      <span>{(getValues("deposit") || 0).toFixed(3)} KWD</span>
+                    {(getValues("discount") || 0) > 0 && (
+                      <div className="flex justify-between items-center py-1 text-rose-600">
+                        <span className="text-sm flex items-center gap-1">
+                          <Calculator className="w-3 h-3" /> {t('discount')}
+                        </span>
+                        <span className="font-medium">-{(getValues("discount") || 0).toFixed(3)} KWD</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between items-center py-2 border-t border-dashed border-amber-200">
+                      <span className="font-medium text-gray-800">{t('total')}</span>
+                      <span className="text-lg font-bold text-amber-600">{total.toFixed(3)} KWD</span>
                     </div>
                     
-                    <div className="flex justify-between font-medium border-t pt-1 mt-1">
-                      <span>{t('remaining')}</span>
-                      <span className={remaining <= 0 ? "text-green-600" : "text-amber-600"}>
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-sm text-gray-600">{t('deposit')}</span>
+                      <span className="font-medium text-green-600">{(getValues("deposit") || 0).toFixed(3)} KWD</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center py-2 border-t border-dashed border-amber-200">
+                      <span className="font-medium text-gray-800">{t('remaining')}</span>
+                      <span className={`text-lg font-bold ${remaining <= 0 ? "text-green-600" : "text-amber-600"}`}>
                         {remaining.toFixed(3)} KWD
                       </span>
                     </div>
                     
                     {remaining <= 0 && (
-                      <div className="flex items-center justify-center gap-1.5 bg-green-50 text-green-700 py-1 px-2 rounded-md mt-2">
-                        <Check className="w-3.5 h-3.5" />
-                        <span className="text-xs font-medium">{t('paidInFull')}</span>
+                      <div className="mt-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 px-3 rounded-md flex items-center justify-center gap-2 shadow-sm">
+                        <Check className="w-4 h-4" />
+                        <span className="font-medium">{t('paidInFull')}</span>
+                        <PartyPopper className="w-4 h-4" />
                       </div>
                     )}
                   </div>
