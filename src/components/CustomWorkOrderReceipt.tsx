@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -290,6 +289,10 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                           <span>{lens.color}</span>
                         </div>
                       )}
+                      <div className="flex justify-between">
+                        <span className="font-semibold">{isRtl ? "الكمية" : "Quantity"}:</span>
+                        <span>{lens.qty || 1}</span>
+                      </div>
                       {lens.price > 0 && (
                         <div className="flex justify-between">
                           <span className="font-semibold">{isRtl ? "السعر" : "Price"}:</span>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -76,7 +75,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const auth = authNumber || (invoice as any).authNumber;
   const isPaid = rem <= 0;
   
-  // Prioritize passed contactLenses, then invoice.contactLensItems
   const contactLensItems = contactLenses || invoice.contactLensItems || [];
   
   const isContactLens = invoiceType === "contacts" || invoice.invoiceType === "contacts" || contactLensItems.length > 0;
@@ -181,9 +179,10 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                   <div className="font-bold text-sm">{lens.brand} {lens.type}</div>
                   <span className="font-bold text-sm">{lens.price.toFixed(3)} KWD</span>
                 </div>
-                {lens.color && (
-                  <div className="text-xs font-medium text-center">{t("color")}: {lens.color}</div>
-                )}
+                <div className="text-xs font-medium text-center">
+                  {lens.color && <span>{t("color")}: {lens.color} - </span>}
+                  <span>{t("quantity")}: {lens.qty || 1}</span>
+                </div>
               </div>
             ))
           ) : (
@@ -381,4 +380,3 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
     </div>
   );
 };
-
