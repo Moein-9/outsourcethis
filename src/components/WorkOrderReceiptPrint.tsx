@@ -35,6 +35,13 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
   };
   
   try {
+    // Clean up any existing print frames first
+    const existingPrintElements = document.querySelectorAll('#thermal-print');
+    existingPrintElements.forEach(el => {
+      ReactDOM.unmountComponentAtNode(el as HTMLElement);
+      el.remove();
+    });
+    
     // Create a new div for printing
     const workOrderElement = document.createElement('div');
     workOrderElement.id = 'thermal-print';
@@ -48,6 +55,7 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
     workOrderElement.style.position = 'fixed';
     workOrderElement.style.top = '0';
     workOrderElement.style.left = '0';
+    workOrderElement.style.zIndex = '-1000'; // Keep it below everything
     workOrderElement.style.overflow = 'hidden';
     
     // Add class for print styling
@@ -77,19 +85,27 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
     // Ensure content is fully rendered before printing
     setTimeout(() => {
       workOrderElement.style.visibility = 'visible';
+      workOrderElement.style.zIndex = '9999'; // Bring it to the front for printing
       
-      // Use single window.print() to avoid multiple popups
+      // Use a single print operation to prevent multiple popups
       window.print();
       
       // Clean up after printing
       setTimeout(() => {
         if (document.body.contains(workOrderElement)) {
-          // Clean up React components before removing element
-          ReactDOM.unmountComponentAtNode(workOrderElement);
-          document.body.removeChild(workOrderElement);
+          workOrderElement.style.zIndex = '-1000'; // Hide it again
+          workOrderElement.style.visibility = 'hidden';
+          
+          // Clean up React components after a delay
+          setTimeout(() => {
+            if (document.body.contains(workOrderElement)) {
+              ReactDOM.unmountComponentAtNode(workOrderElement);
+              document.body.removeChild(workOrderElement);
+            }
+          }, 500);
         }
-      }, 1000);
-    }, 500);
+      }, 500);
+    }, 300);
   } catch (error) {
     console.error("Error printing work order:", error);
     toast({

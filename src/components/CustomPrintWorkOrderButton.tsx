@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogTrigger,
-  DialogTitle,
-  DialogDescription
-} from '@/components/ui/dialog';
+  Sheet, 
+  SheetContent, 
+  SheetTrigger,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from '@/components/ui/sheet';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
 import { printWorkOrderReceipt } from './WorkOrderReceiptPrint';
 
@@ -38,9 +39,11 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   
   const handlePrint = () => {
     setIsLoading(true);
-    setOpen(false); // Close dialog before printing
     
-    // Slightly longer delay to ensure dialog is fully closed
+    // Close the sheet before printing to avoid stacking dialogs
+    setOpen(false);
+    
+    // Add a delay before printing to ensure the sheet is fully closed
     setTimeout(() => {
       try {
         // Use our unified printing method
@@ -71,20 +74,20 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     </Button>
   );
   
-  // Ensure we only pass a single valid element to DialogTrigger
+  // Ensure we only pass a single valid element to SheetTrigger
   const triggerElement = React.isValidElement(children) ? children : defaultButton;
   
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         {triggerElement}
-      </DialogTrigger>
-      <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto p-0">
+      </SheetTrigger>
+      <SheetContent side="right" className="sm:max-w-md p-0 overflow-y-auto">
         <div className="p-6 flex flex-col items-center">
-          <DialogTitle className="sr-only">{t('workOrderPreview')}</DialogTitle>
-          <DialogDescription className="sr-only">
+          <SheetTitle className="text-center">{t('workOrderPreview')}</SheetTitle>
+          <SheetDescription className="text-center mb-4">
             {t('previewBeforePrinting')}
-          </DialogDescription>
+          </SheetDescription>
           
           <div className="w-full max-w-[80mm] bg-white p-0 border rounded shadow-sm mb-4">
             <CustomWorkOrderReceipt 
@@ -94,16 +97,20 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               isPrintable={false}
             />
           </div>
-          <Button 
-            onClick={handlePrint} 
-            className="mt-4 gap-2"
-            disabled={isLoading}
-          >
-            <Printer className="h-4 w-4" />
-            {isLoading ? t('printing') : t('print')}
-          </Button>
+          
+          <SheetFooter className="w-full flex justify-center mt-4">
+            <Button 
+              onClick={handlePrint} 
+              className="gap-2"
+              disabled={isLoading}
+              size="lg"
+            >
+              <Printer className="h-4 w-4" />
+              {isLoading ? t('printing') : t('print')}
+            </Button>
+          </SheetFooter>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 };
