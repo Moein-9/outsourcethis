@@ -23,6 +23,13 @@ export class CustomPrintService {
           <head>
             <title>Work Order</title>
             <style>
+              /* Reset and base styles */
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              
               @media print {
                 @page {
                   size: 80mm auto !important;
@@ -30,22 +37,24 @@ export class CustomPrintService {
                   padding: 0 !important;
                 }
                 
-                body {
+                html, body {
                   width: 80mm !important;
                   margin: 0 !important;
                   padding: 0 !important;
-                  background: white !important; /* White background for print */
+                  background: white !important;
                   color: black !important;
+                  height: auto !important;
+                  min-height: 0 !important;
+                  max-height: none !important;
+                  overflow: visible !important;
                 }
                 
                 #work-order-receipt {
                   width: 76mm !important;
                   max-width: 76mm !important;
-                  page-break-after: always !important;
+                  page-break-after: avoid !important;
                   page-break-inside: avoid !important;
-                  position: absolute !important;
-                  left: 0 !important;
-                  top: 0 !important;
+                  position: relative !important;
                   border: none !important;
                   box-shadow: none !important;
                   padding: 2mm !important;
@@ -57,8 +66,16 @@ export class CustomPrintService {
                   max-height: none !important;
                 }
                 
+                /* Force single page */
+                body {
+                  display: block !important;
+                  page-break-after: always !important;
+                  page-break-before: always !important;
+                  page-break-inside: avoid !important;
+                }
+                
                 /* Force content to be visible */
-                .print-receipt * {
+                * {
                   visibility: visible !important;
                   opacity: 1 !important;
                 }
@@ -76,14 +93,6 @@ export class CustomPrintService {
                   color: white !important;
                 }
                 
-                /* Improve dynamic sizing */
-                html, body {
-                  height: auto !important;
-                  min-height: 0 !important;
-                  max-height: none !important;
-                  overflow: visible !important;
-                }
-                
                 /* Fix Chrome printing issues */
                 body {
                   -webkit-print-color-adjust: exact !important;
@@ -91,15 +100,8 @@ export class CustomPrintService {
                   print-color-adjust: exact !important;
                 }
                 
-                /* Dynamic height adjustment */
-                .print-receipt {
-                  height: fit-content !important;
-                  min-height: fit-content !important;
-                  max-height: fit-content !important;
-                }
-                
                 /* Ensure proper page breaks and avoid blank pages */
-                .print-receipt {
+                #custom-work-order-content {
                   break-inside: avoid !important;
                   break-after: avoid-page !important;
                   page-break-inside: avoid !important;
@@ -113,6 +115,7 @@ export class CustomPrintService {
                 padding: 0;
                 background: white;
                 color: black;
+                width: 80mm;
               }
               
               /* Background classes */

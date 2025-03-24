@@ -6,6 +6,7 @@ import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
+import { CustomPrintWorkOrderButton } from "./CustomPrintWorkOrderButton";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -50,10 +51,9 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
 }) => {
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
-  const { addInvoice, addExistingInvoice } = useInvoiceStore();
+  const { addInvoice } = useInvoiceStore();
   
-  const handlePrint = () => {
-    // If it's a new invoice, save it first to generate an invoice ID
+  const handleSaveInvoice = () => {
     if (isNewInvoice && !invoice.invoiceId) {
       setLoading(true);
       try {
@@ -92,8 +92,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           description: t("invoiceNumber") + ": " + invoiceId,
         });
         
-        // Show the print selector with the updated invoice that has an ID
-        showPrintSelector(updatedInvoice);
+        return updatedInvoice;
       } catch (error) {
         console.error("Error saving invoice:", error);
         toast({
@@ -101,41 +100,23 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           description: t("errorSavingInvoice"),
           variant: "destructive",
         });
+        return null;
       } finally {
         setLoading(false);
       }
-    } else {
-      // If already has an ID, just show the print selector
-      showPrintSelector(invoice);
     }
+    
+    return invoice;
   };
   
-  const showPrintSelector = (invoiceToUse: Invoice) => {
-    // Create the print selector with proper styling for printing
-    const selectorContainer = document.createElement('div');
-    selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars
-    document.body.appendChild(selectorContainer);
-    
-    const selector = (
-      <WorkOrderPrintSelector
-        invoice={invoiceToUse}
-        patientName={patientName}
-        patientPhone={patientPhone}
-        rx={rx}
-        lensType={lensType}
-        coating={coating}
-        frame={frame}
-        contactLenses={contactLenses}
-        contactLensRx={contactLensRx}
-        thermalOnly={thermalOnly}
-      />
-    );
-    
-    return selector;
+  const handlePrint = () => {
+    const invoiceToUse = handleSaveInvoice();
+    if (!invoiceToUse) return;
   };
 
-  return (
-    <>
+  // For new invoices, show a simple button that saves and then prints
+  if (isNewInvoice) {
+    return (
       <Button 
         variant={variant} 
         size={size} 
@@ -146,26 +127,26 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         <Printer className="h-4 w-4 mr-1" /> 
         {loading ? t("saving") : t("printWorkOrder")}
       </Button>
-      
-      {!isNewInvoice && (
-        <WorkOrderPrintSelector
-          invoice={invoice}
-          patientName={patientName}
-          patientPhone={patientPhone}
-          rx={rx}
-          lensType={lensType}
-          coating={coating}
-          frame={frame}
-          contactLenses={contactLenses}
-          contactLensRx={contactLensRx}
-          thermalOnly={thermalOnly}
-          trigger={
-            <Button variant={variant} size={size} className={className}>
-              <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
-            </Button>
-          }
-        />
-      )}
-    </>
+    );
+  }
+  
+  // For existing invoices, use CustomPrintWorkOrderButton
+  return (
+    <CustomPrintWorkOrderButton
+      workOrder={invoice}
+      invoice={invoice}
+      patient={{
+        name: patientName,
+        phone: patientPhone,
+        rx: rx
+      }}
+      className={className}
+      variant={variant}
+      size={size}
+    >
+      <Button variant={variant} size={size} className={className}>
+        <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
+      </Button>
+    </CustomPrintWorkOrderButton>
   );
 };
