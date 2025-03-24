@@ -295,8 +295,14 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                       </div>
                       {lens.price > 0 && (
                         <div className="flex justify-between">
-                          <span className="font-semibold">{isRtl ? "السعر" : "Price"}:</span>
+                          <span className="font-semibold">{isRtl ? "السعر الإفرادي" : "Unit Price"}:</span>
                           <span className="font-bold">{lens.price.toFixed(3)} KWD</span>
+                        </div>
+                      )}
+                      {lens.price > 0 && lens.qty > 1 && (
+                        <div className="flex justify-between">
+                          <span className="font-semibold">{isRtl ? "المجموع" : "Total"}:</span>
+                          <span className="font-bold">{(lens.price * (lens.qty || 1)).toFixed(3)} KWD</span>
                         </div>
                       )}
                     </div>
@@ -574,3 +580,4 @@ const getCoatingArabic = (coating: string): string => {
   
   return coatingMap[coating] || coating;
 };
+
