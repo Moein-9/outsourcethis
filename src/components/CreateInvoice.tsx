@@ -390,9 +390,14 @@ const CreateInvoiceContent: React.FC = () => {
                                   <p className="font-medium text-green-700 flex items-center gap-1">
                                     <Tag className="w-3 h-3" /> {lens.brand} {lens.type}
                                   </p>
+                                  {lens.qty > 1 && (
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                      {t('quantity')}: {lens.qty}
+                                    </p>
+                                  )}
                                 </div>
                                 <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md text-sm">
-                                  {lens.price?.toFixed(3)} KWD
+                                  {(lens.price * (lens.qty || 1)).toFixed(3)} KWD
                                 </p>
                               </div>
                             </div>

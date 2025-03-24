@@ -67,6 +67,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     handleFilterApply();
   }, [filterBrand, filterType, search]);
 
+  // Calculate total with proper quantities
   const totalPrice = selectedLenses.reduce((sum, lens) => {
     const quantity = itemQuantities[lens.id] || 1;
     return sum + (lens.price * quantity);
@@ -91,17 +92,35 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   };
 
   const handleSelectLens = (lens: ContactLensItem) => {
-    const existingIndex = selectedLenses.findIndex(item => item.id === lens.id);
+    // Check if we already have this exact lens
+    const existingLensIndex = selectedLenses.findIndex(item => 
+      item.id === lens.id && 
+      item.brand === lens.brand && 
+      item.type === lens.type && 
+      item.bc === lens.bc && 
+      item.diameter === lens.diameter && 
+      item.power === lens.power
+    );
     
-    if (existingIndex >= 0) {
+    if (existingLensIndex >= 0) {
+      // Update quantity instead of adding duplicate
       const currentQty = itemQuantities[lens.id] || 1;
       setItemQuantities({
         ...itemQuantities,
         [lens.id]: currentQty + 1
       });
       
+      // Update lens qty in the selected array
+      const updatedLenses = [...selectedLenses];
+      updatedLenses[existingLensIndex] = {
+        ...updatedLenses[existingLensIndex],
+        qty: currentQty + 1
+      };
+      
+      setSelectedLenses(updatedLenses);
+      
       onSelect({
-        items: selectedLenses,
+        items: updatedLenses,
         rxData,
         quantities: {
           ...itemQuantities,
@@ -113,7 +132,9 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
       return;
     }
     
-    const updatedSelection = [...selectedLenses, lens];
+    // If it's a new lens, add it with qty 1
+    const newLens = { ...lens, qty: 1 };
+    const updatedSelection = [...selectedLenses, newLens];
     setSelectedLenses(updatedSelection);
     
     setItemQuantities({
@@ -151,13 +172,21 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   const handleUpdateQuantity = (lensId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
     
+    // Update quantity in itemQuantities state
     setItemQuantities({
       ...itemQuantities,
       [lensId]: newQuantity
     });
     
+    // Also update the qty property in the actual lens item
+    const updatedLenses = selectedLenses.map(lens => 
+      lens.id === lensId ? { ...lens, qty: newQuantity } : lens
+    );
+    
+    setSelectedLenses(updatedLenses);
+    
     onSelect({
-      items: selectedLenses,
+      items: updatedLenses,
       rxData,
       quantities: {
         ...itemQuantities,
@@ -167,8 +196,16 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   };
   
   const handleConfirmSelection = () => {
+    // Make sure all lenses have their qty property updated before finalizing
+    const finalLenses = selectedLenses.map(lens => ({
+      ...lens,
+      qty: itemQuantities[lens.id] || 1
+    }));
+    
+    setSelectedLenses(finalLenses);
+    
     onSelect({
-      items: selectedLenses,
+      items: finalLenses,
       rxData,
       quantities: itemQuantities
     });

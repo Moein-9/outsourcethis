@@ -107,7 +107,10 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     const discount = getValues<number>('discount') || 0;
     
     const contactLensItems = getValues<any[]>('contactLensItems') || [];
-    const contactLensTotal = contactLensItems.reduce((sum, lens) => sum + (lens.price || 0), 0);
+    // Calculate contact lens total accounting for quantities
+    const contactLensTotal = contactLensItems.reduce((sum, lens) => 
+      sum + ((lens.price || 0) * (lens.qty || 1)), 0
+    );
     
     if (getValues<string>('invoiceType') === 'glasses') {
       return Math.max(0, lensPrice + coatingPrice + framePrice - discount);

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -197,18 +196,31 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   
   const handleContactLensSelection = (selection: ContactLensSelection) => {
     if (selection.items) {
-      setValue('contactLensItems', selection.items);
+      // Save items with their quantities
+      const itemsWithQuantities = selection.items.map(item => ({
+        ...item,
+        qty: selection.quantities?.[item.id] || 1
+      }));
+      
+      setValue('contactLensItems', itemsWithQuantities);
       
       if (selection.rxData) {
         setValue('contactLensRx', selection.rxData);
       }
       
-      const lensesTotal = selection.items.reduce((sum, lens) => sum + lens.price, 0);
+      // Calculate total based on quantity
+      const lensesTotal = itemsWithQuantities.reduce((sum, lens) => 
+        sum + (lens.price * (lens.qty || 1)), 0
+      );
+      
       setValue('total', lensesTotal - (getValues<number>('discount') || 0));
       setValue('remaining', Math.max(0, lensesTotal - (getValues<number>('discount') || 0) - (getValues<number>('deposit') || 0)));
       
+      // Count total lenses including quantities
+      const totalLensCount = itemsWithQuantities.reduce((count, lens) => count + (lens.qty || 1), 0);
+      
       toast({
-        description: `${t('contactLensesTotal')} (${selection.items.length} ${t('lensCount')})`,
+        description: `${t('contactLensesTotal')} (${totalLensCount} ${t('lensCount')})`,
       });
     }
   };
