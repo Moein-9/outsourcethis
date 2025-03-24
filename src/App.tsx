@@ -9,17 +9,19 @@ import NotFound from "./pages/NotFound";
 import ReportPage from "./pages/ReportPage";
 import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 
-// Create a new QueryClient instance
+// Create a new QueryClient instance with explicit configuration
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      refetchOnWindowFocus: false
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
     }
   }
 });
 
-const App = () => {
+// Functional component without arrow function shorthand for clarity
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -37,6 +39,6 @@ const App = () => {
       </TooltipProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
