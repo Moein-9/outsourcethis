@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -58,6 +57,10 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const phone = patientPhone || invoice.patientPhone;
   const lensTypeValue = lensType || invoice.lensType;
   const coatingValue = coating || invoice.coating;
+  
+  const contactLensItems = contactLenses || (invoice as any).contactLensItems || [];
+  const contactLensRxData = contactLensRx || (invoice as any).contactLensRx;
+  
   const frameData = frame || (invoice.frameBrand ? {
     brand: invoice.frameBrand,
     model: invoice.frameModel,
@@ -66,9 +69,9 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
     price: invoice.framePrice
   } : undefined);
   
-  const isContactLens = contactLenses && contactLenses.length > 0;
+  const isContactLens = contactLensItems && contactLensItems.length > 0;
+  const invoiceType = (invoice as any).invoiceType || 'glasses';
   
-  // Use the workOrderId instead of invoiceId for the work order receipt
   const orderNumber = invoice.workOrderId || "NEW ORDER";
 
   return (
@@ -228,7 +231,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           )}
         </div>
 
-        {!isContactLens && frameData && (
+        {invoiceType === 'glasses' && frameData && (
           <>
             <div className="section-heading">
               <Glasses style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
@@ -262,8 +265,8 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               <span>{t("contactLensDetails")} {language === 'ar' && '(تفاصيل العدسات اللاصقة)'}</span>
             </div>
             <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
-              {contactLenses.map((lens, idx) => (
-                <div key={idx} style={{ marginBottom: "2mm", borderBottom: idx < contactLenses.length - 1 ? "0.2mm dashed #ccc" : "none", paddingBottom: "1mm" }}>
+              {contactLensItems.map((lens, idx) => (
+                <div key={idx} style={{ marginBottom: "2mm", borderBottom: idx < contactLensItems.length - 1 ? "0.2mm dashed #ccc" : "none", paddingBottom: "1mm" }}>
                   <div className="data-row">
                     <span className="data-label">{t("lens")} {idx + 1}:</span>
                     <span className="data-value">{lens.brand} {lens.type}</span>
@@ -272,13 +275,23 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                     <span className="data-label">{t("power")}:</span>
                     <span className="data-value">{lens.power}</span>
                   </div>
+                  {lens.color && (
+                    <div className="data-row">
+                      <span className="data-label">{t("color")}:</span>
+                      <span className="data-value">{lens.color}</span>
+                    </div>
+                  )}
+                  <div className="data-row">
+                    <span className="data-label">{t("quantity")}:</span>
+                    <span className="data-value">{lens.qty || 1}</span>
+                  </div>
                 </div>
               ))}
             </div>
           </>
         )}
 
-        {!isContactLens && rx && (
+        {invoiceType === 'glasses' && rx && (
           <>
             <div className="section-heading">
               <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
@@ -319,7 +332,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </>
         )}
         
-        {isContactLens && contactLensRx && (
+        {isContactLens && contactLensRxData && (
           <>
             <div className="section-heading">
               <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
@@ -340,19 +353,19 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 <tbody>
                   <tr>
                     <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.sphere || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.cylinder || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.axis || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.bc || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.dia || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.dia || "_____"}</td>
                   </tr>
                   <tr>
                     <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.sphere || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.cylinder || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.axis || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.bc || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.dia || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.dia || "_____"}</td>
                   </tr>
                 </tbody>
               </table>
@@ -360,7 +373,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </>
         )}
 
-        {!isContactLens && (
+        {invoiceType === 'glasses' && lensTypeValue && (
           <>
             <div className="section-heading">
               <Ruler style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />

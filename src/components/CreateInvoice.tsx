@@ -61,6 +61,7 @@ const CreateInvoiceContent: React.FC = () => {
     patientName: getValues("patientName") || "Customer Name",
     patientPhone: getValues("patientPhone") || "",
     patientId: getValues("patientId"),
+    invoiceType: getValues("invoiceType") || "glasses",
     lensType: getValues("lensType") || "",
     lensPrice: getValues("lensPrice") || 0,
     coating: getValues("coating") || "",
@@ -75,7 +76,8 @@ const CreateInvoiceContent: React.FC = () => {
     remaining: getValues("remaining") || 0,
     paymentMethod: getValues("paymentMethod") || "Cash",
     isPaid: (getValues("remaining") || 0) <= 0,
-    authNumber: getValues("authNumber") || ""
+    authNumber: getValues("authNumber") || "",
+    contactLensItems: getValues("contactLensItems") || []
   };
 
   const calculateTotal = () => {
@@ -524,6 +526,8 @@ const CreateInvoiceContent: React.FC = () => {
                 size: getValues("frameSize") || "",
                 price: getValues("framePrice") || 0
               }}
+              contactLenses={getValues("contactLensItems") || []}
+              contactLensRx={getValues("contactLensRx")}
             />
           </div>
           <SheetFooter className="print:hidden mt-4">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -28,7 +27,6 @@ export const InvoiceStepPayment: React.FC = () => {
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
   
-  // Update totals when dependencies change
   useEffect(() => {
     const newTotal = calculateTotal();
     const newRemaining = Math.max(0, newTotal - deposit);
@@ -36,7 +34,6 @@ export const InvoiceStepPayment: React.FC = () => {
     setTotal(newTotal);
     setRemaining(newRemaining);
     
-    // Update form values
     setValue('total', newTotal);
     setValue('remaining', newRemaining);
     setValue('isPaid', newRemaining <= 0);
@@ -79,39 +76,32 @@ export const InvoiceStepPayment: React.FC = () => {
       return;
     }
     
-    // Get patient details
     const patientId = getValues<string>('patientId') || 'anonymous';
+    const invoiceType = getValues<string>('invoiceType') || 'glasses';
     
-    // Create a work order
-    const workOrder = {
-      patientId,
-      lensType: {
-        name: getValues<string>('lensType'),
-        price: getValues<number>('lensPrice')
-      }
+    let workOrder: any = {
+      patientId
     };
     
-    // Generate work order ID
+    if (invoiceType === 'glasses') {
+      workOrder.lensType = {
+        name: getValues<string>('lensType'),
+        price: getValues<number>('lensPrice')
+      };
+    } else if (invoiceType === 'contacts') {
+      workOrder.contactLenses = getValues('contactLensItems') || [];
+      workOrder.contactLensRx = getValues('contactLensRx') || null;
+    }
+    
     const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
     setValue('workOrderId', workOrderId);
     
-    // Create and save the invoice
     const formData = getValues();
-    const invoiceData = {
+    const invoiceData: any = {
       patientId: formData.patientId,
       patientName: formData.patientName,
       patientPhone: formData.patientPhone,
-      
-      lensType: formData.lensType,
-      lensPrice: formData.lensPrice,
-      
-      coating: formData.coating,
-      coatingPrice: formData.coatingPrice,
-      
-      frameBrand: formData.frameBrand,
-      frameModel: formData.frameModel,
-      frameColor: formData.frameColor,
-      framePrice: formData.framePrice,
+      invoiceType: formData.invoiceType || 'glasses',
       
       discount: formData.discount,
       deposit: formData.deposit,
@@ -122,7 +112,22 @@ export const InvoiceStepPayment: React.FC = () => {
       workOrderId: workOrderId // Link to the work order
     };
     
-    // Generate invoice ID
+    if (invoiceType === 'glasses') {
+      invoiceData.lensType = formData.lensType;
+      invoiceData.lensPrice = formData.lensPrice;
+      
+      invoiceData.coating = formData.coating;
+      invoiceData.coatingPrice = formData.coatingPrice;
+      
+      invoiceData.frameBrand = formData.frameBrand;
+      invoiceData.frameModel = formData.frameModel;
+      invoiceData.frameColor = formData.frameColor;
+      invoiceData.framePrice = formData.framePrice;
+    } else if (invoiceType === 'contacts') {
+      invoiceData.contactLensItems = formData.contactLensItems || [];
+      invoiceData.contactLensRx = formData.contactLensRx || null;
+    }
+    
     const invoiceId = addInvoice(invoiceData);
     setValue('invoiceId', invoiceId);
     
@@ -133,7 +138,6 @@ export const InvoiceStepPayment: React.FC = () => {
       description: `${t('orderSavedSuccess')}`,
     });
 
-    // Navigate to summary tab
     if (window && window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('navigateToSummary'));
     }

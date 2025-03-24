@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { ContactLensItem } from '@/components/ContactLensSelector';
 
 export interface Payment {
   amount: number;
@@ -14,6 +15,8 @@ export interface Invoice {
   patientName: string;
   patientPhone: string;
   
+  invoiceType?: 'glasses' | 'contacts';
+  
   lensType: string;
   lensPrice: number;
   
@@ -23,8 +26,11 @@ export interface Invoice {
   frameBrand: string;
   frameModel: string;
   frameColor: string;
-  frameSize?: string; // Added frame size
+  frameSize?: string;
   framePrice: number;
+  
+  contactLensItems?: ContactLensItem[];
+  contactLensRx?: any;
   
   discount: number;
   deposit: number;
@@ -35,8 +41,8 @@ export interface Invoice {
   payments?: Payment[];
   createdAt: string;
   isPaid: boolean;
-  authNumber?: string; // Added for authorization numbers
-  workOrderId?: string; // Reference to the work order
+  authNumber?: string;
+  workOrderId?: string;
 }
 
 // Define WorkOrder interface
@@ -44,11 +50,14 @@ export interface WorkOrder {
   id: string;
   patientId: string;
   createdAt: string;
+  
   lensType?: {
     name: string;
     price: number;
   };
-  // Add other work order fields as needed
+  
+  contactLenses?: ContactLensItem[];
+  contactLensRx?: any;
 }
 
 interface InvoiceState {
@@ -64,8 +73,8 @@ interface InvoiceState {
   clearInvoices?: () => void;
   addExistingInvoice?: (invoice: Invoice) => void;
   addWorkOrder?: (workOrder: Omit<WorkOrder, "id" | "createdAt">) => string;
-  updateInvoice: (updatedInvoice: Invoice) => void; // Added updateInvoice function
-  updateWorkOrder?: (workOrder: WorkOrder) => void; // Added updateWorkOrder function
+  updateInvoice: (updatedInvoice: Invoice) => void;
+  updateWorkOrder?: (workOrder: WorkOrder) => void;
 }
 
 export const useInvoiceStore = create<InvoiceState>()(
