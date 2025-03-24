@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
@@ -69,7 +68,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   };
   
   return (
-    <Card className="border-amber-200 shadow-md">
+    <Card className="border-amber-200 shadow-md w-full">
       <CardHeader className="pb-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-t-lg">
         <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
           <Receipt className="h-5 w-5" />
@@ -79,7 +78,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
           {language === 'ar' ? "أوامر العمل والفواتير الخاصة بالعميل" : "Work orders and invoices for the client"}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="w-full overflow-x-auto">
         <Tabs 
           defaultValue="active" 
           value={activeTab}
@@ -103,7 +102,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
               </h3>
               
               {getActiveWorkOrders(workOrders).length > 0 ? (
-                <div className="rounded-md border overflow-hidden shadow-sm">
+                <div className="rounded-md border overflow-x-auto shadow-sm">
                   <Table>
                     <TableHeader className="bg-amber-50">
                       <TableRow>
@@ -112,7 +111,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                         <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
                         <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
                         <TableHead>{t('status')}</TableHead>
-                        <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
+                        <TableHead className="text-right">{t('actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -183,7 +182,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
               </h3>
               
               {invoices.filter(inv => inv.isPaid).length > 0 ? (
-                <div className="rounded-md border overflow-hidden shadow-sm">
+                <div className="rounded-md border overflow-x-auto shadow-sm">
                   <Table>
                     <TableHeader className="bg-green-50">
                       <TableRow>
@@ -192,7 +191,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                         <TableHead>{language === 'ar' ? "المبلغ" : "Amount"}</TableHead>
                         <TableHead>{language === 'ar' ? "تاريخ الفاتورة" : "Invoice Date"}</TableHead>
                         <TableHead>{t('status')}</TableHead>
-                        <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
+                        <TableHead className="text-right">{t('actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -246,7 +245,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
               </h3>
               
               {getCompletedWorkOrders(workOrders).length > 0 ? (
-                <div className="rounded-md border overflow-hidden shadow-sm">
+                <div className="rounded-md border overflow-x-auto shadow-sm">
                   <Table>
                     <TableHeader className="bg-blue-50">
                       <TableRow>
@@ -254,7 +253,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                         <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
                         <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
                         <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
-                        <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
+                        <TableHead className="text-right">{t('actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
