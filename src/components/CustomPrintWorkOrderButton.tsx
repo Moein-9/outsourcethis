@@ -41,9 +41,16 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     setIsPrinting(true);
     setOpen(false); // Close dialog before printing
     
+    // Make sure we're displaying the workOrderId, not the invoiceId
+    const workOrderData = {
+      ...workOrder,
+      // If workOrderId exists use it, otherwise generate a new one
+      workOrderId: workOrder.workOrderId || `WO${Date.now().toString().slice(-6)}`
+    };
+    
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+      CustomPrintService.printWorkOrder(workOrderData, invoice, patient);
       setIsPrinting(false);
     }, 300);
   };

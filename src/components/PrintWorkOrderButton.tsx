@@ -49,14 +49,13 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   onInvoiceSaved,
   children,
 }) => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   
   // Create a new object for invoice data instead of trying to modify the original invoice
   const invoiceData = {
     ...invoice,
     invoiceId: invoice.invoiceId || `INV${Date.now().toString().slice(-6)}`,
     workOrderId: invoice.workOrderId || `WO${Date.now().toString().slice(-6)}`
-    // Don't try to access rx directly from invoice since it doesn't exist on the Invoice type
   };
   
   return (
@@ -66,7 +65,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       patient={{
         name: patientName || invoiceData.patientName,
         phone: patientPhone || invoiceData.patientPhone,
-        rx: rx // Use the rx prop directly instead of trying to get it from invoice
+        rx: rx // Use the rx prop directly
       }}
       className={className}
       variant={variant}
@@ -74,7 +73,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     >
       {children || (
         <Button variant={variant} size={size} className={className}>
-          <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
+          <Printer className="h-4 w-4 mr-1" /> 
+          {language === 'ar' ? 'طباعة أمر العمل' : t('printWorkOrder')}
         </Button>
       )}
     </CustomPrintWorkOrderButton>
