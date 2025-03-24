@@ -67,7 +67,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const remaining = total - amountPaid;
   const isPaid = remaining <= 0;
   
-  const invoiceNumber = invoice?.invoiceId || invoice?.workOrderId || workOrder?.id || `WO${Date.now().toString().slice(-6)}`;
+  // Use the work order ID specifically for the work order receipt
+  const workOrderNumber = workOrder?.id || invoice?.workOrderId || `WO${Date.now().toString().slice(-6)}`;
 
   // If there's no workOrder or invoice data, show a message
   if (!workOrder && !invoice) {
@@ -139,7 +140,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         <p className="text-xs mb-0 text-gray-600">
           {isRtl ? "ORDER #: " : "رقم الطلب: "}
-          <span className="font-semibold">{invoiceNumber}</span>
+          <span className="font-semibold">{workOrderNumber}</span>
         </p>
         <p className="text-xs text-gray-600 rx-creation-date">
           {format(new Date(), 'yyyy-MM-dd HH:mm', { locale: enUS })}

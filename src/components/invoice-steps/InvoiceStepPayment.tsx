@@ -16,13 +16,14 @@ import { toast } from "@/components/ui/use-toast";
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
   const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
+  const addInvoice = useInvoiceStore(state => state.addInvoice);
   const addWorkOrder = useInvoiceStore(state => state.addWorkOrder);
   
   const [discount, setDiscount] = useState(getValues<number>('discount') || 0);
   const [deposit, setDeposit] = useState(getValues<number>('deposit') || 0);
   const [paymentMethod, setPaymentMethod] = useState(getValues<string>('paymentMethod') || "");
   const [authNumber, setAuthNumber] = useState(getValues<string>('authNumber') || "");
-  const [workOrderCreated, setWorkOrderCreated] = useState(!!getValues<string>('workOrderId'));
+  const [workOrderCreated, setWorkOrderCreated] = useState(false);
   
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
@@ -68,7 +69,7 @@ export const InvoiceStepPayment: React.FC = () => {
     setValue('authNumber', e.target.value);
   };
 
-  const createWorkOrder = () => {
+  const saveOrder = () => {
     if (!paymentMethod) {
       toast({
         title: t('error'),
@@ -90,13 +91,44 @@ export const InvoiceStepPayment: React.FC = () => {
       }
     };
     
+    // Generate unique work order ID
     const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
     setValue('workOrderId', workOrderId);
+    
+    // Create invoice (with a different ID than work order)
+    const formData = getValues();
+    const invoiceData = {
+      patientId: formData.patientId,
+      patientName: formData.patientName,
+      patientPhone: formData.patientPhone,
+      
+      lensType: formData.lensType,
+      lensPrice: formData.lensPrice,
+      
+      coating: formData.coating,
+      coatingPrice: formData.coatingPrice,
+      
+      frameBrand: formData.frameBrand,
+      frameModel: formData.frameModel,
+      frameColor: formData.frameColor,
+      framePrice: formData.framePrice,
+      
+      discount: formData.discount,
+      deposit: formData.deposit,
+      total: formData.total,
+      
+      paymentMethod: formData.paymentMethod,
+      authNumber: formData.authNumber,
+      workOrderId: workOrderId  // Store reference to work order
+    };
+    
+    const invoiceId = addInvoice(invoiceData);
+    setValue('invoiceId', invoiceId);  // Store the invoice ID separately
     setWorkOrderCreated(true);
     
     toast({
       title: t('success'),
-      description: `${t('workOrderCreated')} ${workOrderId}`,
+      description: `${t('orderSavedSuccess')} ${invoiceId}`,
     });
   };
   
@@ -274,9 +306,9 @@ export const InvoiceStepPayment: React.FC = () => {
             <Button 
               className="w-full" 
               size="lg"
-              onClick={createWorkOrder}
+              onClick={saveOrder}
             >
-              {t('createWorkOrder')}
+              {language === 'ar' ? 'حفظ الطلب | Save Order' : 'Save Order | حفظ الطلب'}
             </Button>
           </motion.div>
         ) : (
@@ -286,7 +318,13 @@ export const InvoiceStepPayment: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <Check className="w-5 h-5 mr-2" />
-            <span className="font-medium">{t('workOrderCreated')}: {getValues<string>('workOrderId')}</span>
+            <span className="font-medium">
+              {t('orderSaved')}:
+              <br />
+              {t('invoice')}: {getValues<string>('invoiceId')}
+              <br />
+              {t('workOrder')}: {getValues<string>('workOrderId')}
+            </span>
           </motion.div>
         )}
       </div>
