@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Printer, FileText, Receipt } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Invoice } from '@/store/invoiceStore';
-import { Patient, usePatientStore } from '@/store/patientStore';
+import { Patient } from '@/store/patientStore';
 
 interface PrintOptionsDialogProps {
   invoice?: Invoice;
