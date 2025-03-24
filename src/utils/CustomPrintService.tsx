@@ -35,7 +35,8 @@ export class CustomPrintService {
                   width: 80mm !important;
                   margin: 0 !important;
                   padding: 0 !important;
-                  background: white !important;
+                  background: #222222 !important; /* Dark background for print */
+                  color: white !important;
                 }
                 
                 #work-order-receipt {
@@ -50,7 +51,8 @@ export class CustomPrintService {
                   box-shadow: none !important;
                   padding: 2mm !important;
                   margin: 0 !important;
-                  background: white !important;
+                  background: #222222 !important;
+                  color: white !important;
                   height: auto !important;
                   min-height: 0 !important;
                   max-height: none !important;
@@ -94,12 +96,78 @@ export class CustomPrintService {
               }
               
               body {
-                font-family: Arial, sans-serif;
+                font-family: Cairo, Arial, sans-serif;
                 margin: 0;
                 padding: 0;
+                background: #222222;
+                color: white;
               }
               
-              /* Add any additional styles needed for the work order */
+              /* Additional styles for dark mode receipt */
+              .text-yellow-300 {
+                color: #fcd34d;
+              }
+              
+              .text-gray-300 {
+                color: #d1d5db;
+              }
+              
+              .text-white {
+                color: #ffffff;
+              }
+              
+              .bg-yellow-600 {
+                background-color: #d97706;
+              }
+              
+              .bg-gray-700 {
+                background-color: #374151;
+              }
+              
+              .bg-gray-800 {
+                background-color: #1f2937;
+              }
+              
+              .border-gray-600 {
+                border-color: #4b5563;
+              }
+              
+              .border-gray-700 {
+                border-color: #374151;
+              }
+              
+              /* Payment status indicators */
+              .bg-green-900 {
+                background-color: #064e3b;
+              }
+              
+              .border-green-700 {
+                border-color: #047857;
+              }
+              
+              .text-green-300 {
+                color: #6ee7b7;
+              }
+              
+              .text-green-400 {
+                color: #34d399;
+              }
+              
+              .bg-red-900 {
+                background-color: #7f1d1d;
+              }
+              
+              .border-red-700 {
+                border-color: #b91c1c;
+              }
+              
+              .text-red-300 {
+                color: #fca5a5;
+              }
+              
+              .text-red-200 {
+                color: #fecaca;
+              }
             </style>
           </head>
           <body>
