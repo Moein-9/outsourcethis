@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -233,11 +232,11 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                         <thead>
                           <tr className="bg-muted/50">
                             <th className="p-2 border text-center">{t('eye')}</th>
-                            <th className="p-2 border text-center">{t('sphere')}</th>
-                            <th className="p-2 border text-center">{t('cylinder')}</th>
-                            <th className="p-2 border text-center">{t('axis')}</th>
-                            <th className="p-2 border text-center">{t('addition')}</th>
-                            <th className="p-2 border text-center">{t('pdRight')}</th>
+                            <th className="p-2 border text-center">SPH</th>
+                            <th className="p-2 border text-center">CYL</th>
+                            <th className="p-2 border text-center">AXIS</th>
+                            <th className="p-2 border text-center">ADD</th>
+                            <th className="p-2 border text-center">PD</th>
                           </tr>
                         </thead>
                         <tbody>
