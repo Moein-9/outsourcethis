@@ -13,6 +13,7 @@ import { useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 import { PrintWorkOrderButton } from "../PrintWorkOrderButton";
 import { ReceiptInvoice } from "../ReceiptInvoice";
+import { PrintService } from "@/utils/PrintService";
 
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -25,6 +26,7 @@ export const InvoiceStepPayment: React.FC = () => {
   const [authNumber, setAuthNumber] = useState(getValues<string>('authNumber') || "");
   const [invoiceCreated, setInvoiceCreated] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
   
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
@@ -142,7 +144,57 @@ export const InvoiceStepPayment: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
+  const handlePrintReceipt = () => {
+    setPrintLoading(true);
+    try {
+      const container = document.createElement('div');
+      container.style.display = 'none';
+      document.body.appendChild(container);
+      
+      const receiptDiv = document.createElement('div');
+      receiptDiv.id = 'receipt-to-print';
+      container.appendChild(receiptDiv);
+      
+      const ReactDOM = require('react-dom');
+      ReactDOM.render(
+        React.createElement(ReceiptInvoice, { 
+          invoice: getValues(),
+          patientName: getValues<string>('patientName'),
+          patientPhone: getValues<string>('patientPhone'),
+          isPrintable: true
+        }),
+        receiptDiv,
+        () => {
+          const receiptHtml = receiptDiv.innerHTML;
+          
+          setTimeout(() => {
+            if (document.body.contains(container)) {
+              document.body.removeChild(container);
+            }
+            setPrintLoading(false);
+          }, 500);
+          
+          PrintService.printHtml(
+            PrintService.prepareReceiptDocument(receiptHtml, language === 'ar' ? 'إيصال' : 'Receipt'),
+            'receipt',
+            () => {
+              setPrintLoading(false);
+            }
+          );
+        }
+      );
+    } catch (error) {
+      console.error("Error printing receipt:", error);
+      toast({
+        title: t("error"),
+        description: language === 'ar' ? "حدث خطأ أثناء طباعة الإيصال" : "Error printing receipt",
+        variant: "destructive",
+      });
+      setPrintLoading(false);
+    }
+  };
+
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
   return (
@@ -379,74 +431,11 @@ export const InvoiceStepPayment: React.FC = () => {
                 variant="default" 
                 className="w-full gap-2" 
                 size="lg"
-                onClick={() => {
-                  const container = document.createElement('div');
-                  container.style.display = 'none';
-                  document.body.appendChild(container);
-                  
-                  const receiptDiv = document.createElement('div');
-                  receiptDiv.id = 'receipt-to-print';
-                  container.appendChild(receiptDiv);
-                  
-                  const ReactDOM = require('react-dom');
-                  ReactDOM.render(
-                    React.createElement(ReceiptInvoice, { 
-                      invoice: getValues(),
-                      patientName: getValues<string>('patientName'),
-                      patientPhone: getValues<string>('patientPhone'),
-                      isPrintable: true
-                    }),
-                    receiptDiv,
-                    () => {
-                      const printWindow = window.open('', '_blank');
-                      if (printWindow) {
-                        printWindow.document.write(`
-                          <html>
-                            <head>
-                              <title>Receipt</title>
-                              <style>
-                                @media print {
-                                  @page {
-                                    size: 80mm auto !important;
-                                    margin: 0 !important;
-                                    padding: 0 !important;
-                                  }
-                                }
-                                body {
-                                  margin: 0;
-                                  padding: 0;
-                                }
-                              </style>
-                            </head>
-                            <body>
-                              ${receiptDiv.innerHTML}
-                              <script>
-                                window.onload = function() {
-                                  setTimeout(function() {
-                                    window.print();
-                                    window.onafterprint = function() {
-                                      window.close();
-                                    };
-                                  }, 500);
-                                };
-                              </script>
-                            </body>
-                          </html>
-                        `);
-                        printWindow.document.close();
-                      }
-                      
-                      setTimeout(() => {
-                        if (document.body.contains(container)) {
-                          document.body.removeChild(container);
-                        }
-                      }, 1000);
-                    }
-                  );
-                }}
+                onClick={handlePrintReceipt}
+                disabled={printLoading}
               >
                 <Receipt className="h-4 w-4" />
-                {t('printReceipt')}
+                {language === 'ar' ? 'طباعة الإيصال' : 'Print Receipt'}
               </Button>
             </div>
           </motion.div>

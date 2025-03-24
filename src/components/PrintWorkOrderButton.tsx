@@ -55,7 +55,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   const invoiceData = {
     ...invoice,
     invoiceId: invoice.invoiceId || `INV${Date.now().toString().slice(-6)}`,
-    workOrderId: invoice.workOrderId || invoice.invoiceId || `WO${Date.now().toString().slice(-6)}`
+    workOrderId: invoice.workOrderId || `WO${Date.now().toString().slice(-6)}`
     // Don't try to access rx directly from invoice since it doesn't exist on the Invoice type
   };
   

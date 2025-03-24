@@ -32,16 +32,19 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   size = "sm",
   children // This prop holds any custom trigger element
 }) => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   const [open, setOpen] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   
   const handlePrint = () => {
     console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
+    setIsPrinting(true);
     setOpen(false); // Close dialog before printing
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
       CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+      setIsPrinting(false);
     }, 300);
   };
   
@@ -51,9 +54,10 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
       variant={variant}
       size={size}
       className={`gap-1 ${className}`}
+      disabled={isPrinting}
     >
       <Printer className="h-4 w-4" />
-      {t('printWorkOrder')}
+      {language === 'ar' ? 'طباعة أمر العمل' : t('printWorkOrder')}
     </Button>
   );
   
@@ -80,9 +84,9 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               isPrintable={false}
             />
           </div>
-          <Button onClick={handlePrint} className="mt-4 gap-2">
+          <Button onClick={handlePrint} className="mt-4 gap-2" disabled={isPrinting}>
             <Printer className="h-4 w-4" />
-            {t('print')}
+            {language === 'ar' ? 'طباعة' : t('print')}
           </Button>
         </div>
       </DialogContent>
