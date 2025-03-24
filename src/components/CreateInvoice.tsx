@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -7,7 +6,7 @@ import { motion } from "framer-motion";
 import { 
   FileText, Printer, Receipt, User, PackageCheck, CreditCard,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
-  MessageCircleDashed, Loader
+  MessageCircleDashed, Loader, Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +28,6 @@ const CreateInvoiceContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState("patient");
   const { getValues, setValue } = useInvoiceForm();
   
-  // Listen for navigation events from other components
   useEffect(() => {
     const handleNavigateToSummary = () => {
       setActiveTab("summary");
