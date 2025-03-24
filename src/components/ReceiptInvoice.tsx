@@ -82,7 +82,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   return (
     <div 
       className={`${dirClass} print-receipt`} 
-      id="receipt-invoice"
+      id="receipt-to-print"
       dir={isRtl ? "rtl" : "ltr"}
       style={{ 
         width: '80mm', 
@@ -312,9 +312,10 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               margin: 0 !important;
               padding: 0 !important;
               background: white !important;
+              color: black !important;
             }
             
-            #receipt-invoice {
+            #receipt-to-print {
               width: 76mm !important; /* 80mm - 4mm for padding */
               max-width: 76mm !important;
               page-break-after: always !important;
@@ -327,10 +328,10 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               padding: 2mm !important;
               margin: 0 !important;
               background: white !important;
+              color: black !important;
               height: auto !important;
               min-height: 0 !important;
               max-height: none !important;
-              text-align: center !important;
             }
             
             .print-receipt * {
@@ -365,7 +366,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             }
             
             @supports (-webkit-appearance:none) {
-              body, html, #receipt-invoice {
+              body, html, #receipt-to-print {
                 height: fit-content !important;
                 min-height: fit-content !important;
                 max-height: fit-content !important;

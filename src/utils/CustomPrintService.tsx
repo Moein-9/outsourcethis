@@ -432,6 +432,7 @@ export class CustomPrintService {
             printWindow.document.write("<p>Unable to find receipt content. Please try again.</p>");
             printWindow.document.close();
             
+            console.error("Receipt element not found: expected id 'receipt-to-print'");
             toast({
               title: "Error",
               description: "Unable to find receipt content for printing.",
