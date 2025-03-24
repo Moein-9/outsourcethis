@@ -176,7 +176,7 @@ export class CustomPrintService {
         toast({
           title: "Warning",
           description: "Could not find work order content. Make sure to click 'Save Order' first.",
-          variant: "warning",
+          variant: "default", // Changed from "warning" to "default" as per allowed variants
         });
       }
     } catch (error) {
