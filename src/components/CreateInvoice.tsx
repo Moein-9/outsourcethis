@@ -278,6 +278,7 @@ const CreateInvoiceContent: React.FC = () => {
                     <InvoiceStepSummary 
                       setInvoicePrintOpen={setInvoicePrintOpen}
                       setWorkOrderPrintOpen={setWorkOrderPrintOpen}
+                      setActiveTab={setActiveTab}
                     />
                     
                     <div className="flex justify-between mt-6">

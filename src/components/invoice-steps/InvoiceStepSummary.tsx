@@ -6,17 +6,19 @@ import { Button } from "@/components/ui/button";
 import { 
   ClipboardCheck, Printer, Receipt, 
   Check, ChevronRight, FileText, PartyPopper,
-  CreditCard, User, Phone, Calendar
+  CreditCard, User, Phone, Calendar, AlertTriangle
 } from "lucide-react";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
   setWorkOrderPrintOpen: (open: boolean) => void;
+  setActiveTab?: (tab: string) => void;
 }
 
 export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({ 
   setInvoicePrintOpen, 
-  setWorkOrderPrintOpen 
+  setWorkOrderPrintOpen,
+  setActiveTab
 }) => {
   const { t, language } = useLanguageStore();
   const { getValues } = useInvoiceForm();
@@ -24,7 +26,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
   const invoice = {
-    invoiceId: getValues<string>('workOrderId') || "PREVIEW",
+    invoiceId: getValues<string>('workOrderId') || "",
     patientName: getValues<string>('patientName') || "",
     patientPhone: getValues<string>('patientPhone') || "",
     patientId: getValues<string>('patientId'),
@@ -51,18 +53,53 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     phone: getValues<string>('patientPhone') || ""
   };
   
+  const hasInvoiceData = !!invoice.workOrderId;
+  
+  // If no invoice data is available, show a guidance message
+  if (!hasInvoiceData) {
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <div className="p-8 rounded-lg bg-amber-50 border-2 border-amber-200 shadow-sm">
+          <div className="flex items-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center shadow-md">
+              <AlertTriangle className="w-8 h-8 text-amber-500" />
+            </div>
+            <div className="ml-5">
+              <h3 className="text-xl font-semibold text-amber-800">
+                {language === 'ar' ? 'لا توجد بيانات للفاتورة بعد' : 'No invoice data yet'}
+              </h3>
+              <p className="text-amber-700 text-base mt-1">
+                {t('startBySelectingClient')}
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-6 flex justify-center">
+            <Button 
+              onClick={() => setActiveTab && setActiveTab("patient")}
+              className="px-6 py-3 h-auto text-base"
+            >
+              <User className="w-5 h-5 mr-2" />
+              {t('goToClientSection')}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="p-6 rounded-lg bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-200 shadow-sm">
-        <div className="flex items-center mb-5">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center shadow-md">
-            <PartyPopper className="w-7 h-7 text-white" />
+      <div className="p-8 rounded-lg bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-200 shadow-sm">
+        <div className="flex items-center mb-6">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center shadow-md">
+            <PartyPopper className="w-8 h-8 text-white" />
           </div>
-          <div className="ml-4">
+          <div className="ml-5">
             <h3 className="text-xl font-semibold text-green-800">
               {t('invoiceCreated')}
             </h3>
-            <p className="text-green-700 text-sm">
+            <p className="text-green-700 text-base mt-1">
               {t('invoiceSuccessMessage')}
             </p>
           </div>

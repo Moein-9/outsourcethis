@@ -702,4 +702,5 @@ export const useLanguageStore = create<LanguageStore>((set) => ({
     const { language } = useLanguageStore.getState();
     return translations[language][key] || key;
   },
-}));
+}
+
