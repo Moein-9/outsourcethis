@@ -4,7 +4,7 @@ import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
 import { Button } from "@/components/ui/button";
 import { 
-  ClipboardCheck, Printer, Receipt, ExternalLink,
+  ClipboardCheck, Printer, Receipt, 
   Check, ChevronRight, FileText, PartyPopper,
   CreditCard, User, Phone, Calendar
 } from "lucide-react";
