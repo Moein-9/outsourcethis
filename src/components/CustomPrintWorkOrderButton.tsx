@@ -20,7 +20,7 @@ interface PrintWorkOrderButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
-  children?: React.ReactNode; // Added children prop
+  children?: React.ReactNode; // This prop is used when passing custom trigger element
 }
 
 export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -30,7 +30,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   className = '',
   variant = "outline",
   size = "sm",
-  children // Added children prop
+  children // This prop holds any custom trigger element
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
@@ -49,8 +49,16 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children ? (
-          children
+          // If children are provided, use them as the trigger
+          // Note: Must be a single element for React.Children.only
+          React.isValidElement(children) ? children : (
+            <Button variant={variant} size={size} className={`gap-1 ${className}`}>
+              <Printer className="h-4 w-4" />
+              {t('printWorkOrder')}
+            </Button>
+          )
         ) : (
+          // Default button if no children provided
           <Button 
             variant={variant}
             size={size}
