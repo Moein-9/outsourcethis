@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +7,7 @@ import { useLanguageStore } from '@/store/languageStore';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { EditWorkOrderDialog } from './EditWorkOrderDialog';
-import { Eye, Pencil, Receipt, Calendar, DollarSign } from 'lucide-react';
+import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PrintWorkOrderButton } from './PrintWorkOrderButton';
 import { CustomPrintWorkOrderButton } from './CustomPrintWorkOrderButton';
