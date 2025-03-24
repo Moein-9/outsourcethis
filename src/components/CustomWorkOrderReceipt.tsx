@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-import { CheckCircle2, AlertTriangle } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Eye, Calendar, User, Phone } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
 
 interface CustomWorkOrderReceiptProps {
@@ -149,16 +149,27 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         
         <div className="space-y-1 text-sm px-3">
           <div className="flex justify-between">
-            <span className="font-bold">{t("customer")}:</span>
+            <span className="font-bold flex items-center">
+              <User className="h-3.5 w-3.5 mr-1" /> {t("customer")}:
+            </span>
             <span className="font-medium">{patientName}</span>
           </div>
           
           {patientPhone && (
             <div className="flex justify-between">
-              <span className="font-bold">{t("phone")}:</span>
+              <span className="font-bold flex items-center">
+                <Phone className="h-3.5 w-3.5 mr-1" /> {t("phone")}:
+              </span>
               <span>{patientPhone}</span>
             </div>
           )}
+          
+          <div className="flex justify-between">
+            <span className="font-bold flex items-center">
+              <Calendar className="h-3.5 w-3.5 mr-1" /> {t("date")}:
+            </span>
+            <span>{format(new Date(), 'dd/MM/yyyy')}</span>
+          </div>
         </div>
       </div>
 
@@ -170,36 +181,42 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               : "Prescription Details | تفاصيل الوصفة الطبية"}
           </div>
           
-          <table className="w-full border-collapse text-xs" style={{ direction: 'ltr' }}>
-            <thead>
-              <tr className="bg-black">
-                <th className="p-1 border border-gray-300 text-center font-bold text-white">Eye</th>
-                <th className="p-1 border border-gray-300 text-center font-bold text-white">Sphere</th>
-                <th className="p-1 border border-gray-300 text-center font-bold text-white">Cylinder</th>
-                <th className="p-1 border border-gray-300 text-center font-bold text-white">Axis</th>
-                <th className="p-1 border border-gray-300 text-center font-bold text-white">Add</th>
-                <th className="p-1 border border-gray-300 text-center font-bold text-white">PD</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">R</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.sphereOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.cylOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.axisOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.addOD || rx.add || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.pdRight || rx.pdOD || rx.pd || "—"}</td>
-              </tr>
-              <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">L</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.sphereOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.cylOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.axisOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.addOS || rx.add || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.pdLeft || rx.pdOS || rx.pd || "—"}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="px-5 mb-3">
+            <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "70mm" }}>
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-400 p-0.5 text-center"></th>
+                  <th className="border border-gray-400 p-0.5 text-center">SPH</th>
+                  <th className="border border-gray-400 p-0.5 text-center">CYL</th>
+                  <th className="border border-gray-400 p-0.5 text-center">AXIS</th>
+                  <th className="border border-gray-400 p-0.5 text-center">ADD</th>
+                  <th className="border border-gray-400 p-0.5 text-center">PD</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-400 p-0.5 text-center font-medium">OD</td>
+                  <td className="border border-gray-400 p-0.5 text-center">{rx.sphereOD || "—"}</td>
+                  <td className="border border-gray-400 p-0.5 text-center">{rx.cylOD || "—"}</td>
+                  <td className="border border-gray-400 p-0.5 text-center">{rx.axisOD || "—"}</td>
+                  <td className="border border-gray-400 p-0.5 text-center">{rx.addOD || rx.add || "—"}</td>
+                  <td className="border border-gray-400 p-0.5 text-center">{rx.pdRight || rx.pdOD || rx.pd || "—"}</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-400 p-0.5 text-center font-medium">OS</td>
+                  <td className="border border-gray-400 p-0.5 text-center">{rx.sphereOS || "—"}</td>
+                  <td className="border border-gray-400 p-0.5 text-center">{rx.cylOS || "—"}</td>
+                  <td className="border border-gray-400 p-0.5 text-center">{rx.axisOS || "—"}</td>
+                  <td className="border border-gray-400 p-0.5 text-center">{rx.addOS || rx.add || "—"}</td>
+                  <td className="border border-gray-400 p-0.5 text-center">{rx.pdLeft || rx.pdOS || rx.pd || "—"}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div className="mt-1 text-[9px] flex justify-between px-2 font-medium">
+              <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
+              <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
+            </div>
+          </div>
         </div>
       )}
 
@@ -441,18 +458,26 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               overflow: visible !important;
             }
             
-            body {
+            /* Make background colors print */
+            .bg-black {
               -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
               print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              background-color: #000 !important;
             }
             
+            .text-white {
+              color: #fff !important;
+            }
+            
+            /* Dynamic height adjustment */
             .print-receipt {
               height: fit-content !important;
               min-height: fit-content !important;
               max-height: fit-content !important;
             }
             
+            /* Ensure proper page breaks */
             .print-receipt {
               break-inside: avoid !important;
               break-after: avoid-page !important;
