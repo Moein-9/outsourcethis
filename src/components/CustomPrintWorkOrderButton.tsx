@@ -32,28 +32,16 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   size = "sm",
   children // This prop holds any custom trigger element
 }) => {
-  const { t, language } = useLanguageStore();
+  const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
-  const [isPrinting, setIsPrinting] = useState(false);
   
   const handlePrint = () => {
     console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
-    setIsPrinting(true);
     setOpen(false); // Close dialog before printing
-    
-    // Make sure we're displaying the workOrderId, not the invoiceId
-    const workOrderData = {
-      ...workOrder,
-      // If workOrderId exists use it, otherwise generate a new one
-      workOrderId: workOrder.workOrderId || `WO${Date.now().toString().slice(-6)}`,
-      // Ensure we have all necessary data
-      invoiceId: workOrder.invoiceId || invoice?.invoiceId || `INV${Date.now().toString().slice(-6)}`
-    };
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrderData, invoice, patient);
-      setIsPrinting(false);
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
     }, 300);
   };
   
@@ -63,10 +51,9 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
       variant={variant}
       size={size}
       className={`gap-1 ${className}`}
-      disabled={isPrinting}
     >
       <Printer className="h-4 w-4" />
-      {language === 'ar' ? 'طباعة أمر العمل' : t('printWorkOrder')}
+      {t('printWorkOrder')}
     </Button>
   );
   
@@ -93,9 +80,9 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               isPrintable={false}
             />
           </div>
-          <Button onClick={handlePrint} className="mt-4 gap-2" disabled={isPrinting}>
+          <Button onClick={handlePrint} className="mt-4 gap-2">
             <Printer className="h-4 w-4" />
-            {language === 'ar' ? 'طباعة' : t('print')}
+            {t('print')}
           </Button>
         </div>
       </DialogContent>

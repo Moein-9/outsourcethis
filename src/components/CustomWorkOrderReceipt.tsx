@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-import { CheckCircle2, AlertTriangle, Calendar, User, Phone } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { 
   Card,
@@ -67,8 +67,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const remaining = total - amountPaid;
   const isPaid = remaining <= 0;
   
-  // Prioritize workOrderId over invoiceId for printing
-  const workOrderNumber = workOrder?.workOrderId || invoice?.workOrderId || `WO${Date.now().toString().slice(-6)}`;
+  const invoiceNumber = invoice?.invoiceId || invoice?.workOrderId || workOrder?.id || `WO${Date.now().toString().slice(-6)}`;
 
   // If there's no workOrder or invoice data, show a message
   if (!workOrder && !invoice) {
@@ -140,7 +139,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         <p className="text-xs mb-0 text-gray-600">
           {isRtl ? "ORDER #: " : "رقم الطلب: "}
-          <span className="font-semibold">{workOrderNumber}</span>
+          <span className="font-semibold">{invoiceNumber}</span>
         </p>
         <p className="text-xs text-gray-600 rx-creation-date">
           {format(new Date(), 'yyyy-MM-dd HH:mm', { locale: enUS })}
@@ -481,7 +480,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               height: auto !important;
               min-height: 0 !important;
               max-height: none !important;
-              overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+              overflow: visible !important;
             }
             
             body {
@@ -518,29 +517,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               color-adjust: exact !important;
               background-color: black !important;
               color: white !important;
-            }
-            
-            /* Make sizing consistent between preview and print */
-            .space-y-1 > :not([hidden]) ~ :not([hidden]) {
-              --tw-space-y-reverse: 0;
-              margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
-              margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
-            }
-            
-            /* Ensure border colors print correctly */
-            .border, .border-gray-300, .border-gray-200 {
-              border-color: #d1d5db !important;
-            }
-            
-            /* Text colors */
-            .text-gray-600 {
-              color: #4b5563 !important;
-            }
-            
-            /* Fix for icons in print */
-            svg {
-              display: inline-block !important;
-              vertical-align: middle !important;
             }
           }
         `}

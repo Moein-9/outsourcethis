@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -76,13 +77,11 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const isPaid = rem <= 0;
   
   const isContactLens = invoiceType === "contacts" || !frameBrand;
-
-  const displayInvoiceId = invoice.invoiceId;
   
   return (
     <div 
       className={`${dirClass} print-receipt`} 
-      id="receipt-to-print"
+      id="receipt-invoice"
       dir={isRtl ? "rtl" : "ltr"}
       style={{ 
         width: '80mm', 
@@ -97,7 +96,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         fontFamily: isRtl ? 'Zain, sans-serif' : 'Yrsa, serif',
         pageBreakInside: 'avoid',
         pageBreakAfter: 'always',
-        textAlign: 'center'
+        textAlign: 'center' // Center all content in the receipt
       }}
     >
       <div className="border-b-2 border-black pb-1 mb-2">
@@ -158,7 +157,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
         
         <div className="flex justify-between items-center px-2">
-          <span className="font-semibold text-sm">#{displayInvoiceId}</span>
+          <span className="font-semibold text-sm">#{invoice.invoiceId}</span>
           <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
             <span className="font-semibold text-sm">{format(new Date(invoice.createdAt), 'dd/MM/yyyy')}</span>
@@ -312,10 +311,9 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               margin: 0 !important;
               padding: 0 !important;
               background: white !important;
-              color: black !important;
             }
             
-            #receipt-to-print {
+            #receipt-invoice {
               width: 76mm !important; /* 80mm - 4mm for padding */
               max-width: 76mm !important;
               page-break-after: always !important;
@@ -328,10 +326,10 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               padding: 2mm !important;
               margin: 0 !important;
               background: white !important;
-              color: black !important;
               height: auto !important;
               min-height: 0 !important;
               max-height: none !important;
+              text-align: center !important;
             }
             
             .print-receipt * {
@@ -366,7 +364,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             }
             
             @supports (-webkit-appearance:none) {
-              body, html, #receipt-to-print {
+              body, html, #receipt-invoice {
                 height: fit-content !important;
                 min-height: fit-content !important;
                 max-height: fit-content !important;
