@@ -1,5 +1,8 @@
 
 import { toast } from "@/hooks/use-toast";
+import { CustomWorkOrderReceipt } from "@/components/CustomWorkOrderReceipt";
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
@@ -16,6 +19,16 @@ export class CustomPrintService {
         });
         return;
       }
+
+      // Directly render the CustomWorkOrderReceipt component to HTML
+      const receiptContent = ReactDOMServer.renderToString(
+        <CustomWorkOrderReceipt 
+          workOrder={workOrder} 
+          invoice={invoice} 
+          patient={patient}
+          isPrintable={true}
+        />
+      );
       
       // Add all the required styles and content
       printWindow.document.write(`
@@ -123,7 +136,9 @@ export class CustomPrintService {
             </style>
           </head>
           <body>
-            <div id="custom-work-order-content"></div>
+            <div id="custom-work-order-content">
+              ${receiptContent}
+            </div>
             <script>
               window.onload = function() {
                 // Force background colors to print properly
@@ -142,37 +157,8 @@ export class CustomPrintService {
         </html>
       `);
       
-      // Get the content of the custom work order
-      const workOrderElement = document.getElementById('work-order-receipt');
-      
-      // If the element exists, copy its innerHTML to the print window
-      if (workOrderElement) {
-        const contentContainer = printWindow.document.getElementById('custom-work-order-content');
-        if (contentContainer) {
-          contentContainer.innerHTML = workOrderElement.innerHTML;
-          
-          // Ensure timestamps are showing original creation dates
-          if (invoice?.rx?.createdAt || workOrder?.rx?.createdAt) {
-            // Use the original RX creation date rather than printing date
-            const rxCreationDate = invoice?.rx?.createdAt || workOrder?.rx?.createdAt;
-            const dateElements = printWindow.document.querySelectorAll('.rx-creation-date');
-            
-            dateElements.forEach(element => {
-              if (element instanceof HTMLElement) {
-                // Format date in English format MM/DD/YYYY HH:MM
-                element.textContent = new Date(rxCreationDate).toLocaleString('en-US');
-              }
-            });
-          }
-          
-          // Wait for content to load before proceeding
-          printWindow.document.close();
-        }
-      } else {
-        // Handle the case where the element doesn't exist
-        printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
-        printWindow.document.close();
-      }
+      // Wait for content to load before proceeding
+      printWindow.document.close();
     } catch (error) {
       console.error("Error printing work order:", error);
       toast({
