@@ -12,7 +12,7 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
-import { printWorkOrderReceipt } from './WorkOrderReceiptPrint';
+import { CustomPrintService } from '@/utils/CustomPrintService';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -47,12 +47,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     setTimeout(() => {
       try {
         // Use our unified printing method
-        printWorkOrderReceipt({
-          invoice: invoice || workOrder,
-          patientName: patient?.name || workOrder?.patientName,
-          patientPhone: patient?.phone || workOrder?.patientPhone,
-          rx: patient?.rx || workOrder?.rx
-        });
+        CustomPrintService.printWorkOrder(workOrder, invoice, patient);
       } catch (error) {
         console.error("Error printing work order:", error);
       } finally {
