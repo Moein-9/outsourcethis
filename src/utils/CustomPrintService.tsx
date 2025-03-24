@@ -172,12 +172,6 @@ export class CustomPrintService {
         // Handle the case where the element doesn't exist
         printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
         printWindow.document.close();
-        
-        toast({
-          title: "Warning",
-          description: "Could not find work order content. Make sure to click 'Save Order' first.",
-          variant: "default", // Changed from "warning" to "default" as per allowed variants
-        });
       }
     } catch (error) {
       console.error("Error printing work order:", error);

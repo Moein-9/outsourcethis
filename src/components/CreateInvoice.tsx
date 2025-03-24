@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { 
-  FileText, Printer, Receipt, User, PackageCheck, CreditCard,
+  FileText, Printer, Receipt, Save, User, PackageCheck, CreditCard, Check,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
   MessageCircleDashed, Loader
 } from "lucide-react";
@@ -18,9 +17,8 @@ import { InvoiceStepPayment } from "@/components/invoice-steps/InvoiceStepPaymen
 import { InvoiceStepSummary } from "@/components/invoice-steps/InvoiceStepSummary";
 import { InvoiceFormProvider, useInvoiceForm } from "@/components/invoice-steps/InvoiceFormContext";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
-import { CustomWorkOrderReceipt } from "@/components/CustomWorkOrderReceipt";
+import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
-import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
 
 const CreateInvoiceContent: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -28,7 +26,15 @@ const CreateInvoiceContent: React.FC = () => {
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("patient");
-  const { getValues, setValue, formState } = useInvoiceForm();
+  const addInvoice = useInvoiceStore((state) => state.addInvoice);
+  const { getValues, setValue } = useInvoiceForm();
+  
+  const handlePrintWorkOrder = () => {
+    setWorkOrderPrintOpen(true);
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
   
   const handlePrintInvoice = () => {
     setInvoicePrintOpen(true);
@@ -37,10 +43,8 @@ const CreateInvoiceContent: React.FC = () => {
     }, 500);
   };
 
-  // Get the current invoice data for preview and printing
   const previewInvoice = {
-    invoiceId: getValues("invoiceId") || "PREVIEW", // Use separate invoiceId, not workOrderId
-    workOrderId: getValues("workOrderId") || "PREVIEW",
+    invoiceId: getValues("workOrderId") || "PREVIEW",
     createdAt: new Date().toISOString(),
     patientName: getValues("patientName") || "Customer Name",
     patientPhone: getValues("patientPhone") || "",
@@ -84,6 +88,43 @@ const CreateInvoiceContent: React.FC = () => {
     return Math.max(0, total - deposit);
   };
 
+  const handleSaveInvoice = () => {
+    const formData = getValues();
+    const invoiceData = {
+      patientId: formData.patientId,
+      patientName: formData.patientName,
+      patientPhone: formData.patientPhone,
+      
+      lensType: formData.lensType,
+      lensPrice: formData.lensPrice,
+      
+      coating: formData.coating,
+      coatingPrice: formData.coatingPrice,
+      
+      frameBrand: formData.frameBrand,
+      frameModel: formData.frameModel,
+      frameColor: formData.frameColor,
+      framePrice: formData.framePrice,
+      
+      discount: formData.discount,
+      deposit: formData.deposit,
+      total: formData.total,
+      
+      paymentMethod: formData.paymentMethod,
+      authNumber: formData.authNumber
+    };
+    
+    const invoiceId = addInvoice(invoiceData);
+    setValue("workOrderId", invoiceId);
+    
+    toast({
+      title: t('success'),
+      description: `${t('invoiceSavedSuccess')} ${invoiceId}.`,
+    });
+    
+    setActiveTab("summary");
+  };
+
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
 
@@ -95,14 +136,6 @@ const CreateInvoiceContent: React.FC = () => {
     ? (!!getValues("lensType") || (!getValues("skipFrame") && !!getValues("frameBrand")))
     : (getValues("contactLensItems")?.length > 0);
 
-  // Check if we should redirect to summary after saving
-  React.useEffect(() => {
-    if (getValues("workOrderId") && getValues("invoiceId") && activeTab === "payment") {
-      // Automatic redirect to summary after successful order creation
-      setActiveTab("summary");
-    }
-  }, [formState, activeTab]);
-
   return (
     <div className="py-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -112,6 +145,11 @@ const CreateInvoiceContent: React.FC = () => {
         </h2>
         
         <div className="flex items-center space-x-3">
+          <Button onClick={handleSaveInvoice} variant="outline" className="flex items-center gap-2">
+            <Save className="w-4 h-4" />
+            {t('saveInvoice')}
+          </Button>
+          
           <Button 
             onClick={handlePrintInvoice} 
             variant="outline" 
@@ -121,18 +159,14 @@ const CreateInvoiceContent: React.FC = () => {
             {t('printInvoice')}
           </Button>
           
-          {previewInvoice.workOrderId && previewInvoice.workOrderId !== "PREVIEW" && (
-            <CustomPrintWorkOrderButton 
-              workOrder={{ id: previewInvoice.workOrderId }}
-              invoice={previewInvoice}
-              patient={{
-                name: previewInvoice.patientName,
-                phone: previewInvoice.patientPhone,
-                rx: getValues("rx")
-              }}
-              variant="outline"
-            />
-          )}
+          <Button 
+            onClick={handlePrintWorkOrder} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <Printer className="w-4 h-4" />
+            {t('printWorkOrder')}
+          </Button>
         </div>
       </div>
 
@@ -223,6 +257,13 @@ const CreateInvoiceContent: React.FC = () => {
                         className="flex items-center gap-2"
                       >
                         {t('previous')}
+                      </Button>
+                      <Button 
+                        onClick={handleSaveInvoice} 
+                        className="flex items-center gap-2"
+                      >
+                        <Save className="w-4 h-4" />
+                        {t('saveInvoice')}
                       </Button>
                     </div>
                   </motion.div>
@@ -446,8 +487,9 @@ const CreateInvoiceContent: React.FC = () => {
                       
                       {remaining <= 0 && (
                         <div className="mt-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 px-3 rounded-md flex items-center justify-center gap-2 shadow-sm">
-                          <PartyPopper className="w-4 h-4" />
+                          <Check className="w-4 h-4" />
                           <span className="font-medium">{t('paidInFull')}</span>
+                          <PartyPopper className="w-4 h-4" />
                         </div>
                       )}
                     </div>
@@ -498,42 +540,27 @@ const CreateInvoiceContent: React.FC = () => {
               {t('workOrder')}
             </SheetTitle>
             <SheetDescription>
-              <Button onClick={() => {
-                setTimeout(() => {
-                  window.print();
-                }, 500);
-              }} className="mt-2">
+              <Button onClick={handlePrintWorkOrder} className="mt-2">
                 <Printer className={`w-4 h-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                 {t('print')}
               </Button>
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6 print:mt-0">
-            <CustomWorkOrderReceipt 
-              workOrder={{ 
-                id: previewInvoice.workOrderId,
-                patientName: previewInvoice.patientName,
-                patientPhone: previewInvoice.patientPhone,
-                lensType: previewInvoice.lensType,
-                lensPrice: previewInvoice.lensPrice,
-                coating: previewInvoice.coating,
-                coatingPrice: previewInvoice.coatingPrice,
-                frameBrand: previewInvoice.frameBrand,
-                frameModel: previewInvoice.frameModel,
-                frameColor: previewInvoice.frameColor,
-                framePrice: previewInvoice.framePrice,
-                discount: previewInvoice.discount,
-                deposit: previewInvoice.deposit,
-                total: previewInvoice.total,
-                remaining: previewInvoice.remaining
-              }}
+            <WorkOrderPrint 
               invoice={previewInvoice}
-              patient={{
-                name: previewInvoice.patientName,
-                phone: previewInvoice.patientPhone,
-                rx: getValues("rx")
+              patientName={getValues("patientName") || ""}
+              patientPhone={getValues("patientPhone") || ""}
+              rx={getValues("rx")}
+              lensType={getValues("lensType") || ""}
+              coating={getValues("coating") || ""}
+              frame={getValues("skipFrame") ? undefined : {
+                brand: getValues("frameBrand") || "",
+                model: getValues("frameModel") || "",
+                color: getValues("frameColor") || "",
+                size: getValues("frameSize") || "",
+                price: getValues("framePrice") || 0
               }}
-              isPrintable={true}
             />
           </div>
           <SheetFooter className="print:hidden mt-4">
