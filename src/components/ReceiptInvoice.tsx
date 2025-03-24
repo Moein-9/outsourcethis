@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -77,6 +76,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const isPaid = rem <= 0;
   
   const isContactLens = invoiceType === "contacts" || !frameBrand;
+
+  const displayInvoiceId = invoice.invoiceId;
   
   return (
     <div 
@@ -96,7 +97,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         fontFamily: isRtl ? 'Zain, sans-serif' : 'Yrsa, serif',
         pageBreakInside: 'avoid',
         pageBreakAfter: 'always',
-        textAlign: 'center' // Center all content in the receipt
+        textAlign: 'center'
       }}
     >
       <div className="border-b-2 border-black pb-1 mb-2">
@@ -157,7 +158,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
         
         <div className="flex justify-between items-center px-2">
-          <span className="font-semibold text-sm">#{invoice.invoiceId}</span>
+          <span className="font-semibold text-sm">#{displayInvoiceId}</span>
           <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
             <span className="font-semibold text-sm">{format(new Date(invoice.createdAt), 'dd/MM/yyyy')}</span>

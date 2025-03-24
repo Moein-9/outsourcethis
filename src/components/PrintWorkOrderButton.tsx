@@ -1,11 +1,9 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
-import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
-import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
-import { toast } from "@/hooks/use-toast";
+import { Invoice } from "@/store/invoiceStore";
 import { CustomPrintWorkOrderButton } from "./CustomPrintWorkOrderButton";
 
 interface PrintWorkOrderButtonProps {
@@ -50,9 +48,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   onInvoiceSaved,
 }) => {
   const { t } = useLanguageStore();
-  const [loading, setLoading] = useState(false);
   
-  // For existing invoices, use CustomPrintWorkOrderButton
   return (
     <CustomPrintWorkOrderButton
       workOrder={invoice}
