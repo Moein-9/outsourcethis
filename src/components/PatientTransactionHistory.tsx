@@ -11,6 +11,7 @@ import { EditWorkOrderDialog } from './EditWorkOrderDialog';
 import { Eye, Pencil, Receipt, Calendar, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PrintWorkOrderButton } from './PrintWorkOrderButton';
+import { CustomPrintWorkOrderButton } from './CustomPrintWorkOrderButton';
 
 interface PatientTransactionHistoryProps {
   patientId: string;
@@ -144,12 +145,15 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <PrintWorkOrderButton 
+                        <CustomPrintWorkOrderButton 
+                          workOrder={invoice}
                           invoice={invoice}
                           variant="ghost"
                           size="icon"
                           className="ml-1 hover:bg-purple-100 hover:text-purple-700 transition-colors"
-                        />
+                        >
+                          <Printer className="h-4 w-4" />
+                        </CustomPrintWorkOrderButton>
                       </TableCell>
                     </TableRow>
                   );

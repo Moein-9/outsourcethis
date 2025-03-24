@@ -45,29 +45,25 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     }, 300);
   };
   
+  // Create a default button if no children are provided or if children is not a valid element
+  const defaultButton = (
+    <Button 
+      variant={variant}
+      size={size}
+      className={`gap-1 ${className}`}
+    >
+      <Printer className="h-4 w-4" />
+      {t('printWorkOrder')}
+    </Button>
+  );
+  
+  // Ensure we only pass a single valid element to DialogTrigger
+  const triggerElement = React.isValidElement(children) ? children : defaultButton;
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {children ? (
-          // If children are provided, use them as the trigger
-          // Note: Must be a single element for React.Children.only
-          React.isValidElement(children) ? children : (
-            <Button variant={variant} size={size} className={`gap-1 ${className}`}>
-              <Printer className="h-4 w-4" />
-              {t('printWorkOrder')}
-            </Button>
-          )
-        ) : (
-          // Default button if no children provided
-          <Button 
-            variant={variant}
-            size={size}
-            className={`gap-1 ${className}`}
-          >
-            <Printer className="h-4 w-4" />
-            {t('printWorkOrder')}
-          </Button>
-        )}
+        {triggerElement}
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto p-0">
         <div className="p-6 flex flex-col items-center">

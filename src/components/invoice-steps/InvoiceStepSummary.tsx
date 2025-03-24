@@ -5,7 +5,7 @@ import { useInvoiceForm } from "./InvoiceFormContext";
 import { Button } from "@/components/ui/button";
 import { 
   ClipboardCheck, Printer, Receipt, ExternalLink,
-  Check, ChevronRight, Sparkles, FileText, PartyPopper,
+  Check, ChevronRight, FileText, PartyPopper,
   CreditCard, User, Phone, Calendar
 } from "lucide-react";
 import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
@@ -130,7 +130,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
       
       <div className="p-5 border-2 border-primary/20 rounded-lg bg-primary/5 shadow-sm">
         <h3 className={`text-lg font-semibold text-primary pb-3 border-b border-primary/20 flex items-center ${textAlignClass}`}>
-          <Sparkles className="w-5 h-5 mr-2 text-primary" />
+          <FileText className="w-5 h-5 mr-2 text-primary" />
           {t('nextSteps')}
         </h3>
         
@@ -173,18 +173,21 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
             workOrder={invoice}
             invoice={invoice}
             patient={patient}
-            className="w-full justify-between group hover:border-primary hover:text-primary transition-all duration-300 hover:shadow-sm"
+            className="w-full justify-between hover:border-primary hover:text-primary transition-all duration-300 hover:shadow-sm"
+            variant="outline"
           >
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3 group-hover:bg-amber-200 transition-colors">
-                <Printer className="w-5 h-5 text-amber-600" />
+            <div className="flex items-center w-full justify-between">
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3 group-hover:bg-amber-200 transition-colors">
+                  <Printer className="w-5 h-5 text-amber-600" />
+                </div>
+                <div className="text-left">
+                  <div className="font-medium">{t('printCustomWorkOrder')}</div>
+                  <div className="text-xs text-muted-foreground">{t('printCustomWorkOrderDescription')}</div>
+                </div>
               </div>
-              <div className="text-left">
-                <div className="font-medium">{t('printCustomWorkOrder')}</div>
-                <div className="text-xs text-muted-foreground">{t('printCustomWorkOrderDescription')}</div>
-              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
             </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
           </CustomPrintWorkOrderButton>
         </div>
       </div>
