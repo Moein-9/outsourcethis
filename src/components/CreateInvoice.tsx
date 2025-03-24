@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -132,7 +131,6 @@ const CreateInvoiceContent: React.FC = () => {
   const total = calculateTotal();
   const remaining = calculateRemaining();
   
-  // Check if data is available to display
   const hasPatientData = !!getValues("patientName");
   const hasProductData = invoiceType === "glasses" 
     ? (!!getValues("lensType") || (!getValues("skipFrame") && !!getValues("frameBrand")))
@@ -293,7 +291,6 @@ const CreateInvoiceContent: React.FC = () => {
                       <Button 
                         variant="default" 
                         onClick={() => {
-                          // Reset form state and go back to patient step
                           setActiveTab("patient");
                         }} 
                         className="flex items-center gap-2"
@@ -326,7 +323,6 @@ const CreateInvoiceContent: React.FC = () => {
             
             <CardContent className="p-0">
               <div className="divide-y divide-dashed">
-                {/* Patient Information */}
                 <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50">
                   <h4 className="text-sm font-medium mb-3 flex items-center gap-2 text-indigo-700">
                     <User className="w-4 h-4 text-blue-500" />
@@ -351,7 +347,6 @@ const CreateInvoiceContent: React.FC = () => {
                   )}
                 </div>
                 
-                {/* Products Information */}
                 <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50">
                   <h4 className="text-sm font-medium mb-3 flex items-center gap-2 text-teal-700">
                     <ShoppingBag className="w-4 h-4 text-emerald-500" />
@@ -362,7 +357,6 @@ const CreateInvoiceContent: React.FC = () => {
                     <div className="space-y-3">
                       {invoiceType === "glasses" ? (
                         <div>
-                          {/* Frame Information */}
                           {!getValues("skipFrame") && getValues("frameBrand") && (
                             <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-amber-100 rounded-bl-full opacity-20"></div>
@@ -382,7 +376,6 @@ const CreateInvoiceContent: React.FC = () => {
                             </div>
                           )}
                           
-                          {/* Lens Information */}
                           {getValues("lensType") && (
                             <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full opacity-20"></div>
@@ -402,7 +395,6 @@ const CreateInvoiceContent: React.FC = () => {
                             </div>
                           )}
                           
-                          {/* Coating Information */}
                           {getValues("coating") && (
                             <div className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 rounded-bl-full opacity-20"></div>
@@ -424,7 +416,6 @@ const CreateInvoiceContent: React.FC = () => {
                         </div>
                       ) : (
                         <div className="space-y-2">
-                          {/* Contact Lens Information */}
                           {(getValues("contactLensItems") || []).map((lens, index) => (
                             <div key={index} className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-bl-full opacity-20"></div>
@@ -454,7 +445,6 @@ const CreateInvoiceContent: React.FC = () => {
                   )}
                 </div>
                 
-                {/* Payment Information */}
                 <div className="p-4 bg-gradient-to-r from-orange-50 to-amber-50">
                   <h4 className="text-sm font-medium mb-3 flex items-center gap-2 text-amber-700">
                     <DollarSign className="w-4 h-4 text-orange-500" />

@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -135,6 +134,12 @@ const translations: Record<string, Record<string, string>> = {
     printInvoiceDescription: 'Print the customer invoice receipt',
     printCustomWorkOrder: 'Print Custom Work Order',
     printCustomWorkOrderDescription: 'Print a specialized work order with custom format',
+    
+    // Tab sections in Create Invoice
+    clientSection: '1) Client Information',
+    productSection: 'Lenses and Frame',
+    paymentSection: 'Payment Method',
+    summarySection: 'Summary',
     
     // Inventory
     frames: 'Frames',
@@ -471,6 +476,12 @@ const translations: Record<string, Record<string, string>> = {
     printCustomWorkOrder: 'طباعة أمر عمل مخصص',
     printCustomWorkOrderDescription: 'طباعة أمر عمل متخصص بتنسيق مخصص',
     
+    // Tab sections in Create Invoice
+    clientSection: '١) بيانات العميل',
+    productSection: 'العدسات والإطار',
+    paymentSection: 'طريقة الدفع',
+    summarySection: 'الملخص',
+    
     // Inventory
     frames: 'الإطارات',
     lenses: 'العدسات',
@@ -536,7 +547,7 @@ const translations: Record<string, Record<string, string>> = {
     duePayments: 'إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية',
     clientId: 'رقم العميل',
     invoiceId: 'رقم الفاتورة',
-    invoiceDate: 'تاريخ الفاتورة',
+    invoiceDate: 'تاريخ ال��اتورة',
     amountDue: 'المبلغ المستحق',
     status: 'الحالة',
     payNow: 'ادفع الآن',
@@ -580,7 +591,6 @@ const translations: Record<string, Record<string, string>> = {
     
     // Create Invoice (Additional)
     invoiceTitle: "إنشاء فاتورة",
-    clientSection: "١) بيانات العميل",
     noClientFile: "لا يوجد ملف عميل",
     phoneColon: "رقم الهاتف:",
     typeToSearch: "اكتب للبحث...",
@@ -600,7 +610,6 @@ const translations: Record<string, Record<string, string>> = {
     discountColon: "الخصم (د.ك):",
     depositColon: "الدفعة (د.ك):",
     payInFull: "دفع كامل",
-    paymentSection: "٥) طريقة الدفع",
     approvalNumber: "رقم الموافقة (Authorization No.):",
     previewInvoice: "معاينة الفاتورة",
     saveAndPrint: "حفظ وطباعة",
@@ -686,4 +695,5 @@ export const useLanguageStore = create<LanguageStore>((set) => ({
     const { language } = useLanguageStore.getState();
     return translations[language][key] || key;
   },
-}));
+}
+
