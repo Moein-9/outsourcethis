@@ -135,7 +135,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
               <div className={`flex justify-between items-center ${textAlignClass}`}>
                 <div className="flex items-center">
                   <Phone className="w-5 h-5 text-blue-400 mr-2" />
-                  <span className="text-gray-600 font-medium">{t('phoneNumber')}:</span>
+                  <span className="text-gray-600 font-medium">{t('clientPhone')}:</span>
                 </div>
                 <span>{invoice.patientPhone}</span>
               </div>
@@ -154,7 +154,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
             <div className={`flex justify-between items-center ${textAlignClass}`}>
               <div className="flex items-center">
                 <Receipt className="w-5 h-5 text-purple-500 mr-2" />
-                <span className="text-gray-600 font-medium">{t('totalAmount')}:</span>
+                <span className="text-gray-600 font-medium">{t('totalInvoice')}:</span>
               </div>
               <span className="font-bold text-lg">{invoice.total.toFixed(2)} {t('kwd')}</span>
             </div>
@@ -165,7 +165,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
                 <span className="text-gray-600 font-medium">{t('paymentStatus')}:</span>
               </div>
               <div className={`px-3 py-1 rounded-full ${invoice.isPaid ? "bg-green-100 text-green-600" : "bg-amber-100 text-amber-600"} font-medium text-sm`}>
-                {invoice.isPaid ? t('paid') : t('partiallyPaid')}
+                {invoice.isPaid ? t('paidInFull') : t('partiallyPaid')}
               </div>
             </div>
           </div>
@@ -174,7 +174,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
       
       <div className="p-6 border-2 border-primary/20 rounded-lg bg-primary/5 shadow-sm">
         <h3 className={`text-lg font-semibold text-primary pb-3 border-b border-primary/20 flex items-center ${textAlignClass}`}>
-          <FileText className="w-5 h-5 mr-2 text-primary" />
+          <FileText className="w-5 h-4" />
           {t('nextSteps')}
         </h3>
         

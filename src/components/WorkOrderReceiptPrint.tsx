@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -422,7 +421,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             borderRadius: "4px",
             margin: "4px 0 1px 0",
             fontWeight: "bold",
-            fontSize: "15px", /* Increased from 13px to 15px to make it more prominent */
+            fontSize: "15px",
             border: "1px solid #FECACA",
             color: "#B91C1C"
           }}>
