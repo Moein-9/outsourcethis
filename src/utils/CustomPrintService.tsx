@@ -30,13 +30,15 @@ export class CustomPrintService {
             <style>
               @media print {
                 @page {
-                  size: 80mm auto !important;
+                  size: 80mm 210mm !important; /* Fixed size matching thermal receipt */
                   margin: 0 !important;
                   padding: 0 !important;
                 }
                 
                 body {
                   width: 80mm !important;
+                  height: auto !important;
+                  overflow: hidden !important;
                   margin: 0 !important;
                   padding: 0 !important;
                   background: white !important; /* White background for print */
@@ -62,6 +64,8 @@ export class CustomPrintService {
                   height: auto !important;
                   min-height: 0 !important;
                   max-height: none !important;
+                  transform-origin: top left !important;
+                  transform: scale(1) !important;
                 }
                 
                 /* Force content to be visible */
@@ -122,6 +126,15 @@ export class CustomPrintService {
                 .technical-term {
                   font-family: Arial, sans-serif !important;
                 }
+                
+                /* Chrome-specific fixes */
+                @supports (-webkit-appearance:none) {
+                  body, html, #work-order-receipt {
+                    height: fit-content !important;
+                    min-height: fit-content !important;
+                    max-height: fit-content !important;
+                  }
+                }
               }
               
               body {
@@ -131,6 +144,7 @@ export class CustomPrintService {
                 background: white;
                 color: black;
                 direction: ${isRtl ? 'rtl' : 'ltr'};
+                width: 80mm;
               }
               
               /* Background classes */

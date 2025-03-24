@@ -44,6 +44,7 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
   workOrderElement.style.position = 'fixed';
   workOrderElement.style.top = '0';
   workOrderElement.style.left = '0';
+  workOrderElement.style.zIndex = '-1000'; // Keep it out of view
   
   // Render the WorkOrderPrint component inside the div
   document.body.appendChild(workOrderElement);
