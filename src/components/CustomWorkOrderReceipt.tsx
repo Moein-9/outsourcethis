@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -41,6 +40,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
     size: workOrder?.frameSize || invoice?.frameSize || "",
     price: workOrder?.framePrice || invoice?.framePrice || 0
   };
+  
+  const contactLensItems = invoice?.contactLensItems || workOrder?.contactLenses || [];
+  const isContactLens = contactLensItems && contactLensItems.length > 0;
   
   const lensType = workOrder?.lensType || invoice?.lensType || "";
   const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
@@ -232,13 +234,13 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       <div className="mb-3">
         <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
           {isRtl 
-            ? "تفاصيل المنتج | Product Details" 
+            ? "ت��اصيل المنتج | Product Details" 
             : "Product Details | تفاصيل المنتج"}
         </div>
         
         <div className="space-y-2 text-sm px-2">
           {/* Frame Details */}
-          {frameData.brand && (
+          {frameData.brand && !isContactLens && (
             <Card className="mb-2 border border-gray-200 rounded-md">
               <CardContent className="p-2">
                 <div className="font-bold border-b border-gray-300 pb-1 mb-1">
@@ -278,8 +280,41 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </Card>
           )}
           
+          {/* Contact Lens Details */}
+          {isContactLens && contactLensItems.length > 0 && (
+            <Card className="mb-2 border border-gray-200 rounded-md">
+              <CardContent className="p-2">
+                <div className="font-bold border-b border-gray-300 pb-1 mb-1">
+                  {isRtl ? "العدسات اللاصقة (Contact Lenses)" : "Contact Lenses (العدسات اللاصقة)"}
+                </div>
+                <div className="px-2 space-y-2 text-xs">
+                  {contactLensItems.map((lens, idx) => (
+                    <div key={idx} className={idx !== 0 ? "border-t border-dashed border-gray-200 pt-2 mt-2" : ""}>
+                      <div className="flex justify-between">
+                        <span className="font-semibold">{isRtl ? "النوع" : "Type"}:</span>
+                        <span>{lens.brand} {lens.type}</span>
+                      </div>
+                      {lens.color && (
+                        <div className="flex justify-between">
+                          <span className="font-semibold">{isRtl ? "اللون" : "Color"}:</span>
+                          <span>{lens.color}</span>
+                        </div>
+                      )}
+                      {lens.price > 0 && (
+                        <div className="flex justify-between">
+                          <span className="font-semibold">{isRtl ? "السعر" : "Price"}:</span>
+                          <span className="font-bold">{lens.price.toFixed(3)} KWD</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
           {/* Lens Details */}
-          {lensType && (
+          {!isContactLens && lensType && (
             <Card className="mb-2 border border-gray-200 rounded-md">
               <CardContent className="p-2">
                 <div className="font-bold border-b border-gray-300 pb-1 mb-1">
@@ -302,7 +337,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           )}
           
           {/* Coating Details */}
-          {coating && (
+          {!isContactLens && coating && (
             <Card className="mb-2 border border-gray-200 rounded-md">
               <CardContent className="p-2">
                 <div className="font-bold border-b border-gray-300 pb-1 mb-1">
@@ -553,3 +588,4 @@ const getCoatingArabic = (coating: string): string => {
   
   return coatingMap[coating] || coating;
 };
+

@@ -271,20 +271,12 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                     <span className="data-label">{t("lens")} {idx + 1}:</span>
                     <span className="data-value">{lens.brand} {lens.type}</span>
                   </div>
-                  <div className="data-row">
-                    <span className="data-label">{t("power")}:</span>
-                    <span className="data-value">{lens.power}</span>
-                  </div>
                   {lens.color && (
                     <div className="data-row">
                       <span className="data-label">{t("color")}:</span>
                       <span className="data-value">{lens.color}</span>
                     </div>
                   )}
-                  <div className="data-row">
-                    <span className="data-label">{t("quantity")}:</span>
-                    <span className="data-value">{lens.qty || 1}</span>
-                  </div>
                 </div>
               ))}
             </div>

@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { 
   ClipboardCheck, Printer, Receipt, 
   Check, ChevronRight, FileText, PartyPopper,
-  CreditCard, User, Phone, Calendar, AlertTriangle
+  CreditCard, User, Phone, Calendar, AlertTriangle,
+  Contact
 } from "lucide-react";
 
 interface InvoiceStepSummaryProps {
@@ -31,6 +32,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     patientName: getValues<string>('patientName') || "",
     patientPhone: getValues<string>('patientPhone') || "",
     patientId: getValues<string>('patientId'),
+    invoiceType: getValues<string>('invoiceType') || "glasses",
     lensType: getValues<string>('lensType') || "",
     lensPrice: getValues<number>('lensPrice') || 0,
     coating: getValues<string>('coating') || "",
@@ -39,6 +41,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     frameModel: getValues<string>('frameModel') || "",
     frameColor: getValues<string>('frameColor') || "",
     framePrice: getValues<number>('framePrice') || 0,
+    contactLensItems: getValues('contactLensItems') || [],
     discount: getValues<number>('discount') || 0,
     deposit: getValues<number>('deposit') || 0,
     total: getValues<number>('total') || 0,
@@ -54,6 +57,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   };
   
   const hasInvoiceData = !!invoice.invoiceId && !!invoice.workOrderId;
+  const isContactLens = invoice.invoiceType === "contacts";
   
   // If no invoice data is available, show a guidance message
   if (!hasInvoiceData) {
@@ -121,6 +125,18 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
                 <span className="text-gray-600 font-medium">{t('workOrderNumber')}:</span>
               </div>
               <span className="font-bold text-lg text-primary">{invoice.workOrderId}</span>
+            </div>
+
+            <div className={`flex justify-between items-center pb-3 border-b border-dashed border-green-200 ${textAlignClass}`}>
+              <div className="flex items-center">
+                {isContactLens ? (
+                  <Contact className="w-5 h-5 text-blue-600 mr-2" />
+                ) : (
+                  <FileText className="w-5 h-5 text-blue-600 mr-2" />
+                )}
+                <span className="text-gray-600 font-medium">{t('orderType')}:</span>
+              </div>
+              <span className="font-medium">{isContactLens ? t('contactLenses') : t('glasses')}</span>
             </div>
             
             <div className={`flex justify-between items-center ${textAlignClass}`}>
