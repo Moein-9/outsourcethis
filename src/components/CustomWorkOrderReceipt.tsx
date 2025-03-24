@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -225,7 +226,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       <div className="mb-3">
         <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
           {isRtl 
-            ? "ت��اصيل المنتج | Product Details" 
+            ? "تفاصيل المنتج | Product Details" 
             : "Product Details | تفاصيل المنتج"}
         </div>
         

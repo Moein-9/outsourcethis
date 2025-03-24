@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,7 @@ export interface ContactLensItem {
   type: string;
   bc: string; // Base curve
   diameter: string;
-  power: string; // Keeping this for data structure, will hide in UI
+  power: string; // Keeping this in the data structure, but not displaying it
   price: number;
   qty: number;
   color?: string;
@@ -379,7 +380,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">اللون</th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">BC</th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">السعر</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">الكمية</th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800"></th>
                       </tr>
                     </thead>
@@ -391,12 +391,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                           <td className="py-2.5 px-3 text-sm">{lens.color || "-"}</td>
                           <td className="py-2.5 px-3 text-sm">{lens.bc}</td>
                           <td className="py-2.5 px-3 text-sm font-medium">{lens.price.toFixed(2)} KWD</td>
-                          <td className="py-2.5 px-3 text-sm">
-                            <Badge variant={lens.qty > 5 ? "outline" : "destructive"} 
-                                  className={`text-xs ${lens.qty > 5 ? 'bg-green-50 text-green-700 border-green-200' : ''}`}>
-                              {lens.qty}
-                            </Badge>
-                          </td>
                           <td className="py-2 px-3">
                             <Button 
                               variant="ghost" 

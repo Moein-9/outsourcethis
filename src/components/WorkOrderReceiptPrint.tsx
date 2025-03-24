@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -326,9 +327,15 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             {contactLenses.slice(0, 2).map((lens, index) => (
               <div key={index} style={{ marginLeft: "2px", marginBottom: "1px" }}>
                 <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: "bold" }}>{isRtl ? "الماركة" : "Brand"}:</span>
-                  <span>{lens.brand}</span>
+                  <span style={{ fontWeight: "bold" }}>{isRtl ? "النوع" : "Type"}:</span>
+                  <span>{lens.brand} {lens.type}</span>
                 </div>
+                {lens.color && (
+                  <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontWeight: "bold" }}>{isRtl ? "اللون" : "Color"}:</span>
+                    <span>{lens.color}</span>
+                  </div>
+                )}
                 <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                   <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
                   <span>{lens.price.toFixed(3)} KWD</span>
@@ -389,7 +396,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           <span>{amountPaid.toFixed(3)} KWD</span>
         </div>
         
-        {/* Enhanced payment status indicators */}
         {isPaid ? (
           <div className="payment-paid" style={{ 
             display: "flex", 
@@ -435,7 +441,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         )}
       </div>
 
-      {/* Added quality confirmation section as shown in screenshot */}
       <div style={{ marginTop: "10px", borderTop: "1px dashed #000", paddingTop: "5px" }}>
         <div style={{ marginBottom: "8px" }}>
           <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -456,165 +461,33 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
             <span>{isRtl ? "التاريخ" : "Date"}: ____ /____ /____</span>
           </div>
         </div>
-
-        <div style={{ marginBottom: "5px" }}>
-          <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {isRtl ? (
-              <>
-                <span>توقيع الفني</span>
-                <span style={{ fontSize: "10px" }}>technician Signature</span>
-              </>
-            ) : (
-              <>
-                <span>technician Signature</span>
-                <span style={{ fontSize: "10px" }}>توقيع الفني</span>
-              </>
-            )}
-          </h3>
-          <div style={{ borderBottom: "1px solid #ccc", height: "15px", marginTop: "5px" }}></div>
-          <div style={{ display: "flex", justifyContent: "flex-end", fontSize: "9px", marginTop: "2px" }}>
-            <span>{isRtl ? "التاريخ" : "Date"}: ____ /____ /____</span>
-          </div>
+      </div>
+      
+      <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", marginTop: "10px", textAlign: "center" }}>
+        <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "2px" }}>
+          {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
+        </div>
+        <div style={{ fontSize: "7px", color: "#666" }}>
+          {isRtl ? 
+            "هذا الإيصال دليل طلب فقط وليس إيصال دفع" : 
+            "This receipt is proof of order only and not a payment receipt"
+          }
         </div>
       </div>
       
-      <div style={{ borderTop: "1px dashed #000", margin: "2px 0", paddingTop: "2px" }}></div>
-      
-      <div style={{ textAlign: "center", marginBottom: "1px", fontSize: "8px" }}>
-        {isRtl ? (
-          <p style={{ margin: "0" }}>شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
-        ) : (
-          <p style={{ margin: "0" }}>Thank you for choosing Moein Optical. We're always delighted to serve you!</p>
-        )}
-        <div style={{ margin: "2px auto", width: "32px", height: "32px" }}>
-          <QRCodeSVG value={generateQRData()} size={32} />
-        </div>
-      </div>
+      <style jsx>{`
+        @media print {
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+          
+          #work-order-receipt {
+            width: 80mm;
+            page-break-after: always;
+          }
+        }
+      `}</style>
     </div>
   );
-};
-
-export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
-  const container = document.createElement('div');
-  container.style.display = 'none';
-  document.body.appendChild(container);
-  
-  const { language, t } = useLanguageStore.getState();
-  const isRtl = language === 'ar';
-  
-  const { invoice, patientName, rx, frame, lensType, coating } = props;
-  // Use workOrderId for the work order receipt
-  const orderNumber = invoice.workOrderId || "";
-  
-  const htmlContent = `
-    <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; text-align: ${isRtl ? 'right' : 'left'}; font-size: 9px; line-height: 1.1;">
-      <div style="text-align: center; margin-bottom: 3px;">
-        <h1 style="font-size: 12px; font-weight: bold; margin: 1px 0;">${t("workOrder")}</h1>
-        <p style="font-size: 10px; margin: 1px 0;">${orderNumber}</p>
-        <p style="font-size: 8px; margin: 1px 0;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
-      </div>
-      
-      <div style="margin-bottom: 3px; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 1px 0;">
-        <p style="margin: 0; font-size: 9px;"><strong>${t("name")}:</strong> ${patientName || invoice.patientName || t("notSpecified")}</p>
-        <p style="margin: 0; font-size: 9px;"><strong>${t("phone")}:</strong> ${props.patientPhone || invoice.patientPhone || t("notSpecified")}</p>
-      </div>
-      
-      ${rx ? `
-      <div style="margin-bottom: 3px;">
-        <h2 style="font-size: 10px; font-weight: bold; margin: 1px 0; border-bottom: 1px solid #ccc; padding-bottom: 1px;">${t("prescription")}</h2>
-        <table style="width: 100%; border-collapse: collapse; font-size: 7px;">
-          <tr>
-            <th style="border: 1px solid #000; padding: 1px;"></th>
-            <th style="border: 1px solid #000; padding: 1px;">SPH</th>
-            <th style="border: 1px solid #000; padding: 1px;">CYL</th>
-            <th style="border: 1px solid #000; padding: 1px;">AX</th>
-            ${(rx.pdOD || rx.pdOS || rx.pd) ? `<th style="border: 1px solid #000; padding: 1px;">PD</th>` : ''}
-          </tr>
-          <tr>
-            <td style="border: 1px solid #000; padding: 1px; font-weight: bold;">OD ${isRtl ? '(يمين)' : ''}</td>
-            <td style="border: 1px solid #000; padding: 1px;">${rx.sphereOD || "-"}</td>
-            <td style="border: 1px solid #000; padding: 1px;">${rx.cylOD || "-"}</td>
-            <td style="border: 1px solid #000; padding: 1px;">${rx.axisOD || "-"}</td>
-            ${(rx.pdOD || rx.pdOS || rx.pd) ? `<td style="border: 1px solid #000; padding: 1px;">${rx.pdOD || rx.pd || "-"}</td>` : ''}
-          </tr>
-          <tr>
-            <td style="border: 1px solid #000; padding: 1px; font-weight: bold;">OS ${isRtl ? '(يسار)' : ''}</td>
-            <td style="border: 1px solid #000; padding: 1px;">${rx.sphereOS || "-"}</td>
-            <td style="border: 1px solid #000; padding: 1px;">${rx.cylOS || "-"}</td>
-            <td style="border: 1px solid #000; padding: 1px;">${rx.axisOS || "-"}</td>
-            ${(rx.pdOD || rx.pdOS || rx.pd) ? `<td style="border: 1px solid #000; padding: 1px;">${rx.pdOS || rx.pd || "-"}</td>` : ''}
-          </tr>
-        </table>
-        ${rx.add ? `<p style="margin: 1px 0; font-size: 8px;"><strong>ADD:</strong> ${rx.add}</p>` : ''}
-      </div>
-      ` : ''}
-      
-      ${frame ? `
-      <div style="margin-bottom: 2px;">
-        <h2 style="font-size: 10px; font-weight: bold; margin: 1px 0; border-bottom: 1px solid #ccc; padding-bottom: 1px;">${t("frame")}</h2>
-        <p style="margin: 0; font-size: 8px;"><strong>${t("brand")}/${t("model")}:</strong> ${frame.brand} ${frame.model}</p>
-        <p style="margin: 0; font-size: 8px;"><strong>${t("color")}:</strong> ${frame.color}</p>
-        ${frame.size ? `<p style="margin: 0; font-size: 8px;"><strong>${t("size")}:</strong> ${frame.size}</p>` : ''}
-        <p style="margin: 0; font-size: 8px;"><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} KWD</p>
-      </div>
-      ` : ''}
-      
-      ${lensType ? `
-      <div style="margin-bottom: 2px;">
-        <h2 style="font-size: 10px; font-weight: bold; margin: 1px 0; border-bottom: 1px solid #ccc; padding-bottom: 1px;">${t("lensType")}</h2>
-        <p style="margin: 0; font-size: 8px;"><strong>${t("type")}:</strong> ${lensType}</p>
-        <p style="margin: 0; font-size: 8px;"><strong>${t("price")}:</strong> ${invoice.lensPrice.toFixed(3)} KWD</p>
-      </div>
-      ` : ''}
-      
-      ${coating ? `
-      <div style="margin-bottom: 2px;">
-        <h2 style="font-size: 10px; font-weight: bold; margin: 1px 0; border-bottom: 1px solid #ccc; padding-bottom: 1px;">${t("coating")}</h2>
-        <p style="margin: 0; font-size: 8px;"><strong>${t("type")}:</strong> ${coating}</p>
-        <p style="margin: 0; font-size: 8px;"><strong>${t("price")}:</strong> ${invoice.coatingPrice.toFixed(3)} KWD</p>
-      </div>
-      ` : ''}
-      
-      <div style="margin-top: 2px; border-top: 1px dashed #000; padding-top: 1px;">
-        <p style="margin: 0; font-size: 8px;"><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} KWD</p>
-        <p style="margin: 0; font-size: 8px;"><strong>${t("paid")}:</strong> ${invoice.deposit.toFixed(3)} KWD</p>
-        <p style="margin: 0; font-size: 8px;"><strong>${t("remaining")}:</strong> ${(invoice.total - invoice.deposit).toFixed(3)} KWD</p>
-      </div>
-      
-      <div style="text-align: center; margin-top: 2px; font-size: 7px;">
-        ${isRtl 
-          ? '<p style="margin: 0;">شكراً لاختياركم نظارات المعين</p>' 
-          : '<p style="margin: 0;">Thank you for choosing Moein Optical</p>'
-        }
-      </div>
-    </div>
-  `;
-  
-  try {
-    document.body.classList.add('printing');
-    
-    const printDoc = PrintService.prepareWorkOrderDocument(htmlContent, t("workOrder"));
-    
-    PrintService.printHtml(printDoc, 'receipt', () => {
-      document.body.classList.remove('printing');
-      if (document.body.contains(container)) {
-        document.body.removeChild(container);
-      }
-      toast({
-        title: t("success"),
-        description: t("printJobSent")
-      });
-    });
-  } catch (error) {
-    console.error('Print error:', error);
-    document.body.classList.remove('printing');
-    if (document.body.contains(container)) {
-      document.body.removeChild(container);
-    }
-    toast({
-      title: t("error"),
-      description: t("printError"),
-      variant: "destructive"
-    });
-  }
 };
