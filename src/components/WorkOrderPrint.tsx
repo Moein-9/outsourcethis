@@ -67,7 +67,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   } : undefined);
   
   const isContactLens = contactLenses && contactLenses.length > 0;
-  const orderNumber = invoice.invoiceId || invoice.workOrderId || "NEW ORDER";
+  const orderNumber = invoice.workOrderId || "NEW ORDER";
 
   return (
     <div className="print-wrapper">
@@ -187,7 +187,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         `}
       </style>
 
-      <div id="work-order-print" className={dirClass} style={{ width: "80mm", padding: "2mm" }}>
+      <div id="work-order-receipt" className={dirClass} style={{ width: "80mm", padding: "2mm" }}>
         <div style={{ textAlign: "center", marginBottom: "5mm", position: "relative" }}>
           <div className="absolute right-0 top-0 hide-print">
             <ClipboardCheck className="w-10 h-10 text-primary" />
@@ -195,7 +195,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           <MoenLogo className="mx-auto w-auto" style={{ height: "10mm", marginBottom: "1mm" }} />
           <h1 style={{ fontSize: "16pt", fontWeight: "bold", margin: "1mm 0" }}>{t("workOrder")}</h1>
           <p style={{ fontSize: "14pt", margin: "1mm 0", color: "#333" }}>{orderNumber}</p>
-          <p style={{ fontSize: "10pt", margin: "1mm 0", color: "#666" }}>
+          <p style={{ fontSize: "10pt", margin: "1mm 0", color: "#666" }} className="rx-creation-date">
             {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
           </p>
           <div style={{ fontSize: "9pt", textAlign: "center", marginTop: "1mm" }}>
@@ -286,7 +286,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
-                    <th style={{ textAlign: "center" }}>{t("eye")}</th>
+                    <th style={{ textAlign: "center" }}>Eye</th>
                     <th style={{ textAlign: "center" }}>SPH</th>
                     <th style={{ textAlign: "center" }}>CYL</th>
                     <th style={{ textAlign: "center" }}>AXIS</th>
@@ -327,7 +327,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
-                    <th style={{ textAlign: "center" }}>{t("eye")}</th>
+                    <th style={{ textAlign: "center" }}>Eye</th>
                     <th style={{ textAlign: "center" }}>SPH</th>
                     <th style={{ textAlign: "center" }}>CYL</th>
                     <th style={{ textAlign: "center" }}>AXIS</th>
@@ -338,81 +338,53 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 <tbody>
                   <tr>
                     <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.sphere || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.cylinder || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.axis || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.bc || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.rightEye.dia || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx?.rightEye?.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx?.rightEye?.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx?.rightEye?.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx?.rightEye?.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx?.rightEye?.dia || "_____"}</td>
                   </tr>
                   <tr>
                     <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.sphere || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.cylinder || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.axis || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.bc || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRx.leftEye.dia || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx?.leftEye?.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx?.leftEye?.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx?.leftEye?.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx?.leftEye?.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRx?.leftEye?.dia || "_____"}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </>
         )}
-
-        {!isContactLens && (
-          <>
-            <div className="section-heading">
-              <Ruler style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-              <span>{t("lensDetails")} {language === 'ar' && '(تفاصيل العدسات)'}</span>
-            </div>
-            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
-              <div className="data-row">
-                <span className="data-label">{t("type")}:</span>
-                <span className="data-value">{lensTypeValue}</span>
-              </div>
-              {coatingValue && (
-                <div className="data-row">
-                  <span className="data-label">{t("coating")}:</span>
-                  <span className="data-value">{coatingValue}</span>
-                </div>
-              )}
-              <div className="data-row">
-                <span className="data-label">{t("price")}:</span>
-                <span className="data-value">{invoice.lensPrice.toFixed(3)} KWD</span>
-              </div>
-              {coatingValue && (
-                <div className="data-row">
-                  <span className="data-label">{t("coatingPrice")}:</span>
-                  <span className="data-value">{invoice.coatingPrice.toFixed(3)} KWD</span>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
+        
         <div className="section-heading">
-          <CircleDot style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-          <span>{t("additionalNotes")} {language === 'ar' && '(ملاحظات إضافية)'}</span>
+          <BadgeCheck style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+          <span>{t("lensInformation")} {language === 'ar' && '(معلومات العدسات)'}</span>
         </div>
+        
         <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
-          <div style={{ border: "0.2mm solid #000", minHeight: "15mm", backgroundColor: "#fff", width: "100%" }}></div>
-        </div>
-
-        <div style={{ marginTop: "5mm", paddingTop: "2mm", borderTop: "0.3mm solid #000" }}>
-          <div style={{ marginBottom: "5mm" }}>
-            <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm" }}>
-              {t("technicianSignature")} {language === 'ar' && '(توقيع الفني)'}
-            </p>
-            <div className="signature-line"></div>
-            <div className="date-line">{t("date")}: ___ / ___ / _____</div>
-          </div>
+          {lensTypeValue && (
+            <div className="data-row">
+              <span className="data-label">{t("lensType")}:</span>
+              <span className="data-value">{lensTypeValue}</span>
+            </div>
+          )}
           
-          <div>
-            <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm", display: "flex", alignItems: "center" }}>
-              <BadgeCheck style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
-              {t("qualityConfirmation")} {language === 'ar' && '(تأكيد الجودة)'}
-            </p>
-            <div className="signature-line"></div>
-            <div className="date-line">{t("date")}: ___ / ___ / _____</div>
+          {coatingValue && (
+            <div className="data-row">
+              <span className="data-label">{t("coating")}:</span>
+              <span className="data-value">{coatingValue}</span>
+            </div>
+          )}
+        </div>
+        
+        <div style={{ marginTop: "6mm", borderTop: "0.3mm dashed #000", paddingTop: "3mm", textAlign: "center" }}>
+          <p style={{ margin: "0", fontStyle: "italic", fontSize: "10pt" }}>
+            {language === 'ar' ? 'شكراً لكم على ثقتكم. نتمنى لكم رؤية واضحة!' : 'Thank you for your trust. We wish you clear vision!'}
+          </p>
+          <div className="date-line">
+            {format(new Date(), 'dd/MM/yyyy')}
           </div>
         </div>
       </div>

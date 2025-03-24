@@ -73,6 +73,7 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     paymentMethod: '',
     authNumber: '',
     workOrderId: '',
+    invoiceId: '',  // Added invoiceId field
     isPaid: false,
   });
   
