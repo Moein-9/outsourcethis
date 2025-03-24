@@ -39,8 +39,10 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
     setOpen(false); // Close dialog before printing
     
-    // Render the receipt directly to avoid "Unable to find work order content" error
-    CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+    // Slightly longer delay to ensure dialog is fully closed and DOM is updated
+    setTimeout(() => {
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+    }, 300);
   };
   
   // Create a default button if no children are provided or if children is not a valid element

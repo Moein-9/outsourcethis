@@ -1,26 +1,14 @@
 
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Make sure we have a root element
-const rootElement = document.getElementById("root");
-
-// If root element doesn't exist, create one
-if (!rootElement) {
+// Ensure the app is properly mounted
+const root = document.getElementById("root");
+if (!root) {
   const rootDiv = document.createElement("div");
   rootDiv.id = "root";
   document.body.appendChild(rootDiv);
 }
 
-// Get the root element again (in case it was just created)
-const container = document.getElementById("root");
-
-// Create root and render app using ReactDOM
-const root = ReactDOM.createRoot(container!);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+createRoot(document.getElementById("root")!).render(<App />);
