@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     
     try {
       if (selectedFormat === "receipt") {
+        // Use our consolidated printing method
         printWorkOrderReceipt({
           invoice,
           patientName,
@@ -90,6 +92,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           });
         }, 1000);
       } else {
+        // For A4 printing, use the PrintService
         const a4Content = `
           <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
             <div style="text-align: center; margin-bottom: 10mm;">

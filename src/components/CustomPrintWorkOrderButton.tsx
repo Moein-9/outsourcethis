@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
-import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
 import { 
   Dialog, 
@@ -12,6 +11,7 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
+import { printWorkOrderReceipt } from './WorkOrderReceiptPrint';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -20,7 +20,7 @@ interface PrintWorkOrderButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
-  children?: React.ReactNode; // This prop is used when passing custom trigger element
+  children?: React.ReactNode; 
 }
 
 export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -30,21 +30,26 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   className = '',
   variant = "outline",
   size = "sm",
-  children // This prop holds any custom trigger element
+  children
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
   const handlePrint = () => {
-    console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
     setIsLoading(true);
     setOpen(false); // Close dialog before printing
     
-    // Slightly longer delay to ensure dialog is fully closed and DOM is updated
+    // Slightly longer delay to ensure dialog is fully closed
     setTimeout(() => {
       try {
-        CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+        // Use our unified printing method
+        printWorkOrderReceipt({
+          invoice: invoice || workOrder,
+          patientName: patient?.name || workOrder?.patientName,
+          patientPhone: patient?.phone || workOrder?.patientPhone,
+          rx: patient?.rx || workOrder?.rx
+        });
       } catch (error) {
         console.error("Error printing work order:", error);
       } finally {
@@ -56,8 +61,8 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   // Create a default button if no children are provided or if children is not a valid element
   const defaultButton = (
     <Button 
-      variant={variant}
-      size={size}
+      variant={variant} 
+      size={size} 
       className={`gap-1 ${className}`}
       disabled={isLoading}
     >
