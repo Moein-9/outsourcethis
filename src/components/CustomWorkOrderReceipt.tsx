@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, Printer } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { 
   Card,
@@ -134,9 +134,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
 
       {/* Work Order Title */}
       <div className="text-center mb-3">
-        <h3 className="font-bold text-lg mb-0">
-          {isRtl ? "أمر عمل" : "WORK ORDER"}
-        </h3>
+        <div className="bg-black text-white py-1 px-2 mb-2 font-bold text-base rounded">
+          {isRtl ? "أمر عمل | WORK ORDER" : "WORK ORDER | أمر عمل"}
+        </div>
         <p className="text-xs mb-0 text-gray-600">
           {isRtl ? "ORDER #: " : "رقم الطلب: "}
           <span className="font-semibold">{invoiceNumber}</span>
