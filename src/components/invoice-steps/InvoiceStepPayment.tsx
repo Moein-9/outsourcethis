@@ -8,22 +8,21 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { 
   BadgePercent, Banknote, CreditCard, Check,
-  CreditCard as CardIcon, Save
+  CreditCard as CardIcon
 } from "lucide-react";
 import { useInvoiceStore } from "@/store/invoiceStore";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
   const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
   const addWorkOrder = useInvoiceStore(state => state.addWorkOrder);
-  const addInvoice = useInvoiceStore(state => state.addInvoice);
   
   const [discount, setDiscount] = useState(getValues<number>('discount') || 0);
   const [deposit, setDeposit] = useState(getValues<number>('deposit') || 0);
   const [paymentMethod, setPaymentMethod] = useState(getValues<string>('paymentMethod') || "");
   const [authNumber, setAuthNumber] = useState(getValues<string>('authNumber') || "");
-  const [orderSaved, setOrderSaved] = useState(!!getValues<string>('workOrderId') && !!getValues<string>('invoiceId'));
+  const [workOrderCreated, setWorkOrderCreated] = useState(!!getValues<string>('workOrderId'));
   
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
@@ -69,7 +68,7 @@ export const InvoiceStepPayment: React.FC = () => {
     setValue('authNumber', e.target.value);
   };
 
-  const saveOrder = () => {
+  const createWorkOrder = () => {
     if (!paymentMethod) {
       toast({
         title: t('error'),
@@ -91,44 +90,13 @@ export const InvoiceStepPayment: React.FC = () => {
       }
     };
     
-    // Generate work order ID
     const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
     setValue('workOrderId', workOrderId);
-    
-    // Create the invoice with separate invoice ID
-    const formData = getValues();
-    const invoiceData = {
-      patientId: formData.patientId,
-      patientName: formData.patientName,
-      patientPhone: formData.patientPhone,
-      
-      lensType: formData.lensType,
-      lensPrice: formData.lensPrice,
-      
-      coating: formData.coating,
-      coatingPrice: formData.coatingPrice,
-      
-      frameBrand: formData.frameBrand,
-      frameModel: formData.frameModel,
-      frameColor: formData.frameColor,
-      framePrice: formData.framePrice,
-      
-      discount: formData.discount,
-      deposit: formData.deposit,
-      total: formData.total,
-      
-      paymentMethod: formData.paymentMethod,
-      authNumber: formData.authNumber,
-      workOrderId: workOrderId // Link to the work order
-    };
-    
-    const invoiceId = addInvoice(invoiceData);
-    setValue('invoiceId', invoiceId);
-    setOrderSaved(true);
+    setWorkOrderCreated(true);
     
     toast({
       title: t('success'),
-      description: `${t('orderSavedSuccess')}`,
+      description: `${t('workOrderCreated')} ${workOrderId}`,
     });
   };
   
@@ -301,15 +269,14 @@ export const InvoiceStepPayment: React.FC = () => {
           </div>
         </div>
         
-        {!orderSaved ? (
+        {!workOrderCreated ? (
           <motion.div className="mt-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Button 
               className="w-full" 
               size="lg"
-              onClick={saveOrder}
+              onClick={createWorkOrder}
             >
-              <Save className="w-5 h-5 mr-2" />
-              {language === 'ar' ? 'حفظ الطلب | Save Order' : 'Save Order | حفظ الطلب'}
+              {t('createWorkOrder')}
             </Button>
           </motion.div>
         ) : (
@@ -319,7 +286,7 @@ export const InvoiceStepPayment: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <Check className="w-5 h-5 mr-2" />
-            <span className="font-medium">{t('orderSavedSuccess')}</span>
+            <span className="font-medium">{t('workOrderCreated')}: {getValues<string>('workOrderId')}</span>
           </motion.div>
         )}
       </div>

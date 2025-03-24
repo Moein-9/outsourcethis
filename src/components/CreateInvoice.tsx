@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { 
-  FileText, Printer, Receipt, User, PackageCheck, CreditCard, Check,
+  FileText, Printer, Receipt, Save, User, PackageCheck, CreditCard, Check,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
   MessageCircleDashed, Loader
 } from "lucide-react";
@@ -19,7 +19,6 @@ import { InvoiceFormProvider, useInvoiceForm } from "@/components/invoice-steps/
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
-import { CustomPrintService } from "@/utils/CustomPrintService";
 
 const CreateInvoiceContent: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -27,39 +26,14 @@ const CreateInvoiceContent: React.FC = () => {
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("patient");
+  const addInvoice = useInvoiceStore((state) => state.addInvoice);
   const { getValues, setValue } = useInvoiceForm();
   
-  // Watch for workOrderId and invoiceId changes to auto-navigate to summary
-  useEffect(() => {
-    const workOrderId = getValues("workOrderId");
-    const invoiceId = getValues("invoiceId");
-    
-    if (workOrderId && invoiceId) {
-      setActiveTab("summary");
-    }
-  }, [getValues]);
-  
   const handlePrintWorkOrder = () => {
-    const workOrder = {
-      id: getValues("workOrderId") || "",
-      patientId: getValues("patientId") || "",
-      createdAt: new Date().toISOString(),
-      rx: getValues("rx"),
-    };
-    
-    const invoice = {
-      invoiceId: getValues("invoiceId") || "",
-      patientName: getValues("patientName") || "",
-      patientPhone: getValues("patientPhone") || "",
-    };
-    
-    const patient = {
-      id: getValues("patientId") || "",
-      name: getValues("patientName") || "",
-      phone: getValues("patientPhone") || "",
-    };
-    
-    CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+    setWorkOrderPrintOpen(true);
+    setTimeout(() => {
+      window.print();
+    }, 500);
   };
   
   const handlePrintInvoice = () => {
@@ -70,8 +44,7 @@ const CreateInvoiceContent: React.FC = () => {
   };
 
   const previewInvoice = {
-    invoiceId: getValues("invoiceId") || "PREVIEW",
-    workOrderId: getValues("workOrderId") || "",
+    invoiceId: getValues("workOrderId") || "PREVIEW",
     createdAt: new Date().toISOString(),
     patientName: getValues("patientName") || "Customer Name",
     patientPhone: getValues("patientPhone") || "",
@@ -115,6 +88,43 @@ const CreateInvoiceContent: React.FC = () => {
     return Math.max(0, total - deposit);
   };
 
+  const handleSaveInvoice = () => {
+    const formData = getValues();
+    const invoiceData = {
+      patientId: formData.patientId,
+      patientName: formData.patientName,
+      patientPhone: formData.patientPhone,
+      
+      lensType: formData.lensType,
+      lensPrice: formData.lensPrice,
+      
+      coating: formData.coating,
+      coatingPrice: formData.coatingPrice,
+      
+      frameBrand: formData.frameBrand,
+      frameModel: formData.frameModel,
+      frameColor: formData.frameColor,
+      framePrice: formData.framePrice,
+      
+      discount: formData.discount,
+      deposit: formData.deposit,
+      total: formData.total,
+      
+      paymentMethod: formData.paymentMethod,
+      authNumber: formData.authNumber
+    };
+    
+    const invoiceId = addInvoice(invoiceData);
+    setValue("workOrderId", invoiceId);
+    
+    toast({
+      title: t('success'),
+      description: `${t('invoiceSavedSuccess')} ${invoiceId}.`,
+    });
+    
+    setActiveTab("summary");
+  };
+
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
 
@@ -135,6 +145,11 @@ const CreateInvoiceContent: React.FC = () => {
         </h2>
         
         <div className="flex items-center space-x-3">
+          <Button onClick={handleSaveInvoice} variant="outline" className="flex items-center gap-2">
+            <Save className="w-4 h-4" />
+            {t('saveInvoice')}
+          </Button>
+          
           <Button 
             onClick={handlePrintInvoice} 
             variant="outline" 
@@ -243,6 +258,13 @@ const CreateInvoiceContent: React.FC = () => {
                       >
                         {t('previous')}
                       </Button>
+                      <Button 
+                        onClick={handleSaveInvoice} 
+                        className="flex items-center gap-2"
+                      >
+                        <Save className="w-4 h-4" />
+                        {t('saveInvoice')}
+                      </Button>
                     </div>
                   </motion.div>
                 </TabsContent>
@@ -257,8 +279,6 @@ const CreateInvoiceContent: React.FC = () => {
                       setInvoicePrintOpen={setInvoicePrintOpen}
                       setWorkOrderPrintOpen={setWorkOrderPrintOpen}
                       setActiveTab={setActiveTab}
-                      handlePrintInvoice={handlePrintInvoice}
-                      handlePrintWorkOrder={handlePrintWorkOrder}
                     />
                     
                     <div className="flex justify-between mt-6">
