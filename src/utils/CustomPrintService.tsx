@@ -2,7 +2,7 @@
 import { toast } from "@/hooks/use-toast";
 import { CustomWorkOrderReceipt } from "@/components/CustomWorkOrderReceipt";
 import React from 'react';
-import * as ReactDOMServer from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
@@ -20,8 +20,8 @@ export class CustomPrintService {
         return;
       }
 
-      // Use ReactDOMServer.renderToString to ensure compatibility with React 18+
-      const receiptContent = ReactDOMServer.renderToString(
+      // Use renderToString to ensure compatibility with React 18+
+      const receiptContent = renderToString(
         <CustomWorkOrderReceipt 
           workOrder={workOrder} 
           invoice={invoice} 

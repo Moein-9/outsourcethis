@@ -1,6 +1,6 @@
 
 import React from 'react'
-import * as ReactDOM from 'react-dom/client'
+import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
@@ -17,8 +17,8 @@ if (!rootElement) {
 // Get the root element again (in case it was just created)
 const container = document.getElementById("root");
 
-// Create root and render app
-const root = ReactDOM.createRoot(container!);
+// Create root and render app using the proper createRoot API
+const root = createRoot(container!);
 root.render(
   <React.StrictMode>
     <App />
