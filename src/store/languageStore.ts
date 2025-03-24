@@ -292,6 +292,12 @@ const translations: Record<string, Record<string, string>> = {
     approvalNumberLabel: "Approval Number:",
     paymentTotalLabel: "Total:",
     paidLabel: "Paid:",
+    
+    // Waiting states for invoice summary
+    waitingForClientData: "Waiting for client data...",
+    waitingForProductData: "Waiting for product data...",
+    waitingForPaymentData: "Waiting for payment data...",
+    
     remainingLabel: "Remaining:",
     
     // LensSelector Component
@@ -609,6 +615,12 @@ const translations: Record<string, Record<string, string>> = {
     approvalNumberLabel: "رقم الموافقة:",
     paymentTotalLabel: "المجموع:",
     paidLabel: "المدفوع:",
+    
+    // Waiting states for invoice summary
+    waitingForClientData: "بانتظار بيانات العميل...",
+    waitingForProductData: "بانتظار بيانات المنتجات...",
+    waitingForPaymentData: "بانتظار بيانات الدفع...",
+    
     remainingLabel: "المتبقي:",
     
     // LensSelector Component
