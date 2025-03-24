@@ -251,7 +251,7 @@ const translations: Record<string, Record<string, string>> = {
     
     // Create Invoice (Additional)
     invoiceTitle: "Create Invoice",
-    clientSection: "1) Client Information",
+    // clientSection is now defined above in "Tab sections in Create Invoice"
     noClientFile: "No client file",
     phoneColon: "Phone Number:",
     typeToSearch: "Type to search...",
@@ -271,7 +271,7 @@ const translations: Record<string, Record<string, string>> = {
     discountColon: "Discount (KWD):",
     depositColon: "Deposit (KWD):",
     payInFull: "Pay in Full",
-    paymentSection: "5) Payment Method",
+    // paymentSection is now defined above in "Tab sections in Create Invoice"
     approvalNumber: "Approval Number (Authorization No.):",
     previewInvoice: "Preview Invoice",
     saveAndPrint: "Save and Print",
@@ -548,7 +548,7 @@ const translations: Record<string, Record<string, string>> = {
     duePayments: 'إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية',
     clientId: 'رقم العميل',
     invoiceId: 'رقم الفاتورة',
-    invoiceDate: 'تاريخ ال��اتورة',
+    invoiceDate: 'تاريخ الفاتورة',
     amountDue: 'المبلغ المستحق',
     status: 'الحالة',
     payNow: 'ادفع الآن',
@@ -592,6 +592,7 @@ const translations: Record<string, Record<string, string>> = {
     
     // Create Invoice (Additional)
     invoiceTitle: "إنشاء فاتورة",
+    // clientSection is defined above in "Tab sections in Create Invoice"
     noClientFile: "لا يوجد ملف عميل",
     phoneColon: "رقم الهاتف:",
     typeToSearch: "اكتب للبحث...",
