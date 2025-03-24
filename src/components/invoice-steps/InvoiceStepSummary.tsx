@@ -22,7 +22,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   setActiveTab
 }) => {
   const { t, language } = useLanguageStore();
-  const { getValues } = useInvoiceForm();
+  const { getValues, calculateTotal, calculateRemaining } = useInvoiceForm();
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
@@ -44,10 +44,10 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     contactLensItems: getValues('contactLensItems') || [],
     discount: getValues<number>('discount') || 0,
     deposit: getValues<number>('deposit') || 0,
-    total: getValues<number>('total') || 0,
-    remaining: getValues<number>('remaining') || 0,
+    total: calculateTotal(),
+    remaining: calculateRemaining(),
     paymentMethod: getValues<string>('paymentMethod') || "",
-    isPaid: getValues<boolean>('isPaid'),
+    isPaid: calculateRemaining() <= 0,
     authNumber: getValues<string>('authNumber') || "",
   };
   

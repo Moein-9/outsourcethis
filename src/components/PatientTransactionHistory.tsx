@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +10,6 @@ import { ar } from 'date-fns/locale';
 import { EditWorkOrderDialog } from './EditWorkOrderDialog';
 import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { PrintWorkOrderButton } from './PrintWorkOrderButton';
 import { CustomPrintWorkOrderButton } from './CustomPrintWorkOrderButton';
 
 interface PatientTransactionHistoryProps {
@@ -39,6 +39,20 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   };
   
   const calculateRemaining = (invoice: any) => {
+    // For contact lens orders, calculate total based on qty
+    if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
+      const contactLensTotal = invoice.contactLensItems.reduce(
+        (sum: number, lens: any) => sum + (lens.price || 0) * (lens.qty || 1), 0
+      );
+      const total = Math.max(0, contactLensTotal - (invoice.discount || 0));
+      const paid = invoice.payments 
+        ? invoice.payments.reduce((sum: number, payment: any) => sum + (payment.amount || 0), 0)
+        : invoice.deposit || 0;
+      
+      return total - paid;
+    }
+    
+    // For regular glasses orders
     const total = invoice.total || 0;
     const paid = invoice.payments 
       ? invoice.payments.reduce((sum: number, payment: any) => sum + (payment.amount || 0), 0)

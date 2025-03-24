@@ -26,7 +26,7 @@ const CreateInvoiceContent: React.FC = () => {
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("patient");
-  const { getValues, setValue } = useInvoiceForm();
+  const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
   
   useEffect(() => {
     const handleNavigateToSummary = () => {
@@ -72,34 +72,12 @@ const CreateInvoiceContent: React.FC = () => {
     framePrice: getValues("framePrice") || 0,
     discount: getValues("discount") || 0,
     deposit: getValues("deposit") || 0,
-    total: getValues("total") || 0,
-    remaining: getValues("remaining") || 0,
+    total: calculateTotal(),
+    remaining: calculateRemaining(),
     paymentMethod: getValues("paymentMethod") || "Cash",
-    isPaid: (getValues("remaining") || 0) <= 0,
+    isPaid: calculateRemaining() <= 0,
     authNumber: getValues("authNumber") || "",
     contactLensItems: getValues("contactLensItems") || []
-  };
-
-  const calculateTotal = () => {
-    const lensPrice = getValues("lensPrice") || 0;
-    const coatingPrice = getValues("coatingPrice") || 0;
-    const framePrice = getValues("skipFrame") ? 0 : (getValues("framePrice") || 0);
-    const discount = getValues("discount") || 0;
-    
-    const contactLensItems = getValues("contactLensItems") || [];
-    const contactLensTotal = contactLensItems.reduce((sum, lens) => sum + (lens.price || 0), 0);
-    
-    if (invoiceType === "glasses") {
-      return Math.max(0, lensPrice + coatingPrice + framePrice - discount);
-    } else {
-      return Math.max(0, contactLensTotal - discount);
-    }
-  };
-
-  const calculateRemaining = () => {
-    const total = calculateTotal();
-    const deposit = getValues("deposit") || 0;
-    return Math.max(0, total - deposit);
   };
 
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';

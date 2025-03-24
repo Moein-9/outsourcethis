@@ -82,14 +82,33 @@ export const DailySalesReport: React.FC = () => {
     
     setTodaySales(todaySalesData);
     
-    const revenue = todaySalesData.reduce((sum, invoice) => sum + invoice.total, 0);
+    const revenue = todaySalesData.reduce((sum, invoice) => {
+      if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
+        const contactLensTotal = invoice.contactLensItems.reduce(
+          (lensSum, lens) => lensSum + (lens.price || 0) * (lens.qty || 1), 0
+        );
+        return sum + Math.max(0, contactLensTotal - (invoice.discount || 0));
+      }
+      return sum + invoice.total;
+    }, 0);
+    
     const lensRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.lensPrice, 0);
     const frameRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.framePrice, 0);
     const coatingRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.coatingPrice, 0);
+    
+    const contactLensRevenue = todaySalesData.reduce((sum, invoice) => {
+      if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
+        return sum + invoice.contactLensItems.reduce(
+          (lensSum, lens) => lensSum + (lens.price || 0) * (lens.qty || 1), 0
+        );
+      }
+      return sum;
+    }, 0);
+    
     const deposits = todaySalesData.reduce((sum, invoice) => sum + invoice.deposit, 0);
     
     setTotalRevenue(revenue);
-    setTotalLensRevenue(lensRevenue);
+    setTotalLensRevenue(lensRevenue + contactLensRevenue);
     setTotalFrameRevenue(frameRevenue);
     setTotalCoatingRevenue(coatingRevenue);
     setTotalDeposit(deposits);
