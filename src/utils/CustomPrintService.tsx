@@ -1,9 +1,14 @@
 
 import { toast } from "@/hooks/use-toast";
+import { useLanguageStore } from "@/store/languageStore";
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
     console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
+    
+    // Get current language
+    const currentLanguage = useLanguageStore.getState().language;
+    const isRtl = currentLanguage === 'ar';
     
     try {
       // Create a new window for printing
@@ -19,7 +24,7 @@ export class CustomPrintService {
       
       // Add all the required styles and content
       printWindow.document.write(`
-        <html>
+        <html ${isRtl ? 'dir="rtl"' : 'dir="ltr"'}>
           <head>
             <title>Work Order</title>
             <style>
@@ -36,6 +41,8 @@ export class CustomPrintService {
                   padding: 0 !important;
                   background: white !important; /* White background for print */
                   color: black !important;
+                  direction: ${isRtl ? 'rtl' : 'ltr'} !important;
+                  font-family: ${isRtl ? 'Cairo, Arial' : 'Arial'}, sans-serif !important;
                 }
                 
                 #work-order-receipt {
@@ -105,14 +112,25 @@ export class CustomPrintService {
                   page-break-inside: avoid !important;
                   page-break-after: avoid !important;
                 }
+                
+                /* Keep RX table in LTR mode regardless of language */
+                table.rx-table {
+                  direction: ltr !important;
+                }
+                
+                /* Make sure technical terms stay in English */
+                .technical-term {
+                  font-family: Arial, sans-serif !important;
+                }
               }
               
               body {
-                font-family: Cairo, Arial, sans-serif;
+                font-family: ${isRtl ? 'Cairo, Arial' : 'Arial'}, sans-serif;
                 margin: 0;
                 padding: 0;
                 background: white;
                 color: black;
+                direction: ${isRtl ? 'rtl' : 'ltr'};
               }
               
               /* Background classes */
@@ -120,7 +138,18 @@ export class CustomPrintService {
                 background-color: black !important;
                 color: white !important;
               }
+              
+              /* Keep RX table in LTR mode regardless of language */
+              table.rx-table {
+                direction: ltr !important;
+              }
+              
+              /* Make sure technical terms stay in English */
+              .technical-term {
+                font-family: Arial, sans-serif !important;
+              }
             </style>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap">
           </head>
           <body>
             <div id="custom-work-order-content"></div>
@@ -164,6 +193,20 @@ export class CustomPrintService {
               }
             });
           }
+          
+          // Make sure technical rx terms stay in English
+          const technicalTerms = printWindow.document.querySelectorAll('th:not(:first-child)');
+          technicalTerms.forEach(term => {
+            if (term instanceof HTMLElement) {
+              term.classList.add('technical-term');
+            }
+          });
+          
+          // Add rx-table class to prescription tables to maintain LTR
+          const tables = printWindow.document.querySelectorAll('table');
+          tables.forEach(table => {
+            table.classList.add('rx-table');
+          });
           
           // Wait for content to load before proceeding
           printWindow.document.close();

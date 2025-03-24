@@ -1,6 +1,5 @@
 
 import React from "react";
-import { PrintService } from "@/utils/PrintService";
 import { useLanguageStore } from "@/store/languageStore";
 import { WorkOrderPrint } from "./WorkOrderPrint";
 import ReactDOM from "react-dom";
@@ -41,6 +40,10 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
   workOrderElement.dir = isRtl ? 'rtl' : 'ltr';
   workOrderElement.style.width = '80mm';
   workOrderElement.style.fontFamily = isRtl ? 'Cairo, sans-serif' : 'Arial, sans-serif';
+  workOrderElement.style.visibility = 'hidden'; // Hide until ready to print
+  workOrderElement.style.position = 'fixed';
+  workOrderElement.style.top = '0';
+  workOrderElement.style.left = '0';
   
   // Render the WorkOrderPrint component inside the div
   document.body.appendChild(workOrderElement);
@@ -61,11 +64,12 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
     );
   };
   
-  // Instead of using the non-existent PrintService.renderToDom method,
-  // use ReactDOM.render directly
+  // Use ReactDOM.render directly
   ReactDOM.render(<Root />, workOrderElement);
   
+  // Ensure content is fully rendered before printing
   setTimeout(() => {
+    workOrderElement.style.visibility = 'visible';
     window.print();
     
     // Remove the element after printing
@@ -76,5 +80,5 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
         document.body.removeChild(workOrderElement);
       }
     }, 1000);
-  }, 300);
+  }, 500);
 };

@@ -34,14 +34,22 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const handlePrint = () => {
     console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
+    setIsLoading(true);
     setOpen(false); // Close dialog before printing
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+      try {
+        CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+      } catch (error) {
+        console.error("Error printing work order:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }, 300);
   };
   
@@ -51,9 +59,10 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
       variant={variant}
       size={size}
       className={`gap-1 ${className}`}
+      disabled={isLoading}
     >
       <Printer className="h-4 w-4" />
-      {t('printWorkOrder')}
+      {isLoading ? t('printing') : t('printWorkOrder')}
     </Button>
   );
   
@@ -80,9 +89,13 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               isPrintable={false}
             />
           </div>
-          <Button onClick={handlePrint} className="mt-4 gap-2">
+          <Button 
+            onClick={handlePrint} 
+            className="mt-4 gap-2"
+            disabled={isLoading}
+          >
             <Printer className="h-4 w-4" />
-            {t('print')}
+            {isLoading ? t('printing') : t('print')}
           </Button>
         </div>
       </DialogContent>

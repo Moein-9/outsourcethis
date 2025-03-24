@@ -286,6 +286,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 <thead>
                   <tr>
                     <th style={{ textAlign: "center" }}>{t("eye")}</th>
+                    {/* Always keep technical terms in English */}
                     <th style={{ textAlign: "center" }}>SPH</th>
                     <th style={{ textAlign: "center" }}>CYL</th>
                     <th style={{ textAlign: "center" }}>AXIS</th>
@@ -327,6 +328,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 <thead>
                   <tr>
                     <th style={{ textAlign: "center" }}>{t("eye")}</th>
+                    {/* Always keep technical terms in English */}
                     <th style={{ textAlign: "center" }}>SPH</th>
                     <th style={{ textAlign: "center" }}>CYL</th>
                     <th style={{ textAlign: "center" }}>AXIS</th>
