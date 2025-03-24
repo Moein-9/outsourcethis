@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,7 +92,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   const handleSelectLens = (lens: ContactLensItem) => {
     const existingIndex = selectedLenses.findIndex(item => item.id === lens.id);
     
-    // If the lens is already selected, increment its quantity instead of showing error
     if (existingIndex >= 0) {
       const currentQty = itemQuantities[lens.id] || 1;
       setItemQuantities({
@@ -101,8 +99,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
         [lens.id]: currentQty + 1
       });
       
-      // No need to update selectedLenses array since the item is already there
-      // But we need to trigger the onSelect with updated quantities
       onSelect({
         items: selectedLenses,
         rxData,
@@ -119,7 +115,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     const updatedSelection = [...selectedLenses, lens];
     setSelectedLenses(updatedSelection);
     
-    // Initialize quantity to 1 for newly added items
     setItemQuantities({
       ...itemQuantities,
       [lens.id]: 1
@@ -141,7 +136,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     const updatedSelection = selectedLenses.filter(lens => lens.id !== lensId);
     setSelectedLenses(updatedSelection);
     
-    // Remove the item from quantities
     const updatedQuantities = { ...itemQuantities };
     delete updatedQuantities[lensId];
     setItemQuantities(updatedQuantities);
@@ -154,7 +148,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   };
   
   const handleUpdateQuantity = (lensId: string, newQuantity: number) => {
-    if (newQuantity < 1) return; // Don't allow less than 1
+    if (newQuantity < 1) return;
     
     setItemQuantities({
       ...itemQuantities,
@@ -312,7 +306,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         {lens.brand} {lens.type}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {lens.color || "Clear"} | {lens.price.toFixed(2)} KWD
+                        {lens.color ? lens.color : "Clear"} | {lens.price.toFixed(2)} KWD
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

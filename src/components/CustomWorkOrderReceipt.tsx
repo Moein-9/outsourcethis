@@ -69,10 +69,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const remaining = total - amountPaid;
   const isPaid = remaining <= 0;
   
-  // Use workOrderId for the work order receipt, prioritizing workOrder's ID if available
   const orderNumber = workOrder?.id || invoice?.workOrderId || `WO${Date.now().toString().slice(-6)}`;
 
-  // If there's no workOrder or invoice data, show a message
   if (!workOrder && !invoice) {
     return (
       <div 
@@ -125,7 +123,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         pageBreakAfter: 'always'
       }}
     >
-      {/* Header with logo */}
       <div className="text-center border-b border-gray-300 pb-2 mb-2">
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-12" />
@@ -135,7 +132,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <p className="text-xs font-medium text-gray-600">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      {/* Work Order Title */}
       <div className="text-center mb-3">
         <div className="bg-black text-white py-1 px-2 mb-2 font-bold text-base rounded">
           {isRtl ? "أمر عمل | WORK ORDER" : "WORK ORDER | أمر عمل"}
@@ -149,7 +145,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </p>
       </div>
 
-      {/* Patient Information */}
       <div className="mb-3">
         <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
           {isRtl 
@@ -183,54 +178,50 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Prescription Details */}
-      {rx && (
-        <div className="mb-3">
-          <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
-            {isRtl 
-              ? "تفاصيل الوصفة الطبية | Prescription Details" 
-              : "Prescription Details | تفاصيل الوصفة الطبية"}
-          </div>
-          
-          <table className="w-full border-collapse text-xs" style={{ direction: 'ltr' }}>
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-1 border border-gray-300 text-center font-bold">Eye</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">SPH</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">CYL</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">AXIS</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">ADD</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">PD</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.sphereOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.cylOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.axisOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.addOD || rx.add || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.pdRight || rx.pdOD || rx.pd || "—"}</td>
-              </tr>
-              <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.sphereOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.cylOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.axisOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.addOS || rx.add || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.pdLeft || rx.pdOS || rx.pd || "—"}</td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div className="mt-1 text-[9px] flex justify-between px-2 font-medium">
-            <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
-            <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
-          </div>
+      <div className="mb-3">
+        <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
+          {isRtl 
+            ? "تفاصيل الوصفة الطبية | Prescription Details" 
+            : "Prescription Details | تفاصيل الوصفة الطبية"}
         </div>
-      )}
+        
+        <table className="w-full border-collapse text-xs" style={{ direction: 'ltr' }}>
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="p-1 border border-gray-300 text-center font-bold">Eye</th>
+              <th className="p-1 border border-gray-300 text-center font-bold">SPH</th>
+              <th className="p-1 border border-gray-300 text-center font-bold">CYL</th>
+              <th className="p-1 border border-gray-300 text-center font-bold">AXIS</th>
+              <th className="p-1 border border-gray-300 text-center font-bold">ADD</th>
+              <th className="p-1 border border-gray-300 text-center font-bold">PD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.sphereOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.cylOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.axisOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.addOD || rx.add || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.pdRight || rx.pdOD || rx.pd || "—"}</td>
+            </tr>
+            <tr>
+              <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.sphereOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.cylOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.axisOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.addOS || rx.add || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.pdLeft || rx.pdOS || rx.pd || "—"}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div className="mt-1 text-[9px] flex justify-between px-2 font-medium">
+          <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
+          <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
+        </div>
+      </div>
 
-      {/* Product Details */}
       <div className="mb-3">
         <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
           {isRtl 
@@ -239,7 +230,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         
         <div className="space-y-2 text-sm px-2">
-          {/* Frame Details */}
           {frameData.brand && !isContactLens && (
             <Card className="mb-2 border border-gray-200 rounded-md">
               <CardContent className="p-2">
@@ -280,7 +270,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </Card>
           )}
           
-          {/* Contact Lens Details */}
           {isContactLens && contactLensItems.length > 0 && (
             <Card className="mb-2 border border-gray-200 rounded-md">
               <CardContent className="p-2">
@@ -313,7 +302,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </Card>
           )}
           
-          {/* Lens Details */}
           {!isContactLens && lensType && (
             <Card className="mb-2 border border-gray-200 rounded-md">
               <CardContent className="p-2">
@@ -336,7 +324,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </Card>
           )}
           
-          {/* Coating Details */}
           {!isContactLens && coating && (
             <Card className="mb-2 border border-gray-200 rounded-md">
               <CardContent className="p-2">
@@ -361,7 +348,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Payment Information */}
       <div className="mb-3">
         <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
           {isRtl 
@@ -422,7 +408,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </Card>
       </div>
 
-      {/* Quality Confirmation */}
       <div className="mb-3">
         <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
           {isRtl 
@@ -447,7 +432,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Notes */}
       <div className="mb-3">
         <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
           {isRtl 
@@ -460,7 +444,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Footer */}
       <div className="text-center border-t border-gray-300 pt-2 text-xs">
         <p className="font-bold text-sm mb-0">
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
@@ -546,7 +529,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               }
             }
             
-            /* Ensure black backgrounds print properly */
             .bg-black {
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
@@ -588,4 +570,3 @@ const getCoatingArabic = (coating: string): string => {
   
   return coatingMap[coating] || coating;
 };
-

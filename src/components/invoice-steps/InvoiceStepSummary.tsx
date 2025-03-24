@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -59,7 +58,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const hasInvoiceData = !!invoice.invoiceId && !!invoice.workOrderId;
   const isContactLens = invoice.invoiceType === "contacts";
   
-  // If no invoice data is available, show a guidance message
   if (!hasInvoiceData) {
     return (
       <div className="space-y-8 animate-fade-in">
