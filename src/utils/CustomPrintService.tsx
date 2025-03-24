@@ -2,7 +2,7 @@
 import { toast } from "@/hooks/use-toast";
 import { CustomWorkOrderReceipt } from "@/components/CustomWorkOrderReceipt";
 import React from 'react';
-import ReactDOMServer from 'react-dom/server';
+import * as ReactDOMServer from 'react-dom/server';
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
