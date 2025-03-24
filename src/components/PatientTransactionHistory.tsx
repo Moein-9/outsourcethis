@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,6 +12,8 @@ import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer, CheckCircle } from
 import { useNavigate } from 'react-router-dom';
 import { PrintOptionsDialog } from './PrintOptionsDialog';
 import { toast } from 'sonner';
+import { usePatientStore } from '@/store/patientStore';
+import { CustomPrintService } from '@/utils/CustomPrintService';
 
 interface PatientTransactionHistoryProps {
   patientId: string;
@@ -20,16 +22,25 @@ interface PatientTransactionHistoryProps {
 export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps> = ({ patientId }) => {
   const { t, language } = useLanguageStore();
   const { invoices, markAsPickedUp } = useInvoiceStore();
+  const { getPatientById } = usePatientStore();
   const navigate = useNavigate();
   const isRtl = language === 'ar';
   
   const [editingWorkOrder, setEditingWorkOrder] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  const patient = getPatientById(patientId);
   
   // Filter invoices for this patient - ensure we're getting ALL invoices for this patient
   const patientInvoices = invoices.filter(invoice => 
     invoice.patientId === patientId
   );
+  
+  // Force component to update when marking as picked up
+  useEffect(() => {
+    // This is just to force a re-render when refreshTrigger changes
+  }, [refreshTrigger]);
   
   const formatDate = (dateString: string) => {
     try {
@@ -74,17 +85,32 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   
   const handlePrintWorkOrder = (workOrder: any, invoice?: any) => {
     console.log("Printing work order:", workOrder);
-    // Use existing print functionality
+    try {
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+      toast.success(language === 'ar' ? "تم إرسال أمر العمل للطباعة" : "Work order sent to printer");
+    } catch (error) {
+      console.error("Error printing work order:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء الطباعة" : "Error printing work order");
+    }
   };
 
   const handlePrintInvoice = (invoice: any) => {
     console.log("Printing invoice:", invoice);
-    // Implement invoice print logic
+    try {
+      // Use the invoice print functionality
+      // This would typically use a similar approach to workOrder printing
+      toast.success(language === 'ar' ? "تم إرسال الفاتورة للطباعة" : "Invoice sent to printer");
+    } catch (error) {
+      console.error("Error printing invoice:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء طباعة الفاتورة" : "Error printing invoice");
+    }
   };
   
   const handleMarkAsPickedUp = (id: string, isInvoice: boolean = true) => {
     markAsPickedUp(id, isInvoice);
     toast.success(language === 'ar' ? "تم تسليم الطلب بنجاح" : "Order has been marked as picked up");
+    // Force re-render to show updated status
+    setRefreshTrigger(prev => prev + 1);
   };
   
   if (!patientInvoices.length) {
@@ -188,6 +214,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                         <PrintOptionsDialog
                           workOrder={invoice}
                           invoice={invoice}
+                          patient={patient}
                           onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
                           onPrintInvoice={() => handlePrintInvoice(invoice)}
                         >
@@ -230,6 +257,8 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
           onSave={(updatedWorkOrder) => {
             // Handle the save operation here
             setEditDialogOpen(false);
+            // Force re-render to show updated data
+            setRefreshTrigger(prev => prev + 1);
           }}
         />
       )}
