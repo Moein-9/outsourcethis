@@ -42,6 +42,7 @@ export class CustomPrintService {
             
             // Clean up
             if (document.body.contains(tempContainer)) {
+              root.unmount();
               document.body.removeChild(tempContainer);
             }
             return;

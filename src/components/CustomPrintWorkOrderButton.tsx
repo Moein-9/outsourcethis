@@ -45,7 +45,9 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     const workOrderData = {
       ...workOrder,
       // If workOrderId exists use it, otherwise generate a new one
-      workOrderId: workOrder.workOrderId || `WO${Date.now().toString().slice(-6)}`
+      workOrderId: workOrder.workOrderId || `WO${Date.now().toString().slice(-6)}`,
+      // Ensure we have all necessary data
+      invoiceId: workOrder.invoiceId || invoice?.invoiceId || `INV${Date.now().toString().slice(-6)}`
     };
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated

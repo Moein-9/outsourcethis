@@ -72,8 +72,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       size={size}
     >
       {children || (
-        <Button variant={variant} size={size} className={className}>
-          <Printer className="h-4 w-4 mr-1" /> 
+        <Button variant={variant} size={size} className={`gap-1 ${className || ""}`}>
+          <Printer className="h-4 w-4" /> 
           {language === 'ar' ? 'طباعة أمر العمل' : t('printWorkOrder')}
         </Button>
       )}

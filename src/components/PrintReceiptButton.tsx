@@ -65,11 +65,11 @@ export const PrintReceiptButton: React.FC<PrintReceiptButtonProps> = ({
         <Button 
           variant={variant} 
           size={size} 
-          className={className}
+          className={`gap-1 ${className || ""}`}
           onClick={handlePrint}
           disabled={isPrinting}
         >
-          <Printer className="h-4 w-4 mr-1" /> 
+          <Printer className="h-4 w-4" /> 
           {language === 'ar' ? 'طباعة الإيصال' : t("printReceipt")}
         </Button>
       )}
