@@ -349,7 +349,12 @@ const translations: Record<string, Record<string, string>> = {
     tip2: "Always store your glasses in a protective case.",
     tip3: "Avoid placing your glasses lens-side down.",
     tip4: "Schedule regular eye exams to ensure your prescription is accurate.",
-    thankYou: "Thank you for choosing Moen Optician. We look forward to serving you again!"
+    thankYou: "Thank you for choosing Moen Optician. We look forward to serving you again!",
+    
+    // Newly added translations 
+    startBySelectingClient: "Start by selecting a client in Step 1",
+    goToClientSection: "Go to Client Section",
+    anonymous: "Anonymous"
   },
   ar: {
     // General UI
@@ -691,7 +696,12 @@ const translations: Record<string, Record<string, string>> = {
     tip2: "احتفظ دائماً بنظارتك داخل العلبة الواقية.",
     tip3: "تجنب وضع النظارة بحيث تكون العدسات ملامسة للسطح.",
     tip4: "احرص على فحص عينيك بانتظام للتأكد من صحة الوصفة.",
-    thankYou: "شكراً لاختياركم موين للبصريات، نتطلع لخدمتكم مرة أخرى!"
+    thankYou: "شكراً لاختياركم موين للبصريات، نتطلع لخدمتكم مرة أخرى!",
+    
+    // Newly added translations
+    startBySelectingClient: "ابدأ باختيار عميل في الخطوة الأولى",
+    goToClientSection: "اذهب إلى قسم العميل",
+    anonymous: "مجهول"
   }
 };
 
@@ -702,5 +712,4 @@ export const useLanguageStore = create<LanguageStore>((set) => ({
     const { language } = useLanguageStore.getState();
     return translations[language][key] || key;
   },
-}
-
+}));
