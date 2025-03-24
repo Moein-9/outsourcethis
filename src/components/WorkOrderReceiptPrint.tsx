@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -62,7 +63,7 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
       >
         <div style="text-align: center; margin-bottom: 4px;">
           <div style="margin-bottom: 2px; display: flex; justify-content: center;">
-            <img src="${storeInfo.logoUrl || ''}" style="height: 24px; margin: 0 auto;" />
+            <img src="/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png" style="height: 24px; margin: 0 auto;" />
           </div>
           <h1 style="font-size: 14px; font-weight: bold; margin: 2px 0;">
             ${storeInfo.name}
