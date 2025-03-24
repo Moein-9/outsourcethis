@@ -67,7 +67,9 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   } : undefined);
   
   const isContactLens = contactLenses && contactLenses.length > 0;
-  const orderNumber = invoice.invoiceId || invoice.workOrderId || "NEW ORDER";
+  
+  // Use the workOrderId instead of invoiceId for the work order receipt
+  const orderNumber = invoice.workOrderId || "NEW ORDER";
 
   return (
     <div className="print-wrapper">

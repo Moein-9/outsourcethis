@@ -51,7 +51,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   
   const generateQRData = () => {
     return JSON.stringify({
-      invoiceId: invoice.invoiceId,
+      workOrderId: invoice.workOrderId,
       patientName,
       total: invoice.total,
       date: invoice.createdAt,
@@ -67,7 +67,8 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   const remaining = invoice.total - amountPaid;
   const isPaid = remaining <= 0;
 
-  const invoiceNumber = invoice.invoiceId || invoice.workOrderId || "";
+  // Use workOrderId for the work order receipt
+  const orderNumber = invoice.workOrderId || "";
 
   return (
     <div 
@@ -102,7 +103,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       <div style={{ marginBottom: "4px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{isRtl ? "رقم أمر العمل" : "Work Order Number"}:</span> 
-          <span>{invoiceNumber}</span>
+          <span>{orderNumber}</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{isRtl ? "التاريخ" : "Date"}:</span>
@@ -503,13 +504,14 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
   const isRtl = language === 'ar';
   
   const { invoice, patientName, rx, frame, lensType, coating } = props;
-  const invoiceNumber = invoice.invoiceId || invoice.workOrderId || "";
+  // Use workOrderId for the work order receipt
+  const orderNumber = invoice.workOrderId || "";
   
   const htmlContent = `
     <div dir="${isRtl ? 'rtl' : 'ltr'}" style="width: 80mm; font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; text-align: ${isRtl ? 'right' : 'left'}; font-size: 9px; line-height: 1.1;">
       <div style="text-align: center; margin-bottom: 3px;">
         <h1 style="font-size: 12px; font-weight: bold; margin: 1px 0;">${t("workOrder")}</h1>
-        <p style="font-size: 10px; margin: 1px 0;">${invoiceNumber}</p>
+        <p style="font-size: 10px; margin: 1px 0;">${orderNumber}</p>
         <p style="font-size: 8px; margin: 1px 0;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
       </div>
       
