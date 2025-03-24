@@ -3,6 +3,7 @@ import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { WorkOrderPrint } from "./WorkOrderPrint";
 import ReactDOM from "react-dom";
+import { PrintService } from "@/utils/PrintService";
 
 interface PrintWorkOrderReceiptOptions {
   invoice: any;
@@ -39,47 +40,56 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
   // Set direction and other styles
   workOrderElement.dir = isRtl ? 'rtl' : 'ltr';
   workOrderElement.style.width = '80mm';
+  workOrderElement.style.maxWidth = '80mm'; // Ensure it doesn't exceed 80mm
   workOrderElement.style.fontFamily = isRtl ? 'Cairo, sans-serif' : 'Arial, sans-serif';
   workOrderElement.style.visibility = 'hidden'; // Hide until ready to print
   workOrderElement.style.position = 'fixed';
   workOrderElement.style.top = '0';
   workOrderElement.style.left = '0';
   workOrderElement.style.zIndex = '-1000'; // Keep it out of view
+  workOrderElement.style.fontSize = '10px'; // Ensure small font size to fit 48 columns
   
   // Render the WorkOrderPrint component inside the div
   document.body.appendChild(workOrderElement);
   
   const Root = () => {
     return (
-      <WorkOrderPrint 
-        invoice={invoice}
-        patientName={options.patientName}
-        patientPhone={options.patientPhone}
-        rx={options.rx}
-        lensType={options.lensType}
-        coating={options.coating}
-        frame={options.frame}
-        contactLenses={options.contactLenses}
-        contactLensRx={options.contactLensRx}
-      />
+      <div className="print-receipt" style={{ width: '80mm', maxWidth: '80mm', overflow: 'hidden', padding: '1mm' }}>
+        <WorkOrderPrint 
+          invoice={invoice}
+          patientName={options.patientName}
+          patientPhone={options.patientPhone}
+          rx={options.rx}
+          lensType={options.lensType}
+          coating={options.coating}
+          frame={options.frame}
+          contactLenses={options.contactLenses}
+          contactLensRx={options.contactLensRx}
+        />
+      </div>
     );
   };
   
   // Use ReactDOM.render directly
   ReactDOM.render(<Root />, workOrderElement);
   
-  // Ensure content is fully rendered before printing
+  // Generate html content for the print service
   setTimeout(() => {
-    workOrderElement.style.visibility = 'visible';
-    window.print();
-    
-    // Remove the element after printing
-    setTimeout(() => {
-      if (document.body.contains(workOrderElement)) {
-        // Clean up React components before removing element
-        ReactDOM.unmountComponentAtNode(workOrderElement);
-        document.body.removeChild(workOrderElement);
-      }
-    }, 1000);
-  }, 500);
+    if (workOrderElement && document.body.contains(workOrderElement)) {
+      const htmlContent = workOrderElement.innerHTML;
+      
+      // Clean up React components before removing element
+      ReactDOM.unmountComponentAtNode(workOrderElement);
+      document.body.removeChild(workOrderElement);
+      
+      // Use the PrintService to handle the printing with the proper formatting
+      PrintService.printHtml(
+        PrintService.prepareWorkOrderDocument(htmlContent, 'Work Order Receipt'),
+        'receipt',
+        () => {
+          console.log('Work order receipt printed successfully');
+        }
+      );
+    }
+  }, 300);
 };

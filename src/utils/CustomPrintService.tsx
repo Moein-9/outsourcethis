@@ -1,6 +1,7 @@
 
 import { toast } from "@/hooks/use-toast";
 import { useLanguageStore } from "@/store/languageStore";
+import { PrintService } from "./PrintService";
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
@@ -30,7 +31,7 @@ export class CustomPrintService {
             <style>
               @media print {
                 @page {
-                  size: 80mm 210mm !important; /* Fixed size matching thermal receipt */
+                  size: 80mm auto !important; /* Fixed width but auto height */
                   margin: 0 !important;
                   padding: 0 !important;
                 }
@@ -45,10 +46,12 @@ export class CustomPrintService {
                   color: black !important;
                   direction: ${isRtl ? 'rtl' : 'ltr'} !important;
                   font-family: ${isRtl ? 'Cairo, Arial' : 'Arial'}, sans-serif !important;
+                  font-size: 10px !important; /* Smaller font to fit 48 columns */
+                  line-height: 1.1 !important; /* Tighter line height */
                 }
                 
                 #work-order-receipt {
-                  width: 76mm !important;
+                  width: 76mm !important; /* 80mm minus margin */
                   max-width: 76mm !important;
                   page-break-after: always !important;
                   page-break-inside: avoid !important;
@@ -120,12 +123,32 @@ export class CustomPrintService {
                 /* Keep RX table in LTR mode regardless of language */
                 table.rx-table {
                   direction: ltr !important;
+                  font-size: 8px !important; /* Smaller font for tables */
                 }
                 
                 /* Make sure technical terms stay in English */
                 .technical-term {
                   font-family: Arial, sans-serif !important;
                 }
+                
+                /* Make tables more compact to fit 48 columns */
+                table {
+                  max-width: 74mm !important;
+                  border-collapse: collapse !important;
+                }
+                
+                th, td {
+                  padding: 0.5mm !important;
+                  font-size: 8px !important;
+                }
+                
+                /* Reduce padding and margins throughout */
+                .p-3 { padding: 1mm !important; }
+                .p-2 { padding: 0.8mm !important; }
+                .p-1 { padding: 0.5mm !important; }
+                .mb-2 { margin-bottom: 1mm !important; }
+                .mb-3 { margin-bottom: 1.5mm !important; }
+                .gap-2 { gap: 0.8mm !important; }
                 
                 /* Chrome-specific fixes */
                 @supports (-webkit-appearance:none) {
@@ -145,6 +168,8 @@ export class CustomPrintService {
                 color: black;
                 direction: ${isRtl ? 'rtl' : 'ltr'};
                 width: 80mm;
+                font-size: 10px;
+                line-height: 1.1;
               }
               
               /* Background classes */
@@ -156,12 +181,32 @@ export class CustomPrintService {
               /* Keep RX table in LTR mode regardless of language */
               table.rx-table {
                 direction: ltr !important;
+                font-size: 8px;
               }
               
               /* Make sure technical terms stay in English */
               .technical-term {
                 font-family: Arial, sans-serif !important;
               }
+              
+              /* Make tables more compact */
+              table {
+                max-width: 74mm;
+                border-collapse: collapse;
+              }
+              
+              th, td {
+                padding: 0.5mm;
+                font-size: 8px;
+              }
+              
+              /* Reduce padding and margins throughout */
+              .p-3 { padding: 1mm; }
+              .p-2 { padding: 0.8mm; }
+              .p-1 { padding: 0.5mm; }
+              .mb-2 { margin-bottom: 1mm; }
+              .mb-3 { margin-bottom: 1.5mm; }
+              .gap-2 { gap: 0.8mm; }
             </style>
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap">
           </head>
@@ -226,17 +271,33 @@ export class CustomPrintService {
           printWindow.document.close();
         }
       } else {
-        // Handle the case where the element doesn't exist
-        console.error("Unable to find work order element with ID 'work-order-receipt'");
-        printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
-        printWindow.document.close();
+        // Use PrintService as fallback method to prevent the "Unable to find work order" error
+        printWindow.close();
         
-        // Show toast notification
-        toast({
-          title: "Error",
-          description: "Unable to find work order content. Please try again.",
-          variant: "destructive",
-        });
+        const workOrders = document.querySelectorAll('.print-receipt');
+        if (workOrders.length > 0) {
+          const workOrderContent = workOrders[0].innerHTML;
+          
+          PrintService.printHtml(
+            PrintService.prepareWorkOrderDocument(workOrderContent, 'Work Order Receipt'),
+            'receipt',
+            () => {
+              console.log('Work order receipt printed successfully using fallback method');
+            }
+          );
+        } else {
+          // Handle the case where the element doesn't exist
+          console.error("Unable to find work order element with ID 'work-order-receipt'");
+          printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
+          printWindow.document.close();
+          
+          // Show toast notification
+          toast({
+            title: "Error",
+            description: "Unable to find work order content. Please try again.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error("Error printing work order:", error);
