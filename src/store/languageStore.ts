@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -122,10 +123,13 @@ const translations: Record<string, Record<string, string>> = {
     invoiceSuccessMessage: 'Your invoice has been successfully created and is ready for printing',
     workOrderNumber: 'Work Order Number',
     clientName: 'Client Name',
+    clientPhone: 'Client Phone', // Updated for better English
     date: 'Date',
     totalAmount: 'Total Amount',
+    totalInvoice: 'Total Invoice', // Updated for better English
     paymentStatus: 'Payment Status',
     paid: 'Paid',
+    paidInFull: 'Paid in Full', // Updated for better English
     partiallyPaid: 'Partially Paid',
     nextSteps: 'Next Steps',
     printWorkOrder: 'Print Work Order',
@@ -471,10 +475,13 @@ const translations: Record<string, Record<string, string>> = {
     invoiceSuccessMessage: 'تم إنشاء الفاتورة بنجاح وهي جاهزة للطباعة',
     workOrderNumber: 'رقم أمر العمل',
     clientName: 'اسم العميل',
+    clientPhone: 'هاتف العميل', // Updated for better Arabic
     date: 'التاريخ',
     totalAmount: 'المبلغ الإجمالي',
+    totalInvoice: 'إجمالي الفاتورة', // Updated for better Arabic
     paymentStatus: 'حالة الدفع',
     paid: 'مدفوع',
+    paidInFull: 'مدفوع بالكامل', // Updated for better Arabic
     partiallyPaid: 'مدفوع جزئياً',
     nextSteps: 'الخطوات التالية',
     printWorkOrder: 'طباعة أمر العمل',
