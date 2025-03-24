@@ -10,10 +10,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTabs,
-  DialogTabsContent,
-  DialogTabsList,
-  DialogTabsTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WorkOrder, Invoice, useInvoiceStore } from "@/store/invoiceStore";
@@ -51,7 +47,18 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   
   // Get the patient associated with this work order
   const patient = workOrder.patientId ? getPatientById(workOrder.patientId) : null;
-  const patientRx = patient?.rx || {};
+  const patientRx = patient?.rx || {
+    sphereOD: "",
+    cylOD: "",
+    axisOD: "",
+    addOD: "",
+    sphereOS: "",
+    cylOS: "",
+    axisOS: "",
+    addOS: "",
+    pdRight: "",
+    pdLeft: ""
+  };
   
   // Initialize form with patient RX
   const form = useForm<RxData>({

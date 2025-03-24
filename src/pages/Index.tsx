@@ -47,11 +47,7 @@ const Index = () => {
       {activeSection === "createClient" && <CreateClient />}
       {activeSection === "createInvoice" && <CreateInvoice />}
       {activeSection === "inventory" && <InventoryTabs />}
-      {activeSection === "remainingPayments" && 
-        <RemainingPayments 
-          selectedInvoiceId={location.state?.selectedInvoice} 
-        />
-      }
+      {activeSection === "remainingPayments" && <RemainingPayments />}
       {activeSection === "patientSearch" && <PatientSearch />}
     </Layout>
   );
