@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -159,7 +160,7 @@ export const PatientSearch: React.FC = () => {
       )}
       
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] lg:max-w-[90vw] max-h-[90vh] overflow-y-auto p-4 lg:p-6">
           {selectedPatient && (
             <>
               <DialogHeader>
@@ -169,7 +170,7 @@ export const PatientSearch: React.FC = () => {
                 </DialogDescription>
               </DialogHeader>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 py-4">
                 <div className="md:col-span-1">
                   <PatientProfileInfo 
                     patient={selectedPatient} 

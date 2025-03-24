@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
@@ -74,7 +73,6 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     });
   };
 
-  // Card layout for mobile view to replace tables
   const TransactionCard = ({ workOrder, invoice, index, onEdit }: { 
     workOrder: WorkOrder, 
     invoice?: Invoice, 
@@ -261,96 +259,98 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                     })}
                   </div>
                 ) : (
-                  <div className="rounded-md border overflow-hidden">
-                    <Table>
-                      <TableHeader className="bg-amber-50 sticky top-0 z-10">
-                        <TableRow className="hover:bg-amber-50/70">
-                          <TableHead className="w-[50px] text-base font-semibold">#</TableHead>
-                          <TableHead className="w-[120px] text-base font-semibold">{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
-                          <TableHead className="w-[120px] text-base font-semibold">{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
-                          <TableHead className="w-[120px] text-base font-semibold">{language === 'ar' ? "التاريخ" : "Date"}</TableHead>
-                          <TableHead className="w-[120px] text-base font-semibold">{t('status')}</TableHead>
-                          <TableHead className="w-[140px] text-right text-base font-semibold">{t('actions')}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {getActiveWorkOrders(workOrders).map((workOrder, index) => {
-                          const invoice = invoices.find(inv => inv.workOrderId === workOrder.id);
-                          const status = !invoice ? (language === 'ar' ? "قيد التنفيذ" : "In Progress") : 
-                            invoice.isPaid ? (language === 'ar' ? "مدفوعة" : "Paid") : 
-                            invoice.deposit > 0 ? (language === 'ar' ? "مدفوعة جزئيًا" : "Partially Paid") : 
-                            (language === 'ar' ? "غير مدفوعة" : "Unpaid");
-                          
-                          const statusColor = !invoice ? "bg-amber-500" : 
-                            invoice.isPaid ? "bg-green-500" : 
-                            invoice.deposit > 0 ? "bg-amber-500" : "bg-red-500";
-                          
-                          return (
-                            <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-amber-50/30 hover:bg-amber-50/50' : 'hover:bg-amber-50/30'}>
-                              <TableCell className="font-medium text-base p-3">{index + 1}</TableCell>
-                              <TableCell className="p-3">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <div className="text-base font-medium">WO-{workOrder.id.substring(0, 8)}</div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>{workOrder.id}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </TableCell>
-                              <TableCell className="p-3">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <div className="text-base">{workOrder.lensType?.name || '-'}</div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>{workOrder.lensType?.name || '-'}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </TableCell>
-                              <TableCell className="p-3 text-base">{formatDate(workOrder.createdAt)}</TableCell>
-                              <TableCell className="p-3">
-                                <Badge className={`${statusColor} text-sm font-medium px-2 py-1`}>{status}</Badge>
-                              </TableCell>
-                              <TableCell className="text-right p-3">
-                                <div className="flex justify-end gap-2">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    className="h-9 px-3 border-amber-200 hover:bg-amber-50 font-medium"
-                                    onClick={() => onEditWorkOrder(workOrder)}
-                                  >
-                                    <Edit className="h-4 w-4 text-amber-600 mr-1.5" />
-                                    <span>{t('edit')}</span>
-                                  </Button>
-                                  <CustomPrintWorkOrderButton
-                                    workOrder={workOrder}
-                                    invoice={invoice}
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-9 px-3 border-amber-200 hover:bg-amber-50 font-medium"
-                                  >
-                                    <Button
+                  <ScrollArea className="rounded-md border h-full max-h-[400px]">
+                    <div className="w-full min-w-max">
+                      <Table forceDirection="ltr">
+                        <TableHeader className="bg-amber-50 sticky top-0 z-10">
+                          <TableRow className="hover:bg-amber-50/70">
+                            <TableHead className="w-[40px] text-base font-semibold">#</TableHead>
+                            <TableHead className="w-[110px] text-base font-semibold">{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                            <TableHead className="w-[110px] text-base font-semibold">{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
+                            <TableHead className="w-[110px] text-base font-semibold">{language === 'ar' ? "التاريخ" : "Date"}</TableHead>
+                            <TableHead className="w-[110px] text-base font-semibold">{t('status')}</TableHead>
+                            <TableHead className="w-[130px] text-right text-base font-semibold">{t('actions')}</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {getActiveWorkOrders(workOrders).map((workOrder, index) => {
+                            const invoice = invoices.find(inv => inv.workOrderId === workOrder.id);
+                            const status = !invoice ? (language === 'ar' ? "قيد التنفيذ" : "In Progress") : 
+                              invoice.isPaid ? (language === 'ar' ? "مدفوعة" : "Paid") : 
+                              invoice.deposit > 0 ? (language === 'ar' ? "مدفوعة جزئيًا" : "Partially Paid") : 
+                              (language === 'ar' ? "غير مدفوعة" : "Unpaid");
+                            
+                            const statusColor = !invoice ? "bg-amber-500" : 
+                              invoice.isPaid ? "bg-green-500" : 
+                              invoice.deposit > 0 ? "bg-amber-500" : "bg-red-500";
+                            
+                            return (
+                              <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-amber-50/30 hover:bg-amber-50/50' : 'hover:bg-amber-50/30'}>
+                                <TableCell className="font-medium text-base p-2">{index + 1}</TableCell>
+                                <TableCell className="p-2">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="text-base font-medium">WO-{workOrder.id.substring(0, 8)}</div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{workOrder.id}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </TableCell>
+                                <TableCell className="p-2">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="text-base">{workOrder.lensType?.name || '-'}</div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{workOrder.lensType?.name || '-'}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </TableCell>
+                                <TableCell className="p-2 text-base">{formatDate(workOrder.createdAt)}</TableCell>
+                                <TableCell className="p-2">
+                                  <Badge className={`${statusColor} text-sm font-medium px-2 py-1`}>{status}</Badge>
+                                </TableCell>
+                                <TableCell className="text-right p-2">
+                                  <div className="flex justify-end gap-1">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      className="h-8 px-2 border-amber-200 hover:bg-amber-50 font-medium"
+                                      onClick={() => onEditWorkOrder(workOrder)}
+                                    >
+                                      <Edit className="h-4 w-4 text-amber-600 mr-1" />
+                                      <span>{t('edit')}</span>
+                                    </Button>
+                                    <CustomPrintWorkOrderButton
+                                      workOrder={workOrder}
+                                      invoice={invoice}
                                       variant="outline"
                                       size="sm"
-                                      className="h-9 px-3 border-amber-200 hover:bg-amber-50 font-medium"
+                                      className="h-8 px-2 border-amber-200 hover:bg-amber-50 font-medium"
                                     >
-                                      <Printer className="h-4 w-4 text-amber-600 mr-1.5" />
-                                      <span>{t('print')}</span>
-                                    </Button>
-                                  </CustomPrintWorkOrderButton>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 px-2 border-amber-200 hover:bg-amber-50 font-medium"
+                                      >
+                                        <Printer className="h-4 w-4 text-amber-600 mr-1" />
+                                        <span>{t('print')}</span>
+                                      </Button>
+                                    </CustomPrintWorkOrderButton>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </ScrollArea>
                 )
               ) : (
                 <div className="text-center py-6 border rounded-md bg-amber-50/20">
@@ -383,66 +383,68 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-md border overflow-hidden">
-                    <Table>
-                      <TableHeader className="bg-green-50 sticky top-0 z-10">
-                        <TableRow className="hover:bg-green-50/70">
-                          <TableHead className="w-[50px] text-base font-semibold">#</TableHead>
-                          <TableHead className="w-[120px] text-base font-semibold">{language === 'ar' ? "رقم الفاتورة" : "Invoice No."}</TableHead>
-                          <TableHead className="w-[100px] text-base font-semibold">{language === 'ar' ? "المبلغ" : "Amount"}</TableHead>
-                          <TableHead className="w-[120px] text-base font-semibold">{language === 'ar' ? "التاريخ" : "Date"}</TableHead>
-                          <TableHead className="w-[100px] text-base font-semibold">{t('status')}</TableHead>
-                          <TableHead className="w-[140px] text-right text-base font-semibold">{t('actions')}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {invoices.filter(inv => inv.isPaid).map((invoice, index) => (
-                          <TableRow key={invoice.invoiceId} className={index % 2 === 0 ? 'bg-green-50/30 hover:bg-green-50/50' : 'hover:bg-green-50/30'}>
-                            <TableCell className="font-medium text-base p-3">{index + 1}</TableCell>
-                            <TableCell className="p-3">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="text-base font-medium">INV-{invoice.invoiceId.substring(0, 8)}</div>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{invoice.invoiceId}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </TableCell>
-                            <TableCell className="p-3 text-base">{invoice.total.toFixed(3)} {t('kwd')}</TableCell>
-                            <TableCell className="p-3 text-base">{formatDate(invoice.createdAt)}</TableCell>
-                            <TableCell className="p-3">
-                              <Badge className="bg-green-500 text-sm font-medium px-2 py-1">
-                                {language === 'ar' ? "مدفوعة" : "Paid"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right p-3">
-                              <div className="flex justify-end gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-9 px-3 border-green-200 hover:bg-green-50 font-medium"
-                                >
-                                  <Eye className="h-4 w-4 text-green-600 mr-1.5" />
-                                  <span>{t('view')}</span>
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-9 px-3 border-green-200 hover:bg-green-50 font-medium"
-                                >
-                                  <Printer className="h-4 w-4 text-green-600 mr-1.5" />
-                                  <span>{t('print')}</span>
-                                </Button>
-                              </div>
-                            </TableCell>
+                  <ScrollArea className="rounded-md border h-full max-h-[400px]">
+                    <div className="w-full min-w-max">
+                      <Table forceDirection="ltr">
+                        <TableHeader className="bg-green-50 sticky top-0 z-10">
+                          <TableRow className="hover:bg-green-50/70">
+                            <TableHead className="w-[40px] text-base font-semibold">#</TableHead>
+                            <TableHead className="w-[110px] text-base font-semibold">{language === 'ar' ? "رقم الفاتورة" : "Invoice No."}</TableHead>
+                            <TableHead className="w-[90px] text-base font-semibold">{language === 'ar' ? "المبلغ" : "Amount"}</TableHead>
+                            <TableHead className="w-[110px] text-base font-semibold">{language === 'ar' ? "التاريخ" : "Date"}</TableHead>
+                            <TableHead className="w-[90px] text-base font-semibold">{t('status')}</TableHead>
+                            <TableHead className="w-[130px] text-right text-base font-semibold">{t('actions')}</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                        </TableHeader>
+                        <TableBody>
+                          {invoices.filter(inv => inv.isPaid).map((invoice, index) => (
+                            <TableRow key={invoice.invoiceId} className={index % 2 === 0 ? 'bg-green-50/30 hover:bg-green-50/50' : 'hover:bg-green-50/30'}>
+                              <TableCell className="font-medium text-base p-2">{index + 1}</TableCell>
+                              <TableCell className="p-2">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="text-base font-medium">INV-{invoice.invoiceId.substring(0, 8)}</div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{invoice.invoiceId}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </TableCell>
+                              <TableCell className="p-2 text-base">{invoice.total.toFixed(3)} {t('kwd')}</TableCell>
+                              <TableCell className="p-2 text-base">{formatDate(invoice.createdAt)}</TableCell>
+                              <TableCell className="p-2">
+                                <Badge className="bg-green-500 text-sm font-medium px-2 py-1">
+                                  {language === 'ar' ? "مدفوعة" : "Paid"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right p-2">
+                                <div className="flex justify-end gap-1">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-8 px-2 border-green-200 hover:bg-green-50 font-medium"
+                                  >
+                                    <Eye className="h-4 w-4 text-green-600 mr-1" />
+                                    <span>{t('view')}</span>
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-8 px-2 border-green-200 hover:bg-green-50 font-medium"
+                                  >
+                                    <Printer className="h-4 w-4 text-green-600 mr-1" />
+                                    <span>{t('print')}</span>
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </ScrollArea>
                 )
               ) : (
                 <div className="text-center py-6 border rounded-md bg-green-50/20">
@@ -473,71 +475,73 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-md border overflow-hidden">
-                    <Table>
-                      <TableHeader className="bg-blue-50 sticky top-0 z-10">
-                        <TableRow className="hover:bg-blue-50/70">
-                          <TableHead className="w-[50px] text-base font-semibold">#</TableHead>
-                          <TableHead className="w-[120px] text-base font-semibold">{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
-                          <TableHead className="w-[120px] text-base font-semibold">{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
-                          <TableHead className="w-[120px] text-base font-semibold">{language === 'ar' ? "التاريخ" : "Date"}</TableHead>
-                          <TableHead className="w-[140px] text-right text-base font-semibold">{t('actions')}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {getCompletedWorkOrders(workOrders).map((workOrder, index) => (
-                          <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30 hover:bg-blue-50/50' : 'hover:bg-blue-50/30'}>
-                            <TableCell className="font-medium text-base p-3">{index + 1}</TableCell>
-                            <TableCell className="p-3">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="text-base font-medium">WO-{workOrder.id.substring(0, 8)}</div>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{workOrder.id}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </TableCell>
-                            <TableCell className="p-3">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="text-base">{workOrder.lensType?.name || '-'}</div>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{workOrder.lensType?.name || '-'}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </TableCell>
-                            <TableCell className="p-3 text-base">{formatDate(workOrder.createdAt)}</TableCell>
-                            <TableCell className="text-right p-3">
-                              <div className="flex justify-end gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-9 px-3 border-blue-200 hover:bg-blue-50 font-medium"
-                                >
-                                  <Eye className="h-4 w-4 text-blue-600 mr-1.5" />
-                                  <span>{t('view')}</span>
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-9 px-3 border-blue-200 hover:bg-blue-50 font-medium"
-                                >
-                                  <Printer className="h-4 w-4 text-blue-600 mr-1.5" />
-                                  <span>{t('print')}</span>
-                                </Button>
-                              </div>
-                            </TableCell>
+                  <ScrollArea className="rounded-md border h-full max-h-[400px]">
+                    <div className="w-full min-w-max">
+                      <Table forceDirection="ltr">
+                        <TableHeader className="bg-blue-50 sticky top-0 z-10">
+                          <TableRow className="hover:bg-blue-50/70">
+                            <TableHead className="w-[40px] text-base font-semibold">#</TableHead>
+                            <TableHead className="w-[110px] text-base font-semibold">{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                            <TableHead className="w-[110px] text-base font-semibold">{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
+                            <TableHead className="w-[110px] text-base font-semibold">{language === 'ar' ? "التاريخ" : "Date"}</TableHead>
+                            <TableHead className="w-[130px] text-right text-base font-semibold">{t('actions')}</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                        </TableHeader>
+                        <TableBody>
+                          {getCompletedWorkOrders(workOrders).map((workOrder, index) => (
+                            <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30 hover:bg-blue-50/50' : 'hover:bg-blue-50/30'}>
+                              <TableCell className="font-medium text-base p-2">{index + 1}</TableCell>
+                              <TableCell className="p-2">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="text-base font-medium">WO-{workOrder.id.substring(0, 8)}</div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{workOrder.id}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </TableCell>
+                              <TableCell className="p-2">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="text-base">{workOrder.lensType?.name || '-'}</div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{workOrder.lensType?.name || '-'}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </TableCell>
+                              <TableCell className="p-2 text-base">{formatDate(workOrder.createdAt)}</TableCell>
+                              <TableCell className="text-right p-2">
+                                <div className="flex justify-end gap-1">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-8 px-2 border-blue-200 hover:bg-blue-50 font-medium"
+                                  >
+                                    <Eye className="h-4 w-4 text-blue-600 mr-1" />
+                                    <span>{t('view')}</span>
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-8 px-2 border-blue-200 hover:bg-blue-50 font-medium"
+                                  >
+                                    <Printer className="h-4 w-4 text-blue-600 mr-1" />
+                                    <span>{t('print')}</span>
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </ScrollArea>
                 )
               ) : (
                 <div className="text-center py-6 border rounded-md bg-blue-50/20">
@@ -559,3 +563,4 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     </Card>
   );
 };
+
