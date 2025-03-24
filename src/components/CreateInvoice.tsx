@@ -17,8 +17,9 @@ import { InvoiceStepPayment } from "@/components/invoice-steps/InvoiceStepPaymen
 import { InvoiceStepSummary } from "@/components/invoice-steps/InvoiceStepSummary";
 import { InvoiceFormProvider, useInvoiceForm } from "@/components/invoice-steps/InvoiceFormContext";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
-import { WorkOrderPrint } from "@/components/WorkOrderPrint";
+import { CustomWorkOrderReceipt } from "@/components/CustomWorkOrderReceipt";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
+import { CustomPrintService } from "@/utils/CustomPrintService";
 
 const CreateInvoiceContent: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -30,10 +31,26 @@ const CreateInvoiceContent: React.FC = () => {
   const { getValues, setValue } = useInvoiceForm();
   
   const handlePrintWorkOrder = () => {
-    setWorkOrderPrintOpen(true);
-    setTimeout(() => {
-      window.print();
-    }, 500);
+    const workOrderData = {
+      patientName: getValues("patientName") || "",
+      patientPhone: getValues("patientPhone") || "",
+      rx: getValues("rx"),
+      lensType: getValues("lensType") || "",
+      lensPrice: getValues("lensPrice") || 0,
+      coating: getValues("coating") || "",
+      coatingPrice: getValues("coatingPrice") || 0,
+      frameBrand: getValues("frameBrand") || "",
+      frameModel: getValues("frameModel") || "",
+      frameColor: getValues("frameColor") || "",
+      frameSize: getValues("frameSize") || "",
+      framePrice: getValues("framePrice") || 0,
+      discount: getValues("discount") || 0,
+      deposit: getValues("deposit") || 0,
+      total: getValues("total") || 0,
+      workOrderId: getValues("workOrderId") || "PREVIEW"
+    };
+    
+    CustomPrintService.printWorkOrder(workOrderData, previewInvoice);
   };
   
   const handlePrintInvoice = () => {
@@ -547,20 +564,10 @@ const CreateInvoiceContent: React.FC = () => {
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6 print:mt-0">
-            <WorkOrderPrint 
+            <CustomWorkOrderReceipt 
+              workOrder={previewInvoice}
               invoice={previewInvoice}
-              patientName={getValues("patientName") || ""}
-              patientPhone={getValues("patientPhone") || ""}
-              rx={getValues("rx")}
-              lensType={getValues("lensType") || ""}
-              coating={getValues("coating") || ""}
-              frame={getValues("skipFrame") ? undefined : {
-                brand: getValues("frameBrand") || "",
-                model: getValues("frameModel") || "",
-                color: getValues("frameColor") || "",
-                size: getValues("frameSize") || "",
-                price: getValues("framePrice") || 0
-              }}
+              isPrintable={true}
             />
           </div>
           <SheetFooter className="print:hidden mt-4">
