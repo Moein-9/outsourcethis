@@ -280,7 +280,7 @@ const CreateInvoiceContent: React.FC = () => {
                       setWorkOrderPrintOpen={setWorkOrderPrintOpen}
                     />
                     
-                    <div className="flex justify-between mt-4">
+                    <div className="flex justify-between mt-6">
                       <Button 
                         variant="outline" 
                         onClick={() => setActiveTab("payment")} 
@@ -295,7 +295,7 @@ const CreateInvoiceContent: React.FC = () => {
                         }} 
                         className="flex items-center gap-2"
                       >
-                        {t('newInvoice')}
+                        {language === 'ar' ? 'فاتورة جديدة' : 'New Invoice'}
                       </Button>
                     </div>
                   </motion.div>

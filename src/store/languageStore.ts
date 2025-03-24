@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -240,6 +239,9 @@ const translations: Record<string, Record<string, string>> = {
     submit: 'Submit',
     confirm: 'Confirm',
     optional: 'Optional',
+    next: 'Next',
+    previous: 'Previous',
+    newInvoice: 'New Invoice',
 
     // Units and Labels
     kwd: 'KWD',
@@ -581,6 +583,9 @@ const translations: Record<string, Record<string, string>> = {
     submit: 'تقديم',
     confirm: 'تأكيد',
     optional: 'اختياري',
+    next: 'التالي',
+    previous: 'السابق',
+    newInvoice: 'فاتورة جديدة',
 
     // Units and Labels
     kwd: 'د.ك',
@@ -592,7 +597,7 @@ const translations: Record<string, Record<string, string>> = {
     
     // Create Invoice (Additional)
     invoiceTitle: "إنشاء فاتورة",
-    // clientSection is defined above in "Tab sections in Create Invoice"
+    // clientSection is now defined above in "Tab sections in Create Invoice"
     noClientFile: "لا يوجد ملف عميل",
     phoneColon: "رقم الهاتف:",
     typeToSearch: "اكتب للبحث...",
