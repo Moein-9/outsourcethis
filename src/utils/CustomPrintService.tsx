@@ -1,6 +1,5 @@
 
 import { toast } from "@/hooks/use-toast";
-import { useLanguageStore } from "@/store/languageStore";
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
@@ -70,6 +69,7 @@ export class CustomPrintService {
                   -webkit-print-color-adjust: exact !important;
                   print-color-adjust: exact !important;
                   color-adjust: exact !important;
+                  color: white !important;
                 }
                 
                 .text-white {
@@ -118,15 +118,26 @@ export class CustomPrintService {
               /* Background classes */
               .bg-black {
                 background-color: black !important;
-              }
-              
-              .text-white {
                 color: white !important;
               }
             </style>
           </head>
           <body>
             <div id="custom-work-order-content"></div>
+            <script>
+              window.onload = function() {
+                // Force background colors to print properly
+                document.body.style.webkitPrintColorAdjust = 'exact';
+                document.body.style.printColorAdjust = 'exact';
+                
+                setTimeout(function() {
+                  window.print();
+                  window.onafterprint = function() {
+                    window.close();
+                  };
+                }, 500);
+              };
+            </script>
           </body>
         </html>
       `);
@@ -154,15 +165,8 @@ export class CustomPrintService {
             });
           }
           
-          // Wait for content to load, then print
-          setTimeout(() => {
-            printWindow.document.close();
-            printWindow.focus();
-            printWindow.print();
-            
-            // Close the window after printing (or allow user to close it)
-            // printWindow.close();
-          }, 500);
+          // Wait for content to load before proceeding
+          printWindow.document.close();
         }
       } else {
         // Handle the case where the element doesn't exist
