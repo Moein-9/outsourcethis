@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -76,13 +75,13 @@ export const useInvoiceStore = create<InvoiceState>()(
       workOrders: [], 
       
       addInvoice: (invoice) => {
-        const invoiceId = `INV${Date.now()}`;
+        const invoiceId = `IN${Date.now()}`;
         const createdAt = new Date().toISOString();
         const remaining = Math.max(0, invoice.total - invoice.deposit);
         const isPaid = remaining === 0;
         
         // Extract auth number if it exists
-        const { authNumber, ...restInvoice } = invoice as (typeof invoice & { authNumber?: string });
+        const { authNumber, workOrderId, ...restInvoice } = invoice as (typeof invoice & { authNumber?: string, workOrderId?: string });
         
         const initialPayment: Payment = {
           amount: invoice.deposit,
@@ -103,7 +102,8 @@ export const useInvoiceStore = create<InvoiceState>()(
               remaining,
               isPaid,
               payments,
-              authNumber // Store auth number at invoice level too
+              authNumber, // Store auth number at invoice level too
+              workOrderId // Store the work order ID if provided
             }
           ]
         }));
@@ -236,7 +236,6 @@ export const useInvoiceStore = create<InvoiceState>()(
         return id;
       },
       
-      // Add the updateInvoice function
       updateInvoice: (updatedInvoice) => {
         set((state) => ({
           invoices: state.invoices.map((invoice) => 
@@ -245,7 +244,6 @@ export const useInvoiceStore = create<InvoiceState>()(
         }));
       },
       
-      // Add the updateWorkOrder function
       updateWorkOrder: (updatedWorkOrder) => {
         set((state) => ({
           workOrders: state.workOrders.map((workOrder) => 

@@ -26,7 +26,8 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
   const invoice = {
-    invoiceId: getValues<string>('workOrderId') || "",
+    invoiceId: getValues<string>('invoiceId') || "",
+    workOrderId: getValues<string>('workOrderId') || "",
     patientName: getValues<string>('patientName') || "",
     patientPhone: getValues<string>('patientPhone') || "",
     patientId: getValues<string>('patientId'),
@@ -45,7 +46,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     paymentMethod: getValues<string>('paymentMethod') || "",
     isPaid: getValues<boolean>('isPaid'),
     authNumber: getValues<string>('authNumber') || "",
-    workOrderId: getValues<string>('workOrderId') || "",
   };
   
   const patient = {
@@ -53,7 +53,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     phone: getValues<string>('patientPhone') || ""
   };
   
-  const hasInvoiceData = !!invoice.workOrderId;
+  const hasInvoiceData = !!invoice.invoiceId && !!invoice.workOrderId;
   
   // If no invoice data is available, show a guidance message
   if (!hasInvoiceData) {
@@ -107,6 +107,14 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
         
         <div className="bg-white p-6 rounded-lg border border-green-200 mb-5 shadow-sm">
           <div className="flex flex-col space-y-4">
+            <div className={`flex justify-between items-center pb-3 border-b border-dashed border-green-200 ${textAlignClass}`}>
+              <div className="flex items-center">
+                <Receipt className="w-5 h-5 text-amber-500 mr-2" />
+                <span className="text-gray-600 font-medium">{t('invoiceNumber')}:</span>
+              </div>
+              <span className="font-bold text-lg text-amber-500">{invoice.invoiceId}</span>
+            </div>
+            
             <div className={`flex justify-between items-center pb-3 border-b border-dashed border-green-200 ${textAlignClass}`}>
               <div className="flex items-center">
                 <FileText className="w-5 h-5 text-primary mr-2" />

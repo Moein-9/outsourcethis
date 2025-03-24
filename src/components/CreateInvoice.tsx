@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { 
-  FileText, Printer, Receipt, Save, User, PackageCheck, CreditCard, Check,
+  FileText, Printer, Receipt, User, PackageCheck, CreditCard,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
   MessageCircleDashed, Loader
 } from "lucide-react";
@@ -26,8 +27,20 @@ const CreateInvoiceContent: React.FC = () => {
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("patient");
-  const addInvoice = useInvoiceStore((state) => state.addInvoice);
   const { getValues, setValue } = useInvoiceForm();
+  
+  // Listen for navigation events from other components
+  useEffect(() => {
+    const handleNavigateToSummary = () => {
+      setActiveTab("summary");
+    };
+    
+    window.addEventListener('navigateToSummary', handleNavigateToSummary);
+    
+    return () => {
+      window.removeEventListener('navigateToSummary', handleNavigateToSummary);
+    };
+  }, []);
   
   const handlePrintWorkOrder = () => {
     setWorkOrderPrintOpen(true);
@@ -44,7 +57,8 @@ const CreateInvoiceContent: React.FC = () => {
   };
 
   const previewInvoice = {
-    invoiceId: getValues("workOrderId") || "PREVIEW",
+    invoiceId: getValues("invoiceId") || "PREVIEW",
+    workOrderId: getValues("workOrderId") || "PREVIEW",
     createdAt: new Date().toISOString(),
     patientName: getValues("patientName") || "Customer Name",
     patientPhone: getValues("patientPhone") || "",
@@ -88,43 +102,6 @@ const CreateInvoiceContent: React.FC = () => {
     return Math.max(0, total - deposit);
   };
 
-  const handleSaveInvoice = () => {
-    const formData = getValues();
-    const invoiceData = {
-      patientId: formData.patientId,
-      patientName: formData.patientName,
-      patientPhone: formData.patientPhone,
-      
-      lensType: formData.lensType,
-      lensPrice: formData.lensPrice,
-      
-      coating: formData.coating,
-      coatingPrice: formData.coatingPrice,
-      
-      frameBrand: formData.frameBrand,
-      frameModel: formData.frameModel,
-      frameColor: formData.frameColor,
-      framePrice: formData.framePrice,
-      
-      discount: formData.discount,
-      deposit: formData.deposit,
-      total: formData.total,
-      
-      paymentMethod: formData.paymentMethod,
-      authNumber: formData.authNumber
-    };
-    
-    const invoiceId = addInvoice(invoiceData);
-    setValue("workOrderId", invoiceId);
-    
-    toast({
-      title: t('success'),
-      description: `${t('invoiceSavedSuccess')} ${invoiceId}.`,
-    });
-    
-    setActiveTab("summary");
-  };
-
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
 
@@ -145,11 +122,6 @@ const CreateInvoiceContent: React.FC = () => {
         </h2>
         
         <div className="flex items-center space-x-3">
-          <Button onClick={handleSaveInvoice} variant="outline" className="flex items-center gap-2">
-            <Save className="w-4 h-4" />
-            {t('saveInvoice')}
-          </Button>
-          
           <Button 
             onClick={handlePrintInvoice} 
             variant="outline" 
@@ -257,13 +229,6 @@ const CreateInvoiceContent: React.FC = () => {
                         className="flex items-center gap-2"
                       >
                         {t('previous')}
-                      </Button>
-                      <Button 
-                        onClick={handleSaveInvoice} 
-                        className="flex items-center gap-2"
-                      >
-                        <Save className="w-4 h-4" />
-                        {t('saveInvoice')}
                       </Button>
                     </div>
                   </motion.div>
