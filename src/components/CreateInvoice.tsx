@@ -50,7 +50,10 @@ const CreateInvoiceContent: React.FC = () => {
       workOrderId: getValues("workOrderId") || "PREVIEW"
     };
     
-    CustomPrintService.printWorkOrder(workOrderData, previewInvoice);
+    setWorkOrderPrintOpen(true);
+    setTimeout(() => {
+      CustomPrintService.printWorkOrder(workOrderData, previewInvoice);
+    }, 300);
   };
   
   const handlePrintInvoice = () => {
@@ -557,7 +560,11 @@ const CreateInvoiceContent: React.FC = () => {
               {t('workOrder')}
             </SheetTitle>
             <SheetDescription>
-              <Button onClick={handlePrintWorkOrder} className="mt-2">
+              <Button onClick={() => {
+                setTimeout(() => {
+                  CustomPrintService.printWorkOrder(previewInvoice, previewInvoice);
+                }, 100);
+              }} className="mt-2">
                 <Printer className={`w-4 h-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                 {t('print')}
               </Button>
