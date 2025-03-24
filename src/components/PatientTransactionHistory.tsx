@@ -8,9 +8,10 @@ import { useLanguageStore } from '@/store/languageStore';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { EditWorkOrderDialog } from './EditWorkOrderDialog';
-import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer } from 'lucide-react';
+import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { CustomPrintWorkOrderButton } from './CustomPrintWorkOrderButton';
+import { PrintOptionsDialog } from './PrintOptionsDialog';
+import { toast } from 'sonner';
 
 interface PatientTransactionHistoryProps {
   patientId: string;
@@ -18,7 +19,7 @@ interface PatientTransactionHistoryProps {
 
 export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps> = ({ patientId }) => {
   const { t, language } = useLanguageStore();
-  const { invoices } = useInvoiceStore();
+  const { invoices, markAsPickedUp } = useInvoiceStore();
   const navigate = useNavigate();
   const isRtl = language === 'ar';
   
@@ -69,6 +70,21 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   const viewInvoiceDetails = (invoice: any) => {
     // Navigate to invoice details in "Remaining Payments" section
     navigate('/', { state: { section: 'remainingPayments', selectedInvoice: invoice.invoiceId } });
+  };
+  
+  const handlePrintWorkOrder = (workOrder: any, invoice?: any) => {
+    console.log("Printing work order:", workOrder);
+    // Use existing print functionality
+  };
+
+  const handlePrintInvoice = (invoice: any) => {
+    console.log("Printing invoice:", invoice);
+    // Implement invoice print logic
+  };
+  
+  const handleMarkAsPickedUp = (id: string, isInvoice: boolean = true) => {
+    markAsPickedUp(id, isInvoice);
+    toast.success(language === 'ar' ? "تم تسليم الطلب بنجاح" : "Order has been marked as picked up");
   };
   
   if (!patientInvoices.length) {
@@ -124,6 +140,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                 {patientInvoices.map((invoice) => {
                   const remaining = calculateRemaining(invoice);
                   const isPaid = remaining <= 0;
+                  const isPickedUp = invoice.isPickedUp;
                   
                   return (
                     <TableRow key={invoice.invoiceId} className="hover:bg-accent/5 transition-colors">
@@ -132,11 +149,17 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                       <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          isPaid 
-                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200' 
-                            : 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200'
+                          isPickedUp
+                            ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300'
+                            : isPaid 
+                              ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' 
+                              : 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200'
                         }`}>
-                          {isPaid ? t("paid") : t("partiallyPaid")}
+                          {isPickedUp 
+                            ? t("pickedUp") 
+                            : isPaid 
+                              ? t("paid") 
+                              : t("partiallyPaid")}
                         </span>
                       </TableCell>
                       <TableCell className="text-right space-x-1">
@@ -149,24 +172,46 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleEdit(invoice)}
-                          title={t("edit")}
-                          className="hover:bg-amber-100 hover:text-amber-700 transition-colors"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <CustomPrintWorkOrderButton 
+                        
+                        {!invoice.isPickedUp && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleEdit(invoice)}
+                            title={t("edit")}
+                            className="hover:bg-amber-100 hover:text-amber-700 transition-colors"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
+                        
+                        <PrintOptionsDialog
                           workOrder={invoice}
                           invoice={invoice}
-                          variant="ghost"
-                          size="icon"
-                          className="ml-1 hover:bg-purple-100 hover:text-purple-700 transition-colors"
+                          onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
+                          onPrintInvoice={() => handlePrintInvoice(invoice)}
                         >
-                          <Printer className="h-4 w-4" />
-                        </CustomPrintWorkOrderButton>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-purple-100 hover:text-purple-700 transition-colors"
+                            title={t("print")}
+                          >
+                            <Printer className="h-4 w-4" />
+                          </Button>
+                        </PrintOptionsDialog>
+                        
+                        {!invoice.isPickedUp && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleMarkAsPickedUp(invoice.invoiceId, true)}
+                            title={language === 'ar' ? "تم الاستلام" : "Mark as Picked Up"}
+                            className="hover:bg-green-100 hover:text-green-700 transition-colors"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   );

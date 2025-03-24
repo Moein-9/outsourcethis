@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -41,6 +42,8 @@ export interface Invoice {
   payments?: Payment[];
   createdAt: string;
   isPaid: boolean;
+  isPickedUp?: boolean;
+  pickedUpAt?: string;
   authNumber?: string;
   workOrderId?: string;
 }
@@ -58,6 +61,8 @@ export interface WorkOrder {
   
   contactLenses?: ContactLensItem[];
   contactLensRx?: any;
+  isPickedUp?: boolean;
+  pickedUpAt?: string;
 }
 
 interface InvoiceState {
@@ -65,6 +70,7 @@ interface InvoiceState {
   workOrders: WorkOrder[];
   addInvoice: (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments">) => string;
   markAsPaid: (invoiceId: string, paymentMethod?: string, authNumber?: string) => void;
+  markAsPickedUp: (id: string, isInvoice?: boolean) => void;
   addPartialPayment: (invoiceId: string, payment: Omit<Payment, "date">) => void;
   getInvoiceById: (id: string) => Invoice | undefined;
   getUnpaidInvoices: () => Invoice[];
@@ -112,7 +118,8 @@ export const useInvoiceStore = create<InvoiceState>()(
               isPaid,
               payments,
               authNumber, // Store auth number at invoice level too
-              workOrderId // Store the work order ID if provided
+              workOrderId, // Store the work order ID if provided
+              isPickedUp: false // Initialize as not picked up
             }
           ]
         }));
@@ -151,6 +158,74 @@ export const useInvoiceStore = create<InvoiceState>()(
             return invoice;
           })
         }));
+      },
+      
+      markAsPickedUp: (id, isInvoice = true) => {
+        const pickedUpAt = new Date().toISOString();
+        
+        if (isInvoice) {
+          // Mark invoice as picked up
+          set((state) => ({
+            invoices: state.invoices.map(invoice => {
+              if (invoice.invoiceId === id) {
+                return { 
+                  ...invoice, 
+                  isPickedUp: true,
+                  pickedUpAt
+                };
+              }
+              return invoice;
+            })
+          }));
+          
+          // Also mark associated work order as picked up if it exists
+          const invoice = get().invoices.find(inv => inv.invoiceId === id);
+          if (invoice?.workOrderId) {
+            set((state) => ({
+              workOrders: state.workOrders.map(wo => {
+                if (wo.id === invoice.workOrderId) {
+                  return {
+                    ...wo,
+                    isPickedUp: true,
+                    pickedUpAt
+                  };
+                }
+                return wo;
+              })
+            }));
+          }
+        } else {
+          // Mark work order as picked up
+          set((state) => ({
+            workOrders: state.workOrders.map(wo => {
+              if (wo.id === id) {
+                return {
+                  ...wo,
+                  isPickedUp: true,
+                  pickedUpAt
+                };
+              }
+              return wo;
+            })
+          }));
+          
+          // Also mark associated invoice as picked up if it exists
+          const relatedInvoice = get().invoices.find(inv => inv.workOrderId === id);
+          if (relatedInvoice) {
+            set((state) => ({
+              invoices: state.invoices.map(invoice => {
+                if (invoice.invoiceId === relatedInvoice.invoiceId) {
+                  return {
+                    ...invoice,
+                    isPickedUp: true,
+                    pickedUpAt
+                  };
+                }
+                return invoice;
+              })
+            }));
+          }
+        }
       },
       
       addPartialPayment: (invoiceId, payment) => {
@@ -237,7 +312,8 @@ export const useInvoiceStore = create<InvoiceState>()(
             { 
               ...workOrder, 
               id, 
-              createdAt
+              createdAt,
+              isPickedUp: false // Initialize as not picked up
             }
           ]
         }));
