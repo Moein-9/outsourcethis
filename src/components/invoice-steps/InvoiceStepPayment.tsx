@@ -11,18 +11,20 @@ import {
   CreditCard as CardIcon
 } from "lucide-react";
 import { useInvoiceStore } from "@/store/invoiceStore";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
+import { PrintWorkOrderButton } from "../PrintWorkOrderButton";
 
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
   const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
-  const addWorkOrder = useInvoiceStore(state => state.addWorkOrder);
+  const { addInvoice, addWorkOrder } = useInvoiceStore();
   
   const [discount, setDiscount] = useState(getValues<number>('discount') || 0);
   const [deposit, setDeposit] = useState(getValues<number>('deposit') || 0);
   const [paymentMethod, setPaymentMethod] = useState(getValues<string>('paymentMethod') || "");
   const [authNumber, setAuthNumber] = useState(getValues<string>('authNumber') || "");
-  const [workOrderCreated, setWorkOrderCreated] = useState(!!getValues<string>('workOrderId'));
+  const [invoiceCreated, setInvoiceCreated] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
@@ -68,7 +70,7 @@ export const InvoiceStepPayment: React.FC = () => {
     setValue('authNumber', e.target.value);
   };
 
-  const createWorkOrder = () => {
+  const saveOrder = () => {
     if (!paymentMethod) {
       toast({
         title: t('error'),
@@ -78,26 +80,73 @@ export const InvoiceStepPayment: React.FC = () => {
       return;
     }
     
-    // Get patient details
-    const patientId = getValues<string>('patientId') || 'anonymous';
+    setLoading(true);
     
-    // Create a work order
-    const workOrder = {
-      patientId,
-      lensType: {
-        name: getValues<string>('lensType'),
-        price: getValues<number>('lensPrice')
-      }
-    };
-    
-    const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
-    setValue('workOrderId', workOrderId);
-    setWorkOrderCreated(true);
-    
-    toast({
-      title: t('success'),
-      description: `${t('workOrderCreated')} ${workOrderId}`,
-    });
+    try {
+      // Get patient details
+      const patientId = getValues<string>('patientId') || 'anonymous';
+      
+      // 1. Create a work order
+      const workOrder = {
+        patientId,
+        lensType: {
+          name: getValues<string>('lensType'),
+          price: getValues<number>('lensPrice')
+        }
+      };
+      
+      const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
+      setValue('workOrderId', workOrderId);
+      
+      // 2. Create the invoice and link it to the work order
+      const invoiceData = {
+        patientId: getValues<string>('patientId'),
+        patientName: getValues<string>('patientName'),
+        patientPhone: getValues<string>('patientPhone'),
+        lensType: getValues<string>('lensType'),
+        lensPrice: getValues<number>('lensPrice'),
+        coating: getValues<string>('coating'),
+        coatingPrice: getValues<number>('coatingPrice'),
+        frameBrand: getValues<string>('frameBrand'),
+        frameModel: getValues<string>('frameModel'),
+        frameColor: getValues<string>('frameColor'),
+        frameSize: getValues<string>('frameSize'),
+        framePrice: getValues<number>('framePrice'),
+        discount: getValues<number>('discount'),
+        deposit: getValues<number>('deposit'),
+        total: getValues<number>('total'),
+        paymentMethod: getValues<string>('paymentMethod'),
+        authNumber: getValues<string>('authNumber'),
+        workOrderId // Link to the work order
+      };
+      
+      const invoiceId = addInvoice(invoiceData);
+      setValue('invoiceId', invoiceId);
+      
+      setInvoiceCreated(true);
+      
+      toast({
+        title: t('success'),
+        description: `${t('orderCreated')}: ${workOrderId} / ${invoiceId}`,
+      });
+      
+      // Navigate to summary tab
+      setTimeout(() => {
+        const summaryTab = document.querySelector('[value="summary"]');
+        if (summaryTab instanceof HTMLElement) {
+          summaryTab.click();
+        }
+      }, 500);
+    } catch (error) {
+      console.error("Error saving order:", error);
+      toast({
+        title: t('error'),
+        description: t('errorSavingOrder'),
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
@@ -269,14 +318,15 @@ export const InvoiceStepPayment: React.FC = () => {
           </div>
         </div>
         
-        {!workOrderCreated ? (
+        {!invoiceCreated ? (
           <motion.div className="mt-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Button 
               className="w-full" 
               size="lg"
-              onClick={createWorkOrder}
+              onClick={saveOrder}
+              disabled={loading}
             >
-              {t('createWorkOrder')}
+              {loading ? t('saving') : language === 'ar' ? 'حفظ الطلب' : 'Save Order'}
             </Button>
           </motion.div>
         ) : (
@@ -286,7 +336,9 @@ export const InvoiceStepPayment: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <Check className="w-5 h-5 mr-2" />
-            <span className="font-medium">{t('workOrderCreated')}: {getValues<string>('workOrderId')}</span>
+            <span className="font-medium">
+              {t('orderCreated')}: {getValues<string>('workOrderId')} / {getValues<string>('invoiceId')}
+            </span>
           </motion.div>
         )}
       </div>
