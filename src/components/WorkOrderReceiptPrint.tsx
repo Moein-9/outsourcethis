@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -299,9 +298,19 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
                 </div>
                 ` : ''}
                 <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
-                  <span style="font-weight: bold;">${isRtl ? "السعر" : "Price"}:</span>
+                  <span style="font-weight: bold;">${isRtl ? "الكمية" : "Quantity"}:</span>
+                  <span>${lens.qty || 1}</span>
+                </div>
+                <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
+                  <span style="font-weight: bold;">${isRtl ? "السعر الإفرادي" : "Unit Price"}:</span>
                   <span>${lens.price.toFixed(3)} KWD</span>
                 </div>
+                ${(lens.qty && lens.qty > 1) ? `
+                <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
+                  <span style="font-weight: bold;">${isRtl ? "المجموع" : "Total"}:</span>
+                  <span>${(lens.price * (lens.qty || 1)).toFixed(3)} KWD</span>
+                </div>
+                ` : ''}
               </div>
             `).join('')}
           </div>
@@ -764,9 +773,19 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
                   </div>
                 )}
                 <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
+                  <span style={{ fontWeight: "bold" }}>{isRtl ? "الكمية" : "Quantity"}:</span>
+                  <span>{lens.qty || 1}</span>
+                </div>
+                <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر الإفرادي" : "Unit Price"}:</span>
                   <span>{lens.price.toFixed(3)} KWD</span>
                 </div>
+                {lens.qty && lens.qty > 1 && (
+                  <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontWeight: "bold" }}>{isRtl ? "المجموع" : "Total"}:</span>
+                    <span>{(lens.price * (lens.qty || 1)).toFixed(3)} KWD</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
