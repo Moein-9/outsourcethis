@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
@@ -47,7 +48,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   const formatDate = (dateString?: string) => {
     if (!dateString) return language === 'ar' ? "تاريخ غير متوفر" : "Date not available";
     try {
-      return format(parseISO(dateString), "PPP", { locale: language === 'ar' ? ar : enUS });
+      return format(parseISO(dateString), "PP", { locale: language === 'ar' ? ar : enUS });
     } catch (error) {
       return language === 'ar' ? "تاريخ غير صالح" : "Invalid date";
     }
@@ -78,7 +79,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
           {language === 'ar' ? "أوامر العمل والفواتير الخاصة بالعميل" : "Work orders and invoices for the client"}
         </CardDescription>
       </CardHeader>
-      <CardContent className="w-full overflow-x-auto">
+      <CardContent className="p-2 sm:p-4">
         <Tabs 
           defaultValue="active" 
           value={activeTab}
@@ -102,61 +103,67 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
               </h3>
               
               {getActiveWorkOrders(workOrders).length > 0 ? (
-                <div className="rounded-md border overflow-x-auto shadow-sm">
-                  <Table>
-                    <TableHeader className="bg-amber-50">
-                      <TableRow>
-                        <TableHead className="w-12">#</TableHead>
-                        <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
-                        <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
-                        <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
-                        <TableHead>{t('status')}</TableHead>
-                        <TableHead className="text-right">{t('actions')}</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {getActiveWorkOrders(workOrders).map((workOrder, index) => {
-                        const invoice = invoices.find(inv => inv.workOrderId === workOrder.id);
-                        const status = !invoice ? (language === 'ar' ? "قيد التنفيذ" : "In Progress") : 
-                          invoice.isPaid ? (language === 'ar' ? "مدفوعة" : "Paid") : 
-                          invoice.deposit > 0 ? (language === 'ar' ? "مدفوعة جزئيًا" : "Partially Paid") : 
-                          (language === 'ar' ? "غير مدفوعة" : "Unpaid");
-                        
-                        const statusColor = !invoice ? "bg-amber-500" : 
-                          invoice.isPaid ? "bg-green-500" : 
-                          invoice.deposit > 0 ? "bg-amber-500" : "bg-red-500";
-                        
-                        return (
-                          <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-amber-50/30' : ''}>
-                            <TableCell className="font-medium">{index + 1}</TableCell>
-                            <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
-                            <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
-                            <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
-                            <TableCell>
-                              <Badge className={statusColor}>{status}</Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="border-amber-200 hover:bg-amber-50"
-                                  onClick={() => onEditWorkOrder(workOrder)}
-                                >
-                                  <Edit className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
-                                  {t('edit')}
-                                </Button>
-                                <Button variant="outline" size="sm" className="border-amber-200 hover:bg-amber-50">
-                                  <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
-                                  {t('print')}
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                <div className="rounded-md border shadow-sm">
+                  <div className="max-w-full overflow-hidden">
+                    <Table>
+                      <TableHeader className="bg-amber-50">
+                        <TableRow>
+                          <TableHead className="w-[5%]">#</TableHead>
+                          <TableHead className="w-[20%]">{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                          <TableHead className="w-[20%]">{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
+                          <TableHead className="w-[20%]">{language === 'ar' ? "التاريخ" : "Date"}</TableHead>
+                          <TableHead className="w-[15%]">{t('status')}</TableHead>
+                          <TableHead className="w-[20%] text-right">{t('actions')}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {getActiveWorkOrders(workOrders).map((workOrder, index) => {
+                          const invoice = invoices.find(inv => inv.workOrderId === workOrder.id);
+                          const status = !invoice ? (language === 'ar' ? "قيد التنفيذ" : "In Progress") : 
+                            invoice.isPaid ? (language === 'ar' ? "مدفوعة" : "Paid") : 
+                            invoice.deposit > 0 ? (language === 'ar' ? "مدفوعة جزئيًا" : "Partially Paid") : 
+                            (language === 'ar' ? "غير مدفوعة" : "Unpaid");
+                          
+                          const statusColor = !invoice ? "bg-amber-500" : 
+                            invoice.isPaid ? "bg-green-500" : 
+                            invoice.deposit > 0 ? "bg-amber-500" : "bg-red-500";
+                          
+                          return (
+                            <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-amber-50/30' : ''}>
+                              <TableCell className="font-medium">{index + 1}</TableCell>
+                              <TableCell className="truncate">WO-{workOrder.id.substring(0, 8)}</TableCell>
+                              <TableCell className="truncate">{workOrder.lensType?.name || '-'}</TableCell>
+                              <TableCell className="truncate">{formatDate(workOrder.createdAt)}</TableCell>
+                              <TableCell>
+                                <Badge className={`${statusColor} whitespace-nowrap`}>{status}</Badge>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-1">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-8 px-2 border-amber-200 hover:bg-amber-50"
+                                    onClick={() => onEditWorkOrder(workOrder)}
+                                  >
+                                    <Edit className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
+                                    <span className="hidden sm:inline">{t('edit')}</span>
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-8 px-2 border-amber-200 hover:bg-amber-50"
+                                  >
+                                    <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
+                                    <span className="hidden sm:inline">{t('print')}</span>
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-6 border rounded-md bg-amber-50/20">
@@ -182,46 +189,56 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
               </h3>
               
               {invoices.filter(inv => inv.isPaid).length > 0 ? (
-                <div className="rounded-md border overflow-x-auto shadow-sm">
-                  <Table>
-                    <TableHeader className="bg-green-50">
-                      <TableRow>
-                        <TableHead className="w-12">#</TableHead>
-                        <TableHead>{language === 'ar' ? "رقم الفاتورة" : "Invoice No."}</TableHead>
-                        <TableHead>{language === 'ar' ? "المبلغ" : "Amount"}</TableHead>
-                        <TableHead>{language === 'ar' ? "تاريخ الفاتورة" : "Invoice Date"}</TableHead>
-                        <TableHead>{t('status')}</TableHead>
-                        <TableHead className="text-right">{t('actions')}</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {invoices.filter(inv => inv.isPaid).map((invoice, index) => (
-                        <TableRow key={invoice.invoiceId} className={index % 2 === 0 ? 'bg-green-50/30' : ''}>
-                          <TableCell className="font-medium">{index + 1}</TableCell>
-                          <TableCell>INV-{invoice.invoiceId.substring(0, 8)}</TableCell>
-                          <TableCell>{invoice.total.toFixed(3)} {t('kwd')}</TableCell>
-                          <TableCell>{formatDate(invoice.createdAt)}</TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-500">
-                              {language === 'ar' ? "مدفوعة" : "Paid"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
-                                <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
-                                {t('view')}
-                              </Button>
-                              <Button variant="outline" size="sm" className="border-green-200 hover:bg-green-50">
-                                <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
-                                {t('print')}
-                              </Button>
-                            </div>
-                          </TableCell>
+                <div className="rounded-md border shadow-sm">
+                  <div className="max-w-full overflow-hidden">
+                    <Table>
+                      <TableHeader className="bg-green-50">
+                        <TableRow>
+                          <TableHead className="w-[5%]">#</TableHead>
+                          <TableHead className="w-[25%]">{language === 'ar' ? "رقم الفاتورة" : "Invoice No."}</TableHead>
+                          <TableHead className="w-[15%]">{language === 'ar' ? "المبلغ" : "Amount"}</TableHead>
+                          <TableHead className="w-[25%]">{language === 'ar' ? "التاريخ" : "Date"}</TableHead>
+                          <TableHead className="w-[10%]">{t('status')}</TableHead>
+                          <TableHead className="w-[20%] text-right">{t('actions')}</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {invoices.filter(inv => inv.isPaid).map((invoice, index) => (
+                          <TableRow key={invoice.invoiceId} className={index % 2 === 0 ? 'bg-green-50/30' : ''}>
+                            <TableCell className="font-medium">{index + 1}</TableCell>
+                            <TableCell className="truncate">INV-{invoice.invoiceId.substring(0, 8)}</TableCell>
+                            <TableCell>{invoice.total.toFixed(3)} {t('kwd')}</TableCell>
+                            <TableCell className="truncate">{formatDate(invoice.createdAt)}</TableCell>
+                            <TableCell>
+                              <Badge className="bg-green-500 whitespace-nowrap">
+                                {language === 'ar' ? "مدفوعة" : "Paid"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-1">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8 px-2 border-green-200 hover:bg-green-50"
+                                >
+                                  <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
+                                  <span className="hidden sm:inline">{t('view')}</span>
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8 px-2 border-green-200 hover:bg-green-50"
+                                >
+                                  <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-green-600`} />
+                                  <span className="hidden sm:inline">{t('print')}</span>
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-6 border rounded-md bg-green-50/20">
@@ -245,40 +262,50 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
               </h3>
               
               {getCompletedWorkOrders(workOrders).length > 0 ? (
-                <div className="rounded-md border overflow-x-auto shadow-sm">
-                  <Table>
-                    <TableHeader className="bg-blue-50">
-                      <TableRow>
-                        <TableHead className="w-12">#</TableHead>
-                        <TableHead>{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
-                        <TableHead>{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
-                        <TableHead>{language === 'ar' ? "تاريخ الطلب" : "Order Date"}</TableHead>
-                        <TableHead className="text-right">{t('actions')}</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {getCompletedWorkOrders(workOrders).map((workOrder, index) => (
-                        <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30' : ''}>
-                          <TableCell className="font-medium">{index + 1}</TableCell>
-                          <TableCell>WO-{workOrder.id.substring(0, 8)}</TableCell>
-                          <TableCell>{workOrder.lensType?.name || '-'}</TableCell>
-                          <TableCell>{formatDate(workOrder.createdAt)}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
-                                <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
-                                {t('view')}
-                              </Button>
-                              <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50">
-                                <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
-                                {t('print')}
-                              </Button>
-                            </div>
-                          </TableCell>
+                <div className="rounded-md border shadow-sm">
+                  <div className="max-w-full overflow-hidden">
+                    <Table>
+                      <TableHeader className="bg-blue-50">
+                        <TableRow>
+                          <TableHead className="w-[5%]">#</TableHead>
+                          <TableHead className="w-[30%]">{language === 'ar' ? "رقم الطلب" : "Order No."}</TableHead>
+                          <TableHead className="w-[30%]">{language === 'ar' ? "نوع العدسة" : "Lens Type"}</TableHead>
+                          <TableHead className="w-[20%]">{language === 'ar' ? "التاريخ" : "Date"}</TableHead>
+                          <TableHead className="w-[15%] text-right">{t('actions')}</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {getCompletedWorkOrders(workOrders).map((workOrder, index) => (
+                          <TableRow key={workOrder.id} className={index % 2 === 0 ? 'bg-blue-50/30' : ''}>
+                            <TableCell className="font-medium">{index + 1}</TableCell>
+                            <TableCell className="truncate">WO-{workOrder.id.substring(0, 8)}</TableCell>
+                            <TableCell className="truncate">{workOrder.lensType?.name || '-'}</TableCell>
+                            <TableCell className="truncate">{formatDate(workOrder.createdAt)}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-1">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8 px-2 border-blue-200 hover:bg-blue-50"
+                                >
+                                  <Eye className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                  <span className="hidden sm:inline">{t('view')}</span>
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8 px-2 border-blue-200 hover:bg-blue-50"
+                                >
+                                  <Printer className={`h-3.5 w-3.5 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-blue-600`} />
+                                  <span className="hidden sm:inline">{t('print')}</span>
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-6 border rounded-md bg-blue-50/20">
