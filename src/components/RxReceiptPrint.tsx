@@ -1,6 +1,6 @@
-
 import React from "react";
 import { format, parseISO } from "date-fns";
+import { enUS } from "date-fns/locale";
 import { RxData } from "@/store/patientStore";
 import { Eye, Calendar, User, Phone } from "lucide-react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
@@ -31,10 +31,10 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   
   const dirClass = isRtl ? 'rtl text-right' : 'ltr text-left';
 
-  // Format the prescription date from the RX object - using original RX date
+  // Format the prescription date from the RX object - using original RX date and English format
   const formattedRxDate = rx.createdAt 
-    ? format(parseISO(rx.createdAt), 'dd/MM/yyyy HH:mm')
-    : format(new Date(), 'dd/MM/yyyy HH:mm');
+    ? format(parseISO(rx.createdAt), 'MM/dd/yyyy HH:mm', { locale: enUS })
+    : format(new Date(), 'MM/dd/yyyy HH:mm', { locale: enUS });
 
   return (
     <div 

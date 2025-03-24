@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { enUS } from "date-fns/locale";
 import { useInvoiceStore, Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -116,7 +118,7 @@ export const DailySalesReport: React.FC = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
     
-    const today = new Date().toLocaleDateString('ar-EG');
+    const today = format(new Date(), 'MM/dd/yyyy', { locale: enUS });
     const pageTitle = `تقرير المبيعات اليومي - ${today}`;
     
     let paymentBreakdownHTML = '';
@@ -356,7 +358,7 @@ export const DailySalesReport: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold text-blue-900">{totalRevenue.toFixed(2)} د.ك</div>
             <p className="text-xs text-blue-600 mt-1">
-              لليوم: {new Date().toLocaleDateString('ar-EG')}
+              لليوم: {format(new Date(), 'MM/dd/yyyy', { locale: enUS })}
             </p>
           </CardContent>
         </Card>

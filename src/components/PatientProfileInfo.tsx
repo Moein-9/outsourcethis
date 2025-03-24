@@ -38,7 +38,8 @@ export const PatientProfileInfo: React.FC<PatientProfileInfoProps> = ({
   const formatDate = (dateString?: string) => {
     if (!dateString) return language === 'ar' ? "تاريخ غير متوفر" : "Date not available";
     try {
-      return format(parseISO(dateString), "PPP", { locale: language === 'ar' ? ar : enUS });
+      // Always use English locale for date formatting to ensure MM/DD/YYYY format
+      return format(parseISO(dateString), "MM/dd/yyyy", { locale: enUS });
     } catch (error) {
       return language === 'ar' ? "تاريخ غير صالح" : "Invalid date";
     }

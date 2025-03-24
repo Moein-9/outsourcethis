@@ -102,7 +102,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
                 <Calendar className="w-5 h-5 text-amber-500 mr-2" />
                 <span className="text-gray-600 font-medium">{t('date')}:</span>
               </div>
-              <span>{new Date().toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}</span>
+              <span>{new Date().toLocaleDateString('en-US')}</span>
             </div>
             
             <div className="my-2 border-t border-dashed border-green-200"></div>

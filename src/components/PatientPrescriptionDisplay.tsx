@@ -1,7 +1,7 @@
 
 import React from "react";
 import { format, parseISO } from "date-fns";
-import { ar, enUS } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { useLanguageStore } from "@/store/languageStore";
 import { RxData, RxHistoryItem } from "@/store/patientStore";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,8 @@ export const PatientPrescriptionDisplay: React.FC<PatientPrescriptionDisplayProp
   const formatDate = (dateString?: string) => {
     if (!dateString) return language === 'ar' ? "تاريخ غير متوفر" : "Date not available";
     try {
-      return format(parseISO(dateString), "PPP", { locale: language === 'ar' ? ar : enUS });
+      // Always use English locale for date formatting to ensure MM/DD/YYYY format
+      return format(parseISO(dateString), "MM/dd/yyyy", { locale: enUS });
     } catch (error) {
       return language === 'ar' ? "تاريخ غير صالح" : "Invalid date";
     }

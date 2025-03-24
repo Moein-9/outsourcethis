@@ -1,5 +1,7 @@
+
 import React from "react";
 import { format } from "date-fns";
+import { enUS } from "date-fns/locale";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
 import { CheckCircle2 } from "lucide-react";
@@ -101,7 +103,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           {invoiceNumber}
         </p>
         <p className="text-xs">
-          {format(new Date(), 'yyyy-MM-dd HH:mm')}
+          {format(new Date(), 'yyyy-MM-dd HH:mm', { locale: enUS })}
         </p>
       </div>
 

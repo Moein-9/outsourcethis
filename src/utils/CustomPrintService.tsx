@@ -125,7 +125,8 @@ export class CustomPrintService {
             
             dateElements.forEach(element => {
               if (element instanceof HTMLElement) {
-                element.textContent = new Date(rxCreationDate).toLocaleString();
+                // Format date in English format MM/DD/YYYY HH:MM
+                element.textContent = new Date(rxCreationDate).toLocaleString('en-US');
               }
             });
           }
