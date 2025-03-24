@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { 
   BadgePercent, Banknote, CreditCard, Check,
-  CreditCard as CardIcon
+  CreditCard as CardIcon, Receipt, Printer
 } from "lucide-react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 import { PrintWorkOrderButton } from "../PrintWorkOrderButton";
+import { ReceiptInvoice } from "../ReceiptInvoice";
 
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -131,10 +132,12 @@ export const InvoiceStepPayment: React.FC = () => {
         description: `${t('orderCreated')}\n${t('workOrder')}: ${workOrderId}\n${t('invoice')}: ${invoiceId}`,
       });
       
-      // Immediately navigate to summary tab without delay
+      // Immediately navigate to summary tab
       const summaryTab = document.querySelector('[value="summary"]');
       if (summaryTab instanceof HTMLElement) {
         summaryTab.click();
+      } else {
+        console.log("Summary tab not found, manual navigation required");
       }
     } catch (error) {
       console.error("Error saving order:", error);
@@ -150,8 +153,10 @@ export const InvoiceStepPayment: React.FC = () => {
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
+  // Continue with the existing render logic...
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Discount Section */}
       <div className="border rounded-lg p-5 bg-card shadow-sm">
         <div className="border-b border-primary/30 pb-3 mb-4">
           <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
@@ -204,6 +209,7 @@ export const InvoiceStepPayment: React.FC = () => {
         </div>
       </div>
 
+      {/* Payment Section */}
       <div className="border rounded-lg p-5 bg-card shadow-sm">
         <div className="border-b border-primary/30 pb-3 mb-4">
           <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
@@ -330,28 +336,33 @@ export const InvoiceStepPayment: React.FC = () => {
           </motion.div>
         ) : (
           <motion.div 
-            className="mt-6 p-3 border border-green-500 rounded-lg bg-green-50 text-green-700" 
+            className="mt-6" 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="flex flex-col items-center justify-center space-y-1">
-              <div className="flex items-center justify-center gap-2">
-                <Check className="w-5 h-5" />
-                <span className="font-medium">{t('orderCreated')}</span>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 w-full mt-2">
-                <div className="border border-green-300 rounded p-2 text-center bg-green-100">
-                  <div className="text-xs text-green-600 font-medium">{t('workOrder')}</div>
-                  <div className="font-bold">{getValues<string>('workOrderId')}</div>
+            <div className="p-3 border border-green-500 rounded-lg bg-green-50 text-green-700 mb-4">
+              <div className="flex flex-col items-center justify-center space-y-1">
+                <div className="flex items-center justify-center gap-2">
+                  <Check className="w-5 h-5" />
+                  <span className="font-medium">{t('orderCreated')}</span>
                 </div>
                 
-                <div className="border border-green-300 rounded p-2 text-center bg-green-100">
-                  <div className="text-xs text-green-600 font-medium">{t('invoice')}</div>
-                  <div className="font-bold">{getValues<string>('invoiceId')}</div>
+                <div className="grid grid-cols-2 gap-4 w-full mt-2">
+                  <div className="border border-green-300 rounded p-2 text-center bg-green-100">
+                    <div className="text-xs text-green-600 font-medium">{t('workOrder')}</div>
+                    <div className="font-bold">{getValues<string>('workOrderId')}</div>
+                  </div>
+                  
+                  <div className="border border-green-300 rounded p-2 text-center bg-green-100">
+                    <div className="text-xs text-green-600 font-medium">{t('invoice')}</div>
+                    <div className="font-bold">{getValues<string>('invoiceId')}</div>
+                  </div>
                 </div>
               </div>
-              
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Print Work Order button */}
               <PrintWorkOrderButton
                 invoice={getValues()}
                 patientName={getValues<string>('patientName')}
@@ -367,9 +378,94 @@ export const InvoiceStepPayment: React.FC = () => {
                   price: getValues<number>('framePrice'),
                 }}
                 variant="outline"
-                className="mt-3 w-full"
+                className="w-full"
                 isNewInvoice={true}
-              />
+              >
+                <Button variant="outline" className="w-full gap-2" size="lg">
+                  <Printer className="h-4 w-4" />
+                  {t('printWorkOrder')}
+                </Button>
+              </PrintWorkOrderButton>
+              
+              {/* Print Receipt button */}
+              <Button 
+                variant="default" 
+                className="w-full gap-2" 
+                size="lg"
+                onClick={() => {
+                  // Create a hidden container to render the receipt
+                  const container = document.createElement('div');
+                  container.style.display = 'none';
+                  document.body.appendChild(container);
+                  
+                  // Add an ID for the receipt to be found
+                  const receiptDiv = document.createElement('div');
+                  receiptDiv.id = 'receipt-to-print';
+                  container.appendChild(receiptDiv);
+                  
+                  // Render the receipt in the hidden div
+                  const ReactDOM = require('react-dom');
+                  ReactDOM.render(
+                    React.createElement(ReceiptInvoice, { 
+                      invoice: getValues(),
+                      patientName: getValues<string>('patientName'),
+                      patientPhone: getValues<string>('patientPhone'),
+                      isPrintable: true
+                    }),
+                    receiptDiv,
+                    () => {
+                      // Open a new window for printing
+                      const printWindow = window.open('', '_blank');
+                      if (printWindow) {
+                        printWindow.document.write(`
+                          <html>
+                            <head>
+                              <title>Receipt</title>
+                              <style>
+                                @media print {
+                                  @page {
+                                    size: 80mm auto !important;
+                                    margin: 0 !important;
+                                    padding: 0 !important;
+                                  }
+                                }
+                                body {
+                                  margin: 0;
+                                  padding: 0;
+                                }
+                              </style>
+                            </head>
+                            <body>
+                              ${receiptDiv.innerHTML}
+                              <script>
+                                window.onload = function() {
+                                  setTimeout(function() {
+                                    window.print();
+                                    window.onafterprint = function() {
+                                      window.close();
+                                    };
+                                  }, 500);
+                                };
+                              </script>
+                            </body>
+                          </html>
+                        `);
+                        printWindow.document.close();
+                      }
+                      
+                      // Clean up
+                      setTimeout(() => {
+                        if (document.body.contains(container)) {
+                          document.body.removeChild(container);
+                        }
+                      }, 1000);
+                    }
+                  );
+                }}
+              >
+                <Receipt className="h-4 w-4" />
+                {t('printReceipt')}
+              </Button>
             </div>
           </motion.div>
         )}

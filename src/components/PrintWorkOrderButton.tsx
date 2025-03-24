@@ -49,14 +49,21 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
 }) => {
   const { t } = useLanguageStore();
   
+  // Ensure the invoice has a valid ID for display and tracking
+  const invoiceData = {
+    ...invoice,
+    invoiceId: invoice.invoiceId || `INV${Date.now().toString().slice(-6)}`,
+    workOrderId: invoice.workOrderId || invoice.invoiceId || `WO${Date.now().toString().slice(-6)}`
+  };
+  
   return (
     <CustomPrintWorkOrderButton
-      workOrder={invoice}
-      invoice={invoice}
+      workOrder={invoiceData}
+      invoice={invoiceData}
       patient={{
-        name: patientName,
-        phone: patientPhone,
-        rx: rx
+        name: patientName || invoiceData.patientName,
+        phone: patientPhone || invoiceData.patientPhone,
+        rx: rx || invoiceData.rx
       }}
       className={className}
       variant={variant}
