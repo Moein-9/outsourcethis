@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { PrinterIcon, Newspaper, FileText } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { PrintService } from "@/utils/PrintService";
 import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
 
@@ -85,7 +86,9 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
         setTimeout(() => {
           setPrintingInProgress(false);
           setIsDialogOpen(false);
-          toast.success(t("printingCompleted"));
+          toast({
+            title: t("printingCompleted")
+          });
         }, 1000);
       } else {
         const a4Content = `
@@ -97,14 +100,14 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             </div>
             
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
-              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("patientInformation")}</h2>
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("patientInformation")}${isRtl ? ' (Patient Information)' : ''}</h2>
               <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
               <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
             </div>
             
             ${frame ? `
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
-              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("frameDetails")}</h2>
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("frameDetails")}${isRtl ? ' (Frame Details)' : ''}</h2>
               <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
               <p><strong>${t("model")}:</strong> ${frame.model}</p>
               <p><strong>${t("color")}:</strong> ${frame.color}</p>
@@ -114,8 +117,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             
             ${rx ? `
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
-              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("prescriptionDetails")}</h2>
-              <table style="width: 100%; border-collapse: collapse;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("prescriptionDetails")}${isRtl ? ' (Prescription Details)' : ''}</h2>
+              <table style="width: 100%; border-collapse: collapse; direction: ltr;">
                 <thead>
                   <tr>
                     <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("eye")}</th>
@@ -128,7 +131,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
                 </thead>
                 <tbody>
                   <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("rightEye")} (OD)</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">OD ${isRtl ? '(Right)' : 'R'}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.sphereOD || "-"}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.cylOD || "-"}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.axisOD || "-"}</td>
@@ -136,7 +139,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.pdRight || "-"}</td>
                   </tr>
                   <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("leftEye")} (OS)</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">OS ${isRtl ? '(Left)' : 'L'}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.sphereOS || "-"}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.cylOS || "-"}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.axisOS || "-"}</td>
@@ -150,7 +153,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             
             ${lensType ? `
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
-              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("lensDetails")}</h2>
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("lensDetails")}${isRtl ? ' (Lens Details)' : ''}</h2>
               <p><strong>${t("type")}:</strong> ${lensType}</p>
               <p><strong>${t("price")}:</strong> ${invoice.lensPrice.toFixed(3)} ${t("currency")}</p>
               ${coating ? `<p><strong>${t("coating")}:</strong> ${coating}</p>` : ''}
@@ -159,7 +162,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             ` : ''}
             
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
-              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("paymentInformation")}</h2>
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("paymentInformation")}${isRtl ? ' (Payment Information)' : ''}</h2>
               <p><strong>${t("subtotal")}:</strong> ${(invoice.total + invoice.discount).toFixed(3)} ${t("currency")}</p>
               ${invoice.discount > 0 ? `<p><strong>${t("discount")}:</strong> -${invoice.discount.toFixed(3)} ${t("currency")}</p>` : ''}
               <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} ${t("currency")}</p>
@@ -169,12 +172,12 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             
             <div style="margin-top: 20mm; display: flex; justify-content: space-between;">
               <div>
-                <p style="font-weight: bold; margin-bottom: 30px;">${t("technicianSignature")}</p>
+                <p style="font-weight: bold; margin-bottom: 30px;">${t("technicianSignature")}${isRtl ? ' (Technician Signature)' : ''}</p>
                 <div style="border-bottom: 1px solid #000; width: 150px;"></div>
                 <p style="margin-top: 5px; font-size: 12px;">${t("date")}: ___/___/_____</p>
               </div>
               <div>
-                <p style="font-weight: bold; margin-bottom: 30px;">${t("qualityConfirmation")}</p>
+                <p style="font-weight: bold; margin-bottom: 30px;">${t("qualityConfirmation")}${isRtl ? ' (Quality Confirmation)' : ''}</p>
                 <div style="border-bottom: 1px solid #000; width: 150px;"></div>
                 <p style="margin-top: 5px; font-size: 12px;">${t("date")}: ___/___/_____</p>
               </div>
@@ -186,13 +189,18 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
         PrintService.printHtml(htmlContent, 'a4', () => {
           setPrintingInProgress(false);
           setIsDialogOpen(false);
-          toast.success(t("printingCompleted"));
+          toast({
+            title: t("printingCompleted")
+          });
         });
       }
     } catch (error) {
       console.error('Printing error:', error);
       setPrintingInProgress(false);
-      toast.error(t("printingFailed"));
+      toast({
+        title: t("printingFailed"),
+        variant: "destructive"
+      });
     }
   };
   
