@@ -3,6 +3,7 @@ import React from "react";
 import { PrintService } from "@/utils/PrintService";
 import { useLanguageStore } from "@/store/languageStore";
 import { WorkOrderPrint } from "./WorkOrderPrint";
+import ReactDOM from "react-dom";
 
 interface PrintWorkOrderReceiptOptions {
   invoice: any;
@@ -60,7 +61,9 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
     );
   };
   
-  PrintService.renderToDom(workOrderElement, <Root />);
+  // Instead of using the non-existent PrintService.renderToDom method,
+  // use ReactDOM.render directly
+  ReactDOM.render(<Root />, workOrderElement);
   
   setTimeout(() => {
     window.print();
@@ -68,6 +71,8 @@ export const printWorkOrderReceipt = (options: PrintWorkOrderReceiptOptions) => 
     // Remove the element after printing
     setTimeout(() => {
       if (document.body.contains(workOrderElement)) {
+        // Clean up React components before removing element
+        ReactDOM.unmountComponentAtNode(workOrderElement);
         document.body.removeChild(workOrderElement);
       }
     }, 1000);
