@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, CSSProperties } from 'react';
 import { toast } from '@/hooks/use-toast';
 import QRCodeReact from 'qrcode.react';
 import QRCode from 'qrcode';
@@ -167,7 +168,7 @@ export const FrameLabelTemplate: React.FC = () => {
   };
   
   // CSS styles for the preview
-  const previewStyles = {
+  const previewStyles: Record<string, React.CSSProperties> = {
     container: {
       width: '200px',
       height: '32px',
@@ -181,7 +182,7 @@ export const FrameLabelTemplate: React.FC = () => {
       height: '100%',
       padding: '2px',
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'column' as 'column',
       justifyContent: 'space-between',
       alignItems: 'center',
       borderRight: '1px solid #eee'
@@ -191,7 +192,7 @@ export const FrameLabelTemplate: React.FC = () => {
       height: '100%',
       padding: '2px 4px',
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'column' as 'column',
       justifyContent: 'space-between'
     },
     storeLogo: {
@@ -215,9 +216,9 @@ export const FrameLabelTemplate: React.FC = () => {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       maxHeight: '16px',
-      display: '-webkit-box',
+      display: '-webkit-box' as any,
       WebkitLineClamp: 2,
-      WebkitBoxOrient: 'vertical'
+      WebkitBoxOrient: 'vertical' as any
     },
     detailInfo: {
       fontSize: '6px',
