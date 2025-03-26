@@ -1,6 +1,5 @@
-
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface LanguageState {
   language: 'en' | 'ar';
@@ -201,7 +200,7 @@ const translations = {
     save: 'حفظ',
     viewPrescription: 'عرض الوصفة',
     close: 'إغلاق',
-    contactLensPrescription: 'وصفة العدسات اللاصقة',
+    contactLensPrescription: 'وصفة ال��دسات اللاصقة',
     noContactLensRx: 'لا توجد وصفة عدسات لاصقة متاحة لهذا المريض.',
     axis: 'محور',
     sphere: 'كرة',
@@ -243,7 +242,9 @@ const useLanguageStore = create<LanguageState>()(
     }),
     {
       name: 'language-storage',
-      storage: typeof window !== 'undefined' ? window.localStorage : null,
+      storage: typeof window !== 'undefined' 
+        ? createJSONStorage(() => localStorage)
+        : undefined,
     }
   )
 );
