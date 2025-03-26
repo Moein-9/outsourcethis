@@ -152,7 +152,7 @@ export const FrameInventory: React.FC = () => {
       qty
     });
     
-    toast.success(t("frameAddedSuccessfully", { brand: frameBrand, model: frameModel }));
+    toast.success(t("frameAddedSuccessfully"));
     
     setFrameBrand("");
     setFrameModel("");
