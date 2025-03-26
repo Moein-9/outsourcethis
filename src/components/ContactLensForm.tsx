@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Eye, AlertTriangle } from "lucide-react";
@@ -27,6 +27,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   showMissingRxWarning = false
 }) => {
   const { language, t } = useLanguageStore();
+  const [validationErrors, setValidationErrors] = useState({
+    rightEye: { cylinder: false, axis: false },
+    leftEye: { cylinder: false, axis: false },
+  });
 
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
     const updatedRx = {
@@ -37,6 +41,14 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       }
     };
     onChange(updatedRx);
+    
+    // Validate CYL and AXIS relationship
+    if (field === 'cylinder' || field === 'axis') {
+      validateCylAxis('rightEye', 
+        field === 'cylinder' ? value : rxData.rightEye.cylinder,
+        field === 'axis' ? value : rxData.rightEye.axis
+      );
+    }
   };
 
   const handleLeftEyeChange = (field: keyof ContactLensRx["leftEye"], value: string) => {
@@ -48,7 +60,34 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       }
     };
     onChange(updatedRx);
+    
+    // Validate CYL and AXIS relationship
+    if (field === 'cylinder' || field === 'axis') {
+      validateCylAxis('leftEye', 
+        field === 'cylinder' ? value : rxData.leftEye.cylinder,
+        field === 'axis' ? value : rxData.leftEye.axis
+      );
+    }
   };
+
+  const validateCylAxis = (eye: 'rightEye' | 'leftEye', cyl: string, axis: string) => {
+    const hasCyl = cyl !== "-";
+    const hasAxis = axis !== "-";
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [eye]: {
+        cylinder: hasCyl && !hasAxis, // Error if CYL but no AXIS
+        axis: !hasCyl && hasAxis, // Error if AXIS but no CYL (unlikely but for completeness)
+      }
+    }));
+  };
+
+  // Validate both eyes on mount and when rxData changes
+  React.useEffect(() => {
+    validateCylAxis('rightEye', rxData.rightEye.cylinder, rxData.rightEye.axis);
+    validateCylAxis('leftEye', rxData.leftEye.cylinder, rxData.leftEye.axis);
+  }, [rxData]);
 
   // Generate sphere options from +4.00 to -9.00
   const generateSphereOptions = () => {
@@ -151,18 +190,31 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   {generateSphereOptions()}
                 </select>
               </td>
-              <td className="border border-blue-100 p-2">
+              <td className={`border border-blue-100 p-2 ${validationErrors.rightEye.cylinder ? 'bg-red-50' : ''}`}>
                 <select 
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md bg-white text-sm ${
+                    validationErrors.rightEye.cylinder 
+                      ? 'border-2 border-red-400' 
+                      : 'border border-blue-200'
+                  }`}
                   value={rxData.rightEye.cylinder}
                   onChange={(e) => handleRightEyeChange("cylinder", e.target.value)}
                 >
                   {generateCylinderOptions()}
                 </select>
+                {validationErrors.rightEye.cylinder && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {t("axisRequired")}
+                  </p>
+                )}
               </td>
-              <td className="border border-blue-100 p-2">
+              <td className={`border border-blue-100 p-2 ${validationErrors.rightEye.axis ? 'bg-red-50' : ''}`}>
                 <select 
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md bg-white text-sm ${
+                    validationErrors.rightEye.cylinder 
+                      ? 'border-2 border-red-400 animate-pulse' 
+                      : 'border border-blue-200'
+                  }`}
                   value={rxData.rightEye.axis}
                   onChange={(e) => handleRightEyeChange("axis", e.target.value)}
                 >
@@ -215,18 +267,31 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   {generateSphereOptions()}
                 </select>
               </td>
-              <td className="border border-rose-100 p-2">
+              <td className={`border border-rose-100 p-2 ${validationErrors.leftEye.cylinder ? 'bg-red-50' : ''}`}>
                 <select 
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md bg-white text-sm ${
+                    validationErrors.leftEye.cylinder 
+                      ? 'border-2 border-red-400' 
+                      : 'border border-rose-200'
+                  }`}
                   value={rxData.leftEye.cylinder}
                   onChange={(e) => handleLeftEyeChange("cylinder", e.target.value)}
                 >
                   {generateCylinderOptions()}
                 </select>
+                {validationErrors.leftEye.cylinder && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {t("axisRequired")}
+                  </p>
+                )}
               </td>
-              <td className="border border-rose-100 p-2">
+              <td className={`border border-rose-100 p-2 ${validationErrors.leftEye.axis ? 'bg-red-50' : ''}`}>
                 <select 
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md bg-white text-sm ${
+                    validationErrors.leftEye.cylinder 
+                      ? 'border-2 border-red-400 animate-pulse' 
+                      : 'border border-rose-200'
+                  }`}
                   value={rxData.leftEye.axis}
                   onChange={(e) => handleLeftEyeChange("axis", e.target.value)}
                 >

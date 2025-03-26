@@ -7,12 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, MessageSquare } from "lucide-react";
+import { CalendarIcon, MessageSquare, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensForm } from "@/components/ContactLensForm";
 import { useLanguageStore } from "@/store/languageStore";
 import { Textarea } from "@/components/ui/textarea";
+import { PrescriptionInput, generateSphereOptions, generateCylinderOptions, generateAxisOptions, generateAddOptions, generatePDOptions } from "@/components/PrescriptionInput";
 
 export const CreateClient: React.FC = () => {
   const addPatient = usePatientStore((state) => state.addPatient);
@@ -26,7 +27,7 @@ export const CreateClient: React.FC = () => {
   const [dobMonth, setDobMonth] = useState("");
   const [dobYear, setDobYear] = useState("");
   const [rxDate, setRxDate] = useState<Date | undefined>(new Date());
-  const [notes, setNotes] = useState(""); // New state for notes
+  const [notes, setNotes] = useState(""); // State for notes
   
   // Rx states
   const [sphOD, setSphOD] = useState("");
@@ -40,6 +41,12 @@ export const CreateClient: React.FC = () => {
   const [pdRight, setPdRight] = useState("");
   const [pdLeft, setPdLeft] = useState("");
   
+  // Validation states
+  const [validationErrors, setValidationErrors] = useState({
+    rightEye: { cylinder: false, axis: false },
+    leftEye: { cylinder: false, axis: false },
+  });
+  
   // Contact lens RX state
   const [contactLensRx, setContactLensRx] = useState<ContactLensRx>({
     rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" },
@@ -50,68 +57,25 @@ export const CreateClient: React.FC = () => {
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
-  // Generate options for select elements
-  const generateSphOptions = () => {
-    const options = [];
-    for (let i = 10; i >= -10; i -= 0.25) {
-      const formatted = i >= 0 ? `+${i.toFixed(2)}` : i.toFixed(2);
-      options.push(
-        <option key={`sph-${i}`} value={formatted}>
-          {formatted}
-        </option>
-      );
-    }
-    return options;
-  };
-  
-  const generateCylOptions = () => {
-    const options = [];
-    for (let i = 0; i >= -6; i -= 0.25) {
-      const formatted = i.toFixed(2);
-      options.push(
-        <option key={`cyl-${i}`} value={formatted}>
-          {formatted}
-        </option>
-      );
-    }
-    return options;
-  };
-  
-  const generateAxisOptions = () => {
-    const options = [];
-    for (let i = 0; i <= 180; i += 1) {
-      options.push(
-        <option key={`axis-${i}`} value={i}>
-          {i}
-        </option>
-      );
-    }
-    return options;
-  };
-  
-  const generateAddOptions = () => {
-    const options = [];
-    for (let i = 0; i <= 3; i += 0.25) {
-      const formatted = i === 0 ? "0.00" : `+${i.toFixed(2)}`;
-      options.push(
-        <option key={`add-${i}`} value={formatted}>
-          {formatted}
-        </option>
-      );
-    }
-    return options;
-  };
-  
-  const generatePdOptions = () => {
-    const options = [];
-    for (let i = 40; i <= 80; i += 1) {
-      options.push(
-        <option key={`pd-${i}`} value={i}>
-          {i}
-        </option>
-      );
-    }
-    return options;
+  // Validate CYL and AXIS relationship
+  const validateCylAxis = () => {
+    const rightHasCyl = cylOD !== "" && cylOD !== "0.00";
+    const rightHasAxis = axisOD !== "";
+    const leftHasCyl = cylOS !== "" && cylOS !== "0.00";
+    const leftHasAxis = axisOS !== "";
+    
+    setValidationErrors({
+      rightEye: {
+        cylinder: rightHasCyl && !rightHasAxis, // Error if CYL but no AXIS
+        axis: !rightHasCyl && rightHasAxis, // Error if AXIS but no CYL (unlikely but for completeness)
+      },
+      leftEye: {
+        cylinder: leftHasCyl && !leftHasAxis, // Error if CYL but no AXIS
+        axis: !leftHasCyl && leftHasAxis, // Error if AXIS but no CYL (unlikely but for completeness)
+      }
+    });
+    
+    return !(rightHasCyl && !rightHasAxis) && !(leftHasCyl && !leftHasAxis);
   };
   
   // Generate day options
@@ -175,6 +139,18 @@ export const CreateClient: React.FC = () => {
         variant: "destructive"
       });
       return;
+    }
+    
+    // Validate prescription if in glasses tab
+    if (activeTab === "glasses") {
+      if (!validateCylAxis()) {
+        toast({
+          title: t("error"),
+          description: t("axisRequired"),
+          variant: "destructive"
+        });
+        return;
+      }
     }
     
     // Format DOB if available
@@ -264,6 +240,19 @@ export const CreateClient: React.FC = () => {
       leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" }
     });
   };
+  
+  // Effect to validate prescription changes
+  useEffect(() => {
+    if (activeTab === "glasses") {
+      validateCylAxis();
+    }
+  }, [cylOD, axisOD, cylOS, axisOS, activeTab]);
+
+  const sphereOptions = generateSphereOptions();
+  const cylinderOptions = generateCylinderOptions();
+  const axisOptions = generateAxisOptions();
+  const addOptions = generateAddOptions();
+  const pdOptions = generatePDOptions();
   
   return (
     <div className={`py-4 ${dirClass}`}>
@@ -365,7 +354,7 @@ export const CreateClient: React.FC = () => {
                 </div>
               </div>
               
-              {/* New Notes Field */}
+              {/* Notes Field */}
               <div className="space-y-2">
                 <Label 
                   htmlFor="notes" 
@@ -435,107 +424,103 @@ export const CreateClient: React.FC = () => {
                       <tr>
                         <th className="text-center border border-border bg-muted p-2">{t("rightEye")} (OD)</th>
                         <td className="border border-border p-1">
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                          <PrescriptionInput
+                            type="sphere"
                             value={sphOD}
-                            onChange={(e) => setSphOD(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generateSphOptions()}
-                          </select>
+                            onChange={setSphOD}
+                            options={sphereOptions}
+                          />
                         </td>
-                        <td className="border border-border p-1">
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                        <td className={`border border-border p-1 ${validationErrors.rightEye.cylinder ? 'bg-red-50' : ''}`}>
+                          <PrescriptionInput
+                            type="cylinder"
                             value={cylOD}
-                            onChange={(e) => setCylOD(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generateCylOptions()}
-                          </select>
+                            onChange={setCylOD}
+                            options={cylinderOptions}
+                            hasError={validationErrors.rightEye.cylinder}
+                          />
+                          {validationErrors.rightEye.cylinder && (
+                            <div className="flex items-center text-xs text-red-600 mt-1">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              {t("axisRequired")}
+                            </div>
+                          )}
                         </td>
-                        <td className="border border-border p-1">
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                        <td className={`border border-border p-1 ${validationErrors.rightEye.cylinder ? 'bg-red-50' : ''}`}>
+                          <PrescriptionInput
+                            type="axis"
                             value={axisOD}
-                            onChange={(e) => setAxisOD(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generateAxisOptions()}
-                          </select>
+                            onChange={setAxisOD}
+                            options={axisOptions}
+                            hasError={validationErrors.rightEye.cylinder}
+                          />
                         </td>
                         <td className="border border-border p-1">
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                          <PrescriptionInput
+                            type="add"
                             value={addOD}
-                            onChange={(e) => setAddOD(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generateAddOptions()}
-                          </select>
+                            onChange={setAddOD}
+                            options={addOptions}
+                          />
                         </td>
                         <td className="border border-border p-1">
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                          <PrescriptionInput
+                            type="pd"
                             value={pdRight}
-                            onChange={(e) => setPdRight(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generatePdOptions()}
-                          </select>
+                            onChange={setPdRight}
+                            options={pdOptions}
+                          />
                         </td>
                       </tr>
                       <tr>
                         <th className="text-center border border-border bg-muted p-2">{t("leftEye")} (OS)</th>
                         <td className="border border-border p-1">
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                          <PrescriptionInput
+                            type="sphere"
                             value={sphOS}
-                            onChange={(e) => setSphOS(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generateSphOptions()}
-                          </select>
+                            onChange={setSphOS}
+                            options={sphereOptions}
+                          />
                         </td>
-                        <td className="border border-border p-1">
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                        <td className={`border border-border p-1 ${validationErrors.leftEye.cylinder ? 'bg-red-50' : ''}`}>
+                          <PrescriptionInput
+                            type="cylinder"
                             value={cylOS}
-                            onChange={(e) => setCylOS(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generateCylOptions()}
-                          </select>
+                            onChange={setCylOS}
+                            options={cylinderOptions}
+                            hasError={validationErrors.leftEye.cylinder}
+                          />
+                          {validationErrors.leftEye.cylinder && (
+                            <div className="flex items-center text-xs text-red-600 mt-1">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              {t("axisRequired")}
+                            </div>
+                          )}
                         </td>
-                        <td className="border border-border p-1">
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                        <td className={`border border-border p-1 ${validationErrors.leftEye.cylinder ? 'bg-red-50' : ''}`}>
+                          <PrescriptionInput
+                            type="axis"
                             value={axisOS}
-                            onChange={(e) => setAxisOS(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generateAxisOptions()}
-                          </select>
+                            onChange={setAxisOS}
+                            options={axisOptions}
+                            hasError={validationErrors.leftEye.cylinder}
+                          />
                         </td>
                         <td className="border border-border p-1">
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                          <PrescriptionInput
+                            type="add"
                             value={addOS}
-                            onChange={(e) => setAddOS(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generateAddOptions()}
-                          </select>
+                            onChange={setAddOS}
+                            options={addOptions}
+                          />
                         </td>
                         <td className="border border-border p-1">
-                          <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                          <PrescriptionInput
+                            type="pd"
                             value={pdLeft}
-                            onChange={(e) => setPdLeft(e.target.value)}
-                          >
-                            <option value="" disabled>{t("choose")}</option>
-                            {generatePdOptions()}
-                          </select>
+                            onChange={setPdLeft}
+                            options={pdOptions}
+                          />
                         </td>
                       </tr>
                     </tbody>
