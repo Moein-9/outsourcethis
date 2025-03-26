@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -123,13 +122,13 @@ const translations: Record<string, Record<string, string>> = {
     invoiceSuccessMessage: 'Your invoice has been successfully created and is ready for printing',
     workOrderNumber: 'Work Order Number',
     clientName: 'Client Name',
-    clientPhone: 'Client Phone', // Updated for better English
+    clientPhone: 'Client Phone',
     date: 'Date',
     totalAmount: 'Total Amount',
-    totalInvoice: 'Total Invoice', // Updated for better English
+    totalInvoice: 'Total Invoice',
     paymentStatus: 'Payment Status',
     paid: 'Paid',
-    paidInFull: 'Paid in Full', // Updated for better English
+    paidInFull: 'Paid in Full',
     partiallyPaid: 'Partially Paid',
     nextSteps: 'Next Steps',
     printWorkOrder: 'Print Work Order',
@@ -358,7 +357,10 @@ const translations: Record<string, Record<string, string>> = {
     // Newly added translations 
     startBySelectingClient: "Start by selecting a client in Step 1",
     goToClientSection: "Go to Client Section",
-    anonymous: "Anonymous"
+    anonymous: "Anonymous",
+    
+    // Add the new notesPlaceholder translation
+    notesPlaceholder: "You can add any information about the customer here..."
   },
   ar: {
     // General UI
@@ -475,13 +477,13 @@ const translations: Record<string, Record<string, string>> = {
     invoiceSuccessMessage: 'تم إنشاء الفاتورة بنجاح وهي جاهزة للطباعة',
     workOrderNumber: 'رقم أمر العمل',
     clientName: 'اسم العميل',
-    clientPhone: 'هاتف العميل', // Updated for better Arabic
+    clientPhone: 'هاتف العميل',
     date: 'التاريخ',
     totalAmount: 'المبلغ الإجمالي',
-    totalInvoice: 'إجمالي الفاتورة', // Updated for better Arabic
+    totalInvoice: 'إجمالي الفاتورة',
     paymentStatus: 'حالة الدفع',
     paid: 'مدفوع',
-    paidInFull: 'مدفوع بالكامل', // Updated for better Arabic
+    paidInFull: 'مدفوع بالكامل',
     partiallyPaid: 'مدفوع جزئياً',
     nextSteps: 'الخطوات التالية',
     printWorkOrder: 'طباعة أمر العمل',
@@ -708,7 +710,10 @@ const translations: Record<string, Record<string, string>> = {
     // Newly added translations
     startBySelectingClient: "ابدأ باختيار عميل في الخطوة الأولى",
     goToClientSection: "اذهب إلى قسم العميل",
-    anonymous: "مجهول"
+    anonymous: "مجهول",
+    
+    // Add the new notesPlaceholder translation in Arabic
+    notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا..."
   }
 };
 
