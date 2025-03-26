@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -91,7 +92,6 @@ const translations = {
     viewPrescription: 'View Prescription',
     close: 'Close',
     contactLensPrescription: 'Contact Lens Prescription',
-    contactLensesTab: 'Contact Lenses',
     noContactLensRx: 'No contact lens prescription available for this patient.',
     axis: 'Axis',
     sphere: 'Sphere',
@@ -117,6 +117,7 @@ const translations = {
     cylAxisError: "If CYL is entered, AXIS must also be specified.",
     rightPD: "Right PD",
     leftPD: "Left PD",
+    prescription: "Prescription"
   },
   ar: {
     name: 'الاسم',
@@ -201,7 +202,6 @@ const translations = {
     viewPrescription: 'عرض الوصفة',
     close: 'إغلاق',
     contactLensPrescription: 'وصفة العدسات اللاصقة',
-    contactLensesTab: 'عدسات لاصقة',
     noContactLensRx: 'لا توجد وصفة عدسات لاصقة متاحة لهذا المريض.',
     axis: 'محور',
     sphere: 'كرة',
@@ -227,6 +227,7 @@ const translations = {
     cylAxisError: "إذا تم إدخال قيمة الأسطوانة، يجب أيضًا تحديد المحور.",
     rightPD: "PD الأيمن",
     leftPD: "PD الأيسر",
+    prescription: "وصفة طبية"
   }
 };
 
@@ -242,7 +243,7 @@ const useLanguageStore = create<LanguageState>()(
     }),
     {
       name: 'language-storage',
-      storage: typeof window !== 'undefined' ? localStorage : undefined,
+      storage: typeof window !== 'undefined' ? window.localStorage : null,
     }
   )
 );
