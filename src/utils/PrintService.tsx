@@ -358,6 +358,7 @@ export const PrintService = {
           
           .detail-info {
             font-size: 7pt !important;
+            font-weight: bold !important;
             margin-bottom: 0.25mm !important;
             line-height: 1.1 !important;
             overflow: hidden !important;

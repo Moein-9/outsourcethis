@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { toast } from '@/hooks/use-toast';
 import QRCodeReact from 'qrcode.react';
@@ -121,6 +122,11 @@ export const usePrintLabel = () => {
   
   // Helper function to create frame label HTML content with pre-generated QR code
   const createFrameLabelContent = (frame: FrameItem, qrCodeDataURL: string) => {
+    // Format price to remove decimal places if they're all zeros
+    const formattedPrice = Number.isInteger(frame.price) 
+      ? Math.floor(frame.price)
+      : frame.price.toFixed(3);
+    
     return `
       <div class="label-container">
         <div class="left-section">
@@ -135,7 +141,7 @@ export const usePrintLabel = () => {
           <div class="brand-name">${frame.brand} ${frame.model}</div>
           <div class="detail-info">Color: ${frame.color || '-'}</div>
           <div class="detail-info">Size: ${frame.size || '-'}</div>
-          <div class="price">${frame.price.toFixed(3)} KWD</div>
+          <div class="price">${formattedPrice} KWD</div>
         </div>
       </div>
     `;
@@ -242,6 +248,11 @@ export const FrameLabelTemplate: React.FC = () => {
   };
   
   const PreviewLabel = ({ frame }: { frame: FrameItem }) => {
+    // Format price to remove decimal places if they're all zeros
+    const formattedPrice = Number.isInteger(frame.price) 
+      ? Math.floor(frame.price)
+      : frame.price.toFixed(3);
+      
     return (
       <div style={previewStyles.container}>
         <div style={previewStyles.leftSection}>
@@ -262,7 +273,7 @@ export const FrameLabelTemplate: React.FC = () => {
           <div style={previewStyles.brandName}>{frame.brand} {frame.model}</div>
           <div style={previewStyles.detailInfo}>Color: {frame.color || '-'}</div>
           <div style={previewStyles.detailInfo}>Size: {frame.size || '-'}</div>
-          <div style={previewStyles.price}>{frame.price.toFixed(3)} KWD</div>
+          <div style={previewStyles.price}>{formattedPrice} KWD</div>
         </div>
       </div>
     );
