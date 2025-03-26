@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
@@ -152,7 +153,7 @@ export const FrameInventory: React.FC = () => {
       qty
     });
     
-    toast.success(t("frameAddedSuccessfully"));
+    toast.success(t("frameAddedSuccessfully", { brand: frameBrand, model: frameModel }));
     
     setFrameBrand("");
     setFrameModel("");
