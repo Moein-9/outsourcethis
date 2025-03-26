@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import QRCode from 'qrcode.react';
@@ -15,8 +14,39 @@ export const usePrintLabel = () => {
   const { frames } = useInventoryStore();
   const { t } = useLanguageStore();
   
+  // Generate QR code as data URL
+  const generateQRCodeDataURL = (text: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 200;
+      canvas.height = 200;
+      
+      try {
+        QRCode.toCanvas(canvas, text, {
+          width: 200,
+          height: 200,
+          margin: 0,
+          color: {
+            dark: '#000000',
+            light: '#ffffff',
+          },
+          level: 'H', // High error correction capability
+        }, (error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          const dataURL = canvas.toDataURL('image/png');
+          resolve(dataURL);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+  
   // Function to print a single frame label by ID
-  const printSingleLabel = (frameId: string) => {
+  const printSingleLabel = async (frameId: string) => {
     const frame = frames.find(f => f.frameId === frameId);
     
     if (!frame) {
@@ -28,19 +58,29 @@ export const usePrintLabel = () => {
       return;
     }
     
-    const labelContent = createFrameLabelContent(frame);
-    const htmlDocument = PrintService.prepareLabelDocument(labelContent);
-    
-    PrintService.printHtml(htmlDocument, 'label', () => {
-      toast({
-        title: t('success'),
-        description: t('labelPrintedSuccessfully')
+    try {
+      const qrCodeDataURL = await generateQRCodeDataURL(frame.frameId);
+      const labelContent = createFrameLabelContent(frame, qrCodeDataURL);
+      const htmlDocument = PrintService.prepareLabelDocument(labelContent);
+      
+      PrintService.printHtml(htmlDocument, 'label', () => {
+        toast({
+          title: t('success'),
+          description: t('labelPrintedSuccessfully')
+        });
       });
-    });
+    } catch (error) {
+      toast({
+        title: t('error'),
+        description: t('errorGeneratingQRCode'),
+        variant: "destructive"
+      });
+      console.error('QR code generation error:', error);
+    }
   };
   
   // Function to print multiple frame labels
-  const printMultipleLabels = (frameIds: string[]) => {
+  const printMultipleLabels = async (frameIds: string[]) => {
     if (frameIds.length === 0) {
       toast({
         title: t('error'),
@@ -61,26 +101,35 @@ export const usePrintLabel = () => {
       return;
     }
     
-    let allLabelsContent = '';
-    selectedFrames.forEach(frame => {
-      allLabelsContent += createFrameLabelContent(frame);
-    });
-    
-    const htmlDocument = PrintService.prepareLabelDocument(allLabelsContent);
-    
-    PrintService.printHtml(htmlDocument, 'label', () => {
-      toast({
-        title: t('success'),
-        description: t('labelsPrintedSuccessfully')
+    try {
+      let allLabelsContent = '';
+      
+      // Process frames sequentially to ensure all QR codes are generated properly
+      for (const frame of selectedFrames) {
+        const qrCodeDataURL = await generateQRCodeDataURL(frame.frameId);
+        allLabelsContent += createFrameLabelContent(frame, qrCodeDataURL);
+      }
+      
+      const htmlDocument = PrintService.prepareLabelDocument(allLabelsContent);
+      
+      PrintService.printHtml(htmlDocument, 'label', () => {
+        toast({
+          title: t('success'),
+          description: t('labelsPrintedSuccessfully')
+        });
       });
-    });
+    } catch (error) {
+      toast({
+        title: t('error'),
+        description: t('errorGeneratingQRCodes'),
+        variant: "destructive"
+      });
+      console.error('QR code generation error:', error);
+    }
   };
   
-  // Helper function to create frame label HTML content
-  const createFrameLabelContent = (frame: FrameItem) => {
-    // QR value is the frame ID
-    const qrValue = frame.frameId;
-    
+  // Helper function to create frame label HTML content with pre-generated QR code
+  const createFrameLabelContent = (frame: FrameItem, qrCodeDataURL: string) => {
     return `
       <div class="label-container">
         <div class="left-section">
@@ -88,20 +137,7 @@ export const usePrintLabel = () => {
             <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" />
           </div>
           <div class="qr-code">
-            <canvas id="qr-code-${frame.frameId}" class="qr-canvas"></canvas>
-            <script>
-              (function() {
-                var canvas = document.getElementById("qr-code-${frame.frameId}");
-                var qr = new QRCode(canvas, {
-                  text: "${qrValue}",
-                  width: 32,
-                  height: 32,
-                  colorDark: "#000000",
-                  colorLight: "#ffffff",
-                  correctLevel: QRCode.CorrectLevel.H
-                });
-              })();
-            </script>
+            <img src="${qrCodeDataURL}" alt="QR Code" class="qr-image" />
           </div>
         </div>
         <div class="right-section">
@@ -146,7 +182,6 @@ export const FrameLabelTemplate: React.FC = () => {
     printMultipleLabels(selectedFrames);
   };
   
-  // Create a frame preview for demonstration
   const PreviewLabel = ({ frame }: { frame: FrameItem }) => {
     return (
       <div className="label-container-preview">
@@ -157,9 +192,10 @@ export const FrameLabelTemplate: React.FC = () => {
           <div className="qr-code-preview">
             <QRCode 
               value={frame.frameId} 
-              size={36} 
+              size={100} 
               level="H"
               includeMargin={false}
+              style={{ width: "36px", height: "36px" }}
             />
           </div>
         </div>

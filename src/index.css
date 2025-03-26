@@ -219,14 +219,11 @@
     margin-bottom: 1mm !important;
   }
   
-  .qr-code img, .qr-code canvas, .qr-code svg {
+  .qr-code img.qr-image {
     height: 9mm !important;
     width: 9mm !important;
-  }
-  
-  .qr-canvas {
-    height: 9mm !important;
-    width: 9mm !important;
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: crisp-edges !important;
   }
 }
 
