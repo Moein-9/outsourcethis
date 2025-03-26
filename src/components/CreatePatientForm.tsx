@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { PatientNotes } from '@/components/PatientNotes';
 
 // Schema for patient creation
 const patientSchema = z.object({
@@ -27,6 +28,8 @@ export const CreatePatientForm: React.FC = () => {
   const { addPatient } = usePatientStore();
   const { language, t } = useLanguageStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Create a temporary patient ID for notes
+  const [tempPatientId, setTempPatientId] = useState(`temp-${Date.now()}`);
 
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientSchema),
@@ -67,8 +70,9 @@ export const CreatePatientForm: React.FC = () => {
       
       toast.success(language === 'ar' ? 'تمت إضافة المريض بنجاح' : 'Patient added successfully');
       
-      // Reset form
+      // Reset form and generate a new temporary patient ID
       form.reset();
+      setTempPatientId(`temp-${Date.now()}`);
     } catch (error) {
       console.error('Error adding patient:', error);
       toast.error(language === 'ar' ? 'حدث خطأ أثناء إضافة المريض' : 'Error adding patient');
@@ -78,108 +82,113 @@ export const CreatePatientForm: React.FC = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{language === 'ar' ? 'إضافة مريض جديد' : 'Add New Patient'}</CardTitle>
-        <CardDescription>
-          {language === 'ar' 
-            ? 'أدخل بيانات المريض الأساسية. يمكنك إضافة الوصفة الطبية لاحقاً.'
-            : 'Enter the basic patient information. You can add prescription details later.'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('name')}</FormLabel>
-                  <FormControl>
-                    <Input placeholder={language === 'ar' ? 'اسم المريض' : 'Patient name'} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('phoneNumber')}</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder={language === 'ar' ? 'رقم الهاتف' : 'Phone number'} 
-                      type="tel" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="dob"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('dateOfBirth')}</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="date" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-1.5">
-                    <MessageSquare className="h-4 w-4" />
-                    {language === 'ar' ? 'ملاحظات' : 'Notes'}
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={language === 'ar' 
-                        ? 'أضف ملاحظات عن المريض هنا...' 
-                        : 'Add notes about the patient here...'
-                      }
-                      className="resize-none min-h-[120px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {language === 'ar' 
-                      ? 'هذه الملاحظات ستظهر في سجل المريض وملف العميل.' 
-                      : 'These notes will appear in the patient record and client profile.'}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isSubmitting}
-            >
-              {isSubmitting 
-                ? (language === 'ar' ? 'جاري الإضافة...' : 'Adding...') 
-                : (language === 'ar' ? 'إضافة المريض' : 'Add Patient')}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{language === 'ar' ? 'إضافة مريض جديد' : 'Add New Patient'}</CardTitle>
+          <CardDescription>
+            {language === 'ar' 
+              ? 'أدخل بيانات المريض الأساسية. يمكنك إضافة الوصفة الطبية لاحقاً.'
+              : 'Enter the basic patient information. You can add prescription details later.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('name')}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={language === 'ar' ? 'اسم المريض' : 'Patient name'} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('phoneNumber')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder={language === 'ar' ? 'رقم الهاتف' : 'Phone number'} 
+                        type="tel" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="dob"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('dateOfBirth')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="date" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-1.5">
+                      <MessageSquare className="h-4 w-4" />
+                      {language === 'ar' ? 'ملاحظات' : 'Notes'}
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder={language === 'ar' 
+                          ? 'أضف ملاحظات عن المريض هنا...' 
+                          : 'Add notes about the patient here...'
+                        }
+                        className="resize-none min-h-[120px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {language === 'ar' 
+                        ? 'هذه الملاحظات ستظهر في سجل المريض وملف العميل.' 
+                        : 'These notes will appear in the patient record and client profile.'}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting 
+                  ? (language === 'ar' ? 'جاري الإضافة...' : 'Adding...') 
+                  : (language === 'ar' ? 'إضافة المريض' : 'Add Patient')}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+      
+      {/* Patient Notes Component for interactive notes management */}
+      <PatientNotes patientId={tempPatientId} />
+    </div>
   );
 };
