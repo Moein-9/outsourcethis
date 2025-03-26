@@ -360,7 +360,27 @@ const translations: Record<string, Record<string, string>> = {
     anonymous: "Anonymous",
     
     // Add the new notesPlaceholder translation
-    notesPlaceholder: "You can add any information about the customer here..."
+    notesPlaceholder: "You can add any information about the customer here...",
+
+    // Lens Thickness
+    lensThicknesses: 'Lens Thicknesses',
+    thicknessName: 'Thickness Name',
+    thicknessNameExample: 'e.g., 1.67, Polycarbonate',
+    thicknessDescription: 'Brief description of this lens thickness',
+    addThickness: 'Add Thickness',
+    editThickness: 'Edit Thickness',
+    deleteThickness: 'Delete Thickness',
+    addNewThicknessTitle: 'Add New Lens Thickness',
+    addNewThicknessDescription: 'Add a new lens thickness option to your inventory',
+    updateThicknessDetails: 'Update the details of this lens thickness',
+    thicknessAddedSuccess: 'Lens thickness added successfully',
+    thicknessUpdatedSuccess: 'Lens thickness updated successfully',
+    thicknessDeletedSuccess: 'Lens thickness deleted successfully',
+    deleteThicknessConfirm: 'Are you sure you want to delete this lens thickness?',
+    noThicknesses: 'No lens thicknesses found. Add your first one!',
+    saveChanges: 'Save Changes',
+    thicknessDisabled: 'Thickness selection is currently disabled',
+    fillRequiredFields: 'Please fill in all required fields',
   },
   ar: {
     // General UI
@@ -713,7 +733,27 @@ const translations: Record<string, Record<string, string>> = {
     anonymous: "مجهول",
     
     // Add the new notesPlaceholder translation in Arabic
-    notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا..."
+    notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا...",
+
+    // Lens Thickness
+    lensThicknesses: 'سماكات العدسات',
+    thicknessName: 'اسم السماكة',
+    thicknessNameExample: 'مثال: 1.67، بوليكاربونيت',
+    thicknessDescription: 'وصف موجز لسماكة العدسة',
+    addThickness: 'إضافة سماكة',
+    editThickness: 'تعديل السماكة',
+    deleteThickness: 'حذف السماكة',
+    addNewThicknessTitle: 'إضافة سماكة عدسة جديدة',
+    addNewThicknessDescription: 'أضف خيار سماكة عدسة جديد إلى المخزون',
+    updateThicknessDetails: 'تحديث تفاصيل سماكة العدسة',
+    thicknessAddedSuccess: 'تمت إضافة سماكة العدسة بنجاح',
+    thicknessUpdatedSuccess: 'تم تحديث سماكة العدسة بنجاح',
+    thicknessDeletedSuccess: 'تم حذف سماكة العدسة بنجاح',
+    deleteThicknessConfirm: 'هل أنت متأكد من رغبتك في حذف سماكة العدسة هذه؟',
+    noThicknesses: 'لم يتم العثور على سماكات للعدسات. أضف أول واحدة!',
+    saveChanges: 'حفظ التغييرات',
+    thicknessDisabled: 'اختيار السماكة معطل حاليًا',
+    fillRequiredFields: 'يرجى ملء جميع الحقول المطلوبة',
   }
 };
 
