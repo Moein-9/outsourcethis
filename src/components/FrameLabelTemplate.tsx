@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import QRCode from 'qrcode.react';
 import { Button } from "@/components/ui/button";
@@ -88,10 +88,11 @@ export const usePrintLabel = () => {
             <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" />
           </div>
           <div class="qr-code">
-            <div id="qr-code-${frame.frameId}"></div>
+            <canvas id="qr-code-${frame.frameId}" class="qr-canvas"></canvas>
             <script>
               (function() {
-                var qrcode = new QRCode(document.getElementById("qr-code-${frame.frameId}"), {
+                var canvas = document.getElementById("qr-code-${frame.frameId}");
+                var qr = new QRCode(canvas, {
                   text: "${qrValue}",
                   width: 32,
                   height: 32,
@@ -145,6 +146,33 @@ export const FrameLabelTemplate: React.FC = () => {
     printMultipleLabels(selectedFrames);
   };
   
+  // Create a frame preview for demonstration
+  const PreviewLabel = ({ frame }: { frame: FrameItem }) => {
+    return (
+      <div className="label-container-preview">
+        <div className="left-section-preview">
+          <div className="store-logo-preview">
+            <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" />
+          </div>
+          <div className="qr-code-preview">
+            <QRCode 
+              value={frame.frameId} 
+              size={36} 
+              level="H"
+              includeMargin={false}
+            />
+          </div>
+        </div>
+        <div className="right-section-preview">
+          <div className="brand-name-preview">{frame.brand} {frame.model}</div>
+          <div className="detail-info-preview">Color: {frame.color || '-'}</div>
+          <div className="detail-info-preview">Size: {frame.size || '-'}</div>
+          <div className="price-preview">{frame.price.toFixed(3)} KWD</div>
+        </div>
+      </div>
+    );
+  };
+  
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center">
@@ -163,6 +191,14 @@ export const FrameLabelTemplate: React.FC = () => {
           </Button>
         </div>
       </div>
+      
+      {/* Preview of the first selected frame */}
+      {selectedFrames.length > 0 && frames.length > 0 && (
+        <div className="mb-4 p-3 border rounded-md">
+          <h3 className="text-sm font-medium mb-2">{t('labelPreview')}</h3>
+          <PreviewLabel frame={frames.find(f => f.frameId === selectedFrames[0]) || frames[0]} />
+        </div>
+      )}
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
         {frames.map(frame => (

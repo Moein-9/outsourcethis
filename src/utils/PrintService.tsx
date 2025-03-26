@@ -269,7 +269,7 @@ export const PrintService = {
         <title>${title}</title>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
-        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/lib/index.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
         <style>
           @page {
             size: 100mm 16mm !important;
@@ -314,6 +314,7 @@ export const PrintService = {
             flex-direction: column !important;
             justify-content: center !important;
             margin-right: 30mm !important; /* Account for 30mm unprintable tail */
+            overflow: hidden !important;
           }
           
           .left-section {
@@ -324,15 +325,17 @@ export const PrintService = {
             flex-direction: column !important;
             justify-content: space-between !important;
             align-items: center !important;
+            border-right: 0.5px solid #ccc !important;
           }
           
           .brand-name {
             font-weight: bold !important;
             font-size: 10pt !important;
             margin-bottom: 0.5mm !important;
-            white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
+            max-width: 100% !important;
+            line-height: 1.1 !important;
           }
           
           .detail-info {
@@ -343,8 +346,9 @@ export const PrintService = {
           
           .price {
             font-weight: bold !important;
-            font-size: 12pt !important;
+            font-size: 14pt !important;
             margin-top: 1mm !important;
+            color: #000000 !important;
           }
           
           .store-logo {
