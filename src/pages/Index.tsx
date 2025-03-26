@@ -8,6 +8,7 @@ import { Inventory } from "@/components/Inventory";
 import { InventoryTabs } from "@/components/InventoryTabs";
 import { RemainingPayments } from "@/components/RemainingPayments";
 import { PatientSearch } from "@/components/PatientSearch";
+import { CreatePatientForm } from "@/components/CreatePatientForm";
 import { useLocation } from "react-router-dom";
 import { useLanguageStore } from "@/store/languageStore";
 
@@ -49,6 +50,7 @@ const Index = () => {
       {activeSection === "inventory" && <InventoryTabs />}
       {activeSection === "remainingPayments" && <RemainingPayments />}
       {activeSection === "patientSearch" && <PatientSearch />}
+      {activeSection === "createPatient" && <CreatePatientForm />}
     </Layout>
   );
 };
