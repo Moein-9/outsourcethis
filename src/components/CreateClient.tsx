@@ -7,11 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensForm } from "@/components/ContactLensForm";
 import { useLanguageStore } from "@/store/languageStore";
+import { Textarea } from "@/components/ui/textarea";
 
 export const CreateClient: React.FC = () => {
   const addPatient = usePatientStore((state) => state.addPatient);
@@ -25,6 +26,7 @@ export const CreateClient: React.FC = () => {
   const [dobMonth, setDobMonth] = useState("");
   const [dobYear, setDobYear] = useState("");
   const [rxDate, setRxDate] = useState<Date | undefined>(new Date());
+  const [notes, setNotes] = useState(""); // New state for notes
   
   // Rx states
   const [sphOD, setSphOD] = useState("");
@@ -181,16 +183,13 @@ export const CreateClient: React.FC = () => {
       dob = `${dobDay}/${dobMonth}/${dobYear}`;
     }
     
-    // No longer collecting notes in this component
-    const patientNotes = [];
-    
     if (activeTab === "glasses") {
       const patientData = {
         name,
         phone,
         dob,
-        notes: "",  // Keep empty
-        patientNotes, // Empty array
+        notes: notes.trim(), // Include notes in patient data
+        patientNotes: [], // Keep empty array
         rx: {
           sphereOD: sphOD,
           cylOD,
@@ -213,8 +212,8 @@ export const CreateClient: React.FC = () => {
         name,
         phone,
         dob,
-        notes: "",  // Keep empty
-        patientNotes, // Empty array
+        notes: notes.trim(), // Include notes in contact lens patient data
+        patientNotes: [], // Keep empty array
         rx: {
           sphereOD: "-",
           cylOD: "-",
@@ -259,6 +258,7 @@ export const CreateClient: React.FC = () => {
     setPdRight("");
     setPdLeft("");
     setRxDate(new Date());
+    setNotes(""); // Reset notes
     setContactLensRx({
       rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" },
       leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" }
@@ -363,6 +363,25 @@ export const CreateClient: React.FC = () => {
                     {t("clientDidntShareDOB")}
                   </Label>
                 </div>
+              </div>
+              
+              {/* New Notes Field */}
+              <div className="space-y-2">
+                <Label 
+                  htmlFor="notes" 
+                  className={`flex items-center gap-1 ${textAlignClass}`}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  {t("notes")}
+                </Label>
+                <Textarea
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder={t("notesPlaceholder") || "Add notes about this client..."}
+                  className={textAlignClass}
+                  dir="auto"
+                />
               </div>
             </div>
           </div>
