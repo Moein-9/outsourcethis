@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import QRCodeReact from 'qrcode.react';
@@ -167,14 +166,81 @@ export const FrameLabelTemplate: React.FC = () => {
     printMultipleLabels(selectedFrames);
   };
   
+  // CSS styles for the preview
+  const previewStyles = {
+    container: {
+      width: '200px',
+      height: '32px',
+      display: 'flex',
+      border: '1px solid #ddd',
+      overflow: 'hidden',
+      background: 'white'
+    },
+    leftSection: {
+      width: '70px',
+      height: '100%',
+      padding: '2px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderRight: '1px solid #eee'
+    },
+    rightSection: {
+      width: '130px',
+      height: '100%',
+      padding: '2px 4px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between'
+    },
+    storeLogo: {
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+      marginBottom: '1px'
+    },
+    storeLogoImg: {
+      height: '10px',
+      width: 'auto'
+    },
+    qrCode: {
+      display: 'flex',
+      justifyContent: 'center'
+    },
+    brandName: {
+      fontWeight: 'bold',
+      fontSize: '8px',
+      lineHeight: '1',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      maxHeight: '16px',
+      display: '-webkit-box',
+      WebkitLineClamp: 2,
+      WebkitBoxOrient: 'vertical'
+    },
+    detailInfo: {
+      fontSize: '6px',
+      lineHeight: '1',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis'
+    },
+    price: {
+      fontWeight: 'bold',
+      fontSize: '10px',
+      marginTop: '1px'
+    }
+  };
+  
   const PreviewLabel = ({ frame }: { frame: FrameItem }) => {
     return (
-      <div className="label-container-preview">
-        <div className="left-section-preview">
-          <div className="store-logo-preview">
-            <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" />
+      <div style={previewStyles.container}>
+        <div style={previewStyles.leftSection}>
+          <div style={previewStyles.storeLogo}>
+            <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" style={previewStyles.storeLogoImg} />
           </div>
-          <div className="qr-code-preview">
+          <div style={previewStyles.qrCode}>
             <QRCodeReact 
               value={frame.frameId} 
               size={100} 
@@ -184,11 +250,11 @@ export const FrameLabelTemplate: React.FC = () => {
             />
           </div>
         </div>
-        <div className="right-section-preview">
-          <div className="brand-name-preview">{frame.brand} {frame.model}</div>
-          <div className="detail-info-preview">Color: {frame.color || '-'}</div>
-          <div className="detail-info-preview">Size: {frame.size || '-'}</div>
-          <div className="price-preview">{frame.price.toFixed(3)} KWD</div>
+        <div style={previewStyles.rightSection}>
+          <div style={previewStyles.brandName}>{frame.brand} {frame.model}</div>
+          <div style={previewStyles.detailInfo}>Color: {frame.color || '-'}</div>
+          <div style={previewStyles.detailInfo}>Size: {frame.size || '-'}</div>
+          <div style={previewStyles.price}>{frame.price.toFixed(3)} KWD</div>
         </div>
       </div>
     );
@@ -218,79 +284,6 @@ export const FrameLabelTemplate: React.FC = () => {
         <div className="mb-4 p-3 border rounded-md">
           <h3 className="text-sm font-medium mb-2">{t('labelPreview')}</h3>
           <PreviewLabel frame={frames.find(f => f.frameId === selectedFrames[0]) || frames[0]} />
-          <style jsx>{`
-            .label-container-preview {
-              width: 200px;
-              height: 32px;
-              display: flex;
-              border: 1px solid #ddd;
-              overflow: hidden;
-              background: white;
-            }
-            
-            .left-section-preview {
-              width: 70px;
-              height: 100%;
-              padding: 2px;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              align-items: center;
-              border-right: 1px solid #eee;
-            }
-            
-            .right-section-preview {
-              width: 130px;
-              height: 100%;
-              padding: 2px 4px;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-            }
-            
-            .store-logo-preview {
-              width: 100%;
-              display: flex;
-              justify-content: center;
-              margin-bottom: 1px;
-            }
-            
-            .store-logo-preview img {
-              height: 10px;
-              width: auto;
-            }
-            
-            .qr-code-preview {
-              display: flex;
-              justify-content: center;
-            }
-            
-            .brand-name-preview {
-              font-weight: bold;
-              font-size: 8px;
-              line-height: 1;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              max-height: 16px;
-              display: -webkit-box;
-              -webkit-line-clamp: 2;
-              -webkit-box-orient: vertical;
-            }
-            
-            .detail-info-preview {
-              font-size: 6px;
-              line-height: 1;
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-            }
-            
-            .price-preview {
-              font-weight: bold;
-              font-size: 10px;
-              margin-top: 1px;
-            }
-          `}</style>
         </div>
       )}
       
