@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
-import QRCode from 'qrcode.react';
+import QRCodeReact from 'qrcode.react';
+import QRCode from 'qrcode';
 import { Button } from "@/components/ui/button";
 import { useInventoryStore, FrameItem } from '@/store/inventoryStore';
 import { Check } from 'lucide-react';
@@ -16,32 +17,15 @@ export const usePrintLabel = () => {
   
   // Generate QR code as data URL
   const generateQRCodeDataURL = (text: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 200;
-      canvas.height = 200;
-      
-      try {
-        QRCode.toCanvas(canvas, text, {
-          width: 200,
-          height: 200,
-          margin: 0,
-          color: {
-            dark: '#000000',
-            light: '#ffffff',
-          },
-          level: 'H', // High error correction capability
-        }, (error) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-          const dataURL = canvas.toDataURL('image/png');
-          resolve(dataURL);
-        });
-      } catch (error) {
-        reject(error);
-      }
+    return QRCode.toDataURL(text, {
+      width: 200,
+      height: 200,
+      margin: 0,
+      color: {
+        dark: '#000000',
+        light: '#ffffff',
+      },
+      errorCorrectionLevel: 'H', // High error correction capability
     });
   };
   
@@ -190,7 +174,7 @@ export const FrameLabelTemplate: React.FC = () => {
             <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" />
           </div>
           <div className="qr-code-preview">
-            <QRCode 
+            <QRCodeReact 
               value={frame.frameId} 
               size={100} 
               level="H"
