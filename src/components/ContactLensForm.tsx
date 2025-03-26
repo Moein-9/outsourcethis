@@ -1,19 +1,10 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Eye, AlertTriangle } from "lucide-react";
 import { ContactLensRx } from "@/store/patientStore";
 import { useLanguageStore } from "@/store/languageStore";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { PrescriptionInput } from "@/components/ui/PrescriptionInput";
 
 interface ContactLensFormProps {
   rxData: ContactLensRx;
@@ -27,6 +18,22 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   showMissingRxWarning = false
 }) => {
   const { language, t } = useLanguageStore();
+  const [validationErrors, setValidationErrors] = useState({
+    rightEye: { cylinderWithoutAxis: false },
+    leftEye: { cylinderWithoutAxis: false }
+  });
+
+  // Validate CYL/AXIS pairing on form data change
+  useEffect(() => {
+    setValidationErrors({
+      rightEye: { 
+        cylinderWithoutAxis: rxData.rightEye.cylinder !== "-" && rxData.rightEye.axis === "-" 
+      },
+      leftEye: { 
+        cylinderWithoutAxis: rxData.leftEye.cylinder !== "-" && rxData.leftEye.axis === "-" 
+      }
+    });
+  }, [rxData]);
 
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
     const updatedRx = {
@@ -53,25 +60,21 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   // Generate sphere options from +4.00 to -9.00
   const generateSphereOptions = () => {
     const options = [];
-    options.push(<option key="sph-none" value="-">-</option>);
+    options.push({ value: "-", label: "-" });
     
     // Add positive values from +4.00 to +0.25
     for (let i = 4.00; i >= 0.25; i -= 0.25) {
-      const value = i.toFixed(2);
-      options.push(
-        <option key={`sph-plus-${value}`} value={`+${value}`}>+{value}</option>
-      );
+      const value = `+${i.toFixed(2)}`;
+      options.push({ value, label: value });
     }
     
     // Add 0.00
-    options.push(<option key="sph-zero" value="0.00">0.00</option>);
+    options.push({ value: "0.00", label: "0.00" });
     
     // Add negative values from -0.25 to -9.00
     for (let i = -0.25; i >= -9.00; i -= 0.25) {
       const value = i.toFixed(2);
-      options.push(
-        <option key={`sph-minus-${Math.abs(i)}`} value={value}>{value}</option>
-      );
+      options.push({ value, label: value });
     }
     
     return options;
@@ -80,23 +83,31 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   // Generate cylinder options: -0.75, -1.25, -1.75, -2.25
   const generateCylinderOptions = () => {
     const cylValues = ["-", "-0.75", "-1.25", "-1.75", "-2.25"];
-    return cylValues.map(value => (
-      <option key={`cyl-${value}`} value={value}>{value}</option>
-    ));
+    return cylValues.map(value => ({ value, label: value }));
   };
 
   // Generate axis options from 10° to 180° in increments of 10°
   const generateAxisOptions = () => {
-    const options = [];
-    options.push(<option key="axis-none" value="-">-</option>);
+    const options = [{ value: "-", label: "-" }];
     
     for (let i = 10; i <= 180; i += 10) {
-      options.push(
-        <option key={`axis-${i}`} value={i.toString()}>{i}°</option>
-      );
+      const value = i.toString();
+      options.push({ value, label: `${value}°` });
     }
     
     return options;
+  };
+
+  // Generate BC (base curve) options
+  const generateBcOptions = () => {
+    const values = ["-", "8.4", "8.5", "8.6", "8.7", "8.8"];
+    return values.map(value => ({ value, label: value }));
+  };
+
+  // Generate diameter options
+  const generateDiaOptions = () => {
+    const values = ["-", "14.0", "14.2", "14.4", "14.5"];
+    return values.map(value => ({ value, label: value }));
   };
 
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
@@ -116,6 +127,16 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
           <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
           <p className="text-amber-700 text-sm">
             {t("noContactLensRx")}
+          </p>
+        </div>
+      )}
+
+      {/* Validation error messages */}
+      {(validationErrors.rightEye.cylinderWithoutAxis || validationErrors.leftEye.cylinderWithoutAxis) && (
+        <div className="p-3 mb-4 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
+          <p className="text-red-700 text-sm">
+            {t("cylAxisError")}
           </p>
         </div>
       )}
@@ -143,58 +164,51 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                 </div>
               </td>
               <td className="border border-blue-100 p-2">
-                <select 
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                <PrescriptionInput
+                  id="right-sphere"
                   value={rxData.rightEye.sphere}
-                  onChange={(e) => handleRightEyeChange("sphere", e.target.value)}
-                >
-                  {generateSphereOptions()}
-                </select>
+                  onChange={(value) => handleRightEyeChange("sphere", value)}
+                  options={generateSphereOptions()}
+                  placeholder={t("choose")}
+                />
               </td>
               <td className="border border-blue-100 p-2">
-                <select 
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                <PrescriptionInput
+                  id="right-cylinder"
                   value={rxData.rightEye.cylinder}
-                  onChange={(e) => handleRightEyeChange("cylinder", e.target.value)}
-                >
-                  {generateCylinderOptions()}
-                </select>
+                  onChange={(value) => handleRightEyeChange("cylinder", value)}
+                  options={generateCylinderOptions()}
+                  placeholder={t("choose")}
+                  isInvalid={validationErrors.rightEye.cylinderWithoutAxis}
+                />
               </td>
               <td className="border border-blue-100 p-2">
-                <select 
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                <PrescriptionInput
+                  id="right-axis"
                   value={rxData.rightEye.axis}
-                  onChange={(e) => handleRightEyeChange("axis", e.target.value)}
-                >
-                  {generateAxisOptions()}
-                </select>
+                  onChange={(value) => handleRightEyeChange("axis", value)}
+                  options={generateAxisOptions()}
+                  placeholder={t("choose")}
+                  isInvalid={validationErrors.rightEye.cylinderWithoutAxis}
+                />
               </td>
               <td className="border border-blue-100 p-2">
-                <select 
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                <PrescriptionInput
+                  id="right-bc"
                   value={rxData.rightEye.bc}
-                  onChange={(e) => handleRightEyeChange("bc", e.target.value)}
-                >
-                  <option value="-">-</option>
-                  <option value="8.4">8.4</option>
-                  <option value="8.5">8.5</option>
-                  <option value="8.6">8.6</option>
-                  <option value="8.7">8.7</option>
-                  <option value="8.8">8.8</option>
-                </select>
+                  onChange={(value) => handleRightEyeChange("bc", value)}
+                  options={generateBcOptions()}
+                  placeholder={t("choose")}
+                />
               </td>
               <td className="border border-blue-100 p-2">
-                <select
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                <PrescriptionInput
+                  id="right-dia"
                   value={rxData.rightEye.dia}
-                  onChange={(e) => handleRightEyeChange("dia", e.target.value)}
-                >
-                  <option value="-">-</option>
-                  <option value="14.0">14.0</option>
-                  <option value="14.2">14.2</option>
-                  <option value="14.4">14.4</option>
-                  <option value="14.5">14.5</option>
-                </select>
+                  onChange={(value) => handleRightEyeChange("dia", value)}
+                  options={generateDiaOptions()}
+                  placeholder={t("choose")}
+                />
               </td>
             </tr>
             
@@ -207,58 +221,51 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                 </div>
               </td>
               <td className="border border-rose-100 p-2">
-                <select 
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                <PrescriptionInput
+                  id="left-sphere"
                   value={rxData.leftEye.sphere}
-                  onChange={(e) => handleLeftEyeChange("sphere", e.target.value)}
-                >
-                  {generateSphereOptions()}
-                </select>
+                  onChange={(value) => handleLeftEyeChange("sphere", value)}
+                  options={generateSphereOptions()}
+                  placeholder={t("choose")}
+                />
               </td>
               <td className="border border-rose-100 p-2">
-                <select 
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                <PrescriptionInput
+                  id="left-cylinder"
                   value={rxData.leftEye.cylinder}
-                  onChange={(e) => handleLeftEyeChange("cylinder", e.target.value)}
-                >
-                  {generateCylinderOptions()}
-                </select>
+                  onChange={(value) => handleLeftEyeChange("cylinder", value)}
+                  options={generateCylinderOptions()}
+                  placeholder={t("choose")}
+                  isInvalid={validationErrors.leftEye.cylinderWithoutAxis}
+                />
               </td>
               <td className="border border-rose-100 p-2">
-                <select 
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                <PrescriptionInput
+                  id="left-axis"
                   value={rxData.leftEye.axis}
-                  onChange={(e) => handleLeftEyeChange("axis", e.target.value)}
-                >
-                  {generateAxisOptions()}
-                </select>
+                  onChange={(value) => handleLeftEyeChange("axis", value)}
+                  options={generateAxisOptions()}
+                  placeholder={t("choose")}
+                  isInvalid={validationErrors.leftEye.cylinderWithoutAxis}
+                />
               </td>
               <td className="border border-rose-100 p-2">
-                <select 
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                <PrescriptionInput
+                  id="left-bc"
                   value={rxData.leftEye.bc}
-                  onChange={(e) => handleLeftEyeChange("bc", e.target.value)}
-                >
-                  <option value="-">-</option>
-                  <option value="8.4">8.4</option>
-                  <option value="8.5">8.5</option>
-                  <option value="8.6">8.6</option>
-                  <option value="8.7">8.7</option>
-                  <option value="8.8">8.8</option>
-                </select>
+                  onChange={(value) => handleLeftEyeChange("bc", value)}
+                  options={generateBcOptions()}
+                  placeholder={t("choose")}
+                />
               </td>
               <td className="border border-rose-100 p-2">
-                <select
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                <PrescriptionInput
+                  id="left-dia"
                   value={rxData.leftEye.dia}
-                  onChange={(e) => handleLeftEyeChange("dia", e.target.value)}
-                >
-                  <option value="-">-</option>
-                  <option value="14.0">14.0</option>
-                  <option value="14.2">14.2</option>
-                  <option value="14.4">14.4</option>
-                  <option value="14.5">14.5</option>
-                </select>
+                  onChange={(value) => handleLeftEyeChange("dia", value)}
+                  options={generateDiaOptions()}
+                  placeholder={t("choose")}
+                />
               </td>
             </tr>
           </tbody>
