@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -23,7 +22,7 @@ import { format, parseISO } from "date-fns";
 import { ar } from "date-fns/locale";
 import { enUS } from "date-fns/locale/en-US";
 import { 
-  AlertTriangle, 
+  AlertCircle, 
   FileText, 
   Glasses, 
   History, 
@@ -42,7 +41,6 @@ import { useLanguageStore } from "@/store/languageStore";
 import { RxLanguageDialog } from "./RxReceiptPrint";
 import { Textarea } from "./ui/textarea";
 import { Separator } from "./ui/separator";
-import { PrescriptionInput, generateSphereOptions, generateCylinderOptions, generateAxisOptions, generateAddOptions, generatePDOptions } from "@/components/PrescriptionInput";
 
 interface PatientRxManagerProps {
   patientId: string;
@@ -90,52 +88,37 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   const [localPatientNotes, setLocalPatientNotes] = useState(patientNotes);
   const [newNote, setNewNote] = useState("");
   
-  // Validation state
-  const [validationErrors, setValidationErrors] = useState({
-    rightEye: { cylinder: false, axis: false },
-    leftEye: { cylinder: false, axis: false },
-  });
-  
   useEffect(() => {
     setLocalCurrentRx(currentRx);
     setLocalRxHistory(rxHistory);
     setLocalPatientNotes(patientNotes);
   }, [currentRx, rxHistory, patientNotes]);
 
-  const handleRxInputChange = (field: keyof RxData, value: string) => {
-    setNewRx(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Validate CYL/AXIS relationships when those fields change
-    if (field === 'cylOD' || field === 'axisOD' || field === 'cylOS' || field === 'axisOS') {
-      validateCylAxis({
-        ...newRx,
-        [field]: value
-      });
+  const handleRxInputChange = (eye: "OD" | "OS", field: "sphere" | "cyl" | "axis" | "add", value: string) => {
+    if (eye === "OD") {
+      setNewRx(prev => ({
+        ...prev,
+        [`sphere${eye}`]: field === "sphere" ? value : prev.sphereOD,
+        [`cyl${eye}`]: field === "cyl" ? value : prev.cylOD,
+        [`axis${eye}`]: field === "axis" ? value : prev.axisOD,
+        [`add${eye}`]: field === "add" ? value : prev.addOD,
+      }));
+    } else {
+      setNewRx(prev => ({
+        ...prev,
+        [`sphere${eye}`]: field === "sphere" ? value : prev.sphereOS,
+        [`cyl${eye}`]: field === "cyl" ? value : prev.cylOS,
+        [`axis${eye}`]: field === "axis" ? value : prev.axisOS,
+        [`add${eye}`]: field === "add" ? value : prev.addOS,
+      }));
     }
   };
 
-  // Validation function
-  const validateCylAxis = (rx: RxData = newRx) => {
-    const rightHasCyl = rx.cylOD !== "" && rx.cylOD !== "0.00";
-    const rightHasAxis = rx.axisOD !== "";
-    const leftHasCyl = rx.cylOS !== "" && rx.cylOS !== "0.00";
-    const leftHasAxis = rx.axisOS !== "";
-    
-    setValidationErrors({
-      rightEye: {
-        cylinder: rightHasCyl && !rightHasAxis, // Error if CYL but no AXIS
-        axis: !rightHasCyl && rightHasAxis, // Error if AXIS but no CYL (unlikely but for completeness)
-      },
-      leftEye: {
-        cylinder: leftHasCyl && !leftHasAxis, // Error if CYL but no AXIS
-        axis: !leftHasCyl && leftHasAxis, // Error if AXIS but no CYL (unlikely but for completeness)
-      }
-    });
-    
-    return !(rightHasCyl && !rightHasAxis) && !(leftHasCyl && !leftHasAxis);
+  const handlePdChange = (eye: "Right" | "Left", value: string) => {
+    setNewRx(prev => ({
+      ...prev,
+      [`pd${eye}`]: value
+    }));
   };
 
   const handleSaveNewRx = () => {
@@ -143,16 +126,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
       toast({
         title: t("dataError"),
         description: t("fillAllRequiredFields"),
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Validate CYL/AXIS relationships
-    if (!validateCylAxis()) {
-      toast({
-        title: t("error"),
-        description: t("axisRequired"),
         variant: "destructive"
       });
       return;
@@ -217,6 +190,69 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     }
   };
 
+  const generateSphOptions = () => {
+    const options = [];
+    for (let i = 10; i >= -10; i -= 0.25) {
+      const formatted = i >= 0 ? `+${i.toFixed(2)}` : i.toFixed(2);
+      options.push(
+        <option key={`sph-${i}`} value={formatted}>
+          {formatted}
+        </option>
+      );
+    }
+    return options;
+  };
+  
+  const generateCylOptions = () => {
+    const options = [];
+    for (let i = 0; i >= -6; i -= 0.25) {
+      const formatted = i.toFixed(2);
+      options.push(
+        <option key={`cyl-${i}`} value={formatted}>
+          {formatted}
+        </option>
+      );
+    }
+    return options;
+  };
+  
+  const generateAxisOptions = () => {
+    const options = [];
+    for (let i = 0; i <= 180; i += 1) {
+      options.push(
+        <option key={`axis-${i}`} value={i}>
+          {i}
+        </option>
+      );
+    }
+    return options;
+  };
+  
+  const generateAddOptions = () => {
+    const options = [];
+    for (let i = 0; i <= 3; i += 0.25) {
+      const formatted = i === 0 ? "0.00" : `+${i.toFixed(2)}`;
+      options.push(
+        <option key={`add-${i}`} value={formatted}>
+          {formatted}
+        </option>
+      );
+    }
+    return options;
+  };
+  
+  const generatePdOptions = () => {
+    const options = [];
+    for (let i = 40; i <= 80; i += 1) {
+      options.push(
+        <option key={`pd-${i}`} value={i}>
+          {i}
+        </option>
+      );
+    }
+    return options;
+  };
+
   const handleAddNote = () => {
     if (!newNote.trim()) {
       toast({
@@ -244,13 +280,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
       description: t("noteAddedSuccessfully")
     });
   };
-
-  // Initialize prescription option arrays
-  const sphereOptions = generateSphereOptions();
-  const cylinderOptions = generateCylinderOptions();
-  const axisOptions = generateAxisOptions();
-  const addOptions = generateAddOptions();
-  const pdOptions = generatePDOptions();
 
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
@@ -469,7 +498,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
           {/* Care Tips Section */}
           <div className="bg-green-50 p-4 rounded-lg border border-green-200">
             <h4 className="font-medium mb-3 text-green-800 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-green-600" />
+              <AlertCircle className="h-5 w-5 text-green-600" />
               {t("glassesCareTips")}
             </h4>
             <ul className={`space-y-3 pl-1 ${dirClass}`}>
@@ -520,60 +549,72 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 
                 <div className="lg:col-span-1">
                   <Label htmlFor="sphereOD" className="block mb-1">SPH</Label>
-                  <PrescriptionInput
-                    type="sphere"
+                  <select
+                    id="sphereOD"
+                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2 ltr"
                     value={newRx.sphereOD}
-                    onChange={(value) => handleRxInputChange("sphereOD", value)}
-                    options={sphereOptions}
-                  />
+                    onChange={(e) => handleRxInputChange("OD", "sphere", e.target.value)}
+                    dir="ltr"
+                  >
+                    <option value="" disabled>{t("choose")}</option>
+                    {generateSphOptions()}
+                  </select>
                 </div>
                 
                 <div className="lg:col-span-1">
                   <Label htmlFor="cylOD" className="block mb-1">CYL</Label>
-                  <PrescriptionInput
-                    type="cylinder"
+                  <select
+                    id="cylOD"
+                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2 ltr"
                     value={newRx.cylOD}
-                    onChange={(value) => handleRxInputChange("cylOD", value)}
-                    options={cylinderOptions}
-                    hasError={validationErrors.rightEye.cylinder}
-                  />
-                  {validationErrors.rightEye.cylinder && (
-                    <div className="flex items-center text-xs text-red-600 mt-1">
-                      <AlertTriangle className="h-3 w-3 mr-1" />
-                      {t("axisRequired")}
-                    </div>
-                  )}
+                    onChange={(e) => handleRxInputChange("OD", "cyl", e.target.value)}
+                    dir="ltr"
+                  >
+                    <option value="" disabled>{t("choose")}</option>
+                    {generateCylOptions()}
+                  </select>
                 </div>
                 
                 <div className="lg:col-span-1">
                   <Label htmlFor="axisOD" className="block mb-1">AXIS</Label>
-                  <PrescriptionInput
-                    type="axis"
+                  <select
+                    id="axisOD"
+                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2 ltr"
                     value={newRx.axisOD}
-                    onChange={(value) => handleRxInputChange("axisOD", value)}
-                    options={axisOptions}
-                    hasError={validationErrors.rightEye.cylinder}
-                  />
+                    onChange={(e) => handleRxInputChange("OD", "axis", e.target.value)}
+                    dir="ltr"
+                  >
+                    <option value="" disabled>{t("choose")}</option>
+                    {generateAxisOptions()}
+                  </select>
                 </div>
                 
                 <div className="lg:col-span-1">
                   <Label htmlFor="addOD" className="block mb-1">ADD</Label>
-                  <PrescriptionInput
-                    type="add"
+                  <select
+                    id="addOD"
+                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2 ltr"
                     value={newRx.addOD}
-                    onChange={(value) => handleRxInputChange("addOD", value)}
-                    options={addOptions}
-                  />
+                    onChange={(e) => handleRxInputChange("OD", "add", e.target.value)}
+                    dir="ltr"
+                  >
+                    <option value="" disabled>{t("choose")}</option>
+                    {generateAddOptions()}
+                  </select>
                 </div>
                 
                 <div className="lg:col-span-1">
                   <Label htmlFor="pdRight" className="block mb-1">PD ({t("right")})</Label>
-                  <PrescriptionInput
-                    type="pd"
+                  <select
+                    id="pdRight"
+                    className="w-full h-10 rounded-md border border-blue-200 bg-white px-3 py-2 ltr"
                     value={newRx.pdRight}
-                    onChange={(value) => handleRxInputChange("pdRight", value)}
-                    options={pdOptions}
-                  />
+                    onChange={(e) => handlePdChange("Right", e.target.value)}
+                    dir="ltr"
+                  >
+                    <option value="" disabled>{t("choose")}</option>
+                    {generatePdOptions()}
+                  </select>
                 </div>
                 
                 <div className="lg:col-span-1">
@@ -584,61 +625,69 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
                 </div>
                 
                 <div className="lg:col-span-1">
-                  <Label htmlFor="sphereOS" className="block mb-1">SPH</Label>
-                  <PrescriptionInput
-                    type="sphere"
+                  <select
+                    id="sphereOS"
+                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2 ltr"
                     value={newRx.sphereOS}
-                    onChange={(value) => handleRxInputChange("sphereOS", value)}
-                    options={sphereOptions}
-                  />
+                    onChange={(e) => handleRxInputChange("OS", "sphere", e.target.value)}
+                    dir="ltr"
+                  >
+                    <option value="" disabled>{t("choose")}</option>
+                    {generateSphOptions()}
+                  </select>
                 </div>
                 
                 <div className="lg:col-span-1">
-                  <Label htmlFor="cylOS" className="block mb-1">CYL</Label>
-                  <PrescriptionInput
-                    type="cylinder"
+                  <select
+                    id="cylOS"
+                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2 ltr"
                     value={newRx.cylOS}
-                    onChange={(value) => handleRxInputChange("cylOS", value)}
-                    options={cylinderOptions}
-                    hasError={validationErrors.leftEye.cylinder}
-                  />
-                  {validationErrors.leftEye.cylinder && (
-                    <div className="flex items-center text-xs text-red-600 mt-1">
-                      <AlertTriangle className="h-3 w-3 mr-1" />
-                      {t("axisRequired")}
-                    </div>
-                  )}
+                    onChange={(e) => handleRxInputChange("OS", "cyl", e.target.value)}
+                    dir="ltr"
+                  >
+                    <option value="" disabled>{t("choose")}</option>
+                    {generateCylOptions()}
+                  </select>
                 </div>
                 
                 <div className="lg:col-span-1">
-                  <Label htmlFor="axisOS" className="block mb-1">AXIS</Label>
-                  <PrescriptionInput
-                    type="axis"
+                  <select
+                    id="axisOS"
+                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2 ltr"
                     value={newRx.axisOS}
-                    onChange={(value) => handleRxInputChange("axisOS", value)}
-                    options={axisOptions}
-                    hasError={validationErrors.leftEye.cylinder}
-                  />
+                    onChange={(e) => handleRxInputChange("OS", "axis", e.target.value)}
+                    dir="ltr"
+                  >
+                    <option value="" disabled>{t("choose")}</option>
+                    {generateAxisOptions()}
+                  </select>
                 </div>
                 
                 <div className="lg:col-span-1">
-                  <Label htmlFor="addOS" className="block mb-1">ADD</Label>
-                  <PrescriptionInput
-                    type="add"
+                  <select
+                    id="addOS"
+                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2 ltr"
                     value={newRx.addOS}
-                    onChange={(value) => handleRxInputChange("addOS", value)}
-                    options={addOptions}
-                  />
+                    onChange={(e) => handleRxInputChange("OS", "add", e.target.value)}
+                    dir="ltr"
+                  >
+                    <option value="" disabled>{t("choose")}</option>
+                    {generateAddOptions()}
+                  </select>
                 </div>
                 
                 <div className="lg:col-span-1">
                   <Label htmlFor="pdLeft" className="block mb-1">PD ({t("left")})</Label>
-                  <PrescriptionInput
-                    type="pd"
+                  <select
+                    id="pdLeft"
+                    className="w-full h-10 rounded-md border border-rose-200 bg-white px-3 py-2 ltr"
                     value={newRx.pdLeft}
-                    onChange={(value) => handleRxInputChange("pdLeft", value)}
-                    options={pdOptions}
-                  />
+                    onChange={(e) => handlePdChange("Left", e.target.value)}
+                    dir="ltr"
+                  >
+                    <option value="" disabled>{t("choose")}</option>
+                    {generatePdOptions()}
+                  </select>
                 </div>
               </div>
             </div>
