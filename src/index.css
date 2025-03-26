@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;500;600;700&display=swap');
@@ -140,7 +141,7 @@
   }
   
   @page {
-    size: 100mm 16mm !important;
+    size: 100mm 16mm landscape !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -151,6 +152,7 @@
     page-break-after: always !important;
     page-break-inside: avoid !important;
     display: flex !important;
+    flex-direction: row !important;
     justify-content: flex-start !important;
     overflow: hidden !important;
     margin: 0 !important;
@@ -175,7 +177,7 @@
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
-    margin-right: 30mm !important;
+    margin-right: 30mm !important; /* Account for safe zone */
   }
   
   .brand-name {

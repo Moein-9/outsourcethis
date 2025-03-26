@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { toast } from '@/hooks/use-toast';
 import QRCodeReact from 'qrcode.react';
@@ -329,4 +328,3 @@ export const FrameLabelTemplate: React.FC = () => {
     </div>
   );
 };
-

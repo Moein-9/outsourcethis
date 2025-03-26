@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { toast } from '@/hooks/use-toast';
 
@@ -268,11 +267,16 @@ export const PrintService = {
       <head>
         <title>${title}</title>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
         <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
         <style>
           @page {
-            size: 100mm 16mm !important;
+            size: 100mm 16mm landscape !important;
             margin: 0mm !important;
             padding: 0mm !important;
           }
@@ -286,35 +290,30 @@ export const PrintService = {
             margin: 0 !important;
             padding: 0 !important;
             width: 100mm !important;
+            height: 16mm !important;
             max-width: 100mm !important;
+            max-height: 16mm !important;
             overflow: hidden !important;
             font-family: 'Yrsa', serif !important;
             -webkit-print-color-adjust: exact !important;
             color-adjust: exact !important;
             print-color-adjust: exact !important;
+            transform-origin: top left !important;
           }
           
           .label-container {
             width: 100mm !important;
             height: 16mm !important;
             display: flex !important;
+            flex-direction: row !important;
             justify-content: flex-start !important;
+            align-items: center !important;
             margin: 0 !important;
             padding: 0 !important;
             overflow: hidden !important;
             page-break-after: always !important;
             page-break-inside: avoid !important;
-          }
-          
-          .right-section {
-            width: 35mm !important;
-            height: 16mm !important;
-            padding: 1mm !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
-            margin-right: 30mm !important; /* Account for 30mm unprintable tail */
-            overflow: hidden !important;
+            position: relative !important;
           }
           
           .left-section {
@@ -326,6 +325,20 @@ export const PrintService = {
             justify-content: space-between !important;
             align-items: center !important;
             border-right: 0.5px solid #ccc !important;
+            box-sizing: border-box !important;
+          }
+          
+          .right-section {
+            width: 35mm !important;
+            height: 16mm !important;
+            padding: 1mm !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            box-sizing: border-box !important;
+            /* Account for 30mm unprintable tail - safe zone */
+            margin-right: 30mm !important;
+            overflow: hidden !important;
           }
           
           .brand-name {
@@ -384,6 +397,12 @@ export const PrintService = {
           
           /* Fix for print dialog appearing but not working */
           @media print {
+            html {
+              width: 100mm !important;
+              height: 16mm !important;
+              overflow: hidden !important;
+            }
+            
             body {
               width: 100mm !important;
               height: 16mm !important;
@@ -395,9 +414,9 @@ export const PrintService = {
               print-color-adjust: exact !important;
             }
             
-            /* Ensure only one copy prints */
+            /* Ensure only one label prints per page */
             @page {
-              size: 100mm 16mm !important;
+              size: 100mm 16mm landscape !important;
               margin: 0mm !important;
               margin-left: 0mm !important;
               margin-right: 0mm !important;
@@ -411,6 +430,17 @@ export const PrintService = {
         ${content}
         <script>
           window.addEventListener('DOMContentLoaded', function() {
+            // Force landscape orientation
+            if (window.matchMedia) {
+              const mediaQueryList = window.matchMedia('print');
+              mediaQueryList.addListener(function(mql) {
+                if (mql.matches) {
+                  document.body.style.width = '100mm';
+                  document.body.style.height = '16mm';
+                }
+              });
+            }
+            
             // Wait for the content to be fully loaded before notifying completion
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
