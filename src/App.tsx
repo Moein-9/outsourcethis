@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ReportPage from "./pages/ReportPage";
+import PrintLabelPage from "./pages/PrintLabelPage";
 import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/reports" element={<ReportPage />} />
+          <Route path="/print-labels" element={<PrintLabelPage />} />
           <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

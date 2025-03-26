@@ -48,6 +48,9 @@ export const usePrintLabel = () => {
       const labelContent = createFrameLabelContent(frame, qrCodeDataURL);
       const htmlDocument = PrintService.prepareLabelDocument(labelContent);
       
+      console.log("Printing frame label:", frame.frameId);
+      console.log("Generated QR code data URL length:", qrCodeDataURL.length);
+      
       PrintService.printHtml(htmlDocument, 'label', () => {
         toast({
           title: t('success'),
@@ -55,12 +58,12 @@ export const usePrintLabel = () => {
         });
       });
     } catch (error) {
+      console.error('QR code generation error:', error);
       toast({
         title: t('error'),
         description: t('errorGeneratingQRCode'),
         variant: "destructive"
       });
-      console.error('QR code generation error:', error);
     }
   };
   
@@ -87,6 +90,7 @@ export const usePrintLabel = () => {
     }
     
     try {
+      console.log(`Printing ${selectedFrames.length} frame labels`);
       let allLabelsContent = '';
       
       // Process frames sequentially to ensure all QR codes are generated properly
@@ -97,6 +101,9 @@ export const usePrintLabel = () => {
       
       const htmlDocument = PrintService.prepareLabelDocument(allLabelsContent);
       
+      // Log the HTML to see if it's properly formatted
+      console.log("Generated HTML document for printing");
+      
       PrintService.printHtml(htmlDocument, 'label', () => {
         toast({
           title: t('success'),
@@ -104,12 +111,12 @@ export const usePrintLabel = () => {
         });
       });
     } catch (error) {
+      console.error('QR code generation error:', error);
       toast({
         title: t('error'),
         description: t('errorGeneratingQRCodes'),
         variant: "destructive"
       });
-      console.error('QR code generation error:', error);
     }
   };
   
@@ -164,6 +171,7 @@ export const FrameLabelTemplate: React.FC = () => {
   };
   
   const handlePrintSelected = () => {
+    console.log(`Attempting to print ${selectedFrames.length} selected frames`);
     printMultipleLabels(selectedFrames);
   };
   
@@ -182,7 +190,7 @@ export const FrameLabelTemplate: React.FC = () => {
       height: '100%',
       padding: '2px',
       display: 'flex',
-      flexDirection: 'column' as 'column',
+      flexDirection: 'column' as const,
       justifyContent: 'space-between',
       alignItems: 'center',
       borderRight: '1px solid #eee'
@@ -192,7 +200,7 @@ export const FrameLabelTemplate: React.FC = () => {
       height: '100%',
       padding: '2px 4px',
       display: 'flex',
-      flexDirection: 'column' as 'column',
+      flexDirection: 'column' as const,
       justifyContent: 'space-between'
     },
     storeLogo: {
@@ -224,7 +232,7 @@ export const FrameLabelTemplate: React.FC = () => {
       fontSize: '6px',
       lineHeight: '1',
       overflow: 'hidden',
-      whiteSpace: 'nowrap',
+      whiteSpace: 'nowrap' as const,
       textOverflow: 'ellipsis'
     },
     price: {
@@ -244,10 +252,10 @@ export const FrameLabelTemplate: React.FC = () => {
           <div style={previewStyles.qrCode}>
             <QRCodeReact 
               value={frame.frameId} 
-              size={100} 
+              size={36}
               level="H"
               includeMargin={false}
-              style={{ width: "36px", height: "36px" }}
+              renderAs="svg"
             />
           </div>
         </div>
@@ -321,3 +329,4 @@ export const FrameLabelTemplate: React.FC = () => {
     </div>
   );
 };
+
