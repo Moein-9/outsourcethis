@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import QRCodeReact from 'qrcode.react';
@@ -217,6 +218,79 @@ export const FrameLabelTemplate: React.FC = () => {
         <div className="mb-4 p-3 border rounded-md">
           <h3 className="text-sm font-medium mb-2">{t('labelPreview')}</h3>
           <PreviewLabel frame={frames.find(f => f.frameId === selectedFrames[0]) || frames[0]} />
+          <style jsx>{`
+            .label-container-preview {
+              width: 200px;
+              height: 32px;
+              display: flex;
+              border: 1px solid #ddd;
+              overflow: hidden;
+              background: white;
+            }
+            
+            .left-section-preview {
+              width: 70px;
+              height: 100%;
+              padding: 2px;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              align-items: center;
+              border-right: 1px solid #eee;
+            }
+            
+            .right-section-preview {
+              width: 130px;
+              height: 100%;
+              padding: 2px 4px;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+            }
+            
+            .store-logo-preview {
+              width: 100%;
+              display: flex;
+              justify-content: center;
+              margin-bottom: 1px;
+            }
+            
+            .store-logo-preview img {
+              height: 10px;
+              width: auto;
+            }
+            
+            .qr-code-preview {
+              display: flex;
+              justify-content: center;
+            }
+            
+            .brand-name-preview {
+              font-weight: bold;
+              font-size: 8px;
+              line-height: 1;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-height: 16px;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+            }
+            
+            .detail-info-preview {
+              font-size: 6px;
+              line-height: 1;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+            
+            .price-preview {
+              font-weight: bold;
+              font-size: 10px;
+              margin-top: 1px;
+            }
+          `}</style>
         </div>
       )}
       

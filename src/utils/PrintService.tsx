@@ -312,7 +312,7 @@ export const PrintService = {
             padding: 1mm !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: center !important;
+            justify-content: space-between !important;
             margin-right: 30mm !important; /* Account for 30mm unprintable tail */
             overflow: hidden !important;
           }
@@ -330,24 +330,32 @@ export const PrintService = {
           
           .brand-name {
             font-weight: bold !important;
-            font-size: 10pt !important;
+            font-size: 8pt !important;
             margin-bottom: 0.5mm !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
+            white-space: normal !important;
             max-width: 100% !important;
             line-height: 1.1 !important;
+            max-height: 4mm !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
           }
           
           .detail-info {
-            font-size: 8pt !important;
-            margin-bottom: 0.5mm !important;
+            font-size: 7pt !important;
+            margin-bottom: 0.25mm !important;
             line-height: 1.1 !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
           }
           
           .price {
             font-weight: bold !important;
-            font-size: 14pt !important;
-            margin-top: 1mm !important;
+            font-size: 12pt !important;
+            margin-top: 0.5mm !important;
             color: #000000 !important;
           }
           
