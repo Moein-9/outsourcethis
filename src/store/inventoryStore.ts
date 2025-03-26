@@ -19,6 +19,13 @@ export interface LensType {
   type: "distance" | "reading" | "progressive" | "bifocal" | "sunglasses";
 }
 
+export interface LensThickness {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+}
+
 export interface LensCoating {
   id: string;
   name: string;
@@ -41,6 +48,7 @@ export interface ContactLensItem {
 interface InventoryState {
   frames: FrameItem[];
   lensTypes: LensType[];
+  lensThicknesses: LensThickness[];
   lensCoatings: LensCoating[];
   contactLenses: ContactLensItem[];
   
@@ -54,6 +62,11 @@ interface InventoryState {
   addLensType: (lens: Omit<LensType, "id">) => string;
   updateLensType: (id: string, lens: Partial<Omit<LensType, "id">>) => void;
   deleteLensType: (id: string) => void;
+  
+  // Thickness methods
+  addLensThickness: (thickness: Omit<LensThickness, "id">) => string;
+  updateLensThickness: (id: string, thickness: Partial<Omit<LensThickness, "id">>) => void;
+  deleteLensThickness: (id: string) => void;
   
   // Coating methods
   addLensCoating: (coating: Omit<LensCoating, "id">) => string;
@@ -77,6 +90,13 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "lens3", name: "عدسات تقدمية", price: 40, type: "progressive" },
         { id: "lens4", name: "عدسات ثنائية", price: 25, type: "bifocal" },
         { id: "lens5", name: "عدسات شمسية", price: 30, type: "sunglasses" }
+      ],
+      lensThicknesses: [
+        { id: "thick1", name: "1.56", price: 10, description: "Standard" },
+        { id: "thick2", name: "Polycarbonate", price: 15, description: "Impact resistant" },
+        { id: "thick3", name: "1.60", price: 20, description: "Thin" },
+        { id: "thick4", name: "1.67", price: 25, description: "Extra thin" },
+        { id: "thick5", name: "1.74", price: 30, description: "Ultra thin" }
       ],
       lensCoatings: [
         { id: "coat1", name: "مضاد للانعكاس", price: 5, description: "Anti-Reflective Coating" },
@@ -152,6 +172,31 @@ export const useInventoryStore = create<InventoryState>()(
       deleteLensType: (id) => {
         set((state) => ({
           lensTypes: state.lensTypes.filter(type => type.id !== id)
+        }));
+      },
+      
+      // Thickness methods
+      addLensThickness: (thickness) => {
+        const id = `thick${Date.now()}`;
+        
+        set((state) => ({
+          lensThicknesses: [...state.lensThicknesses, { ...thickness, id }]
+        }));
+        
+        return id;
+      },
+      
+      updateLensThickness: (id, thickness) => {
+        set((state) => ({
+          lensThicknesses: state.lensThicknesses.map(item => 
+            item.id === id ? { ...item, ...thickness } : item
+          )
+        }));
+      },
+      
+      deleteLensThickness: (id) => {
+        set((state) => ({
+          lensThicknesses: state.lensThicknesses.filter(item => item.id !== id)
         }));
       },
       

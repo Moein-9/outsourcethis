@@ -1,28 +1,33 @@
 
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
-import { LensType, LensCoating, useInventoryStore } from "@/store/inventoryStore";
+import { LensType, LensCoating, LensThickness, useInventoryStore } from "@/store/inventoryStore";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Eye, Check, X } from "lucide-react";
+import { LensThicknessSelector } from "./LensThicknessSelector";
 
 interface LensSelectorProps {
   onSelectLensType: (lens: LensType | null) => void;
+  onSelectThickness: (thickness: LensThickness | null) => void;
   onSelectCoating: (coating: LensCoating | null) => void;
   skipLens?: boolean;
   onSkipLensChange?: (skip: boolean) => void;
   initialLensType?: LensType | null;
+  initialThickness?: LensThickness | null;
   initialCoating?: LensCoating | null;
 }
 
 export const LensSelector: React.FC<LensSelectorProps> = ({
   onSelectLensType,
+  onSelectThickness,
   onSelectCoating,
   skipLens = false,
   onSkipLensChange,
   initialLensType = null,
+  initialThickness = null,
   initialCoating = null,
 }) => {
   const { t, language } = useLanguageStore();
@@ -30,6 +35,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const coatings = useInventoryStore((state) => state.lensCoatings);
   
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(initialLensType);
+  const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(initialThickness);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(initialCoating);
   
   // Initialize from props if provided
@@ -37,14 +43,22 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     if (initialLensType) {
       setSelectedLensType(initialLensType);
     }
+    if (initialThickness) {
+      setSelectedThickness(initialThickness);
+    }
     if (initialCoating) {
       setSelectedCoating(initialCoating);
     }
-  }, [initialLensType, initialCoating]);
+  }, [initialLensType, initialThickness, initialCoating]);
   
   const handleLensTypeSelect = (lens: LensType) => {
     setSelectedLensType(lens);
     onSelectLensType(lens);
+  };
+  
+  const handleThicknessSelect = (thickness: LensThickness | null) => {
+    setSelectedThickness(thickness);
+    onSelectThickness(thickness);
   };
   
   const handleCoatingSelect = (coating: LensCoating) => {
@@ -59,8 +73,10 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     
     if (checked) {
       setSelectedLensType(null);
+      setSelectedThickness(null);
       setSelectedCoating(null);
       onSelectLensType(null);
+      onSelectThickness(null);
       onSelectCoating(null);
     }
   };
@@ -90,8 +106,11 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
             <TabsTrigger value="lensType" className="flex-1 bg-[#8B5CF6] data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
               <span className="text-white">1</span> - {t('selectLensType')}
             </TabsTrigger>
+            <TabsTrigger value="thickness" className="flex-1 bg-[#5EEAD4] data-[state=active]:bg-[#5EEAD4] data-[state=active]:text-white">
+              <span className="text-white">2</span> - {t('selectThickness')}
+            </TabsTrigger>
             <TabsTrigger value="coating" className="flex-1 bg-[#F97316] data-[state=active]:bg-[#F97316] data-[state=active]:text-white">
-              <span className="text-white">2</span> - {t('selectCoatings')}
+              <span className="text-white">3</span> - {t('selectCoatings')}
             </TabsTrigger>
           </TabsList>
           
@@ -127,6 +146,14 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                 </div>
               ))}
             </div>
+          </TabsContent>
+          
+          <TabsContent value="thickness" className="space-y-4">
+            <LensThicknessSelector 
+              onSelectThickness={handleThicknessSelect}
+              initialThickness={selectedThickness}
+              disabled={!selectedLensType}
+            />
           </TabsContent>
           
           <TabsContent value="coating" className="space-y-4">

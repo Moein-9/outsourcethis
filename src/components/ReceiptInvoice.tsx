@@ -15,6 +15,8 @@ interface ReceiptInvoiceProps {
   invoiceType?: "glasses" | "contacts";
   lensType?: string;
   lensPrice?: number;
+  lensThickness?: string;
+  lensThicknessPrice?: number;
   coating?: string;
   coatingPrice?: number;
   frame?: {
@@ -42,6 +44,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   invoiceType,
   lensType,
   lensPrice,
+  lensThickness,
+  lensThicknessPrice,
   coating,
   coatingPrice,
   frame,
@@ -62,6 +66,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const phone = patientPhone || invoice.patientPhone;
   const lens = lensType || invoice.lensType;
   const lensP = lensPrice !== undefined ? lensPrice : invoice.lensPrice;
+  const thickness = lensThickness || (invoice as any).lensThickness;
+  const thicknessP = lensThicknessPrice !== undefined ? lensThicknessPrice : (invoice as any).lensThicknessPrice || 0;
   const coat = coating || invoice.coating;
   const coatP = coatingPrice !== undefined ? coatingPrice : invoice.coatingPrice;
   const frameBrand = frame?.brand || invoice.frameBrand;
@@ -78,7 +84,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const contactLensItems = contactLenses || invoice.contactLensItems || [];
   
   const isContactLens = invoiceType === "contacts" || invoice.invoiceType === "contacts" || contactLensItems.length > 0;
-  
+
   return (
     <div 
       className={`${dirClass} print-receipt`} 
@@ -204,6 +210,16 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                     <span className="font-bold text-sm">{lensP.toFixed(3)} KWD</span>
                   </div>
                   <div className="text-xs font-medium text-center">{lens}</div>
+                </div>
+              )}
+              
+              {thickness && (
+                <div className="p-1.5 border border-gray-300 rounded">
+                  <div className="flex justify-between px-2 mb-1">
+                    <div className="font-bold text-sm">{isRtl ? "السماكة | Thickness" : "Thickness | السماكة"}</div>
+                    <span className="font-bold text-sm">{thicknessP.toFixed(3)} KWD</span>
+                  </div>
+                  <div className="text-xs font-medium text-center">{thickness}</div>
                 </div>
               )}
               

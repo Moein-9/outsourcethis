@@ -21,6 +21,9 @@ export interface Invoice {
   lensType: string;
   lensPrice: number;
   
+  lensThickness?: string;
+  lensThicknessPrice?: number;
+  
   coating: string;
   coatingPrice: number;
   
@@ -55,6 +58,11 @@ export interface WorkOrder {
   createdAt: string;
   
   lensType?: {
+    name: string;
+    price: number;
+  };
+  
+  lensThickness?: {
     name: string;
     price: number;
   };

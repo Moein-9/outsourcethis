@@ -1,7 +1,8 @@
+
 import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
-import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
+import { useInventoryStore, LensType, LensThickness, LensCoating } from "@/store/inventoryStore";
 import { toast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   
   const [skipFrame, setSkipFrame] = useState(getValues<boolean>('skipFrame'));
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
+  const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(null);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
   
   const [frameSearch, setFrameSearch] = useState("");
@@ -71,8 +73,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     if (!frameSearch.trim()) {
       toast({
         title: t('error'),
-        description: t('searchTermError'),
-        variant: "destructive"
+        description: t('searchTermError')
       });
       return;
     }
@@ -113,6 +114,12 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setValue('lensPrice', lens?.price || 0);
   };
   
+  const handleThicknessSelect = (thickness: LensThickness | null) => {
+    setSelectedThickness(thickness);
+    setValue('lensThickness', thickness?.name || '');
+    setValue('lensThicknessPrice', thickness?.price || 0);
+  };
+  
   const handleCoatingSelect = (coating: LensCoating | null) => {
     setSelectedCoating(coating);
     setValue('coating', coating?.name || '');
@@ -128,8 +135,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     if (!newBrand || !newModel || !newColor || !newPrice) {
       toast({
         title: t('error'),
-        description: t('frameDetailsError'),
-        variant: "destructive"
+        description: t('frameDetailsError')
       });
       return;
     }
@@ -140,8 +146,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     if (isNaN(price) || price <= 0) {
       toast({
         title: t('error'),
-        description: t('priceError'),
-        variant: "destructive"
+        description: t('priceError')
       });
       return;
     }
@@ -149,8 +154,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     if (isNaN(qty) || qty <= 0) {
       toast({
         title: t('error'),
-        description: t('quantityError'),
-        variant: "destructive"
+        description: t('quantityError')
       });
       return;
     }
@@ -239,10 +243,12 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
             
             <LensSelector 
               onSelectLensType={handleLensTypeSelect}
+              onSelectThickness={handleThicknessSelect}
               onSelectCoating={handleCoatingSelect}
               skipLens={skipFrame}
               onSkipLensChange={handleSkipFrameChange}
               initialLensType={selectedLensType}
+              initialThickness={selectedThickness}
               initialCoating={selectedCoating}
             />
           </div>

@@ -12,6 +12,7 @@ interface WorkOrderPrintProps {
   patientPhone?: string;
   rx?: any;
   lensType?: string;
+  lensThickness?: string;
   coating?: string;
   frame?: {
     brand: string;
@@ -45,6 +46,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   patientPhone,
   rx,
   lensType,
+  lensThickness,
   coating,
   frame,
   contactLenses,
@@ -56,6 +58,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const name = patientName || invoice.patientName;
   const phone = patientPhone || invoice.patientPhone;
   const lensTypeValue = lensType || invoice.lensType;
+  const lensThicknessValue = lensThickness || (invoice as any).lensThickness;
   const coatingValue = coating || invoice.coating;
   
   const contactLensItems = contactLenses || (invoice as any).contactLensItems || [];
@@ -254,6 +257,35 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 <span className="data-label">{t("size")}:</span>
                 <span className="data-value">{frameData.size || "-"}</span>
               </div>
+            </div>
+          </>
+        )}
+
+        {invoiceType === 'glasses' && lensTypeValue && (
+          <>
+            <div className="section-heading">
+              <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("lensDetails")} {language === 'ar' && '(تفاصيل العدسات)'}</span>
+            </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+              <div className="data-row">
+                <span className="data-label">{t("lensType")}:</span>
+                <span className="data-value">{lensTypeValue}</span>
+              </div>
+              
+              {lensThicknessValue && (
+                <div className="data-row">
+                  <span className="data-label">{t("thickness")}:</span>
+                  <span className="data-value">{lensThicknessValue}</span>
+                </div>
+              )}
+              
+              {coatingValue && (
+                <div className="data-row">
+                  <span className="data-label">{t("coating")}:</span>
+                  <span className="data-value">{coatingValue}</span>
+                </div>
+              )}
             </div>
           </>
         )}
