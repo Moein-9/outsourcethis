@@ -1,8 +1,7 @@
-
 import React, { useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Dashboard } from "@/components/Dashboard";
-import { CreateClient } from "@/components/CreateClient";
+// import { CreateClient } from "@/components/CreateClient";
 import CreateInvoice from "@/components/CreateInvoice";
 import { Inventory } from "@/components/Inventory";
 import { InventoryTabs } from "@/components/InventoryTabs";
@@ -45,7 +44,7 @@ const Index = () => {
       onNavigate={setActiveSection}
     >
       {activeSection === "dashboard" && <Dashboard />}
-      {activeSection === "createClient" && <CreateClient />}
+      {activeSection === "createClient" && <CreatePatientForm />}
       {activeSection === "createInvoice" && <CreateInvoice />}
       {activeSection === "inventory" && <InventoryTabs />}
       {activeSection === "remainingPayments" && <RemainingPayments />}
