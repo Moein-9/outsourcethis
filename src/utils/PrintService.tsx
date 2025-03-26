@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { toast } from '@/hooks/use-toast';
 
@@ -41,78 +42,102 @@ export const PrintService = {
     onComplete?: () => void
   ) => {
     try {
-      // Create the print frame
-      const iframe = PrintService.createPrintFrame();
-      let completionTimeout: ReturnType<typeof setTimeout>;
+      console.log(`[PrintService] Starting print process for ${paperType}`);
       
-      // Set up a listener for completion
-      const printCompleteHandler = (e: MessageEvent) => {
-        if (e.data === 'print-complete') {
-          window.removeEventListener('message', printCompleteHandler);
-          
-          // Always clean up the iframe after printing
-          if (completionTimeout) clearTimeout(completionTimeout);
-          completionTimeout = setTimeout(() => {
-            if (document.body.contains(iframe)) {
-              document.body.removeChild(iframe);
-            }
-            if (onComplete) onComplete();
-          }, 500);
-        }
-      };
+      // Use a consistent approach: window-based for all prints
+      const printWindow = window.open('', '_blank', 'width=800,height=600');
       
-      window.addEventListener('message', printCompleteHandler);
-      
-      // Write the content to the iframe
-      if (iframe.contentWindow) {
-        iframe.contentWindow.document.open();
-        iframe.contentWindow.document.write(htmlContent);
-        iframe.contentWindow.document.close();
-        
-        // Focus iframe and trigger print after content is loaded
-        iframe.onload = function() {
-          // Make sure the iframe is focused before printing
-          iframe.contentWindow?.focus();
-          
-          try {
-            // Print with a small delay to ensure browser is ready
-            setTimeout(() => {
-              iframe.contentWindow?.print();
-              
-              // Set a backup timeout in case the print complete event doesn't fire
-              setTimeout(() => {
-                window.postMessage('print-complete', '*');
-              }, 2000);
-            }, 300);
-          } catch (printError) {
-            console.error('Print error:', printError);
-            toast({
-              title: "Error",
-              description: "Failed to print. Please try again.",
-              variant: "destructive"
-            });
-            
-            // Clean up even if there's an error
-            window.postMessage('print-complete', '*');
-          }
-        };
-      } else {
+      if (!printWindow) {
+        console.error('[PrintService] Failed to open print window - likely blocked by browser');
         toast({
-          title: "Error",
-          description: "Failed to create print frame. Please try again.",
+          title: "Print Error",
+          description: "Popup blocked. Please allow popups for this site and try again.",
           variant: "destructive"
         });
-        
         if (onComplete) onComplete();
+        return;
       }
-    } catch (error) {
-      console.error('Print error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to print. Please try again.",
-        variant: "destructive"
+      
+      // Set up completion handler
+      let printCompleted = false;
+      let documentLoaded = false;
+      
+      // Listen for beforeunload to detect when print dialog is closed
+      printWindow.addEventListener('beforeunload', () => {
+        console.log('[PrintService] Print window closing');
+        if (!printCompleted) {
+          printCompleted = true;
+          if (onComplete) {
+            console.log('[PrintService] Running completion callback');
+            setTimeout(() => onComplete(), 100);
+          }
+        }
       });
       
+      // Write content to the window
+      printWindow.document.open();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Handle document loaded event
+      printWindow.onload = () => {
+        documentLoaded = true;
+        console.log('[PrintService] Document loaded in print window');
+        
+        // Focus window before printing (important for Firefox)
+        printWindow.focus();
+        
+        // Wait for resources to load
+        setTimeout(() => {
+          try {
+            // Track print dialog showing
+            console.log('[PrintService] Triggering browser print dialog');
+            printWindow.print();
+            
+            // Set a fallback completion handler (in case beforeunload doesn't fire)
+            setTimeout(() => {
+              if (!printCompleted) {
+                console.log('[PrintService] Using fallback completion (timeout)');
+                printCompleted = true;
+                // Close window in case it's still open
+                try { printWindow.close(); } catch (e) {}
+                if (onComplete) onComplete();
+              }
+            }, 5000);
+          } catch (printError) {
+            console.error('[PrintService] Error during print:', printError);
+            printWindow.close();
+            toast({
+              title: "Print Error",
+              description: "Failed to print. Try refreshing the page or using a different browser.",
+              variant: "destructive"
+            });
+            if (onComplete) onComplete();
+          }
+        }, 500); // Increased timeout to ensure resources load
+      };
+      
+      // Handle load failures
+      setTimeout(() => {
+        if (!documentLoaded) {
+          console.error('[PrintService] Document failed to load in print window');
+          try { printWindow.close(); } catch (e) {}
+          toast({
+            title: "Print Error",
+            description: "Document failed to load for printing. Please try again.",
+            variant: "destructive"
+          });
+          if (onComplete) onComplete();
+        }
+      }, 3000);
+      
+    } catch (error) {
+      console.error('[PrintService] Critical error:', error);
+      toast({
+        title: "Print Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
       if (onComplete) onComplete();
     }
   },

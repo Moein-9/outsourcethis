@@ -5,16 +5,21 @@ import QRCodeReact from 'qrcode.react';
 import QRCode from 'qrcode';
 import { Button } from "@/components/ui/button";
 import { useInventoryStore, FrameItem } from '@/store/inventoryStore';
-import { Check } from 'lucide-react';
+import { Check, AlertTriangle } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 import { PrintService } from '@/utils/PrintService';
+
+interface FrameLabelTemplateProps {
+  onPrintError?: (errorMessage: string) => void;
+}
 
 /**
  * Custom hook for frame label printing functionality
  */
-export const usePrintLabel = () => {
+export const usePrintLabel = (onError?: (message: string) => void) => {
   const { frames } = useInventoryStore();
   const { t } = useLanguageStore();
+  const [isPrinting, setIsPrinting] = useState(false);
   
   // Generate QR code as data URL
   const generateQRCodeDataURL = (text: string): Promise<string> => {
@@ -35,88 +40,106 @@ export const usePrintLabel = () => {
     const frame = frames.find(f => f.frameId === frameId);
     
     if (!frame) {
+      const errorMsg = t('frameNotFound');
       toast({
         title: t('error'),
-        description: t('frameNotFound'),
+        description: errorMsg,
         variant: "destructive"
       });
+      if (onError) onError(errorMsg);
       return;
     }
     
     try {
+      setIsPrinting(true);
+      console.log(`[LabelPrinting] Starting single label print for frame ${frameId}`);
+      
       const qrCodeDataURL = await generateQRCodeDataURL(frame.frameId);
       const labelContent = createFrameLabelContent(frame, qrCodeDataURL);
       const htmlDocument = PrintService.prepareLabelDocument(labelContent);
       
-      console.log("Printing frame label:", frame.frameId);
-      console.log("Generated QR code data URL length:", qrCodeDataURL.length);
+      console.log("[LabelPrinting] Generated QR code data URL length:", qrCodeDataURL.length);
       
       PrintService.printHtml(htmlDocument, 'label', () => {
+        console.log(`[LabelPrinting] Print process completed for frame ${frameId}`);
+        setIsPrinting(false);
         toast({
           title: t('success'),
           description: t('labelPrintedSuccessfully')
         });
       });
     } catch (error) {
-      console.error('QR code generation error:', error);
+      console.error('[LabelPrinting] QR code generation error:', error);
+      const errorMsg = t('errorGeneratingQRCode');
       toast({
         title: t('error'),
-        description: t('errorGeneratingQRCode'),
+        description: errorMsg,
         variant: "destructive"
       });
+      if (onError) onError(errorMsg);
+      setIsPrinting(false);
     }
   };
   
   // Function to print multiple frame labels
   const printMultipleLabels = async (frameIds: string[]) => {
     if (frameIds.length === 0) {
+      const errorMsg = t('noFramesSelected');
       toast({
         title: t('error'),
-        description: t('noFramesSelected'),
+        description: errorMsg,
         variant: "destructive"
       });
+      if (onError) onError(errorMsg);
       return;
     }
     
     const selectedFrames = frames.filter(f => frameIds.includes(f.frameId));
     
     if (selectedFrames.length === 0) {
+      const errorMsg = t('noFramesFound');
       toast({
         title: t('error'),
-        description: t('noFramesFound'),
+        description: errorMsg,
         variant: "destructive"
       });
+      if (onError) onError(errorMsg);
       return;
     }
     
     try {
-      console.log(`Printing ${selectedFrames.length} frame labels`);
+      setIsPrinting(true);
+      console.log(`[LabelPrinting] Starting multi-label print for ${selectedFrames.length} frames`);
+      
       let allLabelsContent = '';
       
       // Process frames sequentially to ensure all QR codes are generated properly
       for (const frame of selectedFrames) {
+        console.log(`[LabelPrinting] Generating label content for frame ${frame.frameId}`);
         const qrCodeDataURL = await generateQRCodeDataURL(frame.frameId);
         allLabelsContent += createFrameLabelContent(frame, qrCodeDataURL);
       }
       
       const htmlDocument = PrintService.prepareLabelDocument(allLabelsContent);
       
-      // Log the HTML to see if it's properly formatted
-      console.log("Generated HTML document for printing");
-      
       PrintService.printHtml(htmlDocument, 'label', () => {
+        console.log(`[LabelPrinting] Print process completed for ${selectedFrames.length} frames`);
+        setIsPrinting(false);
         toast({
           title: t('success'),
           description: t('labelsPrintedSuccessfully')
         });
       });
     } catch (error) {
-      console.error('QR code generation error:', error);
+      console.error('[LabelPrinting] QR code generation error:', error);
+      const errorMsg = t('errorGeneratingQRCodes');
       toast({
         title: t('error'),
-        description: t('errorGeneratingQRCodes'),
+        description: errorMsg,
         variant: "destructive"
       });
+      if (onError) onError(errorMsg);
+      setIsPrinting(false);
     }
   };
   
@@ -147,15 +170,15 @@ export const usePrintLabel = () => {
     `;
   };
   
-  return { printSingleLabel, printMultipleLabels };
+  return { printSingleLabel, printMultipleLabels, isPrinting };
 };
 
 /**
  * Frame Label Template Component
  */
-export const FrameLabelTemplate: React.FC = () => {
+export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintError }) => {
   const { frames } = useInventoryStore();
-  const { printMultipleLabels } = usePrintLabel();
+  const { printMultipleLabels, isPrinting } = usePrintLabel(onPrintError);
   const { t } = useLanguageStore();
   const [selectedFrames, setSelectedFrames] = useState<string[]>([]);
   
@@ -176,7 +199,7 @@ export const FrameLabelTemplate: React.FC = () => {
   };
   
   const handlePrintSelected = () => {
-    console.log(`Attempting to print ${selectedFrames.length} selected frames`);
+    console.log(`[FrameLabelTemplate] Attempting to print ${selectedFrames.length} selected frames`);
     printMultipleLabels(selectedFrames);
   };
   
@@ -286,17 +309,35 @@ export const FrameLabelTemplate: React.FC = () => {
           <span className="font-medium">{t('selectedFrames')}: {selectedFrames.length}</span>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={selectAllFrames}>
+          <Button variant="outline" size="sm" onClick={selectAllFrames} disabled={isPrinting}>
             {t('selectAll')}
           </Button>
-          <Button variant="outline" size="sm" onClick={deselectAllFrames}>
+          <Button variant="outline" size="sm" onClick={deselectAllFrames} disabled={isPrinting}>
             {t('deselectAll')}
           </Button>
-          <Button variant="secondary" size="sm" onClick={handlePrintSelected}>
-            {t('printSelected')}
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            onClick={handlePrintSelected} 
+            disabled={selectedFrames.length === 0 || isPrinting}
+            className="relative"
+          >
+            {isPrinting ? t('printing') : t('printSelected')}
+            {isPrinting && (
+              <span className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              </span>
+            )}
           </Button>
         </div>
       </div>
+      
+      {selectedFrames.length === 0 && frames.length > 0 && (
+        <div className="p-3 bg-amber-50 text-amber-800 rounded border border-amber-200 flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 text-amber-500" />
+          <span>{t('selectFramesToPrint')}</span>
+        </div>
+      )}
       
       {/* Preview of the first selected frame */}
       {selectedFrames.length > 0 && frames.length > 0 && (
