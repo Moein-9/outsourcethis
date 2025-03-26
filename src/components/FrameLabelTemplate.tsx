@@ -78,6 +78,7 @@ export const usePrintLabel = () => {
   
   // Helper function to create frame label HTML content
   const createFrameLabelContent = (frame: FrameItem) => {
+    // QR value is the frame ID
     const qrValue = frame.frameId;
     
     return `
@@ -87,10 +88,19 @@ export const usePrintLabel = () => {
             <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" />
           </div>
           <div class="qr-code">
-            <svg viewBox="0 0 40 40" width="40" height="40">
-              <rect width="40" height="40" fill="white" />
-              <text x="20" y="23" text-anchor="middle" font-size="6" fill="black">${qrValue.substring(0, 8)}</text>
-            </svg>
+            <div id="qr-code-${frame.frameId}"></div>
+            <script>
+              (function() {
+                var qrcode = new QRCode(document.getElementById("qr-code-${frame.frameId}"), {
+                  text: "${qrValue}",
+                  width: 32,
+                  height: 32,
+                  colorDark: "#000000",
+                  colorLight: "#ffffff",
+                  correctLevel: QRCode.CorrectLevel.H
+                });
+              })();
+            </script>
           </div>
         </div>
         <div class="right-section">

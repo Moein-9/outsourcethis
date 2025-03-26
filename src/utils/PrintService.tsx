@@ -269,6 +269,7 @@ export const PrintService = {
         <title>${title}</title>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
+        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/lib/index.min.js"></script>
         <style>
           @page {
             size: 100mm 16mm !important;
@@ -294,11 +295,11 @@ export const PrintService = {
           }
           
           .label-container {
-            width: 90mm !important;
+            width: 100mm !important;
             height: 16mm !important;
             display: flex !important;
-            justify-content: space-between !important;
-            margin: 0 auto 0 auto !important;
+            justify-content: flex-start !important;
+            margin: 0 !important;
             padding: 0 !important;
             overflow: hidden !important;
             page-break-after: always !important;
@@ -306,28 +307,28 @@ export const PrintService = {
           }
           
           .right-section {
-            width: 45mm !important;
-            margin-left: 25mm !important;
-            height: 100% !important;
-            padding: 1mm 0 !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: center !important;
-          }
-          
-          .left-section {
-            width: 45mm !important;
-            height: 100% !important;
+            width: 35mm !important;
+            height: 16mm !important;
             padding: 1mm !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: center !important;
+            margin-right: 30mm !important; /* Account for 30mm unprintable tail */
+          }
+          
+          .left-section {
+            width: 35mm !important;
+            height: 16mm !important;
+            padding: 1mm !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
             align-items: center !important;
           }
           
           .brand-name {
             font-weight: bold !important;
-            font-size: 8pt !important;
+            font-size: 10pt !important;
             margin-bottom: 0.5mm !important;
             white-space: nowrap !important;
             overflow: hidden !important;
@@ -338,34 +339,59 @@ export const PrintService = {
             font-size: 8pt !important;
             margin-bottom: 0.5mm !important;
             line-height: 1.1 !important;
-            text-align: center !important;
           }
           
           .price {
             font-weight: bold !important;
-            font-size: 8pt !important;
+            font-size: 12pt !important;
+            margin-top: 1mm !important;
           }
           
           .store-logo {
             display: flex !important;
             justify-content: center !important;
             width: 100% !important;
-            margin-bottom: 0.2mm !important;
+            margin-bottom: 1mm !important;
           }
           
           .store-logo img {
-            max-height: 3.5mm !important;
+            max-height: 5mm !important;
             width: auto !important;
           }
           
           .qr-code {
             display: flex !important;
             justify-content: center !important;
+            margin-bottom: 1mm !important;
           }
           
-          .qr-code img, .qr-code svg {
-            height: 40px !important;
-            width: 40px !important;
+          .qr-code img, .qr-code canvas, .qr-code svg {
+            height: 9mm !important;
+            width: 9mm !important;
+          }
+          
+          /* Fix for print dialog appearing but not working */
+          @media print {
+            body {
+              width: 100mm !important;
+              height: 16mm !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              overflow: hidden !important;
+              -webkit-print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            
+            /* Ensure only one copy prints */
+            @page {
+              size: 100mm 16mm !important;
+              margin: 0mm !important;
+              margin-left: 0mm !important;
+              margin-right: 0mm !important;
+              margin-top: 0mm !important;
+              margin-bottom: 0mm !important;
+            }
           }
         </style>
       </head>
