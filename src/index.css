@@ -84,25 +84,25 @@
     padding: 0 !important;
     height: auto !important;
     width: auto !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   body * {
     visibility: hidden;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   .print-receipt, .print-receipt *, 
   .print-container, .print-container * {
     visibility: visible;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   .print-receipt, .print-container {
     position: absolute;
     left: 0;
     top: 0;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   /* Hide scrollbars when printing */
@@ -120,26 +120,16 @@
   
   /* Critical fix for printing dialog issues */
   body.printing {
-    width: 80mm !important;
+    width: auto !important;
     height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   body.printing * {
     visibility: visible !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
-  }
-  
-  /* Ensure only one copy prints */
-  @page {
-    size: 80mm auto !important;
-    margin: 0mm !important;
-    margin-left: 0mm !important;
-    margin-right: 0mm !important;
-    margin-top: 0mm !important;
-    margin-bottom: 0mm !important;
+    overflow: hidden !important;
   }
 }
 
@@ -149,7 +139,7 @@
     width: 100mm;
     height: 16mm;
     page-break-inside: avoid;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
     position: relative;
     margin: 0;
     padding: 0;
@@ -157,9 +147,9 @@
   
   /* Fix for frame labels */
   @page {
-    size: 100mm 16mm;
-    margin: 0;
-    padding: 0;
+    size: 100mm 16mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
   /* Make sure each label gets its own page */
@@ -184,7 +174,7 @@
 .thermal-print {
   width: 80mm !important;
   font-family: 'Yrsa', serif !important;
-  overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+  overflow: hidden !important;
 }
 
 .thermal-print[dir="rtl"] {
@@ -198,9 +188,9 @@
     width: 80mm !important;
     max-width: 80mm !important;
     margin: 0 !important;
-    padding: 3mm !important; /* Reduced padding to fit more content */
+    padding: 3mm !important;
     font-family: 'Yrsa', serif !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   /* RTL thermal printing */
@@ -212,7 +202,7 @@
   .print-receipt, #work-order-receipt {
     page-break-after: always !important;
     page-break-inside: avoid !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   /* Critical fix for ensuring only one copy prints */
@@ -222,7 +212,7 @@
     page-break-after: always !important;
     visibility: visible !important;
     position: relative !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   /* Hide the preview text in actual prints */

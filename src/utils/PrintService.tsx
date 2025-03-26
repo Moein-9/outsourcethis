@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { toast } from '@/hooks/use-toast';
 
@@ -43,7 +44,6 @@ export const PrintService = {
     try {
       // Create the print frame
       const iframe = PrintService.createPrintFrame();
-      let printTimeout: ReturnType<typeof setTimeout>;
       let completionTimeout: ReturnType<typeof setTimeout>;
       
       // Set up a listener for completion
@@ -72,34 +72,30 @@ export const PrintService = {
         
         // Focus iframe and trigger print after content is loaded
         iframe.onload = function() {
-          if (printTimeout) clearTimeout(printTimeout);
+          // Make sure the iframe is focused before printing
+          iframe.contentWindow?.focus();
           
-          printTimeout = setTimeout(() => {
-            if (iframe.contentWindow) {
-              // Make sure the iframe is focused before printing
-              iframe.contentWindow.focus();
+          try {
+            // Print with a small delay to ensure browser is ready
+            setTimeout(() => {
+              iframe.contentWindow?.print();
               
-              try {
-                // Print with a small delay to ensure browser is ready
-                iframe.contentWindow.print();
-                
-                // Set a backup timeout in case the print complete event doesn't fire
-                setTimeout(() => {
-                  window.postMessage('print-complete', '*');
-                }, 2000);
-              } catch (printError) {
-                console.error('Print error:', printError);
-                toast({
-                  title: "Error",
-                  description: "Failed to print. Please try again.",
-                  variant: "destructive"
-                });
-                
-                // Clean up even if there's an error
+              // Set a backup timeout in case the print complete event doesn't fire
+              setTimeout(() => {
                 window.postMessage('print-complete', '*');
-              }
-            }
-          }, 300);
+              }, 2000);
+            }, 300);
+          } catch (printError) {
+            console.error('Print error:', printError);
+            toast({
+              title: "Error",
+              description: "Failed to print. Please try again.",
+              variant: "destructive"
+            });
+            
+            // Clean up even if there's an error
+            window.postMessage('print-complete', '*');
+          }
         };
       } else {
         toast({
@@ -247,25 +243,12 @@ export const PrintService = {
       <body>
         <div class="receipt-container">${content}</div>
         <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            // Force printing after content is loaded
-            setTimeout(function() {
-              window.focus();
-              window.print();
-              setTimeout(function() {
-                window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 300);
-          });
-          
-          // Backup in case DOMContentLoaded doesn't fire properly
-          setTimeout(function() {
-            window.focus();
-            window.print();
+          window.addEventListener('DOMContentLoaded', function() {
+            // Wait for the content to be fully loaded before focusing and printing
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 500);
-          }, 1000);
+            }, 2000);
+          });
         </script>
       </body>
       </html>
@@ -389,24 +372,12 @@ export const PrintService = {
       <body>
         ${content}
         <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-              window.focus();
-              window.print();
-              setTimeout(function() {
-                window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 300);
-          });
-          
-          // Backup in case DOMContentLoaded doesn't fire properly
-          setTimeout(function() {
-            window.focus();
-            window.print();
+          window.addEventListener('DOMContentLoaded', function() {
+            // Wait for the content to be fully loaded before notifying completion
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 500);
-          }, 1000);
+            }, 1000);
+          });
         </script>
       </body>
       </html>
@@ -544,24 +515,12 @@ export const PrintService = {
       <body>
         <div class="rx-container">${content}</div>
         <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-              window.focus();
-              window.print();
-              setTimeout(function() {
-                window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 300);
-          });
-          
-          // Backup in case DOMContentLoaded doesn't fire properly
-          setTimeout(function() {
-            window.focus();
-            window.print();
+          window.addEventListener('DOMContentLoaded', function() {
+            // Wait for the content to be fully loaded before notifying completion
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 500);
-          }, 1000);
+            }, 1000);
+          });
         </script>
       </body>
       </html>
@@ -760,25 +719,12 @@ export const PrintService = {
       <body>
         <div class="workorder-container">${content}</div>
         <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            // Force printing after content is loaded
-            setTimeout(function() {
-              window.focus();
-              window.print();
-              setTimeout(function() {
-                window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 300);
-          });
-          
-          // Backup in case DOMContentLoaded doesn't fire properly
-          setTimeout(function() {
-            window.focus();
-            window.print();
+          window.addEventListener('DOMContentLoaded', function() {
+            // Wait for the content to be fully loaded before notifying completion
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 500);
-          }, 1000);
+            }, 1000);
+          });
         </script>
       </body>
       </html>
@@ -866,24 +812,12 @@ export const PrintService = {
       <body>
         <div class="a4-container">${content}</div>
         <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-              window.focus();
-              window.print();
-              setTimeout(function() {
-                window.parent.postMessage('print-complete', '*');
-              }, 500);
-            }, 300);
-          });
-          
-          // Backup in case DOMContentLoaded doesn't fire properly
-          setTimeout(function() {
-            window.focus();
-            window.print();
+          window.addEventListener('DOMContentLoaded', function() {
+            // Wait for the content to be fully loaded before notifying completion
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 500);
-          }, 1000);
+            }, 1000);
+          });
         </script>
       </body>
       </html>

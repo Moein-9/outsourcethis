@@ -78,6 +78,8 @@ export const usePrintLabel = () => {
   
   // Helper function to create frame label HTML content
   const createFrameLabelContent = (frame: FrameItem) => {
+    const qrValue = frame.frameId;
+    
     return `
       <div class="label-container">
         <div class="left-section">
@@ -85,12 +87,10 @@ export const usePrintLabel = () => {
             <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" />
           </div>
           <div class="qr-code">
-            <div id="qr-code-${frame.frameId}"></div>
-            <script>
-              var qrContainer = document.getElementById('qr-code-${frame.frameId}');
-              var qrSvg = '${generateQRCodeSVG(frame.frameId)}';
-              qrContainer.innerHTML = qrSvg;
-            </script>
+            <svg viewBox="0 0 40 40" width="40" height="40">
+              <rect width="40" height="40" fill="white" />
+              <text x="20" y="23" text-anchor="middle" font-size="6" fill="black">${qrValue.substring(0, 8)}</text>
+            </svg>
           </div>
         </div>
         <div class="right-section">
@@ -101,18 +101,6 @@ export const usePrintLabel = () => {
         </div>
       </div>
     `;
-  };
-  
-  // Generate QR code SVG string
-  const generateQRCodeSVG = (value: string) => {
-    // Create a simple QR code SVG string
-    const svgString = `
-      <svg viewBox="0 0 40 40" width="40" height="40">
-        <rect width="40" height="40" fill="white" />
-        <text x="20" y="23" text-anchor="middle" font-size="6" fill="black">${value.substring(0, 8)}</text>
-      </svg>
-    `;
-    return svgString.replace(/"/g, '\'').replace(/\s+/g, ' ').trim();
   };
   
   return { printSingleLabel, printMultipleLabels };
