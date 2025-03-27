@@ -83,7 +83,11 @@ export const LensTypeManager: React.FC = () => {
     { value: "sunglasses", label: t("sunglasses") }
   ];
   
-  const filteredLenses = lensTypes.filter(lens => lens.type === activeTab);
+  // Get filtered lenses based on the active tab
+  // For "distance-reading" tab, show both distance and reading lenses
+  const filteredLenses = activeTab === "distance-reading" 
+    ? lensTypes.filter(lens => lens.type === "distance" || lens.type === "reading")
+    : lensTypes.filter(lens => lens.type === activeTab);
   
   return (
     <div className="space-y-4">
@@ -137,10 +141,9 @@ export const LensTypeManager: React.FC = () => {
         </Dialog>
       </div>
       
-      <Tabs defaultValue="distance" value={activeTab} onValueChange={setActiveTab}>
+      <Tabs defaultValue="distance-reading" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-3 md:grid-cols-5 mb-4">
-          <TabsTrigger value="distance">{t("distance")}</TabsTrigger>
-          <TabsTrigger value="reading">{t("reading")}</TabsTrigger>
+          <TabsTrigger value="distance-reading">{t("distanceReading")}</TabsTrigger>
           <TabsTrigger value="progressive">{t("progressive")}</TabsTrigger>
           <TabsTrigger value="bifocal">{t("bifocal")}</TabsTrigger>
           <TabsTrigger value="sunglasses">{t("sunglasses")}</TabsTrigger>

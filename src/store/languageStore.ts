@@ -181,6 +181,7 @@ const translations: Record<string, Record<string, string>> = {
     updateLens: 'Update Lens',
     deleteLensConfirm: 'Are you sure you want to delete this lens?',
     contactLensManagement: 'Contact Lens Management',
+    distanceReading: 'Distance/Reading',
     
     // Coating
     coatingInventory: 'Coating Inventory',
@@ -536,6 +537,7 @@ const translations: Record<string, Record<string, string>> = {
     updateLens: 'تحديث العدسة',
     deleteLensConfirm: 'هل أنت متأكد من رغبتك في حذف هذه العدسة؟',
     contactLensManagement: 'إدارة العدسات اللاصقة',
+    distanceReading: 'النظر البعيد/القراءة',
     
     // Coating
     coatingInventory: 'مخزون الطلاءات',
