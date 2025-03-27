@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -218,26 +217,26 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
           </h2>
           
           ${props.frame ? `
-          <div style="margin-bottom: 2px;">
-            <h3 style="font-size: 11px; font-weight: bold; margin: 1px 0;">
+          <div style="margin-bottom: 3px;">
+            <h3 style="font-size: 11px; font-weight: bold; margin: 2px 0;">
               ${isRtl ? 'الإطار' : 'Frame'} ${isRtl ? `<span style="font-size: 10px;">(Frame)</span>` : `<span style="font-size: 10px;">(الإطار)</span>`}
             </h3>
-            <div style="margin-left: 2px; border: 1px solid #ddd; padding: 1px 2px; border-radius: 2px;" class="product-box">
-              <div style="display: flex; justify-content: space-between;">
+            <div style="margin-left: 2px;">
+              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "الماركة/الموديل" : "Brand/Model"}:</span>
                 <span>${props.frame.brand} ${props.frame.model}</span>
               </div>
-              <div style="display: flex; justify-content: space-between;">
+              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "اللون" : "Color"}:</span>
                 <span>${props.frame.color}</span>
               </div>
               ${props.frame.size ? `
-              <div style="display: flex; justify-content: space-between;">
+              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "الحجم" : "Size"}:</span>
                 <span>${props.frame.size}</span>
               </div>
               ` : ''}
-              <div style="display: flex; justify-content: space-between;">
+              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "السعر" : "Price"}:</span>
                 <span>${props.frame.price.toFixed(3)} KWD</span>
               </div>
@@ -246,16 +245,16 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
           ` : ''}
           
           ${props.lensType ? `
-          <div style="margin-bottom: 2px;">
-            <h3 style="font-size: 11px; font-weight: bold; margin: 1px 0;">
+          <div style="margin-bottom: 3px;">
+            <h3 style="font-size: 11px; font-weight: bold; margin: 2px 0;">
               ${isRtl ? 'العدسات الطبية' : 'Lenses'} ${isRtl ? `<span style="font-size: 10px;">(Lenses)</span>` : `<span style="font-size: 10px;">(العدسات الطبية)</span>`}
             </h3>
-            <div style="margin-left: 2px; border: 1px solid #ddd; padding: 1px 2px; border-radius: 2px;" class="product-box">
-              <div style="display: flex; justify-content: space-between;">
+            <div style="margin-left: 2px;">
+              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "النوع" : "Type"}:</span>
                 <span>${props.lensType}</span>
               </div>
-              <div style="display: flex; justify-content: space-between;">
+              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "السعر" : "Price"}:</span>
                 <span>${props.invoice.lensPrice.toFixed(3)} KWD</span>
               </div>
@@ -264,16 +263,16 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
           ` : ''}
           
           ${props.coating ? `
-          <div style="margin-bottom: 2px;">
-            <h3 style="font-size: 11px; font-weight: bold; margin: 1px 0;">
+          <div style="margin-bottom: 3px;">
+            <h3 style="font-size: 11px; font-weight: bold; margin: 2px 0;">
               ${isRtl ? 'الطلاء' : 'Coating'} ${isRtl ? `<span style="font-size: 10px;">(Coating)</span>` : `<span style="font-size: 10px;">(الطلاء)</span>`}
             </h3>
-            <div style="margin-left: 2px; border: 1px solid #ddd; padding: 1px 2px; border-radius: 2px;" class="product-box">
-              <div style="display: flex; justify-content: space-between;">
+            <div style="margin-left: 2px;">
+              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "النوع" : "Type"}:</span>
                 <span>${props.coating}</span>
               </div>
-              <div style="display: flex; justify-content: space-between;">
+              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "السعر" : "Price"}:</span>
                 <span>${props.invoice.coatingPrice.toFixed(3)} KWD</span>
               </div>
@@ -282,32 +281,32 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
           ` : ''}
           
           ${props.contactLenses && props.contactLenses.length > 0 ? `
-          <div style="margin-bottom: 2px;">
-            <h3 style="font-size: 11px; font-weight: bold; margin: 1px 0;">
+          <div style="margin-bottom: 3px;">
+            <h3 style="font-size: 11px; font-weight: bold; margin: 2px 0;">
               ${isRtl ? 'العدسات اللاصقة' : 'Contact Lenses'} ${isRtl ? `<span style="font-size: 10px;">(Contact Lenses)</span>` : `<span style="font-size: 10px;">(العدسات اللاصقة)</span>`}
             </h3>
             ${props.contactLenses.slice(0, 2).map((lens, index) => `
-              <div key="${index}" style="margin-left: 2px; border: 1px solid #ddd; padding: 1px 2px; border-radius: 2px; margin-bottom: 1px;" class="product-box">
-                <div style="display: flex; justify-content: space-between;">
+              <div key="${index}" style="margin-left: 2px; margin-bottom: 1px;">
+                <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                   <span style="font-weight: bold;">${isRtl ? "النوع" : "Type"}:</span>
                   <span>${lens.brand} ${lens.type}</span>
                 </div>
                 ${lens.color ? `
-                <div style="display: flex; justify-content: space-between;">
+                <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                   <span style="font-weight: bold;">${isRtl ? "اللون" : "Color"}:</span>
                   <span>${lens.color}</span>
                 </div>
                 ` : ''}
-                <div style="display: flex; justify-content: space-between;">
+                <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                   <span style="font-weight: bold;">${isRtl ? "الكمية" : "Quantity"}:</span>
                   <span>${lens.qty || 1}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
+                <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                   <span style="font-weight: bold;">${isRtl ? "السعر الإفرادي" : "Unit Price"}:</span>
                   <span>${lens.price.toFixed(3)} KWD</span>
                 </div>
                 ${(lens.qty && lens.qty > 1) ? `
-                <div style="display: flex; justify-content: space-between;">
+                <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                   <span style="font-weight: bold;">${isRtl ? "المجموع" : "Total"}:</span>
                   <span>${(lens.price * (lens.qty || 1)).toFixed(3)} KWD</span>
                 </div>
@@ -398,14 +397,14 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
             display: flex;
             justify-content: space-between;
             background-color: #FEE2E2;
-            padding: 6px;
+            padding: 4px;
             border-radius: 4px;
-            margin: 6px 0 1px 0;
+            margin: 4px 0 1px 0;
             font-weight: bold;
-            font-size: 16px;
-            border: 2px solid #FECACA;
-            color: #ea384c;
-          " class="payment-remaining">
+            font-size: 15px;
+            border: 1px solid #FECACA;
+            color: #B91C1C;
+          ">
             ${isRtl ? (
               `<span>المتبقي (REMAINING):</span>`
             ) : (
@@ -431,6 +430,18 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
             <div style="display: flex; justify-content: flex-end; font-size: 9px; margin-top: 2px;">
               <span>${isRtl ? "التاريخ" : "Date"}: ____ /____ /____</span>
             </div>
+          </div>
+        </div>
+        
+        <div style="border-top: 1px dashed #000; padding-top: 5px; margin-top: 10px; text-align: center;">
+          <div style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">
+            ${isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
+          </div>
+          <div style="font-size: 7px; color: #666;">
+            ${isRtl ? 
+              "هذا الإيصال دليل طلب فقط وليس إيصال دفع" : 
+              "This receipt is proof of order only and not a payment receipt"
+            }
           </div>
         </div>
       </div>
@@ -928,32 +939,3 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     </div>
   );
 };
-
-const getLensTypeArabic = (lensType: string): string => {
-  const lensTypeMap: Record<string, string> = {
-    "Single Vision": "نظارات للنظر",
-    "Progressive": "عدسات متعددة البؤر",
-    "Bifocal": "ثنائية البؤرة",
-    "Reading": "نظارات للقراءة",
-    "Distance": "نظارات للنظر البعيد",
-    "Intermediate": "نظارات للمسافة المتوسطة",
-    // Add more mappings as needed
-  };
-  
-  return lensTypeMap[lensType] || lensType;
-};
-
-const getCoatingArabic = (coating: string): string => {
-  const coatingMap: Record<string, string> = {
-    "Anti-Reflective": "طلاء مضاد للانعكاس",
-    "Blue Light Filter": "فلتر الضوء الأزرق",
-    "Photochromic": "عدسات متغيرة اللون",
-    "Scratch Resistant": "مقاوم للخدش",
-    "UV Protection": "حماية من الأشعة فوق البنفسجية",
-    "Polarized": "استقطاب",
-    // Add more mappings as needed
-  };
-  
-  return coatingMap[coating] || coating;
-};
-

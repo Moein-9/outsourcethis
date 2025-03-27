@@ -1,5 +1,5 @@
 
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
@@ -9,7 +9,11 @@ export class CustomPrintService {
       // Create a new window for printing
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
-        toast.error("Unable to open print window. Please allow popups for this site.");
+        toast({
+          title: "Error",
+          description: "Unable to open print window. Please allow popups for this site.",
+          variant: "destructive",
+        });
         return;
       }
       
@@ -73,29 +77,6 @@ export class CustomPrintService {
                   color: white !important;
                 }
                 
-                /* Red color for remaining payment */
-                .payment-remaining, 
-                [style*="color: #ea384c"],
-                [style*="color: #B91C1C"] {
-                  color: #ea384c !important;
-                  background-color: #FEE2E2 !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                  color-adjust: exact !important;
-                  border: 2px solid #FECACA !important;
-                  font-size: 16px !important;
-                  font-weight: bold !important;
-                  padding: 6px !important;
-                }
-                
-                /* Compact product boxes styling */
-                .product-box {
-                  padding: 2px !important;
-                  margin-bottom: 2px !important;
-                  border: 1px solid #ddd !important;
-                  border-radius: 2px !important;
-                }
-                
                 /* Improve dynamic sizing */
                 html, body {
                   height: auto !important;
@@ -139,26 +120,6 @@ export class CustomPrintService {
               .bg-black {
                 background-color: black !important;
                 color: white !important;
-              }
-              
-              /* Red color for remaining payment */
-              .payment-remaining, 
-              [style*="color: #ea384c"],
-              [style*="color: #B91C1C"] {
-                color: #ea384c !important;
-                background-color: #FEE2E2 !important;
-                border: 2px solid #FECACA !important;
-                font-weight: bold !important;
-                font-size: 16px !important;
-                padding: 6px !important;
-              }
-              
-              /* Compact product boxes styling */
-              .product-box {
-                padding: 2px !important;
-                margin-bottom: 2px !important;
-                border: 1px solid #ddd !important;
-                border-radius: 2px !important;
               }
             </style>
           </head>
@@ -205,40 +166,6 @@ export class CustomPrintService {
             });
           }
           
-          // Add compact styling to product boxes
-          const productBoxes = printWindow.document.querySelectorAll('.p-1.border.border-gray-300.rounded.mb-1, div[style*="border: 1px solid"]');
-          productBoxes.forEach(box => {
-            if (box instanceof HTMLElement) {
-              box.classList.add('product-box');
-            }
-          });
-          
-          // Remove thank you message and disclaimer if they exist
-          const thankYouElements = printWindow.document.querySelectorAll('div[style*="text-align: center"]');
-          thankYouElements.forEach(element => {
-            if (element instanceof HTMLElement && 
-                (element.textContent?.includes('Thank you') || 
-                 element.textContent?.includes('شكراً') || 
-                 element.textContent?.toLowerCase().includes('receipt is proof'))) {
-              element.remove();
-            }
-          });
-          
-          // Enhance the remaining payment styling
-          const remainingPaymentElements = printWindow.document.querySelectorAll('div[style*="color: #B91C1C"], div[style*="color: #ea384c"]');
-          remainingPaymentElements.forEach(element => {
-            if (element instanceof HTMLElement) {
-              element.classList.add('payment-remaining');
-              element.style.fontSize = '16px';
-              element.style.padding = '6px';
-              element.style.margin = '6px 0';
-              element.style.fontWeight = 'bold';
-              element.style.color = '#ea384c';
-              element.style.backgroundColor = '#FEE2E2';
-              element.style.border = '2px solid #FECACA';
-            }
-          });
-          
           // Wait for content to load before proceeding
           printWindow.document.close();
         }
@@ -249,7 +176,11 @@ export class CustomPrintService {
       }
     } catch (error) {
       console.error("Error printing work order:", error);
-      toast.error("An error occurred while trying to print the work order.");
+      toast({
+        title: "Error",
+        description: "An error occurred while trying to print the work order.",
+        variant: "destructive",
+      });
     }
   }
 }

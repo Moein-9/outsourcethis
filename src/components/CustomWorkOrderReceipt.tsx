@@ -258,11 +258,11 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           {isRtl ? "المنتجات | Products" : "Products | المنتجات"}
         </div>
         
-        <div className="space-y-1 px-1">
+        <div className="space-y-2 px-1">
           {isContactLens && contactLensItems.length > 0 ? (
             contactLensItems.map((lens, idx) => (
-              <div key={idx} className="p-1 border border-gray-300 rounded mb-1 product-box">
-                <div className="flex justify-between px-2">
+              <div key={idx} className="p-1.5 border border-gray-300 rounded">
+                <div className="flex justify-between px-2 mb-1">
                   <div className="font-bold text-sm">{lens.brand} {lens.type}</div>
                   <span className="font-bold text-sm">{lens.price.toFixed(3)} KWD</span>
                 </div>
@@ -273,31 +273,22 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               </div>
             ))
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-2">
               {frameData.brand && (
-                <div className="p-1 border border-gray-300 rounded mb-1 product-box">
-                  <div className="flex justify-between px-2">
+                <div className="p-1.5 border border-gray-300 rounded">
+                  <div className="flex justify-between px-2 mb-1">
                     <div className="font-bold text-sm">{isRtl ? "الإطار | Frame" : "Frame | الإطار"}</div>
                     <span className="font-bold text-sm">{frameData.price.toFixed(3)} KWD</span>
                   </div>
                   <div className="text-xs font-medium text-center">{frameData.brand} {frameData.model}</div>
-                  {frameData.color && frameData.size && (
-                    <div className="text-xs font-medium text-center">
-                      {t("color")}: {frameData.color} - {t("size")}: {frameData.size}
-                    </div>
-                  )}
-                  {frameData.color && !frameData.size && (
-                    <div className="text-xs font-medium text-center">{t("color")}: {frameData.color}</div>
-                  )}
-                  {!frameData.color && frameData.size && (
-                    <div className="text-xs font-medium text-center">{t("size")}: {frameData.size}</div>
-                  )}
+                  {frameData.color && <div className="text-xs font-medium text-center">{t("color")}: {frameData.color}</div>}
+                  {frameData.size && <div className="text-xs font-medium text-center">{t("size")}: {frameData.size}</div>}
                 </div>
               )}
               
               {lensName && (
-                <div className="p-1 border border-gray-300 rounded mb-1 product-box">
-                  <div className="flex justify-between px-2">
+                <div className="p-1.5 border border-gray-300 rounded">
+                  <div className="flex justify-between px-2 mb-1">
                     <div className="font-bold text-sm">{isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}</div>
                     <span className="font-bold text-sm">{lensPrice.toFixed(3)} KWD</span>
                   </div>
@@ -306,8 +297,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               )}
               
               {coatingName && (
-                <div className="p-1 border border-gray-300 rounded mb-1 product-box">
-                  <div className="flex justify-between px-2">
+                <div className="p-1.5 border border-gray-300 rounded">
+                  <div className="flex justify-between px-2 mb-1">
                     <div className="font-bold text-sm">{isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}</div>
                     <span className="font-bold text-sm">{coatingPrice.toFixed(3)} KWD</span>
                   </div>
@@ -343,10 +334,10 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           {isRtl ? "الدفع | Payment" : "Payment | الدفع"}
         </div>
         
-        <div className="space-y-1">
+        <div className="space-y-2">
           {invoice?.payments?.map((payment, index) => (
-            <div key={index} className="p-1 border border-gray-300 rounded mb-1 product-box">
-              <div className="flex justify-between px-2">
+            <div key={index} className="p-1.5 border border-gray-300 rounded">
+              <div className="flex justify-between px-2 mb-1">
                 <div className="font-bold text-sm">
                   {format(new Date(payment.date), 'dd/MM/yyyy')}
                 </div>
@@ -359,8 +350,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               </div>
             </div>
           )) || (deposit > 0 && (
-            <div className="p-1 border border-gray-300 rounded mb-1 product-box">
-              <div className="flex justify-between px-2">
+            <div className="p-1.5 border border-gray-300 rounded">
+              <div className="flex justify-between px-2 mb-1">
                 <div className="font-bold text-sm">
                   {format(new Date(), 'dd/MM/yyyy')}
                 </div>
@@ -374,12 +365,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           ))}
           
           {remaining > 0 ? (
-            <div className="flex justify-between font-bold py-2 px-3 mt-2 pt-1 border-2 border-black rounded payment-remaining" 
-                 style={{ 
-                   color: '#ea384c', 
-                   backgroundColor: '#FEE2E2', 
-                   borderColor: '#FECACA' 
-                 }}>
+            <div className="flex justify-between font-bold mt-2 pt-1 border-t-2 border-black px-2">
               <span className="text-base">{t("remaining")}:</span>
               <span className="text-base">{remaining.toFixed(3)} KWD</span>
             </div>
@@ -422,6 +408,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <div className="border border-gray-300 rounded p-2 min-h-16">
           
         </div>
+      </div>
+
+      <div className="text-center border-t-2 border-black pt-2 text-xs">
+        <p className="font-bold text-sm mb-0">
+          {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
+        </p>
+        <p className="text-[9px] mt-1 text-gray-500">
+          {isRtl ? "هذا الإيصال يعتبر إثبات للطلب فقط وليس إيصال دفع" : 
+                  "This receipt is proof of order only and not a payment receipt"}
+        </p>
       </div>
       
       <style>
@@ -492,6 +488,14 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               page-break-after: avoid !important;
             }
             
+            @supports (-webkit-appearance:none) {
+              body, html, #work-order-receipt {
+                height: fit-content !important;
+                min-height: fit-content !important;
+                max-height: fit-content !important;
+              }
+            }
+            
             .bg-black {
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
@@ -499,33 +503,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               background-color: black !important;
               color: white !important;
             }
-            
-            .product-box {
-              padding: 2px !important;
-              margin-bottom: 2px !important;
-            }
-            
-            .payment-remaining {
-              color: #ea384c !important;
-              background-color: #FEE2E2 !important;
-              border-color: #FECACA !important;
-              font-weight: bold !important;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-            }
-          }
-          
-          .product-box {
-            padding: 4px !important;
-            margin-bottom: 3px !important;
-          }
-          
-          .payment-remaining {
-            color: #ea384c !important;
-            background-color: #FEE2E2 !important;
-            border-color: #FECACA !important;
-            font-weight: bold !important;
           }
         `}
       </style>
