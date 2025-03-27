@@ -142,37 +142,64 @@ export class CustomPrintService {
         </html>
       `);
       
-      // Get the content of the custom work order
-      const workOrderElement = document.getElementById('work-order-receipt');
+      // Create a hidden div, render the component to get its HTML content
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '-9999px';
+      tempDiv.innerHTML = `
+        <div id="temp-work-order-receipt" class="print-receipt" style="width: 80mm; max-width: 80mm;">
+          <!-- CustomWorkOrderReceipt will be rendered here -->
+        </div>
+      `;
+      document.body.appendChild(tempDiv);
       
-      // If the element exists, copy its innerHTML to the print window
-      if (workOrderElement) {
-        const contentContainer = printWindow.document.getElementById('custom-work-order-content');
-        if (contentContainer) {
-          contentContainer.innerHTML = workOrderElement.innerHTML;
-          
-          // Ensure timestamps are showing original creation dates
-          if (invoice?.rx?.createdAt || workOrder?.rx?.createdAt) {
-            // Use the original RX creation date rather than printing date
-            const rxCreationDate = invoice?.rx?.createdAt || workOrder?.rx?.createdAt;
-            const dateElements = printWindow.document.querySelectorAll('.rx-creation-date');
+      // Import React and ReactDOM dynamically to render the component
+      import('react').then((React) => {
+        import('react-dom/client').then((ReactDOM) => {
+          import('../components/CustomWorkOrderReceipt').then((module) => {
+            const CustomWorkOrderReceipt = module.CustomWorkOrderReceipt;
             
-            dateElements.forEach(element => {
-              if (element instanceof HTMLElement) {
-                // Format date in English format MM/DD/YYYY HH:MM
-                element.textContent = new Date(rxCreationDate).toLocaleString('en-US');
+            // Create a root and render the component
+            const root = ReactDOM.createRoot(document.getElementById('temp-work-order-receipt')!);
+            root.render(
+              React.createElement(CustomWorkOrderReceipt, {
+                workOrder,
+                invoice,
+                patient,
+                isPrintable: true
+              })
+            );
+            
+            // Wait for the component to render
+            setTimeout(() => {
+              const tempReceiptElement = document.getElementById('temp-work-order-receipt');
+              if (tempReceiptElement) {
+                // Get the rendered HTML content
+                const contentContainer = printWindow.document.getElementById('custom-work-order-content');
+                if (contentContainer) {
+                  contentContainer.innerHTML = tempReceiptElement.innerHTML;
+                  
+                  // Clean up
+                  document.body.removeChild(tempDiv);
+                  root.unmount();
+                  
+                  // Close the document to finish writing
+                  printWindow.document.close();
+                }
+              } else {
+                console.error("Could not find temp receipt element");
+                printWindow.document.write("<p>Error rendering work order content.</p>");
+                printWindow.document.close();
               }
-            });
-          }
-          
-          // Wait for content to load before proceeding
-          printWindow.document.close();
-        }
-      } else {
-        // Handle the case where the element doesn't exist
-        printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
+            }, 300);
+          });
+        });
+      }).catch(error => {
+        console.error("Error loading dependencies:", error);
+        printWindow.document.write("<p>Error loading dependencies.</p>");
         printWindow.document.close();
-      }
+      });
     } catch (error) {
       console.error("Error printing work order:", error);
       toast({
