@@ -41,10 +41,18 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     setIsPrinting(true);
     setOpen(false); // Close dialog before printing
     
-    // Slightly longer delay to ensure dialog is fully closed and DOM is updated
+    // Short delay to ensure dialog is fully closed before printing
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
-      setIsPrinting(false);
+      try {
+        CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+      } catch (error) {
+        console.error("Error during print process:", error);
+      } finally {
+        // Reset printing state after a short delay
+        setTimeout(() => {
+          setIsPrinting(false);
+        }, 500);
+      }
     }, 300);
   };
   
