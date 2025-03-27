@@ -66,6 +66,24 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
     return lens.price !== undefined ? lens.price : 0;
   };
 
+  // Map lens type to coating/thickness category
+  const getLensCategoryForCoatings = (activeTab: string): "distance-reading" | "progressive" | "bifocal" => {
+    if (activeTab === "distance" || activeTab === "reading") {
+      return "distance-reading";
+    } else if (activeTab === "progressive") {
+      return "progressive";
+    } else if (activeTab === "bifocal") {
+      return "bifocal";
+    }
+    return "distance-reading"; // Default fallback
+  };
+
+  // Get available coatings based on active tab
+  const getAvailableCoatings = (): LensCoating[] => {
+    const category = getLensCategoryForCoatings(activeTab);
+    return lensCoatings.filter(coating => coating.category === category);
+  };
+
   // Category colors
   const categoryColors = {
     distance: "bg-blue-50 border-blue-200 text-blue-700",
@@ -162,7 +180,7 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
         {expandedSection === "coating" && (
           <ScrollArea className="h-[160px] bg-gradient-to-b from-amber-50/30 to-white">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-3">
-              {lensCoatings.map((coating) => (
+              {getAvailableCoatings().map((coating) => (
                 <Card 
                   key={coating.id} 
                   className={`cursor-pointer transition-all border hover:shadow ${
@@ -180,7 +198,7 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
                   </CardContent>
                 </Card>
               ))}
-              {lensCoatings.length === 0 && (
+              {getAvailableCoatings().length === 0 && (
                 <p className="col-span-3 text-center p-2 text-muted-foreground text-sm">
                   لا توجد طلاءات متاحة
                 </p>
