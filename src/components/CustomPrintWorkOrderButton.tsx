@@ -12,6 +12,7 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
+import { toast } from 'sonner';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -34,14 +35,24 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   
   const handlePrint = () => {
+    setIsPrinting(true);
     console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
     setOpen(false); // Close dialog before printing
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+      try {
+        CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+        toast.success(t('printingSent'));
+      } catch (error) {
+        console.error("Error printing:", error);
+        toast.error(t('printingError'));
+      } finally {
+        setIsPrinting(false);
+      }
     }, 300);
   };
   
@@ -51,9 +62,10 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
       variant={variant}
       size={size}
       className={`gap-1 ${className}`}
+      disabled={isPrinting}
     >
       <Printer className="h-4 w-4" />
-      {t('printWorkOrder')}
+      {isPrinting ? t('printing') : t('printWorkOrder')}
     </Button>
   );
   
@@ -80,9 +92,9 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               isPrintable={false}
             />
           </div>
-          <Button onClick={handlePrint} className="mt-4 gap-2">
+          <Button onClick={handlePrint} className="mt-4 gap-2" disabled={isPrinting}>
             <Printer className="h-4 w-4" />
-            {t('print')}
+            {isPrinting ? t('printing') : t('print')}
           </Button>
         </div>
       </DialogContent>
