@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -102,7 +103,22 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "coat4", name: "مضاد للانعكاس للعدسات التقدمية", price: 10, description: "Anti-Reflective for Progressive", category: "progressive" },
         { id: "coat5", name: "حماية شاشة للعدسات التقدمية", price: 12, description: "Blue Light Protection for Progressive", category: "progressive" },
         { id: "coat6", name: "مضاد للانعكاس للعدسات الثنائية", price: 8, description: "Anti-Reflective for Bifocal", category: "bifocal" },
-        { id: "coat7", name: "حماية شاشة للعدسات الثنائية", price: 9, description: "Blue Light Protection for Bifocal", category: "bifocal" }
+        { id: "coat7", name: "حماية شاشة للعدسات الثنائية", price: 9, description: "Blue Light Protection for Bifocal", category: "bifocal" },
+        
+        // New coating items for distance-reading
+        { id: "coat8", name: "Basic (عادي)", price: 0, description: "Basic Coating", category: "distance-reading" },
+        { id: "coat9", name: "Filter (فلتر)", price: 0, description: "Filter Coating", category: "distance-reading" },
+        { id: "coat10", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating", category: "distance-reading" },
+        
+        // New coating items for progressive
+        { id: "coat11", name: "Basic (عادي)", price: 0, description: "Basic Coating for Progressive", category: "progressive" },
+        { id: "coat12", name: "Filter (فلتر)", price: 0, description: "Filter Coating for Progressive", category: "progressive" },
+        { id: "coat13", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Progressive", category: "progressive" },
+        
+        // New coating items for bifocal
+        { id: "coat14", name: "Basic (عادي)", price: 0, description: "Basic Coating for Bifocal", category: "bifocal" },
+        { id: "coat15", name: "Filter (فلتر)", price: 0, description: "Filter Coating for Bifocal", category: "bifocal" },
+        { id: "coat16", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Bifocal", category: "bifocal" }
       ],
       lensThicknesses: [
         { id: "thick1", name: "عادي", price: 0, description: "Standard Thickness", category: "distance-reading" },
@@ -111,7 +127,31 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "thick4", name: "عادي للعدسات التقدمية", price: 5, description: "Standard for Progressive", category: "progressive" },
         { id: "thick5", name: "رقيق للعدسات التقدمية", price: 15, description: "Thin for Progressive", category: "progressive" },
         { id: "thick6", name: "عادي للعدسات الثنائية", price: 3, description: "Standard for Bifocal", category: "bifocal" },
-        { id: "thick7", name: "رقيق للعدسات الثنائية", price: 12, description: "Thin for Bifocal", category: "bifocal" }
+        { id: "thick7", name: "رقيق للعدسات الثنائية", price: 12, description: "Thin for Bifocal", category: "bifocal" },
+        
+        // New thickness items for distance-reading
+        { id: "thick8", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness", category: "distance-reading" },
+        { id: "thick9", name: "Standard Thickness", price: 0, description: "Standard Thickness", category: "distance-reading" },
+        { id: "thick10", name: "Polycarbonate", price: 0, description: "Polycarbonate Material", category: "distance-reading" },
+        { id: "thick11", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens", category: "distance-reading" },
+        { id: "thick12", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens", category: "distance-reading" },
+        { id: "thick13", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens", category: "distance-reading" },
+        
+        // New thickness items for progressive
+        { id: "thick14", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness for Progressive", category: "progressive" },
+        { id: "thick15", name: "Standard Thickness", price: 0, description: "Standard Thickness for Progressive", category: "progressive" },
+        { id: "thick16", name: "Polycarbonate", price: 0, description: "Polycarbonate Material for Progressive", category: "progressive" },
+        { id: "thick17", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens for Progressive", category: "progressive" },
+        { id: "thick18", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens for Progressive", category: "progressive" },
+        { id: "thick19", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens for Progressive", category: "progressive" },
+        
+        // New thickness items for bifocal
+        { id: "thick20", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness for Bifocal", category: "bifocal" },
+        { id: "thick21", name: "Standard Thickness", price: 0, description: "Standard Thickness for Bifocal", category: "bifocal" },
+        { id: "thick22", name: "Polycarbonate", price: 0, description: "Polycarbonate Material for Bifocal", category: "bifocal" },
+        { id: "thick23", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens for Bifocal", category: "bifocal" },
+        { id: "thick24", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens for Bifocal", category: "bifocal" },
+        { id: "thick25", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens for Bifocal", category: "bifocal" }
       ],
       contactLenses: [
         { id: "cl1", brand: "Acuvue", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 25, qty: 30 },
