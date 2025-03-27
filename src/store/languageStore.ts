@@ -1,10 +1,9 @@
-
 import { create } from 'zustand';
 
 type LanguageStore = {
   language: 'en' | 'ar';
   setLanguage: (language: 'en' | 'ar') => void;
-  t: (key: string, params?: Record<string, string>) => string;
+  t: (key: string) => string;
 };
 
 // Translations for both languages
@@ -173,53 +172,15 @@ const translations: Record<string, Record<string, string>> = {
     lensInventory: 'Lens Inventory',
     lensTypes: 'Lens Types',
     lensCoatings: 'Lens Coatings',
-    lensTypeManagement: 'Lens Type Management',
-    lensCoatingManagement: 'Lens Coating Management',
-    lensThicknessManagement: 'Lens Thickness Management',
     addLens: 'Add Lens',
     editLens: 'Edit Lens',
     deleteLens: 'Delete Lens',
     lensName: 'Lens Name',
-    lensNameExample: 'e.g., Single Vision, Progressive',
     description: 'Description',
-    type: 'Type',
-    addNewLensTitle: 'Add New Lens Type',
-    addNewLensDescription: 'Add a new lens type to your inventory',
-    editLensType: 'Edit Lens Type',
-    updateLensDetails: 'Update lens type details',
-    lensAddedSuccess: 'Lens type added successfully',
-    lensUpdatedSuccess: 'Lens type updated successfully',
-    lensDeletedSuccess: 'Lens type deleted successfully',
-    noLensesInCategory: 'No lenses in this category yet',
-    fillRequiredFields: 'Please fill all required fields',
-    saveChanges: 'Save Changes',
-    
-    // Lens categories
-    distance: 'Distance',
-    reading: 'Reading',
-    progressive: 'Progressive',
-    bifocal: 'Bifocal',
-    sunglasses: 'Sunglasses',
-    
-    // Lens Thickness
-    lensThicknesses: 'Lens Thicknesses',
-    selectLensThickness: 'Select Lens Thickness',
-    thicknessName: 'Thickness Name',
-    thicknessNameExample: 'e.g., 1.67, Polycarbonate',
-    thicknessDescription: 'Brief description of this lens thickness',
-    addThickness: 'Add Thickness',
-    editThickness: 'Edit Thickness',
-    deleteThickness: 'Delete Thickness',
-    addNewThicknessTitle: 'Add New Lens Thickness',
-    addNewThicknessDescription: 'Add a new lens thickness option to your inventory',
-    updateThicknessDetails: 'Update the details of this lens thickness',
-    thicknessAddedSuccess: 'Lens thickness added successfully',
-    thicknessUpdatedSuccess: 'Lens thickness updated successfully',
-    thicknessDeletedSuccess: 'Lens thickness deleted successfully',
-    deleteThicknessConfirm: 'Are you sure you want to delete this lens thickness?',
-    noThicknesses: 'No lens thicknesses found',
-    noThicknessesAvailable: 'No lens thicknesses available',
-    pleaseSelectLensAndCoatingFirst: 'Please select lens type and coating first',
+    addNewLens: 'Add New Lens',
+    updateLens: 'Update Lens',
+    deleteLensConfirm: 'Are you sure you want to delete this lens?',
+    contactLensManagement: 'Contact Lens Management',
     
     // Coating
     coatingInventory: 'Coating Inventory',
@@ -233,7 +194,6 @@ const translations: Record<string, Record<string, string>> = {
     
     // Contact Lenses
     contactLensInventory: 'Contact Lens Inventory',
-    contactLensManagement: 'Contact Lens Management',
     addContactLens: 'Add Contact Lens',
     editContactLens: 'Edit Contact Lens',
     deleteContactLens: 'Delete Contact Lens',
@@ -333,7 +293,6 @@ const translations: Record<string, Record<string, string>> = {
     priceError: "Please enter a valid price.",
     quantityError: "Please enter a valid quantity.",
     frameAddedSuccess: "Frame added successfully.",
-    // Removed the duplicate property frameAddedSuccessfully
     clientSelectionError: "Please select a client or enable the 'No client file' option.",
     lensSelectionError: "Please select a lens type.",
     frameSelectionError: "Please select a frame or enable 'Lenses only' option.",
@@ -366,20 +325,11 @@ const translations: Record<string, Record<string, string>> = {
     
     // LensSelector Component
     frameOnly: "Frame only (without lenses)",
-    selectLensType: "Select Lens Type",
-    selectCoatings: "Select Coating",
-    skipLens: "Skip lenses (frame only)",
-    noCoating: "No Coating",
-    noCoatingDesc: "No additional coating needed",
-    backToLensType: "Back to Lens Type",
-    backToCoating: "Back to Coating",
-    lensSkipped: "Lenses have been skipped",
-    addLens: "Add Lenses",
-    nextStep: "Next Step",
-    choosePaymentMethod: "Choose payment method",
     
     // Additional translations for images shown
     medicalLenses: "Medical Lenses",
+    selectLensType: "Select Lens Type",
+    selectCoatings: "Select Coatings",
     
     // RX Manager translations with improved spacing
     rxAndCareInstructions: "Rx and Care Instructions",
@@ -410,19 +360,7 @@ const translations: Record<string, Record<string, string>> = {
     anonymous: "Anonymous",
     
     // Add the new notesPlaceholder translation
-    notesPlaceholder: "You can add any information about the customer here...",
-    
-    // Frame Inventory
-    searchForFrame: "Search for frames...",
-    printLabels: "Print Labels",
-    printFrameLabels: "Print Frame Labels",
-    selectFramesForLabels: "Select frames to print labels for",
-    showAllFrames: "Show All Frames",
-    noFramesMatchingSearch: "No frames match your search criteria. Try different keywords.",
-    brandExample: "e.g., Ray-Ban, Prada",
-    modelExample: "e.g., Wayfarer, Aviator",
-    colorExample: "e.g., Black, Tortoise",
-    sizeExample: "e.g., 52-18-140",
+    notesPlaceholder: "You can add any information about the customer here..."
   },
   ar: {
     // General UI
@@ -589,53 +527,15 @@ const translations: Record<string, Record<string, string>> = {
     lensInventory: 'مخزون العدسات',
     lensTypes: 'أنواع العدسات',
     lensCoatings: 'طلاءات العدسات',
-    lensTypeManagement: 'إدارة أنواع العدسات',
-    lensCoatingManagement: 'إدارة طلاءات العدسات',
-    lensThicknessManagement: 'إدارة سماكة العدسات',
     addLens: 'إضافة عدسة',
     editLens: 'تعديل عدسة',
     deleteLens: 'حذف عدسة',
     lensName: 'اسم العدسة',
-    lensNameExample: 'مثال: عدسة أحادية الرؤية، عدسة تقدمية',
     description: 'الوصف',
-    type: 'النوع',
-    addNewLensTitle: 'إضافة نوع عدسة جديد',
-    addNewLensDescription: 'أضف نوع عدسة جديد إلى المخزون',
-    editLensType: 'تعديل نوع العدسة',
-    updateLensDetails: 'تحديث تفاصيل نوع العدسة',
-    lensAddedSuccess: 'تم إضافة نوع العدسة بنجاح',
-    lensUpdatedSuccess: 'تم تحديث نوع العدسة بنجاح',
-    lensDeletedSuccess: 'تم حذف نوع العدسة بنجاح',
-    noLensesInCategory: 'لا توجد عدسات في هذه الفئة بعد',
-    fillRequiredFields: 'يرجى ملء جميع الحقول المطلوبة',
-    saveChanges: 'حفظ التغييرات',
-    
-    // Lens categories
-    distance: 'للنظر البعيد',
-    reading: 'للقراءة',
-    progressive: 'تقدمية',
-    bifocal: 'ثنائية البؤرة',
-    sunglasses: 'نظارات شمسية',
-    
-    // Lens Thickness
-    lensThicknesses: 'سماكات العدسات',
-    selectLensThickness: 'اختر سماكة العدسة',
-    thicknessName: 'اسم السماكة',
-    thicknessNameExample: 'مثال: 1.67، بوليكربونات',
-    thicknessDescription: 'وصف موجز لسماكة العدسة',
-    addThickness: 'إضافة سماكة',
-    editThickness: 'تعديل السماكة',
-    deleteThickness: 'حذف السماكة',
-    addNewThicknessTitle: 'إضافة سماكة عدسة جديدة',
-    addNewThicknessDescription: 'أضف خيار سماكة عدسة جديد إلى المخزون',
-    updateThicknessDetails: 'تحديث تفاصيل سماكة العدسة',
-    thicknessAddedSuccess: 'تم إضافة سماكة العدسة بنجاح',
-    thicknessUpdatedSuccess: 'تم تحديث سماكة العدسة بنجاح',
-    thicknessDeletedSuccess: 'تم حذف سماكة العدسة بنجاح',
-    deleteThicknessConfirm: 'هل أنت متأكد من رغبتك في حذف سماكة العدسة هذه؟',
-    noThicknesses: 'لم يتم العثور على سماكات عدسات',
-    noThicknessesAvailable: 'لا توجد سماكات عدسات متوفرة',
-    pleaseSelectLensAndCoatingFirst: 'يرجى اختيار نوع العدسة والطلاء أولاً',
+    addNewLens: 'إضافة عدسة جديدة',
+    updateLens: 'تحديث العدسة',
+    deleteLensConfirm: 'هل أنت متأكد من رغبتك في حذف هذه العدسة؟',
+    contactLensManagement: 'إدارة العدسات اللاصقة',
     
     // Coating
     coatingInventory: 'مخزون الطلاءات',
@@ -649,7 +549,6 @@ const translations: Record<string, Record<string, string>> = {
     
     // Contact Lenses
     contactLensInventory: 'مخزون العدسات اللاصقة',
-    contactLensManagement: 'إدارة العدسات اللاصقة',
     addContactLens: 'إضافة عدسة لاصقة',
     editContactLens: 'تعديل عدسة لاصقة',
     deleteContactLens: 'حذف عدسة لاصقة',
@@ -722,138 +621,107 @@ const translations: Record<string, Record<string, string>> = {
     eye: "العين",
     lensSection: "٢) العدسات الطبية",
     frameSection: "٣) الإطار",
-    searchTerm: "بحث (الماركة/الموديل/اللون/الحجم):",
+    searchTerm: "بحث (Brand/Model/Color/Size):",
     searchExample: "مثال: RayBan...",
     selectedFrame: "الإطار المختار",
     addFrameButton: "إضافة إطار جديد",
-    newFrameDetails: "تفاصيل الإطار الجديد",
+    newFrameDetails: "بيانات الإطار الجديد",
     saveFrame: "حفظ الإطار",
-    discountSection: "٤) الخصم والدفع",
+    discountSection: "٤) الخصم والدفعة",
     discountColon: "الخصم (د.ك):",
-    depositColon: "العربون (د.ك):",
+    depositColon: "الدفعة (د.ك):",
     payInFull: "دفع كامل",
-    // paymentSection is now defined above in "Tab sections in Create Invoice"
-    approvalNumber: "رقم الموافقة (رقم التفويض):",
+    approvalNumber: "رقم الموافقة (Authorization No.):",
     previewInvoice: "معاينة الفاتورة",
     saveAndPrint: "حفظ وطباعة",
     invoiceSummary: "ملخص الفاتورة",
     glasses: "نظارات",
     contacts: "عدسات لاصقة",
-    workOrder: "أمر عمل",
-    invoice: "فاتورة",
-    phoneSearchError: "الرجاء إدخال رقم هاتف للبحث.",
+    workOrder: "أمر العمل",
+    invoice: "الفاتورة",
+    phoneSearchError: "الرجاء إدخال رقم الهاتف للبحث.",
     noClientsFound: "لم يتم العثور على عملاء بهذا الرقم.",
-    searchTermError: "الرجاء إدخال مصطلحات البحث.",
-    noFramesFound: "لم يتم العثور على إطارات.",
+    searchTermError: "الرجاء إدخال كلمات البحث.",
+    noFramesFound: "لم يتم العثور على إطار.",
     frameDetailsError: "الرجاء إدخال تفاصيل الإطار.",
     priceError: "الرجاء إدخال سعر صحيح.",
     quantityError: "الرجاء إدخال كمية صحيحة.",
     frameAddedSuccess: "تم إضافة الإطار بنجاح.",
-    // Removed the duplicate property frameAddedSuccessfully
-    clientSelectionError: "الرجاء اختيار عميل أو تفعيل خيار 'لا يوجد ملف عميل'.",
+    clientSelectionError: "الرجاء اختيار عميل أو تفعيل الخيار 'لا يوجد ملف عميل'.",
     lensSelectionError: "الرجاء اختيار نوع العدسة.",
     frameSelectionError: "الرجاء اختيار إطار أو تفعيل خيار 'عدسات فقط'.",
     contactLensSelectionError: "الرجاء اختيار عدسة لاصقة واحدة على الأقل.",
-    paymentMethodError: "الرجاء اختيار طريقة دفع.",
-    invoiceSavedSuccess: "تم حفظ الفاتورة بنجاح برقم",
+    paymentMethodError: "الرجاء اختيار طريقة الدفع.",
+    invoiceSavedSuccess: "تم حفظ الفاتورة برقم",
     knet: "كي نت",
-    visa: "فيزا",
-    mastercard: "ماستركارد",
-    leftEyeAbbr: "OS (اليسرى)",
-    rightEyeAbbr: "OD (اليمنى)",
-    pdRight: "المسافة البؤبؤية",
+    visa: "Visa",
+    mastercard: "MasterCard",
+    leftEyeAbbr: "OS (يسار)",
+    rightEyeAbbr: "OD (يمين)",
+    pdRight: "PD",
     lensesOnly: "عدسات فقط",
     frameTotal: "سعر الإطار:",
     lensTotal: "سعر العدسة:",
     coatingTotal: "سعر الطلاء:",
     contactLensesTotal: "إجمالي العدسات اللاصقة:",
-    lensCount: "عدسة لاصقة",
+    lensCount: "عدسة",
     approvalNumberLabel: "رقم الموافقة:",
-    paymentTotalLabel: "الإجمالي:",
+    paymentTotalLabel: "المجموع:",
     paidLabel: "المدفوع:",
     
     // Waiting states for invoice summary
-    waitingForClientData: "في انتظار بيانات العميل...",
-    waitingForProductData: "في انتظار بيانات المنتج...",
-    waitingForPaymentData: "في انتظار بيانات الدفع...",
+    waitingForClientData: "بانتظار بيانات العميل...",
+    waitingForProductData: "بانتظار بيانات المنتجات...",
+    waitingForPaymentData: "بانتظار بيانات الدفع...",
     
     remainingLabel: "المتبقي:",
     
     // LensSelector Component
     frameOnly: "إطار فقط (بدون عدسات)",
-    selectLensType: "اختر نوع العدسة",
-    selectCoatings: "اختر الطلاء",
-    skipLens: "تخطي العدسات (إطار فقط)",
-    noCoating: "بدون طلاء",
-    noCoatingDesc: "لا حاجة لطلاء إضافي",
-    backToLensType: "العودة إلى نوع العدسة",
-    backToCoating: "العودة إلى الطلاء",
-    lensSkipped: "تم تخطي العدسات",
-    addLens: "إضافة عدسات",
-    nextStep: "الخطوة التالية",
-    choosePaymentMethod: "اختر طريقة الدفع",
     
     // Additional translations for images shown
-    medicalLenses: "عدسات طبية",
+    medicalLenses: "العدسات الطبية",
+    selectLensType: "اختر نوع العدسة",
+    selectCoatings: "اختر الطلاءات",
     
-    // RX Manager translations with improved spacing
-    rxAndCareInstructions: "الوصفة وتعليمات العناية",
+    // RX Manager translations with proper Arabic translations
+    rxAndCareInstructions: "تعليمات الوصفة والعناية",
     printPrescription: "طباعة الوصفة",
     newRx: "وصفة جديدة",
     currentRx: "الوصفة الحالية",
-    rxHistory: "تاريخ الوصفات",
+    rxHistory: "سجل الوصفات",
     noPreviousRx: "لا توجد وصفات سابقة",
-    noPreviousRxDescription: "ليس لدى هذا المريض أي تاريخ وصفات سابق حتى الآن.",
+    noPreviousRxDescription: "لا يملك هذا المريض أي سجل وصفات سابق حتى الآن",
     addNewRx: "إضافة وصفة جديدة",
     addNewRxFor: "إضافة وصفة جديدة لـ",
     viewPrescription: "عرض الوصفة",
-    selectLanguageForPrinting: "اختر اللغة للطباعة",
+    selectLanguageForPrinting: "اختر لغة الطباعة",
     dataError: "خطأ في البيانات",
     fillAllRequiredFields: "يرجى ملء جميع الحقول المطلوبة",
     
-    // Glasses care tips
-    glassesCareTips: "نصائح العناية بالنظارات",
-    tip1: "نظف نظاراتك بانتظام باستخدام قطعة قماش من الألياف الدقيقة.",
-    tip2: "احتفظ دائمًا بنظاراتك في علبة واقية.",
-    tip3: "تجنب وضع نظاراتك بحيث تكون العدسات للأسفل.",
-    tip4: "قم بجدولة فحوصات العين المنتظمة للتأكد من دقة وصفتك.",
-    thankYou: "شكرًا لاختيارك معين للبصريات. نتطلع إلى خدمتك مرة أخرى!",
+    // Glasses care tips in Arabic
+    glassesCareTips: "نصائح للعناية بالنظارات",
+    tip1: "نظف نظارتك بانتظام باستخدام قماش ناعم.",
+    tip2: "احتفظ دائماً بنظارتك داخل العلبة الواقية.",
+    tip3: "تجنب وضع النظارة بحيث تكون العدسات ملامسة للسطح.",
+    tip4: "احرص على فحص عينيك بانتظام للتأكد من صحة الوصفة.",
+    thankYou: "شكراً لاختياركم موين للبصريات، نتطلع لخدمتكم مرة أخرى!",
     
-    // Newly added translations 
-    startBySelectingClient: "ابدأ باختيار عميل في الخطوة 1",
-    goToClientSection: "الذهاب إلى قسم العميل",
+    // Newly added translations
+    startBySelectingClient: "ابدأ باختيار عميل في الخطوة الأولى",
+    goToClientSection: "اذهب إلى قسم العميل",
     anonymous: "مجهول",
     
-    // Add the new notesPlaceholder translation
-    notesPlaceholder: "يمكنك إضافة أي معلومات حول العميل هنا...",
-    
-    // Frame Inventory
-    searchForFrame: "البحث عن إطارات...",
-    printLabels: "طباعة الملصقات",
-    printFrameLabels: "طباعة ملصقات الإطارات",
-    selectFramesForLabels: "اختر الإطارات لطباعة الملصقات",
-    showAllFrames: "عرض جميع الإطارات",
-    noFramesMatchingSearch: "لا توجد إطارات تطابق معايير البحث. جرب كلمات مختلفة.",
-    brandExample: "مثال: Ray-Ban، Prada",
-    modelExample: "مثال: Wayfarer، Aviator",
-    colorExample: "مثال: أسود، سلحفاة",
-    sizeExample: "مثال: 52-18-140",
+    // Add the new notesPlaceholder translation in Arabic
+    notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا..."
   }
 };
 
-export const useLanguageStore = create<LanguageStore>((set, get) => ({
-  language: 'ar', // Default language is Arabic
+export const useLanguageStore = create<LanguageStore>((set) => ({
+  language: 'ar', // Default language
   setLanguage: (language) => set({ language }),
-  t: (key, params) => {
-    const { language } = get();
-    let text = translations[language][key] || key;
-    
-    if (params) {
-      Object.entries(params).forEach(([paramKey, paramValue]) => {
-        text = text.replace(`{${paramKey}}`, paramValue);
-      });
-    }
-    
-    return text;
+  t: (key) => {
+    const { language } = useLanguageStore.getState();
+    return translations[language][key] || key;
   },
 }));

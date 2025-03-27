@@ -64,8 +64,6 @@ const CreateInvoiceContent: React.FC = () => {
     invoiceType: getValues("invoiceType") || "glasses",
     lensType: getValues("lensType") || "",
     lensPrice: getValues("lensPrice") || 0,
-    lensThickness: getValues("lensThickness") || "",
-    lensThicknessPrice: getValues("lensThicknessPrice") || 0,
     coating: getValues("coating") || "",
     coatingPrice: getValues("coatingPrice") || 0,
     frameBrand: getValues("frameBrand") || "",
@@ -500,7 +498,6 @@ const CreateInvoiceContent: React.FC = () => {
               patientPhone={getValues("patientPhone") || ""}
               rx={getValues("rx")}
               lensType={getValues("lensType") || ""}
-              lensThickness={getValues("lensThickness") || ""}
               coating={getValues("coating") || ""}
               frame={getValues("skipFrame") ? undefined : {
                 brand: getValues("frameBrand") || "",

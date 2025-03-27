@@ -18,7 +18,7 @@ import { usePatientStore, RxData } from "@/store/patientStore";
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { LensSelector } from "@/components/LensSelector";
-import { LensType, LensCoating, LensThickness, useInventoryStore } from "@/store/inventoryStore";
+import { LensType, LensCoating, useInventoryStore } from "@/store/inventoryStore";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface EditWorkOrderDialogProps {
@@ -37,12 +37,11 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   const { language, t } = useLanguageStore();
   const { updateWorkOrder, updateInvoice } = useInvoiceStore();
   const { getPatientById, updatePatientRx } = usePatientStore();
-  const { lensTypes, lensCoatings, lensThicknesses } = useInventoryStore();
+  const { lensTypes, lensCoatings } = useInventoryStore();
   
   const [activeTab, setActiveTab] = useState("rx");
   const [editedWorkOrder, setEditedWorkOrder] = useState<any>({...workOrder});
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
-  const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(null);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
   const [skipLens, setSkipLens] = useState(false);
   
@@ -97,15 +96,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         setSelectedLensType(lensTypeObj || null);
       }
       
-      // For thickness information
-      if ('lensThickness' in workOrder && workOrder.lensThickness) {
-        const thicknessName = typeof workOrder.lensThickness === 'object' 
-          ? workOrder.lensThickness.name 
-          : workOrder.lensThickness;
-        const thicknessObj = lensThicknesses.find(t => t.name === thicknessName);
-        setSelectedThickness(thicknessObj || null);
-      }
-      
       // For coating information
       if ('coating' in workOrder && workOrder.coating) {
         const coatingObj = lensCoatings.find(c => c.name === workOrder.coating);
@@ -117,7 +107,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         setSkipLens(true);
       }
     }
-  }, [workOrder, lensTypes, lensCoatings, lensThicknesses]);
+  }, [workOrder, lensTypes, lensCoatings]);
   
   const handleSave = () => {
     // Get the RX data from the form
@@ -150,21 +140,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         }
       }
       
-      if (selectedThickness) {
-        if ('lensThickness' in updatedOrder && typeof updatedOrder.lensThickness === 'object') {
-          updatedOrder.lensThickness = {
-            name: selectedThickness.name,
-            price: selectedThickness.price
-          };
-        } else {
-          updatedOrder.lensThickness = selectedThickness.name;
-          updatedOrder.lensThicknessPrice = selectedThickness.price;
-        }
-      } else {
-        updatedOrder.lensThickness = '';
-        updatedOrder.lensThicknessPrice = 0;
-      }
-      
       if (selectedCoating) {
         updatedOrder.coating = selectedCoating.name;
         updatedOrder.coatingPrice = selectedCoating.price;
@@ -180,8 +155,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         updatedOrder.lensType = '';
         updatedOrder.lensPrice = 0;
       }
-      updatedOrder.lensThickness = '';
-      updatedOrder.lensThicknessPrice = 0;
       updatedOrder.coating = '';
       updatedOrder.coatingPrice = 0;
     }
@@ -374,12 +347,10 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                 <h3 className="font-medium mb-4">{t('lensSelection')}</h3>
                 <LensSelector
                   onSelectLensType={setSelectedLensType}
-                  onSelectThickness={setSelectedThickness}
                   onSelectCoating={setSelectedCoating}
                   skipLens={skipLens}
                   onSkipLensChange={setSkipLens}
                   initialLensType={selectedLensType}
-                  initialThickness={selectedThickness}
                   initialCoating={selectedCoating}
                 />
               </CardContent>

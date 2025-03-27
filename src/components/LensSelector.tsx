@@ -1,33 +1,28 @@
 
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
-import { LensType, LensCoating, LensThickness, useInventoryStore } from "@/store/inventoryStore";
+import { LensType, LensCoating, useInventoryStore } from "@/store/inventoryStore";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Eye, Check, X } from "lucide-react";
-import { LensThicknessSelector } from "./LensThicknessSelector";
 
 interface LensSelectorProps {
   onSelectLensType: (lens: LensType | null) => void;
-  onSelectThickness: (thickness: LensThickness | null) => void;
   onSelectCoating: (coating: LensCoating | null) => void;
   skipLens?: boolean;
   onSkipLensChange?: (skip: boolean) => void;
   initialLensType?: LensType | null;
-  initialThickness?: LensThickness | null;
   initialCoating?: LensCoating | null;
 }
 
 export const LensSelector: React.FC<LensSelectorProps> = ({
   onSelectLensType,
-  onSelectThickness,
   onSelectCoating,
   skipLens = false,
   onSkipLensChange,
   initialLensType = null,
-  initialThickness = null,
   initialCoating = null,
 }) => {
   const { t, language } = useLanguageStore();
@@ -35,38 +30,26 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const coatings = useInventoryStore((state) => state.lensCoatings);
   
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(initialLensType);
-  const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(initialThickness);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(initialCoating);
-  const [currentStep, setCurrentStep] = useState<"lensType" | "coating" | "thickness">("lensType");
   
   // Initialize from props if provided
   useEffect(() => {
     if (initialLensType) {
       setSelectedLensType(initialLensType);
     }
-    if (initialThickness) {
-      setSelectedThickness(initialThickness);
-    }
     if (initialCoating) {
       setSelectedCoating(initialCoating);
     }
-  }, [initialLensType, initialThickness, initialCoating]);
+  }, [initialLensType, initialCoating]);
   
   const handleLensTypeSelect = (lens: LensType) => {
     setSelectedLensType(lens);
     onSelectLensType(lens);
-    setCurrentStep("coating");
-  };
-  
-  const handleThicknessSelect = (thickness: LensThickness | null) => {
-    setSelectedThickness(thickness);
-    onSelectThickness(thickness);
   };
   
   const handleCoatingSelect = (coating: LensCoating) => {
     setSelectedCoating(coating);
     onSelectCoating(coating);
-    setCurrentStep("thickness");
   };
   
   const handleSkipLensChange = (checked: boolean) => {
@@ -76,10 +59,8 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     
     if (checked) {
       setSelectedLensType(null);
-      setSelectedThickness(null);
       setSelectedCoating(null);
       onSelectLensType(null);
-      onSelectThickness(null);
       onSelectCoating(null);
     }
   };
@@ -104,27 +85,13 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
       </div>
       
       {!skipLens && (
-        <Tabs value={currentStep} onValueChange={(value) => setCurrentStep(value as any)} className="w-full">
+        <Tabs defaultValue="lensType" className="w-full">
           <TabsList className="w-full mb-4">
-            <TabsTrigger 
-              value="lensType" 
-              className="flex-1 bg-[#8B5CF6] data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white"
-            >
+            <TabsTrigger value="lensType" className="flex-1 bg-[#8B5CF6] data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
               <span className="text-white">1</span> - {t('selectLensType')}
             </TabsTrigger>
-            <TabsTrigger 
-              value="coating" 
-              className="flex-1 bg-[#F97316] data-[state=active]:bg-[#F97316] data-[state=active]:text-white"
-              disabled={!selectedLensType}
-            >
+            <TabsTrigger value="coating" className="flex-1 bg-[#F97316] data-[state=active]:bg-[#F97316] data-[state=active]:text-white">
               <span className="text-white">2</span> - {t('selectCoatings')}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="thickness" 
-              className="flex-1 bg-[#5EEAD4] data-[state=active]:bg-[#5EEAD4] data-[state=active]:text-white"
-              disabled={!selectedCoating}
-            >
-              <span className="text-white">3</span> - {t('selectThickness')}
             </TabsTrigger>
           </TabsList>
           
@@ -145,6 +112,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                       <div className="font-medium">{lens.name}</div>
                       <div className="text-sm text-muted-foreground">{lens.type}</div>
                     </div>
+                    <div className="text-right font-semibold">
+                      {lens.price.toFixed(2)} {t('kwd')}
+                    </div>
                   </div>
                   
                   {selectedLensType?.id === lens.id && (
@@ -157,17 +127,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                 </div>
               ))}
             </div>
-            
-            {selectedLensType && (
-              <div className="flex justify-end mt-4">
-                <Button 
-                  onClick={() => setCurrentStep("coating")}
-                  className="bg-[#F97316] hover:bg-[#F97316]/90"
-                >
-                  {t('nextStep')} - {t('selectCoatings')}
-                </Button>
-              </div>
-            )}
           </TabsContent>
           
           <TabsContent value="coating" className="space-y-4">
@@ -211,7 +170,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                 onClick={() => {
                   setSelectedCoating(null);
                   onSelectCoating(null);
-                  setCurrentStep("thickness");
                 }}
               >
                 <div className="flex justify-between items-start">
@@ -232,41 +190,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                   </div>
                 )}
               </div>
-            </div>
-            
-            <div className="flex justify-between mt-4">
-              <Button 
-                variant="outline"
-                onClick={() => setCurrentStep("lensType")}
-              >
-                {t('backToLensType')}
-              </Button>
-              
-              {selectedCoating !== undefined && (
-                <Button 
-                  onClick={() => setCurrentStep("thickness")}
-                  className="bg-[#5EEAD4] hover:bg-[#5EEAD4]/90 text-black"
-                >
-                  {t('nextStep')} - {t('selectThickness')}
-                </Button>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="thickness" className="space-y-4">
-            <LensThicknessSelector 
-              onSelectThickness={handleThicknessSelect}
-              initialThickness={selectedThickness}
-              disabled={!selectedLensType || !selectedCoating}
-            />
-            
-            <div className="flex justify-start mt-4">
-              <Button 
-                variant="outline"
-                onClick={() => setCurrentStep("coating")}
-              >
-                {t('backToCoating')}
-              </Button>
             </div>
           </TabsContent>
         </Tabs>

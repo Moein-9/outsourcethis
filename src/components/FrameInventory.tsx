@@ -1,498 +1,346 @@
+
 import React, { useState, useEffect } from "react";
-import { useInventoryStore, Frame } from "@/store/inventoryStore";
+import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Edit, Plus, Printer, Search, Trash } from "lucide-react";
-import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Search, 
+  Plus, 
+  Glasses, 
+  Package, 
+  Edit, 
+  Copy, 
+  Save, 
+  Tag, 
+  QrCode,
+  Printer 
+} from "lucide-react";
+import { FrameLabelTemplate, usePrintLabel } from "./FrameLabelTemplate";
 import { useLanguageStore } from "@/store/languageStore";
-import { Checkbox } from "@/components/ui/checkbox";
 
-export const FrameInventory: React.FC = () => {
-  const { frames, addFrame, updateFrame, deleteFrame } = useInventoryStore();
+// Frame Item Component
+const FrameItemCard = ({ frame, index, onPrintLabel }: { 
+  frame: FrameItem; 
+  index: number;
+  onPrintLabel: (frameId: string) => void;
+}) => {
   const { t, language } = useLanguageStore();
   
-  // State for search and filtering
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredFrames, setFilteredFrames] = useState<Frame[]>(frames);
+  return (
+    <Card key={index} className="overflow-hidden hover:shadow-md transition-all duration-200 border-gray-200">
+      <CardHeader className="p-3 bg-gray-50 border-b flex flex-row justify-between items-start">
+        <div className="flex items-start gap-2">
+          <Glasses className="h-5 w-5 text-indigo-600 mt-0.5" />
+          <div>
+            <div className="font-bold text-base">{frame.brand} - {frame.model}</div>
+            <div className="text-sm font-medium mt-0.5">{frame.price.toFixed(2)} KWD</div>
+          </div>
+        </div>
+        <Badge variant="destructive" className="text-xs rounded-full">
+          {language === 'ar' ? `في المخزون:${frame.qty}` : `In Stock: ${frame.qty}`}
+        </Badge>
+      </CardHeader>
+      <CardContent className="p-3 pt-2 text-sm">
+        <div className="flex justify-between py-1 border-b border-gray-100">
+          <span className="text-blue-500">{t('color')}:</span>
+          <span>{frame.color || "-"}</span>
+        </div>
+        <div className="flex justify-between py-1">
+          <span className="text-blue-500">{t('size')}:</span>
+          <span>{frame.size || "-"}</span>
+        </div>
+      </CardContent>
+      <CardFooter className="p-0 border-t">
+        <div className="grid grid-cols-3 w-full divide-x divide-x-reverse">
+          <Button variant="ghost" className="rounded-none h-10 text-blue-600">
+            <Edit className="h-4 w-4 mr-1" /> {t('edit')}
+          </Button>
+          <Button variant="ghost" className="rounded-none h-10 text-amber-600">
+            <Copy className="h-4 w-4 mr-1" /> {t('copy')}
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="rounded-none h-10 text-green-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrintLabel(frame.frameId);
+            }}
+          >
+            <QrCode className="h-4 w-4 mr-1" /> {t('print')}
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+};
+
+export const FrameInventory: React.FC = () => {
+  const { frames, addFrame, searchFrames } = useInventoryStore();
+  const { printSingleLabel } = usePrintLabel();
+  const { t, language } = useLanguageStore();
   
-  // State for frame form
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [frameSearchTerm, setFrameSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<ReturnType<typeof searchFrames>>([]);
+  const [isAddFrameDialogOpen, setIsAddFrameDialogOpen] = useState(false);
   const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
   
-  // Frame form state
-  const [currentFrameId, setCurrentFrameId] = useState<string | null>(null);
-  const [brand, setBrand] = useState("");
-  const [model, setModel] = useState("");
-  const [color, setColor] = useState("");
-  const [size, setSize] = useState("");
-  const [price, setPrice] = useState<number | "">("");
-  const [quantity, setQuantity] = useState<number | "">(1);
+  const [frameBrand, setFrameBrand] = useState("");
+  const [frameModel, setFrameModel] = useState("");
+  const [frameColor, setFrameColor] = useState("");
+  const [frameSize, setFrameSize] = useState("");
+  const [framePrice, setFramePrice] = useState("");
+  const [frameQty, setFrameQty] = useState("1");
   
-  // Label printing state
-  const [selectedFrames, setSelectedFrames] = useState<string[]>([]);
-  const [selectAll, setSelectAll] = useState(false);
-  
-  // Filter frames when search term changes
-  useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredFrames(frames);
-    } else {
-      const lowercasedSearch = searchTerm.toLowerCase();
-      const filtered = frames.filter(
-        (frame) =>
-          frame.brand.toLowerCase().includes(lowercasedSearch) ||
-          frame.model.toLowerCase().includes(lowercasedSearch) ||
-          frame.color.toLowerCase().includes(lowercasedSearch) ||
-          frame.size.toLowerCase().includes(lowercasedSearch)
-      );
-      setFilteredFrames(filtered);
+  const handleFrameSearch = () => {
+    if (!frameSearchTerm.trim()) {
+      setSearchResults(frames);
+      return;
     }
-  }, [searchTerm, frames]);
-  
-  // Reset form when dialog closes
-  useEffect(() => {
-    if (!isAddDialogOpen && !isEditDialogOpen) {
-      resetForm();
+    
+    const results = searchFrames(frameSearchTerm);
+    setSearchResults(results);
+    
+    if (results.length === 0) {
+      toast.info(t('noFramesMatchingSearch'));
     }
-  }, [isAddDialogOpen, isEditDialogOpen]);
-  
-  // Update selected frames when frames change
-  useEffect(() => {
-    if (selectAll) {
-      setSelectedFrames(filteredFrames.map(frame => frame.id));
-    }
-  }, [filteredFrames, selectAll]);
-  
-  const resetForm = () => {
-    setCurrentFrameId(null);
-    setBrand("");
-    setModel("");
-    setColor("");
-    setSize("");
-    setPrice("");
-    setQuantity(1);
   };
   
   const handleAddFrame = () => {
-    if (!brand || !model || !color || price === "" || quantity === "") {
-      toast.error(t("frameDetailsError"));
+    if (!frameBrand || !frameModel || !frameColor || !framePrice) {
+      toast.error(t("pleaseEnterCompleteFrameDetails"));
       return;
     }
     
-    addFrame({
-      brand,
-      model,
-      color,
-      size,
-      price: Number(price),
-      quantity: Number(quantity)
-    });
+    const price = parseFloat(framePrice);
+    const qty = parseInt(frameQty);
     
-    toast.success(t("frameAddedSuccess"));
-    setIsAddDialogOpen(false);
-    resetForm();
-  };
-  
-  const handleEditFrame = () => {
-    if (!currentFrameId || !brand || !model || !color || price === "" || quantity === "") {
-      toast.error(t("frameDetailsError"));
+    if (isNaN(price) || price <= 0) {
+      toast.error(t("pleaseEnterValidPrice"));
       return;
     }
     
-    updateFrame(currentFrameId, {
-      brand,
-      model,
-      color,
-      size,
-      price: Number(price),
-      quantity: Number(quantity)
+    if (isNaN(qty) || qty <= 0) {
+      toast.error(t("pleaseEnterValidQuantity"));
+      return;
+    }
+    
+    const frameId = addFrame({
+      brand: frameBrand,
+      model: frameModel,
+      color: frameColor,
+      size: frameSize,
+      price,
+      qty
     });
     
-    toast.success(t("frameUpdatedSuccess"));
-    setIsEditDialogOpen(false);
-    resetForm();
+    toast.success(t("frameAddedSuccessfully", { brand: frameBrand, model: frameModel }));
+    
+    setFrameBrand("");
+    setFrameModel("");
+    setFrameColor("");
+    setFrameSize("");
+    setFramePrice("");
+    setFrameQty("1");
+    setIsAddFrameDialogOpen(false);
+    
+    setSearchResults(frames);
   };
   
-  const handleDeleteFrame = () => {
-    if (currentFrameId) {
-      deleteFrame(currentFrameId);
-      toast.success(t("frameDeletedSuccess"));
-      setIsDeleteDialogOpen(false);
-      setCurrentFrameId(null);
-    }
-  };
-  
-  const startEditFrame = (frame: Frame) => {
-    setCurrentFrameId(frame.id);
-    setBrand(frame.brand);
-    setModel(frame.model);
-    setColor(frame.color);
-    setSize(frame.size);
-    setPrice(frame.price);
-    setQuantity(frame.quantity);
-    setIsEditDialogOpen(true);
-  };
-  
-  const startDeleteFrame = (frameId: string) => {
-    setCurrentFrameId(frameId);
-    setIsDeleteDialogOpen(true);
-  };
-  
-  const handleSelectFrame = (frameId: string, isSelected: boolean) => {
-    if (isSelected) {
-      setSelectedFrames(prev => [...prev, frameId]);
-    } else {
-      setSelectedFrames(prev => prev.filter(id => id !== frameId));
-    }
-  };
-  
-  const handleSelectAll = (isSelected: boolean) => {
-    setSelectAll(isSelected);
-    if (isSelected) {
-      setSelectedFrames(filteredFrames.map(frame => frame.id));
-    } else {
-      setSelectedFrames([]);
-    }
-  };
-  
-  const handlePrintLabels = () => {
-    // Implement label printing logic here
-    console.log("Printing labels for frames:", selectedFrames);
-    toast.success(`Printing ${selectedFrames.length} frame labels`);
-    setIsLabelDialogOpen(false);
-  };
-  
-  const handleShowAllFrames = () => {
-    setSearchTerm("");
-    setFilteredFrames(frames);
-  };
-  
-  const isRtl = language === 'ar';
+  useEffect(() => {
+    setSearchResults(frames);
+  }, [frames]);
   
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t("searchForFrame")}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleShowAllFrames}>
-            {t("showAllFrames")}
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-stretch gap-4">
+        <div className="flex-1 flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={frameSearchTerm}
+              onChange={(e) => setFrameSearchTerm(e.target.value)}
+              placeholder={t('searchForFrame')}
+              className="pl-9 w-full"
+              onKeyDown={(e) => e.key === 'Enter' && handleFrameSearch()}
+            />
+          </div>
+          <Button onClick={handleFrameSearch} variant="secondary" className="shrink-0">
+            <Search className="h-4 w-4 mr-1" /> {t('search')}
           </Button>
-          <Dialog open={isLabelDialogOpen} onOpenChange={setIsLabelDialogOpen}>
+        </div>
+        
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsLabelDialogOpen(true)}
+            className="shrink-0"
+          >
+            <Tag className="h-4 w-4 mr-1" /> {t('printLabels')}
+          </Button>
+          
+          <Dialog open={isAddFrameDialogOpen} onOpenChange={setIsAddFrameDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1">
-                <Printer size={16} />
-                {t("printLabels")}
+              <Button className="shrink-0">
+                <Plus className="h-4 w-4 mr-1" /> {t('addNewFrame')}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>{t("printFrameLabels")}</DialogTitle>
+                <DialogTitle>{t('addNewFrameTitle')}</DialogTitle>
                 <DialogDescription>
-                  {t("selectFramesForLabels")}
+                  {t('addNewFrameDescription')}
                 </DialogDescription>
               </DialogHeader>
-              <div className="max-h-[400px] overflow-y-auto border rounded-md">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">
-                        <Checkbox 
-                          checked={selectAll} 
-                          onCheckedChange={handleSelectAll}
-                        />
-                      </TableHead>
-                      <TableHead>{t("brand")}</TableHead>
-                      <TableHead>{t("model")}</TableHead>
-                      <TableHead>{t("color")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredFrames.map((frame) => (
-                      <TableRow key={frame.id}>
-                        <TableCell>
-                          <Checkbox 
-                            checked={selectedFrames.includes(frame.id)}
-                            onCheckedChange={(checked) => 
-                              handleSelectFrame(frame.id, checked === true)
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>{frame.brand}</TableCell>
-                        <TableCell>{frame.model}</TableCell>
-                        <TableCell>{frame.color}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              <DialogFooter>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsLabelDialogOpen(false)}
-                >
-                  {t("cancel")}
-                </Button>
-                <Button 
-                  onClick={handlePrintLabels}
-                  disabled={selectedFrames.length === 0}
-                >
-                  {t("print")} ({selectedFrames.length})
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="gap-1">
-                <Plus size={16} />
-                {t("addFrame")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t("addNewFrame")}</DialogTitle>
-                <DialogDescription>
-                  {t("addNewFrameDescription")}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
+              
+              <div className="space-y-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="brand">{t("brand")}</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="frameBrand">{t('brand')}</Label>
                     <Input
-                      id="brand"
-                      value={brand}
-                      onChange={(e) => setBrand(e.target.value)}
-                      placeholder={t("brandExample")}
+                      id="frameBrand"
+                      value={frameBrand}
+                      onChange={(e) => setFrameBrand(e.target.value)}
+                      placeholder={t('brandExample')}
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="model">{t("model")}</Label>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="frameModel">{t('model')}</Label>
                     <Input
-                      id="model"
-                      value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                      placeholder={t("modelExample")}
+                      id="frameModel"
+                      value={frameModel}
+                      onChange={(e) => setFrameModel(e.target.value)}
+                      placeholder={t('modelExample')}
                     />
                   </div>
                 </div>
+                
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="color">{t("color")}</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="frameColor">{t('color')}</Label>
                     <Input
-                      id="color"
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                      placeholder={t("colorExample")}
+                      id="frameColor"
+                      value={frameColor}
+                      onChange={(e) => setFrameColor(e.target.value)}
+                      placeholder={t('colorExample')}
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="size">{t("size")}</Label>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="frameSize">{t('size')}</Label>
                     <Input
-                      id="size"
-                      value={size}
-                      onChange={(e) => setSize(e.target.value)}
-                      placeholder={t("sizeExample")}
+                      id="frameSize"
+                      value={frameSize}
+                      onChange={(e) => setFrameSize(e.target.value)}
+                      placeholder={t('sizeExample')}
                     />
                   </div>
                 </div>
+                
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="price">{t("price")}</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="framePrice">{t('price')} (KWD)</Label>
                     <Input
-                      id="price"
+                      id="framePrice"
                       type="number"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value ? Number(e.target.value) : "")}
+                      step="0.01"
+                      min="0"
+                      value={framePrice}
+                      onChange={(e) => setFramePrice(e.target.value)}
                       placeholder="0.00"
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="quantity">{t("quantity")}</Label>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="frameQty">{t('quantity')}</Label>
                     <Input
-                      id="quantity"
+                      id="frameQty"
                       type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(e.target.value ? Number(e.target.value) : "")}
-                      min={1}
+                      step="1"
+                      min="1"
+                      value={frameQty}
+                      onChange={(e) => setFrameQty(e.target.value)}
                     />
                   </div>
                 </div>
               </div>
+              
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  {t("cancel")}
+                <Button variant="outline" onClick={() => setIsAddFrameDialogOpen(false)}>
+                  {t('cancel')}
                 </Button>
-                <Button onClick={handleAddFrame}>{t("save")}</Button>
+                <Button onClick={handleAddFrame}>
+                  <Save className="h-4 w-4 mr-1" /> {t('saveFrame')}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
       </div>
       
-      {filteredFrames.length > 0 ? (
-        <div className="border rounded-md overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("brand")}</TableHead>
-                <TableHead>{t("model")}</TableHead>
-                <TableHead>{t("color")}</TableHead>
-                <TableHead>{t("size")}</TableHead>
-                <TableHead className="text-right">{t("price")}</TableHead>
-                <TableHead className="text-right">{t("quantity")}</TableHead>
-                <TableHead className="text-right">{t("actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredFrames.map((frame) => (
-                <TableRow key={frame.id}>
-                  <TableCell className="font-medium">{frame.brand}</TableCell>
-                  <TableCell>{frame.model}</TableCell>
-                  <TableCell>{frame.color}</TableCell>
-                  <TableCell>{frame.size}</TableCell>
-                  <TableCell className="text-right">
-                    {frame.price.toFixed(2)} {isRtl ? 'د.ك' : 'KD'}
-                  </TableCell>
-                  <TableCell className="text-right">{frame.quantity}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => startEditFrame(frame)}
-                      >
-                        <Edit size={16} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive"
-                        onClick={() => startDeleteFrame(frame.id)}
-                      >
-                        <Trash size={16} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {searchResults.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {searchResults.map((frame, index) => (
+            <FrameItemCard 
+              key={frame.frameId} 
+              frame={frame} 
+              index={index} 
+              onPrintLabel={printSingleLabel}
+            />
+          ))}
         </div>
       ) : (
-        <div className="text-center p-8 bg-muted/50 rounded-lg">
-          <p>{t("noFramesMatchingSearch")}</p>
-          <Button variant="outline" size="sm" className="mt-2" onClick={handleShowAllFrames}>
-            {t("showAllFrames")}
+        <div className="bg-muted/30 rounded-lg p-12 text-center">
+          <Package className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+          <h3 className="text-lg font-medium mb-1">{t('noFramesFound')}</h3>
+          <p className="text-muted-foreground mb-4">
+            {t('noFramesMatchingSearch')}
+          </p>
+          <Button variant="outline" onClick={() => {
+            setFrameSearchTerm("");
+            setSearchResults(frames);
+          }}>
+            {t('showAllFrames')}
           </Button>
         </div>
       )}
       
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+      <Dialog open={isLabelDialogOpen} onOpenChange={setIsLabelDialogOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>{t("editFrame")}</DialogTitle>
+            <DialogTitle>{t('printFrameLabels')}</DialogTitle>
             <DialogDescription>
-              {t("updateFrameDetails")}
+              {t('selectFramesForLabels')}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-brand">{t("brand")}</Label>
-                <Input
-                  id="edit-brand"
-                  value={brand}
-                  onChange={(e) => setBrand(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-model">{t("model")}</Label>
-                <Input
-                  id="edit-model"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-color">{t("color")}</Label>
-                <Input
-                  id="edit-color"
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-size">{t("size")}</Label>
-                <Input
-                  id="edit-size"
-                  value={size}
-                  onChange={(e) => setSize(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-price">{t("price")}</Label>
-                <Input
-                  id="edit-price"
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value ? Number(e.target.value) : "")}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-quantity">{t("quantity")}</Label>
-                <Input
-                  id="edit-quantity"
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value ? Number(e.target.value) : "")}
-                  min={0}
-                />
-              </div>
-            </div>
+          
+          <div className="overflow-y-auto">
+            <FrameLabelTemplate />
           </div>
+          
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              {t("cancel")}
-            </Button>
-            <Button onClick={handleEditFrame}>{t("saveChanges")}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("confirmDelete")}</DialogTitle>
-            <DialogDescription>
-              {t("deleteFrameConfirm")}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-              {t("cancel")}
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteFrame}>
-              {t("delete")}
+            <Button variant="outline" onClick={() => setIsLabelDialogOpen(false)}>
+              {t('close')}
             </Button>
           </DialogFooter>
         </DialogContent>
