@@ -27,14 +27,15 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Printer, BarChart3, LineChart as LineChartIcon, PieChart } from "lucide-react";
+import { BarChart3, LineChart as LineChartIcon } from "lucide-react";
 import { PrintService } from "@/utils/PrintService";
+import { PrintReportButton } from "./PrintReportButton";
 
 interface ComparativeAnalysisProps {
   className?: string;
 }
 
-const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) => {
+export const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) => {
   const invoiceStore = useInvoiceStore();
   const { language } = useLanguageStore();
   const invoices: Invoice[] = invoiceStore?.invoices || [];
@@ -218,9 +219,9 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
           <CardTitle>{translations.comparativeAnalysis}</CardTitle>
         </CardHeader>
         <CardContent className="pl-2 pb-2">
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Select value={selectedTimeRange} onValueChange={handleTimeRangeChange}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder={translations.timeRange} />
               </SelectTrigger>
               <SelectContent>
@@ -235,13 +236,10 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
                 defaultMonth={date?.from}
                 selected={date}
                 onSelect={setDate}
-                className="border rounded-md shadow-sm"
+                className="w-full sm:w-auto"
               />
             )}
-            <Button onClick={handlePrintReport}>
-              <Printer className="mr-2 h-4 w-4" />
-              {translations.printReport}
-            </Button>
+            <PrintReportButton onPrint={handlePrintReport} className="mt-2 sm:mt-0 w-full sm:w-auto" />
           </div>
         </CardContent>
       </Card>

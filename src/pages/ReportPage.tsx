@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { DailySalesReport } from "@/components/reports/DailySalesReport";
-import { ComparativeAnalysis } from "@/components/reports/ComparativeAnalysis";
+import ComparativeAnalysis from "@/components/reports/ComparativeAnalysis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useInvoiceStore } from "@/store/invoiceStore";
@@ -31,7 +30,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { LockKeyhole, Unlock, Eye, EyeOff } from "lucide-react";
 
-// Mock data generator function
 const generateMockData = () => {
   const mockData = [];
   const today = new Date();
@@ -40,7 +38,6 @@ const generateMockData = () => {
   const coatings = ["مضاد للانعكاس", "مضاد للماء", "مضاد للخدش", "حماية من الأشعة الزرقاء"];
   const frameBrands = ["Ray-Ban", "Gucci", "Prada", "Oakley", "Dior", "Chanel"];
   
-  // Generate invoices for today
   for (let i = 0; i < 5; i++) {
     const lensPrice = Math.floor(Math.random() * 50 + 20) * 5;
     const framePrice = Math.floor(Math.random() * 80 + 40) * 5;
@@ -68,7 +65,6 @@ const generateMockData = () => {
     });
   }
   
-  // Generate invoices for previous days (for comparison)
   for (let d = 1; d < 60; d++) {
     const date = new Date();
     date.setDate(today.getDate() - d);
@@ -84,7 +80,6 @@ const generateMockData = () => {
       const finalTotal = total - discount;
       const deposit = Math.random() > 0.3 ? finalTotal : Math.floor(finalTotal * 0.7);
       
-      // Create invoice with past date
       const invoice = {
         patientName: `عميل ${d}${i}`,
         patientPhone: `9665${Math.floor(Math.random() * 10000000)}`,
@@ -102,7 +97,6 @@ const generateMockData = () => {
         paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)]
       };
       
-      // Manually set creation date to past date
       const id = `INV${Date.now() - d * 86400000 - i}`;
       const createdAt = date.toISOString();
       const remaining = Math.max(0, finalTotal - deposit);
@@ -133,17 +127,14 @@ const ReportPage: React.FC = () => {
   const [resetCode, setResetCode] = useState("");
   const [securityAnswer, setSecurityAnswer] = useState("");
   
-  // Default password and security question (in a real app, these would be stored in a database)
   const correctPassword = "admin123";
   const securityQuestion = language === 'ar' 
     ? "ما هو اسم الشركة؟" 
     : "What is the company name?";
-  const correctAnswer = "نظارات"; // Example answer
+  const correctAnswer = "نظارات";
   
-  // Master reset code (would be different in production)
   const masterResetCode = "RESET987654";
   
-  // Text translations based on language
   const translations = {
     reportsTitle: language === 'ar' ? "تقارير النظام" : "System Reports",
     createMockData: language === 'ar' ? "إنشاء بيانات تجريبية" : "Create Test Data",
@@ -175,19 +166,16 @@ const ReportPage: React.FC = () => {
     recoveryCode: language === 'ar' ? "رمز الاستعادة" : "Recovery Code",
     enterRecoveryCode: language === 'ar' ? "أدخل رمز الاستعادة" : "Enter recovery code",
     restore: language === 'ar' ? "استعادة" : "Restore",
-    // Success messages
     loginSuccess: language === 'ar' ? "تم تسجيل الدخول بنجاح" : "Logged in successfully",
     logoutSuccess: language === 'ar' ? "تم تسجيل الخروج بنجاح" : "Logged out successfully",
     mockDataCreated: language === 'ar' ? "تم إنشاء بيانات تجريبية بنجاح" : "Test data created successfully",
     mockDataCleared: language === 'ar' ? "تم مسح البيانات التجريبية" : "Test data cleared successfully",
-    // Error messages
     wrongPassword: language === 'ar' ? "كلمة المرور غير صحيحة" : "Incorrect password",
     wrongAnswer: language === 'ar' ? "الإجابة غير صحيحة" : "Incorrect answer",
     passwordRevealed: language === 'ar' ? `كلمة المرور هي: ${correctPassword}` : `The password is: ${correctPassword}`,
   };
   
   useEffect(() => {
-    // Check if the user is already authenticated (could use local storage in a real app)
     const authStatus = localStorage.getItem("reportAuth");
     if (authStatus === "true") {
       setIsAuthenticated(true);
@@ -198,7 +186,6 @@ const ReportPage: React.FC = () => {
     if (password === correctPassword) {
       setIsAuthenticated(true);
       setPasswordDialogOpen(false);
-      // Save authentication status
       localStorage.setItem("reportAuth", "true");
       toast.success(translations.loginSuccess);
     } else {
@@ -213,7 +200,6 @@ const ReportPage: React.FC = () => {
       (securityAnswer.toLowerCase() === correctAnswer.toLowerCase()) ||
       (resetCode === masterResetCode)
     ) {
-      // Reset the password (in a real app, this would generate a new password)
       toast.success(translations.passwordRevealed);
       setResetDialogOpen(false);
     } else {
@@ -239,21 +225,15 @@ const ReportPage: React.FC = () => {
   };
   
   const handleGenerateMockData = () => {
-    // First clear existing data
     invoiceStore.clearInvoices && invoiceStore.clearInvoices();
-    
-    // Generate and add mock data
     const mockData = generateMockData();
     mockData.forEach(invoice => {
       if (invoice.invoiceId) {
-        // Add pre-dated invoice directly
         invoiceStore.addExistingInvoice && invoiceStore.addExistingInvoice(invoice);
       } else {
-        // Add today's invoice
         invoiceStore.addInvoice(invoice);
       }
     });
-    
     toast.success(translations.mockDataCreated);
   };
   
@@ -267,7 +247,6 @@ const ReportPage: React.FC = () => {
       <div className="container px-4 py-6 md:px-6">
         <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">{translations.reportsTitle}</h1>
         
-        {/* Mock Data Controls - Remove this section when using real data */}
         <div className="flex flex-wrap gap-2 mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
           <Button 
             variant="outline" 
@@ -344,7 +323,6 @@ const ReportPage: React.FC = () => {
           </Tabs>
         </div>
         
-        {/* Password Dialog */}
         <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
           <DialogContent className="sm:max-w-md max-w-[95vw]">
             <DialogHeader>
@@ -406,7 +384,6 @@ const ReportPage: React.FC = () => {
           </DialogContent>
         </Dialog>
         
-        {/* Reset Password Dialog */}
         <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
           <AlertDialogContent className="max-w-[95vw] sm:max-w-md">
             <AlertDialogHeader>
