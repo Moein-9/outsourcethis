@@ -1,5 +1,5 @@
 
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
@@ -9,11 +9,7 @@ export class CustomPrintService {
       // Create a new window for printing
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
-        toast({
-          title: "Error",
-          description: "Unable to open print window. Please allow popups for this site.",
-          variant: "destructive",
-        });
+        toast.error("Unable to open print window. Please allow popups for this site.");
         return;
       }
       
@@ -77,6 +73,14 @@ export class CustomPrintService {
                   color: white !important;
                 }
                 
+                /* Red color for remaining payment */
+                [style*="color: #ea384c"] {
+                  color: #ea384c !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
                 /* Improve dynamic sizing */
                 html, body {
                   height: auto !important;
@@ -120,6 +124,11 @@ export class CustomPrintService {
               .bg-black {
                 background-color: black !important;
                 color: white !important;
+              }
+              
+              /* Red color for remaining payment */
+              [style*="color: #ea384c"] {
+                color: #ea384c !important;
               }
             </style>
           </head>
@@ -176,11 +185,7 @@ export class CustomPrintService {
       }
     } catch (error) {
       console.error("Error printing work order:", error);
-      toast({
-        title: "Error",
-        description: "An error occurred while trying to print the work order.",
-        variant: "destructive",
-      });
+      toast.error("An error occurred while trying to print the work order.");
     }
   }
 }
