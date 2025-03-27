@@ -1,8 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
-import { usePatientStore } from "@/store/patientStore";
-import { useInventoryStore } from "@/store/inventoryStore";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MoenLogoGreen } from "@/assets/logo";
@@ -11,8 +9,6 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 
 export const Dashboard: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const { patients } = usePatientStore();
-  const { frames } = useInventoryStore();
   const { t, language } = useLanguageStore();
 
   useEffect(() => {

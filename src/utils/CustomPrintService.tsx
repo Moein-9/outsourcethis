@@ -121,6 +121,21 @@ export class CustomPrintService {
                 background-color: black !important;
                 color: white !important;
               }
+              
+              /* Add embedded fonts for offline printing */
+              @font-face {
+                font-family: 'Zain';
+                src: local('Zain'), url('/fonts/zain.woff2') format('woff2');
+                font-weight: normal;
+                font-style: normal;
+              }
+              
+              @font-face {
+                font-family: 'Yrsa';
+                src: local('Yrsa'), url('/fonts/yrsa.woff2') format('woff2');
+                font-weight: normal;
+                font-style: normal;
+              }
             </style>
           </head>
           <body>
@@ -173,6 +188,12 @@ export class CustomPrintService {
         // Handle the case where the element doesn't exist
         printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
         printWindow.document.close();
+        console.error("Error: work-order-receipt element not found in the DOM");
+        toast({
+          title: "Error",
+          description: "Unable to find work order content for printing. Please try reloading the page.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error printing work order:", error);

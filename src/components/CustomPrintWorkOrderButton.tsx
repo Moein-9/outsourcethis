@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
@@ -12,7 +12,7 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -40,16 +40,25 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   const handlePrint = () => {
     setIsPrinting(true);
     console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
-    setOpen(false); // Close dialog before printing
     
-    // Slightly longer delay to ensure dialog is fully closed and DOM is updated
+    // Close dialog before printing 
+    setOpen(false);
+    
+    // Give the DOM time to update after dialog closes
     setTimeout(() => {
       try {
         CustomPrintService.printWorkOrder(workOrder, invoice, patient);
-        toast.success(t('printingSent'));
+        toast({
+          title: t('printingSent'),
+          description: t('printingDescription'),
+        });
       } catch (error) {
         console.error("Error printing:", error);
-        toast.error(t('printingError'));
+        toast({
+          title: t('printingError'),
+          description: t('printingErrorDescription'),
+          variant: "destructive",
+        });
       } finally {
         setIsPrinting(false);
       }
@@ -89,7 +98,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               workOrder={workOrder} 
               invoice={invoice} 
               patient={patient}
-              isPrintable={false}
+              isPrintable={true}
             />
           </div>
           <Button onClick={handlePrint} className="mt-4 gap-2" disabled={isPrinting}>
