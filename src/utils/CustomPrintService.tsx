@@ -34,7 +34,7 @@ export class CustomPrintService {
                   width: 80mm !important;
                   margin: 0 !important;
                   padding: 0 !important;
-                  background: white !important; /* White background for print */
+                  background: white !important;
                   color: black !important;
                 }
                 
@@ -55,6 +55,7 @@ export class CustomPrintService {
                   height: auto !important;
                   min-height: 0 !important;
                   max-height: none !important;
+                  text-align: center !important;
                 }
                 
                 /* Force content to be visible */
@@ -108,7 +109,7 @@ export class CustomPrintService {
               }
               
               body {
-                font-family: Cairo, Arial, sans-serif;
+                font-family: 'Zain', 'Yrsa', Arial, sans-serif;
                 margin: 0;
                 padding: 0;
                 background: white;
