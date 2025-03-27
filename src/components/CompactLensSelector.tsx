@@ -61,29 +61,6 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
     }
   };
 
-  // Get lens price safely (with a fallback to 0)
-  const getLensPrice = (lens: LensType): number => {
-    return lens.price !== undefined ? lens.price : 0;
-  };
-
-  // Map lens type to coating/thickness category
-  const getLensCategoryForCoatings = (activeTab: string): "distance-reading" | "progressive" | "bifocal" => {
-    if (activeTab === "distance" || activeTab === "reading") {
-      return "distance-reading";
-    } else if (activeTab === "progressive") {
-      return "progressive";
-    } else if (activeTab === "bifocal") {
-      return "bifocal";
-    }
-    return "distance-reading"; // Default fallback
-  };
-
-  // Get available coatings based on active tab
-  const getAvailableCoatings = (): LensCoating[] => {
-    const category = getLensCategoryForCoatings(activeTab);
-    return lensCoatings.filter(coating => coating.category === category);
-  };
-
   // Category colors
   const categoryColors = {
     distance: "bg-blue-50 border-blue-200 text-blue-700",
@@ -107,7 +84,7 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
           </span>
           {selectedLens && (
             <span className="text-sm font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
-              {selectedLens.name} - {getLensPrice(selectedLens).toFixed(2)} د.ك
+              {selectedLens.name} - {selectedLens.price.toFixed(2)} د.ك
             </span>
           )}
         </div>
@@ -144,7 +121,7 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
                     <CardContent className="p-2 flex items-center justify-between">
                       <div className="font-medium truncate text-sm">{lens.name}</div>
                       <div className="whitespace-nowrap text-xs font-semibold rounded-full px-1.5 py-0.5 bg-white/80">
-                        {getLensPrice(lens).toFixed(2)} د.ك
+                        {lens.price.toFixed(2)} د.ك
                       </div>
                     </CardContent>
                   </Card>
@@ -180,7 +157,7 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
         {expandedSection === "coating" && (
           <ScrollArea className="h-[160px] bg-gradient-to-b from-amber-50/30 to-white">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-3">
-              {getAvailableCoatings().map((coating) => (
+              {lensCoatings.map((coating) => (
                 <Card 
                   key={coating.id} 
                   className={`cursor-pointer transition-all border hover:shadow ${
@@ -198,7 +175,7 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
                   </CardContent>
                 </Card>
               ))}
-              {getAvailableCoatings().length === 0 && (
+              {lensCoatings.length === 0 && (
                 <p className="col-span-3 text-center p-2 text-muted-foreground text-sm">
                   لا توجد طلاءات متاحة
                 </p>
@@ -217,7 +194,7 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                 <span className="font-medium">{selectedLens.name}</span>
-                <span className="text-xs font-semibold bg-white px-1.5 py-0.5 rounded-full">{getLensPrice(selectedLens).toFixed(2)} د.ك</span>
+                <span className="text-xs font-semibold bg-white px-1.5 py-0.5 rounded-full">{selectedLens.price.toFixed(2)} د.ك</span>
               </div>
               <Button 
                 variant="ghost" 

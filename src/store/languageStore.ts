@@ -88,6 +88,8 @@ const translations: Record<string, Record<string, string>> = {
     invoiceCreation: 'Invoice Creation',
     clientDetails: 'Client Details',
     searchClient: 'Search Client',
+    clientName: 'Client Name',
+    clientPhone: 'Client Phone',
     lensDetails: 'Lens Details',
     lensType: 'Lens Type',
     selectLens: 'Select Lens',
@@ -119,30 +121,6 @@ const translations: Record<string, Record<string, string>> = {
     remaining: 'Remaining',
     createInvoiceBtn: 'Create Invoice',
     invoiceCreated: 'Invoice created successfully',
-    invoiceSuccessMessage: 'Your invoice has been successfully created and is ready for printing',
-    workOrderNumber: 'Work Order Number',
-    clientName: 'Client Name',
-    clientPhone: 'Client Phone',
-    date: 'Date',
-    totalAmount: 'Total Amount',
-    totalInvoice: 'Total Invoice',
-    paymentStatus: 'Payment Status',
-    paid: 'Paid',
-    paidInFull: 'Paid in Full',
-    partiallyPaid: 'Partially Paid',
-    nextSteps: 'Next Steps',
-    printWorkOrder: 'Print Work Order',
-    printWorkOrderDescription: 'Print the production work order for the lab',
-    printInvoice: 'Print Invoice',
-    printInvoiceDescription: 'Print the customer invoice receipt',
-    printCustomWorkOrder: 'Print Custom Work Order',
-    printCustomWorkOrderDescription: 'Print a specialized work order with custom format',
-    
-    // Tab sections in Create Invoice
-    clientSection: '1) Client Information',
-    productSection: 'Lenses and Frame',
-    paymentSection: 'Payment Method',
-    summarySection: 'Summary',
     
     // Inventory
     frames: 'Frames',
@@ -172,7 +150,6 @@ const translations: Record<string, Record<string, string>> = {
     lensInventory: 'Lens Inventory',
     lensTypes: 'Lens Types',
     lensCoatings: 'Lens Coatings',
-    lensThicknesses: 'Lens Thicknesses',
     addLens: 'Add Lens',
     editLens: 'Edit Lens',
     deleteLens: 'Delete Lens',
@@ -182,12 +159,29 @@ const translations: Record<string, Record<string, string>> = {
     updateLens: 'Update Lens',
     deleteLensConfirm: 'Are you sure you want to delete this lens?',
     contactLensManagement: 'Contact Lens Management',
-    distanceReading: 'Distance/Reading',
-    distance: 'Distance',
-    reading: 'Reading',
-    progressive: 'Progressive',
-    bifocal: 'Bifocal',
-    sunglasses: 'Sunglasses',
+    
+    // Coating
+    coatingInventory: 'Coating Inventory',
+    addCoating: 'Add Coating',
+    editCoating: 'Edit Coating',
+    deleteCoating: 'Delete Coating',
+    coatingName: 'Coating Name',
+    addNewCoating: 'Add New Coating',
+    updateCoating: 'Update Coating',
+    deleteCoatingConfirm: 'Are you sure you want to delete this coating?',
+    
+    // Contact Lenses
+    contactLensInventory: 'Contact Lens Inventory',
+    addContactLens: 'Add Contact Lens',
+    editContactLens: 'Edit Contact Lens',
+    deleteContactLens: 'Delete Contact Lens',
+    contactLensBrand: 'Brand',
+    power: 'Power',
+    baseCurve: 'Base Curve',
+    diameter: 'Diameter',
+    addNewContactLens: 'Add New Contact Lens',
+    updateContactLens: 'Update Contact Lens',
+    deleteContactLensConfirm: 'Are you sure you want to delete this contact lens?',
     
     // Remaining Payments
     duePayments: 'Manage incomplete invoices and record remaining payments',
@@ -213,6 +207,7 @@ const translations: Record<string, Record<string, string>> = {
     patientDetails: 'Patient Details',
     invoiceHistory: 'Invoice History',
     prescriptionHistory: 'Prescription History',
+    date: 'Date',
     
     // Common Actions
     edit: 'Edit',
@@ -226,9 +221,6 @@ const translations: Record<string, Record<string, string>> = {
     submit: 'Submit',
     confirm: 'Confirm',
     optional: 'Optional',
-    next: 'Next',
-    previous: 'Previous',
-    newInvoice: 'New Invoice',
 
     // Units and Labels
     kwd: 'KWD',
@@ -240,7 +232,7 @@ const translations: Record<string, Record<string, string>> = {
     
     // Create Invoice (Additional)
     invoiceTitle: "Create Invoice",
-    // clientSection is now defined above in "Tab sections in Create Invoice"
+    clientSection: "1) Client Information",
     noClientFile: "No client file",
     phoneColon: "Phone Number:",
     typeToSearch: "Type to search...",
@@ -260,8 +252,9 @@ const translations: Record<string, Record<string, string>> = {
     discountColon: "Discount (KWD):",
     depositColon: "Deposit (KWD):",
     payInFull: "Pay in Full",
-    // paymentSection is now defined above in "Tab sections in Create Invoice"
+    paymentSection: "5) Payment Method",
     approvalNumber: "Approval Number (Authorization No.):",
+    printWorkOrder: "Print Work Order",
     previewInvoice: "Preview Invoice",
     saveAndPrint: "Save and Print",
     invoiceSummary: "Invoice Summary",
@@ -299,12 +292,6 @@ const translations: Record<string, Record<string, string>> = {
     approvalNumberLabel: "Approval Number:",
     paymentTotalLabel: "Total:",
     paidLabel: "Paid:",
-    
-    // Waiting states for invoice summary
-    waitingForClientData: "Waiting for client data...",
-    waitingForProductData: "Waiting for product data...",
-    waitingForPaymentData: "Waiting for payment data...",
-    
     remainingLabel: "Remaining:",
     
     // LensSelector Component
@@ -336,18 +323,7 @@ const translations: Record<string, Record<string, string>> = {
     tip2: "Always store your glasses in a protective case.",
     tip3: "Avoid placing your glasses lens-side down.",
     tip4: "Schedule regular eye exams to ensure your prescription is accurate.",
-    thankYou: "Thank you for choosing Moen Optician. We look forward to serving you again!",
-    
-    // Newly added translations 
-    startBySelectingClient: "Start by selecting a client in Step 1",
-    goToClientSection: "Go to Client Section",
-    anonymous: "Anonymous",
-    
-    // Add new translation for axis validation error
-    axisValidationError: "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.",
-    
-    // Add the new notesPlaceholder translation
-    notesPlaceholder: "You can add any information about the customer here..."
+    thankYou: "Thank you for choosing Moen Optician. We look forward to serving you again!"
   },
   ar: {
     // General UI
@@ -429,6 +405,8 @@ const translations: Record<string, Record<string, string>> = {
     invoiceCreation: 'إنشاء فاتورة',
     clientDetails: 'تفاصيل العميل',
     searchClient: 'بحث عن عميل',
+    clientName: 'اسم العميل',
+    clientPhone: 'هاتف العميل',
     lensDetails: 'العدسات الطبية',
     lensType: 'نوع العدسة',
     selectLens: 'اختر العدسة',
@@ -461,30 +439,6 @@ const translations: Record<string, Record<string, string>> = {
     remaining: 'المتبقي',
     createInvoiceBtn: 'إنشاء الفاتورة',
     invoiceCreated: 'تم إنشاء الفاتورة بنجاح',
-    invoiceSuccessMessage: 'تم إنشاء الفاتورة بنجاح وهي جاهزة للطباعة',
-    workOrderNumber: 'رقم أمر العمل',
-    clientName: 'اسم العميل',
-    clientPhone: 'هاتف العميل',
-    date: 'التاريخ',
-    totalAmount: 'المبلغ الإجمالي',
-    totalInvoice: 'إجمالي الفاتورة',
-    paymentStatus: 'حالة الدفع',
-    paid: 'مدفوع',
-    paidInFull: 'مدفوع بالكامل',
-    partiallyPaid: 'مدفوع جزئياً',
-    nextSteps: 'الخطوات التالية',
-    printWorkOrder: 'طباعة أمر العمل',
-    printWorkOrderDescription: 'طباعة أمر العمل للمختبر',
-    printInvoice: 'طباعة الفاتورة',
-    printInvoiceDescription: 'طباعة إيصال الفاتورة للعميل',
-    printCustomWorkOrder: 'طباعة أمر عمل مخصص',
-    printCustomWorkOrderDescription: 'طباعة أمر عمل متخصص بتنسيق مخصص',
-    
-    // Tab sections in Create Invoice
-    clientSection: '١) بيانات العميل',
-    productSection: 'العدسات والإطار',
-    paymentSection: 'طريقة الدفع',
-    summarySection: 'الملخص',
     
     // Inventory
     frames: 'الإطارات',
@@ -514,7 +468,6 @@ const translations: Record<string, Record<string, string>> = {
     lensInventory: 'مخزون العدسات',
     lensTypes: 'أنواع العدسات',
     lensCoatings: 'طلاءات العدسات',
-    lensThicknesses: 'سماكة العدسات',
     addLens: 'إضافة عدسة',
     editLens: 'تعديل عدسة',
     deleteLens: 'حذف عدسة',
@@ -524,12 +477,29 @@ const translations: Record<string, Record<string, string>> = {
     updateLens: 'تحديث العدسة',
     deleteLensConfirm: 'هل أنت متأكد من رغبتك في حذف هذه العدسة؟',
     contactLensManagement: 'إدارة العدسات اللاصقة',
-    distanceReading: 'النظر البعيد/القراءة',
-    distance: 'النظر البعيد',
-    reading: 'القراءة',
-    progressive: 'متدرجة (Progressive)',
-    bifocal: 'ثنائية البؤرة (Bifocal)',
-    sunglasses: 'نظارات شمسية (Sunglasses)',
+    
+    // Coating
+    coatingInventory: 'مخزون الطلاءات',
+    addCoating: 'إضافة طلاء',
+    editCoating: 'تعديل طلاء',
+    deleteCoating: 'حذف طلاء',
+    coatingName: 'اسم الطلاء',
+    addNewCoating: 'إضافة طلاء جديد',
+    updateCoating: 'تحديث الطلاء',
+    deleteCoatingConfirm: 'هل أنت متأكد من رغبتك في حذف هذا الطلاء؟',
+    
+    // Contact Lenses
+    contactLensInventory: 'مخزون العدسات اللاصقة',
+    addContactLens: 'إضافة عدسة لاصقة',
+    editContactLens: 'تعديل عدسة لاصقة',
+    deleteContactLens: 'حذف عدسة لاصقة',
+    contactLensBrand: 'الماركة',
+    power: 'القوة',
+    baseCurve: 'المنحنى الأساسي',
+    diameter: 'القطر',
+    addNewContactLens: 'إضافة عدسة لاصقة جديدة',
+    updateContactLens: 'تحديث العدسة اللاصقة',
+    deleteContactLensConfirm: 'هل أنت متأكد من رغبتك في حذف هذه العدسة اللاصقة؟',
     
     // Remaining Payments
     duePayments: 'إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية',
@@ -555,6 +525,7 @@ const translations: Record<string, Record<string, string>> = {
     patientDetails: 'تفاصيل المريض',
     invoiceHistory: 'تاريخ الفواتير',
     prescriptionHistory: 'تاريخ الوصفات الطبية',
+    date: 'التاريخ',
     
     // Common Actions
     edit: 'تعديل',
@@ -568,9 +539,6 @@ const translations: Record<string, Record<string, string>> = {
     submit: 'تقديم',
     confirm: 'تأكيد',
     optional: 'اختياري',
-    next: 'التالي',
-    previous: 'السابق',
-    newInvoice: 'فاتورة جديدة',
 
     // Units and Labels
     kwd: 'د.ك',
@@ -582,7 +550,7 @@ const translations: Record<string, Record<string, string>> = {
     
     // Create Invoice (Additional)
     invoiceTitle: "إنشاء فاتورة",
-    // clientSection is now defined above in "Tab sections in Create Invoice"
+    clientSection: "١) بيانات العميل",
     noClientFile: "لا يوجد ملف عميل",
     phoneColon: "رقم الهاتف:",
     typeToSearch: "اكتب للبحث...",
@@ -602,7 +570,9 @@ const translations: Record<string, Record<string, string>> = {
     discountColon: "الخصم (د.ك):",
     depositColon: "الدفعة (د.ك):",
     payInFull: "دفع كامل",
+    paymentSection: "٥) طريقة الدفع",
     approvalNumber: "رقم الموافقة (Authorization No.):",
+    printWorkOrder: "طباعة أمر العمل",
     previewInvoice: "معاينة الفاتورة",
     saveAndPrint: "حفظ وطباعة",
     invoiceSummary: "ملخص الفاتورة",
@@ -639,12 +609,6 @@ const translations: Record<string, Record<string, string>> = {
     approvalNumberLabel: "رقم الموافقة:",
     paymentTotalLabel: "المجموع:",
     paidLabel: "المدفوع:",
-    
-    // Waiting states for invoice summary
-    waitingForClientData: "بانتظار بيانات العميل...",
-    waitingForProductData: "بانتظار بيانات المنتجات...",
-    waitingForPaymentData: "بانتظار بيانات الدفع...",
-    
     remainingLabel: "المتبقي:",
     
     // LensSelector Component
@@ -676,18 +640,7 @@ const translations: Record<string, Record<string, string>> = {
     tip2: "احتفظ دائماً بنظارتك داخل العلبة الواقية.",
     tip3: "تجنب وضع النظارة بحيث تكون العدسات ملامسة للسطح.",
     tip4: "احرص على فحص عينيك بانتظام للتأكد من صحة الوصفة.",
-    thankYou: "شكراً لاختياركم موين للبصريات، نتطلع لخدمتكم مرة أخرى!",
-    
-    // Newly added translations
-    startBySelectingClient: "ابدأ باختيار عميل في الخطوة الأولى",
-    goToClientSection: "اذهب إلى قسم العميل",
-    anonymous: "مجهول",
-    
-    // Add new translation for axis validation error in Arabic
-    axisValidationError: "قيم المحور (AXIS) التي أدخلتها غير صحيحة! إذا كانت قيمة الاسطوانة (CYL) موجودة، فيجب تحديد قيمة المحور.",
-    
-    // Add the new notesPlaceholder translation in Arabic
-    notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا..."
+    thankYou: "شكراً لاختياركم موين للبصريات، نتطلع لخدمتكم مرة أخرى!"
   }
 };
 

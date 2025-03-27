@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -93,7 +92,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
             <div style="text-align: center; margin-bottom: 10mm;">
               <h1 style="font-size: 24px; margin-bottom: 5mm;">${t("workOrder")}</h1>
-              <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.workOrderId}</p>
+              <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.invoiceId}</p>
               <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
             </div>
             

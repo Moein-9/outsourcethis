@@ -15,27 +15,30 @@ import { useLanguageStore } from "@/store/languageStore";
 export const LensTypeManager: React.FC = () => {
   const { lensTypes, addLensType, updateLensType, deleteLensType } = useInventoryStore();
   const { t, language } = useLanguageStore();
-  const [activeTab, setActiveTab] = useState<string>("distance-reading");
+  const [activeTab, setActiveTab] = useState<string>("distance");
   
   // New lens form state
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newLensName, setNewLensName] = useState("");
+  const [newLensPrice, setNewLensPrice] = useState<number | "">("");
   const [newLensType, setNewLensType] = useState<"distance" | "reading" | "progressive" | "bifocal" | "sunglasses">("distance");
   
   // Edit lens form state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editLensId, setEditLensId] = useState("");
   const [editLensName, setEditLensName] = useState("");
+  const [editLensPrice, setEditLensPrice] = useState<number | "">("");
   const [editLensType, setEditLensType] = useState<"distance" | "reading" | "progressive" | "bifocal" | "sunglasses">("distance");
   
   const handleAddLens = () => {
-    if (!newLensName) {
+    if (!newLensName || newLensPrice === "") {
       toast.error(t("fillRequiredFields"));
       return;
     }
     
     addLensType({
       name: newLensName,
+      price: Number(newLensPrice),
       type: newLensType
     });
     
@@ -43,17 +46,19 @@ export const LensTypeManager: React.FC = () => {
     
     // Reset form
     setNewLensName("");
+    setNewLensPrice("");
     setIsAddDialogOpen(false);
   };
   
   const handleEditLens = () => {
-    if (!editLensName) {
+    if (!editLensName || editLensPrice === "") {
       toast.error(t("fillRequiredFields"));
       return;
     }
     
     updateLensType(editLensId, {
       name: editLensName,
+      price: Number(editLensPrice),
       type: editLensType
     });
     
@@ -71,6 +76,7 @@ export const LensTypeManager: React.FC = () => {
   const startEditLens = (lens: LensType) => {
     setEditLensId(lens.id);
     setEditLensName(lens.name);
+    setEditLensPrice(lens.price);
     setEditLensType(lens.type);
     setIsEditDialogOpen(true);
   };
@@ -83,11 +89,7 @@ export const LensTypeManager: React.FC = () => {
     { value: "sunglasses", label: t("sunglasses") }
   ];
   
-  // Get filtered lenses based on the active tab
-  // For "distance-reading" tab, show both distance and reading lenses
-  const filteredLenses = activeTab === "distance-reading" 
-    ? lensTypes.filter(lens => lens.type === "distance" || lens.type === "reading")
-    : lensTypes.filter(lens => lens.type === activeTab);
+  const filteredLenses = lensTypes.filter(lens => lens.type === activeTab);
   
   return (
     <div className="space-y-4">
@@ -118,10 +120,20 @@ export const LensTypeManager: React.FC = () => {
                 />
               </div>
               <div className="grid gap-2">
+                <Label htmlFor="price">{t("price")}</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  value={newLensPrice}
+                  onChange={(e) => setNewLensPrice(e.target.value ? Number(e.target.value) : "")}
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="grid gap-2">
                 <Label htmlFor="type">{t("type")}</Label>
                 <Select value={newLensType} onValueChange={(value) => setNewLensType(value as any)}>
                   <SelectTrigger id="type">
-                    <SelectValue placeholder={t("chooseType") || "Choose type"} />
+                    <SelectValue placeholder={t("choosePaymentMethod")} />
                   </SelectTrigger>
                   <SelectContent>
                     {lensTypeCategories.map((category) => (
@@ -141,9 +153,10 @@ export const LensTypeManager: React.FC = () => {
         </Dialog>
       </div>
       
-      <Tabs defaultValue="distance-reading" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 md:grid-cols-4 mb-4">
-          <TabsTrigger value="distance-reading">{t("distanceReading")}</TabsTrigger>
+      <Tabs defaultValue="distance" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-3 md:grid-cols-5 mb-4">
+          <TabsTrigger value="distance">{t("distance")}</TabsTrigger>
+          <TabsTrigger value="reading">{t("reading")}</TabsTrigger>
           <TabsTrigger value="progressive">{t("progressive")}</TabsTrigger>
           <TabsTrigger value="bifocal">{t("bifocal")}</TabsTrigger>
           <TabsTrigger value="sunglasses">{t("sunglasses")}</TabsTrigger>
@@ -158,7 +171,7 @@ export const LensTypeManager: React.FC = () => {
                     <CardTitle className="text-base">{lens.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 pb-2">
-                    <p className="text-sm text-muted-foreground">{t(lens.type)}</p>
+                    <p className="text-lg font-bold">{lens.price.toFixed(2)} {language === 'ar' ? 'د.ك' : 'KD'}</p>
                   </CardContent>
                   <CardFooter className="p-2 flex justify-end gap-2 bg-muted/50">
                     <Button variant="ghost" size="icon" onClick={() => startEditLens(lens)}>
@@ -201,10 +214,19 @@ export const LensTypeManager: React.FC = () => {
               />
             </div>
             <div className="grid gap-2">
+              <Label htmlFor="edit-price">{t("price")}</Label>
+              <Input
+                id="edit-price"
+                type="number"
+                value={editLensPrice}
+                onChange={(e) => setEditLensPrice(e.target.value ? Number(e.target.value) : "")}
+              />
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="edit-type">{t("type")}</Label>
               <Select value={editLensType} onValueChange={(value) => setEditLensType(value as any)}>
                 <SelectTrigger id="edit-type">
-                  <SelectValue placeholder={t("chooseType") || "Choose type"} />
+                  <SelectValue placeholder={t("choosePaymentMethod")} />
                 </SelectTrigger>
                 <SelectContent>
                   {lensTypeCategories.map((category) => (

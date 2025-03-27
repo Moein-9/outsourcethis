@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { toast } from '@/hooks/use-toast';
 
@@ -42,102 +41,83 @@ export const PrintService = {
     onComplete?: () => void
   ) => {
     try {
-      console.log(`[PrintService] Starting print process for ${paperType}`);
+      // Create the print frame
+      const iframe = PrintService.createPrintFrame();
+      let printTimeout: ReturnType<typeof setTimeout>;
+      let completionTimeout: ReturnType<typeof setTimeout>;
       
-      // Use a consistent approach: window-based for all prints
-      const printWindow = window.open('', '_blank', 'width=800,height=600');
-      
-      if (!printWindow) {
-        console.error('[PrintService] Failed to open print window - likely blocked by browser');
-        toast({
-          title: "Print Error",
-          description: "Popup blocked. Please allow popups for this site and try again.",
-          variant: "destructive"
-        });
-        if (onComplete) onComplete();
-        return;
-      }
-      
-      // Set up completion handler
-      let printCompleted = false;
-      let documentLoaded = false;
-      
-      // Listen for beforeunload to detect when print dialog is closed
-      printWindow.addEventListener('beforeunload', () => {
-        console.log('[PrintService] Print window closing');
-        if (!printCompleted) {
-          printCompleted = true;
-          if (onComplete) {
-            console.log('[PrintService] Running completion callback');
-            setTimeout(() => onComplete(), 100);
-          }
-        }
-      });
-      
-      // Write content to the window
-      printWindow.document.open();
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      
-      // Handle document loaded event
-      printWindow.onload = () => {
-        documentLoaded = true;
-        console.log('[PrintService] Document loaded in print window');
-        
-        // Focus window before printing (important for Firefox)
-        printWindow.focus();
-        
-        // Wait for resources to load
-        setTimeout(() => {
-          try {
-            // Track print dialog showing
-            console.log('[PrintService] Triggering browser print dialog');
-            printWindow.print();
-            
-            // Set a fallback completion handler (in case beforeunload doesn't fire)
-            setTimeout(() => {
-              if (!printCompleted) {
-                console.log('[PrintService] Using fallback completion (timeout)');
-                printCompleted = true;
-                // Close window in case it's still open
-                try { printWindow.close(); } catch (e) {}
-                if (onComplete) onComplete();
-              }
-            }, 5000);
-          } catch (printError) {
-            console.error('[PrintService] Error during print:', printError);
-            printWindow.close();
-            toast({
-              title: "Print Error",
-              description: "Failed to print. Try refreshing the page or using a different browser.",
-              variant: "destructive"
-            });
+      // Set up a listener for completion
+      const printCompleteHandler = (e: MessageEvent) => {
+        if (e.data === 'print-complete') {
+          window.removeEventListener('message', printCompleteHandler);
+          
+          // Always clean up the iframe after printing
+          if (completionTimeout) clearTimeout(completionTimeout);
+          completionTimeout = setTimeout(() => {
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
+            }
             if (onComplete) onComplete();
-          }
-        }, 500); // Increased timeout to ensure resources load
+          }, 500);
+        }
       };
       
-      // Handle load failures
-      setTimeout(() => {
-        if (!documentLoaded) {
-          console.error('[PrintService] Document failed to load in print window');
-          try { printWindow.close(); } catch (e) {}
-          toast({
-            title: "Print Error",
-            description: "Document failed to load for printing. Please try again.",
-            variant: "destructive"
-          });
-          if (onComplete) onComplete();
-        }
-      }, 3000);
+      window.addEventListener('message', printCompleteHandler);
       
+      // Write the content to the iframe
+      if (iframe.contentWindow) {
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(htmlContent);
+        iframe.contentWindow.document.close();
+        
+        // Focus iframe and trigger print after content is loaded
+        iframe.onload = function() {
+          if (printTimeout) clearTimeout(printTimeout);
+          
+          printTimeout = setTimeout(() => {
+            if (iframe.contentWindow) {
+              // Make sure the iframe is focused before printing
+              iframe.contentWindow.focus();
+              
+              try {
+                // Print with a small delay to ensure browser is ready
+                iframe.contentWindow.print();
+                
+                // Set a backup timeout in case the print complete event doesn't fire
+                setTimeout(() => {
+                  window.postMessage('print-complete', '*');
+                }, 2000);
+              } catch (printError) {
+                console.error('Print error:', printError);
+                toast({
+                  title: "Error",
+                  description: "Failed to print. Please try again.",
+                  variant: "destructive"
+                });
+                
+                // Clean up even if there's an error
+                window.postMessage('print-complete', '*');
+              }
+            }
+          }, 300);
+        };
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create print frame. Please try again.",
+          variant: "destructive"
+        });
+        
+        if (onComplete) onComplete();
+      }
     } catch (error) {
-      console.error('[PrintService] Critical error:', error);
+      console.error('Print error:', error);
       toast({
-        title: "Print Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Error",
+        description: "Failed to print. Please try again.",
         variant: "destructive"
       });
+      
       if (onComplete) onComplete();
     }
   },
@@ -267,12 +247,25 @@ export const PrintService = {
       <body>
         <div class="receipt-container">${content}</div>
         <script>
-          window.addEventListener('DOMContentLoaded', function() {
-            // Wait for the content to be fully loaded before focusing and printing
+          document.addEventListener('DOMContentLoaded', function() {
+            // Force printing after content is loaded
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 500);
+            }, 300);
+          });
+          
+          // Backup in case DOMContentLoaded doesn't fire properly
+          setTimeout(function() {
+            window.focus();
+            window.print();
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 2000);
-          });
+            }, 500);
+          }, 1000);
         </script>
       </body>
       </html>
@@ -292,16 +285,10 @@ export const PrintService = {
       <head>
         <title>${title}</title>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
-        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
         <style>
           @page {
-            size: 100mm 16mm landscape !important;
+            size: 100mm 16mm !important;
             margin: 0mm !important;
             padding: 0mm !important;
           }
@@ -315,163 +302,111 @@ export const PrintService = {
             margin: 0 !important;
             padding: 0 !important;
             width: 100mm !important;
-            height: 16mm !important;
             max-width: 100mm !important;
-            max-height: 16mm !important;
             overflow: hidden !important;
             font-family: 'Yrsa', serif !important;
             -webkit-print-color-adjust: exact !important;
             color-adjust: exact !important;
             print-color-adjust: exact !important;
-            transform-origin: top left !important;
           }
           
           .label-container {
-            width: 100mm !important;
+            width: 90mm !important;
             height: 16mm !important;
             display: flex !important;
-            flex-direction: row !important;
-            justify-content: flex-start !important;
-            align-items: center !important;
-            margin: 0 !important;
+            justify-content: space-between !important;
+            margin: 0 auto 0 auto !important;
             padding: 0 !important;
             overflow: hidden !important;
             page-break-after: always !important;
             page-break-inside: avoid !important;
-            position: relative !important;
-          }
-          
-          .left-section {
-            width: 35mm !important;
-            height: 16mm !important;
-            padding: 1mm !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            border-right: 0.5px solid #ccc !important;
-            box-sizing: border-box !important;
           }
           
           .right-section {
-            width: 35mm !important;
-            height: 16mm !important;
+            width: 45mm !important;
+            margin-left: 25mm !important;
+            height: 100% !important;
+            padding: 1mm 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+          }
+          
+          .left-section {
+            width: 45mm !important;
+            height: 100% !important;
             padding: 1mm !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: space-between !important;
-            box-sizing: border-box !important;
-            /* Account for 30mm unprintable tail - safe zone */
-            margin-right: 30mm !important;
-            overflow: hidden !important;
+            justify-content: center !important;
+            align-items: center !important;
           }
           
           .brand-name {
             font-weight: bold !important;
             font-size: 8pt !important;
             margin-bottom: 0.5mm !important;
+            white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
-            white-space: normal !important;
-            max-width: 100% !important;
-            line-height: 1.1 !important;
-            max-height: 4mm !important;
-            display: -webkit-box !important;
-            -webkit-line-clamp: 2 !important;
-            -webkit-box-orient: vertical !important;
           }
           
           .detail-info {
-            font-size: 7pt !important;
-            font-weight: bold !important;
-            margin-bottom: 0.25mm !important;
+            font-size: 8pt !important;
+            margin-bottom: 0.5mm !important;
             line-height: 1.1 !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            white-space: nowrap !important;
+            text-align: center !important;
           }
           
           .price {
             font-weight: bold !important;
-            font-size: 12pt !important;
-            margin-top: 0.5mm !important;
-            color: #000000 !important;
+            font-size: 8pt !important;
           }
           
           .store-logo {
             display: flex !important;
             justify-content: center !important;
             width: 100% !important;
-            margin-bottom: 1mm !important;
+            margin-bottom: 0.2mm !important;
           }
           
           .store-logo img {
-            max-height: 5mm !important;
+            max-height: 3.5mm !important;
             width: auto !important;
           }
           
           .qr-code {
             display: flex !important;
             justify-content: center !important;
-            margin-bottom: 1mm !important;
           }
           
-          .qr-code img, .qr-code canvas, .qr-code svg {
-            height: 9mm !important;
-            width: 9mm !important;
-          }
-          
-          /* Fix for print dialog appearing but not working */
-          @media print {
-            html {
-              width: 100mm !important;
-              height: 16mm !important;
-              overflow: hidden !important;
-            }
-            
-            body {
-              width: 100mm !important;
-              height: 16mm !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              overflow: hidden !important;
-              -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-            
-            /* Ensure only one label prints per page */
-            @page {
-              size: 100mm 16mm landscape !important;
-              margin: 0mm !important;
-              margin-left: 0mm !important;
-              margin-right: 0mm !important;
-              margin-top: 0mm !important;
-              margin-bottom: 0mm !important;
-            }
+          .qr-code img, .qr-code svg {
+            height: 40px !important;
+            width: 40px !important;
           }
         </style>
       </head>
       <body>
         ${content}
         <script>
-          window.addEventListener('DOMContentLoaded', function() {
-            // Force landscape orientation
-            if (window.matchMedia) {
-              const mediaQueryList = window.matchMedia('print');
-              mediaQueryList.addListener(function(mql) {
-                if (mql.matches) {
-                  document.body.style.width = '100mm';
-                  document.body.style.height = '16mm';
-                }
-              });
-            }
-            
-            // Wait for the content to be fully loaded before notifying completion
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 500);
+            }, 300);
+          });
+          
+          // Backup in case DOMContentLoaded doesn't fire properly
+          setTimeout(function() {
+            window.focus();
+            window.print();
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 1000);
-          });
+            }, 500);
+          }, 1000);
         </script>
       </body>
       </html>
@@ -609,12 +544,24 @@ export const PrintService = {
       <body>
         <div class="rx-container">${content}</div>
         <script>
-          window.addEventListener('DOMContentLoaded', function() {
-            // Wait for the content to be fully loaded before notifying completion
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 500);
+            }, 300);
+          });
+          
+          // Backup in case DOMContentLoaded doesn't fire properly
+          setTimeout(function() {
+            window.focus();
+            window.print();
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 1000);
-          });
+            }, 500);
+          }, 1000);
         </script>
       </body>
       </html>
@@ -813,12 +760,25 @@ export const PrintService = {
       <body>
         <div class="workorder-container">${content}</div>
         <script>
-          window.addEventListener('DOMContentLoaded', function() {
-            // Wait for the content to be fully loaded before notifying completion
+          document.addEventListener('DOMContentLoaded', function() {
+            // Force printing after content is loaded
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 500);
+            }, 300);
+          });
+          
+          // Backup in case DOMContentLoaded doesn't fire properly
+          setTimeout(function() {
+            window.focus();
+            window.print();
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 1000);
-          });
+            }, 500);
+          }, 1000);
         </script>
       </body>
       </html>
@@ -906,12 +866,24 @@ export const PrintService = {
       <body>
         <div class="a4-container">${content}</div>
         <script>
-          window.addEventListener('DOMContentLoaded', function() {
-            // Wait for the content to be fully loaded before notifying completion
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                window.parent.postMessage('print-complete', '*');
+              }, 500);
+            }, 300);
+          });
+          
+          // Backup in case DOMContentLoaded doesn't fire properly
+          setTimeout(function() {
+            window.focus();
+            window.print();
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 1000);
-          });
+            }, 500);
+          }, 1000);
         </script>
       </body>
       </html>

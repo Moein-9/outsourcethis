@@ -16,7 +16,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { PatientNote, RxData, usePatientStore } from "@/store/patientStore";
+import { RxData, usePatientStore } from "@/store/patientStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format, parseISO } from "date-fns";
 import { ar } from "date-fns/locale";
@@ -30,17 +30,13 @@ import {
   Eye,
   Plus,
   Calendar,
-  CheckCircle2,
-  MessageSquare,
-  Clock
+  CheckCircle2
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { useLanguageStore } from "@/store/languageStore";
 import { RxLanguageDialog } from "./RxReceiptPrint";
-import { Textarea } from "./ui/textarea";
-import { Separator } from "./ui/separator";
 
 interface PatientRxManagerProps {
   patientId: string;
@@ -49,7 +45,6 @@ interface PatientRxManagerProps {
   currentRx: RxData;
   rxHistory?: RxData[];
   notes?: string;
-  patientNotes?: PatientNote[];
   onRxPrintRequest: (language?: 'en' | 'ar') => void;
 }
 
@@ -60,10 +55,9 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   currentRx,
   rxHistory = [],
   notes,
-  patientNotes = [],
   onRxPrintRequest
 }) => {
-  const { updatePatientRx, getPatientById, addPatientNote } = usePatientStore();
+  const { updatePatientRx, getPatientById } = usePatientStore();
   const { t, language } = useLanguageStore();
   const [isNewRxOpen, setIsNewRxOpen] = useState(false);
   const [newRx, setNewRx] = useState<RxData>({
@@ -85,14 +79,11 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   
   const [localCurrentRx, setLocalCurrentRx] = useState(currentRx);
   const [localRxHistory, setLocalRxHistory] = useState(rxHistory);
-  const [localPatientNotes, setLocalPatientNotes] = useState(patientNotes);
-  const [newNote, setNewNote] = useState("");
   
   useEffect(() => {
     setLocalCurrentRx(currentRx);
     setLocalRxHistory(rxHistory);
-    setLocalPatientNotes(patientNotes);
-  }, [currentRx, rxHistory, patientNotes]);
+  }, [currentRx, rxHistory]);
 
   const handleRxInputChange = (eye: "OD" | "OS", field: "sphere" | "cyl" | "axis" | "add", value: string) => {
     if (eye === "OD") {
@@ -253,34 +244,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     return options;
   };
 
-  const handleAddNote = () => {
-    if (!newNote.trim()) {
-      toast({
-        title: t("error"),
-        description: t("noteCannotBeEmpty"),
-        variant: "destructive"
-      });
-      return;
-    }
-
-    addPatientNote(patientId, newNote);
-    
-    // Update local state to show the new note immediately
-    const newPatientNote = {
-      id: `note-${Date.now()}`,
-      text: newNote,
-      createdAt: new Date().toISOString()
-    };
-    
-    setLocalPatientNotes(prev => [...prev, newPatientNote]);
-    setNewNote("");
-    
-    toast({
-      title: t("success"),
-      description: t("noteAddedSuccessfully")
-    });
-  };
-
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
 
@@ -306,7 +269,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
       </CardHeader>
       <CardContent className="pt-4">
         <div className="space-y-6">
-          {/* Current RX Section */}
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-medium text-blue-800 flex items-center gap-2">
@@ -352,67 +314,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
             </div>
           </div>
           
-          {/* Patient Notes Section */}
-          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-purple-800 flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-purple-600" />
-                {t("patientNotes")}
-              </h4>
-            </div>
-            
-            <div className="space-y-4">
-              {/* Add New Note */}
-              <div className="bg-white p-3 rounded-md shadow-sm border border-purple-100">
-                <Label htmlFor="newNote" className={`mb-2 ${textAlignClass} block text-purple-700`}>{t("addNewNote")}</Label>
-                <div className="flex gap-2">
-                  <Textarea 
-                    id="newNote" 
-                    value={newNote} 
-                    onChange={(e) => setNewNote(e.target.value)} 
-                    placeholder={t("enterNoteAboutPatient")}
-                    className={`min-h-[80px] flex-1 ${textAlignClass}`}
-                  />
-                  <Button 
-                    className="self-end bg-purple-600 hover:bg-purple-700" 
-                    onClick={handleAddNote}
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    {t("addNote")}
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Notes List */}
-              <div className="bg-white rounded-md shadow-sm border border-purple-100">
-                {localPatientNotes && localPatientNotes.length > 0 ? (
-                  <div className="divide-y divide-purple-100">
-                    {localPatientNotes.map((note) => (
-                      <div key={note.id} className="p-3">
-                        <div className="flex justify-between items-start mb-1">
-                          <div className={`text-sm text-gray-500 flex items-center ${textAlignClass}`}>
-                            <Clock className="inline-block h-3.5 w-3.5 mr-1 text-purple-400" />
-                            {formatDate(note.createdAt)}
-                          </div>
-                        </div>
-                        <p className={`text-gray-800 whitespace-pre-wrap ${textAlignClass}`}>{note.text}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-6 bg-gray-50">
-                    <FileText className="h-10 w-10 mx-auto text-gray-400 mb-3" />
-                    <h3 className="text-lg font-medium mb-1 text-gray-600">{t("noNotes")}</h3>
-                    <p className="text-sm text-gray-500 max-w-md mx-auto">
-                      {t("addNotesToTrackInfo")}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          {/* RX History Section */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-medium text-gray-700 flex items-center gap-2">
@@ -495,7 +396,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
             )}
           </div>
 
-          {/* Care Tips Section */}
           <div className="bg-green-50 p-4 rounded-lg border border-green-200">
             <h4 className="font-medium mb-3 text-green-800 flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-green-600" />
@@ -523,7 +423,6 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
         </div>
       </CardContent>
 
-      {/* Dialog components */}
       <Dialog open={isNewRxOpen} onOpenChange={setIsNewRxOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>

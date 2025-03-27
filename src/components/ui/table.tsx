@@ -15,7 +15,6 @@ const Table = React.forwardRef<
       <table
         ref={ref}
         className={cn(`w-full caption-bottom text-sm ${dirClass}`, className)}
-        style={dirClass === 'ltr' ? { direction: 'ltr' } : { direction: 'rtl' }}
         {...props}
       />
     </div>
