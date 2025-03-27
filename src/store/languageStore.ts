@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -330,6 +331,20 @@ const translations: Record<string, Record<string, string>> = {
     medicalLenses: "Medical Lenses",
     selectLensType: "Select Lens Type",
     selectCoatings: "Select Coatings",
+    selectThickness: "Select Thickness",
+    skipLens: "Frame only (without lenses)",
+    noCoating: "No Coating",
+    noCoatingDesc: "Skip coating option",
+    noThickness: "Standard Thickness",
+    noThicknessDesc: "No additional thickness options",
+    selectLensTypeFirst: "Please select a lens type first",
+    lensSkipped: "Lens selection has been skipped",
+    addLens: "Add Lens",
+    
+    // Category names for pricing
+    distanceReadingCategory: "Distance / Reading",
+    progressiveCategory: "Progressive",
+    bifocalCategory: "Bifocal",
     
     // RX Manager translations with improved spacing
     rxAndCareInstructions: "Rx and Care Instructions",
@@ -683,6 +698,20 @@ const translations: Record<string, Record<string, string>> = {
     medicalLenses: "العدسات الطبية",
     selectLensType: "اختر نوع العدسة",
     selectCoatings: "اختر الطلاءات",
+    selectThickness: "اختر السماكة",
+    skipLens: "إطار فقط (بدون عدسات)",
+    noCoating: "بدون طلاء",
+    noCoatingDesc: "تخطي خيار الطلاء",
+    noThickness: "سماكة قياسية",
+    noThicknessDesc: "بدون خيارات سماكة إضافية",
+    selectLensTypeFirst: "الرجاء اختيار نوع العدسة أولاً",
+    lensSkipped: "تم تخطي اختيار العدسة",
+    addLens: "إضافة عدسة",
+    
+    // Category names for pricing
+    distanceReadingCategory: "مسافة / قراءة",
+    progressiveCategory: "تقدمية",
+    bifocalCategory: "ثنائية البؤرة",
     
     // RX Manager translations with proper Arabic translations
     rxAndCareInstructions: "تعليمات الوصفة والعناية",
