@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -52,7 +51,7 @@ interface InventoryState {
   frames: FrameItem[];
   lensTypes: LensType[];
   lensCoatings: LensCoating[];
-  lensThicknesses: LensThickness[]; // New array for lens thicknesses
+  lensThicknesses: LensThickness[];
   contactLenses: ContactLensItem[];
   
   // Frame methods
@@ -88,13 +87,12 @@ export const useInventoryStore = create<InventoryState>()(
     (set, get) => ({
       frames: [],
       lensTypes: [
-        { id: "lens1", name: "نظارات طبية للقراءة", type: "reading" },
-        { id: "lens2", name: "نظارات للنظر البعيد", type: "distance" },
-        { id: "lens3", name: "عدسات تقدمية", type: "progressive" },
-        { id: "lens4", name: "عدسات ثنائية", type: "bifocal" },
-        { id: "lens5", name: "عدسات شمسية", type: "sunglasses" }
+        { id: "lens1", name: "نظارات طبية للقراءة", type: "reading", price: 10 },
+        { id: "lens2", name: "نظارات للنظر البعيد", type: "distance", price: 10 },
+        { id: "lens3", name: "عدسات تقدمية", type: "progressive", price: 20 },
+        { id: "lens4", name: "عدسات ثنائية", type: "bifocal", price: 15 },
+        { id: "lens5", name: "عدسات شمسية", type: "sunglasses", price: 12 }
       ],
-      // Updated with categories
       lensCoatings: [
         { id: "coat1", name: "مضاد للانعكاس", price: 5, description: "Anti-Reflective Coating", category: "distance_reading" },
         { id: "coat2", name: "حماية شاشة", price: 7, description: "Blue Light Protection", category: "distance_reading" },
@@ -103,7 +101,6 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "coat5", name: "حماية شاشة", price: 12, description: "Progressive Blue Light", category: "progressive" },
         { id: "coat6", name: "مضاد للانعكاس", price: 8, description: "Bifocal Anti-Reflective", category: "bifocal" },
       ],
-      // New array for lens thicknesses with initial data
       lensThicknesses: [
         { id: "thick1", name: "قياسية", price: 5, description: "Standard Thickness", category: "distance_reading" },
         { id: "thick2", name: "خفيفة", price: 10, description: "Slim Lens", category: "distance_reading" },
@@ -118,7 +115,6 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "cl3", brand: "Air Optix", type: "Monthly", bc: "8.4", diameter: "14.2", power: "+1.50", price: 22, qty: 8 }
       ],
       
-      // Frame methods
       addFrame: (frame) => {
         const frameId = `FR${Date.now()}`;
         const createdAt = new Date().toISOString();
@@ -159,7 +155,6 @@ export const useInventoryStore = create<InventoryState>()(
         return get().frames.find(frame => frame.frameId === id);
       },
       
-      // Lens methods
       addLensType: (lens) => {
         const id = `lens${Date.now()}`;
         
@@ -184,7 +179,6 @@ export const useInventoryStore = create<InventoryState>()(
         }));
       },
       
-      // Coating methods
       addLensCoating: (coating) => {
         const id = `coat${Date.now()}`;
         
@@ -209,7 +203,6 @@ export const useInventoryStore = create<InventoryState>()(
         }));
       },
       
-      // Thickness methods - new methods
       addLensThickness: (thickness) => {
         const id = `thick${Date.now()}`;
         
@@ -234,7 +227,6 @@ export const useInventoryStore = create<InventoryState>()(
         }));
       },
       
-      // Contact lens methods
       addContactLens: (lens) => {
         const id = `cl${Date.now()}`;
         

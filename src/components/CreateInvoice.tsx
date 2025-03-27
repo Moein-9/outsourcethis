@@ -8,7 +8,7 @@ import {
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
   MessageCircleDashed, Loader, Check, Ruler
 } from "lucide-react";
-import { PaintBrush } from "lucide-react";
+import { Paintbrush } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -480,4 +480,10 @@ const CreateInvoiceContent: React.FC = () => {
   );
 };
 
-export { CreateInvoice };
+export const CreateInvoice: React.FC = () => {
+  return (
+    <InvoiceFormProvider>
+      <CreateInvoiceContent />
+    </InvoiceFormProvider>
+  );
+};

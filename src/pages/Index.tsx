@@ -1,16 +1,12 @@
 
 import React from "react";
-import { PageContainer } from "@/components/PageContainer";
-import { DashboardWidgets } from "@/components/DashboardWidgets";
-import { RecentTransactions } from "@/components/RecentTransactions";
-import { UpcomingAppointments } from "@/components/UpcomingAppointments";
 import { CreateInvoice } from "@/components/CreateInvoice";
 
 const Index = () => {
   return (
-    <PageContainer>
+    <div className="container mx-auto px-4">
       <CreateInvoice />
-    </PageContainer>
+    </div>
   );
 };
 
