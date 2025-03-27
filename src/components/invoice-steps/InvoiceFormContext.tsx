@@ -54,9 +54,10 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     // Product details
     invoiceType: 'glasses',
     lensType: '',
-    lensPrice: 0,
     coating: '',
     coatingPrice: 0,
+    thickness: '',
+    thicknessPrice: 0,
     skipFrame: false,
     frameBrand: '',
     frameModel: '',
@@ -101,8 +102,8 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
   
   // Calculation helpers
   const calculateTotal = () => {
-    const lensPrice = getValues<number>('lensPrice') || 0;
     const coatingPrice = getValues<number>('coatingPrice') || 0;
+    const thicknessPrice = getValues<number>('thicknessPrice') || 0;
     const framePrice = getValues<boolean>('skipFrame') ? 0 : (getValues<number>('framePrice') || 0);
     const discount = getValues<number>('discount') || 0;
     
@@ -113,7 +114,7 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     );
     
     if (getValues<string>('invoiceType') === 'glasses') {
-      return Math.max(0, lensPrice + coatingPrice + framePrice - discount);
+      return Math.max(0, coatingPrice + thicknessPrice + framePrice - discount);
     } else {
       return Math.max(0, contactLensTotal - discount);
     }

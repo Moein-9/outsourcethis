@@ -20,25 +20,22 @@ export const LensTypeManager: React.FC = () => {
   // New lens form state
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newLensName, setNewLensName] = useState("");
-  const [newLensPrice, setNewLensPrice] = useState<number | "">("");
   const [newLensType, setNewLensType] = useState<"distance" | "reading" | "progressive" | "bifocal" | "sunglasses">("distance");
   
   // Edit lens form state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editLensId, setEditLensId] = useState("");
   const [editLensName, setEditLensName] = useState("");
-  const [editLensPrice, setEditLensPrice] = useState<number | "">("");
   const [editLensType, setEditLensType] = useState<"distance" | "reading" | "progressive" | "bifocal" | "sunglasses">("distance");
   
   const handleAddLens = () => {
-    if (!newLensName || newLensPrice === "") {
+    if (!newLensName) {
       toast.error(t("fillRequiredFields"));
       return;
     }
     
     addLensType({
       name: newLensName,
-      price: Number(newLensPrice),
       type: newLensType
     });
     
@@ -46,19 +43,17 @@ export const LensTypeManager: React.FC = () => {
     
     // Reset form
     setNewLensName("");
-    setNewLensPrice("");
     setIsAddDialogOpen(false);
   };
   
   const handleEditLens = () => {
-    if (!editLensName || editLensPrice === "") {
+    if (!editLensName) {
       toast.error(t("fillRequiredFields"));
       return;
     }
     
     updateLensType(editLensId, {
       name: editLensName,
-      price: Number(editLensPrice),
       type: editLensType
     });
     
@@ -76,7 +71,6 @@ export const LensTypeManager: React.FC = () => {
   const startEditLens = (lens: LensType) => {
     setEditLensId(lens.id);
     setEditLensName(lens.name);
-    setEditLensPrice(lens.price);
     setEditLensType(lens.type);
     setIsEditDialogOpen(true);
   };
@@ -120,20 +114,10 @@ export const LensTypeManager: React.FC = () => {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="price">{t("price")}</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  value={newLensPrice}
-                  onChange={(e) => setNewLensPrice(e.target.value ? Number(e.target.value) : "")}
-                  placeholder="0.00"
-                />
-              </div>
-              <div className="grid gap-2">
                 <Label htmlFor="type">{t("type")}</Label>
                 <Select value={newLensType} onValueChange={(value) => setNewLensType(value as any)}>
                   <SelectTrigger id="type">
-                    <SelectValue placeholder={t("choosePaymentMethod")} />
+                    <SelectValue placeholder={t("chooseType") || "Choose type"} />
                   </SelectTrigger>
                   <SelectContent>
                     {lensTypeCategories.map((category) => (
@@ -171,7 +155,7 @@ export const LensTypeManager: React.FC = () => {
                     <CardTitle className="text-base">{lens.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 pb-2">
-                    <p className="text-lg font-bold">{lens.price.toFixed(2)} {language === 'ar' ? 'د.ك' : 'KD'}</p>
+                    <p className="text-sm text-muted-foreground">{lens.type}</p>
                   </CardContent>
                   <CardFooter className="p-2 flex justify-end gap-2 bg-muted/50">
                     <Button variant="ghost" size="icon" onClick={() => startEditLens(lens)}>
@@ -214,19 +198,10 @@ export const LensTypeManager: React.FC = () => {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-price">{t("price")}</Label>
-              <Input
-                id="edit-price"
-                type="number"
-                value={editLensPrice}
-                onChange={(e) => setEditLensPrice(e.target.value ? Number(e.target.value) : "")}
-              />
-            </div>
-            <div className="grid gap-2">
               <Label htmlFor="edit-type">{t("type")}</Label>
               <Select value={editLensType} onValueChange={(value) => setEditLensType(value as any)}>
                 <SelectTrigger id="edit-type">
-                  <SelectValue placeholder={t("choosePaymentMethod")} />
+                  <SelectValue placeholder={t("chooseType") || "Choose type"} />
                 </SelectTrigger>
                 <SelectContent>
                   {lensTypeCategories.map((category) => (

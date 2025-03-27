@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { useInventoryStore, LensCoating } from "@/store/inventoryStore";
+import { useInventoryStore, LensThickness } from "@/store/inventoryStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,145 +13,145 @@ import { Edit, Plus, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguageStore } from "@/store/languageStore";
 
-export const LensCoatingManager: React.FC = () => {
-  const { lensCoatings, addLensCoating, updateLensCoating, deleteLensCoating } = useInventoryStore();
+export const LensThicknessManager: React.FC = () => {
+  const { lensThicknesses, addLensThickness, updateLensThickness, deleteLensThickness } = useInventoryStore();
   const { t, language } = useLanguageStore();
   const [activeTab, setActiveTab] = useState<string>("distance-reading");
   
-  // New coating form state
+  // New thickness form state
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newCoatingName, setNewCoatingName] = useState("");
-  const [newCoatingPrice, setNewCoatingPrice] = useState<number | "">("");
-  const [newCoatingDescription, setNewCoatingDescription] = useState("");
-  const [newCoatingCategory, setNewCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
+  const [newThicknessName, setNewThicknessName] = useState("");
+  const [newThicknessPrice, setNewThicknessPrice] = useState<number | "">("");
+  const [newThicknessDescription, setNewThicknessDescription] = useState("");
+  const [newThicknessCategory, setNewThicknessCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
   
-  // Edit coating form state
+  // Edit thickness form state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editCoatingId, setEditCoatingId] = useState("");
-  const [editCoatingName, setEditCoatingName] = useState("");
-  const [editCoatingPrice, setEditCoatingPrice] = useState<number | "">("");
-  const [editCoatingDescription, setEditCoatingDescription] = useState("");
-  const [editCoatingCategory, setEditCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
+  const [editThicknessId, setEditThicknessId] = useState("");
+  const [editThicknessName, setEditThicknessName] = useState("");
+  const [editThicknessPrice, setEditThicknessPrice] = useState<number | "">("");
+  const [editThicknessDescription, setEditThicknessDescription] = useState("");
+  const [editThicknessCategory, setEditThicknessCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
   
-  const handleAddCoating = () => {
-    if (!newCoatingName || newCoatingPrice === "") {
+  const handleAddThickness = () => {
+    if (!newThicknessName || newThicknessPrice === "") {
       toast.error(t("fillRequiredFields"));
       return;
     }
     
-    addLensCoating({
-      name: newCoatingName,
-      price: Number(newCoatingPrice),
-      description: newCoatingDescription,
-      category: newCoatingCategory
+    addLensThickness({
+      name: newThicknessName,
+      price: Number(newThicknessPrice),
+      description: newThicknessDescription,
+      category: newThicknessCategory
     });
     
-    toast.success(t("coatingAddedSuccess"));
+    toast.success(t("thicknessAddedSuccess") || "Thickness added successfully");
     
     // Reset form
-    setNewCoatingName("");
-    setNewCoatingPrice("");
-    setNewCoatingDescription("");
+    setNewThicknessName("");
+    setNewThicknessPrice("");
+    setNewThicknessDescription("");
     setIsAddDialogOpen(false);
   };
   
-  const handleEditCoating = () => {
-    if (!editCoatingName || editCoatingPrice === "") {
+  const handleEditThickness = () => {
+    if (!editThicknessName || editThicknessPrice === "") {
       toast.error(t("fillRequiredFields"));
       return;
     }
     
-    updateLensCoating(editCoatingId, {
-      name: editCoatingName,
-      price: Number(editCoatingPrice),
-      description: editCoatingDescription,
-      category: editCoatingCategory
+    updateLensThickness(editThicknessId, {
+      name: editThicknessName,
+      price: Number(editThicknessPrice),
+      description: editThicknessDescription,
+      category: editThicknessCategory
     });
     
-    toast.success(t("coatingUpdatedSuccess"));
+    toast.success(t("thicknessUpdatedSuccess") || "Thickness updated successfully");
     
     // Reset form
     setIsEditDialogOpen(false);
   };
   
-  const handleDeleteCoating = (id: string) => {
-    deleteLensCoating(id);
-    toast.success(t("coatingDeletedSuccess"));
+  const handleDeleteThickness = (id: string) => {
+    deleteLensThickness(id);
+    toast.success(t("thicknessDeletedSuccess") || "Thickness deleted successfully");
   };
   
-  const startEditCoating = (coating: LensCoating) => {
-    setEditCoatingId(coating.id);
-    setEditCoatingName(coating.name);
-    setEditCoatingPrice(coating.price);
-    setEditCoatingDescription(coating.description || "");
-    setEditCoatingCategory(coating.category);
+  const startEditThickness = (thickness: LensThickness) => {
+    setEditThicknessId(thickness.id);
+    setEditThicknessName(thickness.name);
+    setEditThicknessPrice(thickness.price);
+    setEditThicknessDescription(thickness.description || "");
+    setEditThicknessCategory(thickness.category);
     setIsEditDialogOpen(true);
   };
   
-  const coatingCategories = [
+  const thicknessCategories = [
     { value: "distance-reading", label: t("distanceReading") || "Distance/Reading" },
     { value: "progressive", label: t("progressive") || "Progressive" },
     { value: "bifocal", label: t("bifocal") || "Bifocal" }
   ];
   
-  const filteredCoatings = lensCoatings.filter(coating => coating.category === activeTab);
+  const filteredThicknesses = lensThicknesses.filter(thickness => thickness.category === activeTab);
   
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">{t("lensCoatings")}</h2>
+        <h2 className="text-xl font-bold">{t("lensThicknesses") || "Lens Thicknesses"}</h2>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-1">
               <Plus size={16} />
-              {t("addCoating")}
+              {t("addThickness") || "Add Thickness"}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t("addNewCoatingTitle")}</DialogTitle>
+              <DialogTitle>{t("addNewThicknessTitle") || "Add New Lens Thickness"}</DialogTitle>
               <DialogDescription>
-                {t("addNewCoatingDescription")}
+                {t("addNewThicknessDescription") || "Enter the details for the new lens thickness option."}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">{t("coatingName")}</Label>
+                <Label htmlFor="name">{t("thicknessName") || "Thickness Name"}</Label>
                 <Input
                   id="name"
-                  value={newCoatingName}
-                  onChange={(e) => setNewCoatingName(e.target.value)}
-                  placeholder={t("coatingNameExample")}
+                  value={newThicknessName}
+                  onChange={(e) => setNewThicknessName(e.target.value)}
+                  placeholder={t("thicknessNameExample") || "e.g. Ultra Thin"}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="price">{t("price")}</Label>
+                <Label htmlFor="price">{t("price") || "Price"}</Label>
                 <Input
                   id="price"
                   type="number"
-                  value={newCoatingPrice}
-                  onChange={(e) => setNewCoatingPrice(e.target.value ? Number(e.target.value) : "")}
+                  value={newThicknessPrice}
+                  onChange={(e) => setNewThicknessPrice(e.target.value ? Number(e.target.value) : "")}
                   placeholder="0.00"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="description">{t("description")}</Label>
+                <Label htmlFor="description">{t("description") || "Description"}</Label>
                 <Textarea
                   id="description"
-                  value={newCoatingDescription}
-                  onChange={(e) => setNewCoatingDescription(e.target.value)}
-                  placeholder={t("coatingDescription")}
+                  value={newThicknessDescription}
+                  onChange={(e) => setNewThicknessDescription(e.target.value)}
+                  placeholder={t("thicknessDescription") || "Optional description"}
                   rows={3}
                 />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="category">{t("category") || "Category"}</Label>
-                <Select value={newCoatingCategory} onValueChange={(value: any) => setNewCoatingCategory(value)}>
+                <Select value={newThicknessCategory} onValueChange={(value: any) => setNewThicknessCategory(value)}>
                   <SelectTrigger id="category">
                     <SelectValue placeholder={t("chooseCategory") || "Choose category"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {coatingCategories.map((category) => (
+                    {thicknessCategories.map((category) => (
                       <SelectItem key={category.value} value={category.value}>
                         {category.label}
                       </SelectItem>
@@ -161,8 +161,8 @@ export const LensCoatingManager: React.FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t("cancel")}</Button>
-              <Button onClick={handleAddCoating}>{t("save")}</Button>
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t("cancel") || "Cancel"}</Button>
+              <Button onClick={handleAddThickness}>{t("save") || "Save"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -176,24 +176,24 @@ export const LensCoatingManager: React.FC = () => {
         </TabsList>
         
         <TabsContent value={activeTab} className="mt-0">
-          {filteredCoatings.length > 0 ? (
+          {filteredThicknesses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredCoatings.map((coating) => (
-                <Card key={coating.id} className="overflow-hidden">
+              {filteredThicknesses.map((thickness) => (
+                <Card key={thickness.id} className="overflow-hidden">
                   <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-base">{coating.name}</CardTitle>
+                    <CardTitle className="text-base">{thickness.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 pb-2">
-                    <p className="text-lg font-bold">{coating.price.toFixed(2)} {language === 'ar' ? 'د.ك' : 'KD'}</p>
-                    {coating.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{coating.description}</p>
+                    <p className="text-lg font-bold">{thickness.price.toFixed(2)} {language === 'ar' ? 'د.ك' : 'KD'}</p>
+                    {thickness.description && (
+                      <p className="text-sm text-muted-foreground mt-1">{thickness.description}</p>
                     )}
                   </CardContent>
                   <CardFooter className="p-2 flex justify-end gap-2 bg-muted/50">
-                    <Button variant="ghost" size="icon" onClick={() => startEditCoating(coating)}>
+                    <Button variant="ghost" size="icon" onClick={() => startEditThickness(thickness)}>
                       <Edit size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteCoating(coating.id)}>
+                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteThickness(thickness.id)}>
                       <Trash size={16} />
                     </Button>
                   </CardFooter>
@@ -202,9 +202,9 @@ export const LensCoatingManager: React.FC = () => {
             </div>
           ) : (
             <div className="text-center p-8 bg-muted/50 rounded-lg">
-              <p>{t("noCoatings")}</p>
+              <p>{t("noThicknessesInCategory") || "No thicknesses in this category"}</p>
               <Button variant="outline" size="sm" className="mt-2" onClick={() => setIsAddDialogOpen(true)}>
-                {t("addCoating")}
+                {t("addThickness") || "Add Thickness"}
               </Button>
             </div>
           )}
@@ -215,46 +215,46 @@ export const LensCoatingManager: React.FC = () => {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("editCoating")}</DialogTitle>
+            <DialogTitle>{t("editThickness") || "Edit Lens Thickness"}</DialogTitle>
             <DialogDescription>
-              {t("updateCoatingDetails")}
+              {t("updateThicknessDetails") || "Update the lens thickness details"}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="edit-name">{t("coatingName")}</Label>
+              <Label htmlFor="edit-name">{t("thicknessName") || "Thickness Name"}</Label>
               <Input
                 id="edit-name"
-                value={editCoatingName}
-                onChange={(e) => setEditCoatingName(e.target.value)}
+                value={editThicknessName}
+                onChange={(e) => setEditThicknessName(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-price">{t("price")}</Label>
+              <Label htmlFor="edit-price">{t("price") || "Price"}</Label>
               <Input
                 id="edit-price"
                 type="number"
-                value={editCoatingPrice}
-                onChange={(e) => setEditCoatingPrice(e.target.value ? Number(e.target.value) : "")}
+                value={editThicknessPrice}
+                onChange={(e) => setEditThicknessPrice(e.target.value ? Number(e.target.value) : "")}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-description">{t("description")}</Label>
+              <Label htmlFor="edit-description">{t("description") || "Description"}</Label>
               <Textarea
                 id="edit-description"
-                value={editCoatingDescription}
-                onChange={(e) => setEditCoatingDescription(e.target.value)}
+                value={editThicknessDescription}
+                onChange={(e) => setEditThicknessDescription(e.target.value)}
                 rows={3}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-category">{t("category") || "Category"}</Label>
-              <Select value={editCoatingCategory} onValueChange={(value: any) => setEditCoatingCategory(value)}>
+              <Select value={editThicknessCategory} onValueChange={(value: any) => setEditThicknessCategory(value)}>
                 <SelectTrigger id="edit-category">
                   <SelectValue placeholder={t("chooseCategory") || "Choose category"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {coatingCategories.map((category) => (
+                  {thicknessCategories.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       {category.label}
                     </SelectItem>
@@ -264,8 +264,8 @@ export const LensCoatingManager: React.FC = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>{t("cancel")}</Button>
-            <Button onClick={handleEditCoating}>{t("saveChanges")}</Button>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>{t("cancel") || "Cancel"}</Button>
+            <Button onClick={handleEditThickness}>{t("saveChanges") || "Save Changes"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

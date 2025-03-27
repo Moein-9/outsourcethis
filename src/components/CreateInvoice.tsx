@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -6,7 +7,7 @@ import { motion } from "framer-motion";
 import { 
   FileText, Printer, Receipt, User, PackageCheck, CreditCard,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
-  MessageCircleDashed, Loader, Check
+  MessageCircleDashed, Loader, Check, Paintbrush, Ruler
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,9 +64,10 @@ const CreateInvoiceContent: React.FC = () => {
     patientId: getValues("patientId"),
     invoiceType: getValues("invoiceType") || "glasses",
     lensType: getValues("lensType") || "",
-    lensPrice: getValues("lensPrice") || 0,
     coating: getValues("coating") || "",
     coatingPrice: getValues("coatingPrice") || 0,
+    thickness: getValues("thickness") || "",
+    thicknessPrice: getValues("thicknessPrice") || 0,
     frameBrand: getValues("frameBrand") || "",
     frameModel: getValues("frameModel") || "",
     frameColor: getValues("frameColor") || "",
@@ -332,20 +334,17 @@ const CreateInvoiceContent: React.FC = () => {
                                     {getValues("lensType")}
                                   </p>
                                 </div>
-                                <p className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-sm">
-                                  {getValues("lensPrice")?.toFixed(3)} KWD
-                                </p>
                               </div>
                             </div>
                           )}
                           
                           {getValues("coating") && (
-                            <div className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
+                            <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 rounded-bl-full opacity-20"></div>
                               <div className="flex justify-between items-start">
                                 <div>
                                   <p className="font-medium text-purple-700 flex items-center gap-1">
-                                    <Tag className="w-3 h-3" /> {t('coating')}
+                                    <Paintbrush className="w-3 h-3" /> {t('coating')}
                                   </p>
                                   <p className="text-sm text-gray-600 mt-1">
                                     {getValues("coating")}
@@ -353,6 +352,25 @@ const CreateInvoiceContent: React.FC = () => {
                                 </div>
                                 <p className="font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-md text-sm">
                                   {getValues("coatingPrice")?.toFixed(3)} KWD
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {getValues("thickness") && (
+                            <div className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
+                              <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-bl-full opacity-20"></div>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="font-medium text-green-700 flex items-center gap-1">
+                                    <Ruler className="w-3 h-3" /> {t('thickness') || "Thickness"}
+                                  </p>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    {getValues("thickness")}
+                                  </p>
+                                </div>
+                                <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md text-sm">
+                                  {getValues("thicknessPrice")?.toFixed(3)} KWD
                                 </p>
                               </div>
                             </div>
@@ -499,6 +517,7 @@ const CreateInvoiceContent: React.FC = () => {
               rx={getValues("rx")}
               lensType={getValues("lensType") || ""}
               coating={getValues("coating") || ""}
+              thickness={getValues("thickness") || ""}
               frame={getValues("skipFrame") ? undefined : {
                 brand: getValues("frameBrand") || "",
                 model: getValues("frameModel") || "",
@@ -519,12 +538,10 @@ const CreateInvoiceContent: React.FC = () => {
   );
 };
 
-const CreateInvoice: React.FC = () => {
+export const CreateInvoice: React.FC = () => {
   return (
     <InvoiceFormProvider>
       <CreateInvoiceContent />
     </InvoiceFormProvider>
   );
 };
-
-export default CreateInvoice;
