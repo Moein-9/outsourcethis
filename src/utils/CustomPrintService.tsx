@@ -4,6 +4,23 @@ import { CustomWorkOrderReceipt } from "@/components/CustomWorkOrderReceipt";
 import * as ReactDOMServer from 'react-dom/server';
 
 export class CustomPrintService {
+  static generateCustomWorkOrderHtml(workOrder: any, invoice?: any, patient?: any): string {
+    try {
+      // Generate the receipt content using the CustomWorkOrderReceipt component
+      return ReactDOMServer.renderToString(
+        <CustomWorkOrderReceipt 
+          workOrder={workOrder} 
+          invoice={invoice} 
+          patient={patient}
+          isPrintable={true}
+        />
+      );
+    } catch (error) {
+      console.error("Error generating custom work order HTML:", error);
+      return `<div>Error generating receipt: ${String(error)}</div>`;
+    }
+  }
+  
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
     console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
     
@@ -19,15 +36,8 @@ export class CustomPrintService {
         return;
       }
       
-      // Generate the receipt content using the CustomWorkOrderReceipt component
-      const receiptContent = ReactDOMServer.renderToString(
-        <CustomWorkOrderReceipt 
-          workOrder={workOrder} 
-          invoice={invoice} 
-          patient={patient}
-          isPrintable={true}
-        />
-      );
+      // Get the HTML content for the receipt
+      const receiptContent = this.generateCustomWorkOrderHtml(workOrder, invoice, patient);
       
       // Add all the required styles and content
       printWindow.document.write(`
