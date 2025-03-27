@@ -35,7 +35,7 @@ interface ComparativeAnalysisProps {
   className?: string;
 }
 
-export const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) => {
+const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) => {
   const invoiceStore = useInvoiceStore();
   const { language } = useLanguageStore();
   const invoices: Invoice[] = invoiceStore?.invoices || [];
@@ -232,10 +232,9 @@ export const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ classN
             </Select>
             {selectedTimeRange === "custom" && (
               <DatePicker
-                mode="range"
-                defaultMonth={date?.from}
-                selected={date}
+                date={date}
                 onSelect={setDate}
+                defaultMonth={date?.from}
                 className="w-full sm:w-auto"
               />
             )}
