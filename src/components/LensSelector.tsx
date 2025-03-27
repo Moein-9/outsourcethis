@@ -142,7 +142,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               <span className="text-white">2</span> - {t('selectCoatings')}
             </TabsTrigger>
             <TabsTrigger value="thickness" className="flex-1 bg-[#10B981] data-[state=active]:bg-[#10B981] data-[state=active]:text-white">
-              <span className="text-white">3</span> - {t('selectThickness')}
+              <span className="text-white">3</span> - {t('selectThickness') || "Select Thickness"}
             </TabsTrigger>
           </TabsList>
           
@@ -161,15 +161,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                   <div className="flex justify-between items-start">
                     <div className={`${textAlignClass}`}>
                       <div className="font-medium">{lens.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {lens.type === "distance" || lens.type === "reading" 
-                          ? t('distanceReadingCategory') 
-                          : lens.type === "progressive" 
-                            ? t('progressiveCategory')
-                            : lens.type === "bifocal"
-                              ? t('bifocalCategory')
-                              : lens.type}
-                      </div>
+                      <div className="text-sm text-muted-foreground">{lens.type}</div>
                     </div>
                   </div>
                   
@@ -250,7 +242,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               </div>
             ) : (
               <div className="p-4 border border-dashed rounded-lg bg-muted/10 text-center">
-                <p className="text-muted-foreground">{t('selectLensTypeFirst')}</p>
+                <p className="text-muted-foreground">{t('selectLensTypeFirst') || "Please select a lens type first"}</p>
               </div>
             )}
           </TabsContent>
@@ -301,8 +293,8 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                 >
                   <div className="flex justify-between items-start">
                     <div className={`${textAlignClass}`}>
-                      <div className="font-medium">{t('noThickness')}</div>
-                      <div className="text-sm text-muted-foreground">{t('noThicknessDesc')}</div>
+                      <div className="font-medium">{t('noThickness') || "No Thickness"}</div>
+                      <div className="text-sm text-muted-foreground">{t('noThicknessDesc') || "No additional thickness options"}</div>
                     </div>
                     <div className="text-right font-semibold">
                       0.00 {t('kwd')}
@@ -320,7 +312,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               </div>
             ) : (
               <div className="p-4 border border-dashed rounded-lg bg-muted/10 text-center">
-                <p className="text-muted-foreground">{t('selectLensTypeFirst')}</p>
+                <p className="text-muted-foreground">{t('selectLensTypeFirst') || "Please select a lens type first"}</p>
               </div>
             )}
           </TabsContent>

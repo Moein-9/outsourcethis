@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -90,11 +89,11 @@ export const useInventoryStore = create<InventoryState>()(
     (set, get) => ({
       frames: [],
       lensTypes: [
-        { id: "lens1", name: "نظارات طبية للقراءة", type: "reading", price: 15 },
-        { id: "lens2", name: "نظارات للنظر البعيد", type: "distance", price: 15 },
-        { id: "lens3", name: "عدسات تقدمية", type: "progressive", price: 25 },
-        { id: "lens4", name: "عدسات ثنائية", type: "bifocal", price: 20 },
-        { id: "lens5", name: "عدسات شمسية", type: "sunglasses", price: 18 }
+        { id: "lens1", name: "نظارات طبية للقراءة", type: "reading" },
+        { id: "lens2", name: "نظارات للنظر البعيد", type: "distance" },
+        { id: "lens3", name: "عدسات تقدمية", type: "progressive" },
+        { id: "lens4", name: "عدسات ثنائية", type: "bifocal" },
+        { id: "lens5", name: "عدسات شمسية", type: "sunglasses" }
       ],
       lensCoatings: [
         { id: "coat1", name: "مضاد للانعكاس", price: 5, description: "Anti-Reflective Coating", category: "distance-reading" },
