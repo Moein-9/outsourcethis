@@ -172,6 +172,7 @@ const translations: Record<string, Record<string, string>> = {
     lensInventory: 'Lens Inventory',
     lensTypes: 'Lens Types',
     lensCoatings: 'Lens Coatings',
+    lensThicknesses: 'Lens Thicknesses',
     addLens: 'Add Lens',
     editLens: 'Edit Lens',
     deleteLens: 'Delete Lens',
@@ -188,30 +189,6 @@ const translations: Record<string, Record<string, string>> = {
     bifocal: 'Bifocal',
     sunglasses: 'Sunglasses',
     
-    // Coating
-    coatingInventory: 'Coating Inventory',
-    addCoating: 'Add Coating',
-    editCoating: 'Edit Coating',
-    deleteCoating: 'Delete Coating',
-    coatingName: 'Coating Name',
-    addNewCoating: 'Add New Coating',
-    updateCoating: 'Update Coating',
-    deleteCoatingConfirm: 'Are you sure you want to delete this coating?',
-    noCoatings: 'No Coatings',
-    
-    // Contact Lenses
-    contactLensInventory: 'Contact Lens Inventory',
-    addContactLens: 'Add Contact Lens',
-    editContactLens: 'Edit Contact Lens',
-    deleteContactLens: 'Delete Contact Lens',
-    contactLensBrand: 'Brand',
-    power: 'Power',
-    baseCurve: 'Base Curve',
-    diameter: 'Diameter',
-    addNewContactLens: 'Add New Contact Lens',
-    updateContactLens: 'Update Contact Lens',
-    deleteContactLensConfirm: 'Are you sure you want to delete this contact lens?',
-
     // Remaining Payments
     duePayments: 'Manage incomplete invoices and record remaining payments',
     clientId: 'Client ID',
@@ -534,6 +511,7 @@ const translations: Record<string, Record<string, string>> = {
     lensInventory: 'مخزون العدسات',
     lensTypes: 'أنواع العدسات',
     lensCoatings: 'طلاءات العدسات',
+    lensThicknesses: 'سماكة العدسات',
     addLens: 'إضافة عدسة',
     editLens: 'تعديل عدسة',
     deleteLens: 'حذف عدسة',
@@ -546,33 +524,9 @@ const translations: Record<string, Record<string, string>> = {
     distanceReading: 'النظر البعيد/القراءة',
     distance: 'النظر البعيد',
     reading: 'القراءة',
-    progressive: 'متدرجة',
-    bifocal: 'ثنائية البؤرة',
-    sunglasses: 'نظارات شمسية',
-    
-    // Coating
-    coatingInventory: 'مخزون الطلاءات',
-    addCoating: 'إضافة طلاء',
-    editCoating: 'تعديل طلاء',
-    deleteCoating: 'حذف طلاء',
-    coatingName: 'اسم الطلاء',
-    addNewCoating: 'إضافة طلاء جديد',
-    updateCoating: 'تحديث الطلاء',
-    deleteCoatingConfirm: 'هل أنت متأكد من رغبتك في حذف هذا الطلاء؟',
-    noCoatings: 'لا توجد طلاءات',
-    
-    // Contact Lenses
-    contactLensInventory: 'مخزون العدسات اللاصقة',
-    addContactLens: 'إضافة عدسة لاصقة',
-    editContactLens: 'تعديل عدسة لاصقة',
-    deleteContactLens: 'حذف عدسة لاصقة',
-    contactLensBrand: 'الماركة',
-    power: 'القوة',
-    baseCurve: 'المنحنى الأساسي',
-    diameter: 'القطر',
-    addNewContactLens: 'إضافة عدسة لاصقة جديدة',
-    updateContactLens: 'تحديث العدسة اللاصقة',
-    deleteContactLensConfirm: 'هل أنت متأكد من رغبتك في حذف هذه العدسة اللاصقة؟',
+    progressive: 'متدرجة (Progressive)',
+    bifocal: 'ثنائية البؤرة (Bifocal)',
+    sunglasses: 'نظارات شمسية (Sunglasses)',
     
     // Remaining Payments
     duePayments: 'إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية',
