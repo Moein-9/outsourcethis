@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -525,11 +526,11 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       <div style={{ borderTop: "1px dashed #000", margin: "4px 0" }}></div>
       
       <div style={{ marginBottom: "4px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", margin-bottom: "2px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{isRtl ? "رقم أمر العمل" : "Work Order Number"}:</span> 
           <span>{orderNumber}</span>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", margin-bottom: "2px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "2px" }}>
           <span style={{ fontWeight: "bold" }}>{isRtl ? "التاريخ" : "Date"}:</span>
           <span>{formatDate(invoice.createdAt)}</span>
         </div>
@@ -602,7 +603,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           <table style={{ 
             width: "100%", 
             borderCollapse: "collapse", 
-            font-size: "8px", 
+            fontSize: "8px", 
             marginTop: "2px",
             direction: "ltr"
           }}>
@@ -786,7 +787,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         border: "1px solid #ccc", 
         padding: "3px",
         borderRadius: "3px",
-        background-color: "#f8f8f8"
+        backgroundColor: "#f8f8f8"
       }}>
         <h2 style={{ 
           fontSize: "13px", 
@@ -875,7 +876,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         )}
       </div>
 
-      <div style={{ marginTop: "10px", borderTop: "1px dashed #000", padding-top: "5px" }}>
+      <div style={{ marginTop: "10px", borderTop: "1px dashed #000", paddingTop: "5px" }}>
         <div style={{ marginBottom: "8px" }}>
           <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             {isRtl ? (
@@ -897,7 +898,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </div>
       </div>
       
-      <div style={{ borderTop: "1px dashed #000", padding-top: "5px", marginTop: "10px", textAlign: "center" }}>
+      <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", marginTop: "10px", textAlign: "center" }}>
         <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "2px" }}>
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
         </div>
@@ -927,3 +928,32 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     </div>
   );
 };
+
+const getLensTypeArabic = (lensType: string): string => {
+  const lensTypeMap: Record<string, string> = {
+    "Single Vision": "نظارات للنظر",
+    "Progressive": "عدسات متعددة البؤر",
+    "Bifocal": "ثنائية البؤرة",
+    "Reading": "نظارات للقراءة",
+    "Distance": "نظارات للنظر البعيد",
+    "Intermediate": "نظارات للمسافة المتوسطة",
+    // Add more mappings as needed
+  };
+  
+  return lensTypeMap[lensType] || lensType;
+};
+
+const getCoatingArabic = (coating: string): string => {
+  const coatingMap: Record<string, string> = {
+    "Anti-Reflective": "طلاء مضاد للانعكاس",
+    "Blue Light Filter": "فلتر الضوء الأزرق",
+    "Photochromic": "عدسات متغيرة اللون",
+    "Scratch Resistant": "مقاوم للخدش",
+    "UV Protection": "حماية من الأشعة فوق البنفسجية",
+    "Polarized": "استقطاب",
+    // Add more mappings as needed
+  };
+  
+  return coatingMap[coating] || coating;
+};
+

@@ -75,19 +75,25 @@ export class CustomPrintService {
                 
                 /* Red color for remaining payment */
                 .payment-remaining, 
-                [style*="color: #ea384c"] {
+                [style*="color: #ea384c"],
+                [style*="color: #B91C1C"] {
                   color: #ea384c !important;
                   background-color: #FEE2E2 !important;
                   -webkit-print-color-adjust: exact !important;
                   print-color-adjust: exact !important;
                   color-adjust: exact !important;
-                  border: 1px solid #FECACA !important;
+                  border: 2px solid #FECACA !important;
+                  font-size: 16px !important;
+                  font-weight: bold !important;
+                  padding: 6px !important;
                 }
                 
                 /* Compact product boxes styling */
                 .product-box {
                   padding: 2px !important;
                   margin-bottom: 2px !important;
+                  border: 1px solid #ddd !important;
+                  border-radius: 2px !important;
                 }
                 
                 /* Improve dynamic sizing */
@@ -137,17 +143,22 @@ export class CustomPrintService {
               
               /* Red color for remaining payment */
               .payment-remaining, 
-              [style*="color: #ea384c"] {
+              [style*="color: #ea384c"],
+              [style*="color: #B91C1C"] {
                 color: #ea384c !important;
                 background-color: #FEE2E2 !important;
-                border: 1px solid #FECACA !important;
+                border: 2px solid #FECACA !important;
                 font-weight: bold !important;
+                font-size: 16px !important;
+                padding: 6px !important;
               }
               
               /* Compact product boxes styling */
               .product-box {
                 padding: 2px !important;
                 margin-bottom: 2px !important;
+                border: 1px solid #ddd !important;
+                border-radius: 2px !important;
               }
             </style>
           </head>
@@ -195,7 +206,7 @@ export class CustomPrintService {
           }
           
           // Add compact styling to product boxes
-          const productBoxes = printWindow.document.querySelectorAll('.p-1.border.border-gray-300.rounded.mb-1');
+          const productBoxes = printWindow.document.querySelectorAll('.p-1.border.border-gray-300.rounded.mb-1, div[style*="border: 1px solid"]');
           productBoxes.forEach(box => {
             if (box instanceof HTMLElement) {
               box.classList.add('product-box');
@@ -203,20 +214,30 @@ export class CustomPrintService {
           });
           
           // Remove thank you message and disclaimer if they exist
-          const thankYouElement = printWindow.document.querySelector('div[style*="text-align: center"]');
-          if (thankYouElement && thankYouElement.textContent?.includes('Thank you')) {
-            thankYouElement.remove();
-          }
+          const thankYouElements = printWindow.document.querySelectorAll('div[style*="text-align: center"]');
+          thankYouElements.forEach(element => {
+            if (element instanceof HTMLElement && 
+                (element.textContent?.includes('Thank you') || 
+                 element.textContent?.includes('شكراً') || 
+                 element.textContent?.toLowerCase().includes('receipt is proof'))) {
+              element.remove();
+            }
+          });
           
           // Enhance the remaining payment styling
-          const remainingPaymentElement = printWindow.document.querySelector('div[style*="color: #B91C1C"]');
-          if (remainingPaymentElement && remainingPaymentElement instanceof HTMLElement) {
-            remainingPaymentElement.classList.add('payment-remaining');
-            remainingPaymentElement.style.fontSize = '16px';
-            remainingPaymentElement.style.padding = '6px';
-            remainingPaymentElement.style.margin = '6px 0';
-            remainingPaymentElement.style.fontWeight = 'bold';
-          }
+          const remainingPaymentElements = printWindow.document.querySelectorAll('div[style*="color: #B91C1C"], div[style*="color: #ea384c"]');
+          remainingPaymentElements.forEach(element => {
+            if (element instanceof HTMLElement) {
+              element.classList.add('payment-remaining');
+              element.style.fontSize = '16px';
+              element.style.padding = '6px';
+              element.style.margin = '6px 0';
+              element.style.fontWeight = 'bold';
+              element.style.color = '#ea384c';
+              element.style.backgroundColor = '#FEE2E2';
+              element.style.border = '2px solid #FECACA';
+            }
+          });
           
           // Wait for content to load before proceeding
           printWindow.document.close();
