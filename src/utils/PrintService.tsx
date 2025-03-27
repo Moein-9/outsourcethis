@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { toast } from '@/hooks/use-toast';
 
@@ -916,5 +915,223 @@ export const PrintService = {
       </body>
       </html>
     `;
+  },
+  
+  /**
+   * Prepares HTML for report printing (thermal printer, 80mm width)
+   * @param content HTML content to print
+   * @param title Report title
+   * @returns Complete HTML document
+   */
+  prepareReportDocument: (content: string, title: string = 'Report') => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
+        <style>
+          @page {
+            size: 80mm auto !important;
+            margin: 0mm !important;
+          }
+          
+          @font-face {
+            font-family: 'Zain';
+            src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
+            font-weight: normal;
+            font-style: normal;
+          }
+          
+          @font-face {
+            font-family: 'Yrsa';
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
+            font-weight: normal;
+            font-style: normal;
+          }
+          
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 80mm !important;
+            font-family: 'Yrsa', serif !important;
+            direction: initial !important;
+            font-size: 10px !important;
+            line-height: 1.1 !important;
+          }
+          
+          /* Ensure Arabic displays correctly */
+          [dir="rtl"] {
+            direction: rtl !important;
+            text-align: right !important;
+            font-family: 'Zain', sans-serif !important;
+          }
+          
+          .arabic {
+            font-family: 'Zain', sans-serif !important;
+            direction: rtl !important;
+            text-align: right !important;
+          }
+          
+          /* Force single page printing */
+          html, body {
+            height: auto !important;
+            width: 80mm !important;
+          }
+          
+          /* Ensure content is properly contained */
+          .report-container {
+            width: 74mm !important;
+            padding: 3mm !important;
+            margin: 0 !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+          }
+          
+          .report-header {
+            text-align: center !important;
+            margin-bottom: 2mm !important;
+            padding-bottom: 2mm !important;
+            border-bottom: 0.3mm dashed #000 !important;
+          }
+          
+          .report-title {
+            font-size: 12pt !important;
+            font-weight: bold !important;
+            margin: 0 0 1mm 0 !important;
+          }
+          
+          .report-date {
+            font-size: 8pt !important;
+            margin: 0 !important;
+          }
+          
+          .summary-section {
+            margin-bottom: 3mm !important;
+          }
+          
+          .section-title {
+            font-size: 9pt !important;
+            font-weight: bold !important;
+            margin: 0 0 1mm 0 !important;
+            padding-bottom: 0.5mm !important;
+            border-bottom: 0.2mm solid #ccc !important;
+          }
+          
+          .summary-item {
+            margin-bottom: 1mm !important;
+          }
+          
+          .summary-item-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            margin-bottom: 0.5mm !important;
+          }
+          
+          .summary-item-title {
+            font-size: 8pt !important;
+            font-weight: normal !important;
+          }
+          
+          .summary-item-value {
+            font-size: 8pt !important;
+            font-weight: bold !important;
+          }
+          
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin-top: 1mm !important;
+            font-size: 7pt !important;
+          }
+          
+          th, td {
+            border: 0.1mm solid black !important;
+            padding: 0.5mm !important;
+            text-align: center !important;
+          }
+          
+          th {
+            font-weight: bold !important;
+            background-color: #f0f0f0 !important;
+          }
+          
+          .footer {
+            margin-top: 2mm !important;
+            padding-top: 2mm !important;
+            border-top: 0.3mm dashed #000 !important;
+            text-align: center !important;
+            font-size: 7pt !important;
+          }
+          
+          .divider {
+            border-top: 0.2mm dashed #aaa !important;
+            margin: 2mm 0 !important;
+          }
+          
+          /* Fix for print dialog appearing but not working */
+          @media print {
+            body {
+              width: 80mm !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              overflow: visible !important;
+              -webkit-print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              font-size: 10px !important;
+              line-height: 1.1 !important;
+            }
+            
+            .report-container {
+              width: 74mm !important;
+              margin: 0 !important;
+              padding: 3mm !important;
+            }
+            
+            /* Ensure only one copy prints */
+            @page {
+              size: 80mm auto !important;
+              margin: 0mm !important;
+              margin-left: 0mm !important;
+              margin-right: 0mm !important;
+              margin-top: 0mm !important;
+              margin-bottom: 0mm !important;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="report-container">${content}</div>
+        <script>
+          window.addEventListener('DOMContentLoaded', function() {
+            // Wait for the content to be fully loaded before focusing and printing
+            setTimeout(function() {
+              window.parent.postMessage('print-complete', '*');
+            }, 2000);
+          });
+        </script>
+      </body>
+      </html>
+    `;
+  },
+  
+  /**
+   * Print a report using the thermal printer format
+   * @param reportContent HTML content to print
+   * @param title Report title
+   * @param onComplete Callback after printing
+   */
+  printReport: (
+    reportContent: string,
+    title: string = 'Daily Sales Report',
+    onComplete?: () => void
+  ) => {
+    const htmlContent = PrintService.prepareReportDocument(reportContent, title);
+    PrintService.printHtml(htmlContent, 'receipt', onComplete);
   }
 };

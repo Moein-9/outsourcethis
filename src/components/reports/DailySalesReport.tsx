@@ -1,14 +1,11 @@
-
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { useInvoiceStore, Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   ChartLine, 
-  Printer, 
   CreditCard, 
   Wallet, 
   Receipt, 
@@ -43,8 +40,12 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { toast } from "sonner";
 import { SalesChart } from "./SalesChart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { PrintService } from "@/utils/PrintService";
+import { PrintReportButton } from "./PrintReportButton";
+import { Button } from "@/components/ui/button";
 
 export const DailySalesReport: React.FC = () => {
   const invoiceStore = useInvoiceStore();
@@ -66,7 +67,6 @@ export const DailySalesReport: React.FC = () => {
   
   const [expandedInvoices, setExpandedInvoices] = useState<Record<string, boolean>>({});
   
-  // Translations
   const t = {
     dailySalesReport: language === 'ar' ? "تقرير المبيعات اليومي" : "Daily Sales Report",
     printReport: language === 'ar' ? "طباعة التقرير" : "Print Report",
@@ -87,22 +87,18 @@ export const DailySalesReport: React.FC = () => {
     lensRevenue: language === 'ar' ? "مبيعات العدسات" : "Lens Revenue",
     frameRevenue: language === 'ar' ? "مبيعات الإطارات" : "Frame Revenue",
     coatingRevenue: language === 'ar' ? "مبيعات الطلاءات" : "Coating Revenue",
-    // Customer info section
     customerInfo: language === 'ar' ? "معلومات العميل" : "Customer Information",
     fileNumber: language === 'ar' ? "رقم الملف" : "File Number",
-    // Payment info section
     paymentInfo: language === 'ar' ? "معلومات الدفع" : "Payment Information",
     total: language === 'ar' ? "المجموع" : "Total",
     paid: language === 'ar' ? "المدفوع" : "Paid",
     remaining: language === 'ar' ? "المتبقي" : "Remaining",
     discount: language === 'ar' ? "الخصم" : "Discount",
     paymentMethod: language === 'ar' ? "طريقة الدفع" : "Payment Method",
-    // Invoice status section
     invoiceStatus: language === 'ar' ? "حالة الفاتورة" : "Invoice Status",
     fullyPaid: language === 'ar' ? "مدفوعة بالكامل" : "Fully Paid",
     partiallyPaid: language === 'ar' ? "مدفوعة جزئياً" : "Partially Paid",
     creationDate: language === 'ar' ? "تاريخ الإنشاء" : "Creation Date",
-    // Product info sections
     lenses: language === 'ar' ? "العدسات" : "Lenses",
     price: language === 'ar' ? "السعر" : "Price",
     frame: language === 'ar' ? "الإطار" : "Frame",
@@ -182,9 +178,6 @@ export const DailySalesReport: React.FC = () => {
   }, [invoices]);
   
   const handlePrintReport = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    
     const today = format(new Date(), 'MM/dd/yyyy', { locale: enUS });
     const pageTitle = language === 'ar' 
       ? `تقرير المبيعات اليومي - ${today}` 
@@ -205,10 +198,7 @@ export const DailySalesReport: React.FC = () => {
     todaySales.forEach(invoice => {
       invoicesHTML += `
         <tr>
-          <td>${invoice.invoiceId}</td>
           <td>${invoice.patientName}</td>
-          <td>${invoice.lensType}</td>
-          <td>${invoice.frameBrand} ${invoice.frameModel}</td>
           <td>${invoice.total.toFixed(2)} ${t.currency}</td>
           <td>${invoice.deposit.toFixed(2)} ${t.currency}</td>
           <td>${invoice.paymentMethod}</td>
@@ -216,167 +206,80 @@ export const DailySalesReport: React.FC = () => {
       `;
     });
     
-    const printContent = `
-      <!DOCTYPE html>
-      <html dir="${language === 'ar' ? 'rtl' : 'ltr'}">
-      <head>
-        <title>${pageTitle}</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            direction: ${language === 'ar' ? 'rtl' : 'ltr'};
-          }
-          .report-header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #333;
-          }
-          .report-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
-          }
-          .report-date {
-            font-size: 14px;
-            color: #555;
-          }
-          .summary-section {
-            margin-bottom: 20px;
-          }
-          .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ccc;
-          }
-          .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-          }
-          .summary-item {
-            background-color: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #eee;
-          }
-          .summary-item-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #555;
-          }
-          .summary-item-value {
-            font-size: 20px;
-            font-weight: bold;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-          }
-          th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: ${language === 'ar' ? 'right' : 'left'};
-          }
-          th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-          }
-          tr:nth-child(even) {
-            background-color: #f9f9f9;
-          }
-          .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-          }
-          @media print {
-            body {
-              print-color-adjust: exact;
-              -webkit-print-color-adjust: exact;
-            }
-            .no-print {
-              display: none;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="report-header">
-          <h1 class="report-title">${t.dailySalesReport}</h1>
-          <p class="report-date">${language === 'ar' ? 'التاريخ:' : 'Date:'} ${today}</p>
-        </div>
-        
-        <div class="summary-section">
-          <h2 class="section-title">${language === 'ar' ? 'ملخص المبيعات' : 'Sales Summary'}</h2>
-          <div class="summary-grid">
-            <div class="summary-item">
-              <div class="summary-item-title">${t.totalSales}</div>
-              <div class="summary-item-value">${totalRevenue.toFixed(2)} ${t.currency}</div>
-            </div>
-            <div class="summary-item">
-              <div class="summary-item-title">${t.totalPayments}</div>
-              <div class="summary-item-value">${totalDeposit.toFixed(2)} ${t.currency}</div>
-            </div>
-            <div class="summary-item">
-              <div class="summary-item-title">${language === 'ar' ? 'عدد الفواتير' : 'Invoice Count'}</div>
-              <div class="summary-item-value">${todaySales.length}</div>
-            </div>
+    const reportContent = `
+      <div class="report-header">
+        <div class="report-title">${t.dailySalesReport}</div>
+        <div class="report-date">${language === 'ar' ? 'التاريخ:' : 'Date:'} ${today}</div>
+      </div>
+      
+      <div class="summary-section">
+        <div class="section-title">${language === 'ar' ? 'ملخص المبيعات' : 'Sales Summary'}</div>
+        <div class="summary-item">
+          <div class="summary-item-row">
+            <span class="summary-item-title">${t.totalSales}:</span>
+            <span class="summary-item-value">${totalRevenue.toFixed(2)} ${t.currency}</span>
+          </div>
+          <div class="summary-item-row">
+            <span class="summary-item-title">${t.totalPayments}:</span>
+            <span class="summary-item-value">${totalDeposit.toFixed(2)} ${t.currency}</span>
+          </div>
+          <div class="summary-item-row">
+            <span class="summary-item-title">${language === 'ar' ? 'عدد الفواتير' : 'Invoice Count'}:</span>
+            <span class="summary-item-value">${todaySales.length}</span>
           </div>
         </div>
-        
-        <div class="summary-section">
-          <h2 class="section-title">${language === 'ar' ? 'تفاصيل المبيعات' : 'Sales Details'}</h2>
-          <div class="summary-grid">
-            <div class="summary-item">
-              <div class="summary-item-title">${t.lensRevenue}</div>
-              <div class="summary-item-value">${totalLensRevenue.toFixed(2)} ${t.currency}</div>
-            </div>
-            <div class="summary-item">
-              <div class="summary-item-title">${t.frameRevenue}</div>
-              <div class="summary-item-value">${totalFrameRevenue.toFixed(2)} ${t.currency}</div>
-            </div>
-            <div class="summary-item">
-              <div class="summary-item-title">${t.coatingRevenue}</div>
-              <div class="summary-item-value">${totalCoatingRevenue.toFixed(2)} ${t.currency}</div>
-            </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="summary-section">
+        <div class="section-title">${language === 'ar' ? 'تفاصيل المبيعات' : 'Sales Details'}</div>
+        <div class="summary-item">
+          <div class="summary-item-row">
+            <span class="summary-item-title">${t.lensRevenue}:</span>
+            <span class="summary-item-value">${totalLensRevenue.toFixed(2)} ${t.currency}</span>
+          </div>
+          <div class="summary-item-row">
+            <span class="summary-item-title">${t.frameRevenue}:</span>
+            <span class="summary-item-value">${totalFrameRevenue.toFixed(2)} ${t.currency}</span>
+          </div>
+          <div class="summary-item-row">
+            <span class="summary-item-title">${t.coatingRevenue}:</span>
+            <span class="summary-item-value">${totalCoatingRevenue.toFixed(2)} ${t.currency}</span>
           </div>
         </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="summary-section">
+        <div class="section-title">${t.paymentMethods}</div>
+        <table>
+          <thead>
+            <tr>
+              <th>${language === 'ar' ? 'طريقة الدفع' : 'Method'}</th>
+              <th>${language === 'ar' ? 'العدد' : 'Count'}</th>
+              <th>${language === 'ar' ? 'المبلغ' : 'Amount'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${paymentBreakdownHTML}
+          </tbody>
+        </table>
+      </div>
+      
+      ${todaySales.length > 0 ? `
+        <div class="divider"></div>
         
         <div class="summary-section">
-          <h2 class="section-title">${t.paymentMethods}</h2>
+          <div class="section-title">${language === 'ar' ? 'قائمة الفواتير' : 'Invoice List'}</div>
           <table>
             <thead>
               <tr>
-                <th>${language === 'ar' ? 'طريقة الدفع' : 'Payment Method'}</th>
-                <th>${language === 'ar' ? 'عدد المعاملات' : 'Transaction Count'}</th>
-                <th>${language === 'ar' ? 'المبلغ' : 'Amount'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${paymentBreakdownHTML}
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="summary-section">
-          <h2 class="section-title">${language === 'ar' ? 'قائمة الفواتير' : 'Invoice List'}</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>${language === 'ar' ? 'رقم الفاتورة' : 'Invoice ID'}</th>
-                <th>${language === 'ar' ? 'اسم العميل' : 'Customer Name'}</th>
-                <th>${language === 'ar' ? 'نوع العدسة' : 'Lens Type'}</th>
-                <th>${language === 'ar' ? 'الإطار' : 'Frame'}</th>
+                <th>${language === 'ar' ? 'العميل' : 'Customer'}</th>
                 <th>${language === 'ar' ? 'المجموع' : 'Total'}</th>
                 <th>${language === 'ar' ? 'المدفوع' : 'Paid'}</th>
-                <th>${language === 'ar' ? 'طريقة الدفع' : 'Payment Method'}</th>
+                <th>${language === 'ar' ? 'الطريقة' : 'Method'}</th>
               </tr>
             </thead>
             <tbody>
@@ -384,39 +287,25 @@ export const DailySalesReport: React.FC = () => {
             </tbody>
           </table>
         </div>
-        
-        <div class="footer">
-          <p>${language === 'ar' 
-            ? `تم إنشاء هذا التقرير بواسطة نظام النظارات - جميع الحقوق محفوظة © ${new Date().getFullYear()}`
-            : `This report was generated by the Optical System - All rights reserved © ${new Date().getFullYear()}`}</p>
-        </div>
-        
-        <div class="no-print">
-          <button onclick="window.print()" style="padding: 10px 20px; margin: 20px auto; display: block; background: #0066cc; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            ${language === 'ar' ? 'طباعة التقرير' : 'Print Report'}
-          </button>
-        </div>
-      </body>
-      </html>
+      ` : ''}
+      
+      <div class="footer">
+        <p>${language === 'ar' 
+          ? `© ${new Date().getFullYear()} نظام النظارات - جميع الحقوق محفوظة`
+          : `© ${new Date().getFullYear()} Optical System - All rights reserved`}</p>
+      </div>
     `;
     
-    printWindow.document.open();
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    
-    printWindow.onload = function() {
-      printWindow.focus();
-    };
+    PrintService.printReport(reportContent, pageTitle, () => {
+      toast.success(language === 'ar' ? 'تم إرسال التقرير للطباعة' : 'Report sent to printer');
+    });
   };
   
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <h2 className="text-xl md:text-2xl font-bold">{t.dailySalesReport}</h2>
-        <Button onClick={handlePrintReport} className="gap-2 bg-primary hover:bg-primary/90 w-full sm:w-auto">
-          <Printer size={16} />
-          {t.printReport}
-        </Button>
+        <PrintReportButton onPrint={handlePrintReport} className="w-full sm:w-auto" />
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
@@ -690,4 +579,3 @@ export const DailySalesReport: React.FC = () => {
     </div>
   );
 };
-
