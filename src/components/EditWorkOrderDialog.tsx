@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,7 +45,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(null);
   const [skipLens, setSkipLens] = useState(false);
   
-  // Get the patient associated with this work order
   const patient = workOrder.patientId ? getPatientById(workOrder.patientId) : null;
   const patientRx = patient?.rx || {
     sphereOD: "",
@@ -61,7 +59,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     pdLeft: ""
   };
   
-  // Initialize form with patient RX
   const form = useForm<RxData>({
     defaultValues: {
       sphereOD: patientRx.sphereOD || "",
@@ -77,13 +74,14 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     }
   });
   
-  // Initialize lens selections from the work order
+  const getLensPrice = (lens: LensType | null): number => {
+    return lens?.price !== undefined ? lens.price : 0;
+  };
+
   useEffect(() => {
     if (workOrder) {
-      // For a work order with lensType
       if ('lensType' in workOrder && workOrder.lensType) {
         const lens = workOrder.lensType;
-        // Convert the lens object to a LensType
         const lensTypeObj = typeof lens === 'object' ? 
           lensTypes.find(lt => lt.name === lens.name) : 
           lensTypes.find(lt => lt.name === lens);
@@ -91,19 +89,16 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         setSelectedLensType(lensTypeObj || null);
       }
       
-      // For an invoice with lens information
       if ('lensType' in workOrder && typeof workOrder.lensType === 'string') {
         const lensTypeObj = lensTypes.find(lt => lt.name === workOrder.lensType);
         setSelectedLensType(lensTypeObj || null);
       }
       
-      // For coating information
       if ('coating' in workOrder && workOrder.coating) {
         const coatingObj = lensCoatings.find(c => c.name === workOrder.coating);
         setSelectedCoating(coatingObj || null);
       }
       
-      // Set skip lens if we have no lens info
       if (!('lensType' in workOrder) || !workOrder.lensType) {
         setSkipLens(true);
       }
@@ -111,33 +106,27 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   }, [workOrder, lensTypes, lensCoatings]);
   
   const handleSave = () => {
-    // Get the RX data from the form
     const rxData = form.getValues();
     
-    // Update the patient's RX if needed
     if (workOrder.patientId) {
       updatePatientRx(workOrder.patientId, rxData);
     }
     
-    // Prepare updated work order
     const updatedOrder = {
       ...editedWorkOrder,
-      rx: rxData, // Add RX data
+      rx: rxData,
     };
     
-    // Add lens info if not skipped
     if (!skipLens) {
       if (selectedLensType) {
-        // Update based on which type of object we're dealing with
         if ('lensType' in updatedOrder && typeof updatedOrder.lensType === 'object') {
           updatedOrder.lensType = {
             name: selectedLensType.name,
-            price: selectedLensType.price || 0 // Handle undefined price
+            price: getLensPrice(selectedLensType)
           };
         } else {
-          // For invoices that store lens info differently
           updatedOrder.lensType = selectedLensType.name;
-          updatedOrder.lensPrice = selectedLensType.price || 0; // Handle undefined price
+          updatedOrder.lensPrice = getLensPrice(selectedLensType);
         }
       }
       
@@ -149,7 +138,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         updatedOrder.coatingPrice = 0;
       }
     } else {
-      // Clear lens info if skipped
       if ('lensType' in updatedOrder && typeof updatedOrder.lensType === 'object') {
         updatedOrder.lensType = null;
       } else {
@@ -160,12 +148,9 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       updatedOrder.coatingPrice = 0;
     }
     
-    // Check if we're working with a WorkOrder or Invoice
     if ('invoiceId' in workOrder) {
-      // It's an invoice
       updateInvoice(updatedOrder);
     } else {
-      // It's a work order
       updateWorkOrder(updatedOrder);
     }
     
@@ -349,7 +334,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                 <LensSelector
                   onSelectLensType={setSelectedLensType}
                   onSelectCoating={setSelectedCoating}
-                  onSelectThickness={setSelectedThickness} // Add missing prop
+                  onSelectThickness={setSelectedThickness}
                   skipLens={skipLens}
                   onSkipLensChange={setSkipLens}
                   initialLensType={selectedLensType}

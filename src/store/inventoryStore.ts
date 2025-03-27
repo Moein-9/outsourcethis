@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -17,6 +16,7 @@ export interface LensType {
   id: string;
   name: string;
   type: "distance" | "reading" | "progressive" | "bifocal" | "sunglasses";
+  price?: number;
 }
 
 export interface LensCoating {

@@ -40,9 +40,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
-  // Initialize from form values if they exist
   React.useEffect(() => {
-    // If we have form values for frames, update the local state
     if (getValues<string>('frameBrand')) {
       setSelectedFrame({
         brand: getValues<string>('frameBrand'),
@@ -100,7 +98,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setSelectedFrame(newFrame);
     setFrameResults([]);
     
-    // Update form values
     setValue('frameBrand', newFrame.brand);
     setValue('frameModel', newFrame.model);
     setValue('frameColor', newFrame.color);
@@ -108,10 +105,14 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setValue('framePrice', newFrame.price);
   };
   
+  const getLensPrice = (lens: LensType | null): number => {
+    return lens?.price !== undefined ? lens.price : 0;
+  };
+  
   const handleLensTypeSelect = (lens: LensType | null) => {
     setSelectedLensType(lens);
     setValue('lensType', lens?.name || '');
-    setValue('lensPrice', lens?.price || 0);
+    setValue('lensPrice', getLensPrice(lens));
   };
   
   const handleCoatingSelect = (coating: LensCoating | null) => {
@@ -181,7 +182,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     
     setSelectedFrame(newFrameData);
     
-    // Update form values
     setValue('frameBrand', newFrameData.brand);
     setValue('frameModel', newFrameData.model);
     setValue('frameColor', newFrameData.color);
@@ -203,7 +203,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   
   const handleContactLensSelection = (selection: ContactLensSelection) => {
     if (selection.items) {
-      // Save items with their quantities
       const itemsWithQuantities = selection.items.map(item => ({
         ...item,
         qty: selection.quantities?.[item.id] || 1
@@ -215,7 +214,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
         setValue('contactLensRx', selection.rxData);
       }
       
-      // Calculate total based on quantity
       const lensesTotal = itemsWithQuantities.reduce((sum, lens) => 
         sum + (lens.price * (lens.qty || 1)), 0
       );
@@ -223,7 +221,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
       setValue('total', lensesTotal - (getValues<number>('discount') || 0));
       setValue('remaining', Math.max(0, lensesTotal - (getValues<number>('discount') || 0) - (getValues<number>('deposit') || 0)));
       
-      // Count total lenses including quantities
       const totalLensCount = itemsWithQuantities.reduce((count, lens) => count + (lens.qty || 1), 0);
       
       toast({

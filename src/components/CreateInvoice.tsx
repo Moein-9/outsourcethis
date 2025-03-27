@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -7,7 +6,7 @@ import { motion } from "framer-motion";
 import { 
   FileText, Printer, Receipt, User, PackageCheck, CreditCard,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
-  MessageCircleDashed, Loader, Check, Ruler
+  MessageCircleDashed, Loader, Check, Ruler, PaintBrush
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,7 +63,7 @@ const CreateInvoiceContent: React.FC = () => {
     patientId: getValues("patientId"),
     invoiceType: getValues("invoiceType") || "glasses",
     lensType: getValues("lensType") || "",
-    lensPrice: getValues("lensPrice") || 0, // Added lensPrice
+    lensPrice: getValues("lensPrice") || 0,
     coating: getValues("coating") || "",
     coatingPrice: getValues("coatingPrice") || 0,
     thickness: getValues("thickness") || "",
@@ -345,7 +344,7 @@ const CreateInvoiceContent: React.FC = () => {
                               <div className="flex justify-between items-start">
                                 <div>
                                   <p className="font-medium text-purple-700 flex items-center gap-1">
-                                    <Paintbrush className="w-3 h-3" /> {t('coating')}
+                                    <PaintBrush className="w-3 h-3" /> {t('coating')}
                                   </p>
                                   <p className="text-sm text-gray-600 mt-1">
                                     {getValues("coating")}
