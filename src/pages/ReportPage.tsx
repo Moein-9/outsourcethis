@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useLanguageStore } from "@/store/languageStore";
 import {
   Dialog,
   DialogContent,
@@ -122,6 +123,7 @@ const generateMockData = () => {
 
 const ReportPage: React.FC = () => {
   const invoiceStore = useInvoiceStore();
+  const { language } = useLanguageStore();
   const [activeTab, setActiveTab] = useState("daily");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -133,11 +135,56 @@ const ReportPage: React.FC = () => {
   
   // Default password and security question (in a real app, these would be stored in a database)
   const correctPassword = "admin123";
-  const securityQuestion = "ما هو اسم الشركة؟";
+  const securityQuestion = language === 'ar' 
+    ? "ما هو اسم الشركة؟" 
+    : "What is the company name?";
   const correctAnswer = "نظارات"; // Example answer
   
   // Master reset code (would be different in production)
   const masterResetCode = "RESET987654";
+  
+  // Text translations based on language
+  const translations = {
+    reportsTitle: language === 'ar' ? "تقارير النظام" : "System Reports",
+    createMockData: language === 'ar' ? "إنشاء بيانات تجريبية" : "Create Test Data",
+    clearMockData: language === 'ar' ? "مسح البيانات التجريبية" : "Clear Test Data",
+    mockDataNote: language === 'ar' 
+      ? "ملاحظة: هذا الشريط للعرض فقط ويمكن إزالته عند استخدام بيانات حقيقية" 
+      : "Note: This strip is for display only and can be removed when using real data",
+    dailyReport: language === 'ar' ? "التقرير اليومي" : "Daily Report",
+    comparativeAnalysis: language === 'ar' ? "التحليل المقارن" : "Comparative Analysis",
+    signOut: language === 'ar' ? "تسجيل الخروج" : "Sign Out",
+    loginToAccess: language === 'ar' ? "تسجيل الدخول للوصول إلى التحليل المقارن" : "Login to Access Comparative Analysis",
+    enterPassword: language === 'ar' 
+      ? "يرجى إدخال كلمة المرور للوصول إلى تقارير التحليل المقارن" 
+      : "Please enter your password to access comparative analysis reports",
+    password: language === 'ar' ? "كلمة المرور" : "Password",
+    forgotPassword: language === 'ar' ? "نسيت كلمة المرور؟" : "Forgot password?",
+    cancel: language === 'ar' ? "إلغاء" : "Cancel",
+    login: language === 'ar' ? "تسجيل الدخول" : "Login",
+    sectionProtected: language === 'ar' ? "هذا القسم محمي بكلمة مرور" : "This section is password protected",
+    pleaseLogin: language === 'ar' 
+      ? "يرجى تسجيل الدخول للوصول إلى التحليل المقارن" 
+      : "Please login to access comparative analysis",
+    resetPassword: language === 'ar' ? "استعادة كلمة المرور" : "Reset Password",
+    resetInstructions: language === 'ar' 
+      ? "يرجى الإجابة على سؤال الأمان أو إدخال رمز الاستعادة" 
+      : "Please answer the security question or enter the recovery code",
+    enterAnswer: language === 'ar' ? "أدخل الإجابة هنا" : "Enter your answer here",
+    or: language === 'ar' ? "أو" : "or",
+    recoveryCode: language === 'ar' ? "رمز الاستعادة" : "Recovery Code",
+    enterRecoveryCode: language === 'ar' ? "أدخل رمز الاستعادة" : "Enter recovery code",
+    restore: language === 'ar' ? "استعادة" : "Restore",
+    // Success messages
+    loginSuccess: language === 'ar' ? "تم تسجيل الدخول بنجاح" : "Logged in successfully",
+    logoutSuccess: language === 'ar' ? "تم تسجيل الخروج بنجاح" : "Logged out successfully",
+    mockDataCreated: language === 'ar' ? "تم إنشاء بيانات تجريبية بنجاح" : "Test data created successfully",
+    mockDataCleared: language === 'ar' ? "تم مسح البيانات التجريبية" : "Test data cleared successfully",
+    // Error messages
+    wrongPassword: language === 'ar' ? "كلمة المرور غير صحيحة" : "Incorrect password",
+    wrongAnswer: language === 'ar' ? "الإجابة غير صحيحة" : "Incorrect answer",
+    passwordRevealed: language === 'ar' ? `كلمة المرور هي: ${correctPassword}` : `The password is: ${correctPassword}`,
+  };
   
   useEffect(() => {
     // Check if the user is already authenticated (could use local storage in a real app)
@@ -153,9 +200,9 @@ const ReportPage: React.FC = () => {
       setPasswordDialogOpen(false);
       // Save authentication status
       localStorage.setItem("reportAuth", "true");
-      toast.success("تم تسجيل الدخول بنجاح");
+      toast.success(translations.loginSuccess);
     } else {
-      toast.error("كلمة المرور غير صحيحة");
+      toast.error(translations.wrongPassword);
     }
     setPassword("");
     setShowPassword(false);
@@ -167,10 +214,10 @@ const ReportPage: React.FC = () => {
       (resetCode === masterResetCode)
     ) {
       // Reset the password (in a real app, this would generate a new password)
-      toast.success(`كلمة المرور هي: ${correctPassword}`);
+      toast.success(translations.passwordRevealed);
       setResetDialogOpen(false);
     } else {
-      toast.error("الإجابة غير صحيحة");
+      toast.error(translations.wrongAnswer);
     }
     setSecurityAnswer("");
     setResetCode("");
@@ -188,7 +235,7 @@ const ReportPage: React.FC = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("reportAuth");
     setActiveTab("daily");
-    toast.success("تم تسجيل الخروج بنجاح");
+    toast.success(translations.logoutSuccess);
   };
   
   const handleGenerateMockData = () => {
@@ -207,48 +254,48 @@ const ReportPage: React.FC = () => {
       }
     });
     
-    toast.success("تم إنشاء بيانات تجريبية بنجاح");
+    toast.success(translations.mockDataCreated);
   };
   
   const handleClearMockData = () => {
     invoiceStore.clearInvoices && invoiceStore.clearInvoices();
-    toast.success("تم مسح البيانات التجريبية");
+    toast.success(translations.mockDataCleared);
   };
   
   return (
     <Layout activeSection="reports" onNavigate={() => {}}>
-      <div className="container py-6">
-        <h1 className="text-3xl font-bold mb-6">تقارير النظام</h1>
+      <div className="container px-4 py-6 md:px-6">
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">{translations.reportsTitle}</h1>
         
         {/* Mock Data Controls - Remove this section when using real data */}
-        <div className="flex gap-2 mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
+        <div className="flex flex-wrap gap-2 mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
           <Button 
             variant="outline" 
-            className="bg-amber-100 hover:bg-amber-200 border-amber-200" 
+            className="bg-amber-100 hover:bg-amber-200 border-amber-200 text-xs md:text-sm w-full sm:w-auto" 
             onClick={handleGenerateMockData}
           >
-            إنشاء بيانات تجريبية
+            {translations.createMockData}
           </Button>
           <Button 
             variant="outline" 
-            className="bg-red-100 hover:bg-red-200 border-red-200" 
+            className="bg-red-100 hover:bg-red-200 border-red-200 text-xs md:text-sm w-full sm:w-auto" 
             onClick={handleClearMockData}
           >
-            مسح البيانات التجريبية
+            {translations.clearMockData}
           </Button>
-          <div className="flex-1 flex items-center text-amber-700 text-sm mr-2">
-            ملاحظة: هذا الشريط للعرض فقط ويمكن إزالته عند استخدام بيانات حقيقية
+          <div className="flex-1 flex items-center text-amber-700 text-xs md:text-sm mx-2 mt-2 sm:mt-0">
+            {translations.mockDataNote}
           </div>
         </div>
         
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <div className="flex justify-between items-center">
-              <TabsList className="grid w-full md:w-auto grid-cols-2 md:grid-cols-2">
-                <TabsTrigger value="daily">التقرير اليومي</TabsTrigger>
-                <TabsTrigger value="comparative" className="flex items-center gap-1">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+              <TabsList className="grid w-full md:w-auto grid-cols-2 md:grid-cols-2 mb-3 md:mb-0">
+                <TabsTrigger value="daily" className="text-sm">{translations.dailyReport}</TabsTrigger>
+                <TabsTrigger value="comparative" className="flex items-center gap-1 text-sm">
                   {!isAuthenticated && <LockKeyhole size={14} />}
-                  التحليل المقارن
+                  {translations.comparativeAnalysis}
                 </TabsTrigger>
               </TabsList>
               
@@ -256,17 +303,17 @@ const ReportPage: React.FC = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex items-center gap-1 text-gray-500"
+                  className="flex items-center gap-1 text-gray-500 self-end md:self-auto mt-2 md:mt-0"
                   onClick={handleSignOut}
                 >
                   <Unlock size={14} />
-                  تسجيل الخروج
+                  {translations.signOut}
                 </Button>
               )}
             </div>
 
             <Card className="mt-4">
-              <CardContent className="pt-6">
+              <CardContent className="pt-6 p-3 md:p-6">
                 <TabsContent value="daily" className="mt-0">
                   <DailySalesReport />
                 </TabsContent>
@@ -275,19 +322,19 @@ const ReportPage: React.FC = () => {
                   {isAuthenticated ? (
                     <ComparativeAnalysis />
                   ) : (
-                    <div className="py-12 text-center">
-                      <LockKeyhole className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-                      <h3 className="text-lg font-medium text-gray-700 mb-2">
-                        هذا القسم محمي بكلمة مرور
+                    <div className="py-8 md:py-12 text-center">
+                      <LockKeyhole className="h-8 w-8 md:h-12 md:w-12 mx-auto text-gray-400 mb-3" />
+                      <h3 className="text-base md:text-lg font-medium text-gray-700 mb-2">
+                        {translations.sectionProtected}
                       </h3>
-                      <p className="text-gray-500 mb-4">
-                        يرجى تسجيل الدخول للوصول إلى التحليل المقارن
+                      <p className="text-sm md:text-base text-gray-500 mb-4 px-4">
+                        {translations.pleaseLogin}
                       </p>
                       <Button 
                         onClick={() => setPasswordDialogOpen(true)}
                         className="bg-primary hover:bg-primary/90"
                       >
-                        تسجيل الدخول
+                        {translations.login}
                       </Button>
                     </div>
                   )}
@@ -299,17 +346,17 @@ const ReportPage: React.FC = () => {
         
         {/* Password Dialog */}
         <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md max-w-[95vw]">
             <DialogHeader>
-              <DialogTitle>تسجيل الدخول للتحليل المقارن</DialogTitle>
+              <DialogTitle>{translations.loginToAccess}</DialogTitle>
               <DialogDescription>
-                يرجى إدخال كلمة المرور للوصول إلى تقارير التحليل المقارن
+                {translations.enterPassword}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="relative">
                 <Label htmlFor="password" className="mb-2 block">
-                  كلمة المرور
+                  {translations.password}
                 </Label>
                 <div className="flex items-center relative">
                   <Input
@@ -336,22 +383,23 @@ const ReportPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <DialogFooter className="flex justify-between sm:justify-between">
+            <DialogFooter className="flex flex-col sm:flex-row justify-between sm:justify-between gap-2">
               <Button
                 variant="link"
                 onClick={() => {
                   setPasswordDialogOpen(false);
                   setResetDialogOpen(true);
                 }}
+                className="self-start"
               >
-                نسيت كلمة المرور؟
+                {translations.forgotPassword}
               </Button>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setPasswordDialogOpen(false)}>
-                  إلغاء
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button variant="outline" onClick={() => setPasswordDialogOpen(false)} className="flex-1 sm:flex-none">
+                  {translations.cancel}
                 </Button>
-                <Button onClick={handlePasswordSubmit}>
-                  تسجيل الدخول
+                <Button onClick={handlePasswordSubmit} className="flex-1 sm:flex-none">
+                  {translations.login}
                 </Button>
               </div>
             </DialogFooter>
@@ -360,11 +408,11 @@ const ReportPage: React.FC = () => {
         
         {/* Reset Password Dialog */}
         <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-[95vw] sm:max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle>استعادة كلمة المرور</AlertDialogTitle>
+              <AlertDialogTitle>{translations.resetPassword}</AlertDialogTitle>
               <AlertDialogDescription>
-                يرجى الإجابة على سؤال الأمان أو إدخال رمز الاستعادة
+                {translations.resetInstructions}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="grid gap-4 py-4">
@@ -376,7 +424,7 @@ const ReportPage: React.FC = () => {
                   id="securityAnswer"
                   value={securityAnswer}
                   onChange={(e) => setSecurityAnswer(e.target.value)}
-                  placeholder="أدخل الإجابة هنا"
+                  placeholder={translations.enterAnswer}
                 />
               </div>
               <div className="relative pt-2">
@@ -384,25 +432,25 @@ const ReportPage: React.FC = () => {
                   <span className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-background px-2 text-muted-foreground">أو</span>
+                  <span className="bg-background px-2 text-muted-foreground">{translations.or}</span>
                 </div>
               </div>
               <div>
                 <Label htmlFor="resetCode" className="mb-2 block">
-                  رمز الاستعادة
+                  {translations.recoveryCode}
                 </Label>
                 <Input
                   id="resetCode"
                   value={resetCode}
                   onChange={(e) => setResetCode(e.target.value)}
-                  placeholder="أدخل رمز الاستعادة"
+                  placeholder={translations.enterRecoveryCode}
                 />
               </div>
             </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+              <AlertDialogCancel className="mt-0">{translations.cancel}</AlertDialogCancel>
               <AlertDialogAction onClick={handleResetSubmit}>
-                استعادة
+                {translations.restore}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
