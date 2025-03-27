@@ -76,6 +76,79 @@ export class CustomPrintService {
                   color: white !important;
                 }
                 
+                /* Red alert colors */
+                .text-\\[\\#ea384c\\] {
+                  color: #ea384c !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
+                .bg-red-100 {
+                  background-color: #fee2e2 !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
+                .border-red-300 {
+                  border-color: #fca5a5 !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
+                .text-red-700 {
+                  color: #b91c1c !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
+                /* Green success colors */
+                .bg-green-100 {
+                  background-color: #dcfce7 !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
+                .border-green-300 {
+                  border-color: #86efac !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
+                .text-green-700 {
+                  color: #15803d !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
+                .text-green-800 {
+                  color: #166534 !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
+                /* Border styling */
+                .border-2 {
+                  border-width: 2px !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
+                .border-black {
+                  border-color: #000 !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
                 /* Improve dynamic sizing */
                 html, body {
                   height: auto !important;
@@ -119,6 +192,37 @@ export class CustomPrintService {
               .bg-black {
                 background-color: black !important;
                 color: white !important;
+              }
+              
+              /* Border styling */
+              .border-2 {
+                border-width: 2px !important;
+              }
+              
+              .border-black {
+                border-color: #000 !important;
+              }
+              
+              /* Red highlight colors */
+              .text-\\[\\#ea384c\\] {
+                color: #ea384c !important;
+              }
+              
+              .bg-red-100 {
+                background-color: #fee2e2 !important;
+              }
+              
+              .border-red-300 {
+                border-color: #fca5a5 !important;
+              }
+              
+              /* Green success colors */
+              .bg-green-100 {
+                background-color: #dcfce7 !important;
+              }
+              
+              .border-green-300 {
+                border-color: #86efac !important;
               }
             </style>
           </head>

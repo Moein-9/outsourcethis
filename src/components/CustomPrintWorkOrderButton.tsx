@@ -72,7 +72,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
             {t('previewBeforePrinting')}
           </DialogDescription>
           
-          <div className="w-full max-w-[80mm] bg-white p-0 border rounded shadow-sm mb-4">
+          <div className="w-full max-w-[80mm] bg-white p-0 border-2 border-black rounded shadow-sm mb-4">
             <CustomWorkOrderReceipt 
               workOrder={workOrder} 
               invoice={invoice} 
