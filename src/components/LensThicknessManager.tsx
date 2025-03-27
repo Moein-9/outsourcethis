@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useInventoryStore, LensThickness } from "@/store/inventoryStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -15,7 +14,7 @@ export const LensThicknessManager: React.FC = () => {
   const { lensThicknesses, addLensThickness, updateLensThickness, deleteLensThickness } = useInventoryStore();
   const { t, language } = useLanguageStore();
   
-  // New thickness form state
+  // Add/Edit form states
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newThicknessName, setNewThicknessName] = useState("");
   const [newThicknessPrice, setNewThicknessPrice] = useState<number | "">("");
@@ -27,6 +26,9 @@ export const LensThicknessManager: React.FC = () => {
   const [editThicknessName, setEditThicknessName] = useState("");
   const [editThicknessPrice, setEditThicknessPrice] = useState<number | "">("");
   const [editThicknessDescription, setEditThicknessDescription] = useState("");
+  
+  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const textDirClass = language === 'ar' ? 'rtl' : 'ltr';
   
   const handleAddThickness = () => {
     if (!newThicknessName || newThicknessPrice === "") {
@@ -81,9 +83,9 @@ export const LensThicknessManager: React.FC = () => {
   };
   
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${textDirClass}`}>
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">{t("lensThicknesses")}</h2>
+        <h2 className={`text-xl font-bold ${textAlignClass}`}>{t("lensThicknesses")}</h2>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-1">
@@ -100,33 +102,34 @@ export const LensThicknessManager: React.FC = () => {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">{t("thicknessName")}</Label>
+                <Label htmlFor="name" className={textAlignClass}>{t("thicknessName")}</Label>
                 <Input
                   id="name"
                   value={newThicknessName}
                   onChange={(e) => setNewThicknessName(e.target.value)}
                   placeholder={t("thicknessNameExample")}
+                  className={textAlignClass}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="price">{t("price")}</Label>
+                <Label htmlFor="price" className={textAlignClass}>{t("price")}</Label>
                 <Input
                   id="price"
                   type="number"
-                  step="0.01"
                   value={newThicknessPrice}
                   onChange={(e) => setNewThicknessPrice(e.target.value ? Number(e.target.value) : "")}
                   placeholder="0.00"
+                  className={textAlignClass}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="description">{t("description")}</Label>
-                <Textarea
+                <Label htmlFor="description" className={textAlignClass}>{t("description")}</Label>
+                <Input
                   id="description"
                   value={newThicknessDescription}
                   onChange={(e) => setNewThicknessDescription(e.target.value)}
                   placeholder={t("thicknessDescription")}
-                  rows={3}
+                  className={textAlignClass}
                 />
               </div>
             </div>
@@ -146,10 +149,8 @@ export const LensThicknessManager: React.FC = () => {
                 <CardTitle className="text-base">{thickness.name}</CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0 pb-2">
+                <p className="text-sm text-muted-foreground mb-2">{thickness.description}</p>
                 <p className="text-lg font-bold">{thickness.price.toFixed(2)} {language === 'ar' ? 'د.ك' : 'KD'}</p>
-                {thickness.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{thickness.description}</p>
-                )}
               </CardContent>
               <CardFooter className="p-2 flex justify-end gap-2 bg-muted/50">
                 <Button variant="ghost" size="icon" onClick={() => startEditThickness(thickness)}>
@@ -182,30 +183,31 @@ export const LensThicknessManager: React.FC = () => {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="edit-name">{t("thicknessName")}</Label>
+              <Label htmlFor="edit-name" className={textAlignClass}>{t("thicknessName")}</Label>
               <Input
                 id="edit-name"
                 value={editThicknessName}
                 onChange={(e) => setEditThicknessName(e.target.value)}
+                className={textAlignClass}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-price">{t("price")}</Label>
+              <Label htmlFor="edit-price" className={textAlignClass}>{t("price")}</Label>
               <Input
                 id="edit-price"
                 type="number"
-                step="0.01"
                 value={editThicknessPrice}
                 onChange={(e) => setEditThicknessPrice(e.target.value ? Number(e.target.value) : "")}
+                className={textAlignClass}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-description">{t("description")}</Label>
-              <Textarea
+              <Label htmlFor="edit-description" className={textAlignClass}>{t("description")}</Label>
+              <Input
                 id="edit-description"
                 value={editThicknessDescription}
                 onChange={(e) => setEditThicknessDescription(e.target.value)}
-                rows={3}
+                className={textAlignClass}
               />
             </div>
           </div>

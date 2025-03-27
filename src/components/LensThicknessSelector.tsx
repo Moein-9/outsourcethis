@@ -34,6 +34,7 @@ export const LensThicknessSelector: React.FC<LensThicknessSelectorProps> = ({
   };
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   
   if (disabled) {
     return (
@@ -52,8 +53,8 @@ export const LensThicknessSelector: React.FC<LensThicknessSelectorProps> = ({
   }
   
   return (
-    <div className="space-y-4">
-      <h3 className="text-base font-medium mb-2">{t('selectLensThickness')}</h3>
+    <div className={`space-y-4 ${dirClass}`}>
+      <h3 className={`text-base font-medium mb-2 ${textAlignClass}`}>{t('selectLensThickness')}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {thicknesses.map((thickness) => (
           <div
@@ -66,7 +67,7 @@ export const LensThicknessSelector: React.FC<LensThicknessSelectorProps> = ({
             onClick={() => handleThicknessSelect(thickness)}
           >
             <div className="flex justify-between items-start">
-              <div className={`${textAlignClass}`}>
+              <div className={`${textAlignClass} flex-1`}>
                 <div className="font-medium">{thickness.name}</div>
                 <div className="text-sm text-muted-foreground">{thickness.description || ''}</div>
               </div>
@@ -76,7 +77,7 @@ export const LensThicknessSelector: React.FC<LensThicknessSelectorProps> = ({
             </div>
             
             {selectedThickness?.id === thickness.id && (
-              <div className="mt-2 flex justify-end">
+              <div className={`mt-2 flex ${language === 'ar' ? 'justify-start' : 'justify-end'}`}>
                 <div className="bg-[#5EEAD4] text-white rounded-full p-1">
                   <Check className="w-4 h-4" />
                 </div>
