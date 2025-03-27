@@ -258,51 +258,54 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           {isRtl ? "المنتجات | Products" : "Products | المنتجات"}
         </div>
         
-        <div className="space-y-2 px-1">
+        {/* More compact product area */}
+        <div className="space-y-1 px-1">
           {isContactLens && contactLensItems.length > 0 ? (
             contactLensItems.map((lens, idx) => (
-              <div key={idx} className="p-1.5 border border-gray-300 rounded">
-                <div className="flex justify-between px-2 mb-1">
-                  <div className="font-bold text-sm">{lens.brand} {lens.type}</div>
-                  <span className="font-bold text-sm">{lens.price.toFixed(3)} KWD</span>
+              <div key={idx} className="p-1 border border-gray-300 rounded mb-1">
+                <div className="flex justify-between items-center px-1">
+                  <div className="font-bold text-xs">{lens.brand} {lens.type}</div>
+                  <span className="font-bold text-xs">{lens.price.toFixed(3)} KWD</span>
                 </div>
-                <div className="text-xs font-medium text-center">
+                <div className="text-[9px] font-medium text-center">
                   {lens.color && <span>{t("color")}: {lens.color} - </span>}
                   <span>{t("quantity")}: {lens.qty || 1}</span>
                 </div>
               </div>
             ))
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {frameData.brand && (
-                <div className="p-1.5 border border-gray-300 rounded">
-                  <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "الإطار | Frame" : "Frame | الإطار"}</div>
-                    <span className="font-bold text-sm">{frameData.price.toFixed(3)} KWD</span>
+                <div className="p-1 border border-gray-300 rounded mb-1">
+                  <div className="flex justify-between items-center px-1">
+                    <div className="font-bold text-xs">{isRtl ? "الإطار" : "Frame"}</div>
+                    <span className="font-bold text-xs">{frameData.price.toFixed(3)} KWD</span>
                   </div>
-                  <div className="text-xs font-medium text-center">{frameData.brand} {frameData.model}</div>
-                  {frameData.color && <div className="text-xs font-medium text-center">{t("color")}: {frameData.color}</div>}
-                  {frameData.size && <div className="text-xs font-medium text-center">{t("size")}: {frameData.size}</div>}
+                  <div className="text-[9px] font-medium text-center">
+                    {frameData.brand} {frameData.model}
+                    {frameData.color && <span> - {t("color")}: {frameData.color}</span>}
+                    {frameData.size && <span> - {t("size")}: {frameData.size}</span>}
+                  </div>
                 </div>
               )}
               
               {lensName && (
-                <div className="p-1.5 border border-gray-300 rounded">
-                  <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}</div>
-                    <span className="font-bold text-sm">{lensPrice.toFixed(3)} KWD</span>
+                <div className="p-1 border border-gray-300 rounded mb-1">
+                  <div className="flex justify-between items-center px-1">
+                    <div className="font-bold text-xs">{isRtl ? "العدسات" : "Lenses"}</div>
+                    <span className="font-bold text-xs">{lensPrice.toFixed(3)} KWD</span>
                   </div>
-                  <div className="text-xs font-medium text-center">{lensName}</div>
+                  <div className="text-[9px] font-medium text-center">{lensName}</div>
                 </div>
               )}
               
               {coatingName && (
-                <div className="p-1.5 border border-gray-300 rounded">
-                  <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}</div>
-                    <span className="font-bold text-sm">{coatingPrice.toFixed(3)} KWD</span>
+                <div className="p-1 border border-gray-300 rounded mb-1">
+                  <div className="flex justify-between items-center px-1">
+                    <div className="font-bold text-xs">{isRtl ? "الطلاء" : "Coating"}</div>
+                    <span className="font-bold text-xs">{coatingPrice.toFixed(3)} KWD</span>
                   </div>
-                  <div className="text-xs font-medium text-center">{coatingName}</div>
+                  <div className="text-[9px] font-medium text-center">{coatingName}</div>
                 </div>
               )}
             </div>
@@ -364,14 +367,15 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </div>
           ))}
           
+          {/* Highlighted remaining payment in red */}
           {remaining > 0 ? (
-            <div className="flex justify-between font-bold mt-2 pt-1 border-t-2 border-black px-2">
+            <div className="flex justify-between font-bold mt-2 pt-1 border-t-2 border-black px-2 bg-red-100 py-1 rounded" style={{ color: '#cc0000' }}>
               <span className="text-base">{t("remaining")}:</span>
               <span className="text-base">{remaining.toFixed(3)} KWD</span>
             </div>
           ) : (
-            <div className="flex items-center justify-center gap-1 mt-2 font-bold border-2 border-black py-1 rounded">
-              <CheckCircle2 className="w-4 h-4" />
+            <div className="flex items-center justify-center gap-1 mt-2 font-bold border-2 border-black py-1 rounded bg-green-50">
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
               <span className="text-sm">{t("paidInFull")}</span>
             </div>
           )}
@@ -502,6 +506,20 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               color-adjust: exact !important;
               background-color: black !important;
               color: white !important;
+            }
+            
+            .bg-red-100 {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              background-color: #fee2e2 !important;
+            }
+            
+            .bg-green-50 {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              background-color: #f0fdf4 !important;
             }
           }
         `}
