@@ -1,10 +1,9 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, CreditCard, Receipt, UserCircle2, Ruler, Glasses, Contact } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { 
   Card,
@@ -128,295 +127,343 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         border: isPrintable ? 'none' : '1px solid #ddd',
         borderRadius: isPrintable ? '0' : '4px',
         boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
-        fontFamily: isRtl ? 'Zain, sans-serif' : 'Yrsa, serif',
+        fontFamily: 'Cairo, sans-serif',
         pageBreakInside: 'avoid',
-        pageBreakAfter: 'always',
-        textAlign: 'center' // Center all content in the receipt
+        pageBreakAfter: 'always'
       }}
     >
-      <div className="border-b-2 border-black pb-1 mb-2">
+      <div className="text-center border-b border-gray-300 pb-2 mb-2">
         <div className="flex justify-center mb-1">
-          <MoenLogo className="w-auto h-10" />
+          <MoenLogo className="w-auto h-12" />
         </div>
         <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
-        <p className="text-xs font-medium mb-0">{storeInfo.address}</p>
-        <p className="text-xs font-medium">{t("phone")}: {storeInfo.phone}</p>
+        <p className="text-xs font-medium mb-0 text-gray-600">{storeInfo.address}</p>
+        <p className="text-xs font-medium text-gray-600">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      <div className="mb-2">
-        <div className="inline-flex items-center justify-center gap-1 border-2 border-black px-2 py-0.5 rounded">
-          <Receipt className="w-4 h-4" />
-          <span className="font-bold text-base">{t("workOrder")}</span>
+      <div className="text-center mb-3">
+        <div className="bg-black text-white py-1 px-2 mb-2 font-bold text-base rounded">
+          {isRtl ? "أمر عمل | WORK ORDER" : "WORK ORDER | أمر عمل"}
         </div>
+        <p className="text-xs mb-0 text-gray-600">
+          {isRtl ? "ORDER #: " : "رقم الطلب: "}
+          <span className="font-semibold">{orderNumber}</span>
+        </p>
+        <p className="text-xs text-gray-600 rx-creation-date">
+          {format(new Date(), 'yyyy-MM-dd HH:mm', { locale: enUS })}
+        </p>
       </div>
 
-      <div className="mb-2 border-2 border-black rounded p-1.5">
-        <div className="mb-1 border-b border-gray-400 pb-1">
-          <div className="flex items-center justify-center gap-1">
-            <User className="w-4 h-4" />
-            <span className="font-bold text-base">
-              {isRtl ? "معلومات العميل | Customer Info" : "Customer Info | معلومات العميل"}
-            </span>
-          </div>
+      <div className="mb-3">
+        <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
+          {isRtl 
+            ? "معلومات المريض | Patient Information" 
+            : "Patient Information | معلومات المريض"}
         </div>
         
-        <div className="space-y-1">
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-1">
-              <UserCircle2 className="w-3.5 h-3.5" />
-              <span className="font-semibold text-sm">{t("name")}:</span>
-            </div>
-            <span className="font-semibold text-sm">{patientName}</span>
+        <div className="space-y-1 text-sm px-3">
+          <div className="flex justify-between items-center">
+            <span className="font-bold flex items-center gap-1">
+              <User className="h-3.5 w-3.5" /> {t("customer")}:
+            </span>
+            <span className="font-medium">{patientName}</span>
           </div>
           
           {patientPhone && (
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-1">
-                <Phone className="w-3.5 h-3.5" />
-                <span className="font-semibold text-sm">{t("phone")}:</span>
-              </div>
-              <span className="font-semibold text-sm">{patientPhone}</span>
+            <div className="flex justify-between items-center">
+              <span className="font-bold flex items-center gap-1">
+                <Phone className="h-3.5 w-3.5" /> {t("phone")}:
+              </span>
+              <span>{patientPhone}</span>
             </div>
           )}
           
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
-              <span className="font-semibold text-sm">{t("date")}:</span>
-            </div>
-            <span className="font-semibold text-sm">{format(new Date(), 'dd/MM/yyyy')}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-2 border-2 border-black rounded p-1.5">
-        <div className="mb-1 border-b border-gray-400 pb-1">
-          <div className="flex items-center justify-center gap-1">
-            <Receipt className="w-4 h-4" />
-            <span className="font-bold text-base">
-              {isRtl ? "رقم أمر العمل | Work Order Number" : "Work Order Number | رقم أمر العمل"}
+          <div className="flex justify-between items-center">
+            <span className="font-bold flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" /> {t("date")}:
             </span>
+            <span>{format(new Date(), 'dd/MM/yyyy')}</span>
           </div>
-        </div>
-        
-        <div className="flex justify-center items-center px-2">
-          <span className="font-semibold text-sm">#{orderNumber}</span>
         </div>
       </div>
 
-      {rx && (
-        <div className="mb-2 border-2 border-black rounded p-1.5">
-          <div className="mb-1 border-b border-gray-400 pb-1">
-            <div className="flex items-center justify-center gap-1">
-              <Eye className="w-4 h-4" />
-              <span className="font-bold text-base">
-                {isRtl ? "تفاصيل الوصفة الطبية | Prescription" : "Prescription | تفاصيل الوصفة الطبية"}
-              </span>
-            </div>
-          </div>
-          
-          <table className="w-full border-collapse text-xs" style={{ direction: 'ltr' }}>
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-1 border border-gray-300 text-center font-bold">Eye</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">SPH</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">CYL</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">AXIS</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">ADD</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">PD</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.sphereOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.cylOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.axisOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.addOD || rx.add || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.pdRight || rx.pdOD || rx.pd || "—"}</td>
-              </tr>
-              <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.sphereOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.cylOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.axisOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.addOS || rx.add || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.pdLeft || rx.pdOS || rx.pd || "—"}</td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div className="mt-1 text-[9px] flex justify-between px-2 font-medium">
-            <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
-            <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Products section - Now more compact */}
-      <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-1 font-bold text-base rounded">
-          {isRtl ? "المنتجات | Products" : "Products | المنتجات"}
+      <div className="mb-3">
+        <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
+          {isRtl 
+            ? "تفاصيل الوصفة الطبية | Prescription Details" 
+            : "Prescription Details | تفاصيل الوصفة الطبية"}
         </div>
         
-        <div className="space-y-1 px-1">
-          {isContactLens && contactLensItems.length > 0 ? (
-            contactLensItems.map((lens, idx) => (
-              <div key={idx} className="p-1 border border-gray-300 rounded">
-                <div className="flex justify-between px-1">
-                  <div className="font-bold text-xs">{lens.brand} {lens.type}</div>
-                  <span className="font-bold text-xs">{lens.price.toFixed(3)} KWD</span>
+        <table className="w-full border-collapse text-xs" style={{ direction: 'ltr' }}>
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="p-1 border border-gray-300 text-center font-bold">Eye</th>
+              <th className="p-1 border border-gray-300 text-center font-bold">SPH</th>
+              <th className="p-1 border border-gray-300 text-center font-bold">CYL</th>
+              <th className="p-1 border border-gray-300 text-center font-bold">AXIS</th>
+              <th className="p-1 border border-gray-300 text-center font-bold">ADD</th>
+              <th className="p-1 border border-gray-300 text-center font-bold">PD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.sphereOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.cylOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.axisOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.addOD || rx.add || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.pdRight || rx.pdOD || rx.pd || "—"}</td>
+            </tr>
+            <tr>
+              <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.sphereOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.cylOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.axisOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.addOS || rx.add || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx.pdLeft || rx.pdOS || rx.pd || "—"}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div className="mt-1 text-[9px] flex justify-between px-2 font-medium">
+          <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
+          <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
+        </div>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
+          {isRtl 
+            ? "تفاصيل المنتج | Product Details" 
+            : "Product Details | تفاصيل المنتج"}
+        </div>
+        
+        <div className="space-y-2 text-sm px-2">
+          {frameData.brand && !isContactLens && (
+            <Card className="mb-2 border border-gray-200 rounded-md">
+              <CardContent className="p-2">
+                <div className="font-bold border-b border-gray-300 pb-1 mb-1">
+                  {isRtl ? "الإطار (Frame)" : "Frame (الإطار)"}
                 </div>
-                <div className="text-[10px] font-medium text-center">
-                  {lens.color && <span>{t("color")}: {lens.color} - </span>}
-                  <span>{t("quantity")}: {lens.qty || 1}</span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="space-y-1">
-              {frameData.brand && (
-                <div className="p-1 border border-gray-300 rounded">
-                  <div className="flex justify-between px-1">
-                    <div className="font-bold text-xs">{isRtl ? "الإطار" : "Frame"}</div>
-                    <span className="font-bold text-xs">{frameData.price.toFixed(3)} KWD</span>
+                <div className="px-2 space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="font-semibold">{isRtl ? "الماركة" : "Brand"}:</span>
+                    <span>{frameData.brand}</span>
                   </div>
-                  <div className="text-[10px] font-medium">{frameData.brand} {frameData.model}</div>
-                  {(frameData.color || frameData.size) && (
-                    <div className="text-[10px] font-medium">
-                      {frameData.color && `${t("color")}: ${frameData.color}`}
-                      {frameData.color && frameData.size && " - "}
-                      {frameData.size && `${t("size")}: ${frameData.size}`}
+                  {frameData.model && (
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{isRtl ? "الموديل" : "Model"}:</span>
+                      <span>{frameData.model}</span>
+                    </div>
+                  )}
+                  {frameData.color && (
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{isRtl ? "اللون" : "Color"}:</span>
+                      <span>{frameData.color}</span>
+                    </div>
+                  )}
+                  {frameData.size && (
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{isRtl ? "المقاس" : "Size"}:</span>
+                      <span>{frameData.size}</span>
+                    </div>
+                  )}
+                  {frameData.price > 0 && (
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{isRtl ? "السعر" : "Price"}:</span>
+                      <span className="font-bold">{frameData.price.toFixed(3)} KWD</span>
                     </div>
                   )}
                 </div>
-              )}
-              
-              {lensName && (
-                <div className="p-1 border border-gray-300 rounded">
-                  <div className="flex justify-between px-1">
-                    <div className="font-bold text-xs">{isRtl ? "العدسات" : "Lenses"}</div>
-                    <span className="font-bold text-xs">{lensPrice.toFixed(3)} KWD</span>
-                  </div>
-                  <div className="text-[10px] font-medium">{lensName}</div>
-                </div>
-              )}
-              
-              {coatingName && (
-                <div className="p-1 border border-gray-300 rounded">
-                  <div className="flex justify-between px-1">
-                    <div className="font-bold text-xs">{isRtl ? "الطلاء" : "Coating"}</div>
-                    <span className="font-bold text-xs">{coatingPrice.toFixed(3)} KWD</span>
-                  </div>
-                  <div className="text-[10px] font-medium">{coatingName}</div>
-                </div>
-              )}
-            </div>
+              </CardContent>
+            </Card>
           )}
-        </div>
-      </div>
-
-      <div className="mb-2 border-2 border-black rounded p-1.5">
-        <div className="space-y-1 px-2">
-          <div className="flex justify-between text-sm">
-            <span className="font-bold">{t("subtotal")}:</span>
-            <span className="font-semibold">{subtotal.toFixed(3)} KWD</span>
-          </div>
-          {discount > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="font-bold">{t("discount")}:</span>
-              <span className="font-semibold">-{discount.toFixed(3)} KWD</span>
-            </div>
-          )}
-          <div className="flex justify-between pt-0.5 mt-0.5 border-t-2 border-black">
-            <span className="font-bold text-base">{t("total")}:</span>
-            <span className="font-bold text-base">{total.toFixed(3)} KWD</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-1 font-bold text-base rounded">
-          {isRtl ? "الدفع | Payment" : "Payment | الدفع"}
-        </div>
-        
-        <div className="space-y-1">
-          {invoice?.payments?.map((payment, index) => (
-            <div key={index} className="p-1 border border-gray-300 rounded">
-              <div className="flex justify-between px-1">
-                <div className="font-bold text-xs">
-                  {format(new Date(payment.date), 'dd/MM/yyyy')}
-                </div>
-                <span className="font-bold text-xs">{payment.amount.toFixed(3)} KWD</span>
-              </div>
-              <div className="text-[10px] font-medium flex items-center justify-center gap-0.5">
-                <CreditCard className="w-3 h-3" />
-                {payment.method}
-                {payment.authNumber && <span> - {payment.authNumber}</span>}
-              </div>
-            </div>
-          )) || (deposit > 0 && (
-            <div className="p-1 border border-gray-300 rounded">
-              <div className="flex justify-between px-1">
-                <div className="font-bold text-xs">
-                  {format(new Date(), 'dd/MM/yyyy')}
-                </div>
-                <span className="font-bold text-xs">{deposit.toFixed(3)} KWD</span>
-              </div>
-              <div className="text-[10px] font-medium flex items-center justify-center gap-0.5">
-                <CreditCard className="w-3 h-3" />
-                {invoice?.paymentMethod || t("cash")}
-              </div>
-            </div>
-          ))}
           
-          {remaining > 0 ? (
-            <div className="flex justify-between font-bold mt-1 pt-1 border-t-2 border-black px-2">
-              <span className="text-base">{t("remaining")}:</span>
-              <span className="text-base" style={{ color: '#ea384c' }}>{remaining.toFixed(3)} KWD</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center gap-1 mt-1 font-bold border-2 border-black py-1 rounded">
-              <CheckCircle2 className="w-4 h-4" />
-              <span className="text-sm">{t("paidInFull")}</span>
-            </div>
+          {isContactLens && contactLensItems.length > 0 && (
+            <Card className="mb-2 border border-gray-200 rounded-md">
+              <CardContent className="p-2">
+                <div className="font-bold border-b border-gray-300 pb-1 mb-1">
+                  {isRtl ? "العدسات اللاصقة (Contact Lenses)" : "Contact Lenses (العدسات اللاصقة)"}
+                </div>
+                <div className="px-2 space-y-2 text-xs">
+                  {contactLensItems.map((lens, idx) => (
+                    <div key={idx} className={idx !== 0 ? "border-t border-dashed border-gray-200 pt-2 mt-2" : ""}>
+                      <div className="flex justify-between">
+                        <span className="font-semibold">{isRtl ? "النوع" : "Type"}:</span>
+                        <span>{lens.brand} {lens.type}</span>
+                      </div>
+                      {lens.color && (
+                        <div className="flex justify-between">
+                          <span className="font-semibold">{isRtl ? "اللون" : "Color"}:</span>
+                          <span>{lens.color}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="font-semibold">{isRtl ? "الكمية" : "Quantity"}:</span>
+                        <span>{lens.qty || 1}</span>
+                      </div>
+                      {lens.price > 0 && (
+                        <div className="flex justify-between">
+                          <span className="font-semibold">{isRtl ? "السعر الإفرادي" : "Unit Price"}:</span>
+                          <span className="font-bold">{lens.price.toFixed(3)} KWD</span>
+                        </div>
+                      )}
+                      {lens.price > 0 && lens.qty > 1 && (
+                        <div className="flex justify-between">
+                          <span className="font-semibold">{isRtl ? "المجموع" : "Total"}:</span>
+                          <span className="font-bold">{(lens.price * (lens.qty || 1)).toFixed(3)} KWD</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {!isContactLens && lensType && (
+            <Card className="mb-2 border border-gray-200 rounded-md">
+              <CardContent className="p-2">
+                <div className="font-bold border-b border-gray-300 pb-1 mb-1">
+                  {isRtl ? "العدسات (Lenses)" : "Lenses (العدسات)"}
+                </div>
+                <div className="px-2 space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="font-semibold">{isRtl ? "النوع" : "Type"}:</span>
+                    <span>{lensName}</span>
+                  </div>
+                  {lensPrice > 0 && (
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{isRtl ? "السعر" : "Price"}:</span>
+                      <span className="font-bold">{lensPrice.toFixed(3)} KWD</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {!isContactLens && coating && (
+            <Card className="mb-2 border border-gray-200 rounded-md">
+              <CardContent className="p-2">
+                <div className="font-bold border-b border-gray-300 pb-1 mb-1">
+                  {isRtl ? "الطلاء (Coating)" : "Coating (الطلاء)"}
+                </div>
+                <div className="px-2 space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="font-semibold">{isRtl ? "النوع" : "Type"}:</span>
+                    <span>{coatingName}</span>
+                  </div>
+                  {coatingPrice > 0 && (
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{isRtl ? "السعر" : "Price"}:</span>
+                      <span className="font-bold">{coatingPrice.toFixed(3)} KWD</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
 
-      <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-1 font-bold text-base rounded">
-          {isRtl ? "تأكيد الجودة | Quality Control" : "Quality Control | تأكيد الجودة"}
+      <div className="mb-3">
+        <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
+          {isRtl 
+            ? "معلومات الدفع | Payment Information" 
+            : "Payment Information | معلومات الدفع"}
         </div>
         
-        <div className="flex gap-2 text-xs mb-1 px-1">
+        <Card className="border border-gray-200 rounded-md">
+          <CardContent className="p-3">
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="font-bold">{t("subtotal")}:</span>
+                <span className="font-semibold">{subtotal.toFixed(3)} KWD</span>
+              </div>
+              
+              {discount > 0 && (
+                <div className="flex justify-between">
+                  <span className="font-bold">{t("discount")}:</span>
+                  <span className="font-semibold">-{discount.toFixed(3)} KWD</span>
+                </div>
+              )}
+              
+              <div className="flex justify-between border-b border-gray-200 pb-1">
+                <span className="font-bold">{t("total")}:</span>
+                <span className="font-semibold">{total.toFixed(3)} KWD</span>
+              </div>
+              
+              <div className="flex justify-between">
+                <span className="font-bold">{t("paid")}:</span>
+                <span className="font-semibold">{amountPaid.toFixed(3)} KWD</span>
+              </div>
+              
+              {isPaid ? (
+                <div className="mt-2 p-1.5 bg-green-100 rounded border border-green-300 text-center">
+                  <div className="flex items-center justify-center gap-1 text-green-800 font-bold">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{isRtl ? "تم الدفع بالكامل" : "PAID IN FULL"}</span>
+                  </div>
+                  {!isRtl ? <div className="text-green-700 text-xs">تم الدفع بالكامل</div> : 
+                           <div className="text-green-700 text-xs">PAID IN FULL</div>}
+                </div>
+              ) : (
+                <div className="mt-2">
+                  <div className="p-1.5 bg-red-100 rounded border border-red-300 text-center">
+                    <div className="font-bold text-red-700 text-base">
+                      {isRtl ? "المبلغ المتبقي" : "REMAINING AMOUNT"}
+                    </div>
+                    <div className="text-lg font-bold text-red-800">
+                      {remaining.toFixed(3)} KWD
+                    </div>
+                    {!isRtl ? <div className="text-red-700 text-xs">المبلغ المتبقي</div> : 
+                             <div className="text-red-700 text-xs">REMAINING AMOUNT</div>}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
+          {isRtl 
+            ? "تأكيد الجودة | Quality Confirmation" 
+            : "Quality Confirmation | تأكيد الجودة"}
+        </div>
+        
+        <div className="flex gap-2 text-sm mb-1 px-1">
           <div className="border border-gray-300 rounded p-1 flex-1">
-            <div className="font-bold mb-1 text-center border-b border-gray-300 pb-0.5 text-[10px]">
+            <div className="font-bold mb-1 text-center border-b border-gray-300 pb-0.5 text-xs">
               {isRtl ? "توقيع الفني" : "Technician Signature"}
             </div>
-            <div className="h-6"></div>
+            <div className="h-8"></div>
           </div>
           
           <div className="border border-gray-300 rounded p-1 flex-1">
-            <div className="font-bold mb-1 text-center border-b border-gray-300 pb-0.5 text-[10px]">
+            <div className="font-bold mb-1 text-center border-b border-gray-300 pb-0.5 text-xs">
               {isRtl ? "توقيع المدير" : "Manager Signature"}
             </div>
-            <div className="h-6"></div>
+            <div className="h-8"></div>
           </div>
         </div>
       </div>
 
-      <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-1 font-bold text-base rounded">
-          {isRtl ? "ملاحظات | Notes" : "Notes | ملاحظات"}
+      <div className="mb-3">
+        <div className="text-center bg-black text-white py-1 mb-2 font-bold text-base rounded">
+          {isRtl 
+            ? "ملاحظات | Notes" 
+            : "Notes | ملاحظات"}
         </div>
         
-        <div className="border border-gray-300 rounded p-2 min-h-12">
+        <div className="border border-gray-300 rounded p-2 min-h-16">
           
         </div>
       </div>
 
-      <div className="text-center border-t-2 border-black pt-2 text-xs">
+      <div className="text-center border-t border-gray-300 pt-2 text-xs">
         <p className="font-bold text-sm mb-0">
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
         </p>
@@ -460,7 +507,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               height: auto !important;
               min-height: 0 !important;
               max-height: none !important;
-              text-align: center !important;
             }
             
             .print-receipt * {

@@ -34,7 +34,7 @@ export class CustomPrintService {
                   width: 80mm !important;
                   margin: 0 !important;
                   padding: 0 !important;
-                  background: white !important;
+                  background: white !important; /* White background for print */
                   color: black !important;
                 }
                 
@@ -55,7 +55,6 @@ export class CustomPrintService {
                   height: auto !important;
                   min-height: 0 !important;
                   max-height: none !important;
-                  text-align: center !important;
                 }
                 
                 /* Force content to be visible */
@@ -109,7 +108,7 @@ export class CustomPrintService {
               }
               
               body {
-                font-family: 'Zain', 'Yrsa', Arial, sans-serif;
+                font-family: Cairo, Arial, sans-serif;
                 margin: 0;
                 padding: 0;
                 background: white;
@@ -120,21 +119,6 @@ export class CustomPrintService {
               .bg-black {
                 background-color: black !important;
                 color: white !important;
-              }
-              
-              /* Add embedded fonts for offline printing */
-              @font-face {
-                font-family: 'Zain';
-                src: local('Zain'), url('/fonts/zain.woff2') format('woff2');
-                font-weight: normal;
-                font-style: normal;
-              }
-              
-              @font-face {
-                font-family: 'Yrsa';
-                src: local('Yrsa'), url('/fonts/yrsa.woff2') format('woff2');
-                font-weight: normal;
-                font-style: normal;
               }
             </style>
           </head>
@@ -188,12 +172,6 @@ export class CustomPrintService {
         // Handle the case where the element doesn't exist
         printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
         printWindow.document.close();
-        console.error("Error: work-order-receipt element not found in the DOM");
-        toast({
-          title: "Error",
-          description: "Unable to find work order content for printing. Please try reloading the page.",
-          variant: "destructive",
-        });
       }
     } catch (error) {
       console.error("Error printing work order:", error);

@@ -2,7 +2,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
-import { Eye, Ruler, CircleDot, ClipboardCheck, User, Glasses, BadgeCheck, Contact, Receipt, UserCircle2, Phone, Calendar, CreditCard, CheckCircle2 } from "lucide-react";
+import { Eye, Ruler, CircleDot, ClipboardCheck, User, Glasses, BadgeCheck, Contact } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
@@ -54,8 +54,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   contactLensRx
 }) => {
   const { language, t } = useLanguageStore();
-  const isRtl = language === 'ar';
-  const dirClass = isRtl ? 'rtl text-right' : 'ltr text-left';
+  const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
   
   const name = patientName || invoice.patientName;
   const phone = patientPhone || invoice.patientPhone;
@@ -78,402 +77,367 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const invoiceType = (invoice as any).invoiceType || 'glasses';
   
   const orderNumber = invoice.workOrderId || "NEW ORDER";
-  
-  const total = invoice.total || 0;
-  const deposit = invoice.deposit || 0;
-  const discount = invoice.discount || 0;
-  const subtotal = total + discount;
-  const remaining = total - deposit;
-  const isPaid = remaining <= 0;
 
   return (
-    <div className={`${dirClass} print-receipt`} id="work-order-print" style={{ width: '80mm', maxWidth: '80mm', margin: '0 auto', textAlign: 'center' }} dir={isRtl ? "rtl" : "ltr"}>
+    <div className="print-wrapper">
       <style>
         {`
           @media print {
+            .hide-print {
+              display: none !important;
+            }
+    
             @page {
               size: 80mm auto !important;
               margin: 0 !important;
               padding: 0 !important;
             }
-            
-            body {
+
+            /* Reset visibility */
+            * {
+              visibility: visible !important;
+            }
+
+            html, body {
               width: 80mm !important;
+              height: auto !important;
               margin: 0 !important;
               padding: 0 !important;
-              background: white !important;
-              color: black !important;
             }
-            
-            #work-order-print {
-              width: 76mm !important;
-              max-width: 76mm !important;
-              page-break-after: always !important;
-              page-break-inside: avoid !important;
-              position: absolute !important;
+
+            .print-wrapper {
+              visibility: visible !important;
+              width: 80mm !important;
+            }
+
+            #thermal-print {
+              visibility: visible !important;
+              position: fixed !important;
               left: 0 !important;
               top: 0 !important;
-              border: none !important;
-              box-shadow: none !important;
-              padding: 2mm !important;
+              width: 80mm !important;
+              padding: 0mm !important;
               margin: 0 !important;
               background: white !important;
-              color: black !important;
-              height: auto !important;
-              min-height: 0 !important;
-              max-height: none !important;
+            }
+
+            /* Content styles */
+            .print-section {
+              width: 75mm !important;
+              margin-bottom: 3mm !important;
+              padding: 0 1mm !important;
+            }
+
+            .print-text-lg { font-size: 14pt !important; }
+            .print-text-md { font-size: 12pt !important; }
+            .print-text-sm { font-size: 10pt !important; }
+
+            table {
+              width: 100% !important;
+              border-collapse: collapse !important;
+              direction: ltr !important;
+            }
+
+            td, th {
+              border: 0.2mm solid black !important;
+              padding: 1mm !important;
               text-align: center !important;
+              font-size: 9pt !important;
             }
             
-            .bg-black {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              background-color: black !important;
-              color: white !important;
+            th {
+              font-weight: bold !important;
+              background-color: #f0f0f0 !important;
+            }
+            
+            .section-heading {
+              font-size: 12pt !important;
+              font-weight: bold !important;
+              margin: 4mm 0 2mm 0 !important;
+              border-bottom: 0.3mm solid #000 !important;
+              padding-bottom: 1mm !important;
+              display: flex !important;
+              align-items: center !important;
+            }
+            
+            .section-heading svg {
+              margin-right: 2mm !important;
+            }
+            
+            .data-row {
+              display: flex !important;
+              justify-content: space-between !important;
+              margin-bottom: 1mm !important;
+              font-size: 10pt !important;
+            }
+            
+            .data-label {
+              font-weight: bold !important;
+              min-width: 30mm !important;
+            }
+            
+            .data-value {
+              flex: 1 !important;
+              text-align: ${language === 'ar' ? 'right' : 'left'} !important;
+            }
+            
+            .signature-line {
+              border-bottom: 0.3mm solid #000 !important;
+              width: 50mm !important;
+              height: 8mm !important;
+              margin: 2mm 0 !important;
+            }
+            
+            .date-line {
+              font-size: 9pt !important;
+              margin-top: 1mm !important;
             }
           }
         `}
       </style>
-      
-      <div className="border-b-2 border-black pb-1 mb-2">
-        <div className="flex justify-center mb-1">
-          <MoenLogo className="w-auto h-10" />
-        </div>
-        <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
-        <p className="text-xs font-medium mb-0">{storeInfo.address}</p>
-        <p className="text-xs font-medium">{t("phone")}: {storeInfo.phone}</p>
-      </div>
 
-      <div className="mb-2">
-        <div className="inline-flex items-center justify-center gap-1 border-2 border-black px-2 py-0.5 rounded">
-          <Receipt className="w-4 h-4" />
-          <span className="font-bold text-base">{t("workOrder")}</span>
-        </div>
-      </div>
-
-      <div className="mb-2 border-2 border-black rounded p-1.5">
-        <div className="mb-1 border-b border-gray-400 pb-1">
-          <div className="flex items-center justify-center gap-1">
-            <User className="w-4 h-4" />
-            <span className="font-bold text-base">
-              {isRtl ? "معلومات العميل | Customer Info" : "Customer Info | معلومات العميل"}
-            </span>
+      <div id="work-order-print" className={dirClass} style={{ width: "80mm", padding: "2mm" }}>
+        <div style={{ textAlign: "center", marginBottom: "5mm", position: "relative" }}>
+          <div className="absolute right-0 top-0 hide-print">
+            <ClipboardCheck className="w-10 h-10 text-primary" />
           </div>
+          <MoenLogo className="mx-auto w-auto" style={{ height: "10mm", marginBottom: "1mm" }} />
+          <h1 style={{ fontSize: "16pt", fontWeight: "bold", margin: "1mm 0" }}>{t("workOrder")}</h1>
+          <p style={{ fontSize: "14pt", margin: "1mm 0", color: "#333" }}>{orderNumber}</p>
+          <p style={{ fontSize: "10pt", margin: "1mm 0", color: "#666" }}>
+            {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
+          </p>
+          <div style={{ fontSize: "9pt", textAlign: "center", marginTop: "1mm" }}>
+            <p style={{ margin: "0" }}>{storeInfo.address}</p>
+            <p style={{ margin: "0" }}>{t("phone")}: {storeInfo.phone}</p>
+          </div>
+        </div>
+
+        <div className="section-heading">
+          <User style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+          <span>{t("patientInformation")} {language === 'ar' && '(معلومات المريض)'}</span>
         </div>
         
-        <div className="space-y-1">
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-1">
-              <UserCircle2 className="w-3.5 h-3.5" />
-              <span className="font-semibold text-sm">{t("name")}:</span>
-            </div>
-            <span className="font-semibold text-sm">{name}</span>
+        <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+          <div className="data-row">
+            <span className="data-label">{t("name")}:</span>
+            <span className="data-value">{name}</span>
           </div>
-          
-          {phone && (
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-1">
-                <Phone className="w-3.5 h-3.5" />
-                <span className="font-semibold text-sm">{t("phone")}:</span>
-              </div>
-              <span className="font-semibold text-sm">{phone}</span>
+          <div className="data-row">
+            <span className="data-label">{t("phone")}:</span>
+            <span className="data-value">{phone}</span>
+          </div>
+          {invoice.patientId && (
+            <div className="data-row">
+              <span className="data-label">{t("patientId")}:</span>
+              <span className="data-value">{invoice.patientId}</span>
             </div>
           )}
-          
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
-              <span className="font-semibold text-sm">{t("date")}:</span>
+        </div>
+
+        {invoiceType === 'glasses' && frameData && (
+          <>
+            <div className="section-heading">
+              <Glasses style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("frameDetails")} {language === 'ar' && '(تفاصيل الإطار)'}</span>
             </div>
-            <span className="font-semibold text-sm">{format(new Date(), 'dd/MM/yyyy')}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-2 border-2 border-black rounded p-1.5">
-        <div className="mb-1 border-b border-gray-400 pb-1">
-          <div className="flex items-center justify-center gap-1">
-            <Receipt className="w-4 h-4" />
-            <span className="font-bold text-base">
-              {isRtl ? "رقم أمر العمل | Work Order Number" : "Work Order Number | رقم أمر العمل"}
-            </span>
-          </div>
-        </div>
-        
-        <div className="flex justify-center items-center px-2">
-          <span className="font-semibold text-sm">#{orderNumber}</span>
-        </div>
-      </div>
-
-      {rx && (
-        <div className="mb-2 border-2 border-black rounded p-1.5">
-          <div className="mb-1 border-b border-gray-400 pb-1">
-            <div className="flex items-center justify-center gap-1">
-              <Eye className="w-4 h-4" />
-              <span className="font-bold text-base">
-                {isRtl ? "تفاصيل الوصفة الطبية | Prescription" : "Prescription | تفاصيل الوصفة الطبية"}
-              </span>
-            </div>
-          </div>
-          
-          <table className="w-full border-collapse text-xs" style={{ direction: 'ltr' }}>
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-1 border border-gray-300 text-center font-bold">Eye</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">SPH</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">CYL</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">AXIS</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">ADD</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">PD</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.sphereOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.cylOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.axisOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.addOD || rx.add || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.pdRight || rx.pdOD || rx.pd || "—"}</td>
-              </tr>
-              <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.sphereOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.cylOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.axisOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.addOS || rx.add || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx.pdLeft || rx.pdOS || rx.pd || "—"}</td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div className="mt-1 text-[9px] flex justify-between px-2 font-medium">
-            <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
-            <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
-          </div>
-        </div>
-      )}
-
-      {isContactLens && contactLensRxData && (
-        <div className="mb-2 border-2 border-black rounded p-1.5">
-          <div className="mb-1 border-b border-gray-400 pb-1">
-            <div className="flex items-center justify-center gap-1">
-              <Eye className="w-4 h-4" />
-              <span className="font-bold text-base">
-                {isRtl ? "وصفة العدسات اللاصقة | Contact Lens Rx" : "Contact Lens Rx | وصفة العدسات اللاصقة"}
-              </span>
-            </div>
-          </div>
-          
-          <table className="w-full border-collapse text-xs" style={{ direction: 'ltr' }}>
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-1 border border-gray-300 text-center font-bold">Eye</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">SPH</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">CYL</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">AXIS</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">BC</th>
-                <th className="p-1 border border-gray-300 text-center font-bold">DIA</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
-                <td className="p-1 border border-gray-300 text-center">{contactLensRxData.rightEye.sphere || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{contactLensRxData.rightEye.cylinder || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{contactLensRxData.rightEye.axis || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{contactLensRxData.rightEye.bc || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{contactLensRxData.rightEye.dia || "—"}</td>
-              </tr>
-              <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
-                <td className="p-1 border border-gray-300 text-center">{contactLensRxData.leftEye.sphere || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{contactLensRxData.leftEye.cylinder || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{contactLensRxData.leftEye.axis || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{contactLensRxData.leftEye.bc || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{contactLensRxData.leftEye.dia || "—"}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded">
-          {isRtl ? "المنتجات | Products" : "Products | المنتجات"}
-        </div>
-        
-        <div className="space-y-2 px-1">
-          {isContactLens && contactLensItems.length > 0 ? (
-            contactLensItems.map((lens, idx) => (
-              <div key={idx} className="p-1.5 border border-gray-300 rounded">
-                <div className="flex justify-between px-2 mb-1">
-                  <div className="font-bold text-sm">{lens.brand} {lens.type}</div>
-                  <span className="font-bold text-sm">{lens.price.toFixed(3)} KWD</span>
-                </div>
-                <div className="text-xs font-medium text-center">
-                  {lens.color && <span>{t("color")}: {lens.color} - </span>}
-                  <span>{t("quantity")}: {lens.qty || 1}</span>
-                </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+              <div className="data-row">
+                <span className="data-label">{t("brand")}:</span>
+                <span className="data-value">{frameData.brand}</span>
               </div>
-            ))
-          ) : (
-            <div className="space-y-2">
-              {frameData && frameData.brand && (
-                <div className="p-1.5 border border-gray-300 rounded">
-                  <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "الإطار | Frame" : "Frame | الإطار"}</div>
-                    <span className="font-bold text-sm">{frameData.price.toFixed(3)} KWD</span>
+              <div className="data-row">
+                <span className="data-label">{t("model")}:</span>
+                <span className="data-value">{frameData.model}</span>
+              </div>
+              <div className="data-row">
+                <span className="data-label">{t("color")}:</span>
+                <span className="data-value">{frameData.color}</span>
+              </div>
+              <div className="data-row">
+                <span className="data-label">{t("size")}:</span>
+                <span className="data-value">{frameData.size || "-"}</span>
+              </div>
+            </div>
+          </>
+        )}
+        
+        {isContactLens && (
+          <>
+            <div className="section-heading">
+              <Contact style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("contactLensDetails")} {language === 'ar' && '(تفاصيل العدسات اللاصقة)'}</span>
+            </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+              {contactLensItems.map((lens, idx) => (
+                <div key={idx} style={{ marginBottom: "2mm", borderBottom: idx < contactLensItems.length - 1 ? "0.2mm dashed #ccc" : "none", paddingBottom: "1mm" }}>
+                  <div className="data-row">
+                    <span className="data-label">{t("lens")} {idx + 1}:</span>
+                    <span className="data-value">{lens.brand} {lens.type}</span>
                   </div>
-                  <div className="text-xs font-medium text-center">{frameData.brand} {frameData.model}</div>
-                  {frameData.color && <div className="text-xs font-medium text-center">{t("color")}: {frameData.color}</div>}
-                  {frameData.size && <div className="text-xs font-medium text-center">{t("size")}: {frameData.size}</div>}
+                  {lens.color && (
+                    <div className="data-row">
+                      <span className="data-label">{t("color")}:</span>
+                      <span className="data-value">{lens.color}</span>
+                    </div>
+                  )}
                 </div>
-              )}
-              
-              {lensTypeValue && (
-                <div className="p-1.5 border border-gray-300 rounded">
-                  <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}</div>
-                    <span className="font-bold text-sm">{invoice.lensPrice.toFixed(3)} KWD</span>
-                  </div>
-                  <div className="text-xs font-medium text-center">{lensTypeValue}</div>
-                </div>
-              )}
-              
+              ))}
+            </div>
+          </>
+        )}
+
+        {invoiceType === 'glasses' && rx && (
+          <>
+            <div className="section-heading">
+              <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("prescriptionDetails")} {language === 'ar' && '(تفاصيل الوصفة الطبية)'}</span>
+            </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: "center" }}>{t("eye")}</th>
+                    <th style={{ textAlign: "center" }}>SPH</th>
+                    <th style={{ textAlign: "center" }}>CYL</th>
+                    <th style={{ textAlign: "center" }}>AXIS</th>
+                    <th style={{ textAlign: "center" }}>ADD</th>
+                    <th style={{ textAlign: "center" }}>PD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.sphereOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.cylOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.axisOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.addOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.pdRight || rx?.pd || "_____"}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.sphereOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.cylOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.axisOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.addOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.pdLeft || rx?.pd || "_____"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+        
+        {isContactLens && contactLensRxData && (
+          <>
+            <div className="section-heading">
+              <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("contactLensPrescription")} {language === 'ar' && '(وصفة العدسات اللاصقة)'}</span>
+            </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: "center" }}>{t("eye")}</th>
+                    <th style={{ textAlign: "center" }}>SPH</th>
+                    <th style={{ textAlign: "center" }}>CYL</th>
+                    <th style={{ textAlign: "center" }}>AXIS</th>
+                    <th style={{ textAlign: "center" }}>BC</th>
+                    <th style={{ textAlign: "center" }}>DIA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.dia || "_____"}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.dia || "_____"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {invoiceType === 'glasses' && lensTypeValue && (
+          <>
+            <div className="section-heading">
+              <Ruler style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("lensDetails")} {language === 'ar' && '(تفاصيل العدسات)'}</span>
+            </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+              <div className="data-row">
+                <span className="data-label">{t("type")}:</span>
+                <span className="data-value">{lensTypeValue}</span>
+              </div>
               {coatingValue && (
-                <div className="p-1.5 border border-gray-300 rounded">
-                  <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}</div>
-                    <span className="font-bold text-sm">{invoice.coatingPrice.toFixed(3)} KWD</span>
-                  </div>
-                  <div className="text-xs font-medium text-center">{coatingValue}</div>
+                <div className="data-row">
+                  <span className="data-label">{t("coating")}:</span>
+                  <span className="data-value">{coatingValue}</span>
                 </div>
               )}
-              
               {thicknessValue && (
-                <div className="p-1.5 border border-gray-300 rounded">
-                  <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "السماكة | Thickness" : "Thickness | السماكة"}</div>
-                    <span className="font-bold text-sm">{(invoice as any).thicknessPrice ? (invoice as any).thicknessPrice.toFixed(3) + ' KWD' : ''}</span>
-                  </div>
-                  <div className="text-xs font-medium text-center">{thicknessValue}</div>
+                <div className="data-row">
+                  <span className="data-label">{t("thickness")}:</span>
+                  <span className="data-value">{thicknessValue}</span>
+                </div>
+              )}
+              <div className="data-row">
+                <span className="data-label">{t("price")}:</span>
+                <span className="data-value">{invoice.lensPrice.toFixed(3)} KWD</span>
+              </div>
+              {coatingValue && (
+                <div className="data-row">
+                  <span className="data-label">{t("coatingPrice")}:</span>
+                  <span className="data-value">{invoice.coatingPrice.toFixed(3)} KWD</span>
+                </div>
+              )}
+              {thicknessValue && (invoice as any).thicknessPrice && (
+                <div className="data-row">
+                  <span className="data-label">{t("thicknessPrice")}:</span>
+                  <span className="data-value">{(invoice as any).thicknessPrice.toFixed(3)} KWD</span>
                 </div>
               )}
             </div>
-          )}
-        </div>
-      </div>
+          </>
+        )}
 
-      <div className="mb-2 border-2 border-black rounded p-1.5">
-        <div className="space-y-1 px-2">
-          <div className="flex justify-between text-sm">
-            <span className="font-bold">{t("subtotal")}:</span>
-            <span className="font-semibold">{subtotal.toFixed(3)} KWD</span>
-          </div>
-          {discount > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="font-bold">{t("discount")}:</span>
-              <span className="font-semibold">-{discount.toFixed(3)} KWD</span>
-            </div>
-          )}
-          <div className="flex justify-between pt-0.5 mt-0.5 border-t-2 border-black">
-            <span className="font-bold text-base">{t("total")}:</span>
-            <span className="font-bold text-base">{total.toFixed(3)} KWD</span>
-          </div>
+        <div className="section-heading">
+          <CircleDot style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+          <span>{t("additionalNotes")} {language === 'ar' && '(ملاحظات إضافية)'}</span>
         </div>
-      </div>
-      
-      <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded">
-          {isRtl ? "الدفع | Payment" : "Payment | الدفع"}
+        <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+          <div style={{ border: "0.2mm solid #000", minHeight: "15mm", backgroundColor: "#fff", width: "100%" }}></div>
         </div>
-        
-        <div className="space-y-2">
-          {invoice.payments?.map((payment, index) => (
-            <div key={index} className="p-1.5 border border-gray-300 rounded">
-              <div className="flex justify-between px-2 mb-1">
-                <div className="font-bold text-sm">
-                  {format(new Date(payment.date), 'dd/MM/yyyy')}
-                </div>
-                <span className="font-bold text-sm">{payment.amount.toFixed(3)} KWD</span>
-              </div>
-              <div className="text-xs font-medium flex items-center justify-center gap-0.5">
-                <CreditCard className="w-3.5 h-3.5" />
-                {payment.method}
-                {payment.authNumber && <span> - {payment.authNumber}</span>}
-              </div>
-            </div>
-          )) || (deposit > 0 && (
-            <div className="p-1.5 border border-gray-300 rounded">
-              <div className="flex justify-between px-2 mb-1">
-                <div className="font-bold text-sm">
-                  {format(new Date(), 'dd/MM/yyyy')}
-                </div>
-                <span className="font-bold text-sm">{deposit.toFixed(3)} KWD</span>
-              </div>
-              <div className="text-xs font-medium flex items-center justify-center gap-0.5">
-                <CreditCard className="w-3.5 h-3.5" />
-                {invoice.paymentMethod || t("cash")}
-              </div>
-            </div>
-          ))}
-          
-          {remaining > 0 ? (
-            <div className="flex justify-between font-bold mt-2 pt-1 border-t-2 border-black px-2">
-              <span className="text-base">{t("remaining")}:</span>
-              <span className="text-base">{remaining.toFixed(3)} KWD</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center gap-1 mt-2 font-bold border-2 border-black py-1 rounded">
-              <CheckCircle2 className="w-4 h-4" />
-              <span className="text-sm">{t("paidInFull")}</span>
-            </div>
-          )}
-        </div>
-      </div>
 
-      <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded">
-          {isRtl ? "تأكيد الجودة | Quality Control" : "Quality Control | تأكيد الجودة"}
-        </div>
-        
-        <div className="flex gap-2 text-sm mb-1 px-1">
-          <div className="border border-gray-300 rounded p-1 flex-1">
-            <div className="font-bold mb-1 text-center border-b border-gray-300 pb-0.5 text-xs">
-              {isRtl ? "توقيع الفني" : "Technician Signature"}
-            </div>
-            <div className="h-8"></div>
+        <div style={{ marginTop: "5mm", paddingTop: "2mm", borderTop: "0.3mm solid #000" }}>
+          <div style={{ marginBottom: "5mm" }}>
+            <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm" }}>
+              {t("technicianSignature")} {language === 'ar' && '(توقيع الفني)'}
+            </p>
+            <div className="signature-line"></div>
+            <div className="date-line">{t("date")}: ___ / ___ / _____</div>
           </div>
           
-          <div className="border border-gray-300 rounded p-1 flex-1">
-            <div className="font-bold mb-1 text-center border-b border-gray-300 pb-0.5 text-xs">
-              {isRtl ? "توقيع المدير" : "Manager Signature"}
-            </div>
-            <div className="h-8"></div>
+          <div>
+            <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm", display: "flex", alignItems: "center" }}>
+              <BadgeCheck style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              {t("qualityConfirmation")} {language === 'ar' && '(تأكيد الجودة)'}
+            </p>
+            <div className="signature-line"></div>
+            <div className="date-line">{t("date")}: ___ / ___ / _____</div>
           </div>
         </div>
-      </div>
-
-      <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded">
-          {isRtl ? "ملاحظات | Notes" : "Notes | ملاحظات"}
-        </div>
-        
-        <div className="border border-gray-300 rounded p-2 min-h-16">
-          
-        </div>
-      </div>
-
-      <div className="text-center border-t-2 border-black pt-2 text-xs">
-        <p className="font-bold text-sm mb-0">
-          {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
-        </p>
-        <p className="text-[9px] mt-1 text-gray-500">
-          {isRtl ? "هذا الإيصال يعتبر إثبات للطلب فقط وليس إيصال دفع" : 
-                  "This receipt is proof of order only and not a payment receipt"}
-        </p>
       </div>
     </div>
   );

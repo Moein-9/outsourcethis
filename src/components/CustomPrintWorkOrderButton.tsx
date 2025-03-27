@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
@@ -12,7 +12,6 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
-import { toast } from '@/hooks/use-toast';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -35,33 +34,14 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
-  const [isPrinting, setIsPrinting] = useState(false);
   
   const handlePrint = () => {
-    setIsPrinting(true);
     console.log("CustomPrintWorkOrderButton: Printing work order", { workOrder, invoice, patient });
+    setOpen(false); // Close dialog before printing
     
-    // Close dialog before printing 
-    setOpen(false);
-    
-    // Give the DOM time to update after dialog closes
+    // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      try {
-        CustomPrintService.printWorkOrder(workOrder, invoice, patient);
-        toast({
-          title: t('printingSent'),
-          description: t('printingDescription'),
-        });
-      } catch (error) {
-        console.error("Error printing:", error);
-        toast({
-          title: t('printingError'),
-          description: t('printingErrorDescription'),
-          variant: "destructive",
-        });
-      } finally {
-        setIsPrinting(false);
-      }
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
     }, 300);
   };
   
@@ -71,10 +51,9 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
       variant={variant}
       size={size}
       className={`gap-1 ${className}`}
-      disabled={isPrinting}
     >
       <Printer className="h-4 w-4" />
-      {isPrinting ? t('printing') : t('printWorkOrder')}
+      {t('printWorkOrder')}
     </Button>
   );
   
@@ -98,12 +77,12 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               workOrder={workOrder} 
               invoice={invoice} 
               patient={patient}
-              isPrintable={true}
+              isPrintable={false}
             />
           </div>
-          <Button onClick={handlePrint} className="mt-4 gap-2" disabled={isPrinting}>
+          <Button onClick={handlePrint} className="mt-4 gap-2">
             <Printer className="h-4 w-4" />
-            {isPrinting ? t('printing') : t('print')}
+            {t('print')}
           </Button>
         </div>
       </DialogContent>
