@@ -9,9 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { ChartLine, Printer, TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { useLanguageStore } from "@/store/languageStore";
 
 export const ComparativeAnalysis: React.FC = () => {
   const { invoices } = useInvoiceStore();
+  const { language } = useLanguageStore();
   
   const [comparisonType, setComparisonType] = useState<"day" | "month" | "year">("month");
   const [period1, setPeriod1] = useState("");
@@ -28,7 +30,39 @@ export const ComparativeAnalysis: React.FC = () => {
     dailyData: [],
     productData: []
   });
-  
+
+  // Translations
+  const translations = {
+    comparativeAnalysis: language === 'ar' ? "التحليل المقارن" : "Comparative Analysis",
+    printReport: language === 'ar' ? "طباعة التقرير" : "Print Report",
+    comparisonSettings: language === 'ar' ? "إعدادات المقارنة" : "Comparison Settings",
+    comparisonType: language === 'ar' ? "نوع المقارنة" : "Comparison Type",
+    dailyComparison: language === 'ar' ? "مقارنة يومية" : "Daily Comparison",
+    monthlyComparison: language === 'ar' ? "مقارنة شهرية" : "Monthly Comparison",
+    yearlyComparison: language === 'ar' ? "مقارنة سنوية" : "Yearly Comparison",
+    firstPeriod: language === 'ar' ? "الفترة الأولى" : "First Period",
+    secondPeriod: language === 'ar' ? "الفترة الثانية" : "Second Period",
+    salesComparison: language === 'ar' ? "مقارنة المبيعات" : "Sales Comparison",
+    salesTrends: language === 'ar' ? "اتجاهات المبيعات" : "Sales Trends",
+    noDataComparison: language === 'ar' ? "لا توجد بيانات كافية للمقارنة" : "Not enough data for comparison",
+    barChart: language === 'ar' ? "رسم شريطي" : "Bar Chart",
+    lineChart: language === 'ar' ? "رسم خطي" : "Line Chart",
+    productComparison: language === 'ar' ? "مقارنة أنواع المنتجات" : "Product Type Comparison",
+    day: language === 'ar' ? "اليوم" : "Day",
+    currency: language === 'ar' ? "د.ك" : "KWD",
+    invoice: language === 'ar' ? "فاتورة" : "invoice",
+    invoices: language === 'ar' ? "فواتير" : "invoices",
+    lenses: language === 'ar' ? "العدسات" : "Lenses",
+    frames: language === 'ar' ? "الإطارات" : "Frames", 
+    coatings: language === 'ar' ? "الطلاءات" : "Coatings",
+    total: language === 'ar' ? "الإجمالي" : "Total",
+  };
+
+  // Month names based on language
+  const monthNames = language === 'ar' 
+    ? ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
+    : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
   // Generate period options based on comparison type
   const generatePeriodOptions = () => {
     const options: { value: string; label: string }[] = [];
@@ -40,7 +74,7 @@ export const ComparativeAnalysis: React.FC = () => {
         const date = new Date();
         date.setDate(today.getDate() - i);
         const value = date.toISOString().split('T')[0];
-        const label = date.toLocaleDateString('ar-EG', { 
+        const label = date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { 
           weekday: 'long', 
           year: 'numeric', 
           month: 'long', 
@@ -53,7 +87,10 @@ export const ComparativeAnalysis: React.FC = () => {
       for (let i = 0; i < 12; i++) {
         const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
         const value = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-        const label = date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' });
+        const label = date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { 
+          year: 'numeric', 
+          month: 'long' 
+        });
         options.push({ value, label });
       }
     } else if (comparisonType === "year") {
@@ -75,7 +112,7 @@ export const ComparativeAnalysis: React.FC = () => {
       setPeriod1(periodOptions[0].value);
       setPeriod2(periodOptions[1].value);
     }
-  }, [comparisonType]);
+  }, [comparisonType, language]);
   
   // Calculate comparison data when periods change
   useEffect(() => {
@@ -151,13 +188,10 @@ export const ComparativeAnalysis: React.FC = () => {
       let xLabel = date;
       
       if (comparisonType === "month") {
-        xLabel = `اليوم ${date}`;
+        xLabel = language === 'ar' ? `اليوم ${date}` : `Day ${date}`;
       } else if (comparisonType === "year") {
-        const monthNames = [
-          "يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", 
-          "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
-        ];
-        xLabel = monthNames[parseInt(date) - 1];
+        const monthIndex = parseInt(date) - 1;
+        xLabel = monthNames[monthIndex];
       }
       
       return { 
@@ -168,16 +202,18 @@ export const ComparativeAnalysis: React.FC = () => {
     }).sort((a, b) => {
       // Sort by date for proper display
       if (comparisonType === "month") {
-        return parseInt(a.date.replace("اليوم ", "")) - parseInt(b.date.replace("اليوم ", ""));
+        const aDay = parseInt(a.date.replace(language === 'ar' ? "اليوم " : "Day ", ""));
+        const bDay = parseInt(b.date.replace(language === 'ar' ? "اليوم " : "Day ", ""));
+        return aDay - bDay;
       }
       return 0;
     });
     
     // Product type breakdown (lenses, frames, coatings)
     const productTypes = [
-      { id: "lens", name: "العدسات" },
-      { id: "frame", name: "الإطارات" },
-      { id: "coating", name: "الطلاءات" }
+      { id: "lens", name: language === 'ar' ? "العدسات" : "Lenses" },
+      { id: "frame", name: language === 'ar' ? "الإطارات" : "Frames" },
+      { id: "coating", name: language === 'ar' ? "الطلاءات" : "Coatings" }
     ];
     
     const productData = productTypes.map(product => {
@@ -185,14 +221,14 @@ export const ComparativeAnalysis: React.FC = () => {
       let period2Value = 0;
       
       if (product.id === "lens") {
-        period1Value = period1Invoices.reduce((sum, inv) => sum + inv.lensPrice, 0);
-        period2Value = period2Invoices.reduce((sum, inv) => sum + inv.lensPrice, 0);
+        period1Value = period1Invoices.reduce((sum, inv) => sum + (inv.lensPrice || 0), 0);
+        period2Value = period2Invoices.reduce((sum, inv) => sum + (inv.lensPrice || 0), 0);
       } else if (product.id === "frame") {
-        period1Value = period1Invoices.reduce((sum, inv) => sum + inv.framePrice, 0);
-        period2Value = period2Invoices.reduce((sum, inv) => sum + inv.framePrice, 0);
+        period1Value = period1Invoices.reduce((sum, inv) => sum + (inv.framePrice || 0), 0);
+        period2Value = period2Invoices.reduce((sum, inv) => sum + (inv.framePrice || 0), 0);
       } else if (product.id === "coating") {
-        period1Value = period1Invoices.reduce((sum, inv) => sum + inv.coatingPrice, 0);
-        period2Value = period2Invoices.reduce((sum, inv) => sum + inv.coatingPrice, 0);
+        period1Value = period1Invoices.reduce((sum, inv) => sum + (inv.coatingPrice || 0), 0);
+        period2Value = period2Invoices.reduce((sum, inv) => sum + (inv.coatingPrice || 0), 0);
       }
       
       return {
@@ -221,27 +257,20 @@ export const ComparativeAnalysis: React.FC = () => {
       productData
     });
     
-  }, [period1, period2, comparisonType, invoices]);
+  }, [period1, period2, comparisonType, invoices, language, monthNames]);
   
   // Handle print report
   const handlePrintComparison = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
     
-    const pageTitle = `تقرير مقارنة - ${comparisonData.period1.label} و ${comparisonData.period2.label}`;
+    const comparisonTitle = language === 'ar' 
+      ? (comparisonType === "day" ? "مقارنة بين يومين" : comparisonType === "month" ? "مقارنة بين شهرين" : "مقارنة بين سنتين")
+      : (comparisonType === "day" ? "Comparison between two days" : comparisonType === "month" ? "Comparison between two months" : "Comparison between two years");
     
-    // Format labels based on comparison type
-    let period1Label = comparisonData.period1.label;
-    let period2Label = comparisonData.period2.label;
-    let comparisonTitle = "";
-    
-    if (comparisonType === "day") {
-      comparisonTitle = "مقارنة بين يومين";
-    } else if (comparisonType === "month") {
-      comparisonTitle = "مقارنة بين شهرين";
-    } else {
-      comparisonTitle = "مقارنة بين سنتين";
-    }
+    const pageTitle = language === 'ar' 
+      ? `تقرير مقارنة - ${comparisonData.period1.label} و ${comparisonData.period2.label}`
+      : `Comparison Report - ${comparisonData.period1.label} and ${comparisonData.period2.label}`;
     
     let productRows = '';
     comparisonData.productData.forEach(item => {
@@ -253,10 +282,10 @@ export const ComparativeAnalysis: React.FC = () => {
       productRows += `
         <tr>
           <td>${item.name}</td>
-          <td>${item.period1.toFixed(2)} د.ك</td>
-          <td>${item.period2.toFixed(2)} د.ك</td>
+          <td>${item.period1.toFixed(2)} ${translations.currency}</td>
+          <td>${item.period2.toFixed(2)} ${translations.currency}</td>
           <td>
-            ${diff > 0 ? '+' : ''}${diff.toFixed(2)} د.ك
+            ${diff > 0 ? '+' : ''}${diff.toFixed(2)} ${translations.currency}
             (${diff > 0 ? '+' : ''}${percentChange}%)
           </td>
         </tr>
@@ -270,26 +299,35 @@ export const ComparativeAnalysis: React.FC = () => {
     
     productRows += `
       <tr class="summary-row">
-        <td>الإجمالي</td>
-        <td>${comparisonData.period1.total.toFixed(2)} د.ك</td>
-        <td>${comparisonData.period2.total.toFixed(2)} د.ك</td>
+        <td>${translations.total}</td>
+        <td>${comparisonData.period1.total.toFixed(2)} ${translations.currency}</td>
+        <td>${comparisonData.period2.total.toFixed(2)} ${translations.currency}</td>
         <td>
-          ${totalDiff > 0 ? '+' : ''}${totalDiff.toFixed(2)} د.ك
+          ${totalDiff > 0 ? '+' : ''}${totalDiff.toFixed(2)} ${translations.currency}
           (${totalDiff > 0 ? '+' : ''}${totalPercentChange}%)
         </td>
       </tr>
     `;
     
+    const summaryTitle = language === 'ar' ? "ملخص المقارنة" : "Comparison Summary";
+    const detailedComparisonTitle = language === 'ar' ? "مقارنة تفصيلية للمنتجات" : "Detailed Product Comparison";
+    const invoiceText = language === 'ar' ? "فاتورة" : "invoice";
+    const invoicesText = language === 'ar' ? "فواتير" : "invoices";
+    const footerText = language === 'ar' 
+      ? `تم إنشاء هذا التقرير بواسطة نظام النظارات - جميع الحقوق محفوظة © ${new Date().getFullYear()}`
+      : `Generated by Optical System - All rights reserved © ${new Date().getFullYear()}`;
+    const printButtonText = language === 'ar' ? "طباعة التقرير" : "Print Report";
+    
     const printContent = `
       <!DOCTYPE html>
-      <html dir="rtl">
+      <html dir="${language === 'ar' ? 'rtl' : 'ltr'}">
       <head>
         <title>${pageTitle}</title>
         <style>
           body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            direction: rtl;
+            direction: ${language === 'ar' ? 'rtl' : 'ltr'};
           }
           .report-header {
             text-align: center;
@@ -363,7 +401,7 @@ export const ComparativeAnalysis: React.FC = () => {
           th, td {
             border: 1px solid #ddd;
             padding: 10px;
-            text-align: right;
+            text-align: ${language === 'ar' ? 'right' : 'left'};
           }
           th {
             background-color: #f2f2f2;
@@ -396,23 +434,23 @@ export const ComparativeAnalysis: React.FC = () => {
       <body>
         <div class="report-header">
           <h1 class="report-title">${comparisonTitle}</h1>
-          <p class="report-subtitle">${period1Label} و ${period2Label}</p>
+          <p class="report-subtitle">${comparisonData.period1.label} ${language === 'ar' ? 'و' : 'and'} ${comparisonData.period2.label}</p>
         </div>
         
         <div class="summary-section">
-          <h2 class="section-title">ملخص المقارنة</h2>
+          <h2 class="section-title">${summaryTitle}</h2>
           <div class="comparison-grid">
             <div class="comparison-item">
-              <div class="period-label">${period1Label}</div>
-              <div class="comparison-value">${comparisonData.period1.total.toFixed(2)} د.ك</div>
-              <div class="comparison-count">${comparisonData.period1.count} فاتورة</div>
+              <div class="period-label">${comparisonData.period1.label}</div>
+              <div class="comparison-value">${comparisonData.period1.total.toFixed(2)} ${translations.currency}</div>
+              <div class="comparison-count">${comparisonData.period1.count} ${comparisonData.period1.count === 1 ? invoiceText : invoicesText}</div>
             </div>
             <div class="comparison-item">
-              <div class="period-label">${period2Label}</div>
-              <div class="comparison-value">${comparisonData.period2.total.toFixed(2)} د.ك</div>
-              <div class="comparison-count">${comparisonData.period2.count} فاتورة</div>
+              <div class="period-label">${comparisonData.period2.label}</div>
+              <div class="comparison-value">${comparisonData.period2.total.toFixed(2)} ${translations.currency}</div>
+              <div class="comparison-count">${comparisonData.period2.count} ${comparisonData.period2.count === 1 ? invoiceText : invoicesText}</div>
               <div class="${totalDiff > 0 ? 'change positive' : 'change negative'}">
-                ${totalDiff > 0 ? '+' : ''}${totalDiff.toFixed(2)} د.ك
+                ${totalDiff > 0 ? '+' : ''}${totalDiff.toFixed(2)} ${translations.currency}
                 (${totalDiff > 0 ? '+' : ''}${totalPercentChange}%)
               </div>
             </div>
@@ -420,14 +458,14 @@ export const ComparativeAnalysis: React.FC = () => {
         </div>
         
         <div class="summary-section">
-          <h2 class="section-title">مقارنة تفصيلية للمنتجات</h2>
+          <h2 class="section-title">${detailedComparisonTitle}</h2>
           <table>
             <thead>
               <tr>
-                <th>نوع المنتج</th>
-                <th>${period1Label}</th>
-                <th>${period2Label}</th>
-                <th>التغيير</th>
+                <th>${language === 'ar' ? 'نوع المنتج' : 'Product Type'}</th>
+                <th>${comparisonData.period1.label}</th>
+                <th>${comparisonData.period2.label}</th>
+                <th>${language === 'ar' ? 'التغيير' : 'Change'}</th>
               </tr>
             </thead>
             <tbody>
@@ -437,12 +475,12 @@ export const ComparativeAnalysis: React.FC = () => {
         </div>
         
         <div class="footer">
-          <p>تم إنشاء هذا التقرير بواسطة نظام النظارات - جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
+          <p>${footerText}</p>
         </div>
         
         <div class="no-print">
           <button onclick="window.print()" style="padding: 10px 20px; margin: 20px auto; display: block; background: #0066cc; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            طباعة التقرير
+            ${printButtonText}
           </button>
         </div>
       </body>
@@ -461,46 +499,46 @@ export const ComparativeAnalysis: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">التحليل المقارن</h2>
-        <Button onClick={handlePrintComparison} className="gap-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+        <h2 className="text-2xl font-bold">{translations.comparativeAnalysis}</h2>
+        <Button onClick={handlePrintComparison} className="gap-2 w-full md:w-auto">
           <Printer size={16} />
-          طباعة التقرير
+          {translations.printReport}
         </Button>
       </div>
       
       {/* Comparison Settings */}
       <Card>
-        <CardHeader>
-          <CardTitle>إعدادات المقارنة</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">{translations.comparisonSettings}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="comparisonType">نوع المقارنة</Label>
+              <Label htmlFor="comparisonType">{translations.comparisonType}</Label>
               <Select 
                 value={comparisonType}
                 onValueChange={(value) => setComparisonType(value as "day" | "month" | "year")}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر نوع المقارنة" />
+                <SelectTrigger id="comparisonType">
+                  <SelectValue placeholder={language === 'ar' ? 'اختر نوع المقارنة' : 'Choose comparison type'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="day">مقارنة يومية</SelectItem>
-                  <SelectItem value="month">مقارنة شهرية</SelectItem>
-                  <SelectItem value="year">مقارنة سنوية</SelectItem>
+                  <SelectItem value="day">{translations.dailyComparison}</SelectItem>
+                  <SelectItem value="month">{translations.monthlyComparison}</SelectItem>
+                  <SelectItem value="year">{translations.yearlyComparison}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="period1">الفترة الأولى</Label>
+              <Label htmlFor="period1">{translations.firstPeriod}</Label>
               <Select 
                 value={period1}
                 onValueChange={setPeriod1}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الفترة الأولى" />
+                <SelectTrigger id="period1">
+                  <SelectValue placeholder={language === 'ar' ? 'اختر الفترة الأولى' : 'Choose first period'} />
                 </SelectTrigger>
                 <SelectContent>
                   {periodOptions.map((option) => (
@@ -513,13 +551,13 @@ export const ComparativeAnalysis: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="period2">الفترة الثانية</Label>
+              <Label htmlFor="period2">{translations.secondPeriod}</Label>
               <Select 
                 value={period2}
                 onValueChange={setPeriod2}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الفترة الثانية" />
+                <SelectTrigger id="period2">
+                  <SelectValue placeholder={language === 'ar' ? 'اختر الفترة الثانية' : 'Choose second period'} />
                 </SelectTrigger>
                 <SelectContent>
                   {periodOptions.map((option) => (
@@ -548,10 +586,10 @@ export const ComparativeAnalysis: React.FC = () => {
               <CardContent>
                 <div className="flex flex-col">
                   <div className="text-3xl font-bold">
-                    {comparisonData.period1.total.toFixed(2)} د.ك
+                    {comparisonData.period1.total.toFixed(2)} {translations.currency}
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">
-                    {comparisonData.period1.count} فاتورة
+                    {comparisonData.period1.count} {comparisonData.period1.count === 1 ? translations.invoice : translations.invoices}
                   </div>
                 </div>
               </CardContent>
@@ -566,10 +604,10 @@ export const ComparativeAnalysis: React.FC = () => {
               <CardContent>
                 <div className="flex flex-col">
                   <div className="text-3xl font-bold">
-                    {comparisonData.period2.total.toFixed(2)} د.ك
+                    {comparisonData.period2.total.toFixed(2)} {translations.currency}
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">
-                    {comparisonData.period2.count} فاتورة
+                    {comparisonData.period2.count} {comparisonData.period2.count === 1 ? translations.invoice : translations.invoices}
                   </div>
                   
                   {comparisonData.period1.total > 0 && (
@@ -585,7 +623,7 @@ export const ComparativeAnalysis: React.FC = () => {
                       )}
                       <span>
                         {comparisonData.period2.total >= comparisonData.period1.total ? "+" : ""}
-                        {(comparisonData.period2.total - comparisonData.period1.total).toFixed(2)} د.ك
+                        {(comparisonData.period2.total - comparisonData.period1.total).toFixed(2)} {translations.currency}
                         {" "}
                         ({comparisonData.period1.total !== 0 ? (
                           <>
@@ -603,16 +641,16 @@ export const ComparativeAnalysis: React.FC = () => {
           
           {/* Chart Tabs */}
           <Tabs defaultValue="bar">
-            <TabsList className="w-full md:w-auto grid grid-cols-2 md:flex">
-              <TabsTrigger value="bar">رسم شريطي</TabsTrigger>
-              <TabsTrigger value="line">رسم خطي</TabsTrigger>
+            <TabsList className="w-full md:w-auto grid grid-cols-2 md:inline-flex">
+              <TabsTrigger value="bar">{translations.barChart}</TabsTrigger>
+              <TabsTrigger value="line">{translations.lineChart}</TabsTrigger>
             </TabsList>
             
             <Card className="mt-4">
               <CardContent className="pt-6">
                 <TabsContent value="bar" className="mt-0">
-                  <h3 className="text-lg font-semibold mb-4">مقارنة المبيعات</h3>
-                  <div className="h-[400px]">
+                  <h3 className="text-lg font-semibold mb-4">{translations.salesComparison}</h3>
+                  <div className="h-[300px] md:h-[400px]">
                     {comparisonData.dailyData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
@@ -623,7 +661,7 @@ export const ComparativeAnalysis: React.FC = () => {
                           <XAxis dataKey="date" />
                           <YAxis />
                           <ChartTooltip 
-                            formatter={(value: number) => `${value.toFixed(2)} د.ك`}
+                            formatter={(value: number) => `${value.toFixed(2)} ${translations.currency}`}
                           />
                           <Legend 
                             payload={[
@@ -646,7 +684,7 @@ export const ComparativeAnalysis: React.FC = () => {
                     ) : (
                       <div className="flex items-center justify-center h-full">
                         <p className="text-center text-muted-foreground">
-                          لا توجد بيانات كافية للمقارنة
+                          {translations.noDataComparison}
                         </p>
                       </div>
                     )}
@@ -654,8 +692,8 @@ export const ComparativeAnalysis: React.FC = () => {
                 </TabsContent>
                 
                 <TabsContent value="line" className="mt-0">
-                  <h3 className="text-lg font-semibold mb-4">اتجاهات المبيعات</h3>
-                  <div className="h-[400px]">
+                  <h3 className="text-lg font-semibold mb-4">{translations.salesTrends}</h3>
+                  <div className="h-[300px] md:h-[400px]">
                     {comparisonData.dailyData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart
@@ -666,7 +704,7 @@ export const ComparativeAnalysis: React.FC = () => {
                           <XAxis dataKey="date" />
                           <YAxis />
                           <ChartTooltip 
-                            formatter={(value: number) => `${value.toFixed(2)} د.ك`}
+                            formatter={(value: number) => `${value.toFixed(2)} ${translations.currency}`}
                           />
                           <Legend 
                             payload={[
@@ -693,7 +731,7 @@ export const ComparativeAnalysis: React.FC = () => {
                     ) : (
                       <div className="flex items-center justify-center h-full">
                         <p className="text-center text-muted-foreground">
-                          لا توجد بيانات كافية للمقارنة
+                          {translations.noDataComparison}
                         </p>
                       </div>
                     )}
@@ -706,7 +744,7 @@ export const ComparativeAnalysis: React.FC = () => {
           {/* Product Type Comparison */}
           <Card>
             <CardHeader>
-              <CardTitle>مقارنة أنواع المنتجات</CardTitle>
+              <CardTitle>{translations.productComparison}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -718,19 +756,19 @@ export const ComparativeAnalysis: React.FC = () => {
                   
                   return (
                     <div key={index} className="space-y-1">
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                         <span className="font-medium">{item.name}</span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                           <span className="text-sm text-muted-foreground">
-                            {item.period1.toFixed(2)} د.ك
+                            {item.period1.toFixed(2)} {translations.currency}
                           </span>
-                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          <ArrowRight className="h-4 w-4 text-muted-foreground hidden md:block" />
                           <span className="text-sm text-muted-foreground">
-                            {item.period2.toFixed(2)} د.ك
+                            {item.period2.toFixed(2)} {translations.currency}
                           </span>
                           <span className={`text-sm ${diff >= 0 ? "text-green-500" : "text-red-500"}`}>
                             {diff > 0 ? "+" : ""}
-                            {diff.toFixed(2)} د.ك
+                            {diff.toFixed(2)} {translations.currency}
                             {" "}
                             ({percentChange.toFixed(1)}%)
                           </span>
@@ -741,8 +779,8 @@ export const ComparativeAnalysis: React.FC = () => {
                         <div className={`h-2.5 rounded-full ${item.period2 > item.period1 ? "bg-green-500" : item.period2 < item.period1 ? "bg-red-500" : "bg-primary"}`} 
                           style={{ 
                             width: `${Math.min(100, Math.abs(percentChange) * 2)}%`,
-                            marginLeft: diff < 0 ? 'auto' : '0',
-                            marginRight: diff < 0 ? '0' : 'auto'
+                            marginLeft: diff < 0 && language === 'en' ? 'auto' : (diff < 0 && language === 'ar' ? '0' : (language === 'ar' ? 'auto' : '0')),
+                            marginRight: diff < 0 && language === 'ar' ? 'auto' : (diff < 0 && language === 'en' ? '0' : (language === 'en' ? 'auto' : '0'))
                           }}
                         ></div>
                       </div>
@@ -752,7 +790,7 @@ export const ComparativeAnalysis: React.FC = () => {
                 
                 {comparisonData.productData.length === 0 && (
                   <div className="py-4 text-center text-muted-foreground">
-                    لا توجد بيانات كافية للمقارنة
+                    {translations.noDataComparison}
                   </div>
                 )}
               </div>
