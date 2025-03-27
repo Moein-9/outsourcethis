@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, MessageSquare } from "lucide-react";
+import { CalendarIcon, MessageSquare, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensForm } from "@/components/ContactLensForm";
@@ -26,7 +26,7 @@ export const CreateClient: React.FC = () => {
   const [dobMonth, setDobMonth] = useState("");
   const [dobYear, setDobYear] = useState("");
   const [rxDate, setRxDate] = useState<Date | undefined>(new Date());
-  const [notes, setNotes] = useState(""); // New state for notes
+  const [notes, setNotes] = useState("");
   
   // Rx states
   const [sphOD, setSphOD] = useState("");
@@ -46,9 +46,40 @@ export const CreateClient: React.FC = () => {
     leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" }
   });
   
+  // Add validation states for glasses prescription
+  const [validationErrors, setValidationErrors] = useState({
+    rightEye: { cylinderAxisError: false },
+    leftEye: { cylinderAxisError: false }
+  });
+  
   // Direction class based on language
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+
+  // Check for validation errors
+  const hasValidationErrors = validationErrors.rightEye.cylinderAxisError || 
+                              validationErrors.leftEye.cylinderAxisError;
+  
+  // Validate cylinder/axis relationship on component mount and when cylinder/axis values change
+  useEffect(() => {
+    validateCylinderAxis('rightEye', cylOD, axisOD);
+    validateCylinderAxis('leftEye', cylOS, axisOS);
+  }, [cylOD, axisOD, cylOS, axisOS]);
+  
+  // Validate that if cylinder has a value, axis must also have a value
+  const validateCylinderAxis = (eye: 'rightEye' | 'leftEye', cylinder: string, axis: string) => {
+    // If cylinder has a non-empty value, axis must also have a non-empty value
+    const hasCylinder = cylinder !== "";
+    const hasAxis = axis !== "";
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [eye]: {
+        ...prev[eye],
+        cylinderAxisError: hasCylinder && !hasAxis
+      }
+    }));
+  };
   
   // Generate options for select elements
   const generateSphOptions = () => {
@@ -177,6 +208,16 @@ export const CreateClient: React.FC = () => {
       return;
     }
     
+    // Check for validation errors before saving
+    if (activeTab === "glasses" && hasValidationErrors) {
+      toast({
+        title: t("error"),
+        description: t("axisValidationError") || "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Format DOB if available
     let dob = "";
     if (!noDob && dobDay && dobMonth && dobYear) {
@@ -188,8 +229,8 @@ export const CreateClient: React.FC = () => {
         name,
         phone,
         dob,
-        notes: notes.trim(), // Include notes in patient data
-        patientNotes: [], // Keep empty array
+        notes: notes.trim(),
+        patientNotes: [],
         rx: {
           sphereOD: sphOD,
           cylOD,
@@ -212,8 +253,8 @@ export const CreateClient: React.FC = () => {
         name,
         phone,
         dob,
-        notes: notes.trim(), // Include notes in contact lens patient data
-        patientNotes: [], // Keep empty array
+        notes: notes.trim(),
+        patientNotes: [],
         rx: {
           sphereOD: "-",
           cylOD: "-",
@@ -258,10 +299,14 @@ export const CreateClient: React.FC = () => {
     setPdRight("");
     setPdLeft("");
     setRxDate(new Date());
-    setNotes(""); // Reset notes
+    setNotes("");
     setContactLensRx({
       rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" },
       leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" }
+    });
+    setValidationErrors({
+      rightEye: { cylinderAxisError: false },
+      leftEye: { cylinderAxisError: false }
     });
   };
   
@@ -365,7 +410,6 @@ export const CreateClient: React.FC = () => {
                 </div>
               </div>
               
-              {/* New Notes Field */}
               <div className="space-y-2">
                 <Label 
                   htmlFor="notes" 
@@ -456,7 +500,7 @@ export const CreateClient: React.FC = () => {
                         </td>
                         <td className="border border-border p-1">
                           <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                            className={`w-full p-1 rounded-md ${validationErrors.rightEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-input bg-background'}`}
                             value={axisOD}
                             onChange={(e) => setAxisOD(e.target.value)}
                           >
@@ -509,7 +553,7 @@ export const CreateClient: React.FC = () => {
                         </td>
                         <td className="border border-border p-1">
                           <select
-                            className="w-full p-1 rounded-md border-input bg-background"
+                            className={`w-full p-1 rounded-md ${validationErrors.leftEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-input bg-background'}`}
                             value={axisOS}
                             onChange={(e) => setAxisOS(e.target.value)}
                           >
@@ -541,6 +585,15 @@ export const CreateClient: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+                
+                {hasValidationErrors && (
+                  <div className="p-3 mt-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                    <p className="text-red-700 text-sm">
+                      {t("axisValidationError") || "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required."}
+                    </p>
+                  </div>
+                )}
               </div>
             </TabsContent>
             
@@ -588,6 +641,7 @@ export const CreateClient: React.FC = () => {
       <Button 
         className="mt-6" 
         onClick={handleSubmit}
+        disabled={activeTab === "glasses" && hasValidationErrors}
       >
         {t("saveAndContinue")}
       </Button>
