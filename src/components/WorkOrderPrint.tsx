@@ -189,34 +189,71 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               font-size: 9pt !important;
               margin-top: 1mm !important;
             }
+
+            .product-card {
+              border: 0.3mm solid black !important;
+              border-radius: 1mm !important;
+              margin-bottom: 2mm !important;
+              padding: 0 !important;
+              overflow: hidden !important;
+            }
+
+            .product-card-header {
+              font-weight: bold !important; 
+              background-color: #f0f0f0 !important;
+              border-bottom: 0.2mm solid black !important;
+              padding: 1.5mm !important;
+            }
+
+            .product-card-content {
+              padding: 1.5mm !important;
+            }
+
+            .signature-box {
+              border: 0.3mm solid #000 !important;
+              border-radius: 1mm !important;
+              padding: 1.5mm !important;
+            }
+            
+            .signature-box-title {
+              font-weight: bold !important;
+              font-size: 10pt !important;
+              text-align: center !important;
+              margin-bottom: 1mm !important;
+              border-bottom: 0.2mm solid #000 !important;
+              padding-bottom: 1mm !important;
+            }
           }
         `}
       </style>
 
       <div id="work-order-print" className={dirClass} style={{ width: "80mm", padding: "2mm" }}>
-        <div style={{ textAlign: "center", marginBottom: "5mm", position: "relative" }}>
+        <div style={{ textAlign: "center", marginBottom: "3mm", position: "relative" }}>
           <div className="absolute right-0 top-0 hide-print">
             <ClipboardCheck className="w-10 h-10 text-primary" />
           </div>
-          <MoenLogo className="mx-auto w-auto" style={{ height: "10mm", marginBottom: "1mm" }} />
-          <div style={{ backgroundColor: "black", color: "white", padding: "2mm 0", marginBottom: "2mm", borderRadius: "1mm" }}>
-            <h1 style={{ fontSize: "16pt", fontWeight: "bold", margin: "0" }}>{language === 'ar' ? "أمر عمل | WORK ORDER" : "WORK ORDER | أمر عمل"}</h1>
+          <MoenLogo className="mx-auto w-auto" style={{ height: "8mm", marginBottom: "1mm" }} />
+          <div style={{ backgroundColor: "black", color: "white", padding: "1.5mm 0", marginBottom: "1.5mm", borderRadius: "1mm" }}>
+            <h1 style={{ fontSize: "14pt", fontWeight: "bold", margin: "0" }}>{language === 'ar' ? "أمر عمل | WORK ORDER" : "WORK ORDER | أمر عمل"}</h1>
           </div>
-          <p style={{ fontSize: "14pt", margin: "1mm 0", color: "#333" }}>{orderNumber}</p>
-          <p style={{ fontSize: "10pt", margin: "1mm 0", color: "#666" }}>
-            {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
-          </p>
-          <div style={{ fontSize: "9pt", textAlign: "center", marginTop: "1mm" }}>
+          <div className="flex justify-center items-center gap-2">
+            <p style={{ fontSize: "13pt", margin: "0", color: "#333", fontWeight: "bold" }}>{orderNumber}</p>
+            <span className="mx-1">-</span>
+            <p style={{ fontSize: "9pt", margin: "0", color: "#666" }}>
+              {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
+            </p>
+          </div>
+          <div style={{ fontSize: "8pt", textAlign: "center", marginTop: "1mm" }}>
             <p style={{ margin: "0" }}>{storeInfo.address}</p>
             <p style={{ margin: "0" }}>{t("phone")}: {storeInfo.phone}</p>
           </div>
         </div>
 
         <div className="section-title">
-          {language === 'ar' ? "معلومات المريض | Patient Information" : "Patient Information | معلومات المريض"}
+          {language === 'ar' ? "معلومات المريض | Patient Info" : "Patient Info | معلومات المريض"}
         </div>
         
-        <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+        <div style={{ padding: "0 2mm", marginBottom: "3mm" }}>
           <div className="data-row">
             <span className="data-label">{t("name")}:</span>
             <span className="data-value">{name}</span>
@@ -225,19 +262,13 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             <span className="data-label">{t("phone")}:</span>
             <span className="data-value">{phone}</span>
           </div>
-          {invoice.patientId && (
-            <div className="data-row">
-              <span className="data-label">{t("patientId")}:</span>
-              <span className="data-value">{invoice.patientId}</span>
-            </div>
-          )}
         </div>
 
         <div className="section-title">
-          {language === 'ar' ? "تفاصيل الوصفة الطبية | Prescription Details" : "Prescription Details | تفاصيل الوصفة الطبية"}
+          {language === 'ar' ? "تفاصيل الوصفة الطبية | Prescription" : "Prescription | تفاصيل الوصفة الطبية"}
         </div>
         
-        <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
+        <div style={{ padding: "0 2mm", marginBottom: "3mm", direction: "ltr" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
@@ -279,12 +310,12 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             <div className="section-title">
               {language === 'ar' ? "تفاصيل المنتج | Product Details" : "Product Details | تفاصيل المنتج"}
             </div>
-            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
-              <div style={{ border: "0.3mm solid black", borderRadius: "1mm", marginBottom: "2mm", padding: "2mm" }}>
-                <div style={{ fontWeight: "bold", borderBottom: "0.2mm solid black", marginBottom: "1mm", paddingBottom: "1mm" }}>
-                  {language === 'ar' ? "الإطار (Frame)" : "Frame (الإطار)"}
+            <div style={{ padding: "0 2mm", marginBottom: "3mm" }}>
+              <div className="product-card">
+                <div className="product-card-header">
+                  {language === 'ar' ? "الإطار | Frame" : "Frame | الإطار"}
                 </div>
-                <div style={{ padding: "0 1mm" }}>
+                <div className="product-card-content">
                   <div className="data-row">
                     <span className="data-label">{t("brand")}:</span>
                     <span className="data-value">{frameData.brand}</span>
@@ -305,11 +336,11 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               </div>
               
               {lensTypeValue && (
-                <div style={{ border: "0.3mm solid black", borderRadius: "1mm", marginBottom: "2mm", padding: "2mm" }}>
-                  <div style={{ fontWeight: "bold", borderBottom: "0.2mm solid black", marginBottom: "1mm", paddingBottom: "1mm" }}>
-                    {language === 'ar' ? "العدسات (Lenses)" : "Lenses (العدسات)"}
+                <div className="product-card">
+                  <div className="product-card-header">
+                    {language === 'ar' ? "العدسات | Lenses" : "Lenses | العدسات"}
                   </div>
-                  <div style={{ padding: "0 1mm" }}>
+                  <div className="product-card-content">
                     <div className="data-row">
                       <span className="data-label">{t("type")}:</span>
                       <span className="data-value">{lensTypeValue}</span>
@@ -338,16 +369,14 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             <div className="section-title">
               {language === 'ar' ? "تفاصيل المنتج | Product Details" : "Product Details | تفاصيل المنتج"}
             </div>
-            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
-              <div style={{ border: "0.3mm solid black", borderRadius: "1mm", marginBottom: "2mm", padding: "2mm" }}>
-                <div style={{ fontWeight: "bold", borderBottom: "0.2mm solid black", marginBottom: "1mm", paddingBottom: "1mm" }}>
-                  {language === 'ar' ? "العدسات اللاصقة (Contact Lenses)" : "Contact Lenses (العدسات اللاصقة)"}
+            <div style={{ padding: "0 2mm", marginBottom: "3mm" }}>
+              <div className="product-card">
+                <div className="product-card-header">
+                  {language === 'ar' ? "العدسات اللاصقة | Contact Lenses" : "Contact Lenses | العدسات اللاصقة"}
                 </div>
                 {contactLensItems.map((lens, idx) => (
-                  <div key={idx} style={{ 
-                    padding: "0 1mm", 
-                    borderBottom: idx < contactLensItems.length - 1 ? "0.2mm dashed #ccc" : "none",
-                    paddingBottom: idx < contactLensItems.length - 1 ? "1mm" : "0"
+                  <div key={idx} className="product-card-content" style={{ 
+                    borderTop: idx > 0 ? "0.2mm dashed #ccc" : "none",
                   }}>
                     <div className="data-row">
                       <span className="data-label">{t("type")}:</span>
@@ -373,9 +402,9 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         {isContactLens && contactLensRxData && (
           <>
             <div className="section-title">
-              {language === 'ar' ? "وصفة العدسات اللاصقة | Contact Lens Prescription" : "Contact Lens Prescription | وصفة العدسات اللاصقة"}
+              {language === 'ar' ? "وصفة العدسات اللاصقة | Contact Lens Rx" : "Contact Lens Rx | وصفة العدسات اللاصقة"}
             </div>
-            <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
+            <div style={{ padding: "0 2mm", marginBottom: "3mm", direction: "ltr" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
@@ -413,29 +442,33 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         <div className="section-title">
           {language === 'ar' ? "ملاحظات | Notes" : "Notes | ملاحظات"}
         </div>
-        <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+        <div style={{ padding: "0 2mm", marginBottom: "3mm" }}>
           <div style={{ border: "0.2mm solid #000", minHeight: "15mm", backgroundColor: "#fff", width: "100%" }}></div>
         </div>
 
-        <div style={{ marginTop: "5mm", paddingTop: "2mm", borderTop: "0.3mm solid #000" }}>
+        <div style={{ marginTop: "4mm", paddingTop: "2mm", borderTop: "0.3mm solid #000" }}>
           <div style={{ display: "flex", gap: "2mm" }}>
             <div style={{ flex: "1" }}>
-              <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm", textAlign: "center" }}>
-                {language === 'ar' ? "توقيع الفني" : "Technician Signature"}
-              </p>
-              <div className="signature-line" style={{ margin: "0 auto" }}></div>
+              <div className="signature-box">
+                <div className="signature-box-title">
+                  {language === 'ar' ? "توقيع الفني" : "Technician"}
+                </div>
+                <div className="signature-line" style={{ margin: "0 auto" }}></div>
+              </div>
             </div>
             
             <div style={{ flex: "1" }}>
-              <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm", textAlign: "center" }}>
-                {language === 'ar' ? "توقيع المدير" : "Manager Signature"}
-              </p>
-              <div className="signature-line" style={{ margin: "0 auto" }}></div>
+              <div className="signature-box">
+                <div className="signature-box-title">
+                  {language === 'ar' ? "توقيع المدير" : "Manager"}
+                </div>
+                <div className="signature-line" style={{ margin: "0 auto" }}></div>
+              </div>
             </div>
           </div>
         </div>
         
-        <div style={{ marginTop: "5mm", textAlign: "center", fontSize: "8pt", color: "#666" }}>
+        <div style={{ marginTop: "4mm", textAlign: "center", fontSize: "8pt", color: "#666" }}>
           <p style={{ marginBottom: "1mm" }}>
             {language === 'ar' ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
           </p>
