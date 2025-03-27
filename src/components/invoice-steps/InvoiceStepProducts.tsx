@@ -1,8 +1,7 @@
-
 import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
-import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store/inventoryStore";
+import { useInventoryStore, LensType, LensCoating } from "@/store/inventoryStore";
 import { toast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,7 +25,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const [skipFrame, setSkipFrame] = useState(getValues<boolean>('skipFrame'));
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
-  const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(null);
   
   const [frameSearch, setFrameSearch] = useState("");
   const [frameResults, setFrameResults] = useState<ReturnType<typeof searchFrames>>([]);
@@ -109,30 +107,16 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setValue('framePrice', newFrame.price);
   };
   
-  const handleLensTypeSelect = (lens: LensType | null, category: string) => {
+  const handleLensTypeSelect = (lens: LensType | null) => {
     setSelectedLensType(lens);
     setValue('lensType', lens?.name || '');
-    setValue('lensTypeCategory', category);
-    
-    // Reset coating and thickness when changing lens type
-    setSelectedCoating(null);
-    setSelectedThickness(null);
-    setValue('coating', '');
-    setValue('coatingPrice', 0);
-    setValue('thickness', '');
-    setValue('thicknessPrice', 0);
+    setValue('lensPrice', lens?.price || 0);
   };
   
   const handleCoatingSelect = (coating: LensCoating | null) => {
     setSelectedCoating(coating);
     setValue('coating', coating?.name || '');
     setValue('coatingPrice', coating?.price || 0);
-  };
-  
-  const handleThicknessSelect = (thickness: LensThickness | null) => {
-    setSelectedThickness(thickness);
-    setValue('thickness', thickness?.name || '');
-    setValue('thicknessPrice', thickness?.price || 0);
   };
   
   const handleSkipFrameChange = (skip: boolean) => {
@@ -256,12 +240,10 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
             <LensSelector 
               onSelectLensType={handleLensTypeSelect}
               onSelectCoating={handleCoatingSelect}
-              onSelectThickness={handleThicknessSelect}
               skipLens={skipFrame}
               onSkipLensChange={handleSkipFrameChange}
               initialLensType={selectedLensType}
               initialCoating={selectedCoating}
-              initialThickness={selectedThickness}
             />
           </div>
 

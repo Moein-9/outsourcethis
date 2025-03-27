@@ -7,8 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Edit, Plus, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguageStore } from "@/store/languageStore";
@@ -16,14 +14,12 @@ import { useLanguageStore } from "@/store/languageStore";
 export const LensCoatingManager: React.FC = () => {
   const { lensCoatings, addLensCoating, updateLensCoating, deleteLensCoating } = useInventoryStore();
   const { t, language } = useLanguageStore();
-  const [activeTab, setActiveTab] = useState<string>("distance_reading");
   
   // New coating form state
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newCoatingName, setNewCoatingName] = useState("");
   const [newCoatingPrice, setNewCoatingPrice] = useState<number | "">("");
   const [newCoatingDescription, setNewCoatingDescription] = useState("");
-  const [newCoatingCategory, setNewCoatingCategory] = useState<"distance_reading" | "progressive" | "bifocal">("distance_reading");
   
   // Edit coating form state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -31,7 +27,6 @@ export const LensCoatingManager: React.FC = () => {
   const [editCoatingName, setEditCoatingName] = useState("");
   const [editCoatingPrice, setEditCoatingPrice] = useState<number | "">("");
   const [editCoatingDescription, setEditCoatingDescription] = useState("");
-  const [editCoatingCategory, setEditCoatingCategory] = useState<"distance_reading" | "progressive" | "bifocal">("distance_reading");
   
   const handleAddCoating = () => {
     if (!newCoatingName || newCoatingPrice === "") {
@@ -42,8 +37,7 @@ export const LensCoatingManager: React.FC = () => {
     addLensCoating({
       name: newCoatingName,
       price: Number(newCoatingPrice),
-      description: newCoatingDescription,
-      category: newCoatingCategory
+      description: newCoatingDescription
     });
     
     toast.success(t("coatingAddedSuccess"));
@@ -64,8 +58,7 @@ export const LensCoatingManager: React.FC = () => {
     updateLensCoating(editCoatingId, {
       name: editCoatingName,
       price: Number(editCoatingPrice),
-      description: editCoatingDescription,
-      category: editCoatingCategory
+      description: editCoatingDescription
     });
     
     toast.success(t("coatingUpdatedSuccess"));
@@ -84,17 +77,8 @@ export const LensCoatingManager: React.FC = () => {
     setEditCoatingName(coating.name);
     setEditCoatingPrice(coating.price);
     setEditCoatingDescription(coating.description || "");
-    setEditCoatingCategory(coating.category);
     setIsEditDialogOpen(true);
   };
-  
-  const categoryOptions = [
-    { value: "distance_reading", label: t("distanceReading") || "Distance/Reading" },
-    { value: "progressive", label: t("progressive") || "Progressive" },
-    { value: "bifocal", label: t("bifocal") || "Bifocal" }
-  ];
-  
-  const filteredCoatings = lensCoatings.filter(coating => coating.category === activeTab);
   
   return (
     <div className="space-y-4">
@@ -135,21 +119,6 @@ export const LensCoatingManager: React.FC = () => {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="category">{t("category") || "Category"}</Label>
-                <Select value={newCoatingCategory} onValueChange={(value) => setNewCoatingCategory(value as any)}>
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder={t("chooseCategory") || "Choose a category"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoryOptions.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        {category.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
                 <Label htmlFor="description">{t("description")}</Label>
                 <Textarea
                   id="description"
@@ -168,48 +137,38 @@ export const LensCoatingManager: React.FC = () => {
         </Dialog>
       </div>
       
-      <Tabs defaultValue="distance_reading" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="distance_reading">{t("distanceReading") || "Distance/Reading"}</TabsTrigger>
-          <TabsTrigger value="progressive">{t("progressive") || "Progressive"}</TabsTrigger>
-          <TabsTrigger value="bifocal">{t("bifocal") || "Bifocal"}</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value={activeTab} className="mt-0">
-          {filteredCoatings.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredCoatings.map((coating) => (
-                <Card key={coating.id} className="overflow-hidden">
-                  <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-base">{coating.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-0 pb-2">
-                    <p className="text-lg font-bold">{coating.price.toFixed(2)} {language === 'ar' ? 'د.ك' : 'KD'}</p>
-                    {coating.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{coating.description}</p>
-                    )}
-                  </CardContent>
-                  <CardFooter className="p-2 flex justify-end gap-2 bg-muted/50">
-                    <Button variant="ghost" size="icon" onClick={() => startEditCoating(coating)}>
-                      <Edit size={16} />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteCoating(coating.id)}>
-                      <Trash size={16} />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center p-8 bg-muted/50 rounded-lg">
-              <p>{t("noCoatingsInCategory") || "No coatings in this category"}</p>
-              <Button variant="outline" size="sm" className="mt-2" onClick={() => setIsAddDialogOpen(true)}>
-                {t("addCoating")}
-              </Button>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+      {lensCoatings.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {lensCoatings.map((coating) => (
+            <Card key={coating.id} className="overflow-hidden">
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-base">{coating.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0 pb-2">
+                <p className="text-lg font-bold">{coating.price.toFixed(2)} {language === 'ar' ? 'د.ك' : 'KD'}</p>
+                {coating.description && (
+                  <p className="text-sm text-muted-foreground mt-1">{coating.description}</p>
+                )}
+              </CardContent>
+              <CardFooter className="p-2 flex justify-end gap-2 bg-muted/50">
+                <Button variant="ghost" size="icon" onClick={() => startEditCoating(coating)}>
+                  <Edit size={16} />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteCoating(coating.id)}>
+                  <Trash size={16} />
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center p-8 bg-muted/50 rounded-lg">
+          <p>{t("noCoatings")}</p>
+          <Button variant="outline" size="sm" className="mt-2" onClick={() => setIsAddDialogOpen(true)}>
+            {t("addCoating")}
+          </Button>
+        </div>
+      )}
       
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -237,21 +196,6 @@ export const LensCoatingManager: React.FC = () => {
                 value={editCoatingPrice}
                 onChange={(e) => setEditCoatingPrice(e.target.value ? Number(e.target.value) : "")}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-category">{t("category") || "Category"}</Label>
-              <Select value={editCoatingCategory} onValueChange={(value) => setEditCoatingCategory(value as any)}>
-                <SelectTrigger id="edit-category">
-                  <SelectValue placeholder={t("chooseCategory") || "Choose a category"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoryOptions.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-description">{t("description")}</Label>

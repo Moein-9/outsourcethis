@@ -65,7 +65,7 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
     
     if (name === 'lensType') {
       const selectedLens = lensTypes.find(lens => lens.type === value);
-      if (selectedLens && selectedLens.price !== undefined) {
+      if (selectedLens) {
         setEditData(prev => ({
           ...prev,
           lensPrice: selectedLens.price
