@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -68,7 +69,7 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
       if (selectedLens) {
         setEditData(prev => ({
           ...prev,
-          lensPrice: selectedLens.price
+          lensPrice: selectedLens.price !== undefined ? selectedLens.price : 0 // Handle undefined price
         }));
       }
     } else if (name === 'coating') {

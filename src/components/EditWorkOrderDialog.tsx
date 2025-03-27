@@ -18,7 +18,7 @@ import { usePatientStore, RxData } from "@/store/patientStore";
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { LensSelector } from "@/components/LensSelector";
-import { LensType, LensCoating, useInventoryStore } from "@/store/inventoryStore";
+import { LensType, LensCoating, LensThickness, useInventoryStore } from "@/store/inventoryStore";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface EditWorkOrderDialogProps {
@@ -43,6 +43,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   const [editedWorkOrder, setEditedWorkOrder] = useState<any>({...workOrder});
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
+  const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(null);
   const [skipLens, setSkipLens] = useState(false);
   
   // Get the patient associated with this work order
@@ -131,12 +132,12 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         if ('lensType' in updatedOrder && typeof updatedOrder.lensType === 'object') {
           updatedOrder.lensType = {
             name: selectedLensType.name,
-            price: selectedLensType.price
+            price: selectedLensType.price || 0 // Handle undefined price
           };
         } else {
           // For invoices that store lens info differently
           updatedOrder.lensType = selectedLensType.name;
-          updatedOrder.lensPrice = selectedLensType.price;
+          updatedOrder.lensPrice = selectedLensType.price || 0; // Handle undefined price
         }
       }
       
@@ -348,10 +349,12 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                 <LensSelector
                   onSelectLensType={setSelectedLensType}
                   onSelectCoating={setSelectedCoating}
+                  onSelectThickness={setSelectedThickness} // Add missing prop
                   skipLens={skipLens}
                   onSkipLensChange={setSkipLens}
                   initialLensType={selectedLensType}
                   initialCoating={selectedCoating}
+                  initialThickness={selectedThickness}
                 />
               </CardContent>
             </Card>
