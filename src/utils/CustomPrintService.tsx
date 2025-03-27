@@ -34,7 +34,7 @@ export class CustomPrintService {
                   width: 80mm !important;
                   margin: 0 !important;
                   padding: 0 !important;
-                  background: white !important;
+                  background: white !important; /* White background for print */
                   color: black !important;
                 }
                 
@@ -55,7 +55,6 @@ export class CustomPrintService {
                   height: auto !important;
                   min-height: 0 !important;
                   max-height: none !important;
-                  text-align: center !important;
                 }
                 
                 /* Force content to be visible */
@@ -75,33 +74,6 @@ export class CustomPrintService {
                 
                 .text-white {
                   color: white !important;
-                }
-                
-                /* Colors for remaining payment and paid status */
-                .bg-red-100 {
-                  background-color: #fee2e2 !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                  color-adjust: exact !important;
-                }
-                
-                .bg-green-50 {
-                  background-color: #f0fdf4 !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                  color-adjust: exact !important;
-                }
-                
-                .text-green-600 {
-                  color: #16a34a !important;
-                }
-                
-                /* Text color for remaining payment amount */
-                [style*="color: #cc0000"] {
-                  color: #cc0000 !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                  color-adjust: exact !important;
                 }
                 
                 /* Improve dynamic sizing */
@@ -133,28 +105,10 @@ export class CustomPrintService {
                   page-break-inside: avoid !important;
                   page-break-after: avoid !important;
                 }
-                
-                /* Compact product styling */
-                .space-y-1 > * {
-                  margin-top: 0.25rem !important;
-                  margin-bottom: 0.25rem !important;
-                }
-                
-                .p-1 {
-                  padding: 0.25rem !important;
-                }
-                
-                .text-xs {
-                  font-size: 0.75rem !important;
-                }
-                
-                .text-\[9px\] {
-                  font-size: 9px !important;
-                }
               }
               
               body {
-                font-family: 'Zain', 'Yrsa', Arial, sans-serif;
+                font-family: Cairo, Arial, sans-serif;
                 margin: 0;
                 padding: 0;
                 background: white;
@@ -165,23 +119,6 @@ export class CustomPrintService {
               .bg-black {
                 background-color: black !important;
                 color: white !important;
-              }
-              
-              .bg-red-100 {
-                background-color: #fee2e2 !important;
-              }
-              
-              .bg-green-50 {
-                background-color: #f0fdf4 !important;
-              }
-              
-              .text-green-600 {
-                color: #16a34a !important;
-              }
-              
-              /* Red text for remaining amount */
-              [style*="color: #cc0000"] {
-                color: #cc0000 !important;
               }
             </style>
           </head>
