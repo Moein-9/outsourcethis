@@ -141,6 +141,16 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   const hasValidationErrors = validationErrors.rightEye.cylinderAxisError || 
                               validationErrors.leftEye.cylinderAxisError;
 
+  // Column widths - making AXIS column wider
+  const columnWidths = {
+    label: "w-[15%]",
+    sphere: "w-[17%]",
+    cylinder: "w-[17%]",
+    axis: "w-[20%]", // Increased width for better readability
+    bc: "w-[15%]",
+    dia: "w-[16%]"
+  };
+
   return (
     <div className={`rounded-lg border p-4 bg-white shadow-sm ${dirClass}`}>
       <div className={`flex items-center justify-between mb-4 pb-2 border-b ${textAlignClass}`}>
@@ -164,24 +174,24 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
         <table className="w-full border-collapse ltr">
           <thead>
             <tr className="bg-blue-50">
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm"></th>
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm">SPHERE (SPH)</th>
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm">CYLINDER (CYL)</th>
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm">AXIS</th>
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm">BASE CURVE (BC)</th>
-              <th className="border border-blue-100 p-2 text-blue-700 text-sm">DIAMETER (DIA)</th>
+              <th className={`border border-blue-100 p-2 text-blue-700 text-sm ${columnWidths.label}`}></th>
+              <th className={`border border-blue-100 p-2 text-blue-700 text-sm ${columnWidths.sphere}`}>SPHERE (SPH)</th>
+              <th className={`border border-blue-100 p-2 text-blue-700 text-sm ${columnWidths.cylinder}`}>CYLINDER (CYL)</th>
+              <th className={`border border-blue-100 p-2 text-blue-700 text-sm ${columnWidths.axis}`}>AXIS</th>
+              <th className={`border border-blue-100 p-2 text-blue-700 text-sm ${columnWidths.bc}`}>BASE CURVE (BC)</th>
+              <th className={`border border-blue-100 p-2 text-blue-700 text-sm ${columnWidths.dia}`}>DIAMETER (DIA)</th>
             </tr>
           </thead>
           <tbody>
             {/* Right Eye Row */}
             <tr className="bg-blue-50/30">
-              <td className="border border-blue-100 p-2">
+              <td className={`border border-blue-100 p-2 ${columnWidths.label}`}>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                   <span className="font-medium text-blue-800">{t("rightEye")} (OD)</span>
                 </div>
               </td>
-              <td className="border border-blue-100 p-2">
+              <td className={`border border-blue-100 p-2 ${columnWidths.sphere}`}>
                 <select 
                   className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
                   value={rxData.rightEye.sphere}
@@ -190,7 +200,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   {generateSphereOptions()}
                 </select>
               </td>
-              <td className="border border-blue-100 p-2">
+              <td className={`border border-blue-100 p-2 ${columnWidths.cylinder}`}>
                 <select 
                   className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
                   value={rxData.rightEye.cylinder}
@@ -199,7 +209,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   {generateCylinderOptions()}
                 </select>
               </td>
-              <td className="border border-blue-100 p-2">
+              <td className={`border border-blue-100 p-2 ${columnWidths.axis}`}>
                 <select 
                   className={`w-full p-1 rounded-md border ${validationErrors.rightEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-blue-200 bg-white'} text-sm`}
                   value={rxData.rightEye.axis}
@@ -208,7 +218,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   {generateAxisOptions()}
                 </select>
               </td>
-              <td className="border border-blue-100 p-2">
+              <td className={`border border-blue-100 p-2 ${columnWidths.bc}`}>
                 <select 
                   className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
                   value={rxData.rightEye.bc}
@@ -222,7 +232,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   <option value="8.8">8.8</option>
                 </select>
               </td>
-              <td className="border border-blue-100 p-2">
+              <td className={`border border-blue-100 p-2 ${columnWidths.dia}`}>
                 <select
                   className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
                   value={rxData.rightEye.dia}
@@ -239,13 +249,13 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
             
             {/* Left Eye Row */}
             <tr className="bg-rose-50/30">
-              <td className="border border-rose-100 p-2">
+              <td className={`border border-rose-100 p-2 ${columnWidths.label}`}>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-rose-500"></div>
                   <span className="font-medium text-rose-800">{t("leftEye")} (OS)</span>
                 </div>
               </td>
-              <td className="border border-rose-100 p-2">
+              <td className={`border border-rose-100 p-2 ${columnWidths.sphere}`}>
                 <select 
                   className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
                   value={rxData.leftEye.sphere}
@@ -254,7 +264,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   {generateSphereOptions()}
                 </select>
               </td>
-              <td className="border border-rose-100 p-2">
+              <td className={`border border-rose-100 p-2 ${columnWidths.cylinder}`}>
                 <select 
                   className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
                   value={rxData.leftEye.cylinder}
@@ -263,7 +273,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   {generateCylinderOptions()}
                 </select>
               </td>
-              <td className="border border-rose-100 p-2">
+              <td className={`border border-rose-100 p-2 ${columnWidths.axis}`}>
                 <select 
                   className={`w-full p-1 rounded-md border ${validationErrors.leftEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-rose-200 bg-white'} text-sm`}
                   value={rxData.leftEye.axis}
@@ -272,7 +282,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   {generateAxisOptions()}
                 </select>
               </td>
-              <td className="border border-rose-100 p-2">
+              <td className={`border border-rose-100 p-2 ${columnWidths.bc}`}>
                 <select 
                   className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
                   value={rxData.leftEye.bc}
@@ -286,7 +296,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   <option value="8.8">8.8</option>
                 </select>
               </td>
-              <td className="border border-rose-100 p-2">
+              <td className={`border border-rose-100 p-2 ${columnWidths.dia}`}>
                 <select
                   className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
                   value={rxData.leftEye.dia}
