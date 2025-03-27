@@ -74,11 +74,20 @@ export class CustomPrintService {
                 }
                 
                 /* Red color for remaining payment */
+                .payment-remaining, 
                 [style*="color: #ea384c"] {
                   color: #ea384c !important;
+                  background-color: #FEE2E2 !important;
                   -webkit-print-color-adjust: exact !important;
                   print-color-adjust: exact !important;
                   color-adjust: exact !important;
+                  border: 1px solid #FECACA !important;
+                }
+                
+                /* Compact product boxes styling */
+                .product-box {
+                  padding: 2px !important;
+                  margin-bottom: 2px !important;
                 }
                 
                 /* Improve dynamic sizing */
@@ -127,8 +136,18 @@ export class CustomPrintService {
               }
               
               /* Red color for remaining payment */
+              .payment-remaining, 
               [style*="color: #ea384c"] {
                 color: #ea384c !important;
+                background-color: #FEE2E2 !important;
+                border: 1px solid #FECACA !important;
+                font-weight: bold !important;
+              }
+              
+              /* Compact product boxes styling */
+              .product-box {
+                padding: 2px !important;
+                margin-bottom: 2px !important;
               }
             </style>
           </head>
@@ -173,6 +192,30 @@ export class CustomPrintService {
                 element.textContent = new Date(rxCreationDate).toLocaleString('en-US');
               }
             });
+          }
+          
+          // Add compact styling to product boxes
+          const productBoxes = printWindow.document.querySelectorAll('.p-1.border.border-gray-300.rounded.mb-1');
+          productBoxes.forEach(box => {
+            if (box instanceof HTMLElement) {
+              box.classList.add('product-box');
+            }
+          });
+          
+          // Remove thank you message and disclaimer if they exist
+          const thankYouElement = printWindow.document.querySelector('div[style*="text-align: center"]');
+          if (thankYouElement && thankYouElement.textContent?.includes('Thank you')) {
+            thankYouElement.remove();
+          }
+          
+          // Enhance the remaining payment styling
+          const remainingPaymentElement = printWindow.document.querySelector('div[style*="color: #B91C1C"]');
+          if (remainingPaymentElement && remainingPaymentElement instanceof HTMLElement) {
+            remainingPaymentElement.classList.add('payment-remaining');
+            remainingPaymentElement.style.fontSize = '16px';
+            remainingPaymentElement.style.padding = '6px';
+            remainingPaymentElement.style.margin = '6px 0';
+            remainingPaymentElement.style.fontWeight = 'bold';
           }
           
           // Wait for content to load before proceeding
