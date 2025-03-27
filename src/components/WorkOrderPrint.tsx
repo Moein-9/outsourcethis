@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -13,6 +14,7 @@ interface WorkOrderPrintProps {
   rx?: any;
   lensType?: string;
   coating?: string;
+  thickness?: string;
   frame?: {
     brand: string;
     model: string;
@@ -46,6 +48,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   rx,
   lensType,
   coating,
+  thickness,
   frame,
   contactLenses,
   contactLensRx
@@ -57,6 +60,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const phone = patientPhone || invoice.patientPhone;
   const lensTypeValue = lensType || invoice.lensType;
   const coatingValue = coating || invoice.coating;
+  const thicknessValue = thickness || (invoice as any).thickness;
   
   const contactLensItems = contactLenses || (invoice as any).contactLensItems || [];
   const contactLensRxData = contactLensRx || (invoice as any).contactLensRx;
@@ -382,6 +386,12 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                   <span className="data-value">{coatingValue}</span>
                 </div>
               )}
+              {thicknessValue && (
+                <div className="data-row">
+                  <span className="data-label">{t("thickness")}:</span>
+                  <span className="data-value">{thicknessValue}</span>
+                </div>
+              )}
               <div className="data-row">
                 <span className="data-label">{t("price")}:</span>
                 <span className="data-value">{invoice.lensPrice.toFixed(3)} KWD</span>
@@ -390,6 +400,12 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 <div className="data-row">
                   <span className="data-label">{t("coatingPrice")}:</span>
                   <span className="data-value">{invoice.coatingPrice.toFixed(3)} KWD</span>
+                </div>
+              )}
+              {thicknessValue && (invoice as any).thicknessPrice && (
+                <div className="data-row">
+                  <span className="data-label">{t("thicknessPrice")}:</span>
+                  <span className="data-value">{(invoice as any).thicknessPrice.toFixed(3)} KWD</span>
                 </div>
               )}
             </div>
