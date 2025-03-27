@@ -77,16 +77,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const invoiceType = (invoice as any).invoiceType || 'glasses';
   
   const orderNumber = invoice.workOrderId || "NEW ORDER";
-  
-  const total = invoice.total || 0;
-  const deposit = invoice.deposit || 0;
-  const remaining = invoice.remaining || 0;
-  const isPaid = remaining <= 0;
-
-  const formatDate = () => {
-    const date = new Date(invoice.createdAt);
-    return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')} ${format(date, 'yyyy-MM-dd')}`;
-  };
 
   return (
     <div className="print-wrapper">
@@ -103,12 +93,16 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               padding: 0 !important;
             }
 
+            /* Reset visibility */
+            * {
+              visibility: visible !important;
+            }
+
             html, body {
               width: 80mm !important;
               height: auto !important;
               margin: 0 !important;
               padding: 0 !important;
-              background: white !important;
             }
 
             .print-wrapper {
@@ -116,7 +110,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               width: 80mm !important;
             }
 
-            #work-order-print {
+            #thermal-print {
               visibility: visible !important;
               position: fixed !important;
               left: 0 !important;
@@ -125,514 +119,323 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               padding: 0mm !important;
               margin: 0 !important;
               background: white !important;
-              border: none !important;
             }
 
-            .section-heading {
-              background-color: black !important;
-              color: white !important;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
+            /* Content styles */
+            .print-section {
+              width: 75mm !important;
+              margin-bottom: 3mm !important;
+              padding: 0 1mm !important;
             }
 
-            .logo-img {
-              margin: 0 auto !important;
-              display: block !important;
-              width: auto !important;
-              height: 10mm !important;
-            }
-
-            .red-bg {
-              background-color: #ffeeee !important;
-              border: 1px solid #ffdddd !important;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
+            .print-text-lg { font-size: 14pt !important; }
+            .print-text-md { font-size: 12pt !important; }
+            .print-text-sm { font-size: 10pt !important; }
 
             table {
               width: 100% !important;
               border-collapse: collapse !important;
+              direction: ltr !important;
             }
 
             td, th {
-              border: 1px solid black !important;
+              border: 0.2mm solid black !important;
               padding: 1mm !important;
               text-align: center !important;
+              font-size: 9pt !important;
             }
-
-            .signature-box {
-              border: 1px solid #ddd !important;
+            
+            th {
+              font-weight: bold !important;
+              background-color: #f0f0f0 !important;
+            }
+            
+            .section-heading {
+              font-size: 12pt !important;
+              font-weight: bold !important;
+              margin: 4mm 0 2mm 0 !important;
+              border-bottom: 0.3mm solid #000 !important;
+              padding-bottom: 1mm !important;
+              display: flex !important;
+              align-items: center !important;
+            }
+            
+            .section-heading svg {
+              margin-right: 2mm !important;
+            }
+            
+            .data-row {
+              display: flex !important;
+              justify-content: space-between !important;
+              margin-bottom: 1mm !important;
+              font-size: 10pt !important;
+            }
+            
+            .data-label {
+              font-weight: bold !important;
+              min-width: 30mm !important;
+            }
+            
+            .data-value {
+              flex: 1 !important;
+              text-align: ${language === 'ar' ? 'right' : 'left'} !important;
+            }
+            
+            .signature-line {
+              border-bottom: 0.3mm solid #000 !important;
+              width: 50mm !important;
+              height: 8mm !important;
+              margin: 2mm 0 !important;
+            }
+            
+            .date-line {
+              font-size: 9pt !important;
+              margin-top: 1mm !important;
             }
           }
         `}
       </style>
 
-      <div 
-        id="work-order-print" 
-        className={dirClass} 
-        style={{ 
-          width: "80mm", 
-          margin: "0 auto", 
-          padding: "0", 
-          backgroundColor: "white", 
-          border: "1px solid #ddd", 
-          boxSizing: "border-box",
-          fontSize: "14px",
-          fontFamily: "'Cairo', sans-serif"
-        }}
-      >
-        {/* Header */}
-        <div style={{ textAlign: "center", padding: "8px 0 6px" }}>
-          <div style={{ marginBottom: "5px" }}>
-            <MoenLogo className="logo-img mx-auto" style={{ height: "36px", width: "auto" }} />
+      <div id="work-order-print" className={dirClass} style={{ width: "80mm", padding: "2mm" }}>
+        <div style={{ textAlign: "center", marginBottom: "5mm", position: "relative" }}>
+          <div className="absolute right-0 top-0 hide-print">
+            <ClipboardCheck className="w-10 h-10 text-primary" />
           </div>
-          <div style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "2px" }}>
-            Moen Optician
-          </div>
-          <div style={{ fontSize: "12px", marginBottom: "2px" }}>
-            {storeInfo.address}
-          </div>
-          <div style={{ fontSize: "12px", marginBottom: "4px" }}>
-            {t("phone")}: {storeInfo.phone}
-          </div>
-          
-          <div style={{ borderTop: "1px solid #ddd", paddingTop: "6px", marginBottom: "2px" }}>
-            <div style={{ fontSize: "18px", fontWeight: "bold" }}>
-              {language === 'ar' ? 'أمر عمل' : 'ORDER'} + PREVIEW
-            </div>
-            <div style={{ fontSize: "13px", color: "#555" }}>
-              {orderNumber}
-            </div>
-            <div style={{ fontSize: "13px", color: "#555" }}>
-              {formatDate()}
-            </div>
+          <MoenLogo className="mx-auto w-auto" style={{ height: "10mm", marginBottom: "1mm" }} />
+          <h1 style={{ fontSize: "16pt", fontWeight: "bold", margin: "1mm 0" }}>{t("workOrder")}</h1>
+          <p style={{ fontSize: "14pt", margin: "1mm 0", color: "#333" }}>{orderNumber}</p>
+          <p style={{ fontSize: "10pt", margin: "1mm 0", color: "#666" }}>
+            {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
+          </p>
+          <div style={{ fontSize: "9pt", textAlign: "center", marginTop: "1mm" }}>
+            <p style={{ margin: "0" }}>{storeInfo.address}</p>
+            <p style={{ margin: "0" }}>{t("phone")}: {storeInfo.phone}</p>
           </div>
         </div>
 
-        {/* Patient Information */}
-        <div style={{ marginBottom: "8px" }}>
-          <div 
-            className="section-heading" 
-            style={{ 
-              backgroundColor: "black", 
-              color: "white", 
-              padding: "4px 8px", 
-              fontWeight: "bold",
-              display: "flex",
-              justifyContent: "space-between"
-            }}
-          >
-            <span>{language === 'ar' ? 'معلومات المريض' : 'Patient Information'} | {language === 'ar' ? 'Patient Information' : 'معلومات المريض'}</span>
+        <div className="section-heading">
+          <User style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+          <span>{t("patientInformation")} {language === 'ar' && '(معلومات المريض)'}</span>
+        </div>
+        
+        <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+          <div className="data-row">
+            <span className="data-label">{t("name")}:</span>
+            <span className="data-value">{name}</span>
           </div>
-          
-          <div style={{ marginTop: "4px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "0 8px" }}>
-              <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                {language === 'ar' ? 'الاسم:' : 'Customer Name'}
-              </div>
-              <div>
-                {name}
-              </div>
+          <div className="data-row">
+            <span className="data-label">{t("phone")}:</span>
+            <span className="data-value">{phone}</span>
+          </div>
+          {invoice.patientId && (
+            <div className="data-row">
+              <span className="data-label">{t("patientId")}:</span>
+              <span className="data-value">{invoice.patientId}</span>
             </div>
-            
-            {phone && (
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "0 8px", marginTop: "4px" }}>
-                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                  {language === 'ar' ? 'الهاتف:' : 'Phone'}
-                </div>
-                <div>
-                  {phone}
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
-        {/* Product Details */}
-        <div style={{ marginBottom: "8px" }}>
-          <div 
-            className="section-heading" 
-            style={{ 
-              backgroundColor: "black", 
-              color: "white", 
-              padding: "4px 8px", 
-              fontWeight: "bold",
-              display: "flex",
-              justifyContent: "space-between"
-            }}
-          >
-            <span>{language === 'ar' ? 'تفاصيل المنتج' : 'Product Details'} | {language === 'ar' ? 'Product Details' : 'تفاصيل المنتج'}</span>
-          </div>
-          
-          {/* Lenses Information */}
-          {lensTypeValue && !isContactLens && (
-            <div style={{ padding: "0 8px", marginTop: "6px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ fontWeight: "bold" }}>
-                  {language === 'ar' ? 'العدسات (Lenses)' : 'Lenses (العدسات)'}:
-                </div>
+        {invoiceType === 'glasses' && frameData && (
+          <>
+            <div className="section-heading">
+              <Glasses style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("frameDetails")} {language === 'ar' && '(تفاصيل الإطار)'}</span>
+            </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+              <div className="data-row">
+                <span className="data-label">{t("brand")}:</span>
+                <span className="data-value">{frameData.brand}</span>
               </div>
-              
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                <div style={{ fontSize: "14px" }}>
-                  {language === 'ar' ? 'النوع (Type)' : 'Type (النوع)'}:
-                </div>
-                <div>
-                  {lensTypeValue === 'Single Vision' ? 'نظارات للقراءة' : lensTypeValue}
-                </div>
+              <div className="data-row">
+                <span className="data-label">{t("model")}:</span>
+                <span className="data-value">{frameData.model}</span>
               </div>
-
-              {coatingValue && (
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                  <div style={{ fontSize: "14px" }}>
-                    {language === 'ar' ? 'الطلاء (Coating)' : 'Coating (الطلاء)'}:
-                  </div>
-                  <div>
-                    {coatingValue === 'Anti-Reflective' ? 'Basic (عادي)' : coatingValue}
-                  </div>
-                </div>
-              )}
-
-              {thicknessValue && (
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                  <div style={{ fontSize: "14px" }}>
-                    {language === 'ar' ? 'السماكة (Thickness)' : 'Thickness (السماكة)'}:
-                  </div>
-                  <div>
-                    {thicknessValue === 'Super Thin 1.67' ? 'Super Thin 1.67 (رقيق جداً)' : thicknessValue}
-                  </div>
-                </div>
-              )}
-              
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                <div style={{ fontSize: "14px" }}>
-                  {language === 'ar' ? 'السعر (Price)' : 'Price (السعر)'}:
-                </div>
-                <div>
-                  KWD {invoice.lensPrice?.toFixed(3) || "0.000"}
-                </div>
+              <div className="data-row">
+                <span className="data-label">{t("color")}:</span>
+                <span className="data-value">{frameData.color}</span>
+              </div>
+              <div className="data-row">
+                <span className="data-label">{t("size")}:</span>
+                <span className="data-value">{frameData.size || "-"}</span>
               </div>
             </div>
-          )}
-          
-          {/* Frame Information */}
-          {frameData && frameData.brand && !isContactLens && (
-            <div style={{ padding: "0 8px", marginTop: "10px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ fontWeight: "bold" }}>
-                  {language === 'ar' ? 'الإطار (Frame)' : 'Frame (الإطار)'}:
-                </div>
-              </div>
-              
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                <div style={{ fontSize: "14px" }}>
-                  {language === 'ar' ? 'الماركة:' : 'Brand:'}
-                </div>
-                <div>
-                  {frameData.brand}
-                </div>
-              </div>
-              
-              {frameData.model && (
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                  <div style={{ fontSize: "14px" }}>
-                    {language === 'ar' ? 'الموديل:' : 'Model:'}
-                  </div>
-                  <div>
-                    {frameData.model}
-                  </div>
-                </div>
-              )}
-              
-              {frameData.color && (
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                  <div style={{ fontSize: "14px" }}>
-                    {language === 'ar' ? 'اللون:' : 'Color:'}
-                  </div>
-                  <div>
-                    {frameData.color}
-                  </div>
-                </div>
-              )}
-              
-              {frameData.size && (
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                  <div style={{ fontSize: "14px" }}>
-                    {language === 'ar' ? 'الحجم:' : 'Size:'}
-                  </div>
-                  <div>
-                    {frameData.size}
-                  </div>
-                </div>
-              )}
-              
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                <div style={{ fontSize: "14px" }}>
-                  {language === 'ar' ? 'السعر:' : 'Price:'}
-                </div>
-                <div>
-                  KWD {frameData.price?.toFixed(3) || "0.000"}
-                </div>
-              </div>
+          </>
+        )}
+        
+        {isContactLens && (
+          <>
+            <div className="section-heading">
+              <Contact style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("contactLensDetails")} {language === 'ar' && '(تفاصيل العدسات اللاصقة)'}</span>
             </div>
-          )}
-          
-          {/* Contact Lens Information */}
-          {isContactLens && contactLensItems.length > 0 && (
-            <div style={{ padding: "0 8px", marginTop: "6px" }}>
-              <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
-                {language === 'ar' ? 'العدسات اللاصقة:' : 'Contact Lenses:'}
-              </div>
-              
+            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
               {contactLensItems.map((lens, idx) => (
-                <div key={idx} style={{ marginBottom: idx < contactLensItems.length - 1 ? "8px" : "0" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <div style={{ fontSize: "14px" }}>
-                      {language === 'ar' ? 'النوع:' : 'Type:'}
-                    </div>
-                    <div>
-                      {lens.brand} {lens.type}
-                    </div>
+                <div key={idx} style={{ marginBottom: "2mm", borderBottom: idx < contactLensItems.length - 1 ? "0.2mm dashed #ccc" : "none", paddingBottom: "1mm" }}>
+                  <div className="data-row">
+                    <span className="data-label">{t("lens")} {idx + 1}:</span>
+                    <span className="data-value">{lens.brand} {lens.type}</span>
                   </div>
-                  
                   {lens.color && (
-                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                      <div style={{ fontSize: "14px" }}>
-                        {language === 'ar' ? 'اللون:' : 'Color:'}
-                      </div>
-                      <div>
-                        {lens.color}
-                      </div>
+                    <div className="data-row">
+                      <span className="data-label">{t("color")}:</span>
+                      <span className="data-value">{lens.color}</span>
                     </div>
                   )}
-                  
-                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                    <div style={{ fontSize: "14px" }}>
-                      {language === 'ar' ? 'الكمية:' : 'Quantity:'}
-                    </div>
-                    <div>
-                      {lens.qty || 1}
-                    </div>
-                  </div>
-                  
-                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                    <div style={{ fontSize: "14px" }}>
-                      {language === 'ar' ? 'السعر:' : 'Price:'}
-                    </div>
-                    <div>
-                      KWD {lens.price?.toFixed(3) || "0.000"}
-                    </div>
-                  </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </>
+        )}
 
-        {/* Prescription Details (if exists) */}
-        {rx && invoiceType === 'glasses' && (
-          <div style={{ marginBottom: "8px" }}>
-            <div 
-              className="section-heading" 
-              style={{ 
-                backgroundColor: "black", 
-                color: "white", 
-                padding: "4px 8px", 
-                fontWeight: "bold",
-                display: "flex",
-                justifyContent: "space-between"
-              }}
-            >
-              <span>{language === 'ar' ? 'تفاصيل الوصفة الطبية' : 'Prescription Details'} | {language === 'ar' ? 'Prescription Details' : 'تفاصيل الوصفة الطبية'}</span>
+        {invoiceType === 'glasses' && rx && (
+          <>
+            <div className="section-heading">
+              <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("prescriptionDetails")} {language === 'ar' && '(تفاصيل الوصفة الطبية)'}</span>
             </div>
-            
-            <div style={{ padding: "6px 8px" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", direction: "ltr" }}>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
-                    <th style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{t("eye")}</th>
-                    <th style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>SPH</th>
-                    <th style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>CYL</th>
-                    <th style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>AXIS</th>
-                    <th style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>ADD</th>
-                    <th style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>PD</th>
+                    <th style={{ textAlign: "center" }}>{t("eye")}</th>
+                    <th style={{ textAlign: "center" }}>SPH</th>
+                    <th style={{ textAlign: "center" }}>CYL</th>
+                    <th style={{ textAlign: "center" }}>AXIS</th>
+                    <th style={{ textAlign: "center" }}>ADD</th>
+                    <th style={{ textAlign: "center" }}>PD</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontWeight: "bold", fontSize: "13px" }}>OD (يمين)</td>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{rx?.sphereOD || "----"}</td>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{rx?.cylOD || "----"}</td>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{rx?.axisOD || "----"}</td>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{rx?.addOD || "----"}</td>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{rx?.pdRight || rx?.pd || "----"}</td>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.sphereOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.cylOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.axisOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.addOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.pdRight || rx?.pd || "_____"}</td>
                   </tr>
                   <tr>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontWeight: "bold", fontSize: "13px" }}>OS (يسار)</td>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{rx?.sphereOS || "----"}</td>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{rx?.cylOS || "----"}</td>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{rx?.axisOS || "----"}</td>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{rx?.addOS || "----"}</td>
-                    <td style={{ border: "1px solid black", padding: "3px", textAlign: "center", fontSize: "13px" }}>{rx?.pdLeft || rx?.pd || "----"}</td>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.sphereOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.cylOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.axisOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.addOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.pdLeft || rx?.pd || "_____"}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-          </div>
+          </>
         )}
         
-        {/* Payment Information */}
-        <div style={{ marginBottom: "8px" }}>
-          <div 
-            className="section-heading" 
-            style={{ 
-              backgroundColor: "black", 
-              color: "white", 
-              padding: "4px 8px", 
-              fontWeight: "bold",
-              display: "flex",
-              justifyContent: "space-between"
-            }}
-          >
-            <span>{language === 'ar' ? 'معلومات الدفع' : 'Payment Information'} | {language === 'ar' ? 'Payment Information' : 'معلومات الدفع'}</span>
-          </div>
-          
-          <div style={{ padding: "6px 8px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-              <div style={{ fontSize: "14px", fontWeight: "bold" }}>
-                {language === 'ar' ? 'المجموع الفرعي:' : 'Subtotal:'}
-              </div>
-              <div>
-                KWD {total.toFixed(3)}
-              </div>
+        {isContactLens && contactLensRxData && (
+          <>
+            <div className="section-heading">
+              <Eye style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("contactLensPrescription")} {language === 'ar' && '(وصفة العدسات اللاصقة)'}</span>
             </div>
-            
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-              <div style={{ fontSize: "14px", fontWeight: "bold" }}>
-                {language === 'ar' ? 'المدفوع:' : 'Paid:'}
-              </div>
-              <div>
-                KWD {deposit.toFixed(3)}
-              </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm", direction: "ltr" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: "center" }}>{t("eye")}</th>
+                    <th style={{ textAlign: "center" }}>SPH</th>
+                    <th style={{ textAlign: "center" }}>CYL</th>
+                    <th style={{ textAlign: "center" }}>AXIS</th>
+                    <th style={{ textAlign: "center" }}>BC</th>
+                    <th style={{ textAlign: "center" }}>DIA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.dia || "_____"}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.dia || "_____"}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: !isPaid ? "8px" : "0" }}>
-              <div style={{ fontSize: "14px", fontWeight: "bold" }}>
-                {language === 'ar' ? 'المتبقي:' : 'Remaining:'}
-              </div>
-              <div>
-                KWD {remaining.toFixed(3)}
-              </div>
+          </>
+        )}
+
+        {invoiceType === 'glasses' && lensTypeValue && (
+          <>
+            <div className="section-heading">
+              <Ruler style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              <span>{t("lensDetails")} {language === 'ar' && '(تفاصيل العدسات)'}</span>
             </div>
-            
-            {!isPaid && remaining > 0 && (
-              <div 
-                className="red-bg"
-                style={{ 
-                  textAlign: "center", 
-                  padding: "6px", 
-                  backgroundColor: "#ffeeee", 
-                  border: "1px solid #ffdddd",
-                  borderRadius: "4px", 
-                  marginTop: "4px" 
-                }}
-              >
-                <div style={{ fontSize: "14px", fontWeight: "bold", color: "#cc0000" }}>
-                  {language === 'ar' ? 'المبلغ المتبقي' : 'REMAINING AMOUNT'}
-                </div>
-                <div style={{ fontSize: "16px", fontWeight: "bold", color: "#cc0000" }}>
-                  KWD {remaining.toFixed(3)}
-                </div>
-                <div style={{ fontSize: "12px", color: "#cc0000" }}>
-                  {language === 'ar' ? 'REMAINING AMOUNT' : 'المبلغ المتبقي'}
-                </div>
+            <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+              <div className="data-row">
+                <span className="data-label">{t("type")}:</span>
+                <span className="data-value">{lensTypeValue}</span>
               </div>
-            )}
-          </div>
+              {coatingValue && (
+                <div className="data-row">
+                  <span className="data-label">{t("coating")}:</span>
+                  <span className="data-value">{coatingValue}</span>
+                </div>
+              )}
+              {thicknessValue && (
+                <div className="data-row">
+                  <span className="data-label">{t("thickness")}:</span>
+                  <span className="data-value">{thicknessValue}</span>
+                </div>
+              )}
+              <div className="data-row">
+                <span className="data-label">{t("price")}:</span>
+                <span className="data-value">{invoice.lensPrice.toFixed(3)} KWD</span>
+              </div>
+              {coatingValue && (
+                <div className="data-row">
+                  <span className="data-label">{t("coatingPrice")}:</span>
+                  <span className="data-value">{invoice.coatingPrice.toFixed(3)} KWD</span>
+                </div>
+              )}
+              {thicknessValue && (invoice as any).thicknessPrice && (
+                <div className="data-row">
+                  <span className="data-label">{t("thicknessPrice")}:</span>
+                  <span className="data-value">{(invoice as any).thicknessPrice.toFixed(3)} KWD</span>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        <div className="section-heading">
+          <CircleDot style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+          <span>{t("additionalNotes")} {language === 'ar' && '(ملاحظات إضافية)'}</span>
         </div>
-        
-        {/* Quality Confirmation */}
-        <div style={{ marginBottom: "8px" }}>
-          <div 
-            className="section-heading" 
-            style={{ 
-              backgroundColor: "black", 
-              color: "white", 
-              padding: "4px 8px", 
-              fontWeight: "bold",
-              display: "flex",
-              justifyContent: "space-between"
-            }}
-          >
-            <span>{language === 'ar' ? 'تأكيد الجودة' : 'Quality Confirmation'} | {language === 'ar' ? 'Quality Confirmation' : 'تأكيد الجودة'}</span>
-          </div>
-          
-          <div style={{ display: "flex", marginTop: "4px" }}>
-            <div 
-              className="signature-box"
-              style={{ 
-                flex: "1", 
-                borderRight: language === 'ar' ? "none" : "1px solid #ddd", 
-                borderLeft: language === 'ar' ? "1px solid #ddd" : "none",
-                padding: "8px", 
-                textAlign: "center",
-                minHeight: "60px"
-              }}
-            >
-              <div style={{ marginBottom: "6px", fontSize: "14px", fontWeight: "bold" }}>
-                {language === 'ar' ? 'توقيع الفني' : 'Technician Signature'}
-              </div>
-              <div style={{ fontSize: "12px", marginTop: "30px" }}>
-                {language === 'ar' ? 'التاريخ: __/__/____' : 'Date: __/__/____'}
-              </div>
-            </div>
-            
-            <div 
-              className="signature-box"
-              style={{ 
-                flex: "1", 
-                padding: "8px", 
-                textAlign: "center",
-                minHeight: "60px"
-              }}
-            >
-              <div style={{ marginBottom: "6px", fontSize: "14px", fontWeight: "bold" }}>
-                {language === 'ar' ? 'توقيع المدير' : 'Manager Signature'}
-              </div>
-              <div style={{ fontSize: "12px", marginTop: "30px" }}>
-                {language === 'ar' ? 'التاريخ: __/__/____' : 'Date: __/__/____'}
-              </div>
-            </div>
-          </div>
+        <div style={{ padding: "0 2mm", marginBottom: "4mm" }}>
+          <div style={{ border: "0.2mm solid #000", minHeight: "15mm", backgroundColor: "#fff", width: "100%" }}></div>
         </div>
-        
-        {/* Notes */}
-        <div style={{ marginBottom: "10px" }}>
-          <div 
-            className="section-heading" 
-            style={{ 
-              backgroundColor: "black", 
-              color: "white", 
-              padding: "4px 8px", 
-              fontWeight: "bold",
-              display: "flex",
-              justifyContent: "space-between"
-            }}
-          >
-            <span>{language === 'ar' ? 'ملاحظات' : 'Notes'} | {language === 'ar' ? 'Notes' : 'ملاحظات'}</span>
+
+        <div style={{ marginTop: "5mm", paddingTop: "2mm", borderTop: "0.3mm solid #000" }}>
+          <div style={{ marginBottom: "5mm" }}>
+            <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm" }}>
+              {t("technicianSignature")} {language === 'ar' && '(توقيع الفني)'}
+            </p>
+            <div className="signature-line"></div>
+            <div className="date-line">{t("date")}: ___ / ___ / _____</div>
           </div>
           
-          <div 
-            style={{ 
-              minHeight: "60px", 
-              border: "1px solid #ddd", 
-              margin: "4px 8px 0", 
-              borderRadius: "2px",
-              textAlign: "center",
-              padding: "8px"
-            }}
-          >
-            {/* Notes content would go here */}
+          <div>
+            <p style={{ fontSize: "11pt", fontWeight: "600", marginBottom: "2mm", display: "flex", alignItems: "center" }}>
+              <BadgeCheck style={{ width: "4mm", height: "4mm", marginRight: "1mm" }} />
+              {t("qualityConfirmation")} {language === 'ar' && '(تأكيد الجودة)'}
+            </p>
+            <div className="signature-line"></div>
+            <div className="date-line">{t("date")}: ___ / ___ / _____</div>
           </div>
         </div>
       </div>
