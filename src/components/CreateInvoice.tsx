@@ -344,7 +344,7 @@ const CreateInvoiceContent: React.FC = () => {
                               <div className="flex justify-between items-start">
                                 <div>
                                   <p className="font-medium text-purple-700 flex items-center gap-1">
-                                    <PaintBrush className="w-3 h-3" /> {t('coating')}
+                                    <Paintbrush className="w-3 h-3" /> {t('coating')}
                                   </p>
                                   <p className="text-sm text-gray-600 mt-1">
                                     {getValues("coating")}
