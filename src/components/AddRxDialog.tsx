@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { RxData } from "@/store/patientStore";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Save, Glasses, Eye } from "lucide-react";
+import { Save, Glasses, Eye, AlertTriangle } from "lucide-react";
 
 interface AddRxDialogProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
   onSave,
   initialRx,
 }) => {
-  const { language } = useLanguageStore();
+  const { language, t } = useLanguageStore();
   
   const [rxData, setRxData] = useState<RxData>(
     initialRx || {
@@ -44,14 +44,52 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
     }
   );
 
+  const [validationErrors, setValidationErrors] = useState({
+    rightEye: { cylinderAxisError: false },
+    leftEye: { cylinderAxisError: false }
+  });
+
+  // Validate cylinder/axis relationship on component mount and when rxData changes
+  useEffect(() => {
+    validateCylinderAxis('rightEye', rxData.cylOD, rxData.axisOD);
+    validateCylinderAxis('leftEye', rxData.cylOS, rxData.axisOS);
+  }, [rxData]);
+
+  // Validate that if cylinder has a value, axis must also have a value
+  const validateCylinderAxis = (eye: 'rightEye' | 'leftEye', cylinder: string, axis: string) => {
+    // If cylinder has a non-empty value, axis must also have a non-empty value
+    const hasCylinder = cylinder !== "";
+    const hasAxis = axis !== "";
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [eye]: {
+        ...prev[eye],
+        cylinderAxisError: hasCylinder && !hasAxis
+      }
+    }));
+  };
+
   const handleChange = (field: keyof RxData, value: string) => {
     setRxData((prev) => ({
       ...prev,
       [field]: value,
     }));
+
+    // Validate cylinder/axis relationship on change
+    if (field === 'cylOD' || field === 'axisOD') {
+      validateCylinderAxis('rightEye', field === 'cylOD' ? value : rxData.cylOD, field === 'axisOD' ? value : rxData.axisOD);
+    } else if (field === 'cylOS' || field === 'axisOS') {
+      validateCylinderAxis('leftEye', field === 'cylOS' ? value : rxData.cylOS, field === 'axisOS' ? value : rxData.axisOS);
+    }
   };
 
   const handleSave = () => {
+    // Check for validation errors before saving
+    if (validationErrors.rightEye.cylinderAxisError || validationErrors.leftEye.cylinderAxisError) {
+      return; // Prevent saving if there are validation errors
+    }
+    
     onSave({
       ...rxData,
       createdAt: new Date().toISOString()
@@ -105,6 +143,10 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
   const axisValues = generateAxisValues();
   const addValues = generateAddValues();
   const pdValues = generatePdValues();
+
+  // Check if there are any validation errors
+  const hasValidationErrors = validationErrors.rightEye.cylinderAxisError || 
+                              validationErrors.leftEye.cylinderAxisError;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -171,7 +213,7 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                     </td>
                     <td className="p-2">
                       <select
-                        className="w-full h-8 text-xs rounded border border-indigo-200 bg-white px-2 ltr"
+                        className={`w-full h-8 text-xs rounded border ${validationErrors.rightEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-indigo-200 bg-white'} px-2 ltr`}
                         value={rxData.axisOD}
                         onChange={(e) => handleChange("axisOD", e.target.value)}
                         dir="ltr"
@@ -244,7 +286,7 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                     </td>
                     <td className="p-2">
                       <select
-                        className="w-full h-8 text-xs rounded border border-purple-200 bg-white px-2 ltr"
+                        className={`w-full h-8 text-xs rounded border ${validationErrors.leftEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-purple-200 bg-white'} px-2 ltr`}
                         value={rxData.axisOS}
                         onChange={(e) => handleChange("axisOS", e.target.value)}
                         dir="ltr"
@@ -285,6 +327,16 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                 </tbody>
               </table>
             </div>
+            
+            {/* Validation error message */}
+            {hasValidationErrors && (
+              <div className="p-3 mt-2 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                <p className="text-red-700 text-sm">
+                  {t("axisValidationError") || "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required."}
+                </p>
+              </div>
+            )}
           </div>
         </div>
         
@@ -298,7 +350,8 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
           </Button>
           <Button 
             onClick={handleSave}
-            className="rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-all"
+            disabled={hasValidationErrors}
+            className={`rounded-md ${hasValidationErrors ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'} text-white transition-all`}
           >
             <Save className="h-4 w-4 mr-2" />
             {language === "ar" ? "حفظ الوصفة" : "Save Prescription"}
