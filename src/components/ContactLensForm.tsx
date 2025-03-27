@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Eye, AlertTriangle } from "lucide-react";
@@ -27,6 +27,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   showMissingRxWarning = false
 }) => {
   const { language, t } = useLanguageStore();
+  const [validationErrors, setValidationErrors] = useState({
+    rightEye: { cylinderAxisError: false },
+    leftEye: { cylinderAxisError: false }
+  });
 
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
     const updatedRx = {
@@ -37,6 +41,11 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       }
     };
     onChange(updatedRx);
+    
+    // Validate cylinder/axis relationship on change
+    if (field === 'cylinder' || field === 'axis') {
+      validateCylinderAxis('rightEye', updatedRx.rightEye.cylinder, updatedRx.rightEye.axis);
+    }
   };
 
   const handleLeftEyeChange = (field: keyof ContactLensRx["leftEye"], value: string) => {
@@ -48,7 +57,33 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       }
     };
     onChange(updatedRx);
+    
+    // Validate cylinder/axis relationship on change
+    if (field === 'cylinder' || field === 'axis') {
+      validateCylinderAxis('leftEye', updatedRx.leftEye.cylinder, updatedRx.leftEye.axis);
+    }
   };
+  
+  // Validate that if cylinder has a value, axis must also have a value
+  const validateCylinderAxis = (eye: 'rightEye' | 'leftEye', cylinder: string, axis: string) => {
+    // If cylinder has a non-empty value that's not "-", axis must also have a non-empty value that's not "-"
+    const hasCylinder = cylinder !== "-" && cylinder !== "";
+    const hasAxis = axis !== "-" && axis !== "";
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [eye]: {
+        ...prev[eye],
+        cylinderAxisError: hasCylinder && !hasAxis
+      }
+    }));
+  };
+  
+  // Initial validation on component mount and when rxData changes
+  useEffect(() => {
+    validateCylinderAxis('rightEye', rxData.rightEye.cylinder, rxData.rightEye.axis);
+    validateCylinderAxis('leftEye', rxData.leftEye.cylinder, rxData.leftEye.axis);
+  }, [rxData]);
 
   // Generate sphere options from +4.00 to -9.00
   const generateSphereOptions = () => {
@@ -101,6 +136,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
 
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  
+  // Check if there are any validation errors
+  const hasValidationErrors = validationErrors.rightEye.cylinderAxisError || 
+                              validationErrors.leftEye.cylinderAxisError;
 
   return (
     <div className={`rounded-lg border p-4 bg-white shadow-sm ${dirClass}`}>
@@ -162,7 +201,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               </td>
               <td className="border border-blue-100 p-2">
                 <select 
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md border ${validationErrors.rightEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-blue-200 bg-white'} text-sm`}
                   value={rxData.rightEye.axis}
                   onChange={(e) => handleRightEyeChange("axis", e.target.value)}
                 >
@@ -226,7 +265,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               </td>
               <td className="border border-rose-100 p-2">
                 <select 
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md border ${validationErrors.leftEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-rose-200 bg-white'} text-sm`}
                   value={rxData.leftEye.axis}
                   onChange={(e) => handleLeftEyeChange("axis", e.target.value)}
                 >
@@ -263,6 +302,16 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
             </tr>
           </tbody>
         </table>
+        
+        {/* Validation error message */}
+        {hasValidationErrors && (
+          <div className="p-3 mt-2 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-700 text-sm">
+              {t("axisValidationError") || "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required."}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -40,6 +39,9 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
   const [manualName, setManualName] = useState(getValues<string>('patientName'));
   const [manualPhone, setManualPhone] = useState(getValues<string>('patientPhone'));
   const [showMissingRxWarning, setShowMissingRxWarning] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({
+    cylinderAxisError: false
+  });
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
@@ -68,7 +70,6 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
     setPatientSearchResults([]);
     setRxVisible(true);
     
-    // Update form values
     setValue('patientId', patient.patientId);
     setValue('patientName', patient.name);
     setValue('patientPhone', patient.phone);
@@ -106,6 +107,20 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
   
   const handleContactLensRxChange = (rxData: any) => {
     setValue('contactLensRx', rxData);
+    
+    let hasError = false;
+    
+    if (rxData.rightEye.cylinder !== "-" && rxData.rightEye.axis === "-") {
+      hasError = true;
+    }
+    
+    if (rxData.leftEye.cylinder !== "-" && rxData.leftEye.axis === "-") {
+      hasError = true;
+    }
+    
+    setValidationErrors({
+      cylinderAxisError: hasError
+    });
   };
   
   return (

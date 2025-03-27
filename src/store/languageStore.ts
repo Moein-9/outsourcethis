@@ -343,6 +343,9 @@ const translations: Record<string, Record<string, string>> = {
     goToClientSection: "Go to Client Section",
     anonymous: "Anonymous",
     
+    // Add new translation for axis validation error
+    axisValidationError: "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.",
+    
     // Add the new notesPlaceholder translation
     notesPlaceholder: "You can add any information about the customer here..."
   },
@@ -679,6 +682,9 @@ const translations: Record<string, Record<string, string>> = {
     startBySelectingClient: "ابدأ باختيار عميل في الخطوة الأولى",
     goToClientSection: "اذهب إلى قسم العميل",
     anonymous: "مجهول",
+    
+    // Add new translation for axis validation error in Arabic
+    axisValidationError: "قيم المحور (AXIS) التي أدخلتها غير صحيحة! إذا كانت قيمة الاسطوانة (CYL) موجودة، فيجب تحديد قيمة المحور.",
     
     // Add the new notesPlaceholder translation in Arabic
     notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا..."
