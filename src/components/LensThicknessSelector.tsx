@@ -38,13 +38,22 @@ export const LensThicknessSelector: React.FC<LensThicknessSelectorProps> = ({
   if (disabled) {
     return (
       <div className="p-4 border border-dashed rounded-lg bg-muted/10 text-center">
-        <p className="text-muted-foreground">{t('thicknessDisabled')}</p>
+        <p className="text-muted-foreground">{t('pleaseSelectLensAndCoatingFirst')}</p>
+      </div>
+    );
+  }
+  
+  if (thicknesses.length === 0) {
+    return (
+      <div className="p-4 border border-dashed rounded-lg bg-muted/10 text-center">
+        <p className="text-muted-foreground">{t('noThicknessesAvailable')}</p>
       </div>
     );
   }
   
   return (
     <div className="space-y-4">
+      <h3 className="text-base font-medium mb-2">{t('selectLensThickness')}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {thicknesses.map((thickness) => (
           <div

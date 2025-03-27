@@ -76,7 +76,7 @@ export const InventoryTabs: React.FC = () => {
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold mb-4 text-purple-800 flex items-center gap-2">
             <Layers className="w-5 h-5" />
-            {t('lensTypes')}
+            {t('lensTypeManagement')}
           </h3>
           <LensTypeManager />
         </div>
@@ -86,7 +86,7 @@ export const InventoryTabs: React.FC = () => {
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold mb-4 text-indigo-800 flex items-center gap-2">
             <Ruler className="w-5 h-5" />
-            {t('lensThicknesses')}
+            {t('lensThicknessManagement')}
           </h3>
           <LensThicknessManager />
         </div>
@@ -96,7 +96,7 @@ export const InventoryTabs: React.FC = () => {
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold mb-4 text-teal-800 flex items-center gap-2">
             <Paintbrush className="w-5 h-5" />
-            {t('lensCoatings')}
+            {t('lensCoatingManagement')}
           </h3>
           <LensCoatingManager />
         </div>

@@ -113,6 +113,7 @@ export const LensThicknessManager: React.FC = () => {
                 <Input
                   id="price"
                   type="number"
+                  step="0.01"
                   value={newThicknessPrice}
                   onChange={(e) => setNewThicknessPrice(e.target.value ? Number(e.target.value) : "")}
                   placeholder="0.00"
@@ -193,6 +194,7 @@ export const LensThicknessManager: React.FC = () => {
               <Input
                 id="edit-price"
                 type="number"
+                step="0.01"
                 value={editThicknessPrice}
                 onChange={(e) => setEditThicknessPrice(e.target.value ? Number(e.target.value) : "")}
               />
