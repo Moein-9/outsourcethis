@@ -4,7 +4,7 @@ import { create } from 'zustand';
 type LanguageStore = {
   language: 'en' | 'ar';
   setLanguage: (language: 'en' | 'ar') => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string>) => string;
 };
 
 // Translations for both languages
@@ -233,6 +233,7 @@ const translations: Record<string, Record<string, string>> = {
     
     // Contact Lenses
     contactLensInventory: 'Contact Lens Inventory',
+    contactLensManagement: 'Contact Lens Management',
     addContactLens: 'Add Contact Lens',
     editContactLens: 'Edit Contact Lens',
     deleteContactLens: 'Delete Contact Lens',
@@ -332,6 +333,7 @@ const translations: Record<string, Record<string, string>> = {
     priceError: "Please enter a valid price.",
     quantityError: "Please enter a valid quantity.",
     frameAddedSuccess: "Frame added successfully.",
+    frameAddedSuccessfully: "Frame added successfully.",
     clientSelectionError: "Please select a client or enable the 'No client file' option.",
     lensSelectionError: "Please select a lens type.",
     frameSelectionError: "Please select a frame or enable 'Lenses only' option.",
@@ -409,6 +411,18 @@ const translations: Record<string, Record<string, string>> = {
     
     // Add the new notesPlaceholder translation
     notesPlaceholder: "You can add any information about the customer here...",
+    
+    // Frame Inventory
+    searchForFrame: "Search for frames...",
+    printLabels: "Print Labels",
+    printFrameLabels: "Print Frame Labels",
+    selectFramesForLabels: "Select frames to print labels for",
+    showAllFrames: "Show All Frames",
+    noFramesMatchingSearch: "No frames match your search criteria. Try different keywords.",
+    brandExample: "e.g., Ray-Ban, Prada",
+    modelExample: "e.g., Wayfarer, Aviator",
+    colorExample: "e.g., Black, Tortoise",
+    sizeExample: "e.g., 52-18-140",
   },
   ar: {
     // General UI
@@ -635,6 +649,7 @@ const translations: Record<string, Record<string, string>> = {
     
     // Contact Lenses
     contactLensInventory: 'مخزون العدسات اللاصقة',
+    contactLensManagement: 'إدارة العدسات اللاصقة',
     addContactLens: 'إضافة عدسة لاصقة',
     editContactLens: 'تعديل عدسة لاصقة',
     deleteContactLens: 'حذف عدسة لاصقة',
@@ -734,6 +749,7 @@ const translations: Record<string, Record<string, string>> = {
     priceError: "الرجاء إدخال سعر صحيح.",
     quantityError: "الرجاء إدخال كمية صحيحة.",
     frameAddedSuccess: "تم إضافة الإطار بنجاح.",
+    frameAddedSuccessfully: "تم إضافة الإطار بنجاح.",
     clientSelectionError: "الرجاء اختيار عميل أو تفعيل خيار 'لا يوجد ملف عميل'.",
     lensSelectionError: "الرجاء اختيار نوع العدسة.",
     frameSelectionError: "الرجاء اختيار إطار أو تفعيل خيار 'عدسات فقط'.",
@@ -810,14 +826,34 @@ const translations: Record<string, Record<string, string>> = {
     
     // Add the new notesPlaceholder translation
     notesPlaceholder: "يمكنك إضافة أي معلومات حول العميل هنا...",
+    
+    // Frame Inventory
+    searchForFrame: "البحث عن إطارات...",
+    printLabels: "طباعة الملصقات",
+    printFrameLabels: "طباعة ملصقات الإطارات",
+    selectFramesForLabels: "اختر الإطارات لطباعة الملصقات",
+    showAllFrames: "عرض جميع الإطارات",
+    noFramesMatchingSearch: "لا توجد إطارات تطابق معايير البحث. جرب كلمات مختلفة.",
+    brandExample: "مثال: Ray-Ban، Prada",
+    modelExample: "مثال: Wayfarer، Aviator",
+    colorExample: "مثال: أسود، سلحفاة",
+    sizeExample: "مثال: 52-18-140",
   }
 };
 
 export const useLanguageStore = create<LanguageStore>((set, get) => ({
   language: 'ar', // Default language is Arabic
   setLanguage: (language) => set({ language }),
-  t: (key) => {
+  t: (key, params) => {
     const { language } = get();
-    return translations[language][key] || key;
+    let text = translations[language][key] || key;
+    
+    if (params) {
+      Object.entries(params).forEach(([paramKey, paramValue]) => {
+        text = text.replace(`{${paramKey}}`, paramValue);
+      });
+    }
+    
+    return text;
   },
 }));
