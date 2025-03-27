@@ -113,6 +113,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const availableCoatings = getLensCoatingsByCategory(activeCategory);
   const availableThicknesses = getLensThicknessesByCategory(activeCategory);
   
+  console.log('Available coatings for category', activeCategory, ':', availableCoatings);
+  console.log('Available thicknesses for category', activeCategory, ':', availableThicknesses);
+  
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   

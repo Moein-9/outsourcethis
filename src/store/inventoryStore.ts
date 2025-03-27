@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -321,7 +320,8 @@ export const useInventoryStore = create<InventoryState>()(
       }
     }),
     {
-      name: 'inventory-store'
+      name: 'inventory-store',
+      version: 2
     }
   )
 );
