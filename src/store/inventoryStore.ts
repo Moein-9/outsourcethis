@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -15,7 +16,6 @@ export interface FrameItem {
 export interface LensType {
   id: string;
   name: string;
-  price: number;
   type: "distance" | "reading" | "progressive" | "bifocal" | "sunglasses";
 }
 
@@ -24,6 +24,15 @@ export interface LensCoating {
   name: string;
   price: number;
   description?: string;
+  category: "distance_reading" | "progressive" | "bifocal"; // Added category field
+}
+
+export interface LensThickness {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  category: "distance_reading" | "progressive" | "bifocal"; // Same categories as coatings
 }
 
 export interface ContactLensItem {
@@ -42,6 +51,7 @@ interface InventoryState {
   frames: FrameItem[];
   lensTypes: LensType[];
   lensCoatings: LensCoating[];
+  lensThicknesses: LensThickness[]; // New array for lens thicknesses
   contactLenses: ContactLensItem[];
   
   // Frame methods
@@ -60,6 +70,11 @@ interface InventoryState {
   updateLensCoating: (id: string, coating: Partial<Omit<LensCoating, "id">>) => void;
   deleteLensCoating: (id: string) => void;
   
+  // Thickness methods
+  addLensThickness: (thickness: Omit<LensThickness, "id">) => string;
+  updateLensThickness: (id: string, thickness: Partial<Omit<LensThickness, "id">>) => void;
+  deleteLensThickness: (id: string) => void;
+  
   // Contact lens methods
   addContactLens: (lens: Omit<ContactLensItem, "id">) => string;
   updateContactLens: (id: string, lens: Partial<Omit<ContactLensItem, "id">>) => void;
@@ -72,16 +87,29 @@ export const useInventoryStore = create<InventoryState>()(
     (set, get) => ({
       frames: [],
       lensTypes: [
-        { id: "lens1", name: "نظارات طبية للقراءة", price: 15, type: "reading" },
-        { id: "lens2", name: "نظارات للنظر البعيد", price: 20, type: "distance" },
-        { id: "lens3", name: "عدسات تقدمية", price: 40, type: "progressive" },
-        { id: "lens4", name: "عدسات ثنائية", price: 25, type: "bifocal" },
-        { id: "lens5", name: "عدسات شمسية", price: 30, type: "sunglasses" }
+        { id: "lens1", name: "نظارات طبية للقراءة", type: "reading" },
+        { id: "lens2", name: "نظارات للنظر البعيد", type: "distance" },
+        { id: "lens3", name: "عدسات تقدمية", type: "progressive" },
+        { id: "lens4", name: "عدسات ثنائية", type: "bifocal" },
+        { id: "lens5", name: "عدسات شمسية", type: "sunglasses" }
       ],
+      // Updated with categories
       lensCoatings: [
-        { id: "coat1", name: "مضاد للانعكاس", price: 5, description: "Anti-Reflective Coating" },
-        { id: "coat2", name: "حماية شاشة", price: 7, description: "Blue Light Protection" },
-        { id: "coat3", name: "ضد الخدش", price: 8, description: "Scratch Resistant" }
+        { id: "coat1", name: "مضاد للانعكاس", price: 5, description: "Anti-Reflective Coating", category: "distance_reading" },
+        { id: "coat2", name: "حماية شاشة", price: 7, description: "Blue Light Protection", category: "distance_reading" },
+        { id: "coat3", name: "ضد الخدش", price: 8, description: "Scratch Resistant", category: "distance_reading" },
+        { id: "coat4", name: "مضاد للانعكاس", price: 10, description: "Progressive Anti-Reflective", category: "progressive" },
+        { id: "coat5", name: "حماية شاشة", price: 12, description: "Progressive Blue Light", category: "progressive" },
+        { id: "coat6", name: "مضاد للانعكاس", price: 8, description: "Bifocal Anti-Reflective", category: "bifocal" },
+      ],
+      // New array for lens thicknesses with initial data
+      lensThicknesses: [
+        { id: "thick1", name: "قياسية", price: 5, description: "Standard Thickness", category: "distance_reading" },
+        { id: "thick2", name: "خفيفة", price: 10, description: "Slim Lens", category: "distance_reading" },
+        { id: "thick3", name: "فائقة الخفة", price: 15, description: "Ultra Slim", category: "distance_reading" },
+        { id: "thick4", name: "قياسية", price: 8, description: "Standard Progressive", category: "progressive" },
+        { id: "thick5", name: "خفيفة", price: 15, description: "Slim Progressive", category: "progressive" },
+        { id: "thick6", name: "قياسية", price: 7, description: "Standard Bifocal", category: "bifocal" },
       ],
       contactLenses: [
         { id: "cl1", brand: "Acuvue", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 25, qty: 30 },
@@ -177,6 +205,31 @@ export const useInventoryStore = create<InventoryState>()(
       deleteLensCoating: (id) => {
         set((state) => ({
           lensCoatings: state.lensCoatings.filter(item => item.id !== id)
+        }));
+      },
+      
+      // Thickness methods - new methods
+      addLensThickness: (thickness) => {
+        const id = `thick${Date.now()}`;
+        
+        set((state) => ({
+          lensThicknesses: [...state.lensThicknesses, { ...thickness, id }]
+        }));
+        
+        return id;
+      },
+      
+      updateLensThickness: (id, thickness) => {
+        set((state) => ({
+          lensThicknesses: state.lensThicknesses.map(item => 
+            item.id === id ? { ...item, ...thickness } : item
+          )
+        }));
+      },
+      
+      deleteLensThickness: (id) => {
+        set((state) => ({
+          lensThicknesses: state.lensThicknesses.filter(item => item.id !== id)
         }));
       },
       
