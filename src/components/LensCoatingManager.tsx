@@ -89,9 +89,9 @@ export const LensCoatingManager: React.FC = () => {
   };
   
   const coatingCategories = [
-    { value: "distance-reading", label: t("distanceReading") || "Distance/Reading" },
-    { value: "progressive", label: t("progressive") || "Progressive" },
-    { value: "bifocal", label: t("bifocal") || "Bifocal" }
+    { value: "distance-reading", label: t("distanceReading") },
+    { value: "progressive", label: t("progressive") },
+    { value: "bifocal", label: t("bifocal") }
   ];
   
   const filteredCoatings = lensCoatings.filter(coating => coating.category === activeTab);
@@ -170,9 +170,9 @@ export const LensCoatingManager: React.FC = () => {
       
       <Tabs defaultValue="distance-reading" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="distance-reading">{t("distanceReading") || "Distance/Reading"}</TabsTrigger>
-          <TabsTrigger value="progressive">{t("progressive") || "Progressive"}</TabsTrigger>
-          <TabsTrigger value="bifocal">{t("bifocal") || "Bifocal"}</TabsTrigger>
+          <TabsTrigger value="distance-reading">{t("distanceReading")}</TabsTrigger>
+          <TabsTrigger value="progressive">{t("progressive")}</TabsTrigger>
+          <TabsTrigger value="bifocal">{t("bifocal")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value={activeTab} className="mt-0">

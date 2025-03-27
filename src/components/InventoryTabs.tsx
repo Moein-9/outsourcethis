@@ -48,7 +48,7 @@ export const InventoryTabs: React.FC = () => {
           className="data-[state=active]:bg-green-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Ruler className="w-4 h-4" />
-          <span>{t('lensThicknesses') || "Lens Thicknesses"}</span>
+          <span>{t('lensThicknesses')}</span>
         </TabsTrigger>
       </TabsList>
       
@@ -96,7 +96,7 @@ export const InventoryTabs: React.FC = () => {
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold mb-4 text-green-800 flex items-center gap-2">
             <Ruler className="w-5 h-5" />
-            {t('lensThicknesses') || "Lens Thicknesses"}
+            {t('lensThicknesses')}
           </h3>
           <LensThicknessManager />
         </div>

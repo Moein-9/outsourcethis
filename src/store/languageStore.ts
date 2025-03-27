@@ -182,6 +182,11 @@ const translations: Record<string, Record<string, string>> = {
     deleteLensConfirm: 'Are you sure you want to delete this lens?',
     contactLensManagement: 'Contact Lens Management',
     distanceReading: 'Distance/Reading',
+    distance: 'Distance',
+    reading: 'Reading',
+    progressive: 'Progressive',
+    bifocal: 'Bifocal',
+    sunglasses: 'Sunglasses',
     
     // Coating
     coatingInventory: 'Coating Inventory',
@@ -192,6 +197,7 @@ const translations: Record<string, Record<string, string>> = {
     addNewCoating: 'Add New Coating',
     updateCoating: 'Update Coating',
     deleteCoatingConfirm: 'Are you sure you want to delete this coating?',
+    noCoatings: 'No Coatings',
     
     // Contact Lenses
     contactLensInventory: 'Contact Lens Inventory',
@@ -205,7 +211,7 @@ const translations: Record<string, Record<string, string>> = {
     addNewContactLens: 'Add New Contact Lens',
     updateContactLens: 'Update Contact Lens',
     deleteContactLensConfirm: 'Are you sure you want to delete this contact lens?',
-    
+
     // Remaining Payments
     duePayments: 'Manage incomplete invoices and record remaining payments',
     clientId: 'Client ID',
@@ -538,6 +544,11 @@ const translations: Record<string, Record<string, string>> = {
     deleteLensConfirm: 'هل أنت متأكد من رغبتك في حذف هذه العدسة؟',
     contactLensManagement: 'إدارة العدسات اللاصقة',
     distanceReading: 'النظر البعيد/القراءة',
+    distance: 'النظر البعيد',
+    reading: 'القراءة',
+    progressive: 'متدرجة',
+    bifocal: 'ثنائية البؤرة',
+    sunglasses: 'نظارات شمسية',
     
     // Coating
     coatingInventory: 'مخزون الطلاءات',
@@ -548,6 +559,7 @@ const translations: Record<string, Record<string, string>> = {
     addNewCoating: 'إضافة طلاء جديد',
     updateCoating: 'تحديث الطلاء',
     deleteCoatingConfirm: 'هل أنت متأكد من رغبتك في حذف هذا الطلاء؟',
+    noCoatings: 'لا توجد طلاءات',
     
     // Contact Lenses
     contactLensInventory: 'مخزون العدسات اللاصقة',

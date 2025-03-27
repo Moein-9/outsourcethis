@@ -15,7 +15,7 @@ import { useLanguageStore } from "@/store/languageStore";
 export const LensTypeManager: React.FC = () => {
   const { lensTypes, addLensType, updateLensType, deleteLensType } = useInventoryStore();
   const { t, language } = useLanguageStore();
-  const [activeTab, setActiveTab] = useState<string>("distance");
+  const [activeTab, setActiveTab] = useState<string>("distance-reading");
   
   // New lens form state
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -142,7 +142,7 @@ export const LensTypeManager: React.FC = () => {
       </div>
       
       <Tabs defaultValue="distance-reading" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 md:grid-cols-5 mb-4">
+        <TabsList className="grid grid-cols-3 md:grid-cols-4 mb-4">
           <TabsTrigger value="distance-reading">{t("distanceReading")}</TabsTrigger>
           <TabsTrigger value="progressive">{t("progressive")}</TabsTrigger>
           <TabsTrigger value="bifocal">{t("bifocal")}</TabsTrigger>
@@ -158,7 +158,7 @@ export const LensTypeManager: React.FC = () => {
                     <CardTitle className="text-base">{lens.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 pb-2">
-                    <p className="text-sm text-muted-foreground">{lens.type}</p>
+                    <p className="text-sm text-muted-foreground">{t(lens.type)}</p>
                   </CardContent>
                   <CardFooter className="p-2 flex justify-end gap-2 bg-muted/50">
                     <Button variant="ghost" size="icon" onClick={() => startEditLens(lens)}>
