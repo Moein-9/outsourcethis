@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -9,6 +8,7 @@ import {
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
   MessageCircleDashed, Loader, Check, Ruler
 } from "lucide-react";
+import { PaintBrush } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -64,6 +64,7 @@ const CreateInvoiceContent: React.FC = () => {
     patientId: getValues("patientId"),
     invoiceType: getValues("invoiceType") || "glasses",
     lensType: getValues("lensType") || "",
+    lensPrice: 0,
     coating: getValues("coating") || "",
     coatingPrice: getValues("coatingPrice") || 0,
     thickness: getValues("thickness") || "",
@@ -344,7 +345,7 @@ const CreateInvoiceContent: React.FC = () => {
                               <div className="flex justify-between items-start">
                                 <div>
                                   <p className="font-medium text-purple-700 flex items-center gap-1">
-                                    <Paintbrush className="w-3 h-3" /> {t('coating')}
+                                    <PaintBrush className="w-3 h-3" /> {t('coating')}
                                   </p>
                                   <p className="text-sm text-gray-600 mt-1">
                                     {getValues("coating")}
@@ -479,10 +480,4 @@ const CreateInvoiceContent: React.FC = () => {
   );
 };
 
-export const CreateInvoice: React.FC = () => {
-  return (
-    <InvoiceFormProvider>
-      <CreateInvoiceContent />
-    </InvoiceFormProvider>
-  );
-};
+export { CreateInvoice };

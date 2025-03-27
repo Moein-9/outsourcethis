@@ -17,6 +17,7 @@ export interface LensType {
   id: string;
   name: string;
   type: "distance" | "reading" | "progressive" | "bifocal" | "sunglasses";
+  price: number; // Added price property
 }
 
 export interface LensCoating {

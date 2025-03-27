@@ -55,6 +55,7 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     invoiceType: 'glasses',
     lensType: '',
     lensTypeCategory: '',
+    lensPrice: 0, // Added lensPrice field
     coating: '',
     coatingPrice: 0,
     thickness: '',
