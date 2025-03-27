@@ -77,6 +77,14 @@ export class CustomPrintService {
                   color: white !important;
                 }
                 
+                /* Make red text print properly */
+                .text-red-600 {
+                  color: #ea384c !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                
                 /* Improve dynamic sizing */
                 html, body {
                   height: auto !important;
@@ -120,6 +128,11 @@ export class CustomPrintService {
               .bg-black {
                 background-color: black !important;
                 color: white !important;
+              }
+              
+              /* Red text for remaining payment */
+              .text-red-600 {
+                color: #ea384c !important;
               }
             </style>
           </head>
