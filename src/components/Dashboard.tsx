@@ -16,10 +16,12 @@ export const Dashboard: React.FC = () => {
   const { t, language } = useLanguageStore();
 
   useEffect(() => {
+    // Set up timer to update the time every second
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
+    // Clean up interval on component unmount
     return () => clearInterval(timer);
   }, []);
 

@@ -16,7 +16,6 @@ import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "sonner";
 import { PrintService } from "@/utils/PrintService";
 import { CustomPrintService } from "@/utils/CustomPrintService";
-import { CustomWorkOrderReceipt } from "@/components/CustomWorkOrderReceipt";
 
 interface WorkOrderPrintSelectorProps {
   invoice: Invoice;
@@ -84,7 +83,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
         frameColor: frame?.color,
         frameSize: frame?.size,
         framePrice: frame?.price,
-        contactLenses
+        contactLenses,
+        createdAt: invoice.createdAt || new Date().toISOString()
       };
       
       if (selectedFormat === "receipt") {

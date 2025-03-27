@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -40,6 +41,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     frameBrand: getValues<string>('frameBrand') || "",
     frameModel: getValues<string>('frameModel') || "",
     frameColor: getValues<string>('frameColor') || "",
+    frameSize: getValues<string>('frameSize') || "",
     framePrice: getValues<number>('framePrice') || 0,
     contactLensItems: getValues('contactLensItems') || [],
     discount: getValues<number>('discount') || 0,
@@ -49,6 +51,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     paymentMethod: getValues<string>('paymentMethod') || "",
     isPaid: calculateRemaining() <= 0,
     authNumber: getValues<string>('authNumber') || "",
+    createdAt: new Date().toISOString() // Add createdAt field to fix the type error
   };
   
   const patient = {
