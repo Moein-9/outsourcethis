@@ -1,26 +1,7 @@
 
 import { toast } from "@/hooks/use-toast";
-import { CustomWorkOrderReceipt } from "@/components/CustomWorkOrderReceipt";
-import * as ReactDOMServer from 'react-dom/server';
 
 export class CustomPrintService {
-  static generateCustomWorkOrderHtml(workOrder: any, invoice?: any, patient?: any): string {
-    try {
-      // Generate the receipt content using the CustomWorkOrderReceipt component
-      return ReactDOMServer.renderToString(
-        <CustomWorkOrderReceipt 
-          workOrder={workOrder} 
-          invoice={invoice} 
-          patient={patient}
-          isPrintable={true}
-        />
-      );
-    } catch (error) {
-      console.error("Error generating custom work order HTML:", error);
-      return `<div>Error generating receipt: ${String(error)}</div>`;
-    }
-  }
-  
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
     console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
     
@@ -35,9 +16,6 @@ export class CustomPrintService {
         });
         return;
       }
-      
-      // Get the HTML content for the receipt
-      const receiptContent = this.generateCustomWorkOrderHtml(workOrder, invoice, patient);
       
       // Add all the required styles and content
       printWindow.document.write(`
@@ -99,14 +77,6 @@ export class CustomPrintService {
                   color: white !important;
                 }
                 
-                /* Make red text print properly */
-                .text-red-600 {
-                  color: #ea384c !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                  color-adjust: exact !important;
-                }
-                
                 /* Improve dynamic sizing */
                 html, body {
                   height: auto !important;
@@ -136,14 +106,6 @@ export class CustomPrintService {
                   page-break-inside: avoid !important;
                   page-break-after: avoid !important;
                 }
-                
-                /* Force print remaining payment in red */
-                [data-remaining="true"] {
-                  color: #ea384c !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                  color-adjust: exact !important;
-                }
               }
               
               body {
@@ -159,15 +121,10 @@ export class CustomPrintService {
                 background-color: black !important;
                 color: white !important;
               }
-              
-              /* Red text for remaining payment */
-              .text-red-600 {
-                color: #ea384c !important;
-              }
             </style>
           </head>
           <body>
-            <div id="custom-work-order-content">${receiptContent}</div>
+            <div id="custom-work-order-content"></div>
             <script>
               window.onload = function() {
                 // Force background colors to print properly
@@ -186,9 +143,37 @@ export class CustomPrintService {
         </html>
       `);
       
-      // Wait for content to load before proceeding
-      printWindow.document.close();
+      // Get the content of the custom work order
+      const workOrderElement = document.getElementById('work-order-receipt');
       
+      // If the element exists, copy its innerHTML to the print window
+      if (workOrderElement) {
+        const contentContainer = printWindow.document.getElementById('custom-work-order-content');
+        if (contentContainer) {
+          contentContainer.innerHTML = workOrderElement.innerHTML;
+          
+          // Ensure timestamps are showing original creation dates
+          if (invoice?.rx?.createdAt || workOrder?.rx?.createdAt) {
+            // Use the original RX creation date rather than printing date
+            const rxCreationDate = invoice?.rx?.createdAt || workOrder?.rx?.createdAt;
+            const dateElements = printWindow.document.querySelectorAll('.rx-creation-date');
+            
+            dateElements.forEach(element => {
+              if (element instanceof HTMLElement) {
+                // Format date in English format MM/DD/YYYY HH:MM
+                element.textContent = new Date(rxCreationDate).toLocaleString('en-US');
+              }
+            });
+          }
+          
+          // Wait for content to load before proceeding
+          printWindow.document.close();
+        }
+      } else {
+        // Handle the case where the element doesn't exist
+        printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
+        printWindow.document.close();
+      }
     } catch (error) {
       console.error("Error printing work order:", error);
       toast({

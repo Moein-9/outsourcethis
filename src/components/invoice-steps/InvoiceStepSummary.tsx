@@ -9,7 +9,6 @@ import {
   CreditCard, User, Phone, Calendar, AlertTriangle,
   Contact
 } from "lucide-react";
-import { WorkOrderPrintSelector } from "@/components/WorkOrderPrintSelector";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -41,7 +40,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     frameBrand: getValues<string>('frameBrand') || "",
     frameModel: getValues<string>('frameModel') || "",
     frameColor: getValues<string>('frameColor') || "",
-    frameSize: getValues<string>('frameSize') || "",
     framePrice: getValues<number>('framePrice') || 0,
     contactLensItems: getValues('contactLensItems') || [],
     discount: getValues<number>('discount') || 0,
@@ -51,7 +49,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     paymentMethod: getValues<string>('paymentMethod') || "",
     isPaid: calculateRemaining() <= 0,
     authNumber: getValues<string>('authNumber') || "",
-    createdAt: new Date().toISOString() // Add createdAt field to fix the type error
   };
   
   const patient = {
@@ -59,23 +56,9 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     phone: getValues<string>('patientPhone') || ""
   };
   
-  const rx = getValues('rx');
-  
-  const frame = invoice.frameBrand ? {
-    brand: invoice.frameBrand,
-    model: invoice.frameModel,
-    color: invoice.frameColor,
-    size: invoice.frameSize || "",
-    price: invoice.framePrice
-  } : undefined;
-  
   const hasInvoiceData = !!invoice.invoiceId && !!invoice.workOrderId;
   const isContactLens = invoice.invoiceType === "contacts";
   
-  const handlePrintWorkOrder = () => {
-    setWorkOrderPrintOpen(true);
-  };
-
   if (!hasInvoiceData) {
     return (
       <div className="space-y-8 animate-fade-in">
@@ -211,33 +194,22 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
         </h3>
         
         <div className="mt-6 space-y-4">
-          <WorkOrderPrintSelector
-            invoice={invoice}
-            patientName={patient.name}
-            patientPhone={patient.phone}
-            rx={rx}
-            lensType={invoice.lensType}
-            coating={invoice.coating}
-            frame={frame}
-            contactLenses={invoice.contactLensItems}
-            trigger={
-              <Button 
-                variant="outline"
-                className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-              >
-                <div className="flex items-center">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
-                    <ClipboardCheck className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-medium">{t('printWorkOrder')}</div>
-                    <div className="text-xs text-muted-foreground">{t('printWorkOrderDescription')}</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-              </Button>
-            }
-          />
+          <Button 
+            variant="outline"
+            className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
+            onClick={() => setWorkOrderPrintOpen(true)}
+          >
+            <div className="flex items-center">
+              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
+                <ClipboardCheck className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">{t('printWorkOrder')}</div>
+                <div className="text-xs text-muted-foreground">{t('printWorkOrderDescription')}</div>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+          </Button>
           
           <Button 
             variant="outline"

@@ -15,7 +15,7 @@ import { PrinterIcon, Newspaper, FileText } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "sonner";
 import { PrintService } from "@/utils/PrintService";
-import { CustomPrintService } from "@/utils/CustomPrintService";
+import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
 
 interface WorkOrderPrintSelectorProps {
   invoice: Invoice;
@@ -70,29 +70,17 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     setPrintingInProgress(true);
     
     try {
-      // Prepare the work order object with all necessary data
-      const workOrderData = {
-        ...invoice,
-        rx,
-        patientName,
-        patientPhone,
-        lensType,
-        coating,
-        frameBrand: frame?.brand,
-        frameModel: frame?.model,
-        frameColor: frame?.color,
-        frameSize: frame?.size,
-        framePrice: frame?.price,
-        contactLenses,
-        createdAt: invoice.createdAt || new Date().toISOString()
-      };
-      
       if (selectedFormat === "receipt") {
-        // Use CustomPrintService for thermal receipt printing
-        CustomPrintService.printWorkOrder(workOrderData, invoice, {
-          name: patientName,
-          phone: patientPhone,
-          rx
+        printWorkOrderReceipt({
+          invoice,
+          patientName,
+          patientPhone,
+          rx,
+          lensType,
+          coating,
+          frame,
+          contactLenses,
+          contactLensRx
         });
         
         setTimeout(() => {
@@ -101,21 +89,96 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           toast.success(t("printingCompleted"));
         }, 1000);
       } else {
-        // For A4 format, create a custom A4 layout using the same design
         const a4Content = `
           <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
             <div style="text-align: center; margin-bottom: 10mm;">
               <h1 style="font-size: 24px; margin-bottom: 5mm;">${t("workOrder")}</h1>
               <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.workOrderId}</p>
-              <p style="font-size: 14px;">${new Date(invoice.createdAt || Date.now()).toLocaleDateString()}</p>
+              <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
             </div>
             
-            <div style="margin: 0 auto; max-width: 80mm; transform: scale(1.3); transform-origin: top center;">
-              ${CustomPrintService.generateCustomWorkOrderHtml(workOrderData, invoice, {
-                name: patientName,
-                phone: patientPhone,
-                rx
-              })}
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("patientInformation")}</h2>
+              <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
+              <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
+            </div>
+            
+            ${frame ? `
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("frameDetails")}</h2>
+              <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
+              <p><strong>${t("model")}:</strong> ${frame.model}</p>
+              <p><strong>${t("color")}:</strong> ${frame.color}</p>
+              <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} ${t("currency")}</p>
+            </div>
+            ` : ''}
+            
+            ${rx ? `
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("prescriptionDetails")}</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("eye")}</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">SPH</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">CYL</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">AXIS</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">ADD</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">PD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("rightEye")} (OD)</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.sphereOD || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.cylOD || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.axisOD || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.addOD || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.pdRight || "-"}</td>
+                  </tr>
+                  <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("leftEye")} (OS)</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.sphereOS || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.cylOS || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.axisOS || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.addOS || "-"}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${rx.pdLeft || "-"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            ` : ''}
+            
+            ${lensType ? `
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("lensDetails")}</h2>
+              <p><strong>${t("type")}:</strong> ${lensType}</p>
+              <p><strong>${t("price")}:</strong> ${invoice.lensPrice.toFixed(3)} ${t("currency")}</p>
+              ${coating ? `<p><strong>${t("coating")}:</strong> ${coating}</p>` : ''}
+              ${coating ? `<p><strong>${t("coatingPrice")}:</strong> ${invoice.coatingPrice.toFixed(3)} ${t("currency")}</p>` : ''}
+            </div>
+            ` : ''}
+            
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("paymentInformation")}</h2>
+              <p><strong>${t("subtotal")}:</strong> ${(invoice.total + invoice.discount).toFixed(3)} ${t("currency")}</p>
+              ${invoice.discount > 0 ? `<p><strong>${t("discount")}:</strong> -${invoice.discount.toFixed(3)} ${t("currency")}</p>` : ''}
+              <p><strong>${t("total")}:</strong> ${invoice.total.toFixed(3)} ${t("currency")}</p>
+              <p><strong>${t("paid")}:</strong> ${invoice.deposit.toFixed(3)} ${t("currency")}</p>
+              <p><strong>${t("remaining")}:</strong> ${(invoice.total - invoice.deposit).toFixed(3)} ${t("currency")}</p>
+            </div>
+            
+            <div style="margin-top: 20mm; display: flex; justify-content: space-between;">
+              <div>
+                <p style="font-weight: bold; margin-bottom: 30px;">${t("technicianSignature")}</p>
+                <div style="border-bottom: 1px solid #000; width: 150px;"></div>
+                <p style="margin-top: 5px; font-size: 12px;">${t("date")}: ___/___/_____</p>
+              </div>
+              <div>
+                <p style="font-weight: bold; margin-bottom: 30px;">${t("qualityConfirmation")}</p>
+                <div style="border-bottom: 1px solid #000; width: 150px;"></div>
+                <p style="margin-top: 5px; font-size: 12px;">${t("date")}: ___/___/_____</p>
+              </div>
             </div>
           </div>
         `;
@@ -191,7 +254,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
                 disabled={!selectedFormat || printingInProgress}
               >
                 <PrinterIcon className="h-4 w-4 mr-2" />
-                {printingInProgress ? t('printing') : t('print')}
+                {printingInProgress ? t("printing") : t("print")}
               </Button>
             </DialogFooter>
           </DialogContent>
