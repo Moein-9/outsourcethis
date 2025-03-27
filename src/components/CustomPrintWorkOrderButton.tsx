@@ -20,6 +20,7 @@ interface PrintWorkOrderButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
+  children?: React.ReactNode; // This prop is used when passing custom trigger element
 }
 
 export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -28,7 +29,8 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   patient,
   className = '',
   variant = "outline",
-  size = "sm"
+  size = "sm",
+  children // This prop holds any custom trigger element
 }) => {
   const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
@@ -43,17 +45,25 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     }, 300);
   };
   
+  // Create a default button if no children are provided or if children is not a valid element
+  const defaultButton = (
+    <Button 
+      variant={variant}
+      size={size}
+      className={`gap-1 ${className}`}
+    >
+      <Printer className="h-4 w-4" />
+      {t('printWorkOrder')}
+    </Button>
+  );
+  
+  // Ensure we only pass a single valid element to DialogTrigger
+  const triggerElement = React.isValidElement(children) ? children : defaultButton;
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant={variant}
-          size={size}
-          className={`gap-1 ${className}`}
-        >
-          <Printer className="h-4 w-4" />
-          {t('printWorkOrder')}
-        </Button>
+        {triggerElement}
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto p-0">
         <div className="p-6 flex flex-col items-center">

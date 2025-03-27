@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { enUS } from "date-fns/locale";
 import { useInvoiceStore, Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,14 +82,33 @@ export const DailySalesReport: React.FC = () => {
     
     setTodaySales(todaySalesData);
     
-    const revenue = todaySalesData.reduce((sum, invoice) => sum + invoice.total, 0);
+    const revenue = todaySalesData.reduce((sum, invoice) => {
+      if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
+        const contactLensTotal = invoice.contactLensItems.reduce(
+          (lensSum, lens) => lensSum + (lens.price || 0) * (lens.qty || 1), 0
+        );
+        return sum + Math.max(0, contactLensTotal - (invoice.discount || 0));
+      }
+      return sum + invoice.total;
+    }, 0);
+    
     const lensRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.lensPrice, 0);
     const frameRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.framePrice, 0);
     const coatingRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.coatingPrice, 0);
+    
+    const contactLensRevenue = todaySalesData.reduce((sum, invoice) => {
+      if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
+        return sum + invoice.contactLensItems.reduce(
+          (lensSum, lens) => lensSum + (lens.price || 0) * (lens.qty || 1), 0
+        );
+      }
+      return sum;
+    }, 0);
+    
     const deposits = todaySalesData.reduce((sum, invoice) => sum + invoice.deposit, 0);
     
     setTotalRevenue(revenue);
-    setTotalLensRevenue(lensRevenue);
+    setTotalLensRevenue(lensRevenue + contactLensRevenue);
     setTotalFrameRevenue(frameRevenue);
     setTotalCoatingRevenue(coatingRevenue);
     setTotalDeposit(deposits);
@@ -116,7 +137,7 @@ export const DailySalesReport: React.FC = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
     
-    const today = new Date().toLocaleDateString('ar-EG');
+    const today = format(new Date(), 'MM/dd/yyyy', { locale: enUS });
     const pageTitle = `تقرير المبيعات اليومي - ${today}`;
     
     let paymentBreakdownHTML = '';
@@ -356,7 +377,7 @@ export const DailySalesReport: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold text-blue-900">{totalRevenue.toFixed(2)} د.ك</div>
             <p className="text-xs text-blue-600 mt-1">
-              لليوم: {new Date().toLocaleDateString('ar-EG')}
+              لليوم: {format(new Date(), 'MM/dd/yyyy', { locale: enUS })}
             </p>
           </CardContent>
         </Card>

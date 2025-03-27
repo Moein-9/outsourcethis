@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -62,6 +61,12 @@ export interface Patient {
   createdAt: string;
 }
 
+export interface WorkOrderEdit {
+  patientId: string;
+  workOrderId: string;
+  updatedData: any;
+}
+
 interface PatientState {
   patients: Patient[];
   addPatient: (patient: Omit<Patient, "patientId" | "createdAt">) => string;
@@ -71,6 +76,8 @@ interface PatientState {
   updatePatientRx: (patientId: string, newRx: RxData) => void;
   updateContactLensRx: (patientId: string, newRx: ContactLensRx) => void; // New method for contact lens RX
   addPatientNote: (patientId: string, noteText: string) => void;
+  deletePatientNote: (patientId: string, noteId: string) => void;
+  editWorkOrder: (edit: WorkOrderEdit) => void;
 }
 
 export const usePatientStore = create<PatientState>()(
@@ -82,6 +89,16 @@ export const usePatientStore = create<PatientState>()(
         const patientId = `PT${Date.now()}`;
         const createdAt = new Date().toISOString();
         
+        // Convert notes from the text field to a PatientNote entry if provided
+        const patientNotes: PatientNote[] = [];
+        if (patient.notes && patient.notes.trim() !== '') {
+          patientNotes.push({
+            id: `note-${Date.now()}`,
+            text: patient.notes,
+            createdAt
+          });
+        }
+        
         set((state) => ({
           patients: [
             ...state.patients,
@@ -89,15 +106,15 @@ export const usePatientStore = create<PatientState>()(
               ...patient, 
               patientId, 
               createdAt,
-              patientNotes: [],
+              patientNotes: [...(patient.patientNotes || []), ...patientNotes],
               rx: {
                 ...patient.rx,
-                createdAt: patient.rx.createdAt || new Date().toISOString() // Add creation date to initial RX
+                createdAt: patient.rx.createdAt || createdAt // Add creation date to initial RX
               },
               // Initialize contact lens RX if provided
               contactLensRx: patient.contactLensRx ? {
                 ...patient.contactLensRx,
-                createdAt: patient.contactLensRx.createdAt || new Date().toISOString()
+                createdAt: patient.contactLensRx.createdAt || createdAt
               } : undefined,
             }
           ]
@@ -157,7 +174,6 @@ export const usePatientStore = create<PatientState>()(
         });
       },
       
-      // New method for updating contact lens RX
       updateContactLensRx: (patientId, newContactLensRx) => {
         set((state) => {
           const patient = state.patients.find(p => p.patientId === patientId);
@@ -212,6 +228,39 @@ export const usePatientStore = create<PatientState>()(
             )
           };
         });
+      },
+      
+      deletePatientNote: (patientId, noteId) => {
+        set((state) => {
+          const patient = state.patients.find(p => p.patientId === patientId);
+          
+          if (!patient || !patient.patientNotes) return state;
+          
+          return {
+            patients: state.patients.map(p => 
+              p.patientId === patientId 
+                ? { 
+                    ...p, 
+                    patientNotes: p.patientNotes?.filter(note => note.id !== noteId) || [] 
+                  } 
+                : p
+            )
+          };
+        });
+      },
+      
+      editWorkOrder: (edit) => {
+        // This will be implemented in the invoiceStore where work orders are stored
+        // Here we ensure any patient-related data is updated if needed
+        const { patientId, updatedData } = edit;
+        
+        if (updatedData.rx) {
+          get().updatePatientRx(patientId, updatedData.rx);
+        }
+        
+        if (updatedData.contactLensRx) {
+          get().updateContactLensRx(patientId, updatedData.contactLensRx);
+        }
       }
     }),
     {

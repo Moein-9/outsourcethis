@@ -1,6 +1,6 @@
-
 import React from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { enUS } from "date-fns/locale";
 import { RxData } from "@/store/patientStore";
 import { Eye, Calendar, User, Phone } from "lucide-react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
@@ -10,7 +10,6 @@ interface RxReceiptPrintProps {
   patientName: string;
   patientPhone?: string;
   rx: RxData;
-  notes?: string;
   isPrintable?: boolean;
   forcedLanguage?: 'en' | 'ar'; // For forced language printing
 }
@@ -19,7 +18,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   patientName,
   patientPhone,
   rx,
-  notes,
   isPrintable = false,
   forcedLanguage
 }) => {
@@ -32,6 +30,11 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
     : "w-full bg-white p-4 border rounded-lg shadow-sm";
   
   const dirClass = isRtl ? 'rtl text-right' : 'ltr text-left';
+
+  // Format the prescription date from the RX object - using original RX date and English format
+  const formattedRxDate = rx.createdAt 
+    ? format(parseISO(rx.createdAt), 'MM/dd/yyyy HH:mm', { locale: enUS })
+    : format(new Date(), 'MM/dd/yyyy HH:mm', { locale: enUS });
 
   return (
     <div 
@@ -63,7 +66,7 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
           <span className="font-semibold flex items-center">
             <Calendar className="h-3.5 w-3.5 mr-1" /> {t("date")}:
           </span>
-          <span>{format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
+          <span>{formattedRxDate}</span>
         </div>
         <div className="flex justify-between border-b pb-0.5 mb-0.5">
           <span className="font-semibold flex items-center">
@@ -81,9 +84,9 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
         )}
       </div>
 
-      {/* Prescription table - Adjusted inward by adding more padding */}
+      {/* Prescription table - Always in LTR format with English headers */}
       <div className="px-5 mb-3">
-        <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "62mm" }}>
+        <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "62mm", direction: "ltr" }}>
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-gray-400 p-0.5 text-center"></th>
@@ -113,28 +116,18 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
             </tr>
           </tbody>
         </table>
-        <div className="mt-1 text-[9px] flex justify-between px-2 font-medium">
+        <div className="mt-1 text-[10px] flex justify-between px-2 font-medium">
           <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
           <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
         </div>
       </div>
 
-      {/* Notes section */}
-      {notes && (
-        <div className="px-5 mb-2">
-          <div className="bg-gray-200 py-0.5 px-1 font-semibold text-[10px] mb-1">
-            {t("notes")}:
-          </div>
-          <p className="text-[9px] px-1">{notes}</p>
-        </div>
-      )}
-
       {/* Care tips */}
       <div className="px-5 mb-2">
-        <div className="bg-gray-800 text-white py-0.5 px-1 font-semibold text-[11px] mb-1 text-center print:bg-black print:text-white">
+        <div className="bg-gray-800 text-white py-0.5 px-1 font-semibold text-[12px] mb-1 text-center print:bg-black print:text-white">
           {t("glassesCareTips")}
         </div>
-        <ul className={`list-disc px-6 space-y-0.5 text-[9px] font-semibold ${dirClass}`}>
+        <ul className={`list-disc px-6 space-y-0.5 text-[12px] font-bold ${dirClass}`}>
           <li>{t("tip1")}</li>
           <li>{t("tip2")}</li>
           <li>{t("tip3")}</li>
@@ -196,10 +189,15 @@ export const RxLanguageDialog: React.FC<{
 };
 
 export const printRxReceipt = (props: RxReceiptPrintProps) => {
-  const { patientName, patientPhone, rx, notes, forcedLanguage } = props;
+  const { patientName, patientPhone, rx, forcedLanguage } = props;
   const { language: appLanguage, t } = useLanguageStore.getState();
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
+  
+  // Format the prescription date from the RX object - using original RX date
+  const formattedRxDate = rx.createdAt 
+    ? format(parseISO(rx.createdAt), 'dd/MM/yyyy HH:mm')
+    : format(new Date(), 'dd/MM/yyyy HH:mm');
   
   const htmlContent = `
 <!DOCTYPE html>
@@ -253,7 +251,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       justify-content: space-between;
       border-bottom: 1px solid #ddd;
       padding: 1mm 0;
-      font-size: 11px;
+      font-size: 12px;
       margin: 0 7mm; /* Added more margin for better safety zone */
     }
     .field-label {
@@ -282,7 +280,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     table {
       width: calc(100% - 14mm); /* Reduced width for safety */
       border-collapse: collapse;
-      direction: ltr;
+      direction: ltr; /* Always LTR for the table */
       font-size: 10px;
       margin: 2mm auto;
     }
@@ -298,7 +296,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     .eye-legend {
       display: flex;
       justify-content: space-between;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 600;
       margin-top: 1mm;
       padding: 0 8mm;
@@ -322,16 +320,16 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       color: white;
       padding: 1mm;
       margin: 2mm 6mm 1mm 6mm;
-      font-size: 11px;
+      font-size: 12px;
     }
     .tips-list {
       padding-${isRtl ? 'right' : 'left'}: 5mm;
       margin: 1mm 8mm;
-      font-size: 9px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
     }
     .tips-list li {
-      margin-bottom: 1mm;
+      margin-bottom: 1.5mm;
     }
     .footer {
       text-align: center;
@@ -351,7 +349,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     }
     /* Print-specific styles to handle background colors */
     @media print {
-      .rx-title {
+      .rx-title, .tips-title {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         color-adjust: exact !important;
@@ -369,13 +367,6 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
         print-color-adjust: exact !important;
         color-adjust: exact !important;
         background-color: #eee !important;
-      }
-      .tips-title {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-        background-color: #000 !important;
-        color: white !important;
       }
     }
   </style>
@@ -404,7 +395,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
           </svg>
           ${isRtl ? 'التاريخ' : 'Date'}:
         </span>
-        <span>${format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
+        <span>${formattedRxDate}</span>
       </div>
       <div class="field">
         <span class="field-label">
@@ -464,11 +455,6 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       <span>OD = ${isRtl ? 'العين اليمنى' : 'Right Eye'}</span>
       <span>OS = ${isRtl ? 'العين اليسرى' : 'Left Eye'}</span>
     </div>
-    
-    ${notes ? `
-    <div class="section-title">${isRtl ? 'ملاحظات' : 'Notes'}:</div>
-    <div class="notes">${notes}</div>
-    ` : ''}
     
     <div class="tips-title">${isRtl ? 'نصائح للعناية بالنظارات' : 'Glasses Care Tips'}</div>
     <ul class="tips-list">

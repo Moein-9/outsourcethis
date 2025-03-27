@@ -28,7 +28,7 @@ interface PrintWorkOrderButtonProps {
   size?: "default" | "sm" | "lg" | "icon";
   thermalOnly?: boolean;
   isNewInvoice?: boolean;
-  onInvoiceSaved?: (invoiceId: string) => void;
+  onInvoiceSaved?: (invoiceId: string, workOrderId: string) => void;
 }
 
 export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
@@ -50,14 +50,26 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
 }) => {
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
-  const { addInvoice, addExistingInvoice } = useInvoiceStore();
+  const { addInvoice, addExistingInvoice, addWorkOrder } = useInvoiceStore();
   
   const handlePrint = () => {
     // If it's a new invoice, save it first to generate an invoice ID
     if (isNewInvoice && !invoice.invoiceId) {
       setLoading(true);
       try {
-        // Save the invoice to get an ID
+        // Create a work order
+        const workOrder = {
+          patientId: invoice.patientId || 'anonymous',
+          lensType: {
+            name: invoice.lensType,
+            price: invoice.lensPrice
+          }
+        };
+        
+        // Generate work order ID
+        const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
+        
+        // Save the invoice to get an ID and link to work order
         const invoiceId = addInvoice({
           patientId: invoice.patientId,
           patientName: invoice.patientName,
@@ -76,15 +88,19 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           total: invoice.total,
           paymentMethod: invoice.paymentMethod,
           authNumber: invoice.authNumber,
-          workOrderId: invoice.workOrderId,
+          workOrderId: workOrderId
         });
         
-        // Update the invoice with the new ID
-        const updatedInvoice = { ...invoice, invoiceId };
+        // Update the invoice with the new IDs
+        const updatedInvoice = { 
+          ...invoice, 
+          invoiceId, 
+          workOrderId 
+        };
         
-        // If callback provided, call it with the new ID
+        // If callback provided, call it with the new IDs
         if (onInvoiceSaved) {
-          onInvoiceSaved(invoiceId);
+          onInvoiceSaved(invoiceId, workOrderId);
         }
         
         toast({

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -76,7 +75,9 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const auth = authNumber || (invoice as any).authNumber;
   const isPaid = rem <= 0;
   
-  const isContactLens = invoiceType === "contacts" || !frameBrand;
+  const contactLensItems = contactLenses || invoice.contactLensItems || [];
+  
+  const isContactLens = invoiceType === "contacts" || invoice.invoiceType === "contacts" || contactLensItems.length > 0;
   
   return (
     <div 
@@ -171,14 +172,17 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
         
         <div className="space-y-2 px-1">
-          {isContactLens && contactLenses && contactLenses.length > 0 ? (
-            contactLenses.map((lens, idx) => (
+          {isContactLens && contactLensItems.length > 0 ? (
+            contactLensItems.map((lens, idx) => (
               <div key={idx} className="p-1.5 border border-gray-300 rounded">
                 <div className="flex justify-between px-2 mb-1">
                   <div className="font-bold text-sm">{lens.brand} {lens.type}</div>
                   <span className="font-bold text-sm">{lens.price.toFixed(3)} KWD</span>
                 </div>
-                <div className="text-xs font-medium text-center">{lens.power}</div>
+                <div className="text-xs font-medium text-center">
+                  {lens.color && <span>{t("color")}: {lens.color} - </span>}
+                  <span>{t("quantity")}: {lens.qty || 1}</span>
+                </div>
               </div>
             ))
           ) : (

@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;500;600;700&display=swap');
@@ -71,7 +70,6 @@
   direction: ltr;
 }
 
-/* Improved print styling for all documents */
 @media print {
   @page {
     margin: 0 !important;
@@ -84,92 +82,153 @@
     padding: 0 !important;
     height: auto !important;
     width: auto !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   body * {
     visibility: hidden;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   .print-receipt, .print-receipt *, 
   .print-container, .print-container * {
     visibility: visible;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   .print-receipt, .print-container {
     position: absolute;
     left: 0;
     top: 0;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
-  /* Hide scrollbars when printing */
   ::-webkit-scrollbar {
     width: 0 !important;
     height: 0 !important;
     display: none !important;
   }
   
-  /* Hide all UI elements when printing */
   header, nav, button, .dialog, .dialog-overlay, 
   .no-print, button, nav, .sidebar, .scrollbar {
     display: none !important;
   }
   
-  /* Critical fix for printing dialog issues */
   body.printing {
-    width: 80mm !important;
+    width: auto !important;
     height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
   body.printing * {
     visibility: visible !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
-  }
-  
-  /* Ensure only one copy prints */
-  @page {
-    size: 80mm auto !important;
-    margin: 0mm !important;
-    margin-left: 0mm !important;
-    margin-right: 0mm !important;
-    margin-top: 0mm !important;
-    margin-bottom: 0mm !important;
+    overflow: hidden !important;
   }
 }
 
-/* Frame label printing styles */
 @media print {
   .frame-label {
     width: 100mm;
     height: 16mm;
     page-break-inside: avoid;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
     position: relative;
     margin: 0;
     padding: 0;
   }
   
-  /* Fix for frame labels */
   @page {
-    size: 100mm 16mm;
-    margin: 0;
-    padding: 0;
+    size: 100mm 16mm landscape !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
-  /* Make sure each label gets its own page */
   .label-container {
-    page-break-after: always;
-    page-break-inside: avoid;
+    width: 100mm !important;
+    height: 16mm !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .left-section {
+    width: 35mm !important;
+    height: 16mm !important;
+    padding: 1mm !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    border-right: 0.5px solid #ccc !important;
+  }
+  
+  .right-section {
+    width: 35mm !important;
+    height: 16mm !important;
+    padding: 1mm !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    margin-right: 30mm !important; /* Account for safe zone */
+  }
+  
+  .brand-name {
+    font-weight: bold !important;
+    font-size: 10pt !important;
+    margin-bottom: 0.5mm !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    line-height: 1.1 !important;
+  }
+  
+  .detail-info {
+    font-size: 8pt !important;
+    font-weight: bold !important;
+    margin-bottom: 0.5mm !important;
+    line-height: 1.1 !important;
+  }
+  
+  .price {
+    font-weight: bold !important;
+    font-size: 14pt !important;
+    margin-top: 1mm !important;
+    color: #000000 !important;
+  }
+  
+  .store-logo {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-bottom: 1mm !important;
+  }
+  
+  .store-logo img {
+    max-height: 5mm !important;
+    width: auto !important;
+  }
+  
+  .qr-code {
+    display: flex !important;
+    justify-content: center !important;
+    margin-bottom: 1mm !important;
+  }
+  
+  .qr-code img.qr-image {
+    height: 9mm !important;
+    width: 9mm !important;
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: crisp-edges !important;
   }
 }
 
-/* Arabic text fixes for all printed content */
 @media print {
   [dir="rtl"] {
     font-family: 'Zain', sans-serif !important;
@@ -180,63 +239,54 @@
   }
 }
 
-/* Receipt print styles specifically for thermal printers */
 .thermal-print {
   width: 80mm !important;
   font-family: 'Yrsa', serif !important;
-  overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+  overflow: hidden !important;
 }
 
 .thermal-print[dir="rtl"] {
   font-family: 'Zain', sans-serif !important;
 }
 
-/* Thermal printer specific styles */
 @media print {
-  /* Ensure proper dimensions for thermal receipts */
   .print-receipt {
     width: 80mm !important;
     max-width: 80mm !important;
     margin: 0 !important;
-    padding: 3mm !important; /* Reduced padding to fit more content */
+    padding: 3mm !important;
     font-family: 'Yrsa', serif !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
-  /* RTL thermal printing */
   .print-receipt[dir="rtl"] {
     font-family: 'Zain', sans-serif !important;
   }
   
-  /* Force single page per receipt */
   .print-receipt, #work-order-receipt {
     page-break-after: always !important;
     page-break-inside: avoid !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
-  /* Critical fix for ensuring only one copy prints */
   #receipt-invoice, #work-order-receipt {
     width: 80mm !important;
     max-width: 80mm !important;
     page-break-after: always !important;
     visibility: visible !important;
     position: relative !important;
-    overflow: hidden !important; /* Changed from visible to hidden to remove scrollbars */
+    overflow: hidden !important;
   }
   
-  /* Hide the preview text in actual prints */
   .preview-text {
     display: none !important;
   }
   
-  /* Optimize bottom spacing */
   .signature-section {
     margin-top: 2mm !important;
     padding-top: 1mm !important;
   }
   
-  /* Payment status indicators */
   .payment-paid {
     display: flex !important;
     justify-content: center !important;
@@ -264,4 +314,168 @@
     border: 1px solid #FECACA !important;
     color: #B91C1C !important;
   }
+}
+
+.label-container-preview {
+  width: 100mm;
+  height: 16mm;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Yrsa', serif;
+  overflow: hidden;
+  position: relative;
+  padding: 0;
+  margin: 0 0 1mm 0;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.right-section-preview {
+  width: 35mm;
+  height: 16mm;
+  padding: 1mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-right: 30mm;
+  overflow: hidden;
+}
+
+.left-section-preview {
+  width: 35mm;
+  height: 16mm;
+  padding: 1mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  border-right: 0.5px solid #ccc;
+}
+
+.brand-name-preview {
+  font-weight: bold;
+  font-size: 10pt;
+  margin-bottom: 0.5mm;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.1;
+}
+
+.detail-info-preview {
+  font-size: 8pt;
+  margin-bottom: 0.5mm;
+  line-height: 1.1;
+}
+
+.price-preview {
+  font-weight: bold;
+  font-size: 14pt;
+  margin-top: 1mm;
+  color: #000000;
+}
+
+.store-logo-preview {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 1mm;
+}
+
+.store-logo-preview img {
+  max-height: 5mm;
+  width: auto;
+}
+
+.qr-code-preview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1mm;
+}
+
+.qr-code-preview canvas {
+  height: 9mm !important;
+  width: 9mm !important;
+}
+
+.label-container {
+  width: 100mm;
+  height: 16mm;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Yrsa', serif;
+  overflow: hidden;
+  position: relative;
+  padding: 0;
+  margin: 0 0 1mm 0;
+}
+
+.right-section {
+  width: 35mm;
+  height: 16mm;
+  padding: 1mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-right: 30mm;
+  overflow: hidden;
+}
+
+.left-section {
+  width: 35mm;
+  height: 16mm;
+  padding: 1mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  border-right: 0.5px solid #ccc;
+}
+
+.brand-name {
+  font-weight: bold;
+  font-size: 10pt;
+  margin-bottom: 0.5mm;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.1;
+}
+
+.detail-info {
+  font-size: 8pt;
+  margin-bottom: 0.5mm;
+  line-height: 1.1;
+}
+
+.price {
+  font-weight: bold;
+  font-size: 14pt;
+  margin-top: 1mm;
+  color: #000000;
+}
+
+.store-logo {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 1mm;
+}
+
+.store-logo img {
+  max-height: 5mm;
+  width: auto;
+}
+
+.qr-code {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1mm;
+}
+
+.qr-code img,
+.qr-code canvas,
+.qr-code svg {
+  height: 9mm;
+  width: 9mm;
 }

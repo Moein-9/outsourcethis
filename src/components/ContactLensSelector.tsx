@@ -30,7 +30,7 @@ export interface ContactLensItem {
   type: string;
   bc: string; // Base curve
   diameter: string;
-  power: string; // Keeping this for data structure, will hide in UI
+  power: string; // Keeping this in the data structure, but not displaying it
   price: number;
   qty: number;
   color?: string;
@@ -67,6 +67,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     handleFilterApply();
   }, [filterBrand, filterType, search]);
 
+  // Calculate total with proper quantities
   const totalPrice = selectedLenses.reduce((sum, lens) => {
     const quantity = itemQuantities[lens.id] || 1;
     return sum + (lens.price * quantity);
@@ -91,20 +92,35 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   };
 
   const handleSelectLens = (lens: ContactLensItem) => {
-    const existingIndex = selectedLenses.findIndex(item => item.id === lens.id);
+    // Check if we already have this exact lens
+    const existingLensIndex = selectedLenses.findIndex(item => 
+      item.id === lens.id && 
+      item.brand === lens.brand && 
+      item.type === lens.type && 
+      item.bc === lens.bc && 
+      item.diameter === lens.diameter && 
+      item.power === lens.power
+    );
     
-    // If the lens is already selected, increment its quantity instead of showing error
-    if (existingIndex >= 0) {
+    if (existingLensIndex >= 0) {
+      // Update quantity instead of adding duplicate
       const currentQty = itemQuantities[lens.id] || 1;
       setItemQuantities({
         ...itemQuantities,
         [lens.id]: currentQty + 1
       });
       
-      // No need to update selectedLenses array since the item is already there
-      // But we need to trigger the onSelect with updated quantities
+      // Update lens qty in the selected array
+      const updatedLenses = [...selectedLenses];
+      updatedLenses[existingLensIndex] = {
+        ...updatedLenses[existingLensIndex],
+        qty: currentQty + 1
+      };
+      
+      setSelectedLenses(updatedLenses);
+      
       onSelect({
-        items: selectedLenses,
+        items: updatedLenses,
         rxData,
         quantities: {
           ...itemQuantities,
@@ -116,10 +132,11 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
       return;
     }
     
-    const updatedSelection = [...selectedLenses, lens];
+    // If it's a new lens, add it with qty 1
+    const newLens = { ...lens, qty: 1 };
+    const updatedSelection = [...selectedLenses, newLens];
     setSelectedLenses(updatedSelection);
     
-    // Initialize quantity to 1 for newly added items
     setItemQuantities({
       ...itemQuantities,
       [lens.id]: 1
@@ -141,7 +158,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     const updatedSelection = selectedLenses.filter(lens => lens.id !== lensId);
     setSelectedLenses(updatedSelection);
     
-    // Remove the item from quantities
     const updatedQuantities = { ...itemQuantities };
     delete updatedQuantities[lensId];
     setItemQuantities(updatedQuantities);
@@ -154,15 +170,23 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   };
   
   const handleUpdateQuantity = (lensId: string, newQuantity: number) => {
-    if (newQuantity < 1) return; // Don't allow less than 1
+    if (newQuantity < 1) return;
     
+    // Update quantity in itemQuantities state
     setItemQuantities({
       ...itemQuantities,
       [lensId]: newQuantity
     });
     
+    // Also update the qty property in the actual lens item
+    const updatedLenses = selectedLenses.map(lens => 
+      lens.id === lensId ? { ...lens, qty: newQuantity } : lens
+    );
+    
+    setSelectedLenses(updatedLenses);
+    
     onSelect({
-      items: selectedLenses,
+      items: updatedLenses,
       rxData,
       quantities: {
         ...itemQuantities,
@@ -172,8 +196,16 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   };
   
   const handleConfirmSelection = () => {
+    // Make sure all lenses have their qty property updated before finalizing
+    const finalLenses = selectedLenses.map(lens => ({
+      ...lens,
+      qty: itemQuantities[lens.id] || 1
+    }));
+    
+    setSelectedLenses(finalLenses);
+    
     onSelect({
-      items: selectedLenses,
+      items: finalLenses,
       rxData,
       quantities: itemQuantities
     });
@@ -312,7 +344,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         {lens.brand} {lens.type}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {lens.color || "Clear"} | {lens.price.toFixed(2)} KWD
+                        {lens.color ? lens.color : "Clear"} | {lens.price.toFixed(2)} KWD
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -385,7 +417,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">اللون</th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">BC</th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">السعر</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">الكمية</th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800"></th>
                       </tr>
                     </thead>
@@ -397,12 +428,6 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                           <td className="py-2.5 px-3 text-sm">{lens.color || "-"}</td>
                           <td className="py-2.5 px-3 text-sm">{lens.bc}</td>
                           <td className="py-2.5 px-3 text-sm font-medium">{lens.price.toFixed(2)} KWD</td>
-                          <td className="py-2.5 px-3 text-sm">
-                            <Badge variant={lens.qty > 5 ? "outline" : "destructive"} 
-                                  className={`text-xs ${lens.qty > 5 ? 'bg-green-50 text-green-700 border-green-200' : ''}`}>
-                              {lens.qty}
-                            </Badge>
-                          </td>
                           <td className="py-2 px-3">
                             <Button 
                               variant="ghost" 
