@@ -333,7 +333,7 @@ const translations: Record<string, Record<string, string>> = {
     priceError: "Please enter a valid price.",
     quantityError: "Please enter a valid quantity.",
     frameAddedSuccess: "Frame added successfully.",
-    frameAddedSuccessfully: "Frame added successfully.",
+    // Removed the duplicate property frameAddedSuccessfully
     clientSelectionError: "Please select a client or enable the 'No client file' option.",
     lensSelectionError: "Please select a lens type.",
     frameSelectionError: "Please select a frame or enable 'Lenses only' option.",
@@ -749,7 +749,7 @@ const translations: Record<string, Record<string, string>> = {
     priceError: "الرجاء إدخال سعر صحيح.",
     quantityError: "الرجاء إدخال كمية صحيحة.",
     frameAddedSuccess: "تم إضافة الإطار بنجاح.",
-    frameAddedSuccessfully: "تم إضافة الإطار بنجاح.",
+    // Removed the duplicate property frameAddedSuccessfully
     clientSelectionError: "الرجاء اختيار عميل أو تفعيل خيار 'لا يوجد ملف عميل'.",
     lensSelectionError: "الرجاء اختيار نوع العدسة.",
     frameSelectionError: "الرجاء اختيار إطار أو تفعيل خيار 'عدسات فقط'.",
