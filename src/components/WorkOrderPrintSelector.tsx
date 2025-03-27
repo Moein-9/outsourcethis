@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ import { PrinterIcon, Newspaper, FileText } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "sonner";
 import { PrintService } from "@/utils/PrintService";
-import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
+import { CustomPrintService } from "@/utils/CustomPrintService";
 
 interface WorkOrderPrintSelectorProps {
   invoice: Invoice;
@@ -71,16 +70,23 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
     
     try {
       if (selectedFormat === "receipt") {
-        printWorkOrderReceipt({
-          invoice,
+        CustomPrintService.printWorkOrder({
+          ...invoice,
+          rx,
           patientName,
           patientPhone,
-          rx,
           lensType,
           coating,
-          frame,
-          contactLenses,
-          contactLensRx
+          frameBrand: frame?.brand,
+          frameModel: frame?.model,
+          frameColor: frame?.color,
+          frameSize: frame?.size,
+          framePrice: frame?.price,
+          contactLenses
+        }, invoice, {
+          name: patientName,
+          phone: patientPhone,
+          rx
         });
         
         setTimeout(() => {
@@ -254,7 +260,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
                 disabled={!selectedFormat || printingInProgress}
               >
                 <PrinterIcon className="h-4 w-4 mr-2" />
-                {printingInProgress ? t("printing") : t("print")}
+                {printingInProgress ? t('printing') : t('print')}
               </Button>
             </DialogFooter>
           </DialogContent>
