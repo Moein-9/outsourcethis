@@ -148,7 +148,7 @@ export const RefundManager: React.FC = () => {
         variant: "default",
       });
       
-      // Print refund receipt
+      // Prepare refund info for the receipt
       const refundInfo = {
         refundId,
         invoiceId: selectedInvoice.invoiceId,
@@ -161,22 +161,27 @@ export const RefundManager: React.FC = () => {
         refundDate: new Date().toISOString(),
         originalTotal: selectedInvoice.total,
         frameBrand: selectedInvoice.frameBrand,
-        frameModel: selectedInvoice.frameModel
+        frameModel: selectedInvoice.frameModel,
+        frameColor: selectedInvoice.frameColor,
+        lensType: selectedInvoice.lensType,
+        invoiceItems: selectedInvoice.items || []
       };
       
-      // Convert the React component to an HTML string using ReactDOMServer
+      // Create the refund receipt element
       const receiptElement = (
         <RefundReceiptTemplate
           refund={refundInfo}
           language={language}
         />
       );
+      
+      // Convert the React component to HTML string for printing
       const receiptHtml = ReactDOMServer.renderToString(receiptElement);
       
-      // Print the receipt
-      PrintService.printReport(
-        receiptHtml, 
-        language === 'ar' ? `إيصال استرداد - ${refundId}` : `Refund Receipt - ${refundId}`,
+      // Use PrintService with the correct document preparation function
+      PrintService.printHtml(
+        PrintService.prepareReceiptDocument(receiptHtml, language === 'ar' ? `إيصال استرداد - ${refundId}` : `Refund Receipt - ${refundId}`),
+        'receipt',
         () => {
           toast({
             title: language === 'ar' ? 'تم إرسال الإيصال للطباعة' : 'Receipt sent to printer',
