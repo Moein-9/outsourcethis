@@ -61,6 +61,7 @@ export const MoenLogoBlack: React.FC<{
   );
 };
 
+// Updated store information based on invoice details
 export const storeInfo = {
   name: "Moen Optician",
   address: "al-somait plaza, Habeeb Munawer St, Al Farwaniyah",

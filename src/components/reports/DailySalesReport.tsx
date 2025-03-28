@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -27,41 +28,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { toast } from "sonner";
 import { SalesChart } from "./SalesChart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { PrintService } from "@/utils/PrintService";
 import { PrintReportButton } from "./PrintReportButton";
 import { Button } from "@/components/ui/button";
-
-const STORE_INFO = {
-  name: {
-    en: "Optical Center",
-    ar: "المركز البصري"
-  },
-  logo: "/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png",
-  address: {
-    en: "123 Vision Street, Kuwait City",
-    ar: "١٢٣ شارع الرؤية، مدينة الكويت"
-  },
-  phone: "+965 1234 5678"
-};
+import { MoenLogo, storeInfo } from "@/assets/logo";
 
 export const DailySalesReport: React.FC = () => {
   const invoiceStore = useInvoiceStore();
@@ -203,9 +175,9 @@ export const DailySalesReport: React.FC = () => {
     paymentBreakdown.forEach(payment => {
       paymentBreakdownHTML += `
         <tr>
-          <td>${payment.method}</td>
-          <td>${payment.count}</td>
-          <td>${payment.amount.toFixed(2)} ${t.currency}</td>
+          <td class="payment-method">${payment.method}</td>
+          <td class="payment-count">${payment.count}</td>
+          <td class="payment-amount">${payment.amount.toFixed(2)} ${t.currency}</td>
         </tr>
       `;
     });
@@ -214,115 +186,276 @@ export const DailySalesReport: React.FC = () => {
     todaySales.forEach(invoice => {
       invoicesHTML += `
         <tr>
-          <td>${invoice.patientName}</td>
-          <td>${invoice.total.toFixed(2)} ${t.currency}</td>
-          <td>${invoice.deposit.toFixed(2)} ${t.currency}</td>
-          <td>${invoice.paymentMethod}</td>
+          <td class="invoice-customer">${invoice.patientName}</td>
+          <td class="invoice-total">${invoice.total.toFixed(2)} ${t.currency}</td>
+          <td class="invoice-paid">${invoice.deposit.toFixed(2)} ${t.currency}</td>
+          <td class="invoice-method">${invoice.paymentMethod || '-'}</td>
         </tr>
       `;
     });
     
-    const storeInfo = `
-      <div class="store-logo">
-        <img src="${STORE_INFO.logo}" alt="${STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}" />
-      </div>
-      <div class="store-info">
-        <p><strong>${STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}</strong></p>
-        <p>${STORE_INFO.address[language === 'ar' ? 'ar' : 'en']}</p>
-        <p>${STORE_INFO.phone}</p>
-      </div>
-    `;
+    const reportDate = format(new Date(), 'dd/MM/yyyy', { locale: enUS });
     
+    // Create the report content with improved styling for thermal printer and bilingual support
     const reportContent = `
-      ${storeInfo}
-      
-      <div class="report-header">
-        <div class="report-title">${t.dailySalesReport}</div>
-        <div class="report-date">${language === 'ar' ? 'التاريخ:' : 'Date:'} ${today}</div>
-      </div>
-      
-      <div class="summary-section">
-        <div class="section-title">${language === 'ar' ? 'ملخص المبيعات' : 'Sales Summary'}</div>
-        <div class="summary-item">
-          <div class="summary-item-row">
-            <span class="summary-item-title">${t.totalSales}:</span>
-            <span class="summary-item-value">${totalRevenue.toFixed(2)} ${t.currency}</span>
+      <div class="report-container">
+        <div class="report-header">
+          <div class="store-logo">
+            <img src="/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png" alt="${storeInfo.name}" />
           </div>
-          <div class="summary-item-row">
-            <span class="summary-item-title">${t.totalPayments}:</span>
-            <span class="summary-item-value">${totalDeposit.toFixed(2)} ${t.currency}</span>
-          </div>
-          <div class="summary-item-row">
-            <span class="summary-item-title">${language === 'ar' ? 'عدد الفواتير' : 'Invoice Count'}:</span>
-            <span class="summary-item-value">${todaySales.length}</span>
+          <div class="store-info">
+            <h2 class="store-name">${storeInfo.name}</h2>
+            <p class="store-address">${storeInfo.address}</p>
+            <p class="store-phone">${language === 'ar' ? 'هاتف:' : 'Phone:'} ${storeInfo.phone}</p>
           </div>
         </div>
-      </div>
-      
-      <div class="divider"></div>
-      
-      <div class="summary-section">
-        <div class="section-title">${language === 'ar' ? 'تفاصيل المبيعات' : 'Sales Details'}</div>
-        <div class="summary-item">
-          <div class="summary-item-row">
-            <span class="summary-item-title">${t.lensRevenue}:</span>
-            <span class="summary-item-value">${totalLensRevenue.toFixed(2)} ${t.currency}</span>
-          </div>
-          <div class="summary-item-row">
-            <span class="summary-item-title">${t.frameRevenue}:</span>
-            <span class="summary-item-value">${totalFrameRevenue.toFixed(2)} ${t.currency}</span>
-          </div>
-          <div class="summary-item-row">
-            <span class="summary-item-title">${t.coatingRevenue}:</span>
-            <span class="summary-item-value">${totalCoatingRevenue.toFixed(2)} ${t.currency}</span>
-          </div>
+
+        <div class="report-title-box">
+          <div class="report-title">${t.dailySalesReport} | Daily Sales Report</div>
+          <div class="report-date">${language === 'ar' ? 'التاريخ:' : 'Date:'} ${reportDate}</div>
         </div>
-      </div>
-      
-      <div class="divider"></div>
-      
-      <div class="summary-section">
-        <div class="section-title">${t.paymentMethods}</div>
-        <table>
-          <thead>
-            <tr>
-              <th>${language === 'ar' ? 'طريقة الدفع' : 'Method'}</th>
-              <th>${language === 'ar' ? 'العدد' : 'Count'}</th>
-              <th>${language === 'ar' ? 'المبلغ' : 'Amount'}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${paymentBreakdownHTML}
-          </tbody>
-        </table>
-      </div>
-      
-      ${todaySales.length > 0 ? `
-        <div class="divider"></div>
-        
+
         <div class="summary-section">
-          <div class="section-title">${language === 'ar' ? 'قائمة الفواتير' : 'Invoice List'}</div>
-          <table>
+          <div class="section-header">${language === 'ar' ? 'ملخص المبيعات | Sales Summary' : 'Sales Summary | ملخص المبيعات'}</div>
+          <table class="summary-table">
+            <tr>
+              <td class="summary-label">${t.totalSales} | Total Sales:</td>
+              <td class="summary-value">${totalRevenue.toFixed(2)} ${t.currency}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">${t.totalPayments} | Total Payments:</td>
+              <td class="summary-value">${totalDeposit.toFixed(2)} ${t.currency}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">${language === 'ar' ? 'عدد الفواتير | Invoice Count:' : 'Invoice Count | عدد الفواتير:'}</td>
+              <td class="summary-value">${todaySales.length}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="summary-section">
+          <div class="section-header">${language === 'ar' ? 'تفاصيل المبيعات | Sales Details' : 'Sales Details | تفاصيل المبيعات'}</div>
+          <table class="summary-table">
+            <tr>
+              <td class="summary-label">${t.lensRevenue} | Lens Revenue:</td>
+              <td class="summary-value">${totalLensRevenue.toFixed(2)} ${t.currency}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">${t.frameRevenue} | Frame Revenue:</td>
+              <td class="summary-value">${totalFrameRevenue.toFixed(2)} ${t.currency}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">${t.coatingRevenue} | Coating Revenue:</td>
+              <td class="summary-value">${totalCoatingRevenue.toFixed(2)} ${t.currency}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="summary-section">
+          <div class="section-header">${language === 'ar' ? 'طرق الدفع | Payment Methods' : 'Payment Methods | طرق الدفع'}</div>
+          <table class="data-table">
             <thead>
               <tr>
-                <th>${language === 'ar' ? 'العميل' : 'Customer'}</th>
-                <th>${language === 'ar' ? 'المجموع' : 'Total'}</th>
-                <th>${language === 'ar' ? 'المدفوع' : 'Paid'}</th>
-                <th>${language === 'ar' ? 'الطريقة' : 'Method'}</th>
+                <th>${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
+                <th>${language === 'ar' ? 'العدد | Count' : 'Count | العدد'}</th>
+                <th>${language === 'ar' ? 'المبلغ | Amount' : 'Amount | المبلغ'}</th>
               </tr>
             </thead>
             <tbody>
-              ${invoicesHTML}
+              ${paymentBreakdownHTML || `
+                <tr>
+                  <td colspan="3" class="no-data">${language === 'ar' ? 'لا توجد بيانات | No data' : 'No data | لا توجد بيانات'}</td>
+                </tr>
+              `}
             </tbody>
           </table>
         </div>
-      ` : ''}
-      
-      <div class="footer">
-        <p>${language === 'ar' 
-          ? `© ${new Date().getFullYear()} نظام النظارات - جميع الحقوق محفوظة`
-          : `© ${new Date().getFullYear()} Optical System - All rights reserved`}</p>
+
+        ${todaySales.length > 0 ? `
+          <div class="summary-section">
+            <div class="section-header">${language === 'ar' ? 'قائمة الفواتير | Invoice List' : 'Invoice List | قائمة الفواتير'}</div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>${language === 'ar' ? 'العميل | Customer' : 'Customer | العميل'}</th>
+                  <th>${language === 'ar' ? 'المجموع | Total' : 'Total | المجموع'}</th>
+                  <th>${language === 'ar' ? 'المدفوع | Paid' : 'Paid | المدفوع'}</th>
+                  <th>${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${invoicesHTML}
+              </tbody>
+            </table>
+          </div>
+        ` : ''}
+
+        <div class="report-footer">
+          <p>${language === 'ar' 
+            ? `© ${new Date().getFullYear()} ${storeInfo.name} - جميع الحقوق محفوظة`
+            : `© ${new Date().getFullYear()} ${storeInfo.name} - All rights reserved`}</p>
+        </div>
       </div>
+      
+      <style>
+        @media print {
+          @page {
+            size: 80mm auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          
+          body {
+            width: 80mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            font-family: 'Arial', sans-serif !important;
+          }
+          
+          .report-container {
+            width: 72mm !important;
+            margin: 4mm auto !important;
+            padding: 0 !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+            background: white !important;
+            font-family: 'Arial', sans-serif !important;
+          }
+          
+          /* Ensure all content is visible */
+          * {
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+        }
+        
+        .report-container {
+          text-align: center;
+          font-family: 'Arial', sans-serif;
+          width: 72mm;
+          margin: 0 auto;
+        }
+        
+        .report-header {
+          margin-bottom: 10px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #000;
+          text-align: center;
+        }
+        
+        .store-logo {
+          text-align: center;
+          margin-bottom: 5px;
+        }
+        
+        .store-logo img {
+          max-height: 40px;
+          max-width: 100%;
+        }
+        
+        .store-info {
+          text-align: center;
+        }
+        
+        .store-name {
+          font-size: 16px;
+          font-weight: bold;
+          margin: 0;
+        }
+        
+        .store-address, .store-phone {
+          font-size: 12px;
+          margin: 2px 0;
+        }
+        
+        .report-title-box {
+          border: 2px solid #000;
+          padding: 5px;
+          margin-bottom: 10px;
+        }
+        
+        .report-title {
+          font-size: 14px;
+          font-weight: bold;
+        }
+        
+        .report-date {
+          font-size: 12px;
+        }
+        
+        .section-header {
+          background-color: #000;
+          color: #fff;
+          padding: 5px;
+          font-size: 14px;
+          font-weight: bold;
+          margin-bottom: 5px;
+          text-align: center;
+        }
+        
+        .summary-section {
+          margin-bottom: 10px;
+          border: 1px solid #000;
+        }
+        
+        .summary-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 13px;
+        }
+        
+        .summary-table td {
+          padding: 4px;
+        }
+        
+        .summary-label {
+          text-align: left;
+          font-weight: bold;
+        }
+        
+        .summary-value {
+          text-align: right;
+          font-weight: bold;
+        }
+        
+        .data-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 11px;
+        }
+        
+        .data-table th, .data-table td {
+          border: 1px solid #000;
+          padding: 4px;
+        }
+        
+        .data-table th {
+          background-color: #f2f2f2;
+          font-weight: bold;
+        }
+        
+        .payment-method, .invoice-customer {
+          text-align: left;
+        }
+        
+        .payment-count, .payment-amount, .invoice-total, .invoice-paid, .invoice-method {
+          text-align: right;
+        }
+        
+        .no-data {
+          text-align: center;
+          padding: 10px;
+        }
+        
+        .report-footer {
+          margin-top: 10px;
+          padding-top: 5px;
+          border-top: 1px solid #000;
+          font-size: 10px;
+          text-align: center;
+        }
+      </style>
     `;
     
     PrintService.printReport(reportContent, pageTitle, () => {
