@@ -11,14 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from '@/hooks/use-toast';
 import { useLanguageStore } from '@/store/languageStore';
-import { RefreshCw, Search, AlertTriangle, CheckCircle2, ArrowLeft, Receipt, ShoppingBag, RefreshCcw, Phone } from 'lucide-react';
+import { RefreshCw, Search, AlertTriangle, CheckCircle2, ArrowLeft, Receipt, ShoppingBag, RefreshCcw, Phone, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { RefundReceiptTemplate } from './RefundReceiptTemplate';
 import { PrintService } from '@/utils/PrintService';
 import * as ReactDOMServer from 'react-dom/server';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { format, isValid } from 'date-fns';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export const RefundManager: React.FC = () => {
   const { language, t } = useLanguageStore();
@@ -27,7 +28,6 @@ export const RefundManager: React.FC = () => {
   const navigate = useNavigate();
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState<'invoice' | 'phone'>('invoice');
   const [searchResults, setSearchResults] = useState<Invoice[]>([]);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isSearching, setIsSearching] = useState(false);
@@ -37,6 +37,15 @@ export const RefundManager: React.FC = () => {
   const [staffNotes, setStaffNotes] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return isValid(date) ? format(date, "dd/MM/yyyy") : "Invalid Date";
+    } catch (error) {
+      return "Invalid Date";
+    }
+  };
   
   const handleSearch = () => {
     if (!searchTerm.trim()) {
@@ -48,22 +57,13 @@ export const RefundManager: React.FC = () => {
     setIsSearching(true);
     setError('');
     
-    let results: Invoice[] = [];
-    
-    // Search based on the selected search type
-    if (searchType === 'invoice') {
-      // Search by invoice ID or patient name
-      results = invoices.filter(invoice => 
-        !invoice.isRefunded && 
-        (invoice.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) || 
-         invoice.patientName.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    } else {
-      // Search by phone number
-      results = invoices.filter(invoice => 
-        !invoice.isRefunded && invoice.patientPhone.includes(searchTerm)
-      );
-    }
+    // Unified search: search by invoice ID, patient name, or phone number
+    const results = invoices.filter(invoice => 
+      !invoice.isRefunded && 
+      (invoice.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) || 
+       invoice.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       invoice.patientPhone.includes(searchTerm))
+    );
     
     setSearchResults(results);
     setIsSearching(false);
@@ -149,8 +149,6 @@ export const RefundManager: React.FC = () => {
       });
       
       // Print refund receipt
-      const patient = selectedInvoice.patientId ? getPatientById(selectedInvoice.patientId) : null;
-      
       const refundInfo = {
         refundId,
         invoiceId: selectedInvoice.invoiceId,
@@ -243,58 +241,35 @@ export const RefundManager: React.FC = () => {
           </CardTitle>
           <CardDescription>
             {language === 'ar' 
-              ? 'ابحث عن الفاتورة أولاً ثم قم بمعالجة استرداد الأموال للعميل'
-              : 'Search for the invoice first, then process a refund for the customer'}
+              ? 'ابحث عن الفاتورة بواسطة رقم الفاتورة، اسم العميل، أو رقم الهاتف'
+              : 'Search for an invoice by invoice number, customer name, or phone number'}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-4">
-            <Tabs 
-              value={searchType} 
-              onValueChange={(value) => setSearchType(value as 'invoice' | 'phone')}
-              className="w-full mb-4"
-            >
-              <TabsList className="w-full grid grid-cols-2">
-                <TabsTrigger value="invoice" className="flex items-center gap-1">
-                  <Receipt className="h-4 w-4" />
-                  {language === 'ar' ? 'بحث بالفاتورة/الاسم' : 'Invoice/Name Search'}
-                </TabsTrigger>
-                <TabsTrigger value="phone" className="flex items-center gap-1">
-                  <Phone className="h-4 w-4" />
-                  {language === 'ar' ? 'بحث برقم الهاتف' : 'Phone Number Search'}
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Label htmlFor="search" className="text-blue-700 font-medium">
-                  {searchType === 'invoice' 
-                    ? (language === 'ar' ? 'ابحث عن الفاتورة أو العميل' : 'Search for Invoice or Customer')
-                    : (language === 'ar' ? 'ابحث برقم الهاتف' : 'Search by Phone Number')}
-                </Label>
-                <div className="flex gap-2 mt-1">
-                  <Input 
-                    id="search" 
-                    value={searchTerm} 
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder={searchType === 'invoice'
-                      ? (language === 'ar' ? 'رقم الفاتورة أو اسم العميل' : 'Invoice number or customer name')
-                      : (language === 'ar' ? 'رقم الهاتف' : 'Phone number')}
-                    className="border-blue-200 focus:border-blue-400"
-                    type={searchType === 'phone' ? 'tel' : 'text'}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  />
-                  <Button 
-                    onClick={handleSearch} 
-                    disabled={isSearching}
-                    className="gap-2 bg-blue-600 hover:bg-blue-700"
-                  >
-                    {isSearching ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                    {language === 'ar' ? 'بحث' : 'Search'}
-                  </Button>
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400" />
                 </div>
+                <Input 
+                  value={searchTerm} 
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={language === 'ar' 
+                    ? 'ابحث بواسطة رقم الفاتورة، اسم العميل، أو رقم الهاتف' 
+                    : 'Search by invoice number, customer name, or phone number'}
+                  className="pl-10 border-blue-200 focus:border-blue-400"
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
               </div>
+              <Button 
+                onClick={handleSearch} 
+                disabled={isSearching}
+                className="gap-2 bg-blue-600 hover:bg-blue-700 md:w-auto w-full"
+              >
+                {isSearching ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                {language === 'ar' ? 'بحث' : 'Search'}
+              </Button>
             </div>
             
             {error && (
@@ -316,46 +291,58 @@ export const RefundManager: React.FC = () => {
                 <div className="bg-blue-50 p-3 text-blue-700 font-medium border-b border-blue-200">
                   {language === 'ar' ? 'نتائج البحث' : 'Search Results'} ({searchResults.length})
                 </div>
-                <table className="w-full">
-                  <thead className="bg-blue-50/70">
-                    <tr>
-                      <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
+                <Table>
+                  <TableHeader className="bg-blue-50/70">
+                    <TableRow>
+                      <TableHead className="text-blue-700 font-semibold">
                         {language === 'ar' ? 'رقم الفاتورة' : 'Invoice ID'}
-                      </th>
-                      <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
+                      </TableHead>
+                      <TableHead className="text-blue-700 font-semibold">
                         {language === 'ar' ? 'العميل' : 'Customer'}
-                      </th>
-                      <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
+                      </TableHead>
+                      <TableHead className="text-blue-700 font-semibold">
                         {language === 'ar' ? 'رقم الهاتف' : 'Phone'}
-                      </th>
-                      <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
+                      </TableHead>
+                      <TableHead className="text-blue-700 font-semibold">
                         {language === 'ar' ? 'التاريخ' : 'Date'}
-                      </th>
-                      <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
+                      </TableHead>
+                      <TableHead className="text-blue-700 font-semibold">
                         {language === 'ar' ? 'المبلغ الإجمالي' : 'Total Amount'}
-                      </th>
-                      <th className="py-3 px-4 text-end text-sm font-semibold text-blue-700">
+                      </TableHead>
+                      <TableHead className="text-blue-700 font-semibold">
+                        {language === 'ar' ? 'الحالة' : 'Status'}
+                      </TableHead>
+                      <TableHead className="text-right text-blue-700 font-semibold">
                         {language === 'ar' ? 'الإجراءات' : 'Actions'}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-blue-100">
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {searchResults.map((invoice) => (
-                      <tr 
+                      <TableRow 
                         key={invoice.invoiceId} 
                         className={`hover:bg-blue-50/30 transition-colors 
                           ${selectedInvoice?.invoiceId === invoice.invoiceId ? 'bg-blue-100/30' : ''}`}
                       >
-                        <td className="py-3 px-4 text-base font-medium">{invoice.invoiceId}</td>
-                        <td className="py-3 px-4 text-base">{invoice.patientName}</td>
-                        <td className="py-3 px-4 text-base">{invoice.patientPhone}</td>
-                        <td className="py-3 px-4 text-base">
-                          {new Date(invoice.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-4 text-base font-semibold text-blue-700">
+                        <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
+                        <TableCell>{invoice.patientName}</TableCell>
+                        <TableCell>{invoice.patientPhone}</TableCell>
+                        <TableCell>{formatDate(invoice.createdAt)}</TableCell>
+                        <TableCell className="font-semibold text-blue-700">
                           {invoice.total.toFixed(3)} KWD
-                        </td>
-                        <td className="py-3 px-4 text-end">
+                        </TableCell>
+                        <TableCell>
+                          {invoice.isPaid ? (
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                              {language === 'ar' ? 'مدفوع' : 'Paid'}
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200">
+                              {language === 'ar' ? 'غير مدفوع' : 'Unpaid'}
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
                           <Button 
                             variant="outline" 
                             size="sm" 
@@ -364,11 +351,11 @@ export const RefundManager: React.FC = () => {
                           >
                             {language === 'ar' ? 'اختيار' : 'Select'}
                           </Button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             )}
             
@@ -386,23 +373,89 @@ export const RefundManager: React.FC = () => {
                       {language === 'ar' ? `رقم الفاتورة: ${selectedInvoice.invoiceId}` : `Invoice: ${selectedInvoice.invoiceId}`}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <ShoppingBag className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm text-blue-700">
-                      {language === 'ar' 
-                        ? `العميل: ${selectedInvoice.patientName}`
-                        : `Customer: ${selectedInvoice.patientName}`}
-                    </span>
-                    {selectedInvoice.patientId && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={goToPatientProfile}
-                        className="h-7 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-100"
-                      >
-                        {language === 'ar' ? 'عرض ملف العميل' : 'View Profile'}
-                      </Button>
-                    )}
+                  
+                  {/* Invoice Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 bg-white/70 p-3 rounded-md">
+                    <div className="space-y-1">
+                      <div className="text-xs text-blue-600 font-medium">
+                        {language === 'ar' ? 'العميل' : 'Customer'}
+                      </div>
+                      <div className="font-medium flex items-center gap-1">
+                        <ShoppingBag className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                        {selectedInvoice.patientName}
+                        {selectedInvoice.patientId && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={goToPatientProfile}
+                            className="h-6 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-100 ml-1"
+                          >
+                            {language === 'ar' ? 'عرض' : 'View'}
+                          </Button>
+                        )}
+                      </div>
+                      <div className="text-sm flex items-center gap-1">
+                        <Phone className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
+                        {selectedInvoice.patientPhone}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="text-xs text-blue-600 font-medium">
+                        {language === 'ar' ? 'معلومات الفاتورة' : 'Invoice Details'}
+                      </div>
+                      <div className="font-medium flex items-center gap-1">
+                        <Calendar className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                        {formatDate(selectedInvoice.createdAt)}
+                      </div>
+                      <div className="text-sm">
+                        {selectedInvoice.invoiceType === 'glasses' ? (
+                          <span>
+                            {selectedInvoice.frameBrand} - {selectedInvoice.frameModel}
+                          </span>
+                        ) : (
+                          <span>
+                            {language === 'ar' ? 'عدسات لاصقة' : 'Contact Lenses'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="text-xs text-blue-600 font-medium">
+                        {language === 'ar' ? 'معلومات الدفع' : 'Payment Details'}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm">
+                          {language === 'ar' ? 'المبلغ الإجمالي:' : 'Total Amount:'}
+                        </div>
+                        <div className="font-bold text-blue-800">
+                          {selectedInvoice.total.toFixed(3)} KWD
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm">
+                          {language === 'ar' ? 'طريقة الدفع:' : 'Payment Method:'}
+                        </div>
+                        <div>{selectedInvoice.paymentMethod}</div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm">
+                          {language === 'ar' ? 'حالة الدفع:' : 'Payment Status:'}
+                        </div>
+                        <div>
+                          {selectedInvoice.isPaid ? (
+                            <Badge className="bg-green-100 text-green-800">
+                              {language === 'ar' ? 'مدفوع' : 'Paid'}
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-amber-100 text-amber-800">
+                              {language === 'ar' ? 'غير مدفوع' : 'Unpaid'}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
