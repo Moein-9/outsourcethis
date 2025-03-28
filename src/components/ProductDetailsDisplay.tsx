@@ -10,7 +10,12 @@ interface ProductDetailsDisplayProps {
     frameBrand?: string;
     frameModel?: string;
     frameColor?: string;
+    frameSize?: string;
     lensType?: string;
+    lensThickness?: string;
+    lensIndex?: string;
+    coating?: string;
+    lensFeatures?: string[];
     contactLensItems?: ContactLensItem[];
   };
 }
@@ -53,10 +58,45 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
             </div>
           )}
           
+          {invoice.frameSize && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-sm text-gray-500">{t('frameSize')}:</div>
+              <div className="text-sm font-medium">{invoice.frameSize}</div>
+            </div>
+          )}
+          
           {invoice.lensType && (
             <div className="grid grid-cols-2 gap-2">
               <div className="text-sm text-gray-500">{t('lensType')}:</div>
               <div className="text-sm font-medium">{invoice.lensType}</div>
+            </div>
+          )}
+          
+          {invoice.lensThickness && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-sm text-gray-500">{t('lensThickness')}:</div>
+              <div className="text-sm font-medium">{invoice.lensThickness}</div>
+            </div>
+          )}
+          
+          {invoice.lensIndex && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-sm text-gray-500">{t('lensIndex')}:</div>
+              <div className="text-sm font-medium">{invoice.lensIndex}</div>
+            </div>
+          )}
+          
+          {invoice.coating && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-sm text-gray-500">{t('coating')}:</div>
+              <div className="text-sm font-medium">{invoice.coating}</div>
+            </div>
+          )}
+          
+          {invoice.lensFeatures && invoice.lensFeatures.length > 0 && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-sm text-gray-500">{t('lensFeatures')}:</div>
+              <div className="text-sm font-medium">{invoice.lensFeatures.join(', ')}</div>
             </div>
           )}
         </div>

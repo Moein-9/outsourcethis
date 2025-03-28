@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useInvoiceStore, Invoice } from '@/store/invoiceStore';
 import { usePatientStore } from '@/store/patientStore';
@@ -267,7 +266,6 @@ export const RefundManager: React.FC = () => {
     }
   };
   
-  // Calculate total paid amount for an invoice
   const calculatePaidAmount = (invoice: Invoice) => {
     if (!invoice.payments || invoice.payments.length === 0) {
       return invoice.deposit || 0;
@@ -275,7 +273,6 @@ export const RefundManager: React.FC = () => {
     return invoice.payments.reduce((sum, payment) => sum + payment.amount, 0);
   };
   
-  // Calculate remaining amount for an invoice
   const calculateRemainingAmount = (invoice: Invoice) => {
     const paidAmount = calculatePaidAmount(invoice);
     return Math.max(0, invoice.total - paidAmount);
@@ -498,23 +495,23 @@ export const RefundManager: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-sm">
-                          {language === 'ar' ? 'المبلغ الإجمالي:' : 'Total Amount:'}
+                          {t("totalAmount")}:
                         </div>
                         <div className="font-bold text-blue-800">
                           {selectedInvoice.total.toFixed(3)} KWD
                         </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm">
-                          {language === 'ar' ? 'المدفوع:' : 'Paid:'}
+                      <div className="flex items-center justify-between bg-amber-50 p-2 rounded-md border border-amber-200">
+                        <div className="text-sm font-medium text-amber-800">
+                          {t("paid")}:
                         </div>
-                        <div className="font-medium text-blue-700">
+                        <div className="font-bold text-amber-800">
                           {calculatePaidAmount(selectedInvoice).toFixed(3)} KWD
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-sm">
-                          {language === 'ar' ? 'المتبقي:' : 'Remaining:'}
+                          {t("remaining")}:
                         </div>
                         <div className="font-medium text-amber-600">
                           {calculateRemainingAmount(selectedInvoice).toFixed(3)} KWD
@@ -522,22 +519,22 @@ export const RefundManager: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-sm">
-                          {language === 'ar' ? 'طريقة الدفع:' : 'Payment Method:'}
+                          {t("paymentMethod")}:
                         </div>
-                        <div>{selectedInvoice.paymentMethod}</div>
+                        <div>{t(selectedInvoice.paymentMethod.toLowerCase())}</div>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-sm">
-                          {language === 'ar' ? 'حالة الدفع:' : 'Payment Status:'}
+                          {t("paymentStatus")}:
                         </div>
                         <div>
                           {selectedInvoice.isPaid ? (
                             <Badge className="bg-green-100 text-green-800">
-                              {language === 'ar' ? 'مدفوع' : 'Paid'}
+                              {t("paidInFull")}
                             </Badge>
                           ) : (
                             <Badge className="bg-amber-100 text-amber-800">
-                              {language === 'ar' ? 'غير مدفوع' : 'Unpaid'}
+                              {t("unpaid")}
                             </Badge>
                           )}
                         </div>

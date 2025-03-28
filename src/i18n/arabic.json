@@ -1,4 +1,3 @@
-
 {
   "loading": "جار التحميل...",
   "name": "الاسم",
@@ -62,7 +61,7 @@
   "total": "المجموع",
   "remaining": "المتبقي",
   "partiallyPaid": "مدفوع جزئياً",
-  "paid": "مدفوع",
+  "paid": "المدفوع",
   "pickedUp": "تم الاستلام",
   "transactionHistory": "سجل المعاملات",
   "noTransactionsYet": "لا توجد معاملات حتى الآن",
@@ -77,10 +76,14 @@
   "kwd": "د.ك",
   "glassesDetails": "تفاصيل النظارة",
   "contactLensDetails": "تفاصيل العدسات اللاصقة",
-  "frameBrand": "الماركة",
-  "frameModel": "الموديل",
-  "frameColor": "اللون",
+  "frameBrand": "ماركة الإطار",
+  "frameModel": "موديل الإطار",
+  "frameColor": "لون الإطار",
+  "frameSize": "مقاس الإطار",
   "lensType": "نوع العدسة",
+  "lensThickness": "سماكة العدسة",
+  "lensIndex": "معامل العدسة",
+  "lensFeatures": "مميزات العدسة",
   "item": "المنتج",
   "quantity": "الكمية",
   "price": "السعر",
@@ -145,5 +148,9 @@
   "productDetails": "تفاصيل المنتج",
   "paymentDetails": "تفاصيل الدفع",
   "paymentHistory": "سجل الدفعات",
-  "discount": "الخصم"
+  "discount": "الخصم",
+  "remaining": "المتبقي",
+  "paymentStatus": "حالة الدفع",
+  "cash": "نقداً",
+  "unpaid": "غير مدفوع"
 }
