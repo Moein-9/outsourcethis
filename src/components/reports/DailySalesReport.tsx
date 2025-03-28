@@ -34,6 +34,7 @@ import { PrintService } from "@/utils/PrintService";
 import { PrintReportButton } from "./PrintReportButton";
 import { Button } from "@/components/ui/button";
 import { MoenLogo, storeInfo } from "@/assets/logo";
+import { toast } from "@/hooks/use-toast";
 
 export const DailySalesReport: React.FC = () => {
   const invoiceStore = useInvoiceStore();
@@ -459,7 +460,11 @@ export const DailySalesReport: React.FC = () => {
     `;
     
     PrintService.printReport(reportContent, pageTitle, () => {
-      toast.success(language === 'ar' ? 'تم إرسال التقرير للطباعة' : 'Report sent to printer');
+      toast({
+        title: language === 'ar' ? 'تم إرسال التقرير للطباعة' : 'Report sent to printer',
+        description: language === 'ar' ? 'تتم معالجة طباعة التقرير' : 'Processing print request',
+        variant: "default",
+      });
     });
   };
   
@@ -470,7 +475,7 @@ export const DailySalesReport: React.FC = () => {
         <div className="flex items-center gap-2">
           <div className="hidden sm:flex items-center text-sm text-muted-foreground gap-1">
             <Store className="h-4 w-4" />
-            <span>{STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}</span>
+            <span>{storeInfo.name}</span>
           </div>
           <PrintReportButton onPrint={handlePrintReport} className="w-full sm:w-auto" />
         </div>
