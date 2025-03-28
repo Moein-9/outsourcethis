@@ -1,3 +1,4 @@
+
 {
   "loading": "جار التحميل...",
   "name": "الاسم",
@@ -44,7 +45,7 @@
   "edit": "تعديل",
   "delete": "حذف",
   "add": "إضافة",
-  "view": "عرض",
+  "view": "مشاهدة",
   "save": "حفظ",
   "update": "تحديث",
   "create": "إنشاء",
@@ -83,6 +84,7 @@
   "lensType": "نوع العدسة",
   "lensThickness": "سماكة العدسة",
   "lensIndex": "معامل العدسة",
+  "coating": "طلاء العدسة",
   "lensFeatures": "مميزات العدسة",
   "item": "المنتج",
   "quantity": "الكمية",
@@ -147,10 +149,6 @@
   "noInvoiceDataYet": "لا توجد بيانات للفاتورة بعد",
   "productDetails": "تفاصيل المنتج",
   "paymentDetails": "تفاصيل الدفع",
-  "paymentHistory": "سجل الدفعات",
   "discount": "الخصم",
-  "remaining": "المتبقي",
-  "paymentStatus": "حالة الدفع",
-  "cash": "نقداً",
   "unpaid": "غير مدفوع"
 }

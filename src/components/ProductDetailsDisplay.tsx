@@ -117,7 +117,7 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
                 <tr key={index} className="border-t border-gray-100">
                   <td className="py-1.5 px-2">{item.brand || item.type || t('contactLenses')}</td>
                   <td className="py-1.5 px-2 text-center">{item.qty || 1}</td>
-                  <td className="py-1.5 px-2 text-right">{item.price.toFixed(3)} KWD</td>
+                  <td className="py-1.5 px-2 text-right">{item.price.toFixed(3)} {t('kwd')}</td>
                 </tr>
               ))}
             </tbody>
