@@ -15,6 +15,7 @@ import { RefreshCw, Search, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { RefundReceiptTemplate } from './RefundReceiptTemplate';
 import { PrintService } from '@/utils/PrintService';
+import * as ReactDOMServer from 'react-dom/server';
 
 export const RefundManager: React.FC = () => {
   const { language, t } = useLanguageStore();
@@ -175,13 +176,20 @@ export const RefundManager: React.FC = () => {
   };
   
   const printRefundReceipt = (refundInfo: any) => {
-    const receiptContent = RefundReceiptTemplate({
-      refund: refundInfo,
-      language
-    });
+    // Create the receipt component
+    const receiptElement = (
+      <RefundReceiptTemplate
+        refund={refundInfo}
+        language={language}
+      />
+    );
     
+    // Convert the React component to an HTML string
+    const receiptHtml = ReactDOMServer.renderToString(receiptElement);
+    
+    // Now we can pass the HTML string to the PrintService
     PrintService.printReport(
-      receiptContent, 
+      receiptHtml, 
       language === 'ar' ? `إيصال استرداد - ${refundInfo.refundId}` : `Refund Receipt - ${refundInfo.refundId}`,
       () => {
         toast({
