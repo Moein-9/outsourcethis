@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Clock } from 'lucide-react';
+import { Clock, RefreshCcw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { MoenLogo } from "@/assets/logo";
@@ -93,6 +93,14 @@ export const Layout: React.FC<LayoutProps> = ({
             className="whitespace-nowrap"
           >
             {t('patientSearch')}
+          </Button>
+          <Button 
+            variant={activeSection === "refundExchange" ? "default" : "outline"} 
+            onClick={() => handleSectionNavigation("refundExchange")}
+            className="whitespace-nowrap"
+          >
+            <RefreshCcw className={`h-4 w-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+            {t('refundExchange') || "Exchange & Refunds"}
           </Button>
         </div>
         <div className="flex items-center gap-3">

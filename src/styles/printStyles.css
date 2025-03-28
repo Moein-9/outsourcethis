@@ -1,0 +1,85 @@
+
+/* Print-specific styles */
+@media print {
+  @page {
+    size: 80mm auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  body {
+    width: 80mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    color: black !important;
+  }
+  
+  #refund-receipt {
+    width: 76mm !important;
+    max-width: 76mm !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 2mm !important;
+    margin: 0 !important;
+    background: white !important;
+    color: black !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+  
+  /* Hide elements that shouldn't be printed */
+  .print-hidden,
+  header, 
+  button:not(.print-visible),
+  nav,
+  footer,
+  .shadcn-header,
+  .shadcn-header-tabs,
+  .dialog-header {
+    display: none !important;
+  }
+  
+  /* Ensure the receipt is properly sized */
+  .print-receipt {
+    width: 76mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: relative !important;
+    display: block !important;
+  }
+  
+  /* Force background colors to print */
+  .print-receipt * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  /* Fix fonts and spacing for print */
+  .print-receipt {
+    font-size: 10pt !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Ensure proper margins inside receipt */
+  .print-receipt > div {
+    margin: 0 !important;
+    padding: 2mm !important;
+  }
+}
+
+/* Force LTR for numbers */
+.force-ltr-numbers {
+  direction: ltr !important;
+  unicode-bidi: embed;
+  text-align: right;
+}
