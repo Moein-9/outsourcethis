@@ -11,11 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from '@/hooks/use-toast';
 import { useLanguageStore } from '@/store/languageStore';
-import { RefreshCw, Search, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, Search, AlertTriangle, CheckCircle2, ArrowLeft, Receipt, ShoppingBag, RefreshCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { RefundReceiptTemplate } from './RefundReceiptTemplate';
 import { PrintService } from '@/utils/PrintService';
 import * as ReactDOMServer from 'react-dom/server';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 export const RefundManager: React.FC = () => {
   const { language, t } = useLanguageStore();
@@ -152,7 +154,27 @@ export const RefundManager: React.FC = () => {
         frameModel: selectedInvoice.frameModel
       };
       
-      printRefundReceipt(refundInfo);
+      // Convert the React component to an HTML string using ReactDOMServer
+      const receiptElement = (
+        <RefundReceiptTemplate
+          refund={refundInfo}
+          language={language}
+        />
+      );
+      const receiptHtml = ReactDOMServer.renderToString(receiptElement);
+      
+      // Print the receipt
+      PrintService.printReport(
+        receiptHtml, 
+        language === 'ar' ? `إيصال استرداد - ${refundId}` : `Refund Receipt - ${refundId}`,
+        () => {
+          toast({
+            title: language === 'ar' ? 'تم إرسال الإيصال للطباعة' : 'Receipt sent to printer',
+            description: language === 'ar' ? 'تتم معالجة طباعة الإيصال' : 'Processing print request',
+            variant: "default",
+          });
+        }
+      );
       
       // Reset form
       setTimeout(() => {
@@ -175,32 +197,6 @@ export const RefundManager: React.FC = () => {
     }
   };
   
-  const printRefundReceipt = (refundInfo: any) => {
-    // Create the receipt component
-    const receiptElement = (
-      <RefundReceiptTemplate
-        refund={refundInfo}
-        language={language}
-      />
-    );
-    
-    // Convert the React component to an HTML string
-    const receiptHtml = ReactDOMServer.renderToString(receiptElement);
-    
-    // Now we can pass the HTML string to the PrintService
-    PrintService.printReport(
-      receiptHtml, 
-      language === 'ar' ? `إيصال استرداد - ${refundInfo.refundId}` : `Refund Receipt - ${refundInfo.refundId}`,
-      () => {
-        toast({
-          title: language === 'ar' ? 'تم إرسال الإيصال للطباعة' : 'Receipt sent to printer',
-          description: language === 'ar' ? 'تتم معالجة طباعة الإيصال' : 'Processing print request',
-          variant: "default",
-        });
-      }
-    );
-  };
-  
   const goToPatientProfile = () => {
     if (selectedInvoice && selectedInvoice.patientId) {
       navigate(`/patient/${selectedInvoice.patientId}`);
@@ -209,20 +205,43 @@ export const RefundManager: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{language === 'ar' ? 'إدارة استرداد الأموال' : 'Refund Management'}</CardTitle>
+      {/* Header with gradient background */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-500 p-2 rounded-full">
+            <RefreshCcw className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-blue-700">
+              {language === 'ar' ? 'إدارة استرداد الأموال والاستبدال' : 'Refund & Exchange Management'}
+            </h1>
+            <p className="text-blue-600 font-medium">
+              {language === 'ar' ? 'معالجة استرداد الأموال واستبدال المنتجات للعملاء' : 
+                'Process refunds and product exchanges for customers'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Card className="border-blue-200 overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 pb-4">
+          <CardTitle className="flex items-center text-blue-700 gap-2">
+            <Search className="h-5 w-5" />
+            {language === 'ar' ? 'البحث عن فاتورة' : 'Search for Invoice'}
+          </CardTitle>
           <CardDescription>
             {language === 'ar' 
               ? 'ابحث عن الفاتورة أولاً ثم قم بمعالجة استرداد الأموال للعميل'
               : 'Search for the invoice first, then process a refund for the customer'}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="space-y-4">
             <div className="flex gap-2">
               <div className="flex-1">
-                <Label htmlFor="search">{language === 'ar' ? 'ابحث عن الفاتورة أو العميل' : 'Search for Invoice or Customer'}</Label>
+                <Label htmlFor="search" className="text-blue-700 font-medium">
+                  {language === 'ar' ? 'ابحث عن الفاتورة أو العميل' : 'Search for Invoice or Customer'}
+                </Label>
                 <div className="flex gap-2 mt-1">
                   <Input 
                     id="search" 
@@ -230,11 +249,12 @@ export const RefundManager: React.FC = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder={language === 'ar' ? 'رقم الفاتورة أو اسم العميل' : 'Invoice number or customer name'}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    className="border-blue-200 focus:border-blue-400"
                   />
                   <Button 
                     onClick={handleSearch} 
                     disabled={isSearching}
-                    className="gap-2"
+                    className="gap-2 bg-blue-600 hover:bg-blue-700"
                   >
                     {isSearching ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                     {language === 'ar' ? 'بحث' : 'Search'}
@@ -244,58 +264,65 @@ export const RefundManager: React.FC = () => {
             </div>
             
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="border-red-300 bg-red-50">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription className="font-medium">{error}</AlertDescription>
               </Alert>
             )}
             
             {success && (
               <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <AlertDescription>{success}</AlertDescription>
+                <AlertDescription className="font-medium">{success}</AlertDescription>
               </Alert>
             )}
             
             {searchResults.length > 0 && (
-              <div className="border rounded-lg overflow-hidden">
+              <div className="rounded-lg overflow-hidden border border-blue-200 shadow-sm">
+                <div className="bg-blue-50 p-3 text-blue-700 font-medium border-b border-blue-200">
+                  {language === 'ar' ? 'نتائج البحث' : 'Search Results'} ({searchResults.length})
+                </div>
                 <table className="w-full">
-                  <thead className="bg-muted/50">
+                  <thead className="bg-blue-50/70">
                     <tr>
-                      <th className="py-2 px-3 text-start text-xs font-medium text-muted-foreground">
+                      <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
                         {language === 'ar' ? 'رقم الفاتورة' : 'Invoice ID'}
                       </th>
-                      <th className="py-2 px-3 text-start text-xs font-medium text-muted-foreground">
+                      <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
                         {language === 'ar' ? 'العميل' : 'Customer'}
                       </th>
-                      <th className="py-2 px-3 text-start text-xs font-medium text-muted-foreground">
+                      <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
                         {language === 'ar' ? 'التاريخ' : 'Date'}
                       </th>
-                      <th className="py-2 px-3 text-start text-xs font-medium text-muted-foreground">
+                      <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
                         {language === 'ar' ? 'المبلغ الإجمالي' : 'Total Amount'}
                       </th>
-                      <th className="py-2 px-3 text-end text-xs font-medium text-muted-foreground">
+                      <th className="py-3 px-4 text-end text-sm font-semibold text-blue-700">
                         {language === 'ar' ? 'الإجراءات' : 'Actions'}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-blue-100">
                     {searchResults.map((invoice) => (
                       <tr 
                         key={invoice.invoiceId} 
-                        className={`hover:bg-muted/30 ${selectedInvoice?.invoiceId === invoice.invoiceId ? 'bg-primary/10' : ''}`}
+                        className={`hover:bg-blue-50/30 transition-colors 
+                          ${selectedInvoice?.invoiceId === invoice.invoiceId ? 'bg-blue-100/30' : ''}`}
                       >
-                        <td className="py-2 px-3 text-sm">{invoice.invoiceId}</td>
-                        <td className="py-2 px-3 text-sm">{invoice.patientName}</td>
-                        <td className="py-2 px-3 text-sm">
+                        <td className="py-3 px-4 text-base font-medium">{invoice.invoiceId}</td>
+                        <td className="py-3 px-4 text-base">{invoice.patientName}</td>
+                        <td className="py-3 px-4 text-base">
                           {new Date(invoice.createdAt).toLocaleDateString()}
                         </td>
-                        <td className="py-2 px-3 text-sm">{invoice.total.toFixed(3)} KWD</td>
-                        <td className="py-2 px-3 text-end">
+                        <td className="py-3 px-4 text-base font-semibold text-blue-700">
+                          {invoice.total.toFixed(3)} KWD
+                        </td>
+                        <td className="py-3 px-4 text-end">
                           <Button 
                             variant="outline" 
                             size="sm" 
                             onClick={() => handleSelectInvoice(invoice)}
+                            className="border-blue-300 text-blue-700 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-400"
                           >
                             {language === 'ar' ? 'اختيار' : 'Select'}
                           </Button>
@@ -308,95 +335,149 @@ export const RefundManager: React.FC = () => {
             )}
             
             {selectedInvoice && (
-              <div className="border rounded-lg p-4 space-y-4 mt-4 bg-muted/5">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-lg">
-                    {language === 'ar' ? 'معلومات استرداد الأموال' : 'Refund Information'}
-                  </h3>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={goToPatientProfile}
-                    disabled={!selectedInvoice.patientId}
-                  >
-                    {language === 'ar' ? 'عرض ملف العميل' : 'View Patient Profile'}
-                  </Button>
+              <div className="mt-6 border rounded-lg border-blue-200 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-100 to-purple-100 p-4 border-b border-blue-200">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <Receipt className="h-5 w-5 text-blue-600" />
+                      <span className="text-blue-800">
+                        {language === 'ar' ? 'معلومات استرداد الأموال' : 'Refund Information'}
+                      </span>
+                    </h3>
+                    <Badge className="bg-blue-600">
+                      {language === 'ar' ? `رقم الفاتورة: ${selectedInvoice.invoiceId}` : `Invoice: ${selectedInvoice.invoiceId}`}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <ShoppingBag className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-blue-700">
+                      {language === 'ar' 
+                        ? `العميل: ${selectedInvoice.patientName}`
+                        : `Customer: ${selectedInvoice.patientName}`}
+                    </span>
+                    {selectedInvoice.patientId && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={goToPatientProfile}
+                        className="h-7 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+                      >
+                        {language === 'ar' ? 'عرض ملف العميل' : 'View Profile'}
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="refundAmount">{language === 'ar' ? 'مبلغ الاسترداد' : 'Refund Amount'}</Label>
-                    <Input
-                      id="refundAmount"
-                      type="number"
-                      step="0.001"
-                      value={refundAmount}
-                      onChange={handleRefundAmountChange}
-                      className="mt-1"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {language === 'ar' 
-                        ? `المبلغ الإجمالي للفاتورة: ${selectedInvoice.total.toFixed(3)} KWD`
-                        : `Total invoice amount: ${selectedInvoice.total.toFixed(3)} KWD`}
-                    </p>
+                <div className="p-5 space-y-6 bg-gradient-to-r from-blue-50/30 to-purple-50/30">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="refundAmount" className="text-blue-700 font-medium">
+                        {language === 'ar' ? 'مبلغ الاسترداد' : 'Refund Amount'}
+                      </Label>
+                      <Input
+                        id="refundAmount"
+                        type="number"
+                        step="0.001"
+                        value={refundAmount}
+                        onChange={handleRefundAmountChange}
+                        className="text-lg font-semibold border-blue-200 focus:border-blue-400"
+                      />
+                      <p className="text-sm text-blue-600 font-medium">
+                        {language === 'ar' 
+                          ? `المبلغ الإجمالي للفاتورة: ${selectedInvoice.total.toFixed(3)} KWD`
+                          : `Total invoice amount: ${selectedInvoice.total.toFixed(3)} KWD`}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="refundMethod" className="text-blue-700 font-medium">
+                        {language === 'ar' ? 'طريقة الاسترداد' : 'Refund Method'}
+                      </Label>
+                      <Select value={refundMethod} onValueChange={setRefundMethod}>
+                        <SelectTrigger id="refundMethod" className="border-blue-200 focus:ring-blue-400">
+                          <SelectValue placeholder={language === 'ar' ? 'اختر طريقة الاسترداد' : 'Select refund method'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Cash" className="text-base">
+                            {language === 'ar' ? 'نقداً' : 'Cash'}
+                          </SelectItem>
+                          <SelectItem value="KNET" className="text-base">
+                            {language === 'ar' ? 'كي نت' : 'KNET'}
+                          </SelectItem>
+                          <SelectItem value="Credit Card" className="text-base">
+                            {language === 'ar' ? 'بطاقة ائتمان' : 'Credit Card'}
+                          </SelectItem>
+                          <SelectItem value="Store Credit" className="text-base">
+                            {language === 'ar' ? 'رصيد المتجر' : 'Store Credit'}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="refundMethod">{language === 'ar' ? 'طريقة الاسترداد' : 'Refund Method'}</Label>
-                    <Select value={refundMethod} onValueChange={setRefundMethod}>
-                      <SelectTrigger id="refundMethod" className="mt-1">
-                        <SelectValue placeholder={language === 'ar' ? 'اختر طريقة الاسترداد' : 'Select refund method'} />
+                  <div className="space-y-2">
+                    <Label htmlFor="refundReason" className="text-blue-700 font-medium">
+                      {language === 'ar' ? 'سبب الاسترداد' : 'Refund Reason'}
+                    </Label>
+                    <Select value={refundReason} onValueChange={setRefundReason}>
+                      <SelectTrigger id="refundReason" className="border-blue-200 focus:ring-blue-400">
+                        <SelectValue placeholder={language === 'ar' ? 'اختر سبب الاسترداد' : 'Select refund reason'} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Cash">{language === 'ar' ? 'نقداً' : 'Cash'}</SelectItem>
-                        <SelectItem value="KNET">{language === 'ar' ? 'كي نت' : 'KNET'}</SelectItem>
-                        <SelectItem value="Credit Card">{language === 'ar' ? 'بطاقة ائتمان' : 'Credit Card'}</SelectItem>
-                        <SelectItem value="Store Credit">{language === 'ar' ? 'رصيد المتجر' : 'Store Credit'}</SelectItem>
+                        <SelectItem value="Customer Dissatisfied" className="text-base">
+                          {language === 'ar' ? 'العميل غير راضٍ' : 'Customer Dissatisfied'}
+                        </SelectItem>
+                        <SelectItem value="Product Defect" className="text-base">
+                          {language === 'ar' ? 'عيب في المنتج' : 'Product Defect'}
+                        </SelectItem>
+                        <SelectItem value="Incorrect Prescription" className="text-base">
+                          {language === 'ar' ? 'وصفة طبية غير صحيحة' : 'Incorrect Prescription'}
+                        </SelectItem>
+                        <SelectItem value="Frame Exchange" className="text-base">
+                          {language === 'ar' ? 'استبدال الإطار' : 'Frame Exchange'}
+                        </SelectItem>
+                        <SelectItem value="Billing Error" className="text-base">
+                          {language === 'ar' ? 'خطأ في الفواتير' : 'Billing Error'}
+                        </SelectItem>
+                        <SelectItem value="Other" className="text-base">
+                          {language === 'ar' ? 'آخر' : 'Other'}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="refundReason">{language === 'ar' ? 'سبب الاسترداد' : 'Refund Reason'}</Label>
-                  <Select value={refundReason} onValueChange={setRefundReason}>
-                    <SelectTrigger id="refundReason" className="mt-1">
-                      <SelectValue placeholder={language === 'ar' ? 'اختر سبب الاسترداد' : 'Select refund reason'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Customer Dissatisfied">{language === 'ar' ? 'العميل غير راضٍ' : 'Customer Dissatisfied'}</SelectItem>
-                      <SelectItem value="Product Defect">{language === 'ar' ? 'عيب في المنتج' : 'Product Defect'}</SelectItem>
-                      <SelectItem value="Incorrect Prescription">{language === 'ar' ? 'وصفة طبية غير صحيحة' : 'Incorrect Prescription'}</SelectItem>
-                      <SelectItem value="Frame Exchange">{language === 'ar' ? 'استبدال الإطار' : 'Frame Exchange'}</SelectItem>
-                      <SelectItem value="Billing Error">{language === 'ar' ? 'خطأ في الفواتير' : 'Billing Error'}</SelectItem>
-                      <SelectItem value="Other">{language === 'ar' ? 'آخر' : 'Other'}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="staffNotes">{language === 'ar' ? 'ملاحظات إضافية' : 'Additional Notes'}</Label>
-                  <Textarea
-                    id="staffNotes"
-                    value={staffNotes}
-                    onChange={(e) => setStaffNotes(e.target.value)}
-                    placeholder={language === 'ar' ? 'أدخل أي ملاحظات إضافية هنا...' : 'Enter any additional notes here...'}
-                    className="mt-1"
-                  />
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="staffNotes" className="text-blue-700 font-medium">
+                      {language === 'ar' ? 'ملاحظات إضافية' : 'Additional Notes'}
+                    </Label>
+                    <Textarea
+                      id="staffNotes"
+                      value={staffNotes}
+                      onChange={(e) => setStaffNotes(e.target.value)}
+                      placeholder={language === 'ar' ? 'أدخل أي ملاحظات إضافية هنا...' : 'Enter any additional notes here...'}
+                      className="h-24 border-blue-200 focus:border-blue-400"
+                    />
+                  </div>
                 </div>
               </div>
             )}
           </div>
         </CardContent>
         {selectedInvoice && (
-          <CardFooter className="flex justify-between">
+          <CardFooter className="flex justify-between p-4 bg-blue-50 border-t border-blue-200">
             <Button 
               variant="outline" 
               onClick={() => setSelectedInvoice(null)}
+              className="gap-1 border-blue-300 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
             >
+              <ArrowLeft className="h-4 w-4" />
               {language === 'ar' ? 'إلغاء' : 'Cancel'}
             </Button>
-            <Button onClick={handleProcessRefund}>
+            <Button 
+              onClick={handleProcessRefund}
+              className="gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <RefreshCcw className="h-4 w-4" />
               {language === 'ar' ? 'معالجة استرداد الأموال' : 'Process Refund'}
             </Button>
           </CardFooter>
