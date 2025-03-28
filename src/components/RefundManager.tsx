@@ -35,6 +35,7 @@ export const RefundManager: React.FC = () => {
   const [refundReason, setRefundReason] = useState<string>('');
   const [staffNotes, setStaffNotes] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   
   const formatDate = (dateString: string) => {
     try {
@@ -57,6 +58,7 @@ export const RefundManager: React.FC = () => {
     }
     
     setIsSearching(true);
+    setErrorMessage('');
     
     const results = invoices.filter(invoice => 
       !invoice.isRefunded && 
@@ -81,6 +83,7 @@ export const RefundManager: React.FC = () => {
     setSelectedInvoice(invoice);
     setRefundAmount(invoice.total);
     setSuccess('');
+    setErrorMessage('');
   };
   
   const handleRefundAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,7 +174,6 @@ export const RefundManager: React.FC = () => {
         variant: "default",
       });
       
-      // Transform contactLensItems to match the required format for invoiceItems
       const contactLensItemsFormatted = selectedInvoice.contactLensItems 
         ? selectedInvoice.contactLensItems.map(item => ({
             name: `${item.brand} ${item.type} ${item.color || ''}`.trim(),
@@ -248,6 +250,7 @@ export const RefundManager: React.FC = () => {
       }, 2000);
       
     } catch (error: any) {
+      setErrorMessage(error.message || (language === 'ar' ? 'حدث خطأ أثناء معالجة الاسترداد' : 'An error occurred while processing the refund'));
       toast({
         title: language === 'ar' ? 'خطأ' : 'Error',
         description: error.message || (language === 'ar' ? 'حدث خطأ أثناء معالجة الاسترداد' : 'An error occurred while processing the refund'),
@@ -329,6 +332,12 @@ export const RefundManager: React.FC = () => {
               </Alert>
             )}
             
+            {errorMessage && (
+              <Alert variant="destructive" className="border-red-300 bg-red-50">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="font-medium">{errorMessage}</AlertDescription>
+              </Alert>
+            )}
             
             
             {searchResults.length > 0 && (
@@ -424,7 +433,7 @@ export const RefundManager: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 bg-white/70 p-3 rounded-md">
                     <div className="space-y-1">
                       <div className="text-xs text-blue-600 font-medium">
-                        {language === 'ar' ? 'العميل' : 'Customer'}
+                        {language === 'ar' ? 'ال��ميل' : 'Customer'}
                       </div>
                       <div className="font-medium flex items-center gap-1">
                         <ShoppingBag className="h-4 w-4 text-blue-500 flex-shrink-0" />
@@ -554,7 +563,7 @@ export const RefundManager: React.FC = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="refundReason" className="text-blue-700 font-medium">
-                      {language === 'ar' ? 'سبب الاسترداد' : 'Refund Reason'}
+                      {language === 'ar' ? 'سب�� الاسترداد' : 'Refund Reason'}
                     </Label>
                     <Select value={refundReason} onValueChange={setRefundReason}>
                       <SelectTrigger id="refundReason" className="border-blue-200 focus:ring-blue-400">
