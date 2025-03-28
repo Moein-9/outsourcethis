@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -204,7 +205,7 @@ const translations: Record<string, Record<string, string>> = {
     process: 'Process',
     
     // Patient Search
-    searchResults: 'Search Results',
+    searchResultsLabel: 'Search Results',
     noResults: 'No results found',
     searchByName: 'Search by name',
     searchByPhone: 'Search by phone',
@@ -283,7 +284,7 @@ const translations: Record<string, Record<string, string>> = {
     contactLensSelectionError: "Please select at least one contact lens.",
     paymentMethodError: "Please select a payment method.",
     invoiceSavedSuccess: "Invoice saved successfully with number",
-    cash: "Cash",
+    cashPayment: "Cash",
     knet: "KNET",
     visa: "Visa",
     mastercard: "MasterCard",
@@ -395,7 +396,7 @@ const translations: Record<string, Record<string, string>> = {
     refundAndExchangeHistory: 'Refund & Exchange History',
     dateProcessed: 'Date Processed',
     processedBy: 'Processed By',
-    searchResults: 'Search Results',
+    searchResultsList: 'Search Results',
     noTransactionsFound: 'No transactions found with the provided search terms',
     returnToSearch: 'Return to Search',
     printRefundInvoice: 'Print Refund Invoice',
@@ -521,7 +522,7 @@ const translations: Record<string, Record<string, string>> = {
     discount: 'الخصم',
     total: 'المجموع',
     paymentMethod: 'طريقة الدفع',
-    cash: 'نقداً',
+    cashPayment: 'نقداً',
     creditCard: 'بطاقة ائتمان',
     deposit: 'العربون',
     remaining: 'المتبقي',
@@ -612,7 +613,7 @@ const translations: Record<string, Record<string, string>> = {
     process: 'معالجة',
     
     // Patient Search
-    searchResults: 'نتائج البحث',
+    searchResultsLabel: 'نتائج البحث',
     noResults: 'لا توجد نتائج',
     searchByName: 'بحث بالاسم',
     searchByPhone: 'بحث برقم الهاتف',
@@ -800,7 +801,26 @@ const translations: Record<string, Record<string, string>> = {
     searchForInvoice: 'البحث عن فاتورة للمعالجة',
     refundAndExchangeHistory: 'سجل الاسترداد والاستبدال',
     dateProcessed: 'تاريخ المعالجة',
-    processedBy: 'تم',
+    processedBy: 'تم معالجته بواسطة',
+    searchResultsList: 'نتائج البحث',
+    noTransactionsFound: 'لم يتم العثور على معاملات بمعايير البحث المقدمة',
+    returnToSearch: 'العودة إلى البحث',
+    printRefundInvoice: 'طباعة فاتورة الاسترداد',
+    refundReceiptTitle: 'إيصال الاسترداد',
+    
+    // Status labels
+    pending: 'قيد الانتظار',
+    completed: 'مكتمل',
+    cancelled: 'ملغي',
+    
+    // Add missing translations needed for the new features
+    quickActions: 'إجراءات سريعة',
+    manageInventory: 'إدارة المخزون',
+    comingSoon: 'قريباً',
+    selectReason: 'اختر سبباً',
+    invoiceDetails: 'تفاصيل الفاتورة',
+    refundDetails: 'تفاصيل الاسترداد',
+    totalRefund: 'إجمالي الاسترداد',
   }
 };
 
