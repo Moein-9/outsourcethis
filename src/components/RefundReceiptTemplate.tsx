@@ -265,7 +265,8 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         </div>
       </div>
       
-      <style jsx>{`
+      <style>
+        {`
         @media print {
           #refund-receipt {
             width: 80mm !important;
@@ -298,7 +299,8 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
             padding: 0mm !important;
           }
         }
-      `}</style>
+      `}
+      </style>
     </div>
   );
 };
