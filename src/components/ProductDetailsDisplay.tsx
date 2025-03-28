@@ -2,6 +2,7 @@
 import React from 'react';
 import { Glasses, Contact, Receipt } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
+import { ContactLensItem } from '@/components/ContactLensSelector';
 
 interface ProductDetailsDisplayProps {
   invoice: {
@@ -10,11 +11,7 @@ interface ProductDetailsDisplayProps {
     frameModel?: string;
     frameColor?: string;
     lensType?: string;
-    contactLensItems?: Array<{
-      name: string;
-      price: number;
-      quantity?: number;
-    }>;
+    contactLensItems?: ContactLensItem[];
   };
 }
 
@@ -78,8 +75,8 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
             <tbody>
               {invoice.contactLensItems.map((item, index) => (
                 <tr key={index} className="border-t border-gray-100">
-                  <td className="py-1.5 px-2">{item.name}</td>
-                  <td className="py-1.5 px-2 text-center">{item.quantity || 1}</td>
+                  <td className="py-1.5 px-2">{item.brand || item.type || t('contactLenses')}</td>
+                  <td className="py-1.5 px-2 text-center">{item.qty || 1}</td>
                   <td className="py-1.5 px-2 text-right">{item.price.toFixed(3)} KWD</td>
                 </tr>
               ))}
