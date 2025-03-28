@@ -18,6 +18,7 @@ import {
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { Card, CardContent } from './ui/card';
 import { Separator } from './ui/separator';
+import { useLanguageStore } from "@/store/languageStore";
 
 interface RefundReceiptTemplateProps {
   refund: {
@@ -46,16 +47,16 @@ interface RefundReceiptTemplateProps {
 }
 
 export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ refund, language }) => {
+  const { t } = useLanguageStore();
   const isArabic = language === 'ar';
-  const direction = isArabic ? 'rtl' : 'ltr';
-  const textAlign = isArabic ? 'right' : 'left';
+  const dirClass = isArabic ? 'rtl' : 'ltr';
   
   // Format the date using date-fns
   const formattedDate = format(new Date(refund.refundDate), 'dd/MM/yyyy hh:mm a');
   
   return (
     <div 
-      className="print-receipt"
+      className={`${dirClass} print-receipt`}
       id="refund-receipt"
       dir={isArabic ? "rtl" : "ltr"}
       style={{ 
@@ -72,11 +73,10 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         pageBreakInside: 'avoid',
         pageBreakAfter: 'always',
         textAlign: 'center', // Center all content in the receipt
-        direction
       }}
     >
       {/* Store Logo and Information Header */}
-      <div className="border-b-2 border-black pb-1 mb-2 text-center">
+      <div className="border-b-2 border-black pb-1 mb-2">
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-10" />
         </div>
@@ -86,7 +86,7 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
       </div>
       
       {/* Refund Receipt Title */}
-      <div className="mb-2 text-center">
+      <div className="mb-2">
         <div className="inline-flex items-center justify-center gap-1 border-2 border-black px-2 py-0.5 rounded">
           <RefreshCcw className="w-4 h-4" />
           <span className="font-bold text-base">
@@ -156,7 +156,7 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
 
       {/* Products Section */}
       <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded text-center">
+        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded">
           {isArabic ? "المنتجات | Products" : "Products | المنتجات"}
         </div>
 
@@ -216,7 +216,7 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
       
       {/* Refund Details */}
       <div className="mb-2">
-        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded text-center">
+        <div className="py-1 bg-black text-white mb-2 font-bold text-base rounded">
           {isArabic ? "تفاصيل الاسترداد | Refund Details" : "Refund Details | تفاصيل الاسترداد"}
         </div>
         
