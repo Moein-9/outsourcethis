@@ -1,17 +1,14 @@
 
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import './styles/printStyles.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/*" element={<App />} />
-      </Routes>
-    </BrowserRouter>
-  </React.StrictMode>,
-)
+// Ensure the app is properly mounted
+const root = document.getElementById("root");
+if (!root) {
+  const rootDiv = document.createElement("div");
+  rootDiv.id = "root";
+  document.body.appendChild(rootDiv);
+}
+
+createRoot(document.getElementById("root")!).render(<App />);

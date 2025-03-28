@@ -10,26 +10,6 @@ export interface Payment {
   authNumber?: string; // Added for card payment authorization numbers
 }
 
-export interface Refund {
-  refundId: string;
-  invoiceId: string;
-  amount: number;
-  reason: string;
-  date: string;
-  method: string;
-  authNumber?: string;
-  processedBy?: string;
-}
-
-export interface Exchange {
-  exchangeId: string;
-  originalInvoiceId: string;
-  newInvoiceId?: string;
-  reason: string;
-  date: string;
-  processedBy?: string;
-}
-
 export interface Invoice {
   invoiceId: string;
   patientId?: string;
@@ -66,14 +46,6 @@ export interface Invoice {
   pickedUpAt?: string;
   authNumber?: string;
   workOrderId?: string;
-  
-  // New fields for refund/exchange tracking
-  isRefunded?: boolean;
-  refundId?: string;
-  refundedAt?: string;
-  isExchanged?: boolean;
-  exchangeId?: string;
-  exchangedAt?: string;
 }
 
 // Define WorkOrder interface
@@ -91,21 +63,11 @@ export interface WorkOrder {
   contactLensRx?: any;
   isPickedUp?: boolean;
   pickedUpAt?: string;
-  
-  // New fields for refund/exchange tracking
-  isRefunded?: boolean;
-  refundId?: string;
-  refundedAt?: string;
-  isExchanged?: boolean;
-  exchangeId?: string;
-  exchangedAt?: string;
 }
 
 interface InvoiceState {
   invoices: Invoice[];
   workOrders: WorkOrder[];
-  refunds: Refund[];
-  exchanges: Exchange[];
   addInvoice: (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments">) => string;
   markAsPaid: (invoiceId: string, paymentMethod?: string, authNumber?: string) => void;
   markAsPickedUp: (id: string, isInvoice?: boolean) => void;
@@ -119,13 +81,6 @@ interface InvoiceState {
   addWorkOrder?: (workOrder: Omit<WorkOrder, "id" | "createdAt">) => string;
   updateInvoice: (updatedInvoice: Invoice) => void;
   updateWorkOrder?: (workOrder: WorkOrder) => void;
-  
-  // New functions for refund and exchange
-  processRefund: (invoiceId: string, amount: number, reason: string, method: string, authNumber?: string) => string;
-  processExchange: (originalInvoiceId: string, newInvoiceId: string | undefined, reason: string) => string;
-  getRefundById: (refundId: string) => Refund | undefined;
-  getExchangeById: (exchangeId: string) => Exchange | undefined;
-  searchTransactions: (query: string) => { invoices: Invoice[], workOrders: WorkOrder[] };
 }
 
 export const useInvoiceStore = create<InvoiceState>()(
@@ -133,8 +88,6 @@ export const useInvoiceStore = create<InvoiceState>()(
     (set, get) => ({
       invoices: [],
       workOrders: [], 
-      refunds: [],
-      exchanges: [],
       
       addInvoice: (invoice) => {
         const invoiceId = `IN${Date.now()}`;
@@ -324,7 +277,7 @@ export const useInvoiceStore = create<InvoiceState>()(
       },
       
       clearInvoices: () => {
-        set({ invoices: [], workOrders: [], refunds: [], exchanges: [] });
+        set({ invoices: [], workOrders: [] });
       },
       
       addExistingInvoice: (invoice) => {
@@ -382,158 +335,6 @@ export const useInvoiceStore = create<InvoiceState>()(
             workOrder.id === updatedWorkOrder.id ? updatedWorkOrder : workOrder
           )
         }));
-      },
-      
-      // New function to process a refund
-      processRefund: (invoiceId, amount, reason, method, authNumber) => {
-        const refundId = `RF${Date.now()}`;
-        const date = new Date().toISOString();
-        
-        // Create the refund record
-        const newRefund: Refund = {
-          refundId,
-          invoiceId,
-          amount,
-          reason,
-          date,
-          method,
-          authNumber
-        };
-        
-        // Update invoice to mark as refunded
-        set((state) => {
-          // Update the invoice
-          const updatedInvoices = state.invoices.map(invoice => {
-            if (invoice.invoiceId === invoiceId) {
-              return {
-                ...invoice,
-                isRefunded: true,
-                refundId,
-                refundedAt: date
-              };
-            }
-            return invoice;
-          });
-          
-          // Also update any related work order
-          const relatedWorkOrder = state.workOrders.find(wo => wo.id === state.invoices.find(inv => inv.invoiceId === invoiceId)?.workOrderId);
-          let updatedWorkOrders = state.workOrders;
-          
-          if (relatedWorkOrder) {
-            updatedWorkOrders = state.workOrders.map(wo => {
-              if (wo.id === relatedWorkOrder.id) {
-                return {
-                  ...wo,
-                  isRefunded: true,
-                  refundId,
-                  refundedAt: date
-                };
-              }
-              return wo;
-            });
-          }
-          
-          // Add the refund to the state
-          return {
-            invoices: updatedInvoices,
-            workOrders: updatedWorkOrders,
-            refunds: [...state.refunds, newRefund]
-          };
-        });
-        
-        return refundId;
-      },
-      
-      // New function to process an exchange
-      processExchange: (originalInvoiceId, newInvoiceId, reason) => {
-        const exchangeId = `EX${Date.now()}`;
-        const date = new Date().toISOString();
-        
-        // Create the exchange record
-        const newExchange: Exchange = {
-          exchangeId,
-          originalInvoiceId,
-          newInvoiceId,
-          reason,
-          date
-        };
-        
-        // Update invoices to mark as exchanged
-        set((state) => {
-          // Update the original invoice
-          const updatedInvoices = state.invoices.map(invoice => {
-            if (invoice.invoiceId === originalInvoiceId) {
-              return {
-                ...invoice,
-                isExchanged: true,
-                exchangeId,
-                exchangedAt: date
-              };
-            }
-            return invoice;
-          });
-          
-          // Also update any related work order
-          const relatedWorkOrder = state.workOrders.find(wo => wo.id === state.invoices.find(inv => inv.invoiceId === originalInvoiceId)?.workOrderId);
-          let updatedWorkOrders = state.workOrders;
-          
-          if (relatedWorkOrder) {
-            updatedWorkOrders = state.workOrders.map(wo => {
-              if (wo.id === relatedWorkOrder.id) {
-                return {
-                  ...wo,
-                  isExchanged: true,
-                  exchangeId,
-                  exchangedAt: date
-                };
-              }
-              return wo;
-            });
-          }
-          
-          // Add the exchange to the state
-          return {
-            invoices: updatedInvoices,
-            workOrders: updatedWorkOrders,
-            exchanges: [...state.exchanges, newExchange]
-          };
-        });
-        
-        return exchangeId;
-      },
-      
-      // Get a specific refund by ID
-      getRefundById: (refundId) => {
-        return get().refunds.find(refund => refund.refundId === refundId);
-      },
-      
-      // Get a specific exchange by ID
-      getExchangeById: (exchangeId) => {
-        return get().exchanges.find(exchange => exchange.exchangeId === exchangeId);
-      },
-      
-      // Search for transactions (invoices and work orders) by query
-      searchTransactions: (query) => {
-        const q = query.toLowerCase();
-        
-        // Search in invoices
-        const invoices = get().invoices.filter(invoice => 
-          invoice.invoiceId.toLowerCase().includes(q) ||
-          invoice.patientName.toLowerCase().includes(q) ||
-          invoice.patientPhone.includes(q)
-        );
-        
-        // Search in work orders
-        const workOrders = get().workOrders.filter(wo => {
-          const patient = get().invoices.find(inv => inv.workOrderId === wo.id);
-          return (
-            wo.id.toLowerCase().includes(q) ||
-            (patient?.patientName.toLowerCase().includes(q) || false) ||
-            (patient?.patientPhone.includes(q) || false)
-          );
-        });
-        
-        return { invoices, workOrders };
       }
     }),
     {

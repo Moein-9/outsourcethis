@@ -16,14 +16,11 @@ export const LanguageToggle: React.FC = () => {
       variant="outline" 
       size="sm" 
       onClick={toggleLanguage}
-      className={`flex items-center gap-2 rounded-full transition-all duration-300 ${
-        language === 'ar' 
-          ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-200' 
-          : 'bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200'
-      }`}
+      className={`flex items-center gap-2 ${language === 'ar' ? 'bg-green-50 hover:bg-green-100' : 'bg-blue-50 hover:bg-blue-100'} transition-all duration-300`}
+      title={language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
     >
-      <Globe className={`h-4 w-4 ${language === 'ar' ? 'text-emerald-500' : 'text-blue-500'}`} />
-      <span className="font-medium">
+      <Globe className={`h-4 w-4 ${language === 'ar' ? 'text-green-600' : 'text-blue-600'}`} />
+      <span className={`${language === 'ar' ? 'text-green-600' : 'text-blue-600'} font-medium`}>
         {language === 'ar' ? 'English' : 'العربية'}
       </span>
     </Button>
