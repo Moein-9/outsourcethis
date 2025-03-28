@@ -498,15 +498,15 @@ export const RefundManager: React.FC = () => {
                           {t("totalAmount")}:
                         </div>
                         <div className="font-bold text-blue-800">
-                          {selectedInvoice.total.toFixed(3)} KWD
+                          {selectedInvoice.total.toFixed(3)} {t('kwd')}
                         </div>
                       </div>
                       <div className="flex items-center justify-between bg-amber-50 p-2 rounded-md border border-amber-200">
                         <div className="text-sm font-medium text-amber-800">
                           {t("paid")}:
                         </div>
-                        <div className="font-bold text-amber-800">
-                          {calculatePaidAmount(selectedInvoice).toFixed(3)} KWD
+                        <div className="font-bold text-amber-800 bg-yellow-200 px-2 py-0.5 rounded">
+                          {calculatePaidAmount(selectedInvoice).toFixed(3)} {t('kwd')}
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
@@ -514,14 +514,14 @@ export const RefundManager: React.FC = () => {
                           {t("remaining")}:
                         </div>
                         <div className="font-medium text-amber-600">
-                          {calculateRemainingAmount(selectedInvoice).toFixed(3)} KWD
+                          {calculateRemainingAmount(selectedInvoice).toFixed(3)} {t('kwd')}
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-sm">
                           {t("paymentMethod")}:
                         </div>
-                        <div>{t(selectedInvoice.paymentMethod.toLowerCase())}</div>
+                        <div>{selectedInvoice.paymentMethod === 'Cash' ? t('cash') : selectedInvoice.paymentMethod}</div>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-sm">

@@ -190,5 +190,6 @@
   "paymentHistory": "Payment History",
   "remaining": "Remaining",
   "paymentStatus": "Payment Status",
-  "unpaid": "Unpaid"
+  "unpaid": "Unpaid",
+  "cash": "Cash"
 }

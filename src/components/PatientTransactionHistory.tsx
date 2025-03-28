@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -290,17 +289,17 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                                   <div className="space-y-3">
                                     <div className="grid grid-cols-2 gap-2">
                                       <div className="text-sm text-gray-500">{t('total')}:</div>
-                                      <div className="text-sm font-medium">{invoice.total.toFixed(3)} KWD</div>
+                                      <div className="text-sm font-medium">{invoice.total.toFixed(3)} {t('kwd')}</div>
                                     </div>
                                     
                                     <div className="grid grid-cols-2 gap-2">
                                       <div className="text-sm text-gray-500">{t('paid')}:</div>
-                                      <div className="text-sm font-medium text-blue-600">{paid.toFixed(3)} KWD</div>
+                                      <div className="text-sm font-medium text-blue-600">{paid.toFixed(3)} {t('kwd')}</div>
                                     </div>
                                     
                                     <div className="grid grid-cols-2 gap-2">
                                       <div className="text-sm text-gray-500">{t('remaining')}:</div>
-                                      <div className="text-sm font-medium text-amber-600">{remaining.toFixed(3)} KWD</div>
+                                      <div className="text-sm font-medium text-amber-600">{remaining.toFixed(3)} {t('kwd')}</div>
                                     </div>
                                     
                                     <div className="grid grid-cols-2 gap-2">
@@ -316,7 +315,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                                     {invoice.discount > 0 && (
                                       <div className="grid grid-cols-2 gap-2">
                                         <div className="text-sm text-gray-500">{t('discount')}:</div>
-                                        <div className="text-sm font-medium text-green-600">{invoice.discount.toFixed(3)} KWD</div>
+                                        <div className="text-sm font-medium text-green-600">{invoice.discount.toFixed(3)} {t('kwd')}</div>
                                       </div>
                                     )}
                                     
@@ -328,7 +327,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                                           <div key={idx} className="grid grid-cols-3 gap-2 text-xs mb-1">
                                             <div>{format(new Date(payment.date), 'dd/MM/yyyy')}</div>
                                             <div className="text-gray-600">{payment.method}</div>
-                                            <div className="font-medium">{payment.amount.toFixed(3)} KWD</div>
+                                            <div className="font-medium">{payment.amount.toFixed(3)} {t('kwd')}</div>
                                           </div>
                                         ))}
                                       </div>
