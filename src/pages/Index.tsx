@@ -7,6 +7,7 @@ import { CreateInvoice } from "@/components/CreateInvoice";
 import { InventoryTabs } from "@/components/InventoryTabs";
 import { RemainingPayments } from "@/components/RemainingPayments";
 import { PatientSearch } from "@/components/PatientSearch";
+import { RefundManager } from "@/components/RefundManager";
 import { useLocation } from "react-router-dom";
 import { useLanguageStore } from "@/store/languageStore";
 
@@ -21,6 +22,26 @@ const Index = () => {
       setActiveSection(location.state.section);
     }
   }, [location.state]);
+
+  // Add event listener for custom navigation events
+  useEffect(() => {
+    const handleNavigate = (event: any) => {
+      if (event.detail && event.detail.section) {
+        setActiveSection(event.detail.section);
+      }
+    };
+
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.addEventListener('navigate', handleNavigate);
+    }
+
+    return () => {
+      if (rootElement) {
+        rootElement.removeEventListener('navigate', handleNavigate);
+      }
+    };
+  }, []);
 
   // Update document's direction based on language
   useEffect(() => {
@@ -48,6 +69,7 @@ const Index = () => {
       {activeSection === "inventory" && <InventoryTabs />}
       {activeSection === "remainingPayments" && <RemainingPayments />}
       {activeSection === "patientSearch" && <PatientSearch />}
+      {activeSection === "refundManager" && <RefundManager />}
     </Layout>
   );
 };

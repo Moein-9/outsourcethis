@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Clock } from "lucide-react";
+import { Clock, RefreshCcw } from "lucide-react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { Link } from "react-router-dom";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { MoenLogoGreen } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Dashboard: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -50,6 +51,40 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Quick Access Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        <Card className="hover:shadow-md transition-shadow duration-300">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">
+              {language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              {language === 'ar' 
+                ? 'معالجة استرداد الأموال واستبدال المنتجات للعملاء' 
+                : 'Process refunds and product exchanges for customers'}
+            </p>
+            <Button 
+              onClick={() => {
+                // Find the closest parent component with id "root" and dispatch a custom event
+                const rootElement = document.getElementById('root');
+                if (rootElement) {
+                  const event = new CustomEvent('navigate', { detail: { section: 'refundManager' } });
+                  rootElement.dispatchEvent(event);
+                }
+                // Alternatively, you can use window.location.hash = '#refundManager';
+              }}
+              className="w-full flex gap-2 items-center justify-center"
+              variant="default"
+            >
+              <RefreshCcw className="h-4 w-4" />
+              {language === 'ar' ? 'إدارة الاسترداد' : 'Manage Refunds'}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
