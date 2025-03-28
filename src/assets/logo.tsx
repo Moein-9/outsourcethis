@@ -16,7 +16,11 @@ export const MoenLogo: React.FC<{
       alt="Moen Optician" 
       className={className}
       onClick={onClick}
-      style={{ cursor: onClick ? 'pointer' : 'default', ...style }}
+      style={{ 
+        cursor: onClick ? 'pointer' : 'default', 
+        maxHeight: '8mm', // Limit height for thermal receipts
+        ...style 
+      }}
     />
   );
 };
@@ -36,7 +40,11 @@ export const MoenLogoGreen: React.FC<{
       alt="Moen Optician" 
       className={className}
       onClick={onClick}
-      style={{ cursor: onClick ? 'pointer' : 'default', ...style }}
+      style={{ 
+        cursor: onClick ? 'pointer' : 'default', 
+        maxHeight: '8mm', // Limit height for thermal receipts
+        ...style 
+      }}
     />
   );
 };
@@ -56,7 +64,11 @@ export const MoenLogoBlack: React.FC<{
       alt="Moen Optician" 
       className={className}
       onClick={onClick}
-      style={{ cursor: onClick ? 'pointer' : 'default', ...style }}
+      style={{ 
+        cursor: onClick ? 'pointer' : 'default', 
+        maxHeight: '8mm', // Limit height for thermal receipts
+        ...style 
+      }}
     />
   );
 };
