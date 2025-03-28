@@ -11,13 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from '@/hooks/use-toast';
 import { useLanguageStore } from '@/store/languageStore';
-import { RefreshCw, Search, AlertTriangle, CheckCircle2, ArrowLeft, Receipt, ShoppingBag, RefreshCcw } from 'lucide-react';
+import { RefreshCw, Search, AlertTriangle, CheckCircle2, ArrowLeft, Receipt, ShoppingBag, RefreshCcw, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { RefundReceiptTemplate } from './RefundReceiptTemplate';
 import { PrintService } from '@/utils/PrintService';
 import * as ReactDOMServer from 'react-dom/server';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 export const RefundManager: React.FC = () => {
   const { language, t } = useLanguageStore();
@@ -26,6 +27,7 @@ export const RefundManager: React.FC = () => {
   const navigate = useNavigate();
   
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState<'invoice' | 'phone'>('invoice');
   const [searchResults, setSearchResults] = useState<Invoice[]>([]);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isSearching, setIsSearching] = useState(false);
@@ -38,20 +40,30 @@ export const RefundManager: React.FC = () => {
   
   const handleSearch = () => {
     if (!searchTerm.trim()) {
-      setError(language === 'ar' ? 'يرجى إدخال رقم الفاتورة أو اسم العميل' : 
-        'Please enter an invoice number or customer name');
+      setError(language === 'ar' ? 'يرجى إدخال رقم الفاتورة أو اسم العميل أو رقم الهاتف' : 
+        'Please enter an invoice number, customer name, or phone number');
       return;
     }
     
     setIsSearching(true);
     setError('');
     
-    // Search by invoice ID or patient name
-    const results = invoices.filter(invoice => 
-      !invoice.isRefunded && 
-      (invoice.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) || 
-       invoice.patientName.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    let results: Invoice[] = [];
+    
+    // Search based on the selected search type
+    if (searchType === 'invoice') {
+      // Search by invoice ID or patient name
+      results = invoices.filter(invoice => 
+        !invoice.isRefunded && 
+        (invoice.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) || 
+         invoice.patientName.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    } else {
+      // Search by phone number
+      results = invoices.filter(invoice => 
+        !invoice.isRefunded && invoice.patientPhone.includes(searchTerm)
+      );
+    }
     
     setSearchResults(results);
     setIsSearching(false);
@@ -237,19 +249,41 @@ export const RefundManager: React.FC = () => {
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-4">
+            <Tabs 
+              value={searchType} 
+              onValueChange={(value) => setSearchType(value as 'invoice' | 'phone')}
+              className="w-full mb-4"
+            >
+              <TabsList className="w-full grid grid-cols-2">
+                <TabsTrigger value="invoice" className="flex items-center gap-1">
+                  <Receipt className="h-4 w-4" />
+                  {language === 'ar' ? 'بحث بالفاتورة/الاسم' : 'Invoice/Name Search'}
+                </TabsTrigger>
+                <TabsTrigger value="phone" className="flex items-center gap-1">
+                  <Phone className="h-4 w-4" />
+                  {language === 'ar' ? 'بحث برقم الهاتف' : 'Phone Number Search'}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
             <div className="flex gap-2">
               <div className="flex-1">
                 <Label htmlFor="search" className="text-blue-700 font-medium">
-                  {language === 'ar' ? 'ابحث عن الفاتورة أو العميل' : 'Search for Invoice or Customer'}
+                  {searchType === 'invoice' 
+                    ? (language === 'ar' ? 'ابحث عن الفاتورة أو العميل' : 'Search for Invoice or Customer')
+                    : (language === 'ar' ? 'ابحث برقم الهاتف' : 'Search by Phone Number')}
                 </Label>
                 <div className="flex gap-2 mt-1">
                   <Input 
                     id="search" 
                     value={searchTerm} 
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder={language === 'ar' ? 'رقم الفاتورة أو اسم العميل' : 'Invoice number or customer name'}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    placeholder={searchType === 'invoice'
+                      ? (language === 'ar' ? 'رقم الفاتورة أو اسم العميل' : 'Invoice number or customer name')
+                      : (language === 'ar' ? 'رقم الهاتف' : 'Phone number')}
                     className="border-blue-200 focus:border-blue-400"
+                    type={searchType === 'phone' ? 'tel' : 'text'}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   />
                   <Button 
                     onClick={handleSearch} 
@@ -292,6 +326,9 @@ export const RefundManager: React.FC = () => {
                         {language === 'ar' ? 'العميل' : 'Customer'}
                       </th>
                       <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
+                        {language === 'ar' ? 'رقم الهاتف' : 'Phone'}
+                      </th>
+                      <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
                         {language === 'ar' ? 'التاريخ' : 'Date'}
                       </th>
                       <th className="py-3 px-4 text-start text-sm font-semibold text-blue-700">
@@ -311,6 +348,7 @@ export const RefundManager: React.FC = () => {
                       >
                         <td className="py-3 px-4 text-base font-medium">{invoice.invoiceId}</td>
                         <td className="py-3 px-4 text-base">{invoice.patientName}</td>
+                        <td className="py-3 px-4 text-base">{invoice.patientPhone}</td>
                         <td className="py-3 px-4 text-base">
                           {new Date(invoice.createdAt).toLocaleDateString()}
                         </td>
