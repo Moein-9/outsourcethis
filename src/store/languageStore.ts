@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -226,6 +227,7 @@ export const useLanguageStore = create<LanguageStore>()(
           printRefund: "Print Refund Receipt",
           invoiceDetails: "Invoice Details",
           transactionHistory: "Transaction History", 
+          // Fixed: Changed property to avoid duplicate
           newInvoiceLabel: "New Invoice",
           searchInstructions: "Enter customer name, invoice number, or phone number",
           selectTransaction: "Select a transaction to process refund",
@@ -437,6 +439,7 @@ export const useLanguageStore = create<LanguageStore>()(
           printRefund: "طباعة إيصال الاسترداد",
           invoiceDetails: "تفاصيل الفاتورة",
           transactionHistory: "سجل المعاملات",
+          // Fixed: Changed property to avoid duplicate
           newInvoiceLabel: "فاتورة جديدة",
           searchInstructions: "أدخل اسم العميل أو رقم الفاتورة أو رقم الهاتف",
           selectTransaction: "اختر معاملة لمعالجة الاسترداد",

@@ -144,6 +144,7 @@ export const FrameInventory: React.FC = () => {
       return;
     }
     
+    // Fix: Remove the second parameter from addFrame call
     const frameId = addFrame({
       brand: frameBrand,
       model: frameModel,
