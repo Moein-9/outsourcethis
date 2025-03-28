@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -205,7 +204,7 @@ const translations: Record<string, Record<string, string>> = {
     process: 'Process',
     
     // Patient Search
-    searchResultsLabel: 'Search Results',
+    searchResults: 'Search Results',
     noResults: 'No results found',
     searchByName: 'Search by name',
     searchByPhone: 'Search by phone',
@@ -284,7 +283,7 @@ const translations: Record<string, Record<string, string>> = {
     contactLensSelectionError: "Please select at least one contact lens.",
     paymentMethodError: "Please select a payment method.",
     invoiceSavedSuccess: "Invoice saved successfully with number",
-    cashPayment: "Cash",
+    cash: "Cash",
     knet: "KNET",
     visa: "Visa",
     mastercard: "MasterCard",
@@ -348,73 +347,7 @@ const translations: Record<string, Record<string, string>> = {
     axisValidationError: "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.",
     
     // Add the new notesPlaceholder translation
-    notesPlaceholder: "You can add any information about the customer here...",
-    
-    // Refunds and Exchanges
-    exchangeAndRefunds: 'Exchange & Refunds',
-    processRefund: 'Process Refund',
-    processExchange: 'Process Exchange',
-    refundAmount: 'Refund Amount',
-    exchangeDetails: 'Exchange Details',
-    reason: 'Reason',
-    searchTransactions: 'Search Transactions',
-    searchByAny: 'Search by name, phone, or invoice number',
-    refundStatus: 'Refund Status',
-    exchangeStatus: 'Exchange Status',
-    refunded: 'Refunded',
-    exchanged: 'Exchanged',
-    originalInvoice: 'Original Invoice',
-    newInvoiceLabel: 'New Invoice',
-    refundInvoice: 'Refund Invoice',
-    refundDate: 'Refund Date',
-    exchangeDate: 'Exchange Date',
-    refundReason: 'Refund Reason',
-    exchangeReason: 'Exchange Reason',
-    amountDifference: 'Amount Difference',
-    additionalPayment: 'Additional Payment',
-    refundCompleted: 'Refund Completed',
-    exchangeCompleted: 'Exchange Completed',
-    transactionHistory: 'Transaction History',
-    notRefunded: 'Not Refunded',
-    notExchanged: 'Not Exchanged',
-    initiateRefund: 'Initiate Refund',
-    initiateExchange: 'Initiate Exchange',
-    selectNewInvoice: 'Select New Invoice',
-    frameDefective: 'Frame Defective',
-    lensDefective: 'Lens Defective',
-    customerDissatisfied: 'Customer Dissatisfied',
-    wrongPrescription: 'Wrong Prescription',
-    other: 'Other',
-    specifyReason: 'Please specify reason',
-    confirmRefund: 'Confirm Refund',
-    confirmExchange: 'Confirm Exchange',
-    refundInvoiceGenerated: 'Refund invoice has been generated',
-    exchangeCompleteMessage: 'Exchange has been completed successfully',
-    processingRefund: 'Processing Refund for Invoice',
-    processingExchange: 'Processing Exchange for Invoice',
-    searchForInvoice: 'Search for invoice to process',
-    refundAndExchangeHistory: 'Refund & Exchange History',
-    dateProcessed: 'Date Processed',
-    processedBy: 'Processed By',
-    searchResultsList: 'Search Results',
-    noTransactionsFound: 'No transactions found with the provided search terms',
-    returnToSearch: 'Return to Search',
-    printRefundInvoice: 'Print Refund Invoice',
-    refundReceiptTitle: 'Refund Receipt',
-    
-    // Status labels
-    pending: 'Pending',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
-    
-    // Add missing translations needed for the new features
-    quickActions: 'Quick Actions',
-    manageInventory: 'Manage Inventory',
-    comingSoon: 'Coming Soon',
-    selectReason: 'Select a Reason',
-    invoiceDetails: 'Invoice Details',
-    refundDetails: 'Refund Details',
-    totalRefund: 'Total Refund',
+    notesPlaceholder: "You can add any information about the customer here..."
   },
   ar: {
     // General UI
@@ -522,7 +455,7 @@ const translations: Record<string, Record<string, string>> = {
     discount: 'الخصم',
     total: 'المجموع',
     paymentMethod: 'طريقة الدفع',
-    cashPayment: 'نقداً',
+    cash: 'نقداً',
     creditCard: 'بطاقة ائتمان',
     deposit: 'العربون',
     remaining: 'المتبقي',
@@ -613,7 +546,7 @@ const translations: Record<string, Record<string, string>> = {
     process: 'معالجة',
     
     // Patient Search
-    searchResultsLabel: 'نتائج البحث',
+    searchResults: 'نتائج البحث',
     noResults: 'لا توجد نتائج',
     searchByName: 'بحث بالاسم',
     searchByPhone: 'بحث برقم الهاتف',
@@ -754,73 +687,7 @@ const translations: Record<string, Record<string, string>> = {
     axisValidationError: "قيم المحور (AXIS) التي أدخلتها غير صحيحة! إذا كانت قيمة الاسطوانة (CYL) موجودة، فيجب تحديد قيمة المحور.",
     
     // Add the new notesPlaceholder translation in Arabic
-    notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا...",
-    
-    // Refunds and Exchanges
-    exchangeAndRefunds: 'الاستبدال والاسترجاع',
-    processRefund: 'معالجة استرداد الأموال',
-    processExchange: 'معالجة الاستبدال',
-    refundAmount: 'مبلغ الاسترداد',
-    exchangeDetails: 'تفاصيل الاستبدال',
-    reason: 'السبب',
-    searchTransactions: 'بحث المعاملات',
-    searchByAny: 'البحث بالاسم أو الهاتف أو رقم الفاتورة',
-    refundStatus: 'حالة الاسترداد',
-    exchangeStatus: 'حالة الاستبدال',
-    refunded: 'تم الاسترداد',
-    exchanged: 'تم الاستبدال',
-    originalInvoice: 'الفاتورة الأصلية',
-    newInvoiceLabel: 'الفاتورة الجديدة',
-    refundInvoice: 'فاتورة الاسترداد',
-    refundDate: 'تاريخ الاسترداد',
-    exchangeDate: 'تاريخ الاستبدال',
-    refundReason: 'سبب الاسترداد',
-    exchangeReason: 'سبب الاستبدال',
-    amountDifference: 'فرق المبلغ',
-    additionalPayment: 'دفعة إضافية',
-    refundCompleted: 'تم اكتمال الاسترداد',
-    exchangeCompleted: 'تم إكمال الاستبدال',
-    transactionHistory: 'سجل المعاملات',
-    notRefunded: 'لم يتم الاسترداد',
-    notExchanged: 'لم يتم الاستبدال',
-    initiateRefund: 'بدء عملية الاسترداد',
-    initiateExchange: 'بدء عملية الاستبدال',
-    selectNewInvoice: 'اختيار فاتورة جديدة',
-    frameDefective: 'إطار معيب',
-    lensDefective: 'عدسة معيبة',
-    customerDissatisfied: 'العميل غير راضٍ',
-    wrongPrescription: 'وصفة طبية خاطئة',
-    other: 'أخرى',
-    specifyReason: 'يرجى تحديد السبب',
-    confirmRefund: 'تأكيد الاسترداد',
-    confirmExchange: 'تأكيد الاستبدال',
-    refundInvoiceGenerated: 'تم إنشاء فاتورة الاسترداد',
-    exchangeCompleteMessage: 'تم إكمال عملية الاستبدال بنجاح',
-    processingRefund: 'معالجة استرداد للفاتورة',
-    processingExchange: 'معالجة استبدال للفاتورة',
-    searchForInvoice: 'البحث عن فاتورة للمعالجة',
-    refundAndExchangeHistory: 'سجل الاسترداد والاستبدال',
-    dateProcessed: 'تاريخ المعالجة',
-    processedBy: 'تم معالجته بواسطة',
-    searchResultsList: 'نتائج البحث',
-    noTransactionsFound: 'لم يتم العثور على معاملات بمعايير البحث المقدمة',
-    returnToSearch: 'العودة إلى البحث',
-    printRefundInvoice: 'طباعة فاتورة الاسترداد',
-    refundReceiptTitle: 'إيصال الاسترداد',
-    
-    // Status labels
-    pending: 'قيد الانتظار',
-    completed: 'مكتمل',
-    cancelled: 'ملغي',
-    
-    // Add missing translations needed for the new features
-    quickActions: 'إجراءات سريعة',
-    manageInventory: 'إدارة المخزون',
-    comingSoon: 'قريباً',
-    selectReason: 'اختر سبباً',
-    invoiceDetails: 'تفاصيل الفاتورة',
-    refundDetails: 'تفاصيل الاسترداد',
-    totalRefund: 'إجمالي الاسترداد',
+    notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا..."
   }
 };
 
