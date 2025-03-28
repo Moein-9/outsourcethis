@@ -53,15 +53,22 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
           </div>
         ) : (
           sortedInvoices.map((invoice) => (
-            <div key={invoice.invoiceId} className="p-3 hover:bg-gray-50">
+            <div key={invoice.invoiceId} className={`p-3 hover:bg-gray-50 ${invoice.isRefunded ? 'bg-red-50' : ''}`}>
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <Receipt className="h-4 w-4 text-indigo-600" />
-                    <span className="font-medium text-gray-800">{invoice.invoiceId}</span>
+                    <Receipt className={`h-4 w-4 ${invoice.isRefunded ? 'text-red-600' : 'text-indigo-600'}`} />
+                    <span className={`font-medium ${invoice.isRefunded ? 'text-red-800' : 'text-gray-800'}`}>
+                      {invoice.invoiceId}
+                    </span>
                     
                     {/* Payment Status */}
-                    {invoice.isPaid ? (
+                    {invoice.isRefunded ? (
+                      <Badge className="bg-red-100 text-red-800 border-red-200 ml-2 flex items-center gap-1">
+                        <RefreshCcw className="h-3 w-3" />
+                        {language === 'ar' ? "تم الاسترداد" : "Refunded"}
+                      </Badge>
+                    ) : invoice.isPaid ? (
                       <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 ml-2">
                         {language === 'ar' ? "مدفوع" : "Paid"}
                       </Badge>
@@ -71,21 +78,15 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                       </Badge>
                     )}
                     
-                    {/* Refund Status */}
-                    {invoice.isRefunded && (
-                      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 ml-2 flex items-center gap-1">
-                        <RefreshCcw className="h-3 w-3" />
-                        {language === 'ar' ? "تم الاسترداد" : "Refunded"}
-                      </Badge>
-                    )}
-                    
                     {/* Pickup Status */}
-                    {invoice.isPickedUp ? (
+                    {invoice.isPickedUp && !invoice.isRefunded && (
                       <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 ml-2 flex items-center gap-1">
                         <CheckCircle className="h-3 w-3" />
                         {language === 'ar' ? "تم الاستلام" : "Picked up"}
                       </Badge>
-                    ) : (
+                    )}
+                    
+                    {!invoice.isPickedUp && !invoice.isRefunded && (
                       <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 ml-2 flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {language === 'ar' ? "جاري التجهيز" : "Processing"}
@@ -111,14 +112,14 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                   
                   {/* Refund Information if applicable */}
                   {invoice.isRefunded && (
-                    <div className="mt-2 text-sm bg-blue-50 p-2 rounded-md border border-blue-100">
-                      <div className="flex items-center gap-1 text-blue-700">
+                    <div className="mt-2 text-sm bg-red-50 p-2 rounded-md border border-red-100">
+                      <div className="flex items-center gap-1 text-red-700">
                         <RefreshCcw className="h-3.5 w-3.5" />
                         <span className="font-medium">
                           {language === 'ar' ? "معلومات الاسترداد:" : "Refund Info:"}
                         </span>
                       </div>
-                      <div className="mt-1 text-blue-800">
+                      <div className="mt-1 text-red-800">
                         <div>
                           {language === 'ar' ? `المبلغ: ${invoice.refundAmount?.toFixed(3)} KWD` : 
                             `Amount: ${invoice.refundAmount?.toFixed(3)} KWD`}
@@ -141,10 +142,10 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                 </div>
                 
                 <div className="text-right">
-                  <div className="font-semibold text-gray-900">
+                  <div className={`font-semibold ${invoice.isRefunded ? 'text-red-900 line-through' : 'text-gray-900'}`}>
                     {invoice.total.toFixed(3)} KWD
                   </div>
-                  {invoice.workOrderId && onEditWorkOrder && (
+                  {invoice.workOrderId && onEditWorkOrder && !invoice.isRefunded && (
                     <Button 
                       variant="ghost" 
                       size="sm" 
