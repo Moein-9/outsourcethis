@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useInvoiceStore, Invoice } from '@/store/invoiceStore';
 import { usePatientStore } from '@/store/patientStore';
@@ -321,12 +320,7 @@ export const RefundManager: React.FC = () => {
               </Button>
             </div>
             
-            {error && (
-              <Alert variant="destructive" className="border-red-300 bg-red-50">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className="font-medium">{error}</AlertDescription>
-              </Alert>
-            )}
+            
             
             {success && (
               <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
@@ -334,6 +328,8 @@ export const RefundManager: React.FC = () => {
                 <AlertDescription className="font-medium">{success}</AlertDescription>
               </Alert>
             )}
+            
+            
             
             {searchResults.length > 0 && (
               <div className="rounded-lg overflow-hidden border border-blue-200 shadow-sm">
@@ -407,6 +403,8 @@ export const RefundManager: React.FC = () => {
                 </Table>
               </div>
             )}
+            
+            
             
             {selectedInvoice && (
               <div className="mt-6 border rounded-lg border-blue-200 overflow-hidden">
