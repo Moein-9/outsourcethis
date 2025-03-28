@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -56,7 +55,6 @@ export interface Invoice {
   pickedUpAt?: string;
   authNumber?: string;
   workOrderId?: string;
-  fileNumber?: string; // Added fileNumber property to resolve the error
   
   // Refund related fields
   isRefunded?: boolean;

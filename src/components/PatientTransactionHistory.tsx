@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +7,7 @@ import { useLanguageStore } from '@/store/languageStore';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { EditWorkOrderDialog } from './EditWorkOrderDialog';
-import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer, CheckCircle, CreditCard, Package, RefreshCcw } from 'lucide-react';
+import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer, CheckCircle, CreditCard, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PrintOptionsDialog } from './PrintOptionsDialog';
 import { toast } from 'sonner';
@@ -28,7 +27,7 @@ interface PatientTransactionHistoryProps {
 
 export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps> = ({ patientId }) => {
   const { t, language } = useLanguageStore();
-  const { invoices, markAsPickedUp, getRefundsByInvoiceId } = useInvoiceStore();
+  const { invoices, markAsPickedUp } = useInvoiceStore();
   const { getPatientById } = usePatientStore();
   const navigate = useNavigate();
   const isRtl = language === 'ar';
@@ -179,48 +178,30 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   const remaining = calculateRemaining(invoice);
                   const isPaid = remaining <= 0;
                   const isPickedUp = invoice.isPickedUp;
-                  const isRefunded = invoice.isRefunded;
                   const paid = invoice.payments 
                     ? invoice.payments.reduce((sum: number, payment: any) => sum + (payment.amount || 0), 0)
                     : invoice.deposit || 0;
                   
-                  // Get refund details if available
-                  const refundDetails = getRefundsByInvoiceId?.(invoice.invoiceId);
-                  
                   return (
                     <React.Fragment key={invoice.invoiceId}>
-                      <TableRow 
-                        className={`hover:bg-accent/5 transition-colors cursor-pointer ${
-                          isRefunded ? 'bg-red-50/50' : ''
-                        }`} 
-                        onClick={() => toggleAccordion(invoice.invoiceId)}
-                      >
-                        <TableCell className="font-medium">
-                          {invoice.invoiceId}
-                        </TableCell>
+                      <TableRow className="hover:bg-accent/5 transition-colors cursor-pointer" onClick={() => toggleAccordion(invoice.invoiceId)}>
+                        <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
                         <TableCell>{formatDate(invoice.createdAt)}</TableCell>
-                        <TableCell className={isRefunded ? 'line-through text-red-600' : ''}>
-                          {invoice.total.toFixed(3)} KWD
-                        </TableCell>
+                        <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
                         <TableCell>
-                          {isRefunded ? (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-red-100 to-red-200 text-red-800 border border-red-300 flex items-center gap-1 w-fit">
-                              <RefreshCcw className="h-3 w-3" />
-                              {t("refunded")}
-                            </span>
-                          ) : isPickedUp ? (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300">
-                              {t("pickedUp")}
-                            </span>
-                          ) : isPaid ? (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300">
-                              {t("paid")}
-                            </span>
-                          ) : (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200">
-                              {t("partiallyPaid")}
-                            </span>
-                          )}
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            isPickedUp
+                              ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300'
+                              : isPaid 
+                                ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' 
+                                : 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200'
+                          }`}>
+                            {isPickedUp 
+                              ? t("pickedUp") 
+                              : isPaid 
+                                ? t("paid") 
+                                : t("partiallyPaid")}
+                          </span>
                         </TableCell>
                         <TableCell className="text-right space-x-1">
                           <Button 
@@ -236,7 +217,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                             <Eye className="h-4 w-4" />
                           </Button>
                           
-                          {!invoice.isPickedUp && !invoice.isRefunded && (
+                          {!invoice.isPickedUp && (
                             <Button 
                               variant="ghost" 
                               size="icon"
@@ -269,7 +250,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                             </Button>
                           </PrintOptionsDialog>
                           
-                          {!invoice.isPickedUp && !invoice.isRefunded && (
+                          {!invoice.isPickedUp && (
                             <Button 
                               variant="ghost" 
                               size="icon"
@@ -289,7 +270,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                       {/* Expandable detail section */}
                       <TableRow className={expandedAccordion === invoice.invoiceId ? "" : "hidden"}>
                         <TableCell colSpan={5} className="p-0">
-                          <div className={`p-4 border-t ${isRefunded ? 'bg-red-50' : 'bg-gray-50'}`}>
+                          <div className="bg-gray-50 p-4 border-t">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
                                 <h3 className="text-sm font-medium mb-2 flex items-center gap-1 text-primary">
@@ -302,106 +283,54 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                               <div>
                                 <h3 className="text-sm font-medium mb-2 flex items-center gap-1 text-primary">
                                   <CreditCard className="h-4 w-4" />
-                                  {isRefunded ? t('refundDetails') : t('paymentDetails')}
+                                  {t('paymentDetails')}
                                 </h3>
-                                <div className={`bg-white border ${isRefunded ? 'border-red-200' : 'border-gray-200'} rounded-md p-4`}>
+                                <div className="bg-white border border-gray-200 rounded-md p-4">
                                   <div className="space-y-3">
-                                    {isRefunded ? (
-                                      // Refund details display - use refundDetails if available, otherwise fall back to invoice data
-                                      <>
-                                        <div className="grid grid-cols-2 gap-2">
-                                          <div className="text-sm text-red-500">{t('refundDate')}:</div>
-                                          <div className="text-sm font-medium">
-                                            {formatDate(refundDetails?.date || invoice.refundDate || '')}
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div className="text-sm text-gray-500">{t('total')}:</div>
+                                      <div className="text-sm font-medium">{invoice.total.toFixed(3)} {t('kwd')}</div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div className="text-sm text-gray-500">{t('paid')}:</div>
+                                      <div className="text-sm font-medium text-blue-600">{paid.toFixed(3)} {t('kwd')}</div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div className="text-sm text-gray-500">{t('remaining')}:</div>
+                                      <div className="text-sm font-medium text-amber-600">{remaining.toFixed(3)} {t('kwd')}</div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div className="text-sm text-gray-500">{t('paymentStatus')}:</div>
+                                      <div className="text-sm font-medium">
+                                        {isPaid ? 
+                                          <span className="text-green-600">{t('paid')}</span> : 
+                                          <span className="text-amber-600">{t('partiallyPaid')}</span>
+                                        }
+                                      </div>
+                                    </div>
+                                    
+                                    {invoice.discount > 0 && (
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div className="text-sm text-gray-500">{t('discount')}:</div>
+                                        <div className="text-sm font-medium text-green-600">{invoice.discount.toFixed(3)} {t('kwd')}</div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Payment History */}
+                                    {invoice.payments && invoice.payments.length > 0 && (
+                                      <div className="mt-3 pt-3 border-t border-gray-100">
+                                        <h4 className="text-xs font-medium text-gray-600 mb-2">{t('paymentHistory')}:</h4>
+                                        {invoice.payments.map((payment: any, idx: number) => (
+                                          <div key={idx} className="grid grid-cols-3 gap-2 text-xs mb-1">
+                                            <div>{format(new Date(payment.date), 'dd/MM/yyyy')}</div>
+                                            <div className="text-gray-600">{payment.method}</div>
+                                            <div className="font-medium">{payment.amount.toFixed(3)} {t('kwd')}</div>
                                           </div>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-2 gap-2">
-                                          <div className="text-sm text-red-500">{t('refundAmount')}:</div>
-                                          <div className="text-sm font-medium text-red-600">
-                                            {(refundDetails?.amount || invoice.refundAmount || 0).toFixed(3)} {t('kwd')}
-                                          </div>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-2 gap-2">
-                                          <div className="text-sm text-red-500">{t('refundMethod')}:</div>
-                                          <div className="text-sm font-medium">
-                                            {refundDetails?.method || invoice.refundMethod || ''}
-                                          </div>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-2 gap-2">
-                                          <div className="text-sm text-red-500">{t('refundReason')}:</div>
-                                          <div className="text-sm font-medium">
-                                            {refundDetails?.reason || invoice.refundReason || ''}
-                                          </div>
-                                        </div>
-                                        
-                                        {refundDetails?.staffNotes && (
-                                          <div className="grid grid-cols-2 gap-2">
-                                            <div className="text-sm text-red-500">{t('staffNotes')}:</div>
-                                            <div className="text-sm font-medium">
-                                              {refundDetails.staffNotes}
-                                            </div>
-                                          </div>
-                                        )}
-                                        
-                                        <div className="mt-3 pt-3 border-t border-red-100 flex items-center gap-1 text-red-600">
-                                          <RefreshCcw className="h-4 w-4" />
-                                          <span className="text-sm font-medium">
-                                            {t('refundProcessed')}
-                                          </span>
-                                        </div>
-                                      </>
-                                    ) : (
-                                      // Normal payment details display for non-refunded invoices
-                                      <>
-                                        <div className="grid grid-cols-2 gap-2">
-                                          <div className="text-sm text-gray-500">{t('total')}:</div>
-                                          <div className="text-sm font-medium">{invoice.total.toFixed(3)} {t('kwd')}</div>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-2 gap-2">
-                                          <div className="text-sm text-gray-500">{t('paid')}:</div>
-                                          <div className="text-sm font-medium text-blue-600">{paid.toFixed(3)} {t('kwd')}</div>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-2 gap-2">
-                                          <div className="text-sm text-gray-500">{t('remaining')}:</div>
-                                          <div className="text-sm font-medium text-amber-600">{remaining.toFixed(3)} {t('kwd')}</div>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-2 gap-2">
-                                          <div className="text-sm text-gray-500">{t('paymentStatus')}:</div>
-                                          <div className="text-sm font-medium">
-                                            {isPaid ? 
-                                              <span className="text-green-600">{t('paid')}</span> : 
-                                              <span className="text-amber-600">{t('partiallyPaid')}</span>
-                                            }
-                                          </div>
-                                        </div>
-                                        
-                                        {invoice.discount > 0 && (
-                                          <div className="grid grid-cols-2 gap-2">
-                                            <div className="text-sm text-gray-500">{t('discount')}:</div>
-                                            <div className="text-sm font-medium text-green-600">{invoice.discount.toFixed(3)} {t('kwd')}</div>
-                                          </div>
-                                        )}
-                                        
-                                        {/* Payment History */}
-                                        {invoice.payments && invoice.payments.length > 0 && (
-                                          <div className="mt-3 pt-3 border-t border-gray-100">
-                                            <h4 className="text-xs font-medium text-gray-600 mb-2">{t('paymentHistory')}:</h4>
-                                            {invoice.payments.map((payment: any, idx: number) => (
-                                              <div key={idx} className="grid grid-cols-3 gap-2 text-xs mb-1">
-                                                <div>{format(new Date(payment.date), 'dd/MM/yyyy')}</div>
-                                                <div className="text-gray-600">{payment.method}</div>
-                                                <div className="font-medium">{payment.amount.toFixed(3)} {t('kwd')}</div>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        )}
-                                      </>
+                                        ))}
+                                      </div>
                                     )}
                                   </div>
                                 </div>
