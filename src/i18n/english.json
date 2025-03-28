@@ -191,5 +191,6 @@
   "remaining": "Remaining",
   "paymentStatus": "Payment Status",
   "unpaid": "Unpaid",
-  "cash": "Cash"
+  "cash": "Cash",
+  "thickness": "Thickness"
 }

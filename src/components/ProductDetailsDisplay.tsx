@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Glasses, Contact, Receipt } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
@@ -17,6 +16,7 @@ interface ProductDetailsDisplayProps {
     coating?: string;
     lensFeatures?: string[];
     contactLensItems?: ContactLensItem[];
+    thickness?: string;
   };
 }
 
@@ -27,6 +27,8 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
   
   const isGlasses = invoice.invoiceType === 'glasses';
   const isContactLens = invoice.invoiceType === 'contacts';
+  
+  const thicknessValue = invoice.lensThickness || invoice.thickness;
   
   return (
     <div className={`bg-white border border-gray-200 rounded-md p-4 ${textAlign}`}>
@@ -72,11 +74,10 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
             </div>
           )}
           
-          {/* Ensure lens thickness is displayed properly */}
-          {invoice.lensThickness && (
+          {thicknessValue && (
             <div className="grid grid-cols-2 gap-2">
               <div className="text-sm text-gray-500">{t('lensThickness')}:</div>
-              <div className="text-sm font-medium">{invoice.lensThickness}</div>
+              <div className="text-sm font-medium">{thicknessValue}</div>
             </div>
           )}
           
