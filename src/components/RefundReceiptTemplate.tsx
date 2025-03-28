@@ -52,9 +52,24 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
   
   return (
     <div 
-      className={`${dirClass} print-receipt`}
+      className={`${dirClass} print-receipt`} 
       id="refund-receipt"
       dir={isArabic ? "rtl" : "ltr"}
+      style={{ 
+        width: '80mm', 
+        maxWidth: '80mm',
+        margin: '0 auto',
+        backgroundColor: 'white',
+        padding: '2mm',
+        fontSize: '12px',
+        border: '1px solid #ddd',
+        borderRadius: '4px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+        fontFamily: isArabic ? 'Zain, sans-serif' : 'Yrsa, serif',
+        pageBreakInside: 'avoid',
+        pageBreakAfter: 'always',
+        textAlign: 'center' // Center all content in the receipt
+      }}
     >
       {/* Store Logo and Information Header */}
       <div className="border-b-2 border-black pb-1 mb-2">
