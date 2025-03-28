@@ -72,6 +72,7 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
             </div>
           )}
           
+          {/* Ensure lens thickness is displayed properly */}
           {invoice.lensThickness && (
             <div className="grid grid-cols-2 gap-2">
               <div className="text-sm text-gray-500">{t('lensThickness')}:</div>
