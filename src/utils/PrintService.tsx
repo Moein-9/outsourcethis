@@ -230,6 +230,37 @@ export const PrintService = {
             margin-bottom: 2px !important;
           }
           
+          /* Modern receipt styles for printing */
+          .modern-receipt {
+            font-family: 'Yrsa', serif !important;
+          }
+          
+          .modern-receipt[dir="rtl"] {
+            font-family: 'Zain', sans-serif !important;
+          }
+          
+          /* Make sure all styles in the receipt are preserved */
+          .receipt-header {
+            background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%) !important;
+            padding: 16px 12px !important;
+            color: white !important;
+            text-align: center !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          /* Preserve gradients for section headers */
+          [style*="background: linear-gradient"] {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          /* Preserve background colors */
+          [style*="backgroundColor"] {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
           /* Fix for print dialog appearing but not working */
           @media print {
             body {
@@ -259,6 +290,13 @@ export const PrintService = {
               margin-right: 0mm !important;
               margin-top: 0mm !important;
               margin-bottom: 0mm !important;
+            }
+            
+            /* Support for inline styles */
+            [style] {
+              -webkit-print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
           }
         </style>
