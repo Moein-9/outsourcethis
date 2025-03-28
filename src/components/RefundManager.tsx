@@ -198,6 +198,9 @@ export const RefundManager: React.FC = () => {
         frameModel: selectedInvoice.frameModel,
         frameColor: selectedInvoice.frameColor,
         lensType: selectedInvoice.lensType,
+        lensThickness: selectedInvoice.lensThickness,
+        thickness: selectedInvoice.thickness,
+        lensIndex: selectedInvoice.lensIndex,
         invoiceItems: [
           ...(selectedInvoice.frameBrand ? [{
             name: selectedInvoice.frameBrand + ' ' + selectedInvoice.frameModel,

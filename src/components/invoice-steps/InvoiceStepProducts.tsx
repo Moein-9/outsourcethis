@@ -125,6 +125,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setSelectedThickness(thickness);
     setValue('thickness', thickness?.name || '');
     setValue('thicknessPrice', thickness?.price || 0);
+    setValue('lensThickness', thickness?.name || '');
   };
   
   const handleSkipFrameChange = (skip: boolean) => {

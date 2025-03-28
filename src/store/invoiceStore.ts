@@ -63,6 +63,11 @@ export interface Invoice {
   refundReason?: string;
   refundMethod?: string;
   refundId?: string;
+  
+  // Adding both thickness fields to ensure compatibility
+  lensThickness?: string;
+  thickness?: string;
+  lensIndex?: string;
 }
 
 // Define WorkOrder interface
