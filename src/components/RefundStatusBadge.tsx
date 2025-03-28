@@ -15,11 +15,13 @@ export const RefundStatusBadge: React.FC<RefundStatusBadgeProps> = ({
   size = "default"
 }) => {
   const { language, t } = useLanguageStore();
+  const iconSize = size === "sm" ? "h-3 w-3" : "h-4 w-4";
+  const iconClass = `${iconSize} ${language === 'ar' ? 'ml-1' : 'mr-1'}`;
   
   if (invoice.isRefunded) {
     return (
-      <Badge variant="destructive" className="flex items-center gap-1">
-        <XCircle className={size === "sm" ? "h-3 w-3" : "h-4 w-4"} />
+      <Badge variant="outline" className="flex items-center gap-1 bg-red-100 text-red-800 hover:bg-red-100 border-red-200">
+        <XCircle className={iconClass} />
         {t('refunded') || "Refunded"}
       </Badge>
     );
@@ -27,8 +29,8 @@ export const RefundStatusBadge: React.FC<RefundStatusBadgeProps> = ({
   
   if (invoice.isExchanged) {
     return (
-      <Badge variant="outline" className="flex items-center gap-1 bg-amber-100 text-amber-800 hover:bg-amber-100">
-        <ArrowLeftRight className={size === "sm" ? "h-3 w-3" : "h-4 w-4"} />
+      <Badge variant="outline" className="flex items-center gap-1 bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">
+        <ArrowLeftRight className={iconClass} />
         {t('exchanged') || "Exchanged"}
       </Badge>
     );
@@ -36,16 +38,16 @@ export const RefundStatusBadge: React.FC<RefundStatusBadgeProps> = ({
   
   if (!invoice.isPaid) {
     return (
-      <Badge variant="outline" className="flex items-center gap-1 bg-amber-100 text-amber-800 hover:bg-amber-100">
-        <Clock className={size === "sm" ? "h-3 w-3" : "h-4 w-4"} />
+      <Badge variant="outline" className="flex items-center gap-1 bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200">
+        <Clock className={iconClass} />
         {t('unpaid') || "Unpaid"}
       </Badge>
     );
   }
   
   return (
-    <Badge variant="outline" className="flex items-center gap-1 bg-green-100 text-green-800 hover:bg-green-100">
-      <CheckCircle className={size === "sm" ? "h-3 w-3" : "h-4 w-4"} />
+    <Badge variant="outline" className="flex items-center gap-1 bg-green-100 text-green-800 hover:bg-green-100 border-green-200">
+      <CheckCircle className={iconClass} />
       {t('completed') || "Completed"}
     </Badge>
   );
