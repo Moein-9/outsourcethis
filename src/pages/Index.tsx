@@ -7,6 +7,7 @@ import { CreateInvoice } from "@/components/CreateInvoice";
 import { InventoryTabs } from "@/components/InventoryTabs";
 import { RemainingPayments } from "@/components/RemainingPayments";
 import { PatientSearch } from "@/components/PatientSearch";
+import { RefundManager } from "@/components/RefundManager";
 import { useLocation } from "react-router-dom";
 import { useLanguageStore } from "@/store/languageStore";
 
@@ -21,6 +22,26 @@ const Index = () => {
       setActiveSection(location.state.section);
     }
   }, [location.state]);
+
+  // Add event listener for custom navigation events
+  useEffect(() => {
+    const handleNavigate = (event: any) => {
+      if (event.detail && event.detail.section) {
+        setActiveSection(event.detail.section);
+      }
+    };
+
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.addEventListener('navigate', handleNavigate);
+    }
+
+    return () => {
+      if (rootElement) {
+        rootElement.removeEventListener('navigate', handleNavigate);
+      }
+    };
+  }, []);
 
   // Update document's direction based on language
   useEffect(() => {
@@ -37,41 +58,6 @@ const Index = () => {
     }
   }, [language]);
 
-  // Add print-specific styles
-  useEffect(() => {
-    // Add a style element for print media
-    const styleEl = document.createElement('style');
-    styleEl.setAttribute('type', 'text/css');
-    styleEl.textContent = `
-      @media print {
-        body * {
-          visibility: hidden;
-        }
-        .print-receipt, .print-receipt * {
-          visibility: visible;
-        }
-        .print-receipt {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-        }
-        .hide-print {
-          display: none !important;
-        }
-        .force-ltr-numbers {
-          direction: ltr !important;
-          display: inline-block;
-        }
-      }
-    `;
-    document.head.appendChild(styleEl);
-    
-    return () => {
-      document.head.removeChild(styleEl);
-    };
-  }, []);
-
   return (
     <Layout
       activeSection={activeSection}
@@ -83,6 +69,7 @@ const Index = () => {
       {activeSection === "inventory" && <InventoryTabs />}
       {activeSection === "remainingPayments" && <RemainingPayments />}
       {activeSection === "patientSearch" && <PatientSearch />}
+      {activeSection === "refundManager" && <RefundManager />}
     </Layout>
   );
 };
