@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { Refund } from '@/store/invoiceStore';
-import { usePatientStore } from '@/store/patientStore';
 import { format } from 'date-fns';
 import { 
   CheckCircle2, 
@@ -16,8 +14,6 @@ import {
   UserCircle2
 } from 'lucide-react';
 import { MoenLogo, storeInfo } from "@/assets/logo";
-import { Card, CardContent } from './ui/card';
-import { Separator } from './ui/separator';
 import { useLanguageStore } from "@/store/languageStore";
 
 interface RefundReceiptTemplateProps {
@@ -59,21 +55,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
       className={`${dirClass} print-receipt`}
       id="refund-receipt"
       dir={isArabic ? "rtl" : "ltr"}
-      style={{ 
-        width: '80mm', 
-        maxWidth: '80mm',
-        margin: '0 auto',
-        backgroundColor: 'white',
-        padding: '2mm',
-        fontSize: '12px',
-        border: '1px solid #ddd',
-        borderRadius: '4px',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-        fontFamily: isArabic ? 'Zain, sans-serif' : 'Yrsa, serif',
-        pageBreakInside: 'avoid',
-        pageBreakAfter: 'always',
-        textAlign: 'center', // Center all content in the receipt
-      }}
     >
       {/* Store Logo and Information Header */}
       <div className="border-b-2 border-black pb-1 mb-2">
@@ -279,83 +260,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
           {format(new Date(), 'yyyy-MM-dd')}
         </div>
       </div>
-      
-      <style>
-        {`
-        @media print {
-          @page {
-            size: 80mm auto !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          
-          body {
-            width: 80mm !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-          }
-          
-          #refund-receipt {
-            width: 76mm !important; /* 80mm - 4mm for padding */
-            max-width: 76mm !important;
-            page-break-after: always !important;
-            page-break-inside: avoid !important;
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-            padding: 2mm !important;
-            margin: 0 !important;
-            background: white !important;
-            height: auto !important;
-            min-height: 0 !important;
-            max-height: none !important;
-            text-align: center !important;
-          }
-          
-          .print-receipt * {
-            visibility: visible !important;
-            opacity: 1 !important;
-          }
-          
-          html, body {
-            height: auto !important;
-            min-height: 0 !important;
-            max-height: none !important;
-            overflow: visible !important;
-          }
-          
-          body {
-            -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          
-          .print-receipt {
-            height: fit-content !important;
-            min-height: fit-content !important;
-            max-height: fit-content !important;
-          }
-          
-          .print-receipt {
-            break-inside: avoid !important;
-            break-after: avoid-page !important;
-            page-break-inside: avoid !important;
-            page-break-after: avoid !important;
-          }
-          
-          @supports (-webkit-appearance:none) {
-            body, html, #refund-receipt {
-              height: fit-content !important;
-              min-height: fit-content !important;
-              max-height: fit-content !important;
-            }
-          }
-        }
-        `}
-      </style>
     </div>
   );
 };

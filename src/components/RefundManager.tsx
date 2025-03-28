@@ -292,7 +292,7 @@ export const RefundManager: React.FC = () => {
           </CardTitle>
           <CardDescription>
             {language === 'ar' 
-              ? 'ابحث عن الفاتورة بواسطة رقم الفاتورة، اسم العميل، أو رقم الهاتف'
+              ? 'ابحث عن الفاتورة بواسط�� رقم الفاتورة، اسم العميل، أو رقم الهاتف'
               : 'Search for an invoice by invoice number, customer name, or phone number'}
           </CardDescription>
         </CardHeader>
