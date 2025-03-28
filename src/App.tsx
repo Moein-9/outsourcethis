@@ -10,6 +10,7 @@ import ReportPage from "./pages/ReportPage";
 import PrintLabelPage from "./pages/PrintLabelPage";
 import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 import { LensDebugger } from "./components/LensDebugger";
+import RefundExchangePage from "./pages/RefundExchangePage";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/print-labels" element={<PrintLabelPage />} />
           <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
           <Route path="/lens-debug" element={<LensDebugger />} />
+          <Route path="/refunds-exchanges" element={<RefundExchangePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

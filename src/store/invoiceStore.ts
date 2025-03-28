@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -8,6 +7,17 @@ export interface Payment {
   method: string;
   date: string;
   authNumber?: string; // Added for card payment authorization numbers
+}
+
+export interface RefundExchange {
+  id: string;
+  type: 'refund' | 'exchange';
+  date: string;
+  amount: number;
+  reason: string;
+  status: 'pending' | 'completed' | 'cancelled';
+  newInvoiceId?: string; // For exchanges, reference to the new invoice
+  processedBy?: string;
 }
 
 export interface Invoice {
@@ -46,6 +56,10 @@ export interface Invoice {
   pickedUpAt?: string;
   authNumber?: string;
   workOrderId?: string;
+  
+  refundExchange?: RefundExchange;
+  isRefunded?: boolean;
+  isExchanged?: boolean;
 }
 
 // Define WorkOrder interface
@@ -63,6 +77,10 @@ export interface WorkOrder {
   contactLensRx?: any;
   isPickedUp?: boolean;
   pickedUpAt?: string;
+  
+  refundExchange?: RefundExchange;
+  isRefunded?: boolean;
+  isExchanged?: boolean;
 }
 
 interface InvoiceState {
@@ -81,6 +99,11 @@ interface InvoiceState {
   addWorkOrder?: (workOrder: Omit<WorkOrder, "id" | "createdAt">) => string;
   updateInvoice: (updatedInvoice: Invoice) => void;
   updateWorkOrder?: (workOrder: WorkOrder) => void;
+  
+  processRefund: (invoiceId: string, amount: number, reason: string) => string;
+  processExchange: (invoiceId: string, newInvoiceId: string, reason: string) => void;
+  getRefundedInvoices: () => Invoice[];
+  getExchangedInvoices: () => Invoice[];
 }
 
 export const useInvoiceStore = create<InvoiceState>()(
@@ -95,14 +118,13 @@ export const useInvoiceStore = create<InvoiceState>()(
         const remaining = Math.max(0, invoice.total - invoice.deposit);
         const isPaid = remaining === 0;
         
-        // Extract auth number if it exists
         const { authNumber, workOrderId, ...restInvoice } = invoice as (typeof invoice & { authNumber?: string, workOrderId?: string });
         
         const initialPayment: Payment = {
           amount: invoice.deposit,
           method: invoice.paymentMethod,
           date: createdAt,
-          authNumber: authNumber // Add auth number to payment
+          authNumber: authNumber
         };
         
         const payments = invoice.deposit > 0 ? [initialPayment] : [];
@@ -117,9 +139,11 @@ export const useInvoiceStore = create<InvoiceState>()(
               remaining,
               isPaid,
               payments,
-              authNumber, // Store auth number at invoice level too
-              workOrderId, // Store the work order ID if provided
-              isPickedUp: false // Initialize as not picked up
+              authNumber,
+              workOrderId,
+              isPickedUp: false,
+              isRefunded: false,
+              isExchanged: false
             }
           ]
         }));
@@ -134,15 +158,13 @@ export const useInvoiceStore = create<InvoiceState>()(
               const remainingAmount = invoice.remaining;
               const method = paymentMethod || invoice.paymentMethod;
               
-              // Create a new payment record for the remaining amount
               const newPayment: Payment = {
                 amount: remainingAmount,
                 method: method,
                 date: new Date().toISOString(),
-                authNumber: authNumber // Add auth number to payment
+                authNumber: authNumber
               };
               
-              // Get existing payments or create empty array if none exist
               const existingPayments = invoice.payments || [];
               
               return { 
@@ -152,7 +174,7 @@ export const useInvoiceStore = create<InvoiceState>()(
                 deposit: invoice.total,
                 paymentMethod: method,
                 payments: [...existingPayments, newPayment],
-                authNumber: authNumber || invoice.authNumber // Update or retain auth number
+                authNumber: authNumber || invoice.authNumber
               };
             }
             return invoice;
@@ -164,7 +186,6 @@ export const useInvoiceStore = create<InvoiceState>()(
         const pickedUpAt = new Date().toISOString();
         
         if (isInvoice) {
-          // Mark invoice as picked up
           set((state) => ({
             invoices: state.invoices.map(invoice => {
               if (invoice.invoiceId === id) {
@@ -178,7 +199,6 @@ export const useInvoiceStore = create<InvoiceState>()(
             })
           }));
           
-          // Also mark associated work order as picked up if it exists
           const invoice = get().invoices.find(inv => inv.invoiceId === id);
           if (invoice?.workOrderId) {
             set((state) => ({
@@ -195,7 +215,6 @@ export const useInvoiceStore = create<InvoiceState>()(
             }));
           }
         } else {
-          // Mark work order as picked up
           set((state) => ({
             workOrders: state.workOrders.map(wo => {
               if (wo.id === id) {
@@ -209,7 +228,6 @@ export const useInvoiceStore = create<InvoiceState>()(
             })
           }));
           
-          // Also mark associated invoice as picked up if it exists
           const relatedInvoice = get().invoices.find(inv => inv.workOrderId === id);
           if (relatedInvoice) {
             set((state) => ({
@@ -232,16 +250,13 @@ export const useInvoiceStore = create<InvoiceState>()(
         set((state) => ({
           invoices: state.invoices.map(invoice => {
             if (invoice.invoiceId === invoiceId) {
-              // Get existing payments or create empty array if none exist
               const existingPayments = invoice.payments || [];
               
-              // Create a new payment record
               const newPayment: Payment = {
                 ...payment,
                 date: new Date().toISOString()
               };
               
-              // Calculate new remaining amount
               const newDeposit = existingPayments.reduce((sum, p) => sum + p.amount, 0) + payment.amount;
               const newRemaining = Math.max(0, invoice.total - newDeposit);
               const isPaid = newRemaining === 0;
@@ -252,7 +267,7 @@ export const useInvoiceStore = create<InvoiceState>()(
                 remaining: newRemaining,
                 deposit: newDeposit,
                 payments: [...existingPayments, newPayment],
-                authNumber: payment.authNumber || invoice.authNumber // Update auth number if provided
+                authNumber: payment.authNumber || invoice.authNumber
               };
             }
             return invoice;
@@ -288,7 +303,7 @@ export const useInvoiceStore = create<InvoiceState>()(
             amount: invoice.deposit,
             method: invoice.paymentMethod,
             date: invoice.createdAt,
-            authNumber: (invoice as any).authNumber // Add auth number if exists
+            authNumber: (invoice as any).authNumber
           };
           
           invoiceToAdd = {
@@ -313,7 +328,9 @@ export const useInvoiceStore = create<InvoiceState>()(
               ...workOrder, 
               id, 
               createdAt,
-              isPickedUp: false // Initialize as not picked up
+              isPickedUp: false,
+              isRefunded: false,
+              isExchanged: false
             }
           ]
         }));
@@ -335,6 +352,109 @@ export const useInvoiceStore = create<InvoiceState>()(
             workOrder.id === updatedWorkOrder.id ? updatedWorkOrder : workOrder
           )
         }));
+      },
+      
+      processRefund: (invoiceId, amount, reason) => {
+        const refundId = `RF${Date.now()}`;
+        const refundDate = new Date().toISOString();
+        
+        const refundExchange: RefundExchange = {
+          id: refundId,
+          type: 'refund',
+          date: refundDate,
+          amount: amount,
+          reason: reason,
+          status: 'completed'
+        };
+        
+        set((state) => ({
+          invoices: state.invoices.map(invoice => {
+            if (invoice.invoiceId === invoiceId) {
+              return {
+                ...invoice,
+                isRefunded: true,
+                refundExchange: refundExchange
+              };
+            }
+            return invoice;
+          })
+        }));
+        
+        const invoice = get().invoices.find(inv => inv.invoiceId === invoiceId);
+        if (invoice?.workOrderId) {
+          set((state) => ({
+            workOrders: state.workOrders.map(wo => {
+              if (wo.id === invoice.workOrderId) {
+                return {
+                  ...wo,
+                  isRefunded: true,
+                  refundExchange: refundExchange
+                };
+              }
+              return wo;
+            })
+          }));
+        }
+        
+        return refundId;
+      },
+      
+      processExchange: (invoiceId, newInvoiceId, reason) => {
+        const exchangeId = `EX${Date.now()}`;
+        const exchangeDate = new Date().toISOString();
+        
+        const refundExchange: RefundExchange = {
+          id: exchangeId,
+          type: 'exchange',
+          date: exchangeDate,
+          amount: 0,
+          reason: reason,
+          status: 'completed',
+          newInvoiceId: newInvoiceId
+        };
+        
+        set((state) => ({
+          invoices: state.invoices.map(invoice => {
+            if (invoice.invoiceId === invoiceId) {
+              const newInvoice = state.invoices.find(inv => inv.invoiceId === newInvoiceId);
+              const exchangeAmount = newInvoice ? newInvoice.total - invoice.total : 0;
+              
+              return {
+                ...invoice,
+                isExchanged: true,
+                refundExchange: {
+                  ...refundExchange,
+                  amount: exchangeAmount
+                }
+              };
+            }
+            return invoice;
+          })
+        }));
+        
+        const invoice = get().invoices.find(inv => inv.invoiceId === invoiceId);
+        if (invoice?.workOrderId) {
+          set((state) => ({
+            workOrders: state.workOrders.map(wo => {
+              if (wo.id === invoice.workOrderId) {
+                return {
+                  ...wo,
+                  isExchanged: true,
+                  refundExchange: invoice.refundExchange
+                };
+              }
+              return wo;
+            })
+          }));
+        }
+      },
+      
+      getRefundedInvoices: () => {
+        return get().invoices.filter(invoice => invoice.isRefunded);
+      },
+      
+      getExchangedInvoices: () => {
+        return get().invoices.filter(invoice => invoice.isExchanged);
       }
     }),
     {
