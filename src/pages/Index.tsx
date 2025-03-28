@@ -37,6 +37,41 @@ const Index = () => {
     }
   }, [language]);
 
+  // Add print-specific styles
+  useEffect(() => {
+    // Add a style element for print media
+    const styleEl = document.createElement('style');
+    styleEl.setAttribute('type', 'text/css');
+    styleEl.textContent = `
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        .print-receipt, .print-receipt * {
+          visibility: visible;
+        }
+        .print-receipt {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+        .hide-print {
+          display: none !important;
+        }
+        .force-ltr-numbers {
+          direction: ltr !important;
+          display: inline-block;
+        }
+      }
+    `;
+    document.head.appendChild(styleEl);
+    
+    return () => {
+      document.head.removeChild(styleEl);
+    };
+  }, []);
+
   return (
     <Layout
       activeSection={activeSection}
