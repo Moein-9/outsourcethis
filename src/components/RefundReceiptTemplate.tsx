@@ -61,7 +61,7 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
   
   return (
     <div 
-      className="print-receipt modern-receipt"
+      className="print-receipt thermal-receipt"
       id="refund-receipt"
       dir={isArabic ? "rtl" : "ltr"}
       style={{ 
@@ -73,82 +73,66 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         fontSize: '12px',
         fontFamily: isArabic ? 'Zain, sans-serif' : 'Yrsa, serif',
         overflow: 'hidden',
-        borderRadius: '12px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        borderRadius: '0',
         direction
       }}
     >
-      {/* Header with Sleek Gradient */}
+      {/* Header - Black and white friendly */}
       <div className="receipt-header" style={{
-        background: 'linear-gradient(135deg, #06b6d4 0%, #0284c7 100%)',
-        padding: '16px 12px',
-        color: 'white',
-        textAlign: 'center'
+        background: 'white',
+        padding: '12px 8px',
+        color: 'black',
+        textAlign: 'center',
+        borderBottom: '1px solid black'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-          <div style={{ 
-            background: 'rgba(255,255,255,0.2)', 
-            borderRadius: '50%', 
-            padding: '6px', 
-            width: '50px', 
-            height: '50px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <MoenLogo className="filter brightness-0 invert" style={{ height: '36px', width: 'auto' }} />
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '6px' }}>
+          <MoenLogo className="w-auto h-10" />
         </div>
-        <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '4px', textAlign: 'center' }}>{storeInfo.name}</h2>
-        <p style={{ fontSize: '11px', marginBottom: '2px', opacity: '0.9', textAlign: 'center' }}>{storeInfo.address}</p>
-        <p style={{ fontSize: '11px', opacity: '0.9', textAlign: 'center' }}>{isArabic ? "هاتف" : "Phone"}: {storeInfo.phone}</p>
+        <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '2px', textAlign: 'center' }}>{storeInfo.name}</h2>
+        <p style={{ fontSize: '11px', marginBottom: '1px', textAlign: 'center' }}>{storeInfo.address}</p>
+        <p style={{ fontSize: '11px', textAlign: 'center' }}>{isArabic ? "هاتف" : "Phone"}: {storeInfo.phone}</p>
       </div>
       
       {/* Receipt Type Badge */}
       <div style={{ 
-        margin: '-18px auto 15px', 
-        width: 'fit-content', 
-        position: 'relative', 
-        zIndex: '1',
-        display: 'flex',
-        justifyContent: 'center'
+        margin: '6px auto', 
+        width: 'fit-content',
+        textAlign: 'center'
       }}>
         <div style={{
           background: 'white',
-          color: '#0891b2',
-          borderRadius: '30px',
-          padding: '8px 16px',
+          color: 'black',
+          borderRadius: '0',
+          padding: '4px 8px',
           fontWeight: 'bold',
           fontSize: '14px',
-          border: '2px solid #0891b2',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          border: '1px solid black',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px'
+          gap: '4px'
         }}>
-          <RefreshCcw style={{ width: '16px', height: '16px' }} />
+          <RefreshCcw style={{ width: '14px', height: '14px' }} />
           <span>{isArabic ? "إيصال استرداد" : "REFUND RECEIPT"}</span>
         </div>
       </div>
 
-      {/* Main Content with Cards */}
-      <div style={{ padding: '0 12px 12px' }}>
+      {/* Main Content - Thermal printer friendly */}
+      <div style={{ padding: '0 8px 8px' }}>
         {/* Customer Information */}
-        <div className="info-card" style={{
-          backgroundColor: '#f0f9ff',
-          borderRadius: '10px',
-          padding: '10px',
-          marginBottom: '12px',
-          border: '1px solid #e0f2fe'
+        <div style={{
+          borderRadius: '0',
+          padding: '8px',
+          marginBottom: '10px',
+          border: '1px solid black'
         }}>
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '5px',
-            borderBottom: '1px dashed #bae6fd',
-            paddingBottom: '5px',
-            marginBottom: '8px',
-            color: '#0c4a6e',
+            gap: '4px',
+            borderBottom: '1px dashed #000',
+            paddingBottom: '4px',
+            marginBottom: '6px',
+            color: 'black',
             fontWeight: 'bold',
             fontSize: '13px'
           }}>
@@ -160,12 +144,12 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
             display: 'flex', 
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '6px',
+            marginBottom: '4px',
             fontSize: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <UserCircle2 style={{ width: '12px', height: '12px', color: '#0e7490' }} />
-              <span style={{ color: '#334155' }}>{isArabic ? "الاسم" : "Name"}:</span>
+              <UserCircle2 style={{ width: '12px', height: '12px' }} />
+              <span>{isArabic ? "الاسم" : "Name"}:</span>
             </div>
             <span style={{ fontWeight: 'bold' }}>{refund.patientName}</span>
           </div>
@@ -178,8 +162,8 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
               fontSize: '12px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Phone style={{ width: '12px', height: '12px', color: '#0e7490' }} />
-                <span style={{ color: '#334155' }}>{isArabic ? "الهاتف" : "Phone"}:</span>
+                <Phone style={{ width: '12px', height: '12px' }} />
+                <span>{isArabic ? "الهاتف" : "Phone"}:</span>
               </div>
               <span style={{ fontWeight: 'bold' }}>{refund.patientPhone}</span>
             </div>
@@ -187,21 +171,20 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         </div>
         
         {/* Refund Details */}
-        <div className="info-card" style={{
-          backgroundColor: '#f0fdfa',
-          borderRadius: '10px',
-          padding: '10px',
-          marginBottom: '12px',
-          border: '1px solid #ccfbf1'
+        <div style={{
+          borderRadius: '0',
+          padding: '8px',
+          marginBottom: '10px',
+          border: '1px solid black'
         }}>
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '5px',
-            borderBottom: '1px dashed #99f6e4',
-            paddingBottom: '5px',
-            marginBottom: '8px',
-            color: '#115e59',
+            gap: '4px',
+            borderBottom: '1px dashed #000',
+            paddingBottom: '4px',
+            marginBottom: '6px',
+            color: 'black',
             fontWeight: 'bold',
             fontSize: '13px'
           }}>
@@ -213,16 +196,15 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
             display: 'flex', 
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '8px'
+            marginBottom: '6px'
           }}>
             <div style={{ 
-              padding: '4px 8px', 
-              backgroundColor: '#f1f5f9',
-              borderRadius: '15px',
+              padding: '3px 6px', 
+              backgroundColor: 'white',
+              borderRadius: '0',
               fontSize: '11px',
               fontWeight: 'bold',
-              color: '#475569',
-              border: '1px solid #e2e8f0'
+              border: '1px solid black'
             }}>
               #{refund.refundId}
             </div>
@@ -231,12 +213,11 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
               display: 'flex', 
               alignItems: 'center', 
               gap: '4px',
-              padding: '4px 8px',
-              backgroundColor: '#f8fafc',
-              borderRadius: '15px',
+              padding: '3px 6px',
+              backgroundColor: 'white',
+              borderRadius: '0',
               fontSize: '11px',
-              color: '#475569',
-              border: '1px solid #e2e8f0'
+              border: '1px solid black'
             }}>
               <Clock style={{ width: '10px', height: '10px' }} />
               <span>{formattedDate}</span>
@@ -247,80 +228,76 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
             display: 'flex', 
             justifyContent: 'space-between',
             alignItems: 'center',
-            paddingTop: '6px',
-            borderTop: '1px dashed #e2e8f0',
+            paddingTop: '4px',
+            borderTop: '1px dashed #000',
             fontSize: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <FileText style={{ width: '12px', height: '12px', color: '#0f766e' }} />
-              <span style={{ color: '#334155' }}>{isArabic ? "رقم الفاتورة" : "Invoice"}:</span>
+              <FileText style={{ width: '12px', height: '12px' }} />
+              <span>{isArabic ? "رقم الفاتورة" : "Invoice"}:</span>
             </div>
             <span style={{ fontWeight: 'bold' }}>#{refund.invoiceId}</span>
           </div>
         </div>
         
         {/* Products Section */}
-        <div style={{ marginBottom: '12px' }}>
+        <div style={{ marginBottom: '10px' }}>
           <div style={{ 
-            background: 'linear-gradient(to right, #0891b2, #0e7490)', 
-            padding: '8px 12px', 
-            borderRadius: '8px',
+            background: 'black', 
+            padding: '6px 8px', 
             color: 'white',
             fontWeight: 'bold',
             fontSize: '13px',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            marginBottom: '10px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+            gap: '4px',
+            marginBottom: '8px'
           }}>
             <Package style={{ width: '14px', height: '14px' }} />
             <span>{isArabic ? "المنتجات" : "Products"}</span>
           </div>
 
           {/* Product Items */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {/* Frame Info */}
             {refund.frameBrand && (
               <div style={{ 
                 backgroundColor: 'white', 
-                borderRadius: '8px',
-                padding: '8px',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                padding: '6px',
+                border: '1px solid black'
               }}>
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: '6px'
+                  marginBottom: '4px'
                 }}>
                   <div style={{ 
-                    color: '#334155', 
+                    color: 'black', 
                     fontWeight: 'bold',
                     fontSize: '12px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px'
                   }}>
-                    <Glasses style={{ width: '12px', height: '12px', color: '#0e7490' }} />
+                    <Glasses style={{ width: '12px', height: '12px' }} />
                     <span>{isArabic ? "الإطار" : "Frame"}</span>
                   </div>
                   <div style={{ 
-                    backgroundColor: '#0ea5e9', 
-                    color: 'white',
+                    backgroundColor: 'white', 
+                    color: 'black',
                     fontWeight: 'bold',
-                    padding: '3px 8px',
-                    borderRadius: '12px',
+                    padding: '2px 6px',
+                    border: '1px solid black',
                     fontSize: '11px'
                   }}>
                     {refund.invoiceItems?.find(item => item.name.includes(refund.frameBrand || ''))?.price.toFixed(3) || '0.000'} KWD
                   </div>
                 </div>
                 <div style={{ 
-                  backgroundColor: '#f8fafc',
-                  padding: '6px',
-                  borderRadius: '6px',
+                  backgroundColor: 'white',
+                  padding: '4px',
+                  border: '1px solid black',
                   fontSize: '11px',
                   textAlign: 'center',
                   fontWeight: '500'
@@ -335,43 +312,41 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
             {refund.lensType && (
               <div style={{ 
                 backgroundColor: 'white', 
-                borderRadius: '8px',
-                padding: '8px',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                padding: '6px',
+                border: '1px solid black'
               }}>
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: '6px'
+                  marginBottom: '4px'
                 }}>
                   <div style={{ 
-                    color: '#334155', 
+                    color: 'black', 
                     fontWeight: 'bold',
                     fontSize: '12px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px'
                   }}>
-                    <Info style={{ width: '12px', height: '12px', color: '#0e7490' }} />
+                    <Info style={{ width: '12px', height: '12px' }} />
                     <span>{isArabic ? "العدسات" : "Lenses"}</span>
                   </div>
                   <div style={{ 
-                    backgroundColor: '#14b8a6', 
-                    color: 'white',
+                    backgroundColor: 'white', 
+                    color: 'black',
                     fontWeight: 'bold',
-                    padding: '3px 8px',
-                    borderRadius: '12px',
+                    padding: '2px 6px',
+                    border: '1px solid black',
                     fontSize: '11px'
                   }}>
                     {refund.invoiceItems?.find(item => item.name.includes('lens') || item.name.includes('Lens'))?.price.toFixed(3) || '0.000'} KWD
                   </div>
                 </div>
                 <div style={{ 
-                  backgroundColor: '#f8fafc',
-                  padding: '6px',
-                  borderRadius: '6px',
+                  backgroundColor: 'white',
+                  padding: '4px',
+                  border: '1px solid black',
                   fontSize: '11px',
                   textAlign: 'center',
                   fontWeight: '500'
@@ -386,30 +361,28 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
               refund.invoiceItems.map((item, index) => (
                 <div key={index} style={{ 
                   backgroundColor: 'white', 
-                  borderRadius: '8px',
-                  padding: '8px',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                  padding: '6px',
+                  border: '1px solid black'
                 }}>
                   <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: item.quantity && item.quantity > 1 ? '6px' : '0'
+                    marginBottom: item.quantity && item.quantity > 1 ? '4px' : '0'
                   }}>
                     <div style={{ 
-                      color: '#334155', 
+                      color: 'black', 
                       fontWeight: 'bold',
                       fontSize: '12px'
                     }}>
                       {item.name}
                     </div>
                     <div style={{ 
-                      backgroundColor: '#0ea5e9', 
-                      color: 'white',
+                      backgroundColor: 'white', 
+                      color: 'black',
                       fontWeight: 'bold',
-                      padding: '3px 8px',
-                      borderRadius: '12px',
+                      padding: '2px 6px',
+                      border: '1px solid black',
                       fontSize: '11px'
                     }}>
                       {item.price.toFixed(3)} KWD
@@ -418,9 +391,9 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
                   
                   {item.quantity && item.quantity > 1 && (
                     <div style={{ 
-                      backgroundColor: '#f8fafc',
-                      padding: '4px 6px',
-                      borderRadius: '6px',
+                      backgroundColor: 'white',
+                      padding: '4px',
+                      border: '1px solid black',
                       fontSize: '11px',
                       textAlign: 'center',
                       fontWeight: '500'
@@ -435,52 +408,47 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         </div>
         
         {/* Refund Details */}
-        <div style={{ marginBottom: '12px' }}>
+        <div style={{ marginBottom: '10px' }}>
           <div style={{ 
-            background: 'linear-gradient(to right, #0891b2, #0e7490)', 
-            padding: '8px 12px', 
-            borderRadius: '8px',
+            background: 'black', 
+            padding: '6px 8px', 
             color: 'white',
             fontWeight: 'bold',
             fontSize: '13px',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            marginBottom: '10px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+            gap: '4px',
+            marginBottom: '8px'
           }}>
             <RefreshCcw style={{ width: '14px', height: '14px' }} />
             <span>{isArabic ? "تفاصيل الاسترداد" : "Refund Details"}</span>
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {/* Refund Method */}
             <div style={{ 
               backgroundColor: 'white', 
-              borderRadius: '8px',
-              padding: '10px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              padding: '8px',
+              border: '1px solid black',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <div style={{ color: '#475569', fontWeight: '500', fontSize: '12px' }}>
+              <div style={{ color: 'black', fontWeight: '500', fontSize: '12px' }}>
                 {isArabic ? "طريقة الاسترداد" : "Refund Method"}
               </div>
               <div style={{ 
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                backgroundColor: '#f8fafc',
-                padding: '4px 10px',
-                borderRadius: '15px',
+                backgroundColor: 'white',
+                padding: '2px 8px',
                 fontWeight: 'bold',
                 fontSize: '11px',
-                color: '#0c4a6e',
-                border: '1px solid #e0f2fe'
+                color: 'black',
+                border: '1px solid black'
               }}>
-                <CreditCard style={{ width: '11px', height: '11px', color: '#0e7490' }} />
+                <CreditCard style={{ width: '11px', height: '11px' }} />
                 <span>{refund.refundMethod}</span>
               </div>
             </div>
@@ -488,27 +456,24 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
             {/* Refund Reason */}
             <div style={{ 
               backgroundColor: 'white', 
-              borderRadius: '8px',
-              padding: '10px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              padding: '8px',
+              border: '1px solid black'
             }}>
               <div style={{ 
-                color: '#475569', 
+                color: 'black', 
                 fontWeight: '500', 
                 fontSize: '12px',
-                marginBottom: '6px' 
+                marginBottom: '4px' 
               }}>
                 {isArabic ? "سبب الاسترداد" : "Reason for Refund"}
               </div>
               <div style={{ 
-                backgroundColor: '#f8fafc',
-                padding: '8px',
-                borderRadius: '6px',
+                backgroundColor: 'white',
+                padding: '6px',
                 fontSize: '11px',
-                color: '#334155',
+                color: 'black',
                 fontWeight: '500',
-                border: '1px solid #f1f5f9',
+                border: '1px solid black',
                 lineHeight: '1.3'
               }}>
                 {refund.refundReason}
@@ -519,27 +484,24 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
             {refund.staffNotes && (
               <div style={{ 
                 backgroundColor: 'white', 
-                borderRadius: '8px',
-                padding: '10px',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                padding: '8px',
+                border: '1px solid black'
               }}>
                 <div style={{ 
-                  color: '#475569', 
+                  color: 'black', 
                   fontWeight: '500', 
                   fontSize: '12px',
-                  marginBottom: '6px' 
+                  marginBottom: '4px' 
                 }}>
                   {isArabic ? "ملاحظات" : "Notes"}
                 </div>
                 <div style={{ 
-                  backgroundColor: '#f8fafc',
-                  padding: '8px',
-                  borderRadius: '6px',
+                  backgroundColor: 'white',
+                  padding: '6px',
                   fontSize: '11px',
-                  color: '#64748b',
+                  color: 'black',
                   fontStyle: 'italic',
-                  border: '1px solid #f1f5f9',
+                  border: '1px solid black',
                   lineHeight: '1.3'
                 }}>
                   {refund.staffNotes}
@@ -552,28 +514,25 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         {/* Amount Information */}
         <div style={{ 
           backgroundColor: 'white', 
-          borderRadius: '10px',
-          padding: '12px',
-          border: '2px solid #ccfbf1',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
-          marginBottom: '15px'
+          padding: '10px',
+          border: '2px solid black',
+          marginBottom: '12px'
         }}>
           <div style={{ 
             display: 'flex', 
             justifyContent: 'space-between',
             alignItems: 'center',
             fontSize: '12px',
-            color: '#475569'
+            color: 'black'
           }}>
             <span>{isArabic ? "المبلغ الأصلي" : "Original Amount"}:</span>
-            <span style={{ fontWeight: 'bold', color: '#334155' }}>{refund.originalTotal.toFixed(3)} KWD</span>
+            <span style={{ fontWeight: 'bold', color: 'black' }}>{refund.originalTotal.toFixed(3)} KWD</span>
           </div>
           
           <div style={{ 
             height: '1px', 
-            backgroundColor: '#e2e8f0', 
-            margin: '8px 0',
-            backgroundImage: 'linear-gradient(to right, transparent, #94a3b8, transparent)'
+            backgroundColor: 'black', 
+            margin: '6px 0'
           }}></div>
           
           <div style={{ 
@@ -585,22 +544,21 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              gap: '5px',
-              color: '#0f766e',
+              gap: '4px',
+              color: 'black',
               fontWeight: 'bold',
               fontSize: '13px'
             }}>
               <CircleDollarSign style={{ width: '14px', height: '14px' }} />
-              <span>{isArabic ? "مبلغ الاسترداد" : "Refund Amount"}:</span>
+              <span>{isArabic ? "مبلغ ال��سترداد" : "Refund Amount"}:</span>
             </div>
             <div style={{ 
               fontSize: '14px',
               fontWeight: 'bold',
-              color: '#0f766e',
-              backgroundColor: '#f0fdfa',
-              padding: '4px 10px',
-              borderRadius: '8px',
-              border: '1px solid #99f6e4'
+              color: 'black',
+              backgroundColor: 'white',
+              padding: '3px 8px',
+              border: '2px solid black'
             }}>
               {refund.refundAmount.toFixed(3)} KWD
             </div>
@@ -608,18 +566,17 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         </div>
         
         {/* Status Badge */}
-        <div style={{ marginBottom: '15px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
           <div style={{ 
-            backgroundColor: '#22c55e',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '8px',
+            backgroundColor: 'white',
+            color: 'black',
+            padding: '6px 12px',
             fontWeight: 'bold',
             fontSize: '13px',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            boxShadow: '0 2px 5px rgba(34, 197, 94, 0.3)'
+            border: '2px solid black'
           }}>
             <CheckCircle style={{ width: '16px', height: '16px' }} />
             <span>{isArabic ? "تم الاسترداد" : "Refunded"}</span>
@@ -629,15 +586,14 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
       
       {/* Footer */}
       <div style={{ 
-        backgroundColor: '#f1f5f9',
-        padding: '10px',
-        borderTop: '1px solid #e2e8f0',
+        borderTop: '1px solid black',
+        padding: '8px',
         textAlign: 'center'
       }}>
         <p style={{ 
           fontSize: '11px',
           fontWeight: 'bold',
-          color: '#475569',
+          color: 'black',
           marginBottom: '4px'
         }}>
           {isArabic
@@ -646,9 +602,12 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         </p>
         <div style={{ 
           fontSize: '10px',
-          color: '#64748b'
+          color: 'black'
         }}>
           {format(new Date(), 'yyyy-MM-dd')}
+        </div>
+        <div style={{ marginTop: '4px', fontSize: '12px' }}>
+          {'- '.repeat(12)}
         </div>
       </div>
 
@@ -678,53 +637,24 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
             top: 0 !important;
             border: none !important;
             box-shadow: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            background: white !important;
-            height: auto !important;
-            min-height: 0 !important;
-            max-height: none !important;
-            text-align: center !important;
-            border-radius: 0 !important;
           }
           
-          .print-receipt * {
+          .thermal-receipt {
+            font-family: ${isArabic ? 'Zain, sans-serif' : 'Yrsa, serif'} !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          
+          .thermal-receipt * {
             visibility: visible !important;
             opacity: 1 !important;
           }
           
-          html, body {
-            height: auto !important;
-            min-height: 0 !important;
-            max-height: none !important;
-            overflow: visible !important;
-          }
-          
-          body {
-            -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          
-          .print-receipt {
-            height: fit-content !important;
-            min-height: fit-content !important;
-            max-height: fit-content !important;
-          }
-          
-          .print-receipt {
-            break-inside: avoid !important;
-            break-after: avoid-page !important;
-            page-break-inside: avoid !important;
-            page-break-after: avoid !important;
-          }
-          
-          /* Ensure gradients and colors print correctly */
-          .receipt-header,
-          [style*="background: linear-gradient"] {
-            -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
-            print-color-adjust: exact !important;
+          .receipt-header {
+            background: white !important;
+            color: black !important;
+            border-bottom: 1px solid black !important;
           }
         }
         `}
