@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useInvoiceStore, Invoice } from '@/store/invoiceStore';
 import { usePatientStore } from '@/store/patientStore';
@@ -143,6 +144,15 @@ export const RefundManager: React.FC = () => {
         variant: "default",
       });
       
+      // Transform contactLensItems to match the required format for invoiceItems
+      const contactLensItemsFormatted = selectedInvoice.contactLensItems 
+        ? selectedInvoice.contactLensItems.map(item => ({
+            name: `${item.brand} ${item.type} ${item.color || ''}`.trim(),
+            price: item.price,
+            quantity: item.qty || 1
+          }))
+        : [];
+      
       const refundInfo = {
         refundId,
         invoiceId: selectedInvoice.invoiceId,
@@ -174,8 +184,9 @@ export const RefundManager: React.FC = () => {
             price: selectedInvoice.coatingPrice,
             quantity: 1
           }] : []),
-          ...(selectedInvoice.contactLensItems || [])
-        ]
+          ...contactLensItemsFormatted
+        ],
+        staffNotes
       };
       
       const receiptElement = (
