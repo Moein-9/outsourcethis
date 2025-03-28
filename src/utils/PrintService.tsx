@@ -959,8 +959,8 @@ export const PrintService = {
             width: 80mm !important;
             font-family: 'Yrsa', serif !important;
             direction: initial !important;
-            font-size: 10px !important;
-            line-height: 1.1 !important;
+            font-size: 12px !important;
+            line-height: 1.3 !important;
           }
           
           /* Ensure Arabic displays correctly */
@@ -984,73 +984,94 @@ export const PrintService = {
           
           /* Ensure content is properly contained */
           .report-container {
-            width: 74mm !important;
-            padding: 3mm !important;
+            width: 72mm !important;
+            padding: 4mm !important;
             margin: 0 !important;
             page-break-after: always !important;
             page-break-inside: avoid !important;
           }
           
+          .store-logo {
+            text-align: center !important;
+            margin-bottom: 3mm !important;
+          }
+          
+          .store-logo img {
+            max-width: 50mm !important;
+            max-height: 15mm !important;
+          }
+          
+          .store-info {
+            text-align: center !important;
+            margin-bottom: 3mm !important;
+            font-size: 11px !important;
+          }
+          
+          .store-info p {
+            margin: 1mm 0 !important;
+          }
+          
           .report-header {
             text-align: center !important;
-            margin-bottom: 2mm !important;
-            padding-bottom: 2mm !important;
-            border-bottom: 0.3mm dashed #000 !important;
+            margin-bottom: 4mm !important;
+            padding-bottom: 3mm !important;
+            border-bottom: 0.5mm dashed #000 !important;
           }
           
           .report-title {
-            font-size: 12pt !important;
+            font-size: 16pt !important;
             font-weight: bold !important;
-            margin: 0 0 1mm 0 !important;
+            margin: 0 0 2mm 0 !important;
           }
           
           .report-date {
-            font-size: 8pt !important;
+            font-size: 10pt !important;
             margin: 0 !important;
           }
           
           .summary-section {
-            margin-bottom: 3mm !important;
+            margin-bottom: 4mm !important;
           }
           
           .section-title {
-            font-size: 9pt !important;
+            font-size: 12pt !important;
             font-weight: bold !important;
-            margin: 0 0 1mm 0 !important;
-            padding-bottom: 0.5mm !important;
-            border-bottom: 0.2mm solid #ccc !important;
+            margin: 0 0 2mm 0 !important;
+            padding-bottom: 1mm !important;
+            border-bottom: 0.3mm solid #ccc !important;
           }
           
           .summary-item {
-            margin-bottom: 1mm !important;
+            margin-bottom: 2mm !important;
           }
           
           .summary-item-row {
             display: flex !important;
             justify-content: space-between !important;
-            margin-bottom: 0.5mm !important;
+            margin-bottom: 1mm !important;
+            padding: 1mm 2mm !important;
           }
           
           .summary-item-title {
-            font-size: 8pt !important;
+            font-size: 10pt !important;
             font-weight: normal !important;
           }
           
           .summary-item-value {
-            font-size: 8pt !important;
+            font-size: 11pt !important;
             font-weight: bold !important;
           }
           
           table {
             width: 100% !important;
             border-collapse: collapse !important;
-            margin-top: 1mm !important;
-            font-size: 7pt !important;
+            margin-top: 2mm !important;
+            font-size: 9pt !important;
           }
           
           th, td {
-            border: 0.1mm solid black !important;
-            padding: 0.5mm !important;
+            border: 0.2mm solid black !important;
+            padding: 1.5mm !important;
             text-align: center !important;
           }
           
@@ -1060,16 +1081,16 @@ export const PrintService = {
           }
           
           .footer {
-            margin-top: 2mm !important;
-            padding-top: 2mm !important;
-            border-top: 0.3mm dashed #000 !important;
+            margin-top: 4mm !important;
+            padding-top: 3mm !important;
+            border-top: 0.5mm dashed #000 !important;
             text-align: center !important;
-            font-size: 7pt !important;
+            font-size: 9pt !important;
           }
           
           .divider {
-            border-top: 0.2mm dashed #aaa !important;
-            margin: 2mm 0 !important;
+            border-top: 0.3mm dashed #aaa !important;
+            margin: 3mm 0 !important;
           }
           
           /* Fix for print dialog appearing but not working */
@@ -1083,14 +1104,14 @@ export const PrintService = {
               -webkit-print-color-adjust: exact !important;
               color-adjust: exact !important;
               print-color-adjust: exact !important;
-              font-size: 10px !important;
-              line-height: 1.1 !important;
+              font-size: 12px !important;
+              line-height: 1.3 !important;
             }
             
             .report-container {
-              width: 74mm !important;
+              width: 72mm !important;
               margin: 0 !important;
-              padding: 3mm !important;
+              padding: 4mm !important;
             }
             
             /* Ensure only one copy prints */

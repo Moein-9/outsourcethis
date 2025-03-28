@@ -27,9 +27,22 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BarChart3, LineChart as LineChartIcon } from "lucide-react";
+import { BarChart3, LineChart as LineChartIcon, MapPin, Store, Phone } from "lucide-react";
 import { PrintService } from "@/utils/PrintService";
 import { PrintReportButton } from "./PrintReportButton";
+
+const STORE_INFO = {
+  name: {
+    en: "Optical Center",
+    ar: "المركز البصري"
+  },
+  logo: "/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png",
+  address: {
+    en: "123 Vision Street, Kuwait City",
+    ar: "١٢٣ شارع الرؤية، مدينة الكويت"
+  },
+  phone: "+965 1234 5678"
+};
 
 interface ComparativeAnalysisProps {
   className?: string;
@@ -95,7 +108,6 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
       return isWithinInterval(invoiceDate, { start: startDate, end: endDate });
     });
     
-    // Prepare sales data for the chart
     const dailySales: { [key: string]: number } = {};
     let total = 0;
     
@@ -112,7 +124,6 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
     
     setSalesData(chartData);
     
-    // Calculate product sales
     const lensSales = filteredInvoices.reduce((sum, invoice) => sum + invoice.lensPrice, 0);
     const frameSales = filteredInvoices.reduce((sum, invoice) => sum + invoice.framePrice, 0);
     const coatingSales = filteredInvoices.reduce((sum, invoice) => sum + invoice.coatingPrice, 0);
@@ -123,7 +134,6 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
       { name: translations.coatingSales, sales: coatingSales },
     ]);
     
-    // Calculate total sales, average daily sales, and transaction count
     setTotalSales(total);
     setTransactionCount(filteredInvoices.length);
     
@@ -144,7 +154,42 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
     const dateRange = language === 'ar' ? 'نطاق التاريخ' : 'Date Range';
     const pageTitle = language === 'ar' ? 'تقرير التحليل المقارن' : 'Comparative Analysis Report';
     
+    const storeInfo = `
+      <div class="store-logo">
+        <img src="${STORE_INFO.logo}" alt="${STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}" />
+      </div>
+      <div class="store-info">
+        <p><strong>${STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}</strong></p>
+        <p>${STORE_INFO.address[language === 'ar' ? 'ar' : 'en']}</p>
+        <p>${STORE_INFO.phone}</p>
+      </div>
+    `;
+    
+    const dateRangeDisplay = date?.from && date?.to ? 
+      `${format(date.from, 'MM/dd/yyyy')} - ${format(date.to, 'MM/dd/yyyy')}` : 
+      language === 'ar' ? 'غير محدد' : 'Not specified';
+    
+    const productAnalysis = `
+      <div class="summary-item-row">
+        <span class="summary-item-title">${language === 'ar' ? 'مبيعات العدسات' : 'Lens Sales'}:</span>
+        <span class="summary-item-value">${productSalesData.find(item => 
+          item.name === translations.lensSales)?.sales.toFixed(2) || '0.00'} ${translations.currency}</span>
+      </div>
+      <div class="summary-item-row">
+        <span class="summary-item-title">${language === 'ar' ? 'مبيعات الإطارات' : 'Frame Sales'}:</span>
+        <span class="summary-item-value">${productSalesData.find(item => 
+          item.name === translations.frameSales)?.sales.toFixed(2) || '0.00'} ${translations.currency}</span>
+      </div>
+      <div class="summary-item-row">
+        <span class="summary-item-title">${language === 'ar' ? 'مبيعات الطلاءات' : 'Coating Sales'}:</span>
+        <span class="summary-item-value">${productSalesData.find(item => 
+          item.name === translations.coatingSales)?.sales.toFixed(2) || '0.00'} ${translations.currency}</span>
+      </div>
+    `;
+    
     const reportContent = `
+      ${storeInfo}
+      
       <div class="report-header">
         <div class="report-title">${pageTitle}</div>
         <div class="report-date">${language === 'ar' ? 'تاريخ الطباعة' : 'Print Date'}: ${format(new Date(), 'MM/dd/yyyy')}</div>
@@ -155,7 +200,7 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
         <div class="summary-item">
           <div class="summary-item-row">
             <span class="summary-item-title">${timeRangeText}:</span>
-            <span class="summary-item-value">${dateRange}</span>
+            <span class="summary-item-value">${dateRangeDisplay}</span>
           </div>
         </div>
       </div>
@@ -167,11 +212,11 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
         <div class="summary-item">
           <div class="summary-item-row">
             <span class="summary-item-title">${language === 'ar' ? 'إجمالي المبيعات' : 'Total Sales'}:</span>
-            <span class="summary-item-value">${totalSales} KWD</span>
+            <span class="summary-item-value">${totalSales.toFixed(2)} ${translations.currency}</span>
           </div>
           <div class="summary-item-row">
             <span class="summary-item-title">${language === 'ar' ? 'متوسط ​​المبيعات اليومي' : 'Average Daily Sales'}:</span>
-            <span class="summary-item-value">${averageDailySales} KWD</span>
+            <span class="summary-item-value">${averageDailySales.toFixed(2)} ${translations.currency}</span>
           </div>
           <div class="summary-item-row">
             <span class="summary-item-title">${language === 'ar' ? 'عدد المعاملات' : 'Transaction Count'}:</span>
@@ -185,18 +230,7 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
       <div class="summary-section">
         <div class="section-title">${language === 'ar' ? 'تحليل المنتج' : 'Product Analysis'}</div>
         <div class="summary-item">
-          <div class="summary-item-row">
-            <span class="summary-item-title">${language === 'ar' ? 'مبيعات العدسات' : 'Lens Sales'}:</span>
-            <span class="summary-item-value">XXX KWD</span>
-          </div>
-          <div class="summary-item-row">
-            <span class="summary-item-title">${language === 'ar' ? 'مبيعات الإطارات' : 'Frame Sales'}:</span>
-            <span class="summary-item-value">XXX KWD</span>
-          </div>
-          <div class="summary-item-row">
-            <span class="summary-item-title">${language === 'ar' ? 'مبيعات الطلاءات' : 'Coating Sales'}:</span>
-            <span class="summary-item-value">XXX KWD</span>
-          </div>
+          ${productAnalysis}
         </div>
       </div>
       
@@ -216,7 +250,13 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
     <div className={`space-y-4 ${className}`}>
       <Card>
         <CardHeader>
-          <CardTitle>{translations.comparativeAnalysis}</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>{translations.comparativeAnalysis}</span>
+            <div className="hidden sm:flex items-center text-sm text-muted-foreground gap-1">
+              <Store className="h-4 w-4" />
+              <span>{STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}</span>
+            </div>
+          </CardTitle>
         </CardHeader>
         <CardContent className="pl-2 pb-2">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">

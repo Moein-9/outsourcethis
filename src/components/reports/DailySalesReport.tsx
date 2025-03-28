@@ -13,7 +13,10 @@ import {
   ChevronDown,
   ChevronUp,
   Eye,
-  Tag
+  Tag,
+  MapPin,
+  Store,
+  Phone
 } from "lucide-react";
 import { 
   Table,
@@ -46,6 +49,19 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { PrintService } from "@/utils/PrintService";
 import { PrintReportButton } from "./PrintReportButton";
 import { Button } from "@/components/ui/button";
+
+const STORE_INFO = {
+  name: {
+    en: "Optical Center",
+    ar: "المركز البصري"
+  },
+  logo: "/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png",
+  address: {
+    en: "123 Vision Street, Kuwait City",
+    ar: "١٢٣ شارع الرؤية، مدينة الكويت"
+  },
+  phone: "+965 1234 5678"
+};
 
 export const DailySalesReport: React.FC = () => {
   const invoiceStore = useInvoiceStore();
@@ -206,7 +222,20 @@ export const DailySalesReport: React.FC = () => {
       `;
     });
     
+    const storeInfo = `
+      <div class="store-logo">
+        <img src="${STORE_INFO.logo}" alt="${STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}" />
+      </div>
+      <div class="store-info">
+        <p><strong>${STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}</strong></p>
+        <p>${STORE_INFO.address[language === 'ar' ? 'ar' : 'en']}</p>
+        <p>${STORE_INFO.phone}</p>
+      </div>
+    `;
+    
     const reportContent = `
+      ${storeInfo}
+      
       <div class="report-header">
         <div class="report-title">${t.dailySalesReport}</div>
         <div class="report-date">${language === 'ar' ? 'التاريخ:' : 'Date:'} ${today}</div>
@@ -305,7 +334,13 @@ export const DailySalesReport: React.FC = () => {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <h2 className="text-xl md:text-2xl font-bold">{t.dailySalesReport}</h2>
-        <PrintReportButton onPrint={handlePrintReport} className="w-full sm:w-auto" />
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center text-sm text-muted-foreground gap-1">
+            <Store className="h-4 w-4" />
+            <span>{STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}</span>
+          </div>
+          <PrintReportButton onPrint={handlePrintReport} className="w-full sm:w-auto" />
+        </div>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
