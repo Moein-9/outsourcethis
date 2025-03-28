@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useInvoiceStore, Invoice } from '@/store/invoiceStore';
 import { usePatientStore } from '@/store/patientStore';
@@ -57,7 +56,6 @@ export const RefundManager: React.FC = () => {
     setIsSearching(true);
     setError('');
     
-    // Unified search: search by invoice ID, patient name, or phone number
     const results = invoices.filter(invoice => 
       !invoice.isRefunded && 
       (invoice.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -87,7 +85,6 @@ export const RefundManager: React.FC = () => {
     } else {
       setRefundAmount(value);
       
-      // Validate refund amount
       if (selectedInvoice && value > selectedInvoice.total) {
         setError(language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز إجمالي الفاتورة' : 
           'Refund amount cannot exceed the invoice total');
@@ -131,7 +128,6 @@ export const RefundManager: React.FC = () => {
     if (!validateRefund() || !selectedInvoice) return;
     
     try {
-      // Process the refund
       const refundId = processRefund(
         selectedInvoice.invoiceId,
         refundAmount,
@@ -140,7 +136,6 @@ export const RefundManager: React.FC = () => {
         staffNotes
       );
       
-      // Show success message
       setSuccess(language === 'ar' ? 'تم معالجة استرداد الأموال بنجاح' : 'Refund processed successfully');
       toast({
         title: language === 'ar' ? 'تم استرداد الأموال' : 'Refund Processed',
@@ -148,7 +143,6 @@ export const RefundManager: React.FC = () => {
         variant: "default",
       });
       
-      // Prepare refund info for the receipt
       const refundInfo = {
         refundId,
         invoiceId: selectedInvoice.invoiceId,
@@ -164,10 +158,26 @@ export const RefundManager: React.FC = () => {
         frameModel: selectedInvoice.frameModel,
         frameColor: selectedInvoice.frameColor,
         lensType: selectedInvoice.lensType,
-        invoiceItems: selectedInvoice.items || []
+        invoiceItems: [
+          ...(selectedInvoice.frameBrand ? [{
+            name: selectedInvoice.frameBrand + ' ' + selectedInvoice.frameModel,
+            price: selectedInvoice.framePrice,
+            quantity: 1
+          }] : []),
+          ...(selectedInvoice.lensType ? [{
+            name: selectedInvoice.lensType,
+            price: selectedInvoice.lensPrice,
+            quantity: 1
+          }] : []),
+          ...(selectedInvoice.coating ? [{
+            name: selectedInvoice.coating,
+            price: selectedInvoice.coatingPrice,
+            quantity: 1
+          }] : []),
+          ...(selectedInvoice.contactLensItems || [])
+        ]
       };
       
-      // Create the refund receipt element
       const receiptElement = (
         <RefundReceiptTemplate
           refund={refundInfo}
@@ -175,10 +185,8 @@ export const RefundManager: React.FC = () => {
         />
       );
       
-      // Convert the React component to HTML string for printing
       const receiptHtml = ReactDOMServer.renderToString(receiptElement);
       
-      // Use PrintService with the correct document preparation function
       PrintService.printHtml(
         PrintService.prepareReceiptDocument(receiptHtml, language === 'ar' ? `إيصال استرداد - ${refundId}` : `Refund Receipt - ${refundId}`),
         'receipt',
@@ -191,7 +199,6 @@ export const RefundManager: React.FC = () => {
         }
       );
       
-      // Reset form
       setTimeout(() => {
         setSelectedInvoice(null);
         setRefundAmount(0);
@@ -220,7 +227,6 @@ export const RefundManager: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      {/* Header with gradient background */}
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="bg-blue-500 p-2 rounded-full">
@@ -379,7 +385,6 @@ export const RefundManager: React.FC = () => {
                     </Badge>
                   </div>
                   
-                  {/* Invoice Details */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 bg-white/70 p-3 rounded-md">
                     <div className="space-y-1">
                       <div className="text-xs text-blue-600 font-medium">
