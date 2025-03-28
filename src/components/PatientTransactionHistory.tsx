@@ -28,7 +28,7 @@ interface PatientTransactionHistoryProps {
 
 export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps> = ({ patientId }) => {
   const { t, language } = useLanguageStore();
-  const { invoices, markAsPickedUp } = useInvoiceStore();
+  const { invoices, markAsPickedUp, getRefundsByInvoiceId } = useInvoiceStore();
   const { getPatientById } = usePatientStore();
   const navigate = useNavigate();
   const isRtl = language === 'ar';
@@ -184,6 +184,9 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                     ? invoice.payments.reduce((sum: number, payment: any) => sum + (payment.amount || 0), 0)
                     : invoice.deposit || 0;
                   
+                  // Get refund details if available
+                  const refundDetails = getRefundsByInvoiceId?.(invoice.invoiceId);
+                  
                   return (
                     <React.Fragment key={invoice.invoiceId}>
                       <TableRow 
@@ -304,35 +307,44 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                                 <div className={`bg-white border ${isRefunded ? 'border-red-200' : 'border-gray-200'} rounded-md p-4`}>
                                   <div className="space-y-3">
                                     {isRefunded ? (
-                                      // Refund details display
+                                      // Refund details display - use refundDetails if available, otherwise fall back to invoice data
                                       <>
                                         <div className="grid grid-cols-2 gap-2">
                                           <div className="text-sm text-red-500">{t('refundDate')}:</div>
                                           <div className="text-sm font-medium">
-                                            {formatDate(invoice.refundDate || '')}
+                                            {formatDate(refundDetails?.date || invoice.refundDate || '')}
                                           </div>
                                         </div>
                                         
                                         <div className="grid grid-cols-2 gap-2">
                                           <div className="text-sm text-red-500">{t('refundAmount')}:</div>
                                           <div className="text-sm font-medium text-red-600">
-                                            {invoice.refundAmount?.toFixed(3)} {t('kwd')}
+                                            {(refundDetails?.amount || invoice.refundAmount || 0).toFixed(3)} {t('kwd')}
                                           </div>
                                         </div>
                                         
                                         <div className="grid grid-cols-2 gap-2">
                                           <div className="text-sm text-red-500">{t('refundMethod')}:</div>
                                           <div className="text-sm font-medium">
-                                            {invoice.refundMethod}
+                                            {refundDetails?.method || invoice.refundMethod || ''}
                                           </div>
                                         </div>
                                         
                                         <div className="grid grid-cols-2 gap-2">
                                           <div className="text-sm text-red-500">{t('refundReason')}:</div>
                                           <div className="text-sm font-medium">
-                                            {invoice.refundReason}
+                                            {refundDetails?.reason || invoice.refundReason || ''}
                                           </div>
                                         </div>
+                                        
+                                        {refundDetails?.staffNotes && (
+                                          <div className="grid grid-cols-2 gap-2">
+                                            <div className="text-sm text-red-500">{t('staffNotes')}:</div>
+                                            <div className="text-sm font-medium">
+                                              {refundDetails.staffNotes}
+                                            </div>
+                                          </div>
+                                        )}
                                         
                                         <div className="mt-3 pt-3 border-t border-red-100 flex items-center gap-1 text-red-600">
                                           <RefreshCcw className="h-4 w-4" />
