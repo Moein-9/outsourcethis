@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -7,16 +8,6 @@ export interface Payment {
   method: string;
   date: string;
   authNumber?: string; // Added for card payment authorization numbers
-}
-
-export interface Refund {
-  refundId: string;
-  amount: number;
-  method: string;
-  date: string;
-  reason: string;
-  staffNotes?: string;
-  associatedInvoiceId: string;
 }
 
 export interface Invoice {
@@ -55,14 +46,6 @@ export interface Invoice {
   pickedUpAt?: string;
   authNumber?: string;
   workOrderId?: string;
-  
-  // Refund related fields
-  isRefunded?: boolean;
-  refundDate?: string;
-  refundAmount?: number;
-  refundReason?: string;
-  refundMethod?: string;
-  refundId?: string;
 }
 
 // Define WorkOrder interface
@@ -80,16 +63,11 @@ export interface WorkOrder {
   contactLensRx?: any;
   isPickedUp?: boolean;
   pickedUpAt?: string;
-  
-  // Refund related fields
-  isRefunded?: boolean;
-  refundDate?: string;
 }
 
 interface InvoiceState {
   invoices: Invoice[];
   workOrders: WorkOrder[];
-  refunds: Refund[];
   addInvoice: (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments">) => string;
   markAsPaid: (invoiceId: string, paymentMethod?: string, authNumber?: string) => void;
   markAsPickedUp: (id: string, isInvoice?: boolean) => void;
@@ -103,18 +81,6 @@ interface InvoiceState {
   addWorkOrder?: (workOrder: Omit<WorkOrder, "id" | "createdAt">) => string;
   updateInvoice: (updatedInvoice: Invoice) => void;
   updateWorkOrder?: (workOrder: WorkOrder) => void;
-  
-  // New refund related functions
-  processRefund: (
-    invoiceId: string, 
-    refundAmount: number, 
-    refundMethod: string, 
-    reason: string, 
-    staffNotes?: string
-  ) => string;
-  getRefundById: (refundId: string) => Refund | undefined;
-  getRefundsByPatientId: (patientId: string) => Refund[];
-  getRefundsByInvoiceId: (invoiceId: string) => Refund | undefined;
 }
 
 export const useInvoiceStore = create<InvoiceState>()(
@@ -122,7 +88,6 @@ export const useInvoiceStore = create<InvoiceState>()(
     (set, get) => ({
       invoices: [],
       workOrders: [], 
-      refunds: [],
       
       addInvoice: (invoice) => {
         const invoiceId = `IN${Date.now()}`;
@@ -370,79 +335,6 @@ export const useInvoiceStore = create<InvoiceState>()(
             workOrder.id === updatedWorkOrder.id ? updatedWorkOrder : workOrder
           )
         }));
-      },
-      
-      processRefund: (invoiceId, refundAmount, refundMethod, reason, staffNotes) => {
-        const invoice = get().invoices.find(inv => inv.invoiceId === invoiceId);
-        if (!invoice) {
-          throw new Error("Invoice not found");
-        }
-        
-        const refundId = `RF${Date.now()}`;
-        const refundDate = new Date().toISOString();
-        
-        // Create a new refund record
-        const newRefund: Refund = {
-          refundId,
-          amount: refundAmount,
-          method: refundMethod,
-          date: refundDate,
-          reason,
-          staffNotes,
-          associatedInvoiceId: invoiceId
-        };
-        
-        // Update the invoice with refund information
-        const updatedInvoice: Invoice = {
-          ...invoice,
-          isRefunded: true,
-          refundDate,
-          refundAmount,
-          refundReason: reason,
-          refundMethod,
-          refundId
-        };
-        
-        // If there's a related work order, update it as well
-        const workOrder = invoice.workOrderId ? 
-          get().workOrders.find(wo => wo.id === invoice.workOrderId) : undefined;
-        
-        let updatedWorkOrders = [...get().workOrders];
-        if (workOrder) {
-          updatedWorkOrders = updatedWorkOrders.map(wo => 
-            wo.id === workOrder.id ? 
-            { ...wo, isRefunded: true, refundDate } : wo
-          );
-        }
-        
-        // Update the store
-        set(state => ({
-          refunds: [...state.refunds, newRefund],
-          invoices: state.invoices.map(inv => 
-            inv.invoiceId === invoiceId ? updatedInvoice : inv
-          ),
-          workOrders: updatedWorkOrders
-        }));
-        
-        return refundId;
-      },
-      
-      getRefundById: (refundId) => {
-        return get().refunds.find(refund => refund.refundId === refundId);
-      },
-      
-      getRefundsByPatientId: (patientId) => {
-        const patientInvoiceIds = get().invoices
-          .filter(invoice => invoice.patientId === patientId)
-          .map(invoice => invoice.invoiceId);
-        
-        return get().refunds.filter(refund => 
-          patientInvoiceIds.includes(refund.associatedInvoiceId)
-        );
-      },
-      
-      getRefundsByInvoiceId: (invoiceId) => {
-        return get().refunds.find(refund => refund.associatedInvoiceId === invoiceId);
       }
     }),
     {

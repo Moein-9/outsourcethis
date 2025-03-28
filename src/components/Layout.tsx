@@ -94,13 +94,6 @@ export const Layout: React.FC<LayoutProps> = ({
           >
             {t('patientSearch')}
           </Button>
-          <Button 
-            variant={activeSection === "refundManager" ? "default" : "outline"} 
-            onClick={() => handleSectionNavigation("refundManager")}
-            className="whitespace-nowrap"
-          >
-            {language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges'}
-          </Button>
         </div>
         <div className="flex items-center gap-3">
           <LanguageToggle />
