@@ -35,7 +35,6 @@ export const RefundManager: React.FC = () => {
   const [refundMethod, setRefundMethod] = useState<string>('');
   const [refundReason, setRefundReason] = useState<string>('');
   const [staffNotes, setStaffNotes] = useState<string>('');
-  const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   
   const formatDate = (dateString: string) => {
@@ -49,13 +48,16 @@ export const RefundManager: React.FC = () => {
   
   const handleSearch = () => {
     if (!searchTerm.trim()) {
-      setError(language === 'ar' ? 'يرجى إدخال رقم الفاتورة أو اسم العميل أو رقم الهاتف' : 
-        'Please enter an invoice number, customer name, or phone number');
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Error',
+        description: language === 'ar' ? 'يرجى إدخال رقم الفاتورة أو اسم العميل أو رقم الهاتف' : 
+          'Please enter an invoice number, customer name, or phone number',
+        variant: "destructive",
+      });
       return;
     }
     
     setIsSearching(true);
-    setError('');
     
     const results = invoices.filter(invoice => 
       !invoice.isRefunded && 
@@ -68,14 +70,17 @@ export const RefundManager: React.FC = () => {
     setIsSearching(false);
     
     if (results.length === 0) {
-      setError(language === 'ar' ? 'لم يتم العثور على فواتير' : 'No invoices found');
+      toast({
+        title: language === 'ar' ? 'لم يتم العثور على نتائج' : 'No Results',
+        description: language === 'ar' ? 'لم يتم العثور على فواتير' : 'No invoices found',
+        variant: "destructive",
+      });
     }
   };
   
   const handleSelectInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setRefundAmount(invoice.total);
-    setError('');
     setSuccess('');
   };
   
@@ -87,38 +92,61 @@ export const RefundManager: React.FC = () => {
       setRefundAmount(value);
       
       if (selectedInvoice && value > selectedInvoice.total) {
-        setError(language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز إجمالي الفاتورة' : 
-          'Refund amount cannot exceed the invoice total');
-      } else {
-        setError('');
+        toast({
+          title: language === 'ar' ? 'خطأ في المبلغ' : 'Amount Error',
+          description: language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز إجمالي الفاتورة' : 
+            'Refund amount cannot exceed the invoice total',
+          variant: "destructive",
+        });
       }
     }
   };
   
   const validateRefund = () => {
     if (!selectedInvoice) {
-      setError(language === 'ar' ? 'يرجى اختيار فاتورة أولاً' : 'Please select an invoice first');
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Error',
+        description: language === 'ar' ? 'يرجى اختيار فاتورة أولاً' : 'Please select an invoice first',
+        variant: "destructive",
+      });
       return false;
     }
     
     if (refundAmount <= 0) {
-      setError(language === 'ar' ? 'يجب أن يكون مبلغ الاسترداد أكبر من 0' : 'Refund amount must be greater than 0');
+      toast({
+        title: language === 'ar' ? 'خطأ في المبلغ' : 'Amount Error',
+        description: language === 'ar' ? 'يجب أن يكون مبلغ الاسترداد أكبر من 0' : 
+          'Refund amount must be greater than 0',
+        variant: "destructive",
+      });
       return false;
     }
     
     if (refundAmount > selectedInvoice.total) {
-      setError(language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز إجمالي الفاتورة' : 
-        'Refund amount cannot exceed the invoice total');
+      toast({
+        title: language === 'ar' ? 'خطأ في المبلغ' : 'Amount Error',
+        description: language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز إجمالي الفاتورة' : 
+          'Refund amount cannot exceed the invoice total',
+        variant: "destructive",
+      });
       return false;
     }
     
     if (!refundMethod) {
-      setError(language === 'ar' ? 'يرجى اختيار طريقة الاسترداد' : 'Please select a refund method');
+      toast({
+        title: language === 'ar' ? 'بيانات مفقودة' : 'Missing Data',
+        description: language === 'ar' ? 'يرجى اختيار طريقة الاسترداد' : 'Please select a refund method',
+        variant: "destructive",
+      });
       return false;
     }
     
     if (!refundReason.trim()) {
-      setError(language === 'ar' ? 'يرجى إدخال سبب الاسترداد' : 'Please enter a reason for the refund');
+      toast({
+        title: language === 'ar' ? 'بيانات مفقودة' : 'Missing Data',
+        description: language === 'ar' ? 'يرجى إدخال سبب الاسترداد' : 'Please enter a reason for the refund',
+        variant: "destructive",
+      });
       return false;
     }
     
@@ -221,7 +249,6 @@ export const RefundManager: React.FC = () => {
       }, 2000);
       
     } catch (error: any) {
-      setError(error.message || 'An error occurred while processing the refund');
       toast({
         title: language === 'ar' ? 'خطأ' : 'Error',
         description: error.message || (language === 'ar' ? 'حدث خطأ أثناء معالجة الاسترداد' : 'An error occurred while processing the refund'),
