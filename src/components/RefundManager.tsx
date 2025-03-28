@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useInvoiceStore, Invoice } from '@/store/invoiceStore';
 import { usePatientStore } from '@/store/patientStore';
@@ -19,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { format, isValid } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ProductDetailsDisplay } from '@/components/ProductDetailsDisplay';
 
 export const RefundManager: React.FC = () => {
   const { language, t } = useLanguageStore();
@@ -265,6 +267,20 @@ export const RefundManager: React.FC = () => {
     }
   };
   
+  // Calculate total paid amount for an invoice
+  const calculatePaidAmount = (invoice: Invoice) => {
+    if (!invoice.payments || invoice.payments.length === 0) {
+      return invoice.deposit || 0;
+    }
+    return invoice.payments.reduce((sum, payment) => sum + payment.amount, 0);
+  };
+  
+  // Calculate remaining amount for an invoice
+  const calculateRemainingAmount = (invoice: Invoice) => {
+    const paidAmount = calculatePaidAmount(invoice);
+    return Math.max(0, invoice.total - paidAmount);
+  };
+  
   return (
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 shadow-sm">
@@ -433,7 +449,7 @@ export const RefundManager: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 bg-white/70 p-3 rounded-md">
                     <div className="space-y-1">
                       <div className="text-xs text-blue-600 font-medium">
-                        {language === 'ar' ? 'ال��ميل' : 'Customer'}
+                        {language === 'ar' ? 'العميل' : 'Customer'}
                       </div>
                       <div className="font-medium flex items-center gap-1">
                         <ShoppingBag className="h-4 w-4 text-blue-500 flex-shrink-0" />
@@ -490,6 +506,22 @@ export const RefundManager: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-sm">
+                          {language === 'ar' ? 'المدفوع:' : 'Paid:'}
+                        </div>
+                        <div className="font-medium text-blue-700">
+                          {calculatePaidAmount(selectedInvoice).toFixed(3)} KWD
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm">
+                          {language === 'ar' ? 'المتبقي:' : 'Remaining:'}
+                        </div>
+                        <div className="font-medium text-amber-600">
+                          {calculateRemainingAmount(selectedInvoice).toFixed(3)} KWD
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm">
                           {language === 'ar' ? 'طريقة الدفع:' : 'Payment Method:'}
                         </div>
                         <div>{selectedInvoice.paymentMethod}</div>
@@ -512,6 +544,14 @@ export const RefundManager: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+                
+                {/* Product Details Section */}
+                <div className="p-4 border-b border-blue-200 bg-blue-50/30">
+                  <h4 className="text-sm font-medium text-blue-700 mb-3">
+                    {language === 'ar' ? 'تفاصيل المنتج' : 'Product Details'}
+                  </h4>
+                  <ProductDetailsDisplay invoice={selectedInvoice} />
                 </div>
                 
                 <div className="p-5 space-y-6 bg-gradient-to-r from-blue-50/30 to-purple-50/30">
@@ -563,7 +603,7 @@ export const RefundManager: React.FC = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="refundReason" className="text-blue-700 font-medium">
-                      {language === 'ar' ? 'سب�� الاسترداد' : 'Refund Reason'}
+                      {language === 'ar' ? 'سبب الاسترداد' : 'Refund Reason'}
                     </Label>
                     <Select value={refundReason} onValueChange={setRefundReason}>
                       <SelectTrigger id="refundReason" className="border-blue-200 focus:ring-blue-400">

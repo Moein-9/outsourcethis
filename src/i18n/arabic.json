@@ -124,7 +124,6 @@
   "paymentSuccessfullyRecorded": "تم تسجيل الدفع بنجاح",
   "paymentCompletedSuccessfully": "تم إكمال الدفع بنجاح! هل ترغب في طباعة الفاتورة النهائية؟",
   "close": "إغلاق",
-  "printInvoice": "طباعة الفاتورة",
   "enterPaymentAmount": "يرجى إدخال مبلغ الدفع",
   "amountGreaterThanRemaining": "المبلغ المدخل أكبر من المبلغ المتبقي",
   "paymentRecordedSuccessfully": "تم تسجيل الدفع بنجاح",
