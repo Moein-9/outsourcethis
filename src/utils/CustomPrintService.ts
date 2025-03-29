@@ -32,48 +32,54 @@ export const CustomPrintService = {
         <html>
           <head>
             <title>Work Order</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
             <style>
               @page {
                 size: 80mm auto !important;
-                margin: 0 !important;
-                padding: 0 !important;
+                margin: 0mm !important;
+                padding: 0mm !important;
               }
               
               body {
                 width: 80mm !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                font-family: Cairo, Arial, sans-serif !important;
+                margin: 0mm !important;
+                padding: 0mm !important;
+                font-family: 'Cairo', Arial, sans-serif !important;
                 background: white !important;
                 color: black !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
               }
               
-              #work-order-receipt {
-                width: 76mm !important;
-                max-width: 76mm !important;
-                page-break-after: always !important;
-                page-break-inside: avoid !important;
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                border: none !important;
-                box-shadow: none !important;
-                padding: 2mm !important;
+              #print-container {
+                width: 80mm !important;
+                max-width: 80mm !important;
                 margin: 0 !important;
-                background: white !important;
-                color: black !important;
+                padding: 0 !important;
               }
               
               .print-receipt {
-                height: auto !important;
-                min-height: 0 !important;
-                max-height: none !important;
+                width: 76mm !important;
+                max-width: 76mm !important;
+                margin: 0mm auto !important;
+                padding: 2mm !important;
+                background-color: white !important;
+                color: black !important;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+                box-shadow: none !important;
+                border: none !important;
               }
               
               .print-receipt * {
                 visibility: visible !important;
                 opacity: 1 !important;
+                color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
               
               .bg-black {
@@ -109,6 +115,7 @@ export const CustomPrintService = {
               .p-1 { padding: 0.25rem !important; }
               .p-2 { padding: 0.5rem !important; }
               .p-3 { padding: 0.75rem !important; }
+              .p-6 { padding: 1.5rem !important; }
               .rounded { border-radius: 0.25rem !important; }
               .border { border-width: 1px !important; }
               .border-gray-300 { border-color: #d1d5db !important; }
@@ -140,6 +147,28 @@ export const CustomPrintService = {
                   -webkit-print-color-adjust: exact !important;
                   print-color-adjust: exact !important;
                   color-adjust: exact !important;
+                  margin: 0mm !important;
+                  padding: 0mm !important;
+                }
+                
+                #print-container {
+                  width: 80mm !important;
+                  max-width: 80mm !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                }
+                
+                .print-receipt {
+                  width: 76mm !important;
+                  max-width: 76mm !important;
+                  margin: 0mm auto !important;
+                  padding: 2mm !important;
+                  background-color: white !important;
+                  color: black !important;
+                  page-break-after: always !important;
+                  page-break-inside: avoid !important;
+                  box-shadow: none !important;
+                  border: none !important;
                 }
                 
                 .bg-black {
@@ -149,6 +178,16 @@ export const CustomPrintService = {
                 
                 body * {
                   visibility: visible !important;
+                }
+                
+                table {
+                  width: 100% !important;
+                  border-collapse: collapse !important;
+                }
+                
+                table th, table td {
+                  border: 1px solid #d1d5db !important;
+                  padding: 1px 2px !important;
                 }
               }
             </style>
@@ -200,7 +239,6 @@ export const CustomPrintService = {
             // Apply specific print styles directly to the element that will be printed
             const printedReceipt = printWindow.document.querySelector('.print-receipt');
             if (printedReceipt) {
-              printedReceipt.setAttribute('id', 'work-order-receipt');
               printedReceipt.setAttribute('style', `
                 width: 76mm !important;
                 max-width: 76mm !important;
@@ -211,8 +249,42 @@ export const CustomPrintService = {
                 font-family: 'Cairo', sans-serif !important;
                 page-break-inside: avoid !important;
                 page-break-after: always !important;
+                box-shadow: none !important;
+                border: none !important;
               `);
             }
+            
+            // Ensure all black backgrounds render properly in print
+            const blackBgElements = printWindow.document.querySelectorAll('.bg-black');
+            blackBgElements.forEach(el => {
+              (el as HTMLElement).style.backgroundColor = 'black';
+              (el as HTMLElement).style.color = 'white';
+              (el as HTMLElement).setAttribute('style', `
+                background-color: black !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              `);
+            });
+            
+            // Ensure all tables have proper borders
+            const tables = printWindow.document.querySelectorAll('table');
+            tables.forEach(table => {
+              table.setAttribute('style', `
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin-bottom: 2px !important;
+              `);
+              
+              const cells = table.querySelectorAll('th, td');
+              cells.forEach(cell => {
+                (cell as HTMLElement).setAttribute('style', `
+                  border: 1px solid #d1d5db !important;
+                  padding: 1px 2px !important;
+                  font-size: 9px !important;
+                `);
+              });
+            });
           }
           
           // Close the document to finish loading
