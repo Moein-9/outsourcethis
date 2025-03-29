@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { useLanguageStore } from '@/store/languageStore';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { EditWorkOrderDialog } from './EditWorkOrderDialog';
-import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer, CheckCircle } from 'lucide-react';
+import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer, CheckCircle, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PrintOptionsDialog } from './PrintOptionsDialog';
 import { toast } from 'sonner';
@@ -54,6 +55,14 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
       return format(new Date(dateString), 'PPp', { locale: isRtl ? ar : undefined });
     } catch (error) {
       return dateString;
+    }
+  };
+  
+  const formatTime = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'HH:mm', { locale: isRtl ? ar : undefined });
+    } catch (error) {
+      return "";
     }
   };
   
@@ -305,11 +314,19 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                     {sortedCompletedInvoices.map((invoice) => {
                       const remaining = calculateRemaining(invoice);
                       const isPaid = remaining <= 0;
+                      const pickedUpAt = invoice.pickedUpAt || new Date().toISOString();
                       
                       return (
                         <TableRow key={invoice.invoiceId} className="hover:bg-green-50 transition-colors animate-fade-in">
                           <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
-                          <TableCell>{formatDate(invoice.createdAt)}</TableCell>
+                          <TableCell>
+                            <div>{formatDate(invoice.createdAt)}</div>
+                            <div className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                              <Clock className="h-3 w-3" />
+                              {language === 'ar' ? "تم الاستلام: " : "Picked up: "}
+                              {formatTime(pickedUpAt)}
+                            </div>
+                          </TableCell>
                           <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
                           <TableCell>
                             <span className="px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300">
