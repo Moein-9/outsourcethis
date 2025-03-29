@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 interface TabbedTransactionsProps {
   invoices: Invoice[];
   workOrders: WorkOrder[];
+  refundedInvoices: Invoice[]; // Add the missing property
   patient?: Patient;
   onEditWorkOrder?: (workOrder: WorkOrder) => void;
 }
@@ -23,6 +24,7 @@ interface TabbedTransactionsProps {
 export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
   invoices,
   workOrders,
+  refundedInvoices,
   patient,
   onEditWorkOrder
 }) => {
