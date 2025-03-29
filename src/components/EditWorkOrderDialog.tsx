@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useInvoiceStore } from "@/store/invoiceStore";
-import { usePatientStore } from "@/store/patientStore";
+import { usePatientStore, WorkOrderEdit as PatientWorkOrderEdit } from "@/store/patientStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -141,7 +141,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   }, [isOpen, workOrder, frames, patient, originalInvoice]);
   
   useEffect(() => {
-    const newTotal = editData.framePrice + editData.lensPrice + editData.coatingPrice - editData.discount;
+    const newTotal = editData.framePrice + editData.lensPrice + editData.coatingPrice;
     setCurrentTotal(newTotal);
     setPriceDifference(newTotal - originalTotal);
   }, [editData, originalTotal]);
@@ -263,34 +263,19 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       if (updateWorkOrder) {
         const storeWorkOrder = {
           ...updatedWorkOrder,
-          lensType: {
-            name: typeof editData.lensType === 'string' ? editData.lensType : 
-              (typeof editData.lensType === 'object' && 'name' in editData.lensType ? 
-                editData.lensType.name : ''),
-            price: editData.lensPrice
-          }
+          lensType: typeof editData.lensType === 'string' ? 
+            { name: editData.lensType, price: editData.lensPrice } : 
+            (typeof editData.lensType === 'object' && editData.lensType ? 
+              editData.lensType : { name: "", price: 0 })
         };
         updateWorkOrder(storeWorkOrder);
       }
       
       if (workOrder.patientId && editWorkOrder) {
-        const workOrderEditData: WorkOrderEdit = {
+        const workOrderEditData: PatientWorkOrderEdit = {
           patientId: workOrder.patientId,
-          workOrderId: workOrder.workOrderId || '',
-          invoiceId: workOrder.invoiceId,
+          workOrderId: workOrder.workOrderId,
           updatedData: updatedWorkOrder,
-          rxData: rxData,
-          frameBrand: updatedWorkOrder.frameBrand,
-          frameModel: updatedWorkOrder.frameModel,
-          frameColor: updatedWorkOrder.frameColor,
-          frameSize: updatedWorkOrder.frameSize,
-          framePrice: updatedWorkOrder.framePrice,
-          lensType: updatedWorkOrder.lensType,
-          lensPrice: updatedWorkOrder.lensPrice,
-          coating: updatedWorkOrder.coating,
-          coatingPrice: updatedWorkOrder.coatingPrice,
-          discount: updatedWorkOrder.discount,
-          total: updatedWorkOrder.total
         };
         
         editWorkOrder(workOrderEditData);

@@ -40,7 +40,7 @@ export interface LensCoating {
 export interface WorkOrder {
   id: string;
   patientId: string;
-  workOrderId: string;
+  workOrderId: string;  // Ensure workOrderId is required
   invoiceId?: string;
   createdAt: string;
   
@@ -84,10 +84,10 @@ export interface WorkOrder {
   refundDate?: string;
 }
 
-// Utility type for converting between WorkOrder types
+// Utility type for converting between WorkOrder types, ensuring it's compatible with patientStore.WorkOrderEdit
 export interface WorkOrderEdit {
   patientId: string;
-  workOrderId: string;
+  workOrderId: string;  // Required in patientStore.WorkOrderEdit
   invoiceId?: string;
   
   // Frame details
@@ -115,7 +115,7 @@ export interface WorkOrderEdit {
   pickedUpAt?: string;
   
   // Additional fields for edit operations
-  updatedData?: any;
+  updatedData: any;  // Required in patientStore.WorkOrderEdit
   rxData?: any; // Adding rxData as a valid property
   
   // Other properties
