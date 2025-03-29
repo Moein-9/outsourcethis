@@ -261,7 +261,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                         {invoice.frameBrand} {invoice.frameModel} - {
                           typeof invoice.lensType === 'object' && invoice.lensType !== null
                             ? invoice.lensType.name 
-                            : invoice.lensType
+                            : invoice.lensType || ''
                         }
                       </span>
                     ) : (
@@ -427,7 +427,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                         {invoice.frameBrand} {invoice.frameModel} - {
                           typeof invoice.lensType === 'object' && invoice.lensType !== null
                             ? invoice.lensType.name 
-                            : invoice.lensType
+                            : invoice.lensType || ''
                         }
                       </span>
                     ) : (

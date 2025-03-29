@@ -59,6 +59,9 @@ export interface WorkOrder {
   coating: string;
   coatingPrice: number;
   
+  // Lens thickness
+  thickness?: string;
+  
   // Pricing
   discount: number;
   total: number;
@@ -104,6 +107,9 @@ export interface WorkOrderEdit {
   // Coating
   coating: string;
   coatingPrice: number;
+  
+  // Lens thickness
+  thickness?: string;
   
   // Pricing
   discount: number;
