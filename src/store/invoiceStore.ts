@@ -389,7 +389,9 @@ export const useInvoiceStore = create<InvoiceState>()(
                 if (!historyExists) {
                   editHistory.push({
                     timestamp: updatedInvoice.lastEditedAt,
-                    notes: "Order updated" 
+                    notes: updatedInvoice.editHistory && updatedInvoice.editHistory.length > 0 
+                      ? updatedInvoice.editHistory[updatedInvoice.editHistory.length - 1].notes
+                      : "Invoice updated" 
                   });
                 }
               }
@@ -405,8 +407,9 @@ export const useInvoiceStore = create<InvoiceState>()(
       },
       
       updateWorkOrder: (updatedWorkOrder) => {
-        set((state) => ({
-          workOrders: state.workOrders.map((workOrder) => {
+        set((state) => {
+          // Update the work order
+          const workOrders = state.workOrders.map((workOrder) => {
             if (workOrder.id === updatedWorkOrder.id) {
               // Ensure the edit history is preserved
               const editHistory = updatedWorkOrder.editHistory || workOrder.editHistory || [];
@@ -424,7 +427,9 @@ export const useInvoiceStore = create<InvoiceState>()(
                 if (!historyExists) {
                   editHistory.push({
                     timestamp: updatedWorkOrder.lastEditedAt,
-                    notes: "Order updated" 
+                    notes: updatedWorkOrder.editHistory && updatedWorkOrder.editHistory.length > 0 
+                      ? updatedWorkOrder.editHistory[updatedWorkOrder.editHistory.length - 1].notes
+                      : "Order updated" 
                   });
                 }
               }
@@ -435,8 +440,34 @@ export const useInvoiceStore = create<InvoiceState>()(
               };
             }
             return workOrder;
-          })
-        }));
+          });
+          
+          // Also update any related invoice
+          const invoices = state.invoices.map(invoice => {
+            if (invoice.workOrderId === updatedWorkOrder.id) {
+              // Ensure we keep the invoice structure intact
+              return {
+                ...invoice,
+                frameBrand: updatedWorkOrder.frameBrand,
+                frameModel: updatedWorkOrder.frameModel,
+                frameColor: updatedWorkOrder.frameColor,
+                frameSize: updatedWorkOrder.frameSize,
+                framePrice: updatedWorkOrder.framePrice,
+                lensType: updatedWorkOrder.lensType,
+                lensPrice: updatedWorkOrder.lensPrice,
+                coating: updatedWorkOrder.coating,
+                coatingPrice: updatedWorkOrder.coatingPrice,
+                discount: updatedWorkOrder.discount,
+                total: updatedWorkOrder.total,
+                lastEditedAt: updatedWorkOrder.lastEditedAt,
+                editHistory: updatedWorkOrder.editHistory
+              };
+            }
+            return invoice;
+          });
+          
+          return { workOrders, invoices };
+        });
       },
       
       processRefund: (invoiceId, refundAmount, refundMethod, reason, staffNotes) => {

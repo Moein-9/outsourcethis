@@ -8,6 +8,7 @@ import { usePatientStore, WorkOrderEdit as PatientWorkOrderEdit } from "@/store/
 import { useLanguageStore } from "@/store/languageStore";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { Search, Edit, Clock, Glasses, CheckCircle2, Eye, Calculator } from "lucide-react";
@@ -32,6 +33,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   const { lensTypes, lensCoatings, frames: storeFrames } = useInventoryStore();
   const isRtl = language === 'ar';
   const [activeTab, setActiveTab] = useState('prescription');
+  const [editNotes, setEditNotes] = useState('');
   
   const patient = workOrder.patientId ? getPatientById?.(workOrder.patientId) : null;
   const originalInvoice = workOrder.invoiceId ? getInvoiceById?.(workOrder.invoiceId) : null;
@@ -96,6 +98,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     if (isOpen) {
       setFrameSearchQuery('');
       setFilteredFrames([]);
+      setEditNotes('');
       
       setUseManualFrameInput(
         !frames.some(f => f.brand === workOrder.frameBrand && 
@@ -236,6 +239,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       const newTotal = subtotal - editData.discount;
       
       const currentDateTime = new Date().toISOString();
+      const noteText = editNotes.trim() || "Order updated";
       
       const updatedWorkOrder: WorkOrder = {
         ...workOrder,
@@ -255,7 +259,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
           ...(workOrder.editHistory || []),
           {
             timestamp: currentDateTime,
-            notes: "Order updated"
+            notes: noteText
           }
         ]
       };
@@ -279,6 +283,33 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         };
         
         editWorkOrder(workOrderEditData);
+      }
+      
+      if (workOrder.invoiceId && originalInvoice) {
+        const updatedInvoice = {
+          ...originalInvoice,
+          frameBrand: editData.frameBrand,
+          frameModel: editData.frameModel,
+          frameColor: editData.frameColor,
+          frameSize: editData.frameSize,
+          framePrice: editData.framePrice,
+          lensType: editData.lensType,
+          lensPrice: editData.lensPrice,
+          coating: editData.coating,
+          coatingPrice: editData.coatingPrice,
+          discount: editData.discount,
+          total: newTotal,
+          lastEditedAt: currentDateTime,
+          editHistory: [
+            ...(originalInvoice.editHistory || []),
+            {
+              timestamp: currentDateTime,
+              notes: noteText
+            }
+          ]
+        };
+        
+        useInvoiceStore.getState().updateInvoice(updatedInvoice);
       }
       
       toast.success(language === 'ar' ? "تم تحديث البيانات بنجاح" : "Order updated successfully");
@@ -605,6 +636,25 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
               </div>
             </div>
             
+            <div>
+              <Label htmlFor="editNotes">
+                {language === 'ar' ? "ملاحظات التعديل" : "Edit Notes"} 
+                <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                id="editNotes"
+                placeholder={language === 'ar' ? "اكتب سبب التعديل هنا..." : "Write reason for edit here..."}
+                value={editNotes}
+                onChange={(e) => setEditNotes(e.target.value)}
+                className="min-h-[80px]"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                {language === 'ar' 
+                  ? "سيتم إضافة هذه الملاحظات إلى سجل التعديلات" 
+                  : "These notes will be added to the edit history"}
+              </p>
+            </div>
+            
             {workOrder.editHistory && workOrder.editHistory.length > 0 && (
               <div className="mt-4">
                 <h4 className="text-sm font-medium mb-2 flex items-center">
@@ -700,7 +750,11 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
             <Button variant="outline" onClick={onClose}>
               {language === 'ar' ? "إلغاء" : "Cancel"}
             </Button>
-            <Button onClick={handleSaveChanges} className="bg-primary">
+            <Button 
+              onClick={handleSaveChanges} 
+              className="bg-primary"
+              disabled={!editNotes.trim()}
+            >
               {language === 'ar' ? "حفظ التغييرات" : "Save Changes"}
             </Button>
           </div>
