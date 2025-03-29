@@ -11,6 +11,7 @@ import { format, isValid } from "date-fns";
 import { PrintService } from "@/utils/PrintService";
 import { toast } from "sonner";
 import { ReceiptInvoice } from "./ReceiptInvoice";
+import ReactDOMServer from 'react-dom/server';
 
 interface PatientTransactionsProps {
   invoices: Invoice[];
@@ -39,33 +40,22 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  // Filter invoices into active and completed
+  // Filter invoices into active, completed and refunded
   const activeInvoices = sortedInvoices.filter(invoice => !invoice.isPickedUp && !invoice.isRefunded);
   const completedInvoices = sortedInvoices.filter(invoice => invoice.isPickedUp && !invoice.isRefunded);
-  
-  // Separate refunded invoices
   const refundedInvoices = sortedInvoices.filter(invoice => invoice.isRefunded);
 
   const handlePrintInvoice = (invoice: Invoice) => {
     try {
-      const receiptElement = document.createElement('div');
+      // Create receipt content using client-side ReactDOMServer
+      const receiptContent = ReactDOMServer.renderToString(
+        <ReceiptInvoice invoice={invoice} isPrintable={true} />
+      );
       
-      // Use ReactDOM to render the receipt component to a string
-      const ReactDOMServer = (window as any).ReactDOMServer;
-      if (!ReactDOMServer) {
-        toast.error("Print service not available");
-        return;
-      }
-      
-      // Create a temporary div to hold the receipt content
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = ReactDOMServer.renderToString(<ReceiptInvoice invoice={invoice} isPrintable={true} />);
-      
-      // Get the HTML content from the temporary div
-      const receiptContent = tempDiv.innerHTML;
-      
-      // Prepare the HTML for printing and print it
+      // Prepare the HTML for printing
       const htmlContent = PrintService.prepareReceiptDocument(receiptContent, `Invoice ${invoice.invoiceId}`);
+      
+      // Print the receipt
       PrintService.printHtml(htmlContent, 'receipt', () => {
         toast.success(language === 'ar' ? "تمت طباعة الفاتورة بنجاح" : "Invoice printed successfully");
       });
@@ -75,7 +65,30 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     }
   };
 
-  const renderInvoiceItem = (invoice: Invoice) => {
+  const handlePrintRefundInvoice = (invoice: Invoice) => {
+    try {
+      // For refunded invoices, create a special refund receipt
+      const receiptContent = ReactDOMServer.renderToString(
+        <ReceiptInvoice invoice={invoice} isPrintable={true} />
+      );
+      
+      // Prepare the HTML for printing with a special title
+      const htmlContent = PrintService.prepareReceiptDocument(
+        receiptContent, 
+        `Refund ${invoice.invoiceId}`
+      );
+      
+      // Print the refund receipt
+      PrintService.printHtml(htmlContent, 'receipt', () => {
+        toast.success(language === 'ar' ? "تمت طباعة إيصال الاسترداد بنجاح" : "Refund receipt printed successfully");
+      });
+    } catch (error) {
+      console.error("Print error:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء طباعة إيصال الاسترداد" : "Error printing refund receipt");
+    }
+  };
+
+  const renderInvoiceItem = (invoice: Invoice, isRefundSection = false) => {
     // Determine if this is a refunded invoice to apply special styling
     const isRefunded = invoice.isRefunded;
     const refundBgClass = isRefunded ? "bg-red-50" : "";
@@ -220,15 +233,27 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
           </div>
           
           <div className="flex flex-row md:flex-col gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 text-xs text-blue-700 hover:text-blue-800 hover:bg-blue-50"
-              onClick={() => handlePrintInvoice(invoice)}
-            >
-              <Printer className="h-3 w-3 mr-1" />
-              {language === 'ar' ? "طباعة الفاتورة" : "Print Invoice"}
-            </Button>
+            {isRefundSection ? (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 text-xs text-red-700 hover:text-red-800 hover:bg-red-50"
+                onClick={() => handlePrintRefundInvoice(invoice)}
+              >
+                <Printer className="h-3 w-3 mr-1" />
+                {language === 'ar' ? "طباعة إيصال الاسترداد" : "Print Refund Receipt"}
+              </Button>
+            ) : (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 text-xs text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+                onClick={() => handlePrintInvoice(invoice)}
+              >
+                <Printer className="h-3 w-3 mr-1" />
+                {language === 'ar' ? "طباعة الفاتورة" : "Print Invoice"}
+              </Button>
+            )}
             
             {!invoice.isPickedUp && !invoice.isRefunded && invoice.workOrderId && onEditWorkOrder && (
               <div className="flex flex-col gap-1">
@@ -276,7 +301,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
 
       <Tabs defaultValue="active" className="w-full">
         <div className="px-3 pt-2 bg-gray-50 border-b">
-          <TabsList className="grid grid-cols-2">
+          <TabsList className="grid grid-cols-3">
             <TabsTrigger value="active" className="text-sm">
               {language === 'ar' ? "المعاملات النشطة" : "Active Transactions"}
               {activeInvoices.length > 0 && (
@@ -290,6 +315,14 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
               {completedInvoices.length > 0 && (
                 <span className="ml-1.5 bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full">
                   {completedInvoices.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="refunded" className="text-sm">
+              {language === 'ar' ? "المعاملات المستردة" : "Refunded Transactions"}
+              {refundedInvoices.length > 0 && (
+                <span className="ml-1.5 bg-red-100 text-red-800 text-xs px-1.5 py-0.5 rounded-full">
+                  {refundedInvoices.length}
                 </span>
               )}
             </TabsTrigger>
@@ -319,25 +352,19 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
             </div>
           )}
         </TabsContent>
-      </Tabs>
 
-      {/* Refunded Transactions Section (if any) */}
-      {refundedInvoices.length > 0 && (
-        <div className="mt-4 border-t pt-2">
-          <div className="px-3 py-2 bg-red-50 flex items-center">
-            <RefreshCcw className="h-4 w-4 text-red-600 mr-2" />
-            <h4 className="font-medium text-red-900">
-              {language === 'ar' ? "العناصر المستردة" : "Refunded Items"}
-            </h4>
-            <span className="ml-2 text-xs bg-red-100 text-red-800 py-0.5 px-1.5 rounded-full">
-              {refundedInvoices.length}
-            </span>
-          </div>
-          <div className="divide-y">
-            {refundedInvoices.map(invoice => renderInvoiceItem(invoice))}
-          </div>
-        </div>
-      )}
+        <TabsContent value="refunded" className="mt-0">
+          {refundedInvoices.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
+              {language === 'ar' ? "لا توجد معاملات مستردة" : "No refunded transactions"}
+            </div>
+          ) : (
+            <div className="divide-y">
+              {refundedInvoices.map(invoice => renderInvoiceItem(invoice, true))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
