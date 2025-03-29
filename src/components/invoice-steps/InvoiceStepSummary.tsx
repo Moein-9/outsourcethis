@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -9,6 +8,7 @@ import {
   CreditCard, User, Phone, Calendar, AlertTriangle,
   Contact
 } from "lucide-react";
+import { CustomPrintService } from "@/utils/CustomPrintService";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -197,7 +197,9 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
           <Button 
             variant="outline"
             className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-            onClick={() => setWorkOrderPrintOpen(true)}
+            onClick={() => {
+              setWorkOrderPrintOpen(true);
+            }}
           >
             <div className="flex items-center">
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
@@ -214,7 +216,9 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
           <Button 
             variant="outline"
             className="w-full justify-between group hover:border-purple-500 hover:bg-purple-50 hover:text-purple-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-            onClick={() => setInvoicePrintOpen(true)}
+            onClick={() => {
+              setInvoicePrintOpen(true);
+            }}
           >
             <div className="flex items-center">
               <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-4 group-hover:bg-purple-200 transition-colors">

@@ -64,7 +64,8 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
 
   const handlePrintInvoice = (invoice: any) => {
     try {
-      // Use existing invoice print functionality
+      // Directly call the CustomPrintService to print invoice
+      CustomPrintService.printInvoice(invoice);
       toast.success(language === 'ar' ? "تم إرسال الفاتورة للطباعة" : "Invoice sent to printer");
     } catch (error) {
       console.error("Error printing invoice:", error);

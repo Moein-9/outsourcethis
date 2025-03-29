@@ -9,6 +9,7 @@ import { Patient } from '@/store/patientStore';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ReceiptInvoice } from './ReceiptInvoice';
+import { CustomPrintService } from '@/utils/CustomPrintService';
 
 interface PrintOptionsDialogProps {
   invoice?: Invoice;
@@ -44,7 +45,10 @@ export function PrintOptionsDialog({
     // Wait for the dialog to close before printing
     setTimeout(() => {
       console.log("[PrintOptionsDialog] Triggering invoice print");
-      onPrintInvoice();
+      if (invoice) {
+        // Directly use CustomPrintService instead of the callback
+        CustomPrintService.printInvoice(invoice);
+      }
     }, 150);
   };
 

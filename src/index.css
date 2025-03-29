@@ -92,7 +92,7 @@
   
   .print-receipt, .print-receipt *, 
   .print-container, .print-container * {
-    visibility: visible;
+    visibility: visible !important;
     overflow: hidden !important;
   }
   
@@ -123,6 +123,12 @@
   }
   
   body.printing * {
+    visibility: visible !important;
+    overflow: hidden !important;
+  }
+  
+  #receipt-invoice, #receipt-invoice *,
+  #work-order-receipt, #work-order-receipt * {
     visibility: visible !important;
     overflow: hidden !important;
   }
@@ -254,7 +260,7 @@
     width: 80mm !important;
     max-width: 80mm !important;
     margin: 0 !important;
-    padding: 3mm !important;
+    padding: 2mm !important;
     font-family: 'Yrsa', serif !important;
     overflow: hidden !important;
   }
@@ -263,7 +269,7 @@
     font-family: 'Zain', sans-serif !important;
   }
   
-  .print-receipt, #work-order-receipt {
+  .print-receipt, #work-order-receipt, #receipt-invoice {
     page-break-after: always !important;
     page-break-inside: avoid !important;
     overflow: hidden !important;
@@ -276,6 +282,48 @@
     visibility: visible !important;
     position: relative !important;
     overflow: hidden !important;
+  }
+  
+  #receipt-invoice {
+    font-size: 9px !important;
+  }
+  
+  #receipt-invoice h1, 
+  #receipt-invoice h2, 
+  #receipt-invoice h3 {
+    margin: 2px 0 !important;
+    padding: 1px 0 !important;
+    font-size: 11px !important;
+  }
+  
+  #receipt-invoice p {
+    margin: 1px 0 !important;
+    line-height: 1.2 !important;
+  }
+  
+  #receipt-invoice table {
+    font-size: 8px !important;
+    margin: 2px 0 !important;
+    border-collapse: collapse !important;
+  }
+  
+  #receipt-invoice td, 
+  #receipt-invoice th {
+    padding: 1px 2px !important;
+    border: 0.5px solid #ddd !important;
+  }
+  
+  #receipt-invoice .my-2 {
+    margin-top: 1px !important;
+    margin-bottom: 1px !important;
+  }
+  
+  #receipt-invoice .p-2 {
+    padding: 1px !important;
+  }
+  
+  #receipt-invoice .space-y-1 > * + * {
+    margin-top: 1px !important;
   }
   
   .preview-text {
