@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Invoice, WorkOrder } from '@/store/invoiceStore';
@@ -16,7 +15,7 @@ import { toast } from 'sonner';
 interface TabbedTransactionsProps {
   invoices: Invoice[];
   workOrders: WorkOrder[];
-  refundedInvoices: Invoice[]; // Add the missing property
+  refundedInvoices: Invoice[];
   patient?: Patient;
   onEditWorkOrder?: (workOrder: WorkOrder) => void;
 }
@@ -42,8 +41,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
   // Filter completed (picked up and not refunded)
   const completedInvoices = sortedInvoices.filter(invoice => invoice.isPickedUp && !invoice.isRefunded);
   
-  // Filter refunded invoices
-  const refundedInvoices = sortedInvoices.filter(invoice => invoice.isRefunded);
+  // We're now using the refundedInvoices prop instead of filtering it here
   
   const formatDate = (dateString: string) => {
     try {
@@ -402,7 +400,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
           {language === 'ar' ? "سجل المعاملات" : "Transaction History"}
         </h3>
         <span className="text-xs bg-indigo-100 text-indigo-800 py-1 px-3 rounded-full">
-          {sortedInvoices.length} {language === 'ar' ? "معاملة" : "transactions"}
+          {sortedInvoices.length + refundedInvoices.length} {language === 'ar' ? "معاملة" : "transactions"}
         </span>
       </div>
 
