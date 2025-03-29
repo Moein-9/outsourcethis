@@ -1,4 +1,3 @@
-
 import { Invoice, WorkOrder } from "@/store/invoiceStore";
 import { Patient } from "@/store/patientStore";
 import { PrintService } from "./PrintService";
@@ -65,7 +64,7 @@ export const CustomPrintService = {
                 width: 76mm !important;
                 max-width: 76mm !important;
                 margin: 0mm auto !important;
-                padding: 2mm !important;
+                padding: 1mm !important;
                 background-color: white !important;
                 color: black !important;
                 page-break-after: always !important;
@@ -110,16 +109,16 @@ export const CustomPrintService = {
               }
               
               table th, table td {
-                padding: 1px !important;
+                padding: 0.5px !important;
                 text-align: center !important;
-                font-size: 9px !important;
+                font-size: 8px !important;
                 border: 1px solid #d1d5db !important;
               }
               
               /* Fix signature boxes */
-              .h-10 {
-                height: 2.5rem !important;
-                min-height: 2.5rem !important;
+              .h-7 {
+                height: 1.75rem !important;
+                min-height: 1.75rem !important;
               }
               
               /* Tailwind-like classes for printing */
@@ -130,20 +129,19 @@ export const CustomPrintService = {
               .justify-between { justify-content: space-between !important; }
               .text-center { text-align: center !important; }
               .font-bold { font-weight: bold !important; }
-              .text-xs { font-size: 0.75rem !important; }
-              .text-sm { font-size: 0.875rem !important; }
-              .text-base { font-size: 1rem !important; }
-              .text-lg { font-size: 1.125rem !important; }
+              .text-xs { font-size: 0.65rem !important; }
+              .text-sm { font-size: 0.75rem !important; }
+              .text-base { font-size: 0.85rem !important; }
+              .text-lg { font-size: 1rem !important; }
               .mb-0 { margin-bottom: 0 !important; }
-              .mb-1 { margin-bottom: 0.25rem !important; }
-              .mb-2 { margin-bottom: 0.5rem !important; }
-              .mb-3 { margin-bottom: 0.75rem !important; }
-              .py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
-              .px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
-              .p-1 { padding: 0.25rem !important; }
-              .p-2 { padding: 0.5rem !important; }
-              .p-3 { padding: 0.75rem !important; }
-              .p-6 { padding: 1.5rem !important; }
+              .mb-1 { margin-bottom: 0.15rem !important; }
+              .mb-2 { margin-bottom: 0.25rem !important; }
+              .mb-3 { margin-bottom: 0.5rem !important; }
+              .py-0.5 { padding-top: 0.1rem !important; padding-bottom: 0.1rem !important; }
+              .px-1 { padding-left: 0.15rem !important; padding-right: 0.15rem !important; }
+              .p-1 { padding: 0.15rem !important; }
+              .p-2 { padding: 0.25rem !important; }
+              .p-3 { padding: 0.5rem !important; }
               .rounded { border-radius: 0.25rem !important; }
               .border { border-width: 1px !important; }
               .border-gray-300 { border-color: #d1d5db !important; }
@@ -156,11 +154,25 @@ export const CustomPrintService = {
                 border-radius: 0.375rem !important;
                 border: 1px solid #e5e7eb !important;
                 overflow: hidden !important;
-                margin-bottom: 0.5rem !important;
+                margin-bottom: 0.15rem !important;
               }
               
               .card-content {
-                padding: 0.5rem !important;
+                padding: 0.15rem !important;
+              }
+              
+              /* Reduce space in nested elements */
+              .space-y-0.5 > * + * {
+                margin-top: 0.1rem !important;
+              }
+              
+              /* Smaller text sizes */
+              .text-[9px] {
+                font-size: 8px !important;
+              }
+              
+              .text-[8px] {
+                font-size: 7px !important;
               }
               
               /* Print-specific overrides */
@@ -190,7 +202,7 @@ export const CustomPrintService = {
                   width: 76mm !important;
                   max-width: 76mm !important;
                   margin: 0mm auto !important;
-                  padding: 2mm !important;
+                  padding: 1mm !important;
                   background-color: white !important;
                   color: black !important;
                   page-break-after: always !important;
@@ -221,9 +233,15 @@ export const CustomPrintService = {
                 
                 table th, table td {
                   border: 1px solid #d1d5db !important;
-                  padding: 1px 2px !important;
-                  font-size: 9px !important;
+                  padding: 0.5px !important;
+                  font-size: 8px !important;
                   text-align: center !important;
+                }
+                
+                /* Ensure all content fits on one page */
+                .min-h-8 {
+                  min-height: 0.5rem !important;
+                  max-height: 1rem !important;
                 }
               }
             </style>
@@ -279,7 +297,7 @@ export const CustomPrintService = {
                 width: 76mm !important;
                 max-width: 76mm !important;
                 margin: 0 auto !important;
-                padding: 2mm !important;
+                padding: 1mm !important;
                 background-color: white !important;
                 color: black !important;
                 font-family: 'Cairo', sans-serif !important;
@@ -330,19 +348,19 @@ export const CustomPrintService = {
               cells.forEach(cell => {
                 (cell as HTMLElement).setAttribute('style', `
                   border: 1px solid #d1d5db !important;
-                  padding: 1px 2px !important;
-                  font-size: 9px !important;
+                  padding: 0.5px !important;
+                  font-size: 8px !important;
                   text-align: center !important;
                 `);
               });
             });
             
             // Fix signature boxes
-            const signatureBoxes = printWindow.document.querySelectorAll('.h-10');
+            const signatureBoxes = printWindow.document.querySelectorAll('.h-7');
             signatureBoxes.forEach(box => {
               (box as HTMLElement).setAttribute('style', `
-                height: 2.5rem !important;
-                min-height: 2.5rem !important;
+                height: 1.75rem !important;
+                min-height: 1.75rem !important;
                 border: 1px dashed #d1d5db !important;
                 border-radius: 0.125rem !important;
               `);
