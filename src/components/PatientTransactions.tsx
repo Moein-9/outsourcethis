@@ -284,6 +284,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                     contactLensRx={invoice.contactLensRx}
                     trigger={
                       <PrintButton 
+                        onClick={() => {}}
                         label={language === 'ar' ? "طباعة أمر العمل" : "Print Work Order"}
                         variant="ghost"
                         size="sm"

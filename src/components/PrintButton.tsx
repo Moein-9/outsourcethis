@@ -18,7 +18,7 @@ export const PrintButton: React.FC<PrintButtonProps> = ({
   onClick,
   label,
   className = "",
-  variant = "primary",
+  variant = "outline", // Changed from "primary" to "outline" which is a valid variant
   size = "sm",
   disabled = false,
   icon,

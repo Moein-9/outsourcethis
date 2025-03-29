@@ -49,6 +49,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   // Create a default button if no children are provided or if children is not a valid element
   const defaultButton = (
     <PrintButton
+      onClick={() => setOpen(true)} // Added the required onClick handler
       label={t('printWorkOrder')}
       className={className}
     />

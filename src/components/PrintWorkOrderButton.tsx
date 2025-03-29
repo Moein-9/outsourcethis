@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -155,6 +156,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           contactLensRx={contactLensRx}
           trigger={
             <PrintButton
+              onClick={() => {}} // Added the required onClick handler with an empty function since it's just a trigger
               label={t("printWorkOrder")}
               className={className}
             />
