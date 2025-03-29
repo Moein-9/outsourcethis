@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Invoice, WorkOrder } from '@/store/invoiceStore';
@@ -11,6 +12,10 @@ import { PencilLine, Receipt, Clock, CheckCircle, RefreshCcw, AlertTriangle, Sho
 import { PrintOptionsDialog } from './PrintOptionsDialog';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { toast } from 'sonner';
+import { PrintReportButton } from './reports/PrintReportButton';
+import { RefundReceiptTemplate } from './RefundReceiptTemplate';
+import * as ReactDOMServer from 'react-dom/server';
+import { PrintService } from '@/utils/PrintService';
 
 interface TabbedTransactionsProps {
   invoices: Invoice[];
@@ -70,6 +75,71 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     } catch (error) {
       console.error("Error printing invoice:", error);
       toast.error(language === 'ar' ? "حدث خطأ أثناء طباعة الفاتورة" : "Error printing invoice");
+    }
+  };
+
+  const handlePrintRefundReceipt = (invoice: any) => {
+    try {
+      // Create the refund info object from the invoice data
+      const refundInfo = {
+        refundId: invoice.refundId || 'N/A',
+        invoiceId: invoice.invoiceId,
+        patientName: invoice.patientName,
+        patientPhone: invoice.patientPhone,
+        patientId: invoice.patientId,
+        refundAmount: invoice.refundAmount || 0,
+        refundMethod: invoice.refundMethod || 'N/A',
+        refundReason: invoice.refundReason || 'N/A',
+        refundDate: invoice.refundDate || new Date().toISOString(),
+        originalTotal: invoice.total,
+        frameBrand: invoice.frameBrand,
+        frameModel: invoice.frameModel,
+        frameColor: invoice.frameColor,
+        lensType: invoice.lensType,
+        invoiceItems: [
+          ...(invoice.frameBrand ? [{
+            name: invoice.frameBrand + ' ' + invoice.frameModel,
+            price: invoice.framePrice,
+            quantity: 1
+          }] : []),
+          ...(invoice.lensType ? [{
+            name: invoice.lensType,
+            price: invoice.lensPrice,
+            quantity: 1
+          }] : []),
+          ...(invoice.coating ? [{
+            name: invoice.coating,
+            price: invoice.coatingPrice,
+            quantity: 1
+          }] : []),
+          ...(invoice.contactLensItems ? invoice.contactLensItems.map((item: any) => ({
+            name: `${item.brand} ${item.type} ${item.color || ''}`.trim(),
+            price: item.price,
+            quantity: item.qty || 1
+          })) : [])
+        ],
+        staffNotes: invoice.refundNotes || ''
+      };
+      
+      const receiptElement = (
+        <RefundReceiptTemplate
+          refund={refundInfo}
+          language={language}
+        />
+      );
+      
+      const receiptHtml = ReactDOMServer.renderToString(receiptElement);
+      
+      PrintService.printHtml(
+        PrintService.prepareReceiptDocument(receiptHtml, language === 'ar' ? `إيصال استرداد - ${refundInfo.refundId}` : `Refund Receipt - ${refundInfo.refundId}`),
+        'receipt',
+        () => {
+          toast.success(language === 'ar' ? 'تم إرسال الإيصال للطباعة' : 'Receipt sent to printer');
+        }
+      );
+    } catch (error) {
+      console.error("Error printing refund receipt:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء طباعة إيصال الاسترداد" : "Error printing refund receipt");
     }
   };
   
@@ -369,22 +439,12 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                   {invoice.total.toFixed(3)} KWD
                 </div>
                 <div className="mt-3">
-                  <PrintOptionsDialog
-                    workOrder={invoice}
-                    invoice={invoice}
-                    patient={patient}
-                    onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
-                    onPrintInvoice={() => handlePrintInvoice(invoice)}
-                  >
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-8 text-xs bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800 hover:border-red-300"
-                    >
-                      <Receipt className="h-3.5 w-3.5 mr-1" />
-                      {language === 'ar' ? "طباعة" : "Print"}
-                    </Button>
-                  </PrintOptionsDialog>
+                  <PrintReportButton 
+                    onPrint={() => handlePrintRefundReceipt(invoice)}
+                    className="h-8 text-xs"
+                    label={language === 'ar' ? "طباعة إيصال الاسترداد" : "Print Refund Receipt"}
+                    variant="outline"
+                  />
                 </div>
               </div>
             </div>
