@@ -43,26 +43,40 @@ export interface WorkOrder {
   invoiceId?: string;
   workOrderId?: string;
   createdAt: string;
+  
+  // Frame details
   frameBrand?: string;
   frameModel?: string;
   frameColor?: string;
   frameSize?: string;
   framePrice: number;
+  
+  // Lens details
   lensType?: string;
   lensPrice: number;
+  
+  // Coating details
   coating?: string;
   coatingPrice: number;
+  
+  // Financial details
   discount: number;
   total: number;
+  deposit?: number;
+  
+  // Status flags
   isPaid?: boolean;
   isPickedUp?: boolean;
   pickedUpAt?: string;
   lastEditedAt?: string;
-  deposit?: number;
+  
+  // Prescription data
   rx?: {
     right: { sphere: string; cylinder: string; axis: string; add: string; pd: string };
     left: { sphere: string; cylinder: string; axis: string; add: string; pd: string };
   };
+  
+  // Edit history
   editHistory?: Array<{
     timestamp: string;
     notes: string;

@@ -93,29 +93,36 @@ export const PatientSearch: React.FC = () => {
     
     // Convert invoiceStore WorkOrders to inventory.ts WorkOrder type
     const storePatientWorkOrders = getWorkOrdersByPatientId(patient.patientId);
-    const convertedWorkOrders: WorkOrder[] = storePatientWorkOrders.map(wo => ({
-      id: wo.id,
-      patientId: wo.patientId,
-      workOrderId: wo.id,
-      createdAt: wo.createdAt,
-      frameBrand: wo.frameBrand,
-      frameModel: wo.frameModel,
-      frameColor: wo.frameColor,
-      frameSize: wo.frameSize,
-      framePrice: 0, // Will be set properly in the component
-      lensType: wo.lensType?.name,
-      lensPrice: wo.lensType?.price || 0,
-      coating: wo.coating,
-      coatingPrice: 0, // Will be set properly in the component
-      discount: 0,     // Will be set properly in the component
-      total: 0,        // Will be set properly in the component
-      isPaid: wo.isPaid,
-      isPickedUp: wo.isPickedUp,
-      pickedUpAt: wo.pickedUpAt,
-      lastEditedAt: wo.lastEditedAt,
-      editHistory: wo.editHistory,
-      rx: wo.rx
-    }));
+    const convertedWorkOrders: WorkOrder[] = storePatientWorkOrders.map(wo => {
+      // Extract lens type name and price
+      const lensTypeName = wo.lensType?.name || '';
+      const lensTypePrice = wo.lensType?.price || 0;
+      
+      return {
+        id: wo.id,
+        patientId: wo.patientId,
+        workOrderId: wo.id,
+        createdAt: wo.createdAt,
+        frameBrand: wo.frameBrand,
+        frameModel: wo.frameModel,
+        frameColor: wo.frameColor,
+        frameSize: wo.frameSize,
+        framePrice: wo.framePrice || 0,
+        lensType: lensTypeName,
+        lensPrice: lensTypePrice,
+        coating: wo.coating || '',
+        coatingPrice: wo.coatingPrice || 0,
+        discount: wo.discount || 0,
+        total: wo.total || 0,
+        isPaid: wo.isPaid,
+        isPickedUp: wo.isPickedUp,
+        pickedUpAt: wo.pickedUpAt,
+        lastEditedAt: wo.lastEditedAt,
+        deposit: wo.deposit || 0,
+        rx: wo.rx,
+        editHistory: wo.editHistory
+      };
+    });
     
     setPatientInvoices(patientInvoices);
     setPatientWorkOrders(convertedWorkOrders);
@@ -152,13 +159,22 @@ export const PatientSearch: React.FC = () => {
         frameModel: updatedWorkOrder.frameModel,
         frameColor: updatedWorkOrder.frameColor,
         frameSize: updatedWorkOrder.frameSize,
-        lensType: { name: updatedWorkOrder.lensType || '', price: updatedWorkOrder.lensPrice },
+        framePrice: updatedWorkOrder.framePrice,
+        lensType: { 
+          name: updatedWorkOrder.lensType || '', 
+          price: updatedWorkOrder.lensPrice 
+        },
         coating: updatedWorkOrder.coating,
+        coatingPrice: updatedWorkOrder.coatingPrice,
+        discount: updatedWorkOrder.discount,
+        total: updatedWorkOrder.total,
+        isPaid: updatedWorkOrder.isPaid,
         isPickedUp: updatedWorkOrder.isPickedUp,
         pickedUpAt: updatedWorkOrder.pickedUpAt,
         lastEditedAt: updatedWorkOrder.lastEditedAt,
         editHistory: updatedWorkOrder.editHistory,
-        rx: updatedWorkOrder.rx
+        rx: updatedWorkOrder.rx,
+        deposit: updatedWorkOrder.deposit
       };
       
       useInvoiceStore.getState().updateWorkOrder(storeWorkOrder);
