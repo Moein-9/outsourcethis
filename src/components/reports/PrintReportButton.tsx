@@ -15,15 +15,14 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
 }) => {
   const { language } = useLanguageStore();
   
-  // Make sure the onClick directly calls the onPrint function
   return (
     <Button 
       onClick={onPrint} 
-      className={`gap-2 bg-primary hover:bg-primary/90 ${className}`}
+      className={`gap-2 bg-green-600 hover:bg-green-700 text-white ${className}`}
       type="button"
     >
       <Printer size={16} />
-      {language === 'ar' ? 'طباعة التقرير' : 'Print Report'}
+      {language === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice'}
     </Button>
   );
 };

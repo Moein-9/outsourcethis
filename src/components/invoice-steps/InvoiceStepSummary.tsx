@@ -215,14 +215,14 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
           
           <Button 
             variant="outline"
-            className="w-full justify-between group hover:border-purple-500 hover:bg-purple-50 hover:text-purple-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
+            className="w-full justify-between group hover:border-green-500 hover:bg-green-50 hover:text-green-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
             onClick={() => {
               setInvoicePrintOpen(true);
             }}
           >
             <div className="flex items-center">
-              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-4 group-hover:bg-purple-200 transition-colors">
-                <Receipt className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4 group-hover:bg-green-200 transition-colors">
+                <Receipt className="w-6 h-6 text-green-600" />
               </div>
               <div className="text-left">
                 <div className="font-medium">{t('printInvoice')}</div>
