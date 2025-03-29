@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -203,6 +202,7 @@ export const PatientSearch: React.FC = () => {
                   <PatientTransactions 
                     workOrders={patientWorkOrders}
                     invoices={patientInvoices}
+                    patient={selectedPatient}
                     onEditWorkOrder={handleEditWorkOrder}
                   />
                 </div>

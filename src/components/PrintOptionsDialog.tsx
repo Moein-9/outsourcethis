@@ -27,6 +27,20 @@ export function PrintOptionsDialog({
   const { t, language } = useLanguageStore();
   const [open, setOpen] = React.useState(false);
 
+  const handlePrintWorkOrder = () => {
+    setOpen(false);
+    setTimeout(() => {
+      onPrintWorkOrder();
+    }, 100);
+  };
+
+  const handlePrintInvoice = () => {
+    setOpen(false);
+    setTimeout(() => {
+      onPrintInvoice();
+    }, 100);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -43,10 +57,7 @@ export function PrintOptionsDialog({
           <Button
             variant="outline"
             className="flex flex-col items-center justify-center h-28 p-4 bg-blue-50 border-blue-200 hover:bg-blue-100 hover:border-blue-300"
-            onClick={() => {
-              setOpen(false);
-              onPrintWorkOrder();
-            }}
+            onClick={handlePrintWorkOrder}
           >
             <FileText className="h-10 w-10 mb-2 text-blue-600" />
             <span className="text-blue-700 font-medium">{t('workOrder')}</span>
@@ -55,10 +66,7 @@ export function PrintOptionsDialog({
           <Button
             variant="outline"
             className="flex flex-col items-center justify-center h-28 p-4 bg-green-50 border-green-200 hover:bg-green-100 hover:border-green-300"
-            onClick={() => {
-              setOpen(false);
-              onPrintInvoice();
-            }}
+            onClick={handlePrintInvoice}
             disabled={!invoice}
           >
             <Receipt className="h-10 w-10 mb-2 text-green-600" />
