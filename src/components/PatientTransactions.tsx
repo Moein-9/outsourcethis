@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, WorkOrder } from "@/store/invoiceStore";
@@ -47,17 +48,27 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
 
   const handlePrintInvoice = (invoice: Invoice) => {
     try {
+      console.log("[PatientTransactions] Printing invoice:", invoice.invoiceId);
+      
+      // Create a div for rendering the receipt
+      const receiptContainer = document.createElement('div');
+      receiptContainer.style.width = '80mm';
+      
+      // Render the ReceiptInvoice component to string
       const receiptContent = ReactDOMServer.renderToString(
         <ReceiptInvoice invoice={invoice} isPrintable={true} />
       );
       
+      // Use PrintService to prepare and print the receipt
       const htmlContent = PrintService.prepareReceiptDocument(receiptContent, `Invoice ${invoice.invoiceId}`);
+      
+      console.log("[PatientTransactions] Sending to print service");
       
       PrintService.printHtml(htmlContent, 'receipt', () => {
         toast.success(language === 'ar' ? "تمت طباعة الفاتورة بنجاح" : "Invoice printed successfully");
       });
     } catch (error) {
-      console.error("Print error:", error);
+      console.error("[PatientTransactions] Print error:", error);
       toast.error(language === 'ar' ? "حدث خطأ أثناء الطباعة" : "Error printing invoice");
     }
   };

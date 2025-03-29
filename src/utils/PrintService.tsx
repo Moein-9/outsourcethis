@@ -230,33 +230,16 @@ export const PrintService = {
             margin-bottom: 2px !important;
           }
           
-          /* Modern receipt styles for printing */
-          .modern-receipt {
-            font-family: 'Yrsa', serif !important;
-          }
-          
-          .modern-receipt[dir="rtl"] {
-            font-family: 'Zain', sans-serif !important;
-          }
-          
-          /* Make sure all styles in the receipt are preserved */
-          .receipt-header {
-            background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%) !important;
-            padding: 16px 12px !important;
+          /* Black background headers */
+          .bg-black {
+            background-color: black !important;
             color: white !important;
-            text-align: center !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          
-          /* Preserve gradients for section headers */
-          [style*="background: linear-gradient"] {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
           
           /* Preserve background colors */
-          [style*="backgroundColor"] {
+          [style*="background"] {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -298,6 +281,15 @@ export const PrintService = {
               color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
+            
+            /* Ensure black backgrounds print as black */
+            .bg-black {
+              background-color: black !important;
+              color: white !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
           }
         </style>
       </head>
@@ -305,6 +297,12 @@ export const PrintService = {
         <div class="receipt-container">${content}</div>
         <script>
           window.addEventListener('DOMContentLoaded', function() {
+            // Apply the background color for black headers
+            document.querySelectorAll('.bg-black').forEach(function(el) {
+              el.style.backgroundColor = 'black';
+              el.style.color = 'white';
+            });
+            
             // Wait for the content to be fully loaded before focusing and printing
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');

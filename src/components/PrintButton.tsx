@@ -18,7 +18,7 @@ export const PrintButton: React.FC<PrintButtonProps> = ({
   onClick,
   label,
   className = "",
-  variant = "default", // Changed to default variant which uses the primary colors
+  variant = "default",
   size = "sm",
   disabled = false,
   icon,
@@ -35,7 +35,7 @@ export const PrintButton: React.FC<PrintButtonProps> = ({
     <Button 
       variant={variant} 
       size={size} 
-      className={`gap-1 ${className}`} // Removed hardcoded bg-indigo classes to use the button's variant styles
+      className={`gap-1 ${className}`}
       onClick={onClick}
       disabled={disabled}
     >
