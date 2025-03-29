@@ -90,8 +90,36 @@ export const CustomPrintService = {
                 color: white !important;
               }
               
+              .bg-\\[\\#FFDEE2\\] {
+                background-color: #FFDEE2 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+              
               .text-white {
                 color: white !important;
+              }
+              
+              /* Table Styles */
+              table {
+                direction: ltr !important;
+                table-layout: fixed !important;
+                width: 100% !important;
+                border-collapse: collapse !important;
+              }
+              
+              table th, table td {
+                padding: 1px !important;
+                text-align: center !important;
+                font-size: 9px !important;
+                border: 1px solid #d1d5db !important;
+              }
+              
+              /* Fix signature boxes */
+              .h-10 {
+                height: 2.5rem !important;
+                min-height: 2.5rem !important;
               }
               
               /* Tailwind-like classes for printing */
@@ -176,6 +204,10 @@ export const CustomPrintService = {
                   color: white !important;
                 }
                 
+                .bg-\\[\\#FFDEE2\\] {
+                  background-color: #FFDEE2 !important;
+                }
+                
                 body * {
                   visibility: visible !important;
                 }
@@ -183,11 +215,15 @@ export const CustomPrintService = {
                 table {
                   width: 100% !important;
                   border-collapse: collapse !important;
+                  direction: ltr !important;
+                  table-layout: fixed !important;
                 }
                 
                 table th, table td {
                   border: 1px solid #d1d5db !important;
                   padding: 1px 2px !important;
+                  font-size: 9px !important;
+                  text-align: center !important;
                 }
               }
             </style>
@@ -267,13 +303,27 @@ export const CustomPrintService = {
               `);
             });
             
-            // Ensure all tables have proper borders
+            // Ensure soft red background renders properly
+            const redBgElements = printWindow.document.querySelectorAll('.bg-\\[\\#FFDEE2\\]');
+            redBgElements.forEach(el => {
+              (el as HTMLElement).style.backgroundColor = '#FFDEE2';
+              (el as HTMLElement).setAttribute('style', `
+                background-color: #FFDEE2 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              `);
+            });
+            
+            // Ensure all tables have proper borders and LTR direction
             const tables = printWindow.document.querySelectorAll('table');
             tables.forEach(table => {
+              table.setAttribute('dir', 'ltr');
               table.setAttribute('style', `
                 width: 100% !important;
                 border-collapse: collapse !important;
                 margin-bottom: 2px !important;
+                direction: ltr !important;
+                table-layout: fixed !important;
               `);
               
               const cells = table.querySelectorAll('th, td');
@@ -282,8 +332,20 @@ export const CustomPrintService = {
                   border: 1px solid #d1d5db !important;
                   padding: 1px 2px !important;
                   font-size: 9px !important;
+                  text-align: center !important;
                 `);
               });
+            });
+            
+            // Fix signature boxes
+            const signatureBoxes = printWindow.document.querySelectorAll('.h-10');
+            signatureBoxes.forEach(box => {
+              (box as HTMLElement).setAttribute('style', `
+                height: 2.5rem !important;
+                min-height: 2.5rem !important;
+                border: 1px dashed #d1d5db !important;
+                border-radius: 0.125rem !important;
+              `);
             });
           }
           

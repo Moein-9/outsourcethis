@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -194,15 +195,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Prescription Details | تفاصيل الوصفة الطبية"}
         </div>
         
-        <table className="w-full border-collapse text-xs" style={{ direction: 'ltr' }}>
+        {/* RX Table - Always LTR regardless of language setting */}
+        <table className="w-full border-collapse text-xs" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100">
-              <th className="p-1 border border-gray-300 text-center font-bold">Eye</th>
-              <th className="p-1 border border-gray-300 text-center font-bold">SPH</th>
-              <th className="p-1 border border-gray-300 text-center font-bold">CYL</th>
-              <th className="p-1 border border-gray-300 text-center font-bold">AXIS</th>
-              <th className="p-1 border border-gray-300 text-center font-bold">ADD</th>
-              <th className="p-1 border border-gray-300 text-center font-bold">PD</th>
+              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '15%' }}>Eye</th>
+              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>SPH</th>
+              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>CYL</th>
+              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>AXIS</th>
+              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>ADD</th>
+              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>PD</th>
             </tr>
           </thead>
           <tbody>
@@ -410,7 +412,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                 </div>
               ) : (
                 <div className="mt-2">
-                  <div className="p-1.5 bg-red-100 rounded border border-red-300 text-center">
+                  <div className="p-1.5 bg-[#FFDEE2] rounded border border-red-300 text-center" style={{ backgroundColor: '#FFDEE2' }}>
                     <div className="font-bold text-red-700 text-base">
                       {isRtl ? "المبلغ المتبقي" : "REMAINING AMOUNT"}
                     </div>
@@ -437,16 +439,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <div className="flex gap-2 text-sm mb-1 px-1">
           <div className="border border-gray-300 rounded p-1 flex-1">
             <div className="font-bold mb-1 text-center border-b border-gray-300 pb-0.5 text-xs">
-              {isRtl ? "توقيع الفني" : "Technician Signature"}
+              {isRtl ? "Technician Signature | توقيع الفني" : "Technician Signature | توقيع الفني"}
             </div>
-            <div className="h-8"></div>
+            <div className="h-10 border-dashed border border-gray-200 rounded-sm"></div>
           </div>
           
           <div className="border border-gray-300 rounded p-1 flex-1">
             <div className="font-bold mb-1 text-center border-b border-gray-300 pb-0.5 text-xs">
-              {isRtl ? "توقيع المدير" : "Manager Signature"}
+              {isRtl ? "Manager Signature | توقيع المدير" : "Manager Signature | توقيع المدير"}
             </div>
-            <div className="h-8"></div>
+            <div className="h-10 border-dashed border border-gray-200 rounded-sm"></div>
           </div>
         </div>
       </div>
@@ -540,20 +542,37 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               page-break-after: avoid !important;
             }
             
-            @supports (-webkit-appearance:none) {
-              body, html, #work-order-receipt {
-                height: fit-content !important;
-                min-height: fit-content !important;
-                max-height: fit-content !important;
-              }
-            }
-            
             .bg-black {
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
               color-adjust: exact !important;
               background-color: black !important;
               color: white !important;
+            }
+            
+            .bg-\\[\\#FFDEE2\\] {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              background-color: #FFDEE2 !important;
+            }
+            
+            table {
+              direction: ltr !important;
+              table-layout: fixed !important;
+            }
+            
+            table th, table td {
+              padding: 1px !important;
+              text-align: center !important;
+              font-size: 9px !important;
+              border: 1px solid #d1d5db !important;
+            }
+            
+            /* Fix signature boxes */
+            .h-10 {
+              height: 2.5rem !important;
+              min-height: 2.5rem !important;
             }
           }
         `}
