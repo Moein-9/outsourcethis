@@ -262,7 +262,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                           invoice.lensType ? (
                             typeof invoice.lensType === 'object' && invoice.lensType !== null
                               ? invoice.lensType.name 
-                              : invoice.lensType
+                              : String(invoice.lensType)
                           ) : ''
                         }
                       </span>
@@ -430,7 +430,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                           invoice.lensType ? (
                             typeof invoice.lensType === 'object' && invoice.lensType !== null
                               ? invoice.lensType.name 
-                              : invoice.lensType
+                              : String(invoice.lensType)
                           ) : ''
                         }
                       </span>
