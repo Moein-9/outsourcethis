@@ -19,6 +19,11 @@ export interface Refund {
   associatedInvoiceId: string;
 }
 
+export interface EditHistory {
+  timestamp: string;
+  notes: string;
+}
+
 export interface Invoice {
   invoiceId: string;
   patientId?: string;
@@ -56,6 +61,10 @@ export interface Invoice {
   authNumber?: string;
   workOrderId?: string;
   
+  // Edit tracking
+  lastEditedAt?: string;
+  editHistory?: EditHistory[];
+  
   // Refund related fields
   isRefunded?: boolean;
   refundDate?: string;
@@ -80,6 +89,10 @@ export interface WorkOrder {
   contactLensRx?: any;
   isPickedUp?: boolean;
   pickedUpAt?: string;
+  
+  // Edit tracking
+  lastEditedAt?: string;
+  editHistory?: EditHistory[];
   
   // Refund related fields
   isRefunded?: boolean;
@@ -358,17 +371,71 @@ export const useInvoiceStore = create<InvoiceState>()(
       
       updateInvoice: (updatedInvoice) => {
         set((state) => ({
-          invoices: state.invoices.map((invoice) => 
-            invoice.invoiceId === updatedInvoice.invoiceId ? updatedInvoice : invoice
-          )
+          invoices: state.invoices.map((invoice) => {
+            if (invoice.invoiceId === updatedInvoice.invoiceId) {
+              // Ensure the edit history is preserved
+              const editHistory = updatedInvoice.editHistory || invoice.editHistory || [];
+              
+              // If lastEditedAt is new, add to edit history if not already tracked
+              if (updatedInvoice.lastEditedAt && 
+                  (!invoice.lastEditedAt || 
+                   new Date(updatedInvoice.lastEditedAt).getTime() !== new Date(invoice.lastEditedAt || '').getTime())) {
+                
+                // Only add new history entry if it doesn't exist already
+                const historyExists = editHistory.some(
+                  h => new Date(h.timestamp).getTime() === new Date(updatedInvoice.lastEditedAt || '').getTime()
+                );
+                
+                if (!historyExists) {
+                  editHistory.push({
+                    timestamp: updatedInvoice.lastEditedAt,
+                    notes: "Order updated" 
+                  });
+                }
+              }
+              
+              return {
+                ...updatedInvoice,
+                editHistory
+              };
+            }
+            return invoice;
+          })
         }));
       },
       
       updateWorkOrder: (updatedWorkOrder) => {
         set((state) => ({
-          workOrders: state.workOrders.map((workOrder) => 
-            workOrder.id === updatedWorkOrder.id ? updatedWorkOrder : workOrder
-          )
+          workOrders: state.workOrders.map((workOrder) => {
+            if (workOrder.id === updatedWorkOrder.id) {
+              // Ensure the edit history is preserved
+              const editHistory = updatedWorkOrder.editHistory || workOrder.editHistory || [];
+              
+              // If lastEditedAt is new, add to edit history if not already tracked
+              if (updatedWorkOrder.lastEditedAt && 
+                  (!workOrder.lastEditedAt || 
+                   new Date(updatedWorkOrder.lastEditedAt).getTime() !== new Date(workOrder.lastEditedAt || '').getTime())) {
+                
+                // Only add new history entry if it doesn't exist already
+                const historyExists = editHistory.some(
+                  h => new Date(h.timestamp).getTime() === new Date(updatedWorkOrder.lastEditedAt || '').getTime()
+                );
+                
+                if (!historyExists) {
+                  editHistory.push({
+                    timestamp: updatedWorkOrder.lastEditedAt,
+                    notes: "Order updated" 
+                  });
+                }
+              }
+              
+              return {
+                ...updatedWorkOrder,
+                editHistory
+              };
+            }
+            return workOrder;
+          })
         }));
       },
       

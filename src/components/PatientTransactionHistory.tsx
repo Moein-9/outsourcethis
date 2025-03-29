@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -215,7 +214,16 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                       return (
                         <TableRow key={invoice.invoiceId} className="hover:bg-accent/5 transition-colors animate-fade-in">
                           <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
-                          <TableCell>{formatDate(invoice.createdAt)}</TableCell>
+                          <TableCell>
+                            <div>{formatDate(invoice.createdAt)}</div>
+                            {invoice.lastEditedAt && (
+                              <div className="text-xs text-amber-600 flex items-center gap-1 mt-1">
+                                <Clock className="h-3 w-3" />
+                                {language === 'ar' ? "تم التعديل: " : "Last edited: "}
+                                {formatTime(invoice.lastEditedAt)}
+                              </div>
+                            )}
+                          </TableCell>
                           <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
                           <TableCell>
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -326,6 +334,13 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                               {language === 'ar' ? "تم الاستلام: " : "Picked up: "}
                               {formatTime(pickedUpAt)}
                             </div>
+                            {invoice.lastEditedAt && (
+                              <div className="text-xs text-amber-600 flex items-center gap-1 mt-1">
+                                <Clock className="h-3 w-3" />
+                                {language === 'ar' ? "تم التعديل: " : "Last edited: "}
+                                {formatTime(invoice.lastEditedAt)}
+                              </div>
+                            )}
                           </TableCell>
                           <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
                           <TableCell>
