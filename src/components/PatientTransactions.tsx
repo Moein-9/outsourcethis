@@ -36,14 +36,14 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     const relatedInvoice = invoices.find(inv => inv.workOrderId === workOrder.id);
     
     console.log("[PatientTransactions] Printing work order:", workOrder.id);
-    console.log("[PatientTransactions] Related invoice:", relatedInvoice?.id);
+    console.log("[PatientTransactions] Related invoice:", relatedInvoice?.invoiceId);
     
     // Call the CustomPrintService
     CustomPrintService.printWorkOrder(workOrder, relatedInvoice, patient);
   };
   
   const handlePrintInvoice = (invoice: Invoice) => {
-    console.log("[PatientTransactions] Printing invoice:", invoice.id);
+    console.log("[PatientTransactions] Printing invoice:", invoice.invoiceId);
     
     // Call the CustomPrintService
     CustomPrintService.printInvoice(invoice);
