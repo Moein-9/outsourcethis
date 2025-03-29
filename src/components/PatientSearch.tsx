@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
@@ -99,17 +98,6 @@ export const PatientSearch: React.FC = () => {
   };
   
   const convertToInventoryWorkOrder = (workOrder: InvoiceWorkOrder): InventoryWorkOrder => {
-    // Fix the type handling for lensType which can be either a string or an object
-    let lensTypeForInventory: string | { name: string; price: number };
-    
-    if (typeof workOrder.lensType === 'object' && workOrder.lensType !== null) {
-      // We're sure it's an object type, so assign it directly
-      lensTypeForInventory = workOrder.lensType;
-    } else {
-      // It's a string or undefined, so handle it as string
-      lensTypeForInventory = (workOrder.lensType as string) || '';
-    }
-      
     return {
       id: workOrder.id,
       patientId: workOrder.patientId,
@@ -121,7 +109,7 @@ export const PatientSearch: React.FC = () => {
       frameColor: '',
       frameSize: '',
       framePrice: 0,
-      lensType: lensTypeForInventory,
+      lensType: workOrder.lensType,
       lensPrice: 0,
       coating: '',
       coatingPrice: 0,
