@@ -1,3 +1,4 @@
+
 // Define common types for the inventory store
 export interface Frame {
   id: string;
@@ -39,7 +40,7 @@ export interface LensCoating {
 export interface WorkOrder {
   id: string;
   patientId: string;
-  workOrderId?: string;
+  workOrderId: string;
   invoiceId?: string;
   createdAt: string;
   
@@ -86,7 +87,7 @@ export interface WorkOrder {
 // Utility type for converting between WorkOrder types
 export interface WorkOrderEdit {
   patientId: string;
-  workOrderId?: string;
+  workOrderId: string;
   invoiceId?: string;
   
   // Frame details

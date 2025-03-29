@@ -82,7 +82,9 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     frameColor: workOrder.frameColor || '',
     frameSize: workOrder.frameSize || '',
     framePrice: workOrder.framePrice || 0,
-    lensType: typeof workOrder.lensType === 'object' ? workOrder.lensType.name : (workOrder.lensType || ''),
+    lensType: typeof workOrder.lensType === 'object' && workOrder.lensType && 'name' in workOrder.lensType
+      ? workOrder.lensType.name 
+      : (workOrder.lensType as string) || '',
     lensPrice: workOrder.lensPrice || 0,
     coating: workOrder.coating || '',
     coatingPrice: workOrder.coatingPrice || 0,
@@ -107,7 +109,9 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         frameColor: workOrder.frameColor || '',
         frameSize: workOrder.frameSize || '',
         framePrice: workOrder.framePrice || 0,
-        lensType: typeof workOrder.lensType === 'object' ? workOrder.lensType.name : (workOrder.lensType || ''),
+        lensType: typeof workOrder.lensType === 'object' && workOrder.lensType && 'name' in workOrder.lensType
+          ? workOrder.lensType.name 
+          : (workOrder.lensType as string) || '',
         lensPrice: workOrder.lensPrice || 0,
         coating: workOrder.coating || '',
         coatingPrice: workOrder.coatingPrice || 0,
@@ -260,7 +264,9 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         const storeWorkOrder = {
           ...updatedWorkOrder,
           lensType: {
-            name: typeof editData.lensType === 'string' ? editData.lensType : editData.lensType.name,
+            name: typeof editData.lensType === 'string' ? editData.lensType : 
+              (typeof editData.lensType === 'object' && 'name' in editData.lensType ? 
+                editData.lensType.name : ''),
             price: editData.lensPrice
           }
         };
@@ -270,7 +276,8 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       if (workOrder.patientId && editWorkOrder) {
         const workOrderEditData: WorkOrderEdit = {
           patientId: workOrder.patientId,
-          workOrderId: workOrder.workOrderId || workOrder.invoiceId || workOrder.id,
+          workOrderId: workOrder.workOrderId || '',
+          invoiceId: workOrder.invoiceId,
           updatedData: updatedWorkOrder,
           rxData: rxData,
           frameBrand: updatedWorkOrder.frameBrand,

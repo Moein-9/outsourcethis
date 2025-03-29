@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
@@ -98,31 +97,29 @@ export const PatientSearch: React.FC = () => {
     setIsProfileOpen(true);
   };
   
-  // Convert from invoiceStore WorkOrder to inventory WorkOrder
   const convertToInventoryWorkOrder = (workOrder: InvoiceWorkOrder): InventoryWorkOrder => {
-    // Ensure lensType is a string if it's an object
-    const lensTypeValue = typeof workOrder.lensType === 'object' && workOrder.lensType 
+    const lensTypeValue = typeof workOrder.lensType === 'object' && workOrder.lensType && 'name' in workOrder.lensType
       ? workOrder.lensType.name 
-      : workOrder.lensType || '';
+      : (workOrder.lensType as string) || '';
       
     return {
       id: workOrder.id,
       patientId: workOrder.patientId,
-      workOrderId: workOrder.workOrderId || '',
-      invoiceId: workOrder.invoiceId || '',
+      workOrderId: workOrder.id,
+      invoiceId: workOrder.id,
       createdAt: workOrder.createdAt || new Date().toISOString(),
-      frameBrand: workOrder.frameBrand || '',
-      frameModel: workOrder.frameModel || '',
-      frameColor: workOrder.frameColor || '',
-      frameSize: workOrder.frameSize || '',
-      framePrice: workOrder.framePrice || 0,
+      frameBrand: '',
+      frameModel: '',
+      frameColor: '',
+      frameSize: '',
+      framePrice: 0,
       lensType: lensTypeValue,
-      lensPrice: workOrder.lensPrice || 0,
-      coating: workOrder.coating || '',
-      coatingPrice: workOrder.coatingPrice || 0,
-      discount: workOrder.discount || 0,
-      total: workOrder.total || 0,
-      isPaid: workOrder.isPaid,
+      lensPrice: 0,
+      coating: '',
+      coatingPrice: 0,
+      discount: 0,
+      total: 0,
+      isPaid: false,
       isPickedUp: workOrder.isPickedUp,
       pickedUpAt: workOrder.pickedUpAt,
       lastEditedAt: workOrder.lastEditedAt,
@@ -135,7 +132,6 @@ export const PatientSearch: React.FC = () => {
   };
   
   const handleEditWorkOrder = (workOrder: InvoiceWorkOrder) => {
-    // Convert to inventory WorkOrder type
     const inventoryWorkOrder = convertToInventoryWorkOrder(workOrder);
     
     setCurrentWorkOrder(inventoryWorkOrder);
@@ -206,7 +202,7 @@ export const PatientSearch: React.FC = () => {
               <DialogHeader>
                 <DialogTitle className="text-xl">{language === 'ar' ? "ملف العميل" : "Client Profile"}</DialogTitle>
                 <DialogDescription>
-                  {language === 'ar' ? "تفاصيل بيانات العميل وسجل المعاملات" : "Client details and transaction history"}
+                  {language === 'ar' ? "تفاصيل بيان��ت العميل وسجل المعاملات" : "Client details and transaction history"}
                 </DialogDescription>
               </DialogHeader>
               
