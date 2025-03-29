@@ -286,9 +286,9 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
 
       <div className="mt-3 pt-2 border-t-2 border-gray-300">
         {isRtl ? (
-          <p className="font-bold text-base mb-0">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p> {/* Increased from text-sm to text-base */}
+          <p className="font-bold text-base mb-0">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p> /* Increased from text-sm to text-base */
         ) : (
-          <p className="font-bold text-base mb-0">Thank you for choosing Moein Optical. We're always delighted to serve you!</p> {/* Increased from text-sm to text-base */}
+          <p className="font-bold text-base mb-0">Thank you for choosing Moein Optical. We're always delighted to serve you!</p> /* Increased from text-sm to text-base */
         )}
         <div className="text-sm font-medium"> {/* Increased from text-xs to text-sm */}
           {format(new Date(), 'yyyy-MM-dd')}
