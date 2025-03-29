@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
@@ -99,10 +98,13 @@ export const PatientSearch: React.FC = () => {
   };
   
   const convertToInventoryWorkOrder = (workOrder: InvoiceWorkOrder): InventoryWorkOrder => {
-    // Check if lensType is an object with name property or a string
-    const lensTypeValue = typeof workOrder.lensType === 'object' && workOrder.lensType && 'name' in workOrder.lensType
-      ? workOrder.lensType 
-      : workOrder.lensType as string; // Type assertion to help TypeScript
+    let lensTypeValue: string | { name: string; price: number };
+    
+    if (typeof workOrder.lensType === 'object' && workOrder.lensType && 'name' in workOrder.lensType) {
+      lensTypeValue = workOrder.lensType as { name: string; price: number };
+    } else {
+      lensTypeValue = workOrder.lensType as string || '';
+    }
       
     return {
       id: workOrder.id,

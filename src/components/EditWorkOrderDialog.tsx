@@ -376,7 +376,9 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                   <SelectContent>
                     {lensTypes.map(lens => (
                       <SelectItem key={lens.id} value={lens.type}>
-                        {language === 'ar' ? lens.name + ' - ' + lens.price.toFixed(3) + ' ' + t('kwd') : lens.name + ' - ' + lens.price.toFixed(3) + ' ' + t('kwd')}
+                        {language === 'ar' 
+                          ? lens.name + ' - ' + (lens.price !== undefined ? lens.price.toFixed(3) : '0.000') + ' ' + t('kwd') 
+                          : lens.name + ' - ' + (lens.price !== undefined ? lens.price.toFixed(3) : '0.000') + ' ' + t('kwd')}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -408,7 +410,9 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                   <SelectContent>
                     {lensCoatings.map(coating => (
                       <SelectItem key={coating.id} value={coating.name}>
-                        {language === 'ar' ? coating.name + ' - ' + coating.price.toFixed(3) + ' ' + t('kwd') : coating.name + ' - ' + coating.price.toFixed(3) + ' ' + t('kwd')}
+                        {language === 'ar' 
+                          ? coating.name + ' - ' + (coating.price !== undefined ? coating.price.toFixed(3) : '0.000') + ' ' + t('kwd') 
+                          : coating.name + ' - ' + (coating.price !== undefined ? coating.price.toFixed(3) : '0.000') + ' ' + t('kwd')}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -594,7 +598,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                   id="total"
                   name="total"
                   type="number"
-                  value={(editData.framePrice + editData.lensPrice + editData.coatingPrice - editData.discount).toFixed(3)}
+                  value={((editData.framePrice || 0) + (editData.lensPrice || 0) + (editData.coatingPrice || 0) - (editData.discount || 0)).toFixed(3)}
                   disabled
                   className="bg-primary/10 font-semibold"
                 />
@@ -629,23 +633,23 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
           <div className="space-y-3 mt-4">
             <div className="flex justify-between items-center py-1 border-b">
               <span className="text-sm">{language === 'ar' ? "المبلغ الأصلي" : "Original Amount"}</span>
-              <span className="font-medium">{originalTotal.toFixed(3)} {t('kwd')}</span>
+              <span className="font-medium">{(originalTotal || 0).toFixed(3)} {t('kwd')}</span>
             </div>
             
             <div className="flex justify-between items-center py-1 border-b">
               <span className="text-sm">{language === 'ar' ? "المبلغ الجديد" : "New Amount"}</span>
-              <span className="font-medium">{currentTotal.toFixed(3)} {t('kwd')}</span>
+              <span className="font-medium">{(currentTotal || 0).toFixed(3)} {t('kwd')}</span>
             </div>
             
             <div className="flex justify-between items-center py-1 border-b">
               <span className="text-sm">{language === 'ar' ? "الخصم" : "Discount"}</span>
-              <span className="font-medium">{editData.discount.toFixed(3)} {t('kwd')}</span>
+              <span className="font-medium">{(editData.discount || 0).toFixed(3)} {t('kwd')}</span>
             </div>
             
             <div className="flex justify-between items-center py-2 mt-2 bg-primary/10 rounded p-2">
               <span className="font-medium">{language === 'ar' ? "الفرق" : "Difference"}</span>
               <span className={`font-bold ${priceDifference > 0 ? 'text-green-600' : priceDifference < 0 ? 'text-red-600' : ''}`}>
-                {priceDifference > 0 ? '+' : ''}{priceDifference.toFixed(3)} {t('kwd')}
+                {priceDifference > 0 ? '+' : ''}{(priceDifference || 0).toFixed(3)} {t('kwd')}
               </span>
             </div>
             
