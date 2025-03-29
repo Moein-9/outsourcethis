@@ -98,12 +98,12 @@ export const PatientSearch: React.FC = () => {
   };
   
   const convertToInventoryWorkOrder = (workOrder: InvoiceWorkOrder): InventoryWorkOrder => {
-    let lensTypeValue: string | { name: string; price: number };
+    let lensTypeForInventory: string | { name: string; price: number };
     
-    if (typeof workOrder.lensType === 'object' && workOrder.lensType && 'name' in workOrder.lensType) {
-      lensTypeValue = workOrder.lensType as { name: string; price: number };
+    if (typeof workOrder.lensType === 'object' && workOrder.lensType !== null) {
+      lensTypeForInventory = workOrder.lensType as { name: string; price: number };
     } else {
-      lensTypeValue = workOrder.lensType as string || '';
+      lensTypeForInventory = workOrder.lensType as string || '';
     }
       
     return {
@@ -117,7 +117,7 @@ export const PatientSearch: React.FC = () => {
       frameColor: '',
       frameSize: '',
       framePrice: 0,
-      lensType: lensTypeValue,
+      lensType: lensTypeForInventory,
       lensPrice: 0,
       coating: '',
       coatingPrice: 0,
