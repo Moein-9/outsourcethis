@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useInvoiceStore, Payment } from "@/store/invoiceStore";
+import { useInvoiceStore, Payment, Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -60,6 +60,7 @@ export const RemainingPayments: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
   const [invoiceForPrint, setInvoiceForPrint] = useState<string | null>(null);
+  const [invoiceDataForPrint, setInvoiceDataForPrint] = useState<Invoice | null>(null);
   const [showReceipt, setShowReceipt] = useState<string | null>(null);
   const navigate = useNavigate();
   
@@ -174,6 +175,13 @@ export const RemainingPayments: React.FC = () => {
       return;
     }
     
+    const willCompletePay = (totalPayment === invoice.remaining);
+    
+    if (willCompletePay) {
+      const invoiceCopy = { ...invoice };
+      setInvoiceDataForPrint(invoiceCopy);
+    }
+    
     for (const entry of paymentEntries) {
       if (entry.amount > 0) {
         addPartialPayment(invoiceId, {
@@ -196,6 +204,12 @@ export const RemainingPayments: React.FC = () => {
   };
   
   const handlePrintReceipt = (invoiceId: string) => {
+    if (invoiceDataForPrint && invoiceId === invoiceDataForPrint.invoiceId) {
+      CustomPrintService.printInvoice(invoiceDataForPrint);
+      setInvoiceDataForPrint(null);
+      return;
+    }
+    
     const invoice = getInvoiceById(invoiceId);
     if (!invoice) {
       toast.error(language === 'ar' ? "لم يتم العثور على الفاتورة" : "Invoice not found");
@@ -571,7 +585,10 @@ export const RemainingPayments: React.FC = () => {
               <Button
                 variant="outline"
                 className="gap-2"
-                onClick={() => setInvoiceForPrint(null)}
+                onClick={() => {
+                  setInvoiceForPrint(null);
+                  setInvoiceDataForPrint(null);
+                }}
               >
                 <span>{language === 'ar' ? "إغلاق" : "Close"}</span>
               </Button>

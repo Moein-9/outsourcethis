@@ -25,9 +25,19 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
   
   const defaultLabel = language === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice';
   
+  const handlePrint = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Add a slight delay to ensure any state updates have completed
+    setTimeout(() => {
+      onPrint();
+    }, 100);
+  };
+  
   return (
     <Button 
-      onClick={onPrint} 
+      onClick={handlePrint} 
       className={`gap-2 text-base font-medium ${variant === "default" ? "bg-green-600 hover:bg-green-700 text-white" : ""} ${className}`}
       type="button"
       variant={variant}
