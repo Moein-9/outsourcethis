@@ -29,6 +29,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   const [editingWorkOrder, setEditingWorkOrder] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [updatedInvoices, setUpdatedInvoices] = useState<any[]>([]);
   
   const patient = getPatientById(patientId);
   
@@ -37,10 +38,16 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
     invoice.patientId === patientId
   );
   
+  // Initialize the updatedInvoices state with the patientInvoices on first render
+  useEffect(() => {
+    setUpdatedInvoices(patientInvoices);
+  }, [invoices, patientId]);
+  
   // Force component to update when marking as picked up
   useEffect(() => {
-    // This is just to force a re-render when refreshTrigger changes
-  }, [refreshTrigger]);
+    // Update the displayed invoices when the refresh trigger changes
+    setUpdatedInvoices(patientInvoices);
+  }, [refreshTrigger, patientInvoices]);
   
   const formatDate = (dateString: string) => {
     try {
@@ -98,7 +105,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
     console.log("Printing invoice:", invoice);
     try {
       // Use the invoice print functionality
-      // This would typically use a similar approach to workOrder printing
+      CustomPrintService.printInvoice(invoice);
       toast.success(language === 'ar' ? "تم إرسال الفاتورة للطباعة" : "Invoice sent to printer");
     } catch (error) {
       console.error("Error printing invoice:", error);
@@ -108,10 +115,24 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   
   const handleMarkAsPickedUp = (id: string, isInvoice: boolean = true) => {
     markAsPickedUp(id, isInvoice);
+    
+    // Update the local invoices state to reflect the picked up status
+    setUpdatedInvoices(currentInvoices => 
+      currentInvoices.map(inv => 
+        inv.invoiceId === id 
+          ? { ...inv, isPickedUp: true, pickedUpAt: new Date().toISOString() } 
+          : inv
+      )
+    );
+    
     toast.success(language === 'ar' ? "تم تسليم الطلب بنجاح" : "Order has been marked as picked up");
     // Force re-render to show updated status
     setRefreshTrigger(prev => prev + 1);
   };
+  
+  // Separate invoices that are not picked up (active) and ones that are picked up (completed)
+  const activeInvoices = updatedInvoices.filter(invoice => !invoice.isPickedUp);
+  const completedInvoices = updatedInvoices.filter(invoice => invoice.isPickedUp);
   
   if (!patientInvoices.length) {
     return (
@@ -142,109 +163,178 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead>{t("invoiceId")}</TableHead>
-                  <TableHead>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {t("date")}
-                    </div>
-                  </TableHead>
-                  <TableHead>
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="w-3.5 h-3.5" />
-                      {t("total")}
-                    </div>
-                  </TableHead>
-                  <TableHead>{t("status")}</TableHead>
-                  <TableHead className="text-right">{t("actions")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {patientInvoices.map((invoice) => {
-                  const remaining = calculateRemaining(invoice);
-                  const isPaid = remaining <= 0;
-                  const isPickedUp = invoice.isPickedUp;
-                  
-                  return (
-                    <TableRow key={invoice.invoiceId} className="hover:bg-accent/5 transition-colors">
-                      <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
-                      <TableCell>{formatDate(invoice.createdAt)}</TableCell>
-                      <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          isPickedUp
-                            ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300'
-                            : isPaid 
-                              ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' 
-                              : 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200'
-                        }`}>
-                          {isPickedUp 
-                            ? t("pickedUp") 
-                            : isPaid 
-                              ? t("paid") 
-                              : t("partiallyPaid")}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right space-x-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => viewInvoiceDetails(invoice)}
-                          title={t("view")}
-                          className="hover:bg-blue-100 hover:text-blue-700 transition-colors"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        
-                        {!invoice.isPickedUp && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleEdit(invoice)}
-                            title={t("edit")}
-                            className="hover:bg-amber-100 hover:text-amber-700 transition-colors"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        )}
-                        
-                        <PrintOptionsDialog
-                          workOrder={invoice}
-                          invoice={invoice}
-                          patient={patient}
-                          onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
-                          onPrintInvoice={() => handlePrintInvoice(invoice)}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="hover:bg-purple-100 hover:text-purple-700 transition-colors"
-                            title={t("print")}
-                          >
-                            <Printer className="h-4 w-4" />
-                          </Button>
-                        </PrintOptionsDialog>
-                        
-                        {!invoice.isPickedUp && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleMarkAsPickedUp(invoice.invoiceId, true)}
-                            title={language === 'ar' ? "تم الاستلام" : "Mark as Picked Up"}
-                            className="hover:bg-green-100 hover:text-green-700 transition-colors"
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </TableCell>
+            {/* Active Transactions */}
+            {activeInvoices.length > 0 && (
+              <>
+                <h3 className="p-4 bg-blue-50/80 font-medium text-blue-800 border-b">
+                  {language === 'ar' ? "المعاملات النشطة" : "Active Transactions"}
+                </h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead>{t("invoiceId")}</TableHead>
+                      <TableHead>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {t("date")}
+                        </div>
+                      </TableHead>
+                      <TableHead>
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="w-3.5 h-3.5" />
+                          {t("total")}
+                        </div>
+                      </TableHead>
+                      <TableHead>{t("status")}</TableHead>
+                      <TableHead className="text-right">{t("actions")}</TableHead>
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {activeInvoices.map((invoice) => {
+                      const remaining = calculateRemaining(invoice);
+                      const isPaid = remaining <= 0;
+                      
+                      return (
+                        <TableRow key={invoice.invoiceId} className="hover:bg-accent/5 transition-colors">
+                          <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
+                          <TableCell>{formatDate(invoice.createdAt)}</TableCell>
+                          <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
+                          <TableCell>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              isPaid 
+                                ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' 
+                                : 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200'
+                            }`}>
+                              {isPaid ? t("paid") : t("partiallyPaid")}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right space-x-1">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => viewInvoiceDetails(invoice)}
+                              title={t("view")}
+                              className="hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => handleEdit(invoice)}
+                              title={t("edit")}
+                              className="hover:bg-amber-100 hover:text-amber-700 transition-colors"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            
+                            <PrintOptionsDialog
+                              workOrder={invoice}
+                              invoice={invoice}
+                              patient={patient}
+                              onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
+                              onPrintInvoice={() => handlePrintInvoice(invoice)}
+                            >
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="hover:bg-purple-100 hover:text-purple-700 transition-colors"
+                                title={t("print")}
+                              >
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                            </PrintOptionsDialog>
+                            
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => handleMarkAsPickedUp(invoice.invoiceId, true)}
+                              title={language === 'ar' ? "تم الاستلام" : "Mark as Picked Up"}
+                              className="hover:bg-green-100 hover:text-green-700 transition-colors"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </>
+            )}
+            
+            {/* Completed Transactions */}
+            {completedInvoices.length > 0 && (
+              <>
+                <h3 className="p-4 bg-green-50/80 font-medium text-green-800 border-b border-t">
+                  {language === 'ar' ? "المعاملات المكتملة" : "Completed Transactions"}
+                </h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead>{t("invoiceId")}</TableHead>
+                      <TableHead>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {t("date")}
+                        </div>
+                      </TableHead>
+                      <TableHead>
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="w-3.5 h-3.5" />
+                          {t("total")}
+                        </div>
+                      </TableHead>
+                      <TableHead>{t("status")}</TableHead>
+                      <TableHead className="text-right">{t("actions")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {completedInvoices.map((invoice) => (
+                      <TableRow key={invoice.invoiceId} className="hover:bg-accent/5 transition-colors">
+                        <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
+                        <TableCell>{formatDate(invoice.createdAt)}</TableCell>
+                        <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
+                        <TableCell>
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300">
+                            {t("pickedUp")}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right space-x-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => viewInvoiceDetails(invoice)}
+                            title={t("view")}
+                            className="hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          
+                          <PrintOptionsDialog
+                            workOrder={invoice}
+                            invoice={invoice}
+                            patient={patient}
+                            onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
+                            onPrintInvoice={() => handlePrintInvoice(invoice)}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="hover:bg-purple-100 hover:text-purple-700 transition-colors"
+                              title={t("print")}
+                            >
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                          </PrintOptionsDialog>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

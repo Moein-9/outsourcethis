@@ -35,9 +35,15 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
 }) => {
   const { language, t } = useLanguageStore();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [localInvoices, setLocalInvoices] = useState<Invoice[]>([]);
+  
+  // Initialize local state with props
+  useEffect(() => {
+    setLocalInvoices(invoices);
+  }, [invoices]);
   
   // Sort invoices by date, newest first
-  const sortedInvoices = [...invoices].sort((a, b) => 
+  const sortedInvoices = [...localInvoices].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
   
@@ -145,6 +151,15 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
   };
   
   const handleMarkAsPickedUp = (id: string, isInvoice: boolean = true) => {
+    // Update the local state before calling the store function
+    setLocalInvoices(prevInvoices => 
+      prevInvoices.map(invoice => 
+        invoice.invoiceId === id 
+          ? { ...invoice, isPickedUp: true, pickedUpAt: new Date().toISOString() } 
+          : invoice
+      )
+    );
+    
     // This function would call the markAsPickedUp function from the invoice store
     // For now, we'll just update the refresh trigger to force a re-render
     setRefreshTrigger(prev => prev + 1);

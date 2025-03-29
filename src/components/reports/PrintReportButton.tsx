@@ -29,10 +29,8 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
     e.preventDefault();
     e.stopPropagation();
     
-    // Add a slight delay to ensure any state updates have completed
-    setTimeout(() => {
-      onPrint();
-    }, 100);
+    // Direct printing without any dialog
+    onPrint();
   };
   
   return (
