@@ -9,13 +9,17 @@ interface PrintReportButtonProps {
   className?: string;
   label?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  icon?: React.ReactNode;
+  disabled?: boolean;
 }
 
 export const PrintReportButton: React.FC<PrintReportButtonProps> = ({ 
   onPrint,
   className = "",
   label,
-  variant = "default"
+  variant = "default",
+  icon,
+  disabled = false
 }) => {
   const { language } = useLanguageStore();
   
@@ -27,8 +31,9 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
       className={`gap-2 ${variant === "default" ? "bg-green-600 hover:bg-green-700 text-white" : ""} ${className}`}
       type="button"
       variant={variant}
+      disabled={disabled}
     >
-      <Printer size={16} />
+      {icon || <Printer size={16} />}
       {label || defaultLabel}
     </Button>
   );

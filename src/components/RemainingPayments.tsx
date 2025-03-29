@@ -50,6 +50,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useNavigate } from "react-router-dom";
 import { ReceiptInvoice } from "./ReceiptInvoice";
 import { useLanguageStore } from "@/store/languageStore";
+import { CustomPrintService } from "@/utils/CustomPrintService";
+import { PrintReportButton } from "./reports/PrintReportButton";
 
 export const RemainingPayments: React.FC = () => {
   const { language, t } = useLanguageStore();
@@ -195,75 +197,12 @@ export const RemainingPayments: React.FC = () => {
   
   const handlePrintReceipt = (invoiceId: string) => {
     const invoice = getInvoiceById(invoiceId);
-    if (!invoice) return;
-    
-    const receiptContent = document.getElementById(`print-receipt-${invoice.invoiceId}`)?.innerHTML;
-    if (!receiptContent) {
-      toast.error(language === 'ar' ? "لم يتم العثور على محتوى الإيصال" : "Receipt content not found");
+    if (!invoice) {
+      toast.error(language === 'ar' ? "لم يتم العثور على الفاتورة" : "Invoice not found");
       return;
     }
     
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      toast.error(language === 'ar' ? "تم حظر النافذة المنبثقة" : "Popup blocked");
-      return;
-    }
-    
-    const printStyles = `
-      @page {
-        size: 80mm auto;
-        margin: 0;
-      }
-      body {
-        width: 80mm !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-family: 'Courier New', monospace;
-      }
-      .receipt-container {
-        width: 80mm !important;
-        max-width: 80mm !important;
-        padding: 5mm;
-        box-sizing: border-box;
-        margin: 0 auto;
-      }
-      @media print {
-        .print-button {
-          display: none !important;
-        }
-      }
-    `;
-    
-    const printContent = `
-      <!DOCTYPE html>
-      <html dir="${language === 'ar' ? 'rtl' : 'ltr'}" lang="${language}">
-      <head>
-        <title>${language === 'ar' ? 'فاتورة' : 'Invoice'} ${invoice.invoiceId}</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>${printStyles}</style>
-      </head>
-      <body>
-        <div class="receipt-container">
-          ${receiptContent}
-        </div>
-        <button class="print-button" onclick="window.print(); setTimeout(() => window.close(), 500);" 
-          style="display: block; margin: 20px auto; padding: 10px 20px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer;">
-          ${language === 'ar' ? 'طباعة' : 'Print'}
-        </button>
-        <script>
-          setTimeout(() => {
-            window.print();
-            setTimeout(() => window.close(), 500);
-          }, 500);
-        </script>
-      </body>
-      </html>
-    `;
-    
-    printWindow.document.open();
-    printWindow.document.write(printContent);
-    printWindow.document.close();
+    CustomPrintService.printInvoice(invoice);
   };
   
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
@@ -441,16 +380,13 @@ export const RemainingPayments: React.FC = () => {
                         >
                           {language === 'ar' ? "إغلاق" : "Close"}
                         </Button>
-                        <Button 
-                          onClick={() => {
+                        <PrintReportButton 
+                          onPrint={() => {
                             setShowReceipt(null);
                             handlePrintReceipt(invoice.invoiceId);
                           }}
-                          className="gap-2"
-                        >
-                          <Printer className="h-4 w-4" />
-                          {language === 'ar' ? "طباعة" : "Print"}
-                        </Button>
+                          label={language === 'ar' ? "طباعة الفاتورة" : "Print Invoice"}
+                        />
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -639,17 +575,15 @@ export const RemainingPayments: React.FC = () => {
               >
                 <span>{language === 'ar' ? "إغلاق" : "Close"}</span>
               </Button>
-              <Button
-                className="bg-blue-600 hover:bg-blue-700 gap-2"
-                onClick={() => {
+              <PrintReportButton
+                className="bg-blue-600 hover:bg-blue-700"
+                onPrint={() => {
                   const invoiceId = invoiceForPrint;
                   setInvoiceForPrint(null);
                   handlePrintReceipt(invoiceId);
                 }}
-              >
-                <Printer className="h-4 w-4" />
-                <span>{language === 'ar' ? "طباعة الفاتورة" : "Print Invoice"}</span>
-              </Button>
+                label={language === 'ar' ? "طباعة الفاتورة" : "Print Invoice"}
+              />
             </div>
           </DialogContent>
         </Dialog>

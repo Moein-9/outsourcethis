@@ -310,6 +310,9 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               padding: 0 !important;
               background: white !important;
               color: black !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
             
             #receipt-invoice {
@@ -327,6 +330,9 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               background-color: white !important;
               color: black !important;
               text-align: center !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
             
             .print-receipt * {
@@ -407,9 +413,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             }
             
             body {
-              -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              print-color-adjust: exact !important;
+              font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'} !important;
             }
           }
         `}
