@@ -175,13 +175,6 @@ export const RemainingPayments: React.FC = () => {
       return;
     }
     
-    const willCompletePay = (totalPayment === invoice.remaining);
-    
-    if (willCompletePay) {
-      const invoiceCopy = { ...invoice };
-      setInvoiceDataForPrint(invoiceCopy);
-    }
-    
     for (const entry of paymentEntries) {
       if (entry.amount > 0) {
         addPartialPayment(invoiceId, {
@@ -195,8 +188,12 @@ export const RemainingPayments: React.FC = () => {
     toast.success(language === 'ar' ? "تم تسجيل الدفع بنجاح" : "Payment recorded successfully");
     
     const updatedInvoice = getInvoiceById(invoiceId);
-    if (updatedInvoice?.isPaid) {
-      setInvoiceForPrint(invoiceId);
+    if (updatedInvoice) {
+      setInvoiceDataForPrint(updatedInvoice);
+      
+      if (updatedInvoice.isPaid) {
+        setInvoiceForPrint(invoiceId);
+      }
     }
     
     setPaymentEntries([{ method: language === 'ar' ? "نقداً" : "Cash", amount: 0 }]);
@@ -204,19 +201,14 @@ export const RemainingPayments: React.FC = () => {
   };
   
   const handlePrintReceipt = (invoiceId: string) => {
-    if (invoiceDataForPrint && invoiceId === invoiceDataForPrint.invoiceId) {
-      CustomPrintService.printInvoice(invoiceDataForPrint);
-      setInvoiceDataForPrint(null);
-      return;
-    }
-    
-    const invoice = getInvoiceById(invoiceId);
-    if (!invoice) {
+    const currentInvoice = getInvoiceById(invoiceId);
+    if (!currentInvoice) {
       toast.error(language === 'ar' ? "لم يتم العثور على الفاتورة" : "Invoice not found");
       return;
     }
     
-    CustomPrintService.printInvoice(invoice);
+    CustomPrintService.printInvoice(currentInvoice);
+    setInvoiceDataForPrint(null);
   };
   
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';

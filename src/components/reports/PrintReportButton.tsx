@@ -43,7 +43,7 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
       variant={variant}
       disabled={disabled}
     >
-      {icon || <Printer size={20} />} {/* Increased icon size from 18 to 20 */}
+      {icon || <Printer size={20} />}
       {label || defaultLabel}
     </Button>
   );
