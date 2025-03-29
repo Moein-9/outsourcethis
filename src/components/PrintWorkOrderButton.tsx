@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
-import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "sonner";
+import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -103,8 +103,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         
         toast.success(t("invoiceSaved"));
         
-        // Show the print selector with the updated invoice that has an ID
-        showPrintSelector(updatedInvoice);
+        // Print the work order directly with the updated invoice
+        printWorkOrder(updatedInvoice);
       } catch (error) {
         console.error("Error saving invoice:", error);
         toast.error(t("errorSavingInvoice"));
@@ -112,58 +112,52 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         setLoading(false);
       }
     } else {
-      // If already has an ID, just show the print selector
-      showPrintSelector(invoice);
+      // If already has an ID, just print the work order
+      printWorkOrder(invoice);
     }
   };
   
-  const showPrintSelector = (invoiceToUse: Invoice) => {
-    return (
-      <WorkOrderPrintSelector
-        invoice={invoiceToUse}
-        patientName={patientName}
-        patientPhone={patientPhone}
-        rx={rx}
-        lensType={lensType}
-        coating={coating}
-        frame={frame}
-        contactLenses={contactLenses}
-        contactLensRx={contactLensRx}
-      />
-    );
+  const printWorkOrder = (invoiceToUse: Invoice) => {
+    try {
+      if (printingInProgress) return;
+      setPrintingInProgress(true);
+      
+      printWorkOrderReceipt({
+        invoice: invoiceToUse,
+        patientName,
+        patientPhone,
+        rx,
+        lensType,
+        coating,
+        frame,
+        contactLenses,
+        contactLensRx
+      });
+      
+      setTimeout(() => {
+        setPrintingInProgress(false);
+        toast.success(t("printingCompleted"));
+      }, 1000);
+    } catch (error) {
+      console.error('Printing error:', error);
+      setPrintingInProgress(false);
+      toast.error(t("printingFailed"));
+    }
   };
 
+  // State to track if printing is in progress to prevent double-clicking
+  const [printingInProgress, setPrintingInProgress] = useState(false);
+
   return (
-    <>
-      <Button 
-        variant={variant} 
-        size={size} 
-        className={className}
-        onClick={handlePrint}
-        disabled={loading}
-      >
-        <Printer className="h-4 w-4 mr-1" /> 
-        {loading ? t("saving") : t("printWorkOrder")}
-      </Button>
-      
-      {!isNewInvoice && (
-        <WorkOrderPrintSelector
-          invoice={invoice}
-          patientName={patientName}
-          patientPhone={patientPhone}
-          rx={rx}
-          lensType={lensType}
-          coating={coating}
-          frame={frame}
-          contactLenses={contactLenses}
-          contactLensRx={contactLensRx}
-          trigger={
-            <Button variant={variant} size={size} className={className}>
-              <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
-            </Button>
-          }
-        />
-      )}
-    </>
+    <Button 
+      variant={variant} 
+      size={size} 
+      className={className}
+      onClick={handlePrint}
+      disabled={loading || printingInProgress}
+    >
+      <Printer className="h-4 w-4 mr-1" /> 
+      {loading ? t("saving") : (printingInProgress ? t("printing") : t("printWorkOrder"))}
+    </Button>
   );
 };
