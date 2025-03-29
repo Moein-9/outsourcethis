@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PencilLine, Receipt, Clock, CheckCircle, RefreshCcw, AlertTriangle, Printer, Package } from "lucide-react";
+import { PencilLine, Receipt, Clock, CheckCircle, RefreshCcw, Printer, Package } from "lucide-react";
 import { format, isValid } from "date-fns";
+import { PrintService } from "@/utils/PrintService";
+import { toast } from "sonner";
+import { ReceiptInvoice } from "./ReceiptInvoice";
 
 interface PatientTransactionsProps {
   invoices: Invoice[];
@@ -37,145 +40,228 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   );
 
   // Filter invoices into active and completed
-  const activeInvoices = sortedInvoices.filter(invoice => !invoice.isPickedUp);
-  const completedInvoices = sortedInvoices.filter(invoice => invoice.isPickedUp);
+  const activeInvoices = sortedInvoices.filter(invoice => !invoice.isPickedUp && !invoice.isRefunded);
+  const completedInvoices = sortedInvoices.filter(invoice => invoice.isPickedUp && !invoice.isRefunded);
   
   // Separate refunded invoices
   const refundedInvoices = sortedInvoices.filter(invoice => invoice.isRefunded);
 
-  const renderInvoiceItem = (invoice: Invoice) => (
-    <div key={invoice.invoiceId} className="p-3 hover:bg-gray-50 border-b last:border-b-0">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-1.5">
-            <Receipt className="h-4 w-4 text-indigo-600" />
-            <span className="font-medium text-gray-800">{invoice.invoiceId}</span>
+  const handlePrintInvoice = (invoice: Invoice) => {
+    try {
+      const receiptElement = document.createElement('div');
+      
+      // Use ReactDOM to render the receipt component to a string
+      const ReactDOMServer = (window as any).ReactDOMServer;
+      if (!ReactDOMServer) {
+        toast.error("Print service not available");
+        return;
+      }
+      
+      // Create a temporary div to hold the receipt content
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = ReactDOMServer.renderToString(<ReceiptInvoice invoice={invoice} isPrintable={true} />);
+      
+      // Get the HTML content from the temporary div
+      const receiptContent = tempDiv.innerHTML;
+      
+      // Prepare the HTML for printing and print it
+      const htmlContent = PrintService.prepareReceiptDocument(receiptContent, `Invoice ${invoice.invoiceId}`);
+      PrintService.printHtml(htmlContent, 'receipt', () => {
+        toast.success(language === 'ar' ? "تمت طباعة الفاتورة بنجاح" : "Invoice printed successfully");
+      });
+    } catch (error) {
+      console.error("Print error:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء الطباعة" : "Error printing invoice");
+    }
+  };
+
+  const renderInvoiceItem = (invoice: Invoice) => {
+    // Determine if this is a refunded invoice to apply special styling
+    const isRefunded = invoice.isRefunded;
+    const refundBgClass = isRefunded ? "bg-red-50" : "";
+    
+    return (
+      <div key={invoice.invoiceId} className={`p-3 hover:bg-gray-50 border-b last:border-b-0 ${refundBgClass}`}>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-1.5">
+              <Receipt className="h-4 w-4 text-indigo-600" />
+              <span className="font-medium text-gray-800">{invoice.invoiceId}</span>
+              
+              {/* Payment Status */}
+              {invoice.isPaid ? (
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 ml-2">
+                  {language === 'ar' ? "مدفوع" : "Paid"}
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 ml-2">
+                  {language === 'ar' ? "غير مدفوع" : "Unpaid"}
+                </Badge>
+              )}
+              
+              {/* Refund Status */}
+              {invoice.isRefunded && (
+                <Badge className="bg-red-100 text-red-800 hover:bg-red-200 ml-2 flex items-center gap-1">
+                  <RefreshCcw className="h-3 w-3" />
+                  {language === 'ar' ? "تم الاسترداد" : "Refunded"}
+                </Badge>
+              )}
+              
+              {/* Pickup Status - Only show if not refunded */}
+              {!invoice.isRefunded && (
+                invoice.isPickedUp ? (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 ml-2 flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    {language === 'ar' ? "تم الاستلام" : "Picked up"}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 ml-2 flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {language === 'ar' ? "جاري التجهيز" : "Processing"}
+                  </Badge>
+                )
+              )}
+            </div>
             
-            {/* Payment Status */}
-            {invoice.isPaid ? (
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 ml-2">
-                {language === 'ar' ? "مدفوع" : "Paid"}
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 ml-2">
-                {language === 'ar' ? "غير مدفوع" : "Unpaid"}
-              </Badge>
-            )}
+            <div className="text-sm text-gray-500 mt-2">
+              {language === 'ar' ? "تاريخ الإنشاء:" : "Created:"} {formatDate(invoice.createdAt)}
+            </div>
             
-            {/* Refund Status */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 bg-gray-50 p-2 rounded-md">
+              <div>
+                <h4 className="text-xs text-gray-500">{language === 'ar' ? "نوع الفاتورة" : "Invoice Type"}</h4>
+                <p className="font-medium">
+                  {invoice.invoiceType === 'glasses' ? 
+                    (language === 'ar' ? "نظارات" : "Glasses") : 
+                    (language === 'ar' ? "عدسات لاصقة" : "Contact Lenses")}
+                </p>
+              </div>
+              <div>
+                <h4 className="text-xs text-gray-500">{language === 'ar' ? "الحالة" : "Status"}</h4>
+                <p className="font-medium">
+                  {invoice.isRefunded ? 
+                    (language === 'ar' ? "مسترد" : "Refunded") : 
+                    invoice.isPickedUp ? 
+                      (language === 'ar' ? "مكتمل" : "Completed") : 
+                      (language === 'ar' ? "قيد التنفيذ" : "In Progress")}
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-3 bg-white border rounded-md p-2">
+              <h4 className="text-sm font-medium mb-1">{language === 'ar' ? "تفاصيل المنتج" : "Product Details"}</h4>
+              
+              {invoice.invoiceType === 'glasses' ? (
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{language === 'ar' ? "الإطار:" : "Frame:"}</span>
+                    <span>{invoice.frameBrand} {invoice.frameModel}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{language === 'ar' ? "نوع العدسة:" : "Lens Type:"}</span>
+                    <span>{invoice.lensType}</span>
+                  </div>
+                  {invoice.coating && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{language === 'ar' ? "الطلاء:" : "Coating:"}</span>
+                      <span>{invoice.coating}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-sm">
+                  {language === 'ar' ? "عدسات لاصقة" : "Contact Lenses"}
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <h4 className="text-xs text-gray-500">{language === 'ar' ? "المبلغ الإجمالي" : "Total Amount"}</h4>
+                <p className="font-bold text-base">{invoice.total.toFixed(3)} KWD</p>
+              </div>
+              <div>
+                <h4 className="text-xs text-gray-500">{language === 'ar' ? "المبلغ المتبقي" : "Remaining"}</h4>
+                <p className={`font-medium text-base ${invoice.remaining > 0 ? "text-amber-600" : "text-green-600"}`}>
+                  {invoice.remaining.toFixed(3)} KWD
+                </p>
+              </div>
+            </div>
+            
+            {/* Refund Information if applicable */}
             {invoice.isRefunded && (
-              <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 ml-2 flex items-center gap-1">
-                <RefreshCcw className="h-3 w-3" />
-                {language === 'ar' ? "تم الاسترداد" : "Refunded"}
-              </Badge>
+              <div className="mt-3 text-sm bg-red-50 p-2 rounded-md border border-red-100">
+                <div className="flex items-center gap-1 text-red-700">
+                  <RefreshCcw className="h-3.5 w-3.5" />
+                  <span className="font-medium">
+                    {language === 'ar' ? "معلومات الاسترداد:" : "Refund Info:"}
+                  </span>
+                </div>
+                <div className="mt-1 text-red-800 grid grid-cols-2 gap-x-2 gap-y-1">
+                  <div>
+                    {language === 'ar' ? `المبلغ:` : `Amount:`}
+                    <span className="font-medium"> {invoice.refundAmount?.toFixed(3)} KWD</span>
+                  </div>
+                  <div>
+                    {language === 'ar' ? `التاريخ:` : `Date:`}
+                    <span className="font-medium"> {formatDate(invoice.refundDate || '')}</span>
+                  </div>
+                  <div>
+                    {language === 'ar' ? `الطريقة:` : `Method:`}
+                    <span className="font-medium"> {invoice.refundMethod}</span>
+                  </div>
+                  <div>
+                    {language === 'ar' ? `السبب:` : `Reason:`}
+                    <span className="font-medium"> {invoice.refundReason}</span>
+                  </div>
+                </div>
+              </div>
             )}
+          </div>
+          
+          <div className="flex flex-row md:flex-col gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 text-xs text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+              onClick={() => handlePrintInvoice(invoice)}
+            >
+              <Printer className="h-3 w-3 mr-1" />
+              {language === 'ar' ? "طباعة الفاتورة" : "Print Invoice"}
+            </Button>
             
-            {/* Pickup Status */}
-            {invoice.isPickedUp ? (
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 ml-2 flex items-center gap-1">
-                <CheckCircle className="h-3 w-3" />
-                {language === 'ar' ? "تم الاستلام" : "Picked up"}
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 ml-2 flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {language === 'ar' ? "جاري التجهيز" : "Processing"}
-              </Badge>
+            {!invoice.isPickedUp && !invoice.isRefunded && invoice.workOrderId && onEditWorkOrder && (
+              <div className="flex flex-col gap-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 text-xs text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50"
+                  onClick={() => {
+                    const workOrder = workOrders.find(wo => wo.id === invoice.workOrderId);
+                    if (workOrder && onEditWorkOrder) {
+                      onEditWorkOrder(workOrder);
+                    }
+                  }}
+                >
+                  <PencilLine className="h-3 w-3 mr-1" />
+                  {language === 'ar' ? "تعديل أمر العمل" : "Edit Work Order"}
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 text-xs text-purple-700 hover:text-purple-800 hover:bg-purple-50"
+                >
+                  <Package className="h-3 w-3 mr-1" />
+                  {language === 'ar' ? "تحديث الحالة" : "Mark as Picked Up"}
+                </Button>
+              </div>
             )}
           </div>
-          
-          <div className="text-sm text-gray-500 mt-1">
-            {formatDate(invoice.createdAt)}
-          </div>
-          
-          <div className="text-sm mt-1">
-            {invoice.invoiceType === 'glasses' ? (
-              <span>
-                {invoice.frameBrand} {invoice.frameModel} - {invoice.lensType}
-              </span>
-            ) : (
-              <span>
-                {language === 'ar' ? "عدسات لاصقة" : "Contact Lenses"}
-              </span>
-            )}
-          </div>
-          
-          {/* Refund Information if applicable */}
-          {invoice.isRefunded && (
-            <div className="mt-2 text-sm bg-blue-50 p-2 rounded-md border border-blue-100">
-              <div className="flex items-center gap-1 text-blue-700">
-                <RefreshCcw className="h-3.5 w-3.5" />
-                <span className="font-medium">
-                  {language === 'ar' ? "معلومات الاسترداد:" : "Refund Info:"}
-                </span>
-              </div>
-              <div className="mt-1 text-blue-800">
-                <div>
-                  {language === 'ar' ? `المبلغ: ${invoice.refundAmount?.toFixed(3)} KWD` : 
-                    `Amount: ${invoice.refundAmount?.toFixed(3)} KWD`}
-                </div>
-                <div>
-                  {language === 'ar' ? `التاريخ: ${formatDate(invoice.refundDate || '')}` : 
-                    `Date: ${formatDate(invoice.refundDate || '')}`}
-                </div>
-                <div>
-                  {language === 'ar' ? `الطريقة: ${invoice.refundMethod}` : 
-                    `Method: ${invoice.refundMethod}`}
-                </div>
-                <div>
-                  {language === 'ar' ? `السبب: ${invoice.refundReason}` : 
-                    `Reason: ${invoice.refundReason}`}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="text-right">
-          <div className="font-semibold text-gray-900">
-            {invoice.total.toFixed(3)} KWD
-          </div>
-          
-          {!invoice.isPickedUp && invoice.workOrderId && onEditWorkOrder && (
-            <div className="flex flex-col gap-1 mt-1">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 text-xs text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50"
-                onClick={() => {
-                  const workOrder = workOrders.find(wo => wo.id === invoice.workOrderId);
-                  if (workOrder && onEditWorkOrder) {
-                    onEditWorkOrder(workOrder);
-                  }
-                }}
-              >
-                <PencilLine className="h-3 w-3 mr-1" />
-                {language === 'ar' ? "تعديل أمر العمل" : "Edit Work Order"}
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 text-xs text-green-700 hover:text-green-800 hover:bg-green-50"
-              >
-                <Printer className="h-3 w-3 mr-1" />
-                {language === 'ar' ? "طباعة الفاتورة" : "Print Invoice"}
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 text-xs text-purple-700 hover:text-purple-800 hover:bg-purple-50"
-              >
-                <Package className="h-3 w-3 mr-1" />
-                {language === 'ar' ? "تحديث الحالة" : "Mark as Picked Up"}
-              </Button>
-            </div>
-          )}
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="mt-4 border rounded-lg overflow-hidden">
@@ -238,12 +324,12 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
       {/* Refunded Transactions Section (if any) */}
       {refundedInvoices.length > 0 && (
         <div className="mt-4 border-t pt-2">
-          <div className="px-3 py-2 bg-blue-50 flex items-center">
-            <RefreshCcw className="h-4 w-4 text-blue-600 mr-2" />
-            <h4 className="font-medium text-blue-900">
+          <div className="px-3 py-2 bg-red-50 flex items-center">
+            <RefreshCcw className="h-4 w-4 text-red-600 mr-2" />
+            <h4 className="font-medium text-red-900">
               {language === 'ar' ? "العناصر المستردة" : "Refunded Items"}
             </h4>
-            <span className="ml-2 text-xs bg-blue-100 text-blue-800 py-0.5 px-1.5 rounded-full">
+            <span className="ml-2 text-xs bg-red-100 text-red-800 py-0.5 px-1.5 rounded-full">
               {refundedInvoices.length}
             </span>
           </div>
