@@ -11,6 +11,8 @@ import { format, isValid } from "date-fns";
 import { PrintService } from "@/utils/PrintService";
 import { toast } from "sonner";
 import { ReceiptInvoice } from "./ReceiptInvoice";
+import { RefundReceiptTemplate } from "./RefundReceiptTemplate"; 
+import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import ReactDOMServer from 'react-dom/server';
 
 interface PatientTransactionsProps {
@@ -67,9 +69,32 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
 
   const handlePrintRefundInvoice = (invoice: Invoice) => {
     try {
-      // For refunded invoices, create a special refund receipt
+      // For refunded invoices, use the RefundReceiptTemplate
+      const refundData = {
+        refundId: invoice.refundId || `RF${Date.now()}`,
+        invoiceId: invoice.invoiceId,
+        patientName: invoice.patientName,
+        patientPhone: invoice.patientPhone,
+        patientId: invoice.patientId,
+        refundAmount: invoice.refundAmount || 0,
+        refundMethod: invoice.refundMethod || "Cash",
+        refundReason: invoice.refundReason || "",
+        refundDate: invoice.refundDate || new Date().toISOString(),
+        originalTotal: invoice.total,
+        frameBrand: invoice.frameBrand,
+        frameModel: invoice.frameModel,
+        frameColor: invoice.frameColor,
+        lensType: invoice.lensType,
+        invoiceItems: [
+          ...(invoice.frameBrand ? [{ name: invoice.frameBrand, price: invoice.framePrice }] : []),
+          ...(invoice.lensType ? [{ name: invoice.lensType, price: invoice.lensPrice }] : []),
+          ...(invoice.coating ? [{ name: invoice.coating, price: invoice.coatingPrice }] : [])
+        ]
+      };
+      
+      // Create refund receipt content
       const receiptContent = ReactDOMServer.renderToString(
-        <ReceiptInvoice invoice={invoice} isPrintable={true} />
+        <RefundReceiptTemplate refund={refundData} language={language} />
       );
       
       // Prepare the HTML for printing with a special title
@@ -92,6 +117,10 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     // Determine if this is a refunded invoice to apply special styling
     const isRefunded = invoice.isRefunded;
     const refundBgClass = isRefunded ? "bg-red-50" : "";
+    
+    // Find the work order associated with this invoice
+    const workOrder = invoice.workOrderId ? 
+      workOrders.find(wo => wo.id === invoice.workOrderId) : undefined;
     
     return (
       <div key={invoice.invoiceId} className={`p-3 hover:bg-gray-50 border-b last:border-b-0 ${refundBgClass}`}>
@@ -244,43 +273,75 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
                 {language === 'ar' ? "طباعة إيصال الاسترداد" : "Print Refund Receipt"}
               </Button>
             ) : (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 text-xs text-blue-700 hover:text-blue-800 hover:bg-blue-50"
-                onClick={() => handlePrintInvoice(invoice)}
-              >
-                <Printer className="h-3 w-3 mr-1" />
-                {language === 'ar' ? "طباعة الفاتورة" : "Print Invoice"}
-              </Button>
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 text-xs text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+                  onClick={() => handlePrintInvoice(invoice)}
+                >
+                  <Printer className="h-3 w-3 mr-1" />
+                  {language === 'ar' ? "طباعة الفاتورة" : "Print Invoice"}
+                </Button>
+                
+                {!invoice.isPickedUp && !invoice.isRefunded && invoice.workOrderId && (
+                  <WorkOrderPrintSelector
+                    invoice={invoice}
+                    patientName={invoice.patientName}
+                    patientPhone={invoice.patientPhone}
+                    rx={workOrder?.rx}
+                    lensType={invoice.lensType}
+                    coating={invoice.coating}
+                    frame={{
+                      brand: invoice.frameBrand,
+                      model: invoice.frameModel,
+                      color: invoice.frameColor,
+                      size: invoice.frameSize || '',
+                      price: invoice.framePrice
+                    }}
+                    contactLenses={invoice.contactLensItems}
+                    contactLensRx={invoice.contactLensRx}
+                    trigger={
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 text-xs text-green-700 hover:text-green-800 hover:bg-green-50"
+                      >
+                        <Receipt className="h-3 w-3 mr-1" />
+                        {language === 'ar' ? "طباعة أمر العمل" : "Print Work Order"}
+                      </Button>
+                    }
+                  />
+                )}
+              </>
             )}
             
             {!invoice.isPickedUp && !invoice.isRefunded && invoice.workOrderId && onEditWorkOrder && (
-              <div className="flex flex-col gap-1">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 text-xs text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50"
-                  onClick={() => {
-                    const workOrder = workOrders.find(wo => wo.id === invoice.workOrderId);
-                    if (workOrder && onEditWorkOrder) {
-                      onEditWorkOrder(workOrder);
-                    }
-                  }}
-                >
-                  <PencilLine className="h-3 w-3 mr-1" />
-                  {language === 'ar' ? "تعديل أمر العمل" : "Edit Work Order"}
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 text-xs text-purple-700 hover:text-purple-800 hover:bg-purple-50"
-                >
-                  <Package className="h-3 w-3 mr-1" />
-                  {language === 'ar' ? "تحديث الحالة" : "Mark as Picked Up"}
-                </Button>
-              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 text-xs text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50"
+                onClick={() => {
+                  const workOrder = workOrders.find(wo => wo.id === invoice.workOrderId);
+                  if (workOrder && onEditWorkOrder) {
+                    onEditWorkOrder(workOrder);
+                  }
+                }}
+              >
+                <PencilLine className="h-3 w-3 mr-1" />
+                {language === 'ar' ? "تعديل أمر العمل" : "Edit Work Order"}
+              </Button>
+            )}
+            
+            {!invoice.isPickedUp && !invoice.isRefunded && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 text-xs text-purple-700 hover:text-purple-800 hover:bg-purple-50"
+              >
+                <Package className="h-3 w-3 mr-1" />
+                {language === 'ar' ? "تحديث الحالة" : "Mark as Picked Up"}
+              </Button>
             )}
           </div>
         </div>
