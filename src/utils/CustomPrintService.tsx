@@ -1,5 +1,8 @@
 
-import { toast } from "@/hooks/use-toast";
+import React from 'react';
+import { toast } from '@/hooks/use-toast';
+import { createRoot } from 'react-dom/client';
+import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
@@ -121,6 +124,7 @@ export class CustomPrintService {
                 color: white !important;
               }
             </style>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
           </head>
           <body>
             <div id="custom-work-order-content"></div>
@@ -142,37 +146,70 @@ export class CustomPrintService {
         </html>
       `);
       
-      // Get the content of the custom work order
-      const workOrderElement = document.getElementById('work-order-receipt');
+      // Create a div to temporarily render our React component to HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.style.display = 'none';
+      document.body.appendChild(tempDiv);
       
-      // If the element exists, copy its innerHTML to the print window
-      if (workOrderElement) {
-        const contentContainer = printWindow.document.getElementById('custom-work-order-content');
-        if (contentContainer) {
-          contentContainer.innerHTML = workOrderElement.innerHTML;
+      // Mount the CustomWorkOrderReceipt to this temp div to get its HTML
+      const root = createRoot(tempDiv);
+      
+      // This will render the component once to get its HTML
+      root.render(
+        <CustomWorkOrderReceipt 
+          workOrder={workOrder} 
+          invoice={invoice}
+          patient={patient}
+          isPrintable={true}
+        />
+      );
+      
+      // Wait a bit for the component to fully render
+      setTimeout(() => {
+        try {
+          // Get the rendered HTML from our temporary div
+          const workOrderHtml = tempDiv.innerHTML;
           
-          // Ensure timestamps are showing original creation dates
-          if (invoice?.rx?.createdAt || workOrder?.rx?.createdAt) {
-            // Use the original RX creation date rather than printing date
-            const rxCreationDate = invoice?.rx?.createdAt || workOrder?.rx?.createdAt;
-            const dateElements = printWindow.document.querySelectorAll('.rx-creation-date');
+          // Put this HTML into the print window
+          const contentContainer = printWindow.document.getElementById('custom-work-order-content');
+          if (contentContainer) {
+            contentContainer.innerHTML = workOrderHtml;
             
-            dateElements.forEach(element => {
-              if (element instanceof HTMLElement) {
-                // Format date in English format MM/DD/YYYY HH:MM
-                element.textContent = new Date(rxCreationDate).toLocaleString('en-US');
-              }
-            });
+            // Ensure timestamps are showing original creation dates
+            if (invoice?.rx?.createdAt || workOrder?.rx?.createdAt) {
+              // Use the original RX creation date rather than printing date
+              const rxCreationDate = invoice?.rx?.createdAt || workOrder?.rx?.createdAt;
+              const dateElements = printWindow.document.querySelectorAll('.rx-creation-date');
+              
+              dateElements.forEach(element => {
+                if (element instanceof HTMLElement) {
+                  // Format date in English format MM/DD/YYYY HH:MM
+                  element.textContent = new Date(rxCreationDate).toLocaleString('en-US');
+                }
+              });
+            }
           }
           
-          // Wait for content to load before proceeding
+          // Clean up
+          document.body.removeChild(tempDiv);
+          root.unmount();
+          
+          // Close the document to finish loading
           printWindow.document.close();
+        } catch (err) {
+          console.error("Error while preparing print content:", err);
+          document.body.removeChild(tempDiv);
+          root.unmount();
+          printWindow.close();
+          
+          toast({
+            title: "Print Error",
+            description: "Failed to prepare print content. Please try again.",
+            variant: "destructive",
+          });
         }
-      } else {
-        // Handle the case where the element doesn't exist
-        printWindow.document.write("<p>Unable to find work order content. Please try again.</p>");
-        printWindow.document.close();
-      }
+      }, 100);
+      
     } catch (error) {
       console.error("Error printing work order:", error);
       toast({
