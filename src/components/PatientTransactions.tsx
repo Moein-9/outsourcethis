@@ -8,12 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PencilLine, Receipt, Clock, CheckCircle, RefreshCcw, Printer, Package } from "lucide-react";
 import { format, isValid } from "date-fns";
-import { PrintService } from "@/utils/PrintService";
 import { toast } from "sonner";
 import { ReceiptInvoice } from "./ReceiptInvoice";
 import { RefundReceiptTemplate } from "./RefundReceiptTemplate"; 
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import ReactDOMServer from 'react-dom/server';
+import { PrintService } from "@/utils/PrintService";
 
 interface PatientTransactionsProps {
   invoices: Invoice[];
@@ -26,7 +26,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   workOrders,
   onEditWorkOrder
 }) => {
-  const { language } = useLanguageStore();
+  const { language, t } = useLanguageStore();
 
   const formatDate = (dateString: string) => {
     try {

@@ -5,7 +5,7 @@ import { Printer } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -101,20 +101,13 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           onInvoiceSaved(invoiceId, workOrderId);
         }
         
-        toast({
-          title: t("invoiceSaved"),
-          description: t("invoiceNumber") + ": " + invoiceId,
-        });
+        toast.success(t("invoiceSaved"));
         
         // Show the print selector with the updated invoice that has an ID
         showPrintSelector(updatedInvoice);
       } catch (error) {
         console.error("Error saving invoice:", error);
-        toast({
-          title: t("error"),
-          description: t("errorSavingInvoice"),
-          variant: "destructive",
-        });
+        toast.error(t("errorSavingInvoice"));
       } finally {
         setLoading(false);
       }
