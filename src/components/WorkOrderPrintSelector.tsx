@@ -23,6 +23,8 @@ interface WorkOrderPrintSelectorProps {
   contactLenses?: any[];
   contactLensRx?: any;
   trigger?: React.ReactNode;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
 }
 
 export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
@@ -36,6 +38,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
+  variant = "default", // Added default variant
+  size = "sm", // Added default size
 }) => {
   const { t } = useLanguageStore();
   const [printingInProgress, setPrintingInProgress] = useState(false);
@@ -80,6 +84,8 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           onClick={handlePrint}
           label={printingInProgress ? t("printing") : t("printWorkOrder")}
           disabled={printingInProgress}
+          variant={variant}
+          size={size}
         />
       )}
     </>

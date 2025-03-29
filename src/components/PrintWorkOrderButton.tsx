@@ -1,7 +1,5 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
@@ -42,7 +40,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   contactLenses,
   contactLensRx,
   className,
-  variant = "outline",
+  variant = "default", // Changed to default to match the standard
   size = "sm",
   isNewInvoice = false,
   onInvoiceSaved,
@@ -142,6 +140,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           label={loading ? t("saving") : t("printWorkOrder")}
           className={className}
           disabled={loading}
+          variant={variant}
+          size={size}
         />
       ) : (
         <WorkOrderPrintSelector
@@ -156,9 +156,11 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           contactLensRx={contactLensRx}
           trigger={
             <PrintButton
-              onClick={() => {}} // Added the required onClick handler with an empty function since it's just a trigger
+              onClick={() => {}} // This is just a trigger, the actual handler is in WorkOrderPrintSelector
               label={t("printWorkOrder")}
               className={className}
+              variant={variant}
+              size={size}
             />
           }
         />

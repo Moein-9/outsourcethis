@@ -29,7 +29,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   invoice,
   patient,
   className = '',
-  variant = "outline",
+  variant = "default", // Changed to default to match the standard
   size = "sm",
   children // This prop holds any custom trigger element
 }) => {
@@ -49,9 +49,11 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   // Create a default button if no children are provided or if children is not a valid element
   const defaultButton = (
     <PrintButton
-      onClick={() => setOpen(true)} // Added the required onClick handler
+      onClick={() => setOpen(true)}
       label={t('printWorkOrder')}
       className={className}
+      variant={variant}
+      size={size}
     />
   );
   
@@ -82,6 +84,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
             onClick={handlePrint}
             label={t('print')}
             className="mt-4"
+            variant="default"
           />
         </div>
       </DialogContent>

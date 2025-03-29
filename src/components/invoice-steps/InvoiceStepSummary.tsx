@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -9,6 +8,7 @@ import {
   CreditCard, User, Phone, Calendar, AlertTriangle,
   Contact
 } from "lucide-react";
+import { PrintButton } from "@/components/PrintButton";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
