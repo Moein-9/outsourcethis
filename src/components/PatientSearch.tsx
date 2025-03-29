@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -49,6 +49,7 @@ export const PatientSearch: React.FC = () => {
   
   const [isAddRxDialogOpen, setIsAddRxDialogOpen] = useState(false);
   const [editTimestamp, setEditTimestamp] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
@@ -87,13 +88,17 @@ export const PatientSearch: React.FC = () => {
     setShowResults(false);
   };
   
-  const refreshPatientData = (patientId: string) => {
+  const refreshPatientData = useCallback((patientId: string) => {
+    console.log("[PatientSearch] Refreshing patient data for ID:", patientId);
     const patientInvoices = getInvoicesByPatientId(patientId);
     const invoiceWorkOrders = getWorkOrdersByPatientId(patientId);
     
+    console.log("[PatientSearch] Updated invoices:", patientInvoices.length);
+    console.log("[PatientSearch] Updated work orders:", invoiceWorkOrders.length);
+    
     setPatientInvoices(patientInvoices);
     setPatientWorkOrders(invoiceWorkOrders);
-  };
+  }, [getInvoicesByPatientId, getWorkOrdersByPatientId]);
   
   const handlePatientSelect = (patient: PatientWithMeta) => {
     setSelectedPatient(patient);
@@ -108,17 +113,17 @@ export const PatientSearch: React.FC = () => {
       workOrderId: workOrder.id, // Use id as workOrderId
       invoiceId: workOrder.id,
       createdAt: workOrder.createdAt || new Date().toISOString(),
-      frameBrand: '',
-      frameModel: '',
-      frameColor: '',
-      frameSize: '',
-      framePrice: 0,
+      frameBrand: workOrder.frameBrand || '',
+      frameModel: workOrder.frameModel || '',
+      frameColor: workOrder.frameColor || '',
+      frameSize: workOrder.frameSize || '',
+      framePrice: workOrder.framePrice || 0,
       lensType: workOrder.lensType || '',
-      lensPrice: 0,
-      coating: '',
-      coatingPrice: 0,
-      discount: 0,
-      total: 0,
+      lensPrice: workOrder.lensPrice || 0,
+      coating: workOrder.coating || '',
+      coatingPrice: workOrder.coatingPrice || 0,
+      discount: workOrder.discount || 0,
+      total: workOrder.total || 0,
       isPaid: false,
       isPickedUp: workOrder.isPickedUp,
       pickedUpAt: workOrder.pickedUpAt,
@@ -167,19 +172,19 @@ export const PatientSearch: React.FC = () => {
         coatingPrice: updatedWorkOrder.coatingPrice,
         discount: updatedWorkOrder.discount,
         total: updatedWorkOrder.total,
+        editHistory: updatedWorkOrder.editHistory
       };
       
       // Update the invoice in the store
       updateInvoice(invoiceToUpdate);
       
-      // Refresh patient data to get latest changes
-      if (selectedPatient) {
-        refreshPatientData(selectedPatient.patientId);
-      }
+      // Trigger an immediate refresh
+      setRefreshTrigger(prev => prev + 1);
+      
+      // Show success message
+      toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
     }
     
-    // Show success message
-    toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
     setEditWorkOrderDialogOpen(false);
   };
   
@@ -225,11 +230,20 @@ export const PatientSearch: React.FC = () => {
   useEffect(() => {
     if (editTimestamp && selectedPatient) {
       // Refresh data after a short delay to ensure store has updated
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         refreshPatientData(selectedPatient.patientId);
       }, 200);
+      
+      return () => clearTimeout(timer);
     }
-  }, [editTimestamp]);
+  }, [editTimestamp, selectedPatient, refreshPatientData]);
+  
+  // Effect to refresh data when refresh trigger changes
+  useEffect(() => {
+    if (refreshTrigger > 0 && selectedPatient) {
+      refreshPatientData(selectedPatient.patientId);
+    }
+  }, [refreshTrigger, selectedPatient, refreshPatientData]);
   
   return (
     <div className="space-y-6">
@@ -287,6 +301,7 @@ export const PatientSearch: React.FC = () => {
                   />
                   
                   <PatientTransactions 
+                    key={`transactions-${refreshTrigger}`}
                     workOrders={patientWorkOrders}
                     invoices={patientInvoices}
                     patient={selectedPatient}

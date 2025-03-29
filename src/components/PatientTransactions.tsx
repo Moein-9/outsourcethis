@@ -25,6 +25,14 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
 }) => {
   const { t } = useLanguageStore();
   const [lastEditTimestamp, setLastEditTimestamp] = useState<string | null>(null);
+  const [localInvoices, setLocalInvoices] = useState<Invoice[]>(invoices);
+  const [localWorkOrders, setLocalWorkOrders] = useState<InvoiceWorkOrder[]>(workOrders);
+  
+  // Effect to update local state when props change
+  useEffect(() => {
+    setLocalInvoices(invoices);
+    setLocalWorkOrders(workOrders);
+  }, [invoices, workOrders]);
   
   // Effect to detect changes in work orders (especially edits)
   useEffect(() => {
@@ -32,31 +40,31 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     let latestEdit: string | null = null;
     
     // Check work orders
-    workOrders.forEach(workOrder => {
+    localWorkOrders.forEach(workOrder => {
       if (workOrder.lastEditedAt && (!latestEdit || new Date(workOrder.lastEditedAt) > new Date(latestEdit))) {
         latestEdit = workOrder.lastEditedAt;
       }
     });
     
     // Check invoices
-    invoices.forEach(invoice => {
+    localInvoices.forEach(invoice => {
       if (invoice.lastEditedAt && (!latestEdit || new Date(invoice.lastEditedAt) > new Date(latestEdit))) {
         latestEdit = invoice.lastEditedAt;
       }
     });
     
     setLastEditTimestamp(latestEdit);
-  }, [workOrders, invoices]);
+  }, [localWorkOrders, localInvoices]);
   
   // Filter out active invoices (not refunded)
-  const activeInvoices = invoices.filter(invoice => !invoice.isRefunded);
+  const activeInvoices = localInvoices.filter(invoice => !invoice.isRefunded);
   
   // Filter out refunded invoices
-  const refundedInvoices = invoices.filter(invoice => invoice.isRefunded);
+  const refundedInvoices = localInvoices.filter(invoice => invoice.isRefunded);
   
   const handlePrintWorkOrder = (workOrder: InvoiceWorkOrder) => {
     // Find related invoice for this work order
-    const relatedInvoice = invoices.find(inv => inv.workOrderId === workOrder.id);
+    const relatedInvoice = localInvoices.find(inv => inv.workOrderId === workOrder.id);
     
     console.log("[PatientTransactions] Printing work order:", workOrder.id);
     console.log("[PatientTransactions] Related invoice:", relatedInvoice?.invoiceId);
@@ -79,13 +87,13 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        {workOrders.length > 0 && invoices.length > 0 && (
+        {localWorkOrders.length > 0 && localInvoices.length > 0 && (
           <PrintOptionsDialog
-            workOrder={workOrders[0]}
-            invoice={invoices[0]}
+            workOrder={localWorkOrders[0]}
+            invoice={localInvoices[0]}
             patient={patient}
-            onPrintWorkOrder={() => handlePrintWorkOrder(workOrders[0])}
-            onPrintInvoice={() => handlePrintInvoice(invoices[0])}
+            onPrintWorkOrder={() => handlePrintWorkOrder(localWorkOrders[0])}
+            onPrintInvoice={() => handlePrintInvoice(localInvoices[0])}
           >
             <Button 
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
@@ -100,7 +108,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
       
       <TabbedTransactions
         invoices={activeInvoices}
-        workOrders={workOrders}
+        workOrders={localWorkOrders}
         refundedInvoices={refundedInvoices}
         patient={patient}
         onEditWorkOrder={onEditWorkOrder}

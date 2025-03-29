@@ -50,6 +50,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const lastEditedAt = workOrder?.lastEditedAt || invoice?.lastEditedAt;
   const hasBeenEdited = !!lastEditedAt;
+  const editHistory = workOrder?.editHistory || invoice?.editHistory || [];
+  const latestEdit = editHistory.length > 0 ? editHistory[editHistory.length - 1] : null;
   
   const getLensTypeString = () => {
     if (!lensType) return '';
@@ -175,6 +177,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                 {format(new Date(lastEditedAt), 'yyyy-MM-dd HH:mm', { locale: enUS })}
               </span>
             </Badge>
+            
+            {latestEdit && latestEdit.notes && (
+              <div className="text-xs text-violet-700 mt-0.5">
+                {latestEdit.notes}
+              </div>
+            )}
           </div>
         )}
       </div>

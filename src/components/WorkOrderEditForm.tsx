@@ -42,6 +42,21 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
     total: workOrder.total || 0,
   });
   
+  // Track original values to identify what changed
+  const [originalData] = useState({
+    frameBrand: workOrder.frameBrand || '',
+    frameModel: workOrder.frameModel || '',
+    frameColor: workOrder.frameColor || '',
+    frameSize: workOrder.frameSize || '',
+    framePrice: workOrder.framePrice || 0,
+    lensType: workOrder.lensType || '',
+    lensPrice: workOrder.lensPrice || 0,
+    coating: workOrder.coating || '',
+    coatingPrice: workOrder.coatingPrice || 0,
+    discount: workOrder.discount || 0,
+    total: workOrder.total || 0,
+  });
+  
   const getLensPrice = (lens: any): number => {
     return lens && lens.price !== undefined ? lens.price : 0;
   };
@@ -93,6 +108,43 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
     }
   };
   
+  const getChanges = (): string[] => {
+    const changes: string[] = [];
+    
+    if (editData.frameBrand !== originalData.frameBrand) {
+      changes.push(`${t("frameBrand")}: ${originalData.frameBrand} → ${editData.frameBrand}`);
+    }
+    if (editData.frameModel !== originalData.frameModel) {
+      changes.push(`${t("frameModel")}: ${originalData.frameModel} → ${editData.frameModel}`);
+    }
+    if (editData.frameColor !== originalData.frameColor) {
+      changes.push(`${t("frameColor")}: ${originalData.frameColor} → ${editData.frameColor}`);
+    }
+    if (editData.frameSize !== originalData.frameSize) {
+      changes.push(`${t("frameSize")}: ${originalData.frameSize} → ${editData.frameSize}`);
+    }
+    if (editData.framePrice !== originalData.framePrice) {
+      changes.push(`${t("framePrice")}: ${originalData.framePrice} → ${editData.framePrice}`);
+    }
+    if (editData.lensType !== originalData.lensType) {
+      changes.push(`${t("lensType")}: ${originalData.lensType} → ${editData.lensType}`);
+    }
+    if (editData.lensPrice !== originalData.lensPrice) {
+      changes.push(`${t("lensPrice")}: ${originalData.lensPrice} → ${editData.lensPrice}`);
+    }
+    if (editData.coating !== originalData.coating) {
+      changes.push(`${t("coating")}: ${originalData.coating} → ${editData.coating}`);
+    }
+    if (editData.coatingPrice !== originalData.coatingPrice) {
+      changes.push(`${t("coatingPrice")}: ${originalData.coatingPrice} → ${editData.coatingPrice}`);
+    }
+    if (editData.discount !== originalData.discount) {
+      changes.push(`${t("discount")}: ${originalData.discount} → ${editData.discount}`);
+    }
+    
+    return changes;
+  };
+  
   const handleSaveChanges = () => {
     try {
       const subtotal = editData.framePrice + editData.lensPrice + editData.coatingPrice;
@@ -101,10 +153,20 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
       // Create timestamp for the edit
       const now = new Date().toISOString();
       
+      // Generate detailed notes about what changed
+      const changes = getChanges();
+      const changeNotes = changes.length > 0 
+        ? language === 'ar' 
+          ? `تم تعديل أمر العمل: ${changes.join('، ')}` 
+          : `Work order edited: ${changes.join(', ')}`
+        : language === 'ar' 
+          ? "تم تعديل أمر العمل" 
+          : "Work order has been edited";
+      
       // Create edit history entry
       const editHistoryEntry = {
         timestamp: now,
-        notes: language === 'ar' ? "تم تعديل أمر العمل" : "Work order has been edited"
+        notes: changeNotes
       };
       
       // Combine existing history with new entry
