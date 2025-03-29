@@ -107,6 +107,15 @@ export const PatientSearch: React.FC = () => {
   };
   
   const convertToInventoryWorkOrder = (workOrder: InvoiceWorkOrder): InventoryWorkOrder => {
+    // Create a lensType that is compatible with InventoryWorkOrder
+    let lensTypeValue: string | { name: string; price: number };
+    
+    if (typeof workOrder.lensType === 'object' && workOrder.lensType !== null) {
+      lensTypeValue = workOrder.lensType;
+    } else {
+      lensTypeValue = String(workOrder.lensType || '');
+    }
+    
     return {
       id: workOrder.id,
       patientId: workOrder.patientId,
@@ -118,13 +127,13 @@ export const PatientSearch: React.FC = () => {
       frameColor: workOrder.frameColor || '',
       frameSize: workOrder.frameSize || '',
       framePrice: workOrder.framePrice || 0,
-      lensType: workOrder.lensType || '',
+      lensType: lensTypeValue,
       lensPrice: workOrder.lensPrice || 0,
       coating: workOrder.coating || '',
       coatingPrice: workOrder.coatingPrice || 0,
       discount: workOrder.discount || 0,
       total: workOrder.total || 0,
-      isPaid: false,
+      isPaid: workOrder.isPaid || false,
       isPickedUp: workOrder.isPickedUp,
       pickedUpAt: workOrder.pickedUpAt,
       lastEditedAt: workOrder.lastEditedAt,
@@ -148,11 +157,44 @@ export const PatientSearch: React.FC = () => {
     const now = new Date().toISOString();
     setEditTimestamp(now);
     
+    // Convert lensType to string for invoice update if it's an object
+    const lensTypeForInvoice = typeof updatedWorkOrder.lensType === 'object' 
+      ? updatedWorkOrder.lensType.name 
+      : updatedWorkOrder.lensType;
+    
     // First, update the local work order state
     if (updatedWorkOrder.id) {
+      // Convert to InvoiceWorkOrder type before updating
+      const invoiceWorkOrderUpdate: InvoiceWorkOrder = {
+        id: updatedWorkOrder.id,
+        patientId: updatedWorkOrder.patientId,
+        createdAt: updatedWorkOrder.createdAt,
+        lensType: typeof updatedWorkOrder.lensType === 'object' 
+          ? updatedWorkOrder.lensType 
+          : { name: String(updatedWorkOrder.lensType), price: updatedWorkOrder.lensPrice },
+        frameBrand: updatedWorkOrder.frameBrand,
+        frameModel: updatedWorkOrder.frameModel,
+        frameColor: updatedWorkOrder.frameColor,
+        frameSize: updatedWorkOrder.frameSize,
+        framePrice: updatedWorkOrder.framePrice,
+        lensPrice: updatedWorkOrder.lensPrice,
+        coating: updatedWorkOrder.coating,
+        coatingPrice: updatedWorkOrder.coatingPrice,
+        discount: updatedWorkOrder.discount,
+        total: updatedWorkOrder.total,
+        isPickedUp: updatedWorkOrder.isPickedUp,
+        pickedUpAt: updatedWorkOrder.pickedUpAt,
+        lastEditedAt: now,
+        editHistory: updatedWorkOrder.editHistory,
+        isRefunded: updatedWorkOrder.isRefunded,
+        refundDate: updatedWorkOrder.refundDate,
+        contactLenses: updatedWorkOrder.contactLenses,
+        contactLensRx: updatedWorkOrder.contactLensRx
+      };
+      
       // Update the work order in our store
       if (typeof updateWorkOrder === 'function') {
-        updateWorkOrder(updatedWorkOrder);
+        updateWorkOrder(invoiceWorkOrderUpdate);
       }
       
       // Create an invoice copy to update the invoice
@@ -166,7 +208,7 @@ export const PatientSearch: React.FC = () => {
         frameColor: updatedWorkOrder.frameColor,
         frameSize: updatedWorkOrder.frameSize,
         framePrice: updatedWorkOrder.framePrice,
-        lensType: updatedWorkOrder.lensType || '',
+        lensType: lensTypeForInvoice,
         lensPrice: updatedWorkOrder.lensPrice,
         coating: updatedWorkOrder.coating,
         coatingPrice: updatedWorkOrder.coatingPrice,

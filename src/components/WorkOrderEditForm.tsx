@@ -34,7 +34,7 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
     frameColor: workOrder.frameColor || '',
     frameSize: workOrder.frameSize || '',
     framePrice: workOrder.framePrice || 0,
-    lensType: workOrder.lensType || '',
+    lensType: typeof workOrder.lensType === 'object' ? workOrder.lensType.name || '' : workOrder.lensType || '',
     lensPrice: workOrder.lensPrice || 0,
     coating: workOrder.coating || '',
     coatingPrice: workOrder.coatingPrice || 0,
@@ -49,7 +49,7 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
     frameColor: workOrder.frameColor || '',
     frameSize: workOrder.frameSize || '',
     framePrice: workOrder.framePrice || 0,
-    lensType: workOrder.lensType || '',
+    lensType: typeof workOrder.lensType === 'object' ? workOrder.lensType.name || '' : workOrder.lensType || '',
     lensPrice: workOrder.lensPrice || 0,
     coating: workOrder.coating || '',
     coatingPrice: workOrder.coatingPrice || 0,
@@ -173,10 +173,25 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
       const existingHistory = workOrder.editHistory || [];
       const updatedHistory = [...existingHistory, editHistoryEntry];
       
+      // Prepare lensType in the correct format for the WorkOrder
+      const lensTypeForWorkOrder = {
+        name: editData.lensType,
+        price: editData.lensPrice
+      };
+      
       // Update work order with new data and edit history
       const updatedWorkOrder = {
         ...workOrder,
-        ...editData,
+        frameBrand: editData.frameBrand,
+        frameModel: editData.frameModel,
+        frameColor: editData.frameColor,
+        frameSize: editData.frameSize,
+        framePrice: editData.framePrice,
+        lensType: lensTypeForWorkOrder,
+        lensPrice: editData.lensPrice,
+        coating: editData.coating,
+        coatingPrice: editData.coatingPrice,
+        discount: editData.discount,
         total: newTotal,
         lastEditedAt: now,
         editHistory: updatedHistory
