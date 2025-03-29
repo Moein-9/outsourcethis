@@ -539,7 +539,11 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                 <div className="text-sm mt-1 font-medium text-red-700">
                   {invoice.invoiceType === 'glasses' ? (
                     <span>
-                      {invoice.frameBrand} {invoice.frameModel} - {invoice.lensType ?? ''}
+                      {invoice.frameBrand} {invoice.frameModel} - {
+                        typeof invoice.lensType === 'object' && invoice.lensType !== null
+                          ? invoice.lensType.name
+                          : String(invoice.lensType ?? '')
+                      }
                     </span>
                   ) : (
                     <span>
