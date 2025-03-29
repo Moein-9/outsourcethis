@@ -121,11 +121,12 @@ export function PrintOptionsDialog({
             {invoice ? (
               <div className="bg-gray-100 p-4 rounded-lg border">
                 <div className="bg-white max-w-[80mm] mx-auto p-1 border rounded shadow-sm">
-                  {/* Using the standardized ReceiptInvoice component */}
-                  <ReceiptInvoice 
-                    invoice={invoice} 
-                    isPrintable={false}
-                  />
+                  <div id="receipt-invoice">
+                    <ReceiptInvoice 
+                      invoice={invoice} 
+                      isPrintable={false}
+                    />
+                  </div>
                 </div>
                 <div className="flex justify-center mt-4">
                   <Button 

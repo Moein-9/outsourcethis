@@ -7,6 +7,7 @@ import { Patient } from "@/store/patientStore";
 import { PrintOptionsDialog } from "./PrintOptionsDialog";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
+import { CustomPrintService } from "@/utils/CustomPrintService";
 
 interface PatientTransactionsProps {
   invoices: Invoice[];
@@ -30,13 +31,16 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   const refundedInvoices = invoices.filter(invoice => invoice.isRefunded);
   
   const handlePrintWorkOrder = (workOrder: WorkOrder) => {
-    // Use the PrintService or window.print() implementation
-    window.print();
+    // Find related invoice for this work order
+    const relatedInvoice = invoices.find(inv => inv.workOrderId === workOrder.workOrderId);
+    
+    // Call the CustomPrintService
+    CustomPrintService.printWorkOrder(workOrder, relatedInvoice, patient);
   };
   
   const handlePrintInvoice = (invoice: Invoice) => {
-    // Use the PrintService or window.print() implementation
-    window.print();
+    // Call the CustomPrintService
+    CustomPrintService.printInvoice(invoice);
   };
   
   return (
