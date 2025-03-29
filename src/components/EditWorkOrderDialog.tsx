@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { Search, Edit, Clock, Glasses, CheckCircle2, BarChart2, Pencil, RefreshCw, Calculator } from "lucide-react";
-import { Frame, WorkOrder } from "@/types/inventory";
+import { Frame, WorkOrder, LensType, LensCoating } from "@/types/inventory";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -30,7 +30,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   onSave
 }) => {
   const { t, language } = useLanguageStore();
-  const { updateWorkOrder } = useInvoiceStore();
   const { editWorkOrder } = usePatientStore();
   const { lensTypes, lensCoatings } = useInventoryStore();
   const isRtl = language === 'ar';
@@ -64,6 +63,12 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   const [filteredFrames, setFilteredFrames] = useState<Frame[]>([]);
   const [selectedFrame, setSelectedFrame] = useState<Frame | null>(null);
   
+  // Initialize the rx object if it doesn't exist
+  const initialRx = workOrder.rx || {
+    right: { sphere: '', cylinder: '', axis: '', add: '', pd: '' },
+    left: { sphere: '', cylinder: '', axis: '', add: '', pd: '' }
+  };
+  
   // Edit data state
   const [editData, setEditData] = useState({
     frameBrand: workOrder.frameBrand || '',
@@ -77,10 +82,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     coatingPrice: workOrder.coatingPrice || 0,
     discount: workOrder.discount || 0,
     total: workOrder.total || 0,
-    rx: workOrder.rx || {
-      right: { sphere: '', cylinder: '', axis: '', add: '', pd: '' },
-      left: { sphere: '', cylinder: '', axis: '', add: '', pd: '' }
-    }
+    rx: initialRx
   });
   
   // Financial summary state
@@ -88,7 +90,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     originalTotal: workOrder.total || 0,
     newTotal: workOrder.total || 0,
     difference: 0,
-    originalPaid: 0, // To be filled from invoice data if available
+    originalPaid: workOrder.deposit || 0,
     remainingToPay: 0
   });
   
@@ -105,6 +107,12 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                          f.color === workOrder.frameColor)
       );
       
+      // Initialize the rx object if it doesn't exist
+      const initialRx = workOrder.rx || {
+        right: { sphere: '', cylinder: '', axis: '', add: '', pd: '' },
+        left: { sphere: '', cylinder: '', axis: '', add: '', pd: '' }
+      };
+      
       // Reset edit data when dialog opens
       setEditData({
         frameBrand: workOrder.frameBrand || '',
@@ -118,10 +126,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         coatingPrice: workOrder.coatingPrice || 0,
         discount: workOrder.discount || 0,
         total: workOrder.total || 0,
-        rx: workOrder.rx || {
-          right: { sphere: '', cylinder: '', axis: '', add: '', pd: '' },
-          left: { sphere: '', cylinder: '', axis: '', add: '', pd: '' }
-        }
+        rx: initialRx
       });
       
       // Initialize financial summary
@@ -169,10 +174,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     }
   }, [frameSearchQuery, frames]);
   
-  const getLensPrice = (lens: any): number => {
-    return lens && lens.price !== undefined ? lens.price : 0;
-  };
-  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
@@ -213,7 +214,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       if (selectedLens) {
         setEditData(prev => ({
           ...prev,
-          lensPrice: getLensPrice(selectedLens)
+          lensPrice: selectedLens.price
         }));
       }
     } else if (name === 'coating') {
@@ -224,12 +225,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
           coatingPrice: selectedCoating.price
         }));
       }
-    } else if (name === 'frameBrand') {
-      setEditData(prev => ({
-        ...prev,
-        frameModel: '',
-        frameColor: ''
-      }));
     }
   };
   
@@ -268,22 +263,10 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         ]
       };
       
-      if (updateWorkOrder) {
-        updateWorkOrder(updatedWorkOrder);
-      }
-      
-      if (workOrder.patientId && editWorkOrder) {
-        editWorkOrder({
-          patientId: workOrder.patientId,
-          workOrderId: workOrder.workOrderId || workOrder.invoiceId,
-          updatedData: updatedWorkOrder
-        });
-      }
+      onSave(updatedWorkOrder);
+      onClose();
       
       toast.success(language === 'ar' ? "تم تحديث البيانات بنجاح" : "Successfully updated");
-      
-      onClose();
-      onSave(updatedWorkOrder);
     } catch (error) {
       console.error("Error updating work order:", error);
       toast.error(language === 'ar' ? "حدث خطأ أثناء التحديث" : "Error updating");
@@ -676,7 +659,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                       <span>{language === 'ar' ? "السعر الجديد" : "New Price"}:</span>
                       <span>{financialSummary.newTotal.toFixed(2)} {language === 'ar' ? "د.ك" : "KWD"}</span>
                     </div>
-                    <div className={`flex justify-between font-medium ${financialSummary.difference > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                    <div className={`flex justify-between font-medium ${financialSummary.difference > 0 ? 'text-red-500' : financialSummary.difference < 0 ? 'text-green-500' : ''}`}>
                       <span>{language === 'ar' ? "الفرق" : "Difference"}:</span>
                       <span>{financialSummary.difference > 0 ? '+' : ''}{financialSummary.difference.toFixed(2)} {language === 'ar' ? "د.ك" : "KWD"}</span>
                     </div>
@@ -712,7 +695,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                 {language === 'ar' ? "تاريخ التعديلات" : "Edit History"}
               </h4>
               <div className="text-sm text-muted-foreground space-y-1 max-h-32 overflow-y-auto border rounded-md p-2">
-                {workOrder.editHistory.map((edit: any, index: number) => (
+                {workOrder.editHistory.map((edit, index) => (
                   <div key={index} className="flex justify-between">
                     <span>{edit.notes}</span>
                     <span>{new Date(edit.timestamp).toLocaleString()}</span>

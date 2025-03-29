@@ -36,12 +36,13 @@ export interface LensCoating {
   description?: string;
 }
 
-// Update WorkOrder type to include all required properties
+// Update WorkOrder type to align with invoiceStore.ts
 export interface WorkOrder {
+  id: string;
+  patientId: string;
   invoiceId?: string;
   workOrderId?: string;
-  patientId?: string;
-  id: string; // Changed from optional to required to match store/invoiceStore
+  createdAt: string;
   frameBrand?: string;
   frameModel?: string;
   frameColor?: string;
@@ -56,8 +57,12 @@ export interface WorkOrder {
   isPaid?: boolean;
   isPickedUp?: boolean;
   pickedUpAt?: string;
-  createdAt?: string;
   lastEditedAt?: string;
+  deposit?: number;
+  rx?: {
+    right: { sphere: string; cylinder: string; axis: string; add: string; pd: string };
+    left: { sphere: string; cylinder: string; axis: string; add: string; pd: string };
+  };
   editHistory?: Array<{
     timestamp: string;
     notes: string;

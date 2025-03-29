@@ -32,7 +32,7 @@ interface PatientWithMeta extends Patient {
 
 export const PatientSearch: React.FC = () => {
   const { patients, searchPatients, updatePatientRx } = usePatientStore();
-  const { invoices, workOrders, getInvoicesByPatientId, getWorkOrdersByPatientId } = useInvoiceStore();
+  const { invoices, workOrders: storeWorkOrders, getInvoicesByPatientId, getWorkOrdersByPatientId } = useInvoiceStore();
   const { language } = useLanguageStore();
   
   const [searchResults, setSearchResults] = useState<PatientWithMeta[]>([]);
@@ -90,10 +90,35 @@ export const PatientSearch: React.FC = () => {
     setSelectedPatient(patient);
     
     const patientInvoices = getInvoicesByPatientId(patient.patientId);
-    const patientWorkOrders = getWorkOrdersByPatientId(patient.patientId);
+    
+    // Convert invoiceStore WorkOrders to inventory.ts WorkOrder type
+    const storePatientWorkOrders = getWorkOrdersByPatientId(patient.patientId);
+    const convertedWorkOrders: WorkOrder[] = storePatientWorkOrders.map(wo => ({
+      id: wo.id,
+      patientId: wo.patientId,
+      workOrderId: wo.id,
+      createdAt: wo.createdAt,
+      frameBrand: wo.frameBrand,
+      frameModel: wo.frameModel,
+      frameColor: wo.frameColor,
+      frameSize: wo.frameSize,
+      framePrice: 0, // Will be set properly in the component
+      lensType: wo.lensType?.name,
+      lensPrice: wo.lensType?.price || 0,
+      coating: wo.coating,
+      coatingPrice: 0, // Will be set properly in the component
+      discount: 0,     // Will be set properly in the component
+      total: 0,        // Will be set properly in the component
+      isPaid: wo.isPaid,
+      isPickedUp: wo.isPickedUp,
+      pickedUpAt: wo.pickedUpAt,
+      lastEditedAt: wo.lastEditedAt,
+      editHistory: wo.editHistory,
+      rx: wo.rx
+    }));
     
     setPatientInvoices(patientInvoices);
-    setPatientWorkOrders(patientWorkOrders);
+    setPatientWorkOrders(convertedWorkOrders);
     
     setIsProfileOpen(true);
   };
@@ -102,7 +127,9 @@ export const PatientSearch: React.FC = () => {
     // Make sure all required properties are present
     const completeWorkOrder: WorkOrder = {
       ...workOrder,
-      id: workOrder.id || '', // Ensure id is present
+      id: workOrder.id || '',
+      patientId: workOrder.patientId || '',
+      createdAt: workOrder.createdAt || new Date().toISOString(),
       framePrice: workOrder.framePrice || 0,
       lensPrice: workOrder.lensPrice || 0,
       coatingPrice: workOrder.coatingPrice || 0,
@@ -115,8 +142,37 @@ export const PatientSearch: React.FC = () => {
   };
   
   const handleSaveWorkOrder = (updatedWorkOrder: WorkOrder) => {
+    // Convert back to invoiceStore WorkOrder format
+    if (useInvoiceStore.getState().updateWorkOrder) {
+      const storeWorkOrder = {
+        id: updatedWorkOrder.id,
+        patientId: updatedWorkOrder.patientId,
+        createdAt: updatedWorkOrder.createdAt,
+        frameBrand: updatedWorkOrder.frameBrand,
+        frameModel: updatedWorkOrder.frameModel,
+        frameColor: updatedWorkOrder.frameColor,
+        frameSize: updatedWorkOrder.frameSize,
+        lensType: { name: updatedWorkOrder.lensType || '', price: updatedWorkOrder.lensPrice },
+        coating: updatedWorkOrder.coating,
+        isPickedUp: updatedWorkOrder.isPickedUp,
+        pickedUpAt: updatedWorkOrder.pickedUpAt,
+        lastEditedAt: updatedWorkOrder.lastEditedAt,
+        editHistory: updatedWorkOrder.editHistory,
+        rx: updatedWorkOrder.rx
+      };
+      
+      useInvoiceStore.getState().updateWorkOrder(storeWorkOrder);
+    }
+    
     toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
     setEditWorkOrderDialogOpen(false);
+    
+    // Update the work order in the local state as well
+    setPatientWorkOrders(prevOrders => 
+      prevOrders.map(order => 
+        order.id === updatedWorkOrder.id ? updatedWorkOrder : order
+      )
+    );
   };
   
   const handleDirectPrint = (printLanguage?: 'en' | 'ar') => {
@@ -255,6 +311,8 @@ export const PatientSearch: React.FC = () => {
         onClose={() => setEditWorkOrderDialogOpen(false)}
         workOrder={currentWorkOrder || {
           id: '',
+          patientId: '',
+          createdAt: new Date().toISOString(),
           framePrice: 0,
           lensPrice: 0,
           coatingPrice: 0,
