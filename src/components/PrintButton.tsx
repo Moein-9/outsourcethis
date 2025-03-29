@@ -14,6 +14,7 @@ interface PrintButtonProps {
   icon?: React.ReactNode;
 }
 
+// Create a button specifically for print functionality
 export const PrintButton: React.FC<PrintButtonProps> = ({
   onClick,
   label,
@@ -31,12 +32,22 @@ export const PrintButton: React.FC<PrintButtonProps> = ({
   // Use the provided icon or default to Printer
   const buttonIcon = icon || <Printer className="h-4 w-4 mr-1" />;
   
+  // Prevent multiple print dialogs by debouncing the click handler
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent any default form submission
+    
+    // Only execute onClick if the button is not disabled
+    if (!disabled && onClick) {
+      onClick();
+    }
+  };
+  
   return (
     <Button 
       variant={variant} 
       size={size} 
       className={`gap-1 ${className}`}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
     >
       {buttonIcon}

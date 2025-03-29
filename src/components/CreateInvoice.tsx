@@ -19,6 +19,9 @@ import { InvoiceFormProvider, useInvoiceForm } from "@/components/invoice-steps/
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
+import { PrintButton } from "@/components/PrintButton";
+import { PrintService } from "@/utils/PrintService";
+import ReactDOMServer from "react-dom/server";
 
 const CreateInvoiceContent: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -41,17 +44,56 @@ const CreateInvoiceContent: React.FC = () => {
   }, []);
   
   const handlePrintWorkOrder = () => {
-    setWorkOrderPrintOpen(true);
-    setTimeout(() => {
-      window.print();
-    }, 500);
+    try {
+      const workOrderComponent = (
+        <WorkOrderPrint 
+          invoice={previewInvoice}
+          patientName={getValues("patientName") || ""}
+          patientPhone={getValues("patientPhone") || ""}
+          rx={getValues("rx")}
+          lensType={getValues("lensType") || ""}
+          coating={getValues("coating") || ""}
+          thickness={getValues("thickness") || ""}
+          frame={getValues("skipFrame") ? undefined : {
+            brand: getValues("frameBrand") || "",
+            model: getValues("frameModel") || "",
+            color: getValues("frameColor") || "",
+            size: getValues("frameSize") || "",
+            price: getValues("framePrice") || 0
+          }}
+          contactLenses={getValues("contactLensItems") || []}
+          contactLensRx={getValues("contactLensRx")}
+        />
+      );
+      
+      const content = ReactDOMServer.renderToString(workOrderComponent);
+      const htmlContent = PrintService.prepareReceiptDocument(content, `Work Order ${getValues("workOrderId")}`);
+      
+      PrintService.printHtml(htmlContent, 'workorder', () => {
+        toast.success(t("printingCompleted"));
+      });
+    } catch (error) {
+      console.error('Printing error:', error);
+      toast.error(t("printingFailed"));
+    }
   };
   
   const handlePrintInvoice = () => {
-    setInvoicePrintOpen(true);
-    setTimeout(() => {
-      window.print();
-    }, 500);
+    try {
+      const invoiceComponent = (
+        <ReceiptInvoice invoice={previewInvoice} isPrintable={true} />
+      );
+      
+      const content = ReactDOMServer.renderToString(invoiceComponent);
+      const htmlContent = PrintService.prepareReceiptDocument(content, `Invoice ${getValues("invoiceId")}`);
+      
+      PrintService.printHtml(htmlContent, 'receipt', () => {
+        toast.success(t("printingCompleted"));
+      });
+    } catch (error) {
+      console.error('Printing error:', error);
+      toast.error(t("printingFailed"));
+    }
   };
 
   const previewInvoice = {
@@ -102,23 +144,21 @@ const CreateInvoiceContent: React.FC = () => {
         </h2>
         
         <div className="flex items-center space-x-3">
-          <Button 
+          <PrintButton 
             onClick={handlePrintInvoice} 
             variant="outline" 
             className="flex items-center gap-2"
-          >
-            <Receipt className="w-4 h-4" />
-            {t('printInvoice')}
-          </Button>
+            label={t('printInvoice')}
+            icon={<Receipt className="w-4 h-4" />}
+          />
           
-          <Button 
+          <PrintButton 
             onClick={handlePrintWorkOrder} 
             variant="outline" 
             className="flex items-center gap-2"
-          >
-            <Printer className="w-4 h-4" />
-            {t('printWorkOrder')}
-          </Button>
+            label={t('printWorkOrder')}
+            icon={<Printer className="w-4 h-4" />}
+          />
         </div>
       </div>
 
@@ -477,10 +517,12 @@ const CreateInvoiceContent: React.FC = () => {
               {t('invoice')}
             </SheetTitle>
             <SheetDescription>
-              <Button onClick={handlePrintInvoice} className="mt-2">
-                <Printer className={`w-4 h-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
-                {t('print')}
-              </Button>
+              <PrintButton 
+                onClick={handlePrintInvoice} 
+                className="mt-2"
+                label={t('print')}
+                icon={<Printer className={`w-4 h-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />}
+              />
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6 print:mt-0">
@@ -503,10 +545,12 @@ const CreateInvoiceContent: React.FC = () => {
               {t('workOrder')}
             </SheetTitle>
             <SheetDescription>
-              <Button onClick={handlePrintWorkOrder} className="mt-2">
-                <Printer className={`w-4 h-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
-                {t('print')}
-              </Button>
+              <PrintButton 
+                onClick={handlePrintWorkOrder} 
+                className="mt-2"
+                label={t('print')}
+                icon={<Printer className={`w-4 h-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />}
+              />
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6 print:mt-0">

@@ -46,6 +46,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   const completedInvoices = sortedInvoices.filter(invoice => invoice.isPickedUp && !invoice.isRefunded);
   const refundedInvoices = sortedInvoices.filter(invoice => invoice.isRefunded);
 
+  // Single, reusable function to handle invoice printing
   const handlePrintInvoice = (invoice: Invoice) => {
     try {
       console.log("[PatientTransactions] Printing invoice:", invoice.invoiceId);
@@ -64,6 +65,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
       
       console.log("[PatientTransactions] Sending to print service");
       
+      // We'll avoid calling window.print() directly here and just use PrintService
       PrintService.printHtml(htmlContent, 'receipt', () => {
         toast.success(language === 'ar' ? "تمت طباعة الفاتورة بنجاح" : "Invoice printed successfully");
       });
@@ -106,6 +108,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
         `Refund ${invoice.invoiceId}`
       );
       
+      // Don't call window.print() directly, use the PrintService
       PrintService.printHtml(htmlContent, 'receipt', () => {
         toast.success(language === 'ar' ? "تمت طباعة إيصال الاسترداد بنجاح" : "Refund receipt printed successfully");
       });

@@ -105,18 +105,18 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         overflow: 'hidden'
       }}
     >
-      {/* Modern Header with logo and store info */}
-      <div className="bg-black text-white p-3 text-center">
+      {/* Header with logo and store info */}
+      <div className="text-center p-3 border-b border-gray-200">
         <div className="flex justify-center mb-2">
           <MoenLogo className="w-auto h-10" />
         </div>
         <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
-        <p className="text-xs font-medium mb-0 opacity-90">{storeInfo.address}</p>
-        <p className="text-xs font-medium opacity-90">{t("phone")}: {storeInfo.phone}</p>
+        <p className="text-xs font-medium mb-0">{storeInfo.address}</p>
+        <p className="text-xs font-medium">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      {/* Invoice Title Bar */}
-      <div className="bg-black text-white py-2 flex items-center justify-center gap-2 font-bold text-base">
+      {/* Invoice Title */}
+      <div className="py-2 px-3 flex items-center justify-center gap-2 font-bold text-base border-b border-gray-200">
         <Receipt className="w-4 h-4" />
         <span>{t("invoice")} {isRtl ? "Invoice" : "الفاتورة"}</span>
         <span className="font-mono">#{invoice.invoiceId}</span>
@@ -124,8 +124,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       
       {/* Customer & Invoice Info */}
       <div className="p-3 border-b border-gray-200">
-        <div className="bg-gray-100 rounded-lg p-2 mb-2">
-          <div className="flex items-center justify-center gap-1 font-bold mb-1 text-gray-700 border-b border-gray-200 pb-1">
+        <div className="mb-2">
+          <div className="flex items-center gap-1 font-bold mb-1 text-gray-700 pb-1">
             <UserCircle2 className="w-4 h-4" />
             <span>{t("customerInfo")}</span>
           </div>
@@ -158,17 +158,18 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       </div>
 
-      {/* Products Section */}
-      <div className="bg-black text-white py-2 px-3 font-bold flex items-center gap-2">
+      {/* Products Section Header */}
+      <div className="py-2 px-3 font-bold flex items-center gap-2 border-b border-gray-200">
         <PackageCheck className="w-4 h-4" />
         <span>{t("products")}</span>
       </div>
       
-      <div className="p-3 space-y-2">
+      {/* Products */}
+      <div className="p-3 space-y-2 border-b border-gray-200">
         {isContactLens && contactLensItems.length > 0 ? (
           <div>
             {contactLensItems.map((lens, idx) => (
-              <div key={idx} className={`${idx !== 0 ? "border-t border-gray-200 pt-2 mt-2" : ""} bg-gray-50 rounded-lg p-2`}>
+              <div key={idx} className={`${idx !== 0 ? "border-t border-gray-200 pt-2 mt-2" : ""}`}>
                 <div className="flex justify-between items-center">
                   <span className="font-medium">{t("lenses")}</span>
                   <span className="font-bold text-gray-800">KWD {lens.price.toFixed(3)}</span>
@@ -185,7 +186,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         ) : (
           <div className="space-y-2">
             {lens && (
-              <div className="bg-gray-50 rounded-lg p-2">
+              <div>
                 <div className="flex justify-between items-center">
                   <span className="font-medium">{t("lenses")}</span>
                   <span className="font-bold text-gray-800">KWD {lensP.toFixed(3)}</span>
@@ -195,7 +196,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             )}
             
             {coat && (
-              <div className="bg-gray-50 rounded-lg p-2">
+              <div className="mt-2 pt-2 border-t border-gray-200">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">{t("coating")}</span>
                   <span className="font-bold text-gray-800">KWD {coatP.toFixed(3)}</span>
@@ -205,7 +206,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             )}
             
             {frameBrand && (
-              <div className="bg-gray-50 rounded-lg p-2">
+              <div className="mt-2 pt-2 border-t border-gray-200">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">{t("frame")}</span>
                   <span className="font-bold text-gray-800">KWD {frameP.toFixed(3)}</span>
@@ -240,14 +241,14 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       </div>
 
       {/* Payment Section */}
-      <div className="bg-black text-white py-2 px-3 font-bold flex items-center gap-2">
+      <div className="py-2 px-3 font-bold flex items-center gap-2 border-b border-gray-200">
         <CreditCard className="w-4 h-4" />
         <span>{t("payment")}</span>
       </div>
       
       <div className="p-3 space-y-2">
         {invoice.payments?.map((payment, index) => (
-          <div key={index} className="bg-gray-50 rounded-lg p-2 flex flex-col">
+          <div key={index} className="flex flex-col">
             <div className="flex justify-between items-center">
               <span className="text-xs text-gray-500">{formatDate(payment.date)}</span>
               <span className="font-bold">KWD {payment.amount.toFixed(3)}</span>
@@ -259,7 +260,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             </div>
           </div>
         )) || (
-          <div className="bg-gray-50 rounded-lg p-2 flex flex-col">
+          <div className="flex flex-col">
             <div className="flex justify-between items-center">
               <span className="text-xs text-gray-500">{formatDate(invoice.createdAt)}</span>
               <span className="font-bold">KWD {dep.toFixed(3)}</span>
@@ -274,12 +275,12 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         
         {/* Paid in Full / Remaining */}
         {isPaid ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-2 flex items-center justify-center gap-2 text-green-700">
+          <div className="border border-green-300 rounded p-2 flex items-center justify-center gap-2 text-green-700 mt-2">
             <CheckCircle2 className="w-4 h-4" />
             <span className="font-bold">{t("paidInFull")}</span>
           </div>
         ) : (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-2">
+          <div className="border border-amber-300 rounded p-2 mt-2">
             <div className="flex justify-between items-center text-amber-700 font-bold">
               <span>{t("remaining")}:</span>
               <span>KWD {rem.toFixed(3)}</span>
@@ -289,7 +290,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="bg-gray-100 py-3 px-2 text-center">
+      <div className="py-3 px-3 text-center border-t border-gray-200">
         <p className="font-medium text-sm mb-1 text-gray-700">
           {isRtl ? 
             "شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!" : 
@@ -372,34 +373,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                 min-height: fit-content !important;
                 max-height: fit-content !important;
               }
-            }
-            
-            .bg-black {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              background-color: black !important;
-              color: white !important;
-            }
-            
-            .bg-gray-50, .bg-gray-100 {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-            }
-            
-            .bg-green-50 {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              background-color: #f0fdf4 !important;
-            }
-            
-            .bg-amber-50 {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              background-color: #fffbeb !important;
             }
           }
         `}

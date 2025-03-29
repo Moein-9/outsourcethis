@@ -13,11 +13,12 @@ interface PrintReportButtonProps {
 export const PrintReportButton: React.FC<PrintReportButtonProps> = ({ 
   onPrint,
   className = "",
-  variant = "default", // Changed to default to match the standard
+  variant = "default",
   size = "sm"
 }) => {
   const { language } = useLanguageStore();
   
+  // Use the consistent PrintButton component with a debounced click handler
   return (
     <PrintButton
       onClick={onPrint}

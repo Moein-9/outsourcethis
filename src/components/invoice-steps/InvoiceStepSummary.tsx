@@ -59,6 +59,14 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const hasInvoiceData = !!invoice.invoiceId && !!invoice.workOrderId;
   const isContactLens = invoice.invoiceType === "contacts";
   
+  const handleOpenInvoicePrint = () => {
+    setInvoicePrintOpen(true);
+  };
+  
+  const handleOpenWorkOrderPrint = () => {
+    setWorkOrderPrintOpen(true);
+  };
+  
   if (!hasInvoiceData) {
     return (
       <div className="space-y-8 animate-fade-in">
@@ -197,7 +205,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
           <Button 
             variant="outline"
             className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-            onClick={() => setWorkOrderPrintOpen(true)}
+            onClick={handleOpenWorkOrderPrint}
           >
             <div className="flex items-center">
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
@@ -214,7 +222,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
           <Button 
             variant="outline"
             className="w-full justify-between group hover:border-purple-500 hover:bg-purple-50 hover:text-purple-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-            onClick={() => setInvoicePrintOpen(true)}
+            onClick={handleOpenInvoicePrint}
           >
             <div className="flex items-center">
               <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-4 group-hover:bg-purple-200 transition-colors">

@@ -38,18 +38,20 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
-  variant = "default", // Added default variant
-  size = "sm", // Added default size
+  variant = "default",
+  size = "sm",
 }) => {
   const { t } = useLanguageStore();
   const [printingInProgress, setPrintingInProgress] = useState(false);
   
+  // Single function to handle printing that prevents multiple dialogs
   const handlePrint = () => {
     if (printingInProgress) return;
     
     setPrintingInProgress(true);
     
     try {
+      // Using the printWorkOrderReceipt function from the imported file
       printWorkOrderReceipt({
         invoice,
         patientName,
