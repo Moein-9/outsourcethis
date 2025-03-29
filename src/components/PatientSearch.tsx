@@ -22,7 +22,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { PlusCircle } from "lucide-react";
-import { WorkOrder } from "@/types/inventory";
+import { WorkOrder as InventoryWorkOrder } from "@/types/inventory";
+import { WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
@@ -41,11 +42,11 @@ export const PatientSearch: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
   const [patientInvoices, setPatientInvoices] = useState<Invoice[]>([]);
-  const [patientWorkOrders, setPatientWorkOrders] = useState<WorkOrder[]>([]);
+  const [patientWorkOrders, setPatientWorkOrders] = useState<InventoryWorkOrder[]>([]);
   
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   const [editWorkOrderDialogOpen, setEditWorkOrderDialogOpen] = useState(false);
-  const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder | null>(null);
+  const [currentWorkOrder, setCurrentWorkOrder] = useState<InventoryWorkOrder | null>(null);
   
   const [isAddRxDialogOpen, setIsAddRxDialogOpen] = useState(false);
   
@@ -93,7 +94,7 @@ export const PatientSearch: React.FC = () => {
     
     // Convert invoiceStore WorkOrders to inventory.ts WorkOrder type
     const storePatientWorkOrders = getWorkOrdersByPatientId(patient.patientId);
-    const convertedWorkOrders: WorkOrder[] = storePatientWorkOrders.map(wo => {
+    const convertedWorkOrders: InventoryWorkOrder[] = storePatientWorkOrders.map(wo => {
       // Extract lens type name and price
       const lensTypeName = wo.lensType?.name || '';
       const lensTypePrice = wo.lensType?.price || 0;
@@ -130,9 +131,9 @@ export const PatientSearch: React.FC = () => {
     setIsProfileOpen(true);
   };
   
-  const handleEditWorkOrder = (workOrder: WorkOrder) => {
+  const handleEditWorkOrder = (workOrder: InventoryWorkOrder) => {
     // Make sure all required properties are present
-    const completeWorkOrder: WorkOrder = {
+    const completeWorkOrder: InventoryWorkOrder = {
       ...workOrder,
       id: workOrder.id || '',
       patientId: workOrder.patientId || '',
@@ -148,10 +149,10 @@ export const PatientSearch: React.FC = () => {
     setEditWorkOrderDialogOpen(true);
   };
   
-  const handleSaveWorkOrder = (updatedWorkOrder: WorkOrder) => {
+  const handleSaveWorkOrder = (updatedWorkOrder: InventoryWorkOrder) => {
     // Convert back to invoiceStore WorkOrder format
     if (useInvoiceStore.getState().updateWorkOrder) {
-      const storeWorkOrder = {
+      const storeWorkOrder: InvoiceWorkOrder = {
         id: updatedWorkOrder.id,
         patientId: updatedWorkOrder.patientId,
         createdAt: updatedWorkOrder.createdAt,
@@ -334,7 +335,7 @@ export const PatientSearch: React.FC = () => {
           coatingPrice: 0,
           discount: 0,
           total: 0
-        } as WorkOrder}
+        } as InventoryWorkOrder}
         onSave={handleSaveWorkOrder}
       />
       
