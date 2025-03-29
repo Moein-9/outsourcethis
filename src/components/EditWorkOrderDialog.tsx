@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { Search, Edit, Clock, Glasses, CheckCircle2, Eye, Calculator } from "lucide-react";
-import { Frame, WorkOrder } from "@/types/inventory";
+import { Frame, WorkOrder, WorkOrderEdit } from "@/types/inventory";
 
 interface EditWorkOrderDialogProps {
   workOrder: WorkOrder;
@@ -278,7 +278,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         const storeWorkOrder = {
           ...updatedWorkOrder,
           lensType: {
-            name: editData.lensType,
+            name: typeof editData.lensType === 'string' ? editData.lensType : editData.lensType.name,
             price: editData.lensPrice
           }
         };
@@ -288,18 +288,44 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       if (workOrder.patientId && editWorkOrder) {
         // Update patient RX if needed
         if (patient) {
-          editWorkOrder({
+          const workOrderEditData: WorkOrderEdit = {
             patientId: workOrder.patientId,
             workOrderId: workOrder.workOrderId || workOrder.invoiceId || workOrder.id,
             updatedData: updatedWorkOrder,
-            rxData: rxData
-          });
+            rxData: rxData,
+            frameBrand: updatedWorkOrder.frameBrand,
+            frameModel: updatedWorkOrder.frameModel,
+            frameColor: updatedWorkOrder.frameColor,
+            frameSize: updatedWorkOrder.frameSize,
+            framePrice: updatedWorkOrder.framePrice,
+            lensType: updatedWorkOrder.lensType,
+            lensPrice: updatedWorkOrder.lensPrice,
+            coating: updatedWorkOrder.coating,
+            coatingPrice: updatedWorkOrder.coatingPrice,
+            discount: updatedWorkOrder.discount,
+            total: updatedWorkOrder.total
+          };
+          
+          editWorkOrder(workOrderEditData);
         } else {
-          editWorkOrder({
+          const workOrderEditData: WorkOrderEdit = {
             patientId: workOrder.patientId,
             workOrderId: workOrder.workOrderId || workOrder.invoiceId || workOrder.id,
-            updatedData: updatedWorkOrder
-          });
+            updatedData: updatedWorkOrder,
+            frameBrand: updatedWorkOrder.frameBrand,
+            frameModel: updatedWorkOrder.frameModel,
+            frameColor: updatedWorkOrder.frameColor,
+            frameSize: updatedWorkOrder.frameSize,
+            framePrice: updatedWorkOrder.framePrice,
+            lensType: updatedWorkOrder.lensType,
+            lensPrice: updatedWorkOrder.lensPrice,
+            coating: updatedWorkOrder.coating,
+            coatingPrice: updatedWorkOrder.coatingPrice,
+            discount: updatedWorkOrder.discount,
+            total: updatedWorkOrder.total
+          };
+          
+          editWorkOrder(workOrderEditData);
         }
       }
       
@@ -721,10 +747,4 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
             </Button>
             <Button onClick={handleSaveChanges} className="bg-primary">
               {language === 'ar' ? "حفظ التغييرات" : "Save Changes"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
+            </Button

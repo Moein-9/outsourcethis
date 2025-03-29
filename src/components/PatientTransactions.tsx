@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
-import { Invoice, WorkOrder } from "@/store/invoiceStore";
+import { Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { TabbedTransactions } from "./TabbedTransactions";
 import { Patient } from "@/store/patientStore";
 import { PrintOptionsDialog } from "./PrintOptionsDialog";
@@ -12,9 +12,9 @@ import { CustomPrintWorkOrderButton } from "./CustomPrintWorkOrderButton";
 
 interface PatientTransactionsProps {
   invoices: Invoice[];
-  workOrders: WorkOrder[];
+  workOrders: InvoiceWorkOrder[];
   patient?: Patient;
-  onEditWorkOrder?: (workOrder: WorkOrder) => void;
+  onEditWorkOrder?: (workOrder: InvoiceWorkOrder) => void;
 }
 
 export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
@@ -31,7 +31,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   // Filter out refunded invoices
   const refundedInvoices = invoices.filter(invoice => invoice.isRefunded);
   
-  const handlePrintWorkOrder = (workOrder: WorkOrder) => {
+  const handlePrintWorkOrder = (workOrder: InvoiceWorkOrder) => {
     // Find related invoice for this work order
     const relatedInvoice = invoices.find(inv => inv.workOrderId === workOrder.id);
     

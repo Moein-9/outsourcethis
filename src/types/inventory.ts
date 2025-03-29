@@ -1,4 +1,3 @@
-
 // Define common types for the inventory store
 export interface Frame {
   id: string;
@@ -45,18 +44,18 @@ export interface WorkOrder {
   createdAt: string;
   
   // Frame details
-  frameBrand?: string;
-  frameModel?: string;
-  frameColor?: string;
+  frameBrand: string;
+  frameModel: string;
+  frameColor: string;
   frameSize?: string;
   framePrice: number;
   
   // Lens details - match the invoiceStore structure
-  lensType?: string | { name: string; price: number };
+  lensType: string | { name: string; price: number };
   lensPrice: number;
   
   // Coating
-  coating?: string;
+  coating: string;
   coatingPrice: number;
   
   // Pricing
@@ -85,4 +84,44 @@ export interface WorkOrder {
 }
 
 // Utility type for converting between WorkOrder types
-export type WorkOrderEdit = Omit<WorkOrder, 'id' | 'createdAt'>;
+export interface WorkOrderEdit {
+  patientId: string;
+  workOrderId?: string;
+  invoiceId?: string;
+  
+  // Frame details
+  frameBrand: string;
+  frameModel: string;
+  frameColor: string;
+  frameSize?: string;
+  framePrice: number;
+  
+  // Lens details
+  lensType: string | { name: string; price: number };
+  lensPrice: number;
+  
+  // Coating
+  coating: string;
+  coatingPrice: number;
+  
+  // Pricing
+  discount: number;
+  total: number;
+  
+  // Status tracking
+  isPaid?: boolean;
+  isPickedUp?: boolean;
+  pickedUpAt?: string;
+  
+  // Additional fields for edit operations
+  updatedData?: any;
+  rxData?: any; // Adding rxData as a valid property
+  
+  // Other properties
+  contactLenses?: any[];
+  contactLensRx?: any;
+  lastEditedAt?: string;
+  editHistory?: Array<{ timestamp: string; notes: string }>;
+  isRefunded?: boolean;
+  refundDate?: string;
+}
