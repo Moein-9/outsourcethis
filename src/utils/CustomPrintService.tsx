@@ -20,121 +20,139 @@ export class CustomPrintService {
         return;
       }
       
-      // Add all the required styles and content
+      // Add basic HTML structure with styles for the receipt
       printWindow.document.write(`
+        <!DOCTYPE html>
         <html>
           <head>
             <title>Work Order</title>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
             <style>
+              @page {
+                size: 80mm auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+              
+              body {
+                width: 80mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-family: Cairo, Arial, sans-serif !important;
+                background: white !important;
+                color: black !important;
+              }
+              
+              #work-order-receipt {
+                width: 76mm !important;
+                max-width: 76mm !important;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 2mm !important;
+                margin: 0 !important;
+                background: white !important;
+                color: black !important;
+              }
+              
+              .print-receipt {
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+              }
+              
+              .print-receipt * {
+                visibility: visible !important;
+                opacity: 1 !important;
+              }
+              
+              .bg-black {
+                background-color: black !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                color: white !important;
+              }
+              
+              .text-white {
+                color: white !important;
+              }
+              
+              /* Tailwind-like classes for printing */
+              .flex { display: flex !important; }
+              .flex-col { flex-direction: column !important; }
+              .items-center { align-items: center !important; }
+              .justify-center { justify-content: center !important; }
+              .justify-between { justify-content: space-between !important; }
+              .text-center { text-align: center !important; }
+              .font-bold { font-weight: bold !important; }
+              .text-xs { font-size: 0.75rem !important; }
+              .text-sm { font-size: 0.875rem !important; }
+              .text-base { font-size: 1rem !important; }
+              .text-lg { font-size: 1.125rem !important; }
+              .mb-0 { margin-bottom: 0 !important; }
+              .mb-1 { margin-bottom: 0.25rem !important; }
+              .mb-2 { margin-bottom: 0.5rem !important; }
+              .mb-3 { margin-bottom: 0.75rem !important; }
+              .py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+              .px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+              .p-1 { padding: 0.25rem !important; }
+              .p-2 { padding: 0.5rem !important; }
+              .p-3 { padding: 0.75rem !important; }
+              .rounded { border-radius: 0.25rem !important; }
+              .border { border-width: 1px !important; }
+              .border-gray-300 { border-color: #d1d5db !important; }
+              .border-b { border-bottom-width: 1px !important; }
+              .bg-gray-100 { background-color: #f3f4f6 !important; }
+              .text-gray-600 { color: #4b5563 !important; }
+              
+              .card { 
+                background-color: white !important; 
+                border-radius: 0.375rem !important;
+                border: 1px solid #e5e7eb !important;
+                overflow: hidden !important;
+                margin-bottom: 0.5rem !important;
+              }
+              
+              .card-content {
+                padding: 0.5rem !important;
+              }
+              
+              /* Print-specific overrides */
               @media print {
-                @page {
-                  size: 80mm auto !important;
-                  margin: 0 !important;
-                  padding: 0 !important;
-                }
-                
-                body {
-                  width: 80mm !important;
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  background: white !important; /* White background for print */
-                  color: black !important;
-                }
-                
-                #work-order-receipt {
-                  width: 76mm !important;
-                  max-width: 76mm !important;
-                  page-break-after: always !important;
-                  page-break-inside: avoid !important;
-                  position: absolute !important;
-                  left: 0 !important;
-                  top: 0 !important;
-                  border: none !important;
-                  box-shadow: none !important;
-                  padding: 2mm !important;
-                  margin: 0 !important;
-                  background: white !important;
-                  color: black !important;
-                  height: auto !important;
-                  min-height: 0 !important;
-                  max-height: none !important;
-                }
-                
-                /* Force content to be visible */
-                .print-receipt * {
-                  visibility: visible !important;
-                  opacity: 1 !important;
-                }
-                
-                /* Background colors should print properly */
-                .bg-black {
-                  background-color: black !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                  color-adjust: exact !important;
-                  color: white !important;
-                }
-                
-                .text-white {
-                  color: white !important;
-                }
-                
-                /* Improve dynamic sizing */
                 html, body {
+                  width: 80mm !important;
                   height: auto !important;
                   min-height: 0 !important;
                   max-height: none !important;
                   overflow: visible !important;
-                }
-                
-                /* Fix Chrome printing issues */
-                body {
+                  background: white !important;
                   -webkit-print-color-adjust: exact !important;
-                  color-adjust: exact !important;
                   print-color-adjust: exact !important;
+                  color-adjust: exact !important;
                 }
                 
-                /* Dynamic height adjustment */
-                .print-receipt {
-                  height: fit-content !important;
-                  min-height: fit-content !important;
-                  max-height: fit-content !important;
+                .bg-black {
+                  background-color: black !important;
+                  color: white !important;
                 }
                 
-                /* Ensure proper page breaks and avoid blank pages */
-                .print-receipt {
-                  break-inside: avoid !important;
-                  break-after: avoid-page !important;
-                  page-break-inside: avoid !important;
-                  page-break-after: avoid !important;
+                body * {
+                  visibility: visible !important;
                 }
-              }
-              
-              body {
-                font-family: Cairo, Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background: white;
-                color: black;
-              }
-              
-              /* Background classes */
-              .bg-black {
-                background-color: black !important;
-                color: white !important;
               }
             </style>
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
           </head>
           <body>
-            <div id="custom-work-order-content"></div>
+            <div id="print-container"></div>
             <script>
               window.onload = function() {
-                // Force background colors to print properly
-                document.body.style.webkitPrintColorAdjust = 'exact';
-                document.body.style.printColorAdjust = 'exact';
-                
                 setTimeout(function() {
+                  window.focus();
                   window.print();
                   window.onafterprint = function() {
                     window.close();
@@ -146,69 +164,78 @@ export class CustomPrintService {
         </html>
       `);
       
-      // Create a div to temporarily render our React component to HTML
+      // Create a div element to hold our component temporarily
       const tempDiv = document.createElement('div');
-      tempDiv.style.display = 'none';
       document.body.appendChild(tempDiv);
+      tempDiv.style.display = 'none';
       
-      // Mount the CustomWorkOrderReceipt to this temp div to get its HTML
+      // Render our component to the temp div
       const root = createRoot(tempDiv);
-      
-      // This will render the component once to get its HTML
       root.render(
-        <CustomWorkOrderReceipt 
-          workOrder={workOrder} 
+        <CustomWorkOrderReceipt
+          workOrder={workOrder}
           invoice={invoice}
           patient={patient}
           isPrintable={true}
         />
       );
       
-      // Wait a bit for the component to fully render
+      // Wait for React to render the component
       setTimeout(() => {
         try {
-          // Get the rendered HTML from our temporary div
-          const workOrderHtml = tempDiv.innerHTML;
+          // Get the HTML content of the rendered component
+          const contentHtml = tempDiv.innerHTML;
           
-          // Put this HTML into the print window
-          const contentContainer = printWindow.document.getElementById('custom-work-order-content');
-          if (contentContainer) {
-            contentContainer.innerHTML = workOrderHtml;
+          // Insert it into the print window
+          const printContainer = printWindow.document.getElementById('print-container');
+          if (printContainer) {
+            printContainer.innerHTML = contentHtml;
             
-            // Ensure timestamps are showing original creation dates
-            if (invoice?.rx?.createdAt || workOrder?.rx?.createdAt) {
-              // Use the original RX creation date rather than printing date
-              const rxCreationDate = invoice?.rx?.createdAt || workOrder?.rx?.createdAt;
-              const dateElements = printWindow.document.querySelectorAll('.rx-creation-date');
-              
-              dateElements.forEach(element => {
-                if (element instanceof HTMLElement) {
-                  // Format date in English format MM/DD/YYYY HH:MM
-                  element.textContent = new Date(rxCreationDate).toLocaleString('en-US');
-                }
-              });
+            // Apply any additional styling to printed output
+            const printedReceipt = printWindow.document.querySelector('#work-order-receipt');
+            if (printedReceipt) {
+              // Make sure the styling is properly applied
+              printedReceipt.setAttribute('style', `
+                width: 76mm !important;
+                max-width: 76mm !important;
+                margin: 0 auto !important;
+                padding: 2mm !important;
+                background-color: white !important;
+                color: black !important;
+                font-family: 'Cairo', sans-serif !important;
+                page-break-inside: avoid !important;
+                page-break-after: always !important;
+              `);
             }
           }
           
-          // Clean up
-          document.body.removeChild(tempDiv);
-          root.unmount();
-          
           // Close the document to finish loading
           printWindow.document.close();
-        } catch (err) {
-          console.error("Error while preparing print content:", err);
-          document.body.removeChild(tempDiv);
+          
+          // Clean up
           root.unmount();
-          printWindow.close();
+          document.body.removeChild(tempDiv);
+          
+        } catch (err) {
+          console.error("Error in print preparation:", err);
+          
+          // Clean up
+          if (tempDiv && tempDiv.parentNode) {
+            root.unmount();
+            document.body.removeChild(tempDiv);
+          }
+          
+          if (printWindow) {
+            printWindow.close();
+          }
           
           toast({
             title: "Print Error",
-            description: "Failed to prepare print content. Please try again.",
+            description: "Failed to prepare the print layout. Please try again.",
             variant: "destructive",
           });
         }
-      }, 100);
+      }, 300); // Give enough time for the component to render
       
     } catch (error) {
       console.error("Error printing work order:", error);
