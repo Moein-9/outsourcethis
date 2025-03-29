@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -81,42 +80,19 @@ export interface WorkOrder {
   patientId: string;
   createdAt: string;
   
-  // Frame details
-  frameBrand?: string;
-  frameModel?: string;
-  frameColor?: string;
-  frameSize?: string;
-  framePrice?: number;
-  
   lensType?: {
     name: string;
     price: number;
   };
   
-  // Financial details
-  coatingPrice?: number;
-  discount?: number;
-  total?: number;
-  deposit?: number;
-  
   contactLenses?: ContactLensItem[];
   contactLensRx?: any;
-  coating?: string;
-  
-  // Status flags
-  isPaid?: boolean;
   isPickedUp?: boolean;
   pickedUpAt?: string;
   
   // Edit tracking
   lastEditedAt?: string;
   editHistory?: EditHistory[];
-  
-  // RX data
-  rx?: {
-    right: { sphere: string; cylinder: string; axis: string; add: string; pd: string };
-    left: { sphere: string; cylinder: string; axis: string; add: string; pd: string };
-  };
   
   // Refund related fields
   isRefunded?: boolean;

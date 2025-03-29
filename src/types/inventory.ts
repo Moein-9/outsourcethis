@@ -36,47 +36,28 @@ export interface LensCoating {
   description?: string;
 }
 
-// Update WorkOrder type to align with invoiceStore.ts
+// Update WorkOrder type to include all required properties
 export interface WorkOrder {
-  id: string;
-  patientId: string;
   invoiceId?: string;
   workOrderId?: string;
-  createdAt: string;
-  
-  // Frame details
+  patientId?: string;
+  id: string; // Changed from optional to required to match store/invoiceStore
   frameBrand?: string;
   frameModel?: string;
   frameColor?: string;
   frameSize?: string;
   framePrice: number;
-  
-  // Lens details
   lensType?: string;
   lensPrice: number;
-  
-  // Coating details
   coating?: string;
   coatingPrice: number;
-  
-  // Financial details
   discount: number;
   total: number;
-  deposit?: number;
-  
-  // Status flags
   isPaid?: boolean;
   isPickedUp?: boolean;
   pickedUpAt?: string;
+  createdAt?: string;
   lastEditedAt?: string;
-  
-  // Prescription data
-  rx?: {
-    right: { sphere: string; cylinder: string; axis: string; add: string; pd: string };
-    left: { sphere: string; cylinder: string; axis: string; add: string; pd: string };
-  };
-  
-  // Edit history
   editHistory?: Array<{
     timestamp: string;
     notes: string;
