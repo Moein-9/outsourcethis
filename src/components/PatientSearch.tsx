@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -48,21 +47,6 @@ export const PatientSearch: React.FC = () => {
   const [currentWorkOrder, setCurrentWorkOrder] = useState<InventoryWorkOrder | null>(null);
   
   const [isAddRxDialogOpen, setIsAddRxDialogOpen] = useState(false);
-  
-  // Add effect to refresh patient data when profile is opened
-  useEffect(() => {
-    if (isProfileOpen && selectedPatient) {
-      refreshPatientData(selectedPatient.patientId);
-    }
-  }, [isProfileOpen]);
-  
-  const refreshPatientData = (patientId: string) => {
-    const patientInvoices = getInvoicesByPatientId(patientId);
-    const invoiceWorkOrders = getWorkOrdersByPatientId(patientId);
-    
-    setPatientInvoices(patientInvoices);
-    setPatientWorkOrders(invoiceWorkOrders);
-  };
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
@@ -151,11 +135,6 @@ export const PatientSearch: React.FC = () => {
   };
   
   const handleSaveWorkOrder = (updatedWorkOrder: InventoryWorkOrder) => {
-    // After saving, refresh the patient data to get the updated work orders
-    if (selectedPatient) {
-      refreshPatientData(selectedPatient.patientId);
-    }
-    
     toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
     setEditWorkOrderDialogOpen(false);
   };
@@ -219,7 +198,7 @@ export const PatientSearch: React.FC = () => {
               <DialogHeader>
                 <DialogTitle className="text-xl">{language === 'ar' ? "ملف العميل" : "Client Profile"}</DialogTitle>
                 <DialogDescription>
-                  {language === 'ar' ? "تفاصيل بيانات العميل وسجل المعاملات" : "Client details and transaction history"}
+                  {language === 'ar' ? "تفاصيل بيان��ت العميل وسجل المعاملات" : "Client details and transaction history"}
                 </DialogDescription>
               </DialogHeader>
               

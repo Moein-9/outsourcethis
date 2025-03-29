@@ -1,9 +1,10 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, Clock } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { 
   Card,
@@ -79,10 +80,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const isPaid = remaining <= 0;
   
   const orderNumber = workOrder?.id || invoice?.workOrderId || `WO${Date.now().toString().slice(-6)}`;
-  
-  const editHistory = workOrder?.editHistory || invoice?.editHistory || [];
-  const hasEditHistory = editHistory && editHistory.length > 0;
-  const lastEdit = hasEditHistory ? editHistory[editHistory.length - 1] : null;
 
   if (!workOrder && !invoice) {
     return (
@@ -156,20 +153,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <p className="text-sm text-gray-600 rx-creation-date">
           {format(new Date(), 'yyyy-MM-dd HH:mm', { locale: enUS })}
         </p>
-        
-        {lastEdit && (
-          <div className="mt-1 bg-amber-50 border border-amber-200 text-amber-800 rounded px-2 py-1 text-xs">
-            <p className="font-bold mb-0 flex items-center justify-center">
-              <Clock className="w-3 h-3 mr-1" />
-              {isRtl ? "تم تعديل هذا الطلب" : "This order has been edited"}
-            </p>
-            <p className="text-2xs mb-0">
-              {isRtl 
-                ? `آخر تعديل: ${new Date(lastEdit.timestamp).toLocaleString()}`
-                : `Last edit: ${new Date(lastEdit.timestamp).toLocaleString()}`}
-            </p>
-          </div>
-        )}
       </div>
 
       <div className="mb-2">
@@ -212,6 +195,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Prescription Details | تفاصيل الوصفة الطبية"}
         </div>
         
+        {/* RX Table - Always LTR regardless of language setting - Improved sizing */}
         <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100">
@@ -476,37 +460,11 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Notes | ملاحظات"}
         </div>
         
+        {/* Enhanced notes section with clearer border, white background, and increased height */}
         <div className="border-2 border-gray-300 rounded p-1 min-h-[50px] bg-white">
           {/* Empty space for notes */}
         </div>
       </div>
-
-      {hasEditHistory && (
-        <div className="mb-2">
-          <div className="text-center bg-black text-white py-1 mb-1 font-bold text-base rounded">
-            {isRtl 
-              ? "سجل التعديلات | Edit History" 
-              : "Edit History | سجل التعديلات"}
-          </div>
-          
-          <div className="text-xs space-y-1">
-            {editHistory.slice(-3).map((edit, index) => (
-              <div key={index} className="flex justify-between p-1 border-b border-dashed border-gray-200">
-                <span>{new Date(edit.timestamp).toLocaleString()}</span>
-                <span className="font-medium">{edit.notes}</span>
-              </div>
-            ))}
-            
-            {editHistory.length > 3 && (
-              <div className="text-center text-gray-500 text-xs pt-1">
-                {isRtl 
-                  ? `+ ${editHistory.length - 3} تعديلات أخرى` 
-                  : `+ ${editHistory.length - 3} more edits`}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       <style>
         {`
@@ -603,15 +561,18 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               border: 1px solid #d1d5db !important;
             }
             
+            /* Fix signature boxes */
             .h-8 {
               height: 2rem !important;
               min-height: 2rem !important;
             }
             
+            /* Reduce margins between sections */
             .mb-2 {
               margin-bottom: 0.3rem !important;
             }
             
+            /* Text sizes for printing */
             .text-xs {
               font-size: 11px !important;
             }
@@ -627,12 +588,14 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             .text-lg {
               font-size: 17px !important;
             }
-            
+
+            /* Work order number specific styling */
             .work-order-number {
               font-size: 15px !important;
               font-weight: bold !important;
             }
             
+            /* Reduce padding */
             .p-1 {
               padding: 0.2rem !important;
             }
@@ -652,6 +615,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               padding-right: 0.5rem !important;
             }
             
+            /* Make the notes section clearly visible */
             .min-h-\\[50px\\] {
               min-height: 50px !important;
               border: 2px solid #d1d5db !important;

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
@@ -30,19 +31,6 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   // Filter out refunded invoices
   const refundedInvoices = invoices.filter(invoice => invoice.isRefunded);
   
-  // Sort workOrders by lastEditedAt to show most recently edited first
-  const sortedWorkOrders = [...workOrders].sort((a, b) => {
-    // If both have lastEditedAt, sort by most recent
-    if (a.lastEditedAt && b.lastEditedAt) {
-      return new Date(b.lastEditedAt).getTime() - new Date(a.lastEditedAt).getTime();
-    }
-    // If only one has lastEditedAt, that one comes first
-    if (a.lastEditedAt) return -1;
-    if (b.lastEditedAt) return 1;
-    // Otherwise sort by createdAt
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
-  
   const handlePrintWorkOrder = (workOrder: InvoiceWorkOrder) => {
     // Find related invoice for this work order
     const relatedInvoice = invoices.find(inv => inv.workOrderId === workOrder.id);
@@ -70,11 +58,11 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
       <div className="flex justify-end">
         {workOrders.length > 0 && invoices.length > 0 && (
           <PrintOptionsDialog
-            workOrder={sortedWorkOrders[0]}
-            invoice={activeInvoices[0]}
+            workOrder={workOrders[0]}
+            invoice={invoices[0]}
             patient={patient}
-            onPrintWorkOrder={() => handlePrintWorkOrder(sortedWorkOrders[0])}
-            onPrintInvoice={() => handlePrintInvoice(activeInvoices[0])}
+            onPrintWorkOrder={() => handlePrintWorkOrder(workOrders[0])}
+            onPrintInvoice={() => handlePrintInvoice(invoices[0])}
           >
             <Button 
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
@@ -89,7 +77,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
       
       <TabbedTransactions
         invoices={activeInvoices}
-        workOrders={sortedWorkOrders}
+        workOrders={workOrders}
         refundedInvoices={refundedInvoices}
         patient={patient}
         onEditWorkOrder={onEditWorkOrder}

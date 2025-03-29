@@ -32,7 +32,7 @@ export interface Invoice {
   
   invoiceType?: 'glasses' | 'contacts';
   
-  lensType: string | { name: string; price: number }; // Updated to accept both string and object
+  lensType: string;
   lensPrice: number;
   
   coating: string;
@@ -78,28 +78,12 @@ export interface Invoice {
 export interface WorkOrder {
   id: string;
   patientId: string;
-  workOrderId: string;
-  invoiceId?: string;
   createdAt: string;
   
-  // Frame details - Adding these to match how they're used in the code
-  frameBrand: string;
-  frameModel: string;
-  frameColor: string;
-  frameSize?: string;
-  framePrice: number;
-  
-  // Lens details
-  lensType: string | { name: string; price: number };
-  lensPrice: number;
-  
-  // Coating
-  coating: string;
-  coatingPrice: number;
-  
-  // Pricing
-  discount: number;
-  total: number;
+  lensType?: {
+    name: string;
+    price: number;
+  };
   
   contactLenses?: ContactLensItem[];
   contactLensRx?: any;
@@ -405,9 +389,7 @@ export const useInvoiceStore = create<InvoiceState>()(
                 if (!historyExists) {
                   editHistory.push({
                     timestamp: updatedInvoice.lastEditedAt,
-                    notes: updatedInvoice.editHistory && updatedInvoice.editHistory.length > 0 
-                      ? updatedInvoice.editHistory[updatedInvoice.editHistory.length - 1].notes
-                      : "Invoice updated" 
+                    notes: "Order updated" 
                   });
                 }
               }
@@ -423,9 +405,8 @@ export const useInvoiceStore = create<InvoiceState>()(
       },
       
       updateWorkOrder: (updatedWorkOrder) => {
-        set((state) => {
-          // Update the work order
-          const workOrders = state.workOrders.map((workOrder) => {
+        set((state) => ({
+          workOrders: state.workOrders.map((workOrder) => {
             if (workOrder.id === updatedWorkOrder.id) {
               // Ensure the edit history is preserved
               const editHistory = updatedWorkOrder.editHistory || workOrder.editHistory || [];
@@ -443,9 +424,7 @@ export const useInvoiceStore = create<InvoiceState>()(
                 if (!historyExists) {
                   editHistory.push({
                     timestamp: updatedWorkOrder.lastEditedAt,
-                    notes: updatedWorkOrder.editHistory && updatedWorkOrder.editHistory.length > 0 
-                      ? updatedWorkOrder.editHistory[updatedWorkOrder.editHistory.length - 1].notes
-                      : "Order updated" 
+                    notes: "Order updated" 
                   });
                 }
               }
@@ -456,38 +435,8 @@ export const useInvoiceStore = create<InvoiceState>()(
               };
             }
             return workOrder;
-          });
-          
-          // Also update any related invoice
-          const invoices = state.invoices.map(invoice => {
-            if (invoice.workOrderId === updatedWorkOrder.id) {
-              // Convert lensType to proper format for Invoice if needed
-              const lensType = typeof updatedWorkOrder.lensType === 'object' ? 
-                updatedWorkOrder.lensType.name : updatedWorkOrder.lensType;
-              
-              // Ensure we keep the invoice structure intact
-              return {
-                ...invoice,
-                frameBrand: updatedWorkOrder.frameBrand,
-                frameModel: updatedWorkOrder.frameModel,
-                frameColor: updatedWorkOrder.frameColor,
-                frameSize: updatedWorkOrder.frameSize,
-                framePrice: updatedWorkOrder.framePrice,
-                lensType: lensType,
-                lensPrice: updatedWorkOrder.lensPrice,
-                coating: updatedWorkOrder.coating,
-                coatingPrice: updatedWorkOrder.coatingPrice,
-                discount: updatedWorkOrder.discount,
-                total: updatedWorkOrder.total,
-                lastEditedAt: updatedWorkOrder.lastEditedAt,
-                editHistory: updatedWorkOrder.editHistory
-              };
-            }
-            return invoice;
-          });
-          
-          return { workOrders, invoices };
-        });
+          })
+        }));
       },
       
       processRefund: (invoiceId, refundAmount, refundMethod, reason, staffNotes) => {
