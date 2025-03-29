@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -92,7 +91,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     frameColor: workOrder.frameColor || '',
     frameSize: workOrder.frameSize || '',
     framePrice: workOrder.framePrice || 0,
-    lensType: workOrder.lensType || '',
+    lensType: typeof workOrder.lensType === 'object' ? workOrder.lensType.name : (workOrder.lensType || ''),
     lensPrice: workOrder.lensPrice || 0,
     coating: workOrder.coating || '',
     coatingPrice: workOrder.coatingPrice || 0,
@@ -120,7 +119,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         frameColor: workOrder.frameColor || '',
         frameSize: workOrder.frameSize || '',
         framePrice: workOrder.framePrice || 0,
-        lensType: workOrder.lensType || '',
+        lensType: typeof workOrder.lensType === 'object' ? workOrder.lensType.name : (workOrder.lensType || ''),
         lensPrice: workOrder.lensPrice || 0,
         coating: workOrder.coating || '',
         coatingPrice: workOrder.coatingPrice || 0,
@@ -250,14 +249,20 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       
       const currentDateTime = new Date().toISOString();
       
-      // Include updated RX data if patient exists
-      const rxUpdates = patient ? { rxUpdates: rxData } : {};
-      
+      // Create updated work order
       const updatedWorkOrder: WorkOrder = {
         ...workOrder,
-        ...editData,
+        frameBrand: editData.frameBrand,
+        frameModel: editData.frameModel,
+        frameColor: editData.frameColor,
+        frameSize: editData.frameSize,
+        framePrice: editData.framePrice,
+        lensType: editData.lensType,
+        lensPrice: editData.lensPrice,
+        coating: editData.coating,
+        coatingPrice: editData.coatingPrice,
+        discount: editData.discount,
         total: newTotal,
-        // Add edit history information
         lastEditedAt: currentDateTime,
         editHistory: [
           ...(workOrder.editHistory || []),
@@ -265,12 +270,19 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
             timestamp: currentDateTime,
             notes: "Order updated"
           }
-        ],
-        ...rxUpdates
+        ]
       };
       
       if (updateWorkOrder) {
-        updateWorkOrder(updatedWorkOrder);
+        // Convert to invoiceStore WorkOrder type
+        const storeWorkOrder = {
+          ...updatedWorkOrder,
+          lensType: {
+            name: editData.lensType,
+            price: editData.lensPrice
+          }
+        };
+        updateWorkOrder(storeWorkOrder);
       }
       
       if (workOrder.patientId && editWorkOrder) {

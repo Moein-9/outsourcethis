@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
-import { useInvoiceStore, Invoice } from "@/store/invoiceStore";
+import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { printRxReceipt } from "./RxReceiptPrint";
 import { PatientNotes } from "./PatientNotes";
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { PlusCircle } from "lucide-react";
-import { WorkOrder } from "@/types/inventory";
+import { WorkOrder as InventoryWorkOrder } from "@/types/inventory";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
@@ -41,11 +41,11 @@ export const PatientSearch: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
   const [patientInvoices, setPatientInvoices] = useState<Invoice[]>([]);
-  const [patientWorkOrders, setPatientWorkOrders] = useState<WorkOrder[]>([]);
+  const [patientWorkOrders, setPatientWorkOrders] = useState<InvoiceWorkOrder[]>([]);
   
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   const [editWorkOrderDialogOpen, setEditWorkOrderDialogOpen] = useState(false);
-  const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder | null>(null);
+  const [currentWorkOrder, setCurrentWorkOrder] = useState<InventoryWorkOrder | null>(null);
   
   const [isAddRxDialogOpen, setIsAddRxDialogOpen] = useState(false);
   
@@ -90,31 +90,59 @@ export const PatientSearch: React.FC = () => {
     setSelectedPatient(patient);
     
     const patientInvoices = getInvoicesByPatientId(patient.patientId);
-    const patientWorkOrders = getWorkOrdersByPatientId(patient.patientId);
+    const invoiceWorkOrders = getWorkOrdersByPatientId(patient.patientId);
     
     setPatientInvoices(patientInvoices);
-    setPatientWorkOrders(patientWorkOrders);
+    setPatientWorkOrders(invoiceWorkOrders);
     
     setIsProfileOpen(true);
   };
   
-  const handleEditWorkOrder = (workOrder: WorkOrder) => {
-    // Make sure all required properties are present
-    const completeWorkOrder: WorkOrder = {
-      ...workOrder,
-      id: workOrder.id || '', // Ensure id is present
-      framePrice: workOrder.framePrice || 0,
-      lensPrice: workOrder.lensPrice || 0,
-      coatingPrice: workOrder.coatingPrice || 0,
-      discount: workOrder.discount || 0,
-      total: workOrder.total || 0
+  // Convert from invoiceStore WorkOrder to inventory WorkOrder
+  const convertToInventoryWorkOrder = (workOrder: InvoiceWorkOrder): InventoryWorkOrder => {
+    // Ensure lensType is a string if it's an object
+    const lensTypeValue = typeof workOrder.lensType === 'object' && workOrder.lensType 
+      ? workOrder.lensType.name 
+      : workOrder.lensType || '';
+      
+    return {
+      id: workOrder.id,
+      patientId: workOrder.patientId,
+      workOrderId: workOrder.workOrderId,
+      invoiceId: workOrder.invoiceId,
+      createdAt: workOrder.createdAt || new Date().toISOString(),
+      frameBrand: workOrder.frameBrand || '',
+      frameModel: workOrder.frameModel || '',
+      frameColor: workOrder.frameColor || '',
+      frameSize: workOrder.frameSize || '',
+      framePrice: typeof workOrder.framePrice === 'number' ? workOrder.framePrice : 0,
+      lensType: lensTypeValue,
+      lensPrice: typeof workOrder.lensPrice === 'number' ? workOrder.lensPrice : 0,
+      coating: workOrder.coating || '',
+      coatingPrice: typeof workOrder.coatingPrice === 'number' ? workOrder.coatingPrice : 0,
+      discount: typeof workOrder.discount === 'number' ? workOrder.discount : 0,
+      total: typeof workOrder.total === 'number' ? workOrder.total : 0,
+      isPaid: workOrder.isPaid,
+      isPickedUp: workOrder.isPickedUp,
+      pickedUpAt: workOrder.pickedUpAt,
+      lastEditedAt: workOrder.lastEditedAt,
+      editHistory: workOrder.editHistory,
+      isRefunded: workOrder.isRefunded,
+      refundDate: workOrder.refundDate,
+      contactLenses: workOrder.contactLenses,
+      contactLensRx: workOrder.contactLensRx
     };
+  };
+  
+  const handleEditWorkOrder = (workOrder: InvoiceWorkOrder) => {
+    // Convert to inventory WorkOrder type
+    const inventoryWorkOrder = convertToInventoryWorkOrder(workOrder);
     
-    setCurrentWorkOrder(completeWorkOrder);
+    setCurrentWorkOrder(inventoryWorkOrder);
     setEditWorkOrderDialogOpen(true);
   };
   
-  const handleSaveWorkOrder = (updatedWorkOrder: WorkOrder) => {
+  const handleSaveWorkOrder = (updatedWorkOrder: InventoryWorkOrder) => {
     toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
     setEditWorkOrderDialogOpen(false);
   };
@@ -250,19 +278,14 @@ export const PatientSearch: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <EditWorkOrderDialog
-        isOpen={editWorkOrderDialogOpen}
-        onClose={() => setEditWorkOrderDialogOpen(false)}
-        workOrder={currentWorkOrder || {
-          id: '',
-          framePrice: 0,
-          lensPrice: 0,
-          coatingPrice: 0,
-          discount: 0,
-          total: 0
-        } as WorkOrder}
-        onSave={handleSaveWorkOrder}
-      />
+      {currentWorkOrder && (
+        <EditWorkOrderDialog
+          isOpen={editWorkOrderDialogOpen}
+          onClose={() => setEditWorkOrderDialogOpen(false)}
+          workOrder={currentWorkOrder}
+          onSave={handleSaveWorkOrder}
+        />
+      )}
       
       {selectedPatient && (
         <AddRxDialog 

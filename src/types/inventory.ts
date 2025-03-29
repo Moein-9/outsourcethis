@@ -36,30 +36,53 @@ export interface LensCoating {
   description?: string;
 }
 
-// Update WorkOrder type to include all required properties
+// WorkOrder type that is compatible with store/invoiceStore
 export interface WorkOrder {
-  invoiceId?: string;
+  id: string;
+  patientId: string;
   workOrderId?: string;
-  patientId?: string;
-  id: string; // Changed from optional to required to match store/invoiceStore
+  invoiceId?: string;
+  createdAt: string;
+  
+  // Frame details
   frameBrand?: string;
   frameModel?: string;
   frameColor?: string;
   frameSize?: string;
   framePrice: number;
-  lensType?: string;
+  
+  // Lens details - match the invoiceStore structure
+  lensType?: string | { name: string; price: number };
   lensPrice: number;
+  
+  // Coating
   coating?: string;
   coatingPrice: number;
+  
+  // Pricing
   discount: number;
   total: number;
+  
+  // Status tracking
   isPaid?: boolean;
   isPickedUp?: boolean;
   pickedUpAt?: string;
-  createdAt?: string;
+  
+  // Contact lens related
+  contactLenses?: any[];
+  contactLensRx?: any;
+  
+  // Edit tracking
   lastEditedAt?: string;
   editHistory?: Array<{
     timestamp: string;
     notes: string;
   }>;
+  
+  // Refund related
+  isRefunded?: boolean;
+  refundDate?: string;
 }
+
+// Utility type for converting between WorkOrder types
+export type WorkOrderEdit = Omit<WorkOrder, 'id' | 'createdAt'>;
