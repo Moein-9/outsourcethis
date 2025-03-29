@@ -102,6 +102,7 @@ export const PatientSearch: React.FC = () => {
     // Make sure all required properties are present
     const completeWorkOrder: WorkOrder = {
       ...workOrder,
+      id: workOrder.id || '', // Ensure id is present
       framePrice: workOrder.framePrice || 0,
       lensPrice: workOrder.lensPrice || 0,
       coatingPrice: workOrder.coatingPrice || 0,
@@ -253,6 +254,7 @@ export const PatientSearch: React.FC = () => {
         isOpen={editWorkOrderDialogOpen}
         onClose={() => setEditWorkOrderDialogOpen(false)}
         workOrder={currentWorkOrder || {
+          id: '',
           framePrice: 0,
           lensPrice: 0,
           coatingPrice: 0,
@@ -272,42 +274,4 @@ export const PatientSearch: React.FC = () => {
       )}
     </div>
   );
-  
-  function handleDirectPrint(printLanguage?: 'en' | 'ar') {
-    if (!selectedPatient) return;
-    
-    const langToPrint = printLanguage || useLanguageStore.getState().language;
-    
-    printRxReceipt({
-      patientName: selectedPatient.name,
-      patientPhone: selectedPatient.phone,
-      rx: selectedPatient.rx,
-      forcedLanguage: langToPrint
-    });
-  }
-  
-  function handleLanguageSelection(selectedLanguage: 'en' | 'ar') {
-    setIsLanguageDialogOpen(false);
-    handleDirectPrint(selectedLanguage);
-  }
-  
-  function handleSaveRx(rxData: RxData) {
-    if (!selectedPatient) return;
-    
-    updatePatientRx(selectedPatient.patientId, rxData);
-    
-    setSelectedPatient(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        rx: rxData,
-        rxHistory: [
-          ...(prev.rxHistory || []),
-          { ...prev.rx, createdAt: new Date().toISOString() }
-        ]
-      };
-    });
-    
-    toast.success(language === 'ar' ? "تم إضافة الوصفة الطبية بنجاح" : "Prescription added successfully");
-  }
 };

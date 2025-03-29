@@ -41,7 +41,7 @@ export interface WorkOrder {
   invoiceId?: string;
   workOrderId?: string;
   patientId?: string;
-  id?: string;
+  id: string; // Changed from optional to required to match store/invoiceStore
   frameBrand?: string;
   frameModel?: string;
   frameColor?: string;
