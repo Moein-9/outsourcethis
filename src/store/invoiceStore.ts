@@ -32,7 +32,7 @@ export interface Invoice {
   
   invoiceType?: 'glasses' | 'contacts';
   
-  lensType: string;
+  lensType: string | { name: string; price: number }; // Updated to accept both string and object
   lensPrice: number;
   
   coating: string;
@@ -78,12 +78,28 @@ export interface Invoice {
 export interface WorkOrder {
   id: string;
   patientId: string;
+  workOrderId: string;
+  invoiceId?: string;
   createdAt: string;
   
-  lensType?: {
-    name: string;
-    price: number;
-  };
+  // Frame details - Adding these to match how they're used in the code
+  frameBrand: string;
+  frameModel: string;
+  frameColor: string;
+  frameSize?: string;
+  framePrice: number;
+  
+  // Lens details
+  lensType: string | { name: string; price: number };
+  lensPrice: number;
+  
+  // Coating
+  coating: string;
+  coatingPrice: number;
+  
+  // Pricing
+  discount: number;
+  total: number;
   
   contactLenses?: ContactLensItem[];
   contactLensRx?: any;
@@ -445,6 +461,10 @@ export const useInvoiceStore = create<InvoiceState>()(
           // Also update any related invoice
           const invoices = state.invoices.map(invoice => {
             if (invoice.workOrderId === updatedWorkOrder.id) {
+              // Convert lensType to proper format for Invoice if needed
+              const lensType = typeof updatedWorkOrder.lensType === 'object' ? 
+                updatedWorkOrder.lensType.name : updatedWorkOrder.lensType;
+              
               // Ensure we keep the invoice structure intact
               return {
                 ...invoice,
@@ -453,7 +473,7 @@ export const useInvoiceStore = create<InvoiceState>()(
                 frameColor: updatedWorkOrder.frameColor,
                 frameSize: updatedWorkOrder.frameSize,
                 framePrice: updatedWorkOrder.framePrice,
-                lensType: updatedWorkOrder.lensType,
+                lensType: lensType,
                 lensPrice: updatedWorkOrder.lensPrice,
                 coating: updatedWorkOrder.coating,
                 coatingPrice: updatedWorkOrder.coatingPrice,

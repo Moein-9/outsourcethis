@@ -42,6 +42,12 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     return editHistory[editHistory.length - 1].notes;
   };
   
+  const renderLensType = (lensType: string | { name: string; price: number; } | undefined | null) => {
+    if (!lensType) return '-';
+    if (typeof lensType === 'string') return lensType;
+    return lensType.name || '-';
+  };
+  
   return (
     <Card>
       <Tabs defaultValue="orders" value={activeTab} onValueChange={setActiveTab}>
@@ -92,9 +98,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                             </div>
                             
                             <div className="text-sm text-gray-500">
-                              {typeof workOrder.lensType === 'object' && workOrder.lensType ? 
-                                workOrder.lensType.name : 
-                                workOrder.lensType}
+                              {renderLensType(workOrder.lensType)}
                             </div>
                             
                             {workOrder.contactLenses && workOrder.contactLenses.length > 0 && (
@@ -173,9 +177,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                             </div>
                             
                             <div className="text-sm text-gray-500">
-                              {typeof invoice.lensType === 'object' ? 
-                                invoice.lensType.name : 
-                                invoice.lensType}
+                              {renderLensType(invoice.lensType)}
                             </div>
                           </div>
                         </TableCell>
