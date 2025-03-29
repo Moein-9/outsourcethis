@@ -37,6 +37,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     
     console.log("[PatientTransactions] Printing work order:", workOrder.id);
     console.log("[PatientTransactions] Related invoice:", relatedInvoice?.invoiceId);
+    console.log("[PatientTransactions] Edit history:", workOrder.editHistory);
     
     // Call the CustomPrintService with the proper parameters
     CustomPrintService.printWorkOrder(workOrder, relatedInvoice, patient);
@@ -44,6 +45,12 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   
   const handlePrintInvoice = (invoice: Invoice) => {
     console.log("[PatientTransactions] Printing invoice:", invoice.invoiceId);
+    
+    // Get the related work order to ensure edit history is included
+    const relatedWorkOrder = workOrders.find(wo => wo.id === invoice.workOrderId);
+    if (relatedWorkOrder && relatedWorkOrder.editHistory?.length) {
+      console.log("[PatientTransactions] Invoice has edit history from work order:", relatedWorkOrder.editHistory);
+    }
     
     // Call the CustomPrintService to handle invoice printing
     if (typeof CustomPrintService.printInvoice === 'function') {
