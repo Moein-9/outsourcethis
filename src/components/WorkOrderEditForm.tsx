@@ -29,17 +29,17 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
   const { lensTypes, lensCoatings, frames } = useInventoryStore();
   const isRtl = language === 'ar';
   
-  // Get proper lensType name from object or string
-  const getLensTypeName = (lensType: string | { name: string; price: number }): string => {
-    if (typeof lensType === 'object' && lensType !== null) {
+  // Fix: Update the getLensTypeName function to handle type correctly
+  const getLensTypeName = (lensType: any): string => {
+    if (typeof lensType === 'object' && lensType !== null && 'name' in lensType) {
       return lensType.name || '';
     }
-    return lensType || '';
+    return typeof lensType === 'string' ? lensType : '';
   };
   
-  // Get proper lensPrice from object or directly
-  const getLensPrice = (lensType: string | { name: string; price: number }, fallbackPrice: number): number => {
-    if (typeof lensType === 'object' && lensType !== null) {
+  // Fix: Update the getLensPrice function to ensure it handles all possible input types
+  const getLensPrice = (lensType: any, fallbackPrice: number): number => {
+    if (typeof lensType === 'object' && lensType !== null && 'price' in lensType) {
       return lensType.price || fallbackPrice;
     }
     return fallbackPrice;
