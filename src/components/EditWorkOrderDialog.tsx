@@ -1,661 +1,505 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { WorkOrder, Invoice, useInvoiceStore } from "@/store/invoiceStore";
+import { useInvoiceStore } from "@/store/invoiceStore";
+import { usePatientStore } from "@/store/patientStore";
 import { useLanguageStore } from "@/store/languageStore";
-import { usePatientStore, RxData } from "@/store/patientStore";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { LensSelector } from "@/components/LensSelector";
-import { LensType, LensCoating, LensThickness, Frame, useInventoryStore } from "@/store/inventoryStore";
-import { 
-  Card, 
-  CardContent,
-  CardHeader,
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  Search, 
-  User, 
-  Eye, 
-  Clock 
-} from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useInventoryStore } from "@/store/inventoryStore";
+import { Frame } from "@/types/inventory";
+import { Search, Edit, Clock, Glasses, CheckCircle2 } from "lucide-react";
 
 interface EditWorkOrderDialogProps {
+  workOrder: any;
   isOpen: boolean;
-  onClose: () => void;
-  workOrder: WorkOrder | Invoice;
-  onSave: (updatedWorkOrder: WorkOrder | Invoice) => void;
+  onOpenChange: (open: boolean) => void;
+  onSave?: () => void;
 }
 
 export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
-  isOpen,
-  onClose,
   workOrder,
+  isOpen,
+  onOpenChange,
   onSave
 }) => {
-  const { language, t } = useLanguageStore();
-  const { updateWorkOrder, updateInvoice } = useInvoiceStore();
-  const { getPatientById, updatePatientRx } = usePatientStore();
+  const { t, language } = useLanguageStore();
+  const { updateInvoice } = useInvoiceStore();
+  const { editWorkOrder } = usePatientStore();
   const { lensTypes, lensCoatings, frames } = useInventoryStore();
+  const isRtl = language === 'ar';
+  const [activeTab, setActiveTab] = useState('prescription');
   
-  const [activeTab, setActiveTab] = useState("rx");
-  const [editedWorkOrder, setEditedWorkOrder] = useState<any>({...workOrder});
-  const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
-  const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
-  const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(null);
-  const [skipLens, setSkipLens] = useState(false);
-  const [frameSearchQuery, setFrameSearchQuery] = useState("");
-  const [frameInputMode, setFrameInputMode] = useState<'search' | 'manual'>('search');
-  const [searchResults, setSearchResults] = useState<Frame[]>([]);
+  // State for manual frame input
+  const [useManualFrameInput, setUseManualFrameInput] = useState(
+    !frames.some(f => f.brand === workOrder.frameBrand && 
+                       f.model === workOrder.frameModel &&
+                       f.color === workOrder.frameColor)
+  );
+  
+  // Frame search state
+  const [frameSearchQuery, setFrameSearchQuery] = useState('');
+  const [filteredFrames, setFilteredFrames] = useState<Frame[]>([]);
   const [selectedFrame, setSelectedFrame] = useState<Frame | null>(null);
   
-  const patient = workOrder.patientId ? getPatientById(workOrder.patientId) : null;
-  const patientRx = patient?.rx || {
-    sphereOD: "",
-    cylOD: "",
-    axisOD: "",
-    addOD: "",
-    sphereOS: "",
-    cylOS: "",
-    axisOS: "",
-    addOS: "",
-    pdRight: "",
-    pdLeft: ""
-  };
-  
-  const form = useForm<RxData>({
-    defaultValues: {
-      sphereOD: patientRx.sphereOD || "",
-      cylOD: patientRx.cylOD || "",
-      axisOD: patientRx.axisOD || "",
-      addOD: patientRx.addOD || "",
-      sphereOS: patientRx.sphereOS || "",
-      cylOS: patientRx.cylOS || "",
-      axisOS: patientRx.axisOS || "",
-      addOS: patientRx.addOS || "",
-      pdRight: patientRx.pdRight || "",
-      pdLeft: patientRx.pdLeft || "",
-    }
+  // Edit data state
+  const [editData, setEditData] = useState({
+    frameBrand: workOrder.frameBrand || '',
+    frameModel: workOrder.frameModel || '',
+    frameColor: workOrder.frameColor || '',
+    frameSize: workOrder.frameSize || '',
+    framePrice: workOrder.framePrice || 0,
+    lensType: workOrder.lensType || '',
+    lensPrice: workOrder.lensPrice || 0,
+    coating: workOrder.coating || '',
+    coatingPrice: workOrder.coatingPrice || 0,
+    discount: workOrder.discount || 0,
+    total: workOrder.total || 0,
   });
   
-  const getLensPrice = (lens: LensType | null): number => {
-    return lens?.price !== undefined ? lens.price : 0;
-  };
-
   useEffect(() => {
-    if (workOrder) {
-      if ('lensType' in workOrder && workOrder.lensType) {
-        const lens = workOrder.lensType;
-        const lensTypeObj = typeof lens === 'object' ? 
-          lensTypes.find(lt => lt.name === lens.name) : 
-          lensTypes.find(lt => lt.name === lens);
-          
-        setSelectedLensType(lensTypeObj || null);
-      }
+    if (isOpen) {
+      // Reset the frame search when dialog opens
+      setFrameSearchQuery('');
+      setFilteredFrames([]);
       
-      if ('lensType' in workOrder && typeof workOrder.lensType === 'string') {
-        const lensTypeObj = lensTypes.find(lt => lt.name === workOrder.lensType);
-        setSelectedLensType(lensTypeObj || null);
-      }
+      // Check if we should start with manual frame input
+      setUseManualFrameInput(
+        !frames.some(f => f.brand === workOrder.frameBrand && 
+                         f.model === workOrder.frameModel &&
+                         f.color === workOrder.frameColor)
+      );
       
-      if ('coating' in workOrder && workOrder.coating) {
-        const coatingObj = lensCoatings.find(c => c.name === workOrder.coating);
-        setSelectedCoating(coatingObj || null);
-      }
-      
-      if (!('lensType' in workOrder) || !workOrder.lensType) {
-        setSkipLens(true);
-      }
-      
-      if ('frameBrand' in workOrder && workOrder.frameBrand && 'frameModel' in workOrder && workOrder.frameModel) {
-        const matchingFrame = frames.find(f => 
-          f.brand === workOrder.frameBrand && 
-          f.model === workOrder.frameModel &&
-          f.color === workOrder.frameColor
-        );
-        
-        if (matchingFrame) {
-          setSelectedFrame(matchingFrame);
-          setFrameInputMode('search');
-        } else {
-          setFrameInputMode('manual');
-        }
-      } else {
-        setFrameInputMode('manual');
-      }
+      // Reset edit data when dialog opens
+      setEditData({
+        frameBrand: workOrder.frameBrand || '',
+        frameModel: workOrder.frameModel || '',
+        frameColor: workOrder.frameColor || '',
+        frameSize: workOrder.frameSize || '',
+        framePrice: workOrder.framePrice || 0,
+        lensType: workOrder.lensType || '',
+        lensPrice: workOrder.lensPrice || 0,
+        coating: workOrder.coating || '',
+        coatingPrice: workOrder.coatingPrice || 0,
+        discount: workOrder.discount || 0,
+        total: workOrder.total || 0,
+      });
     }
-  }, [workOrder, lensTypes, lensCoatings, frames]);
+  }, [isOpen, workOrder, frames]);
   
   useEffect(() => {
-    if (frameSearchQuery.trim().length > 2) {
+    // Filter frames based on search query
+    if (frameSearchQuery.trim()) {
       const query = frameSearchQuery.toLowerCase();
-      const results = frames.filter(frame => 
-        frame.brand.toLowerCase().includes(query) || 
+      const filtered = frames.filter(frame => 
+        frame.brand.toLowerCase().includes(query) ||
         frame.model.toLowerCase().includes(query) ||
         frame.color.toLowerCase().includes(query)
       );
-      setSearchResults(results.slice(0, 10));
+      setFilteredFrames(filtered);
     } else {
-      setSearchResults([]);
+      setFilteredFrames([]);
     }
   }, [frameSearchQuery, frames]);
   
-  const handleSave = () => {
-    const rxData = form.getValues();
-    
-    if (workOrder.patientId) {
-      updatePatientRx(workOrder.patientId, rxData);
-    }
-    
-    const updatedOrder = {
-      ...editedWorkOrder,
-      rx: rxData,
-      lastEditedAt: new Date().toISOString(),
-      editHistory: [
-        ...((editedWorkOrder.editHistory || []) as any[]),
-        {
-          timestamp: new Date().toISOString(),
-          notes: "Order updated"
-        }
-      ]
-    };
-    
-    if (!skipLens) {
-      if (selectedLensType) {
-        if ('lensType' in updatedOrder && typeof updatedOrder.lensType === 'object') {
-          updatedOrder.lensType = {
-            name: selectedLensType.name,
-            price: getLensPrice(selectedLensType)
-          };
-        } else {
-          updatedOrder.lensType = selectedLensType.name;
-          updatedOrder.lensPrice = getLensPrice(selectedLensType);
-        }
-      }
-      
-      if (selectedCoating) {
-        updatedOrder.coating = selectedCoating.name;
-        updatedOrder.coatingPrice = selectedCoating.price;
-      } else {
-        updatedOrder.coating = '';
-        updatedOrder.coatingPrice = 0;
-      }
-    } else {
-      if ('lensType' in updatedOrder && typeof updatedOrder.lensType === 'object') {
-        updatedOrder.lensType = null;
-      } else {
-        updatedOrder.lensType = '';
-        updatedOrder.lensPrice = 0;
-      }
-      updatedOrder.coating = '';
-      updatedOrder.coatingPrice = 0;
-    }
-    
-    if ('invoiceId' in workOrder) {
-      updateInvoice(updatedOrder);
-    } else {
-      updateWorkOrder(updatedOrder);
-    }
-    
-    toast.success(language === 'ar' 
-      ? "تم تحديث الطلب بنجاح" 
-      : "Order updated successfully");
-    
-    onSave(updatedOrder);
+  const getLensPrice = (lens: any): number => {
+    return lens && lens.price !== undefined ? lens.price : 0;
   };
   
-  const handleFrameSelect = (frame: Frame) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    if (name === 'framePrice' || name === 'lensPrice' || name === 'coatingPrice' || name === 'discount' || name === 'total') {
+      setEditData({
+        ...editData,
+        [name]: parseFloat(value) || 0
+      });
+    } else {
+      setEditData({
+        ...editData,
+        [name]: value
+      });
+    }
+  };
+  
+  const handleSelectChange = (name: string, value: string) => {
+    setEditData({
+      ...editData,
+      [name]: value
+    });
+    
+    if (name === 'lensType') {
+      const selectedLens = lensTypes.find(lens => lens.type === value);
+      if (selectedLens) {
+        setEditData(prev => ({
+          ...prev,
+          lensPrice: getLensPrice(selectedLens)
+        }));
+      }
+    } else if (name === 'coating') {
+      const selectedCoating = lensCoatings.find(coating => coating.name === value);
+      if (selectedCoating) {
+        setEditData(prev => ({
+          ...prev,
+          coatingPrice: selectedCoating.price
+        }));
+      }
+    } else if (name === 'frameBrand') {
+      setEditData(prev => ({
+        ...prev,
+        frameModel: '',
+        frameColor: ''
+      }));
+    }
+  };
+  
+  const selectFrame = (frame: Frame) => {
     setSelectedFrame(frame);
-    setEditedWorkOrder({
-      ...editedWorkOrder,
+    setEditData(prev => ({
+      ...prev,
       frameBrand: frame.brand,
       frameModel: frame.model,
       frameColor: frame.color,
-      frameSize: frame.size || "",
-      framePrice: frame.price || 0
-    });
-    setFrameSearchQuery("");
+      frameSize: frame.size || '',
+      framePrice: frame.price
+    }));
   };
   
-  const handleChangeInputMode = (mode: 'search' | 'manual') => {
-    setFrameInputMode(mode);
-    if (mode === 'manual' && selectedFrame) {
-      setSelectedFrame(null);
+  const handleSaveChanges = () => {
+    try {
+      const subtotal = editData.framePrice + editData.lensPrice + editData.coatingPrice;
+      const newTotal = subtotal - editData.discount;
+      
+      const currentDateTime = new Date().toISOString();
+      
+      const updatedWorkOrder = {
+        ...workOrder,
+        ...editData,
+        total: newTotal,
+        // Add edit history information
+        lastEditedAt: currentDateTime,
+        editHistory: [
+          ...(workOrder.editHistory || []),
+          {
+            timestamp: currentDateTime,
+            notes: "Order updated"
+          }
+        ]
+      };
+      
+      updateInvoice(updatedWorkOrder);
+      
+      if (workOrder.patientId) {
+        editWorkOrder({
+          patientId: workOrder.patientId,
+          workOrderId: workOrder.invoiceId || workOrder.workOrderId,
+          updatedData: updatedWorkOrder
+        });
+      }
+      
+      toast({
+        title: t("success"),
+        description: t("workOrderUpdated")
+      });
+      
+      onOpenChange(false);
+      if (onSave) onSave();
+    } catch (error) {
+      console.error("Error updating work order:", error);
+      toast({
+        title: t("error"),
+        description: t("errorUpdatingWorkOrder"),
+        variant: "destructive"
+      });
     }
   };
   
-  if (!isOpen) return null;
-  
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle>{t('editWorkOrder')}</DialogTitle>
-          <DialogDescription>
-            {language === 'ar' 
-              ? "قم بتعديل بيانات أمر العمل"
-              : "Make changes to the work order details"}
-          </DialogDescription>
-        </DialogHeader>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="rx">
-              {t('prescription')}
-            </TabsTrigger>
-            <TabsTrigger value="lensFrame">
-              {t('lensAndFrame')}
-            </TabsTrigger>
-          </TabsList>
-          
-          <ScrollArea className="flex-1">
-            <TabsContent value="rx" className="space-y-4 p-1 m-0">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Eye className="h-4 w-4" />
-                    {t('prescriptionDetails')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Form {...form}>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-3 border rounded-md p-3 bg-slate-50">
-                        <h3 className="font-medium text-primary flex items-center gap-1.5">
-                          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                          {t('rightEye')} (OD)
-                        </h3>
-                        
-                        <div className="grid grid-cols-2 gap-3">
-                          <FormField
-                            control={form.control}
-                            name="sphereOD"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('sphere')}</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="cylOD"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('cylinder')}</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-3">
-                          <FormField
-                            control={form.control}
-                            name="axisOD"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('axis')}</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="addOD"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('add')}</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-3 border rounded-md p-3 bg-slate-50">
-                        <h3 className="font-medium text-primary flex items-center gap-1.5">
-                          <div className="w-3 h-3 bg-rose-500 rounded-full"></div>
-                          {t('leftEye')} (OS)
-                        </h3>
-                        
-                        <div className="grid grid-cols-2 gap-3">
-                          <FormField
-                            control={form.control}
-                            name="sphereOS"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('sphere')}</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="cylOS"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('cylinder')}</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-3">
-                          <FormField
-                            control={form.control}
-                            name="axisOS"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('axis')}</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="addOS"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('add')}</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4 p-3 border rounded-md bg-blue-50">
-                      <h3 className="font-medium text-primary mb-3">{t('pupillaryDistance')}</h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="pdRight"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('pdRight')}</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="pdLeft"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('pdLeft')}</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                  </Form>
-                </CardContent>
-              </Card>
-              
-              {patient && (
-                <Card className="bg-blue-50/30">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2 text-blue-600">
-                      <User className="h-4 w-4" />
-                      {t('patientInfo')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm">
-                    <div>
-                      <span className="font-medium">{t('name')}:</span> {patient.name}
-                    </div>
-                    <div>
-                      <span className="font-medium">{t('phone')}:</span> {patient.phone}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
+  const renderPrescriptionTab = () => (
+    <div className="grid gap-4 py-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <div className="bg-primary/5 p-4 rounded-lg mb-4">
+            <h3 className="text-primary font-medium mb-2 flex items-center">
+              <Glasses className="w-4 h-4 mr-2" />
+              {t("lensInformation")}
+            </h3>
             
-            <TabsContent value="lensFrame" className="space-y-4 p-1 m-0">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{t('lensSelection')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <LensSelector
-                    onSelectLensType={setSelectedLensType}
-                    onSelectCoating={setSelectedCoating}
-                    onSelectThickness={setSelectedThickness}
-                    skipLens={skipLens}
-                    onSkipLensChange={setSkipLens}
-                    initialLensType={selectedLensType}
-                    initialCoating={selectedCoating}
-                    initialThickness={selectedThickness}
-                  />
-                </CardContent>
-              </Card>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="lensType">{t("lensType")}</Label>
+                <Select 
+                  value={editData.lensType} 
+                  onValueChange={(value) => handleSelectChange('lensType', value)}
+                >
+                  <SelectTrigger id="lensType">
+                    <SelectValue placeholder={t("selectLensType")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lensTypes.map(lens => (
+                      <SelectItem key={lens.id} value={lens.type}>{lens.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{t('frameDetails')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-4">
-                    <div className="flex gap-2 mb-3">
-                      <Button 
-                        variant={frameInputMode === 'search' ? "default" : "outline"} 
-                        size="sm"
-                        onClick={() => handleChangeInputMode('search')}
-                      >
-                        <Search className="h-4 w-4 mr-1" />
-                        {t('searchFrame')}
-                      </Button>
-                      <Button 
-                        variant={frameInputMode === 'manual' ? "default" : "outline"} 
-                        size="sm"
-                        onClick={() => handleChangeInputMode('manual')}
-                      >
-                        {t('manualEntry')}
-                      </Button>
-                    </div>
-                    
-                    {frameInputMode === 'search' ? (
-                      <div className="space-y-3">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            placeholder={t('searchByBrandModelOrColor')}
-                            value={frameSearchQuery}
-                            onChange={(e) => setFrameSearchQuery(e.target.value)}
-                            className="pl-9"
-                          />
-                        </div>
-                        
-                        {selectedFrame ? (
-                          <div className="p-3 border rounded-md bg-green-50">
-                            <div className="flex justify-between">
-                              <div>
-                                <h4 className="font-medium">{selectedFrame.brand} {selectedFrame.model}</h4>
-                                <div className="text-sm text-muted-foreground">
-                                  {selectedFrame.color} - {selectedFrame.size || "N/A"}
-                                </div>
-                              </div>
-                              <div className="font-medium text-green-700">
-                                {selectedFrame.price?.toFixed(3) || "0.000"} KWD
-                              </div>
-                            </div>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="mt-2"
-                              onClick={() => {
-                                setSelectedFrame(null);
-                                setFrameSearchQuery("");
-                              }}
-                            >
-                              {t('change')}
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="border rounded-md overflow-hidden">
-                            {searchResults.length > 0 ? (
-                              <div className="max-h-40 overflow-y-auto">
-                                {searchResults.map((frame, index) => (
-                                  <div 
-                                    key={`${frame.brand}-${frame.model}-${frame.color}-${index}`}
-                                    className="p-2 hover:bg-slate-50 cursor-pointer border-b last:border-b-0 flex justify-between"
-                                    onClick={() => handleFrameSelect(frame)}
-                                  >
-                                    <div>
-                                      <div className="font-medium">{frame.brand} {frame.model}</div>
-                                      <div className="text-sm text-muted-foreground">
-                                        {frame.color} - {frame.size || "N/A"}
-                                      </div>
-                                    </div>
-                                    <div className="font-medium">
-                                      {frame.price?.toFixed(3) || "0.000"} KWD
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : frameSearchQuery.length > 0 ? (
-                              <div className="p-3 text-center text-muted-foreground">
-                                {t('noFramesFound')}
-                              </div>
-                            ) : (
-                              <div className="p-3 text-center text-muted-foreground">
-                                {t('typeToSearchFrames')}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="frameBrand">{t('brand')}</Label>
-                          <Input 
-                            id="frameBrand" 
-                            value={editedWorkOrder.frameBrand || ''} 
-                            onChange={(e) => setEditedWorkOrder({...editedWorkOrder, frameBrand: e.target.value})}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="frameModel">{t('model')}</Label>
-                          <Input 
-                            id="frameModel" 
-                            value={editedWorkOrder.frameModel || ''} 
-                            onChange={(e) => setEditedWorkOrder({...editedWorkOrder, frameModel: e.target.value})}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="frameColor">{t('color')}</Label>
-                          <Input 
-                            id="frameColor" 
-                            value={editedWorkOrder.frameColor || ''} 
-                            onChange={(e) => setEditedWorkOrder({...editedWorkOrder, frameColor: e.target.value})}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="frameSize">{t('size')}</Label>
-                          <Input 
-                            id="frameSize" 
-                            value={editedWorkOrder.frameSize || ''} 
-                            onChange={(e) => setEditedWorkOrder({...editedWorkOrder, frameSize: e.target.value})}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="framePrice">{t('price')}</Label>
-                          <Input 
-                            id="framePrice" 
-                            type="number" 
-                            step="0.001"
-                            value={editedWorkOrder.framePrice || 0} 
-                            onChange={(e) => setEditedWorkOrder({...editedWorkOrder, framePrice: Number(e.target.value)})}
-                          />
-                        </div>
-                      </div>
-                    )}
+              <div>
+                <Label htmlFor="lensPrice">{t("lensPrice")}</Label>
+                <Input
+                  id="lensPrice"
+                  name="lensPrice"
+                  type="number"
+                  value={editData.lensPrice}
+                  onChange={handleChange}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="coating">{t("coating")}</Label>
+                <Select 
+                  value={editData.coating} 
+                  onValueChange={(value) => handleSelectChange('coating', value)}
+                >
+                  <SelectTrigger id="coating">
+                    <SelectValue placeholder={t("selectCoating")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lensCoatings.map(coating => (
+                      <SelectItem key={coating.id} value={coating.name}>{coating.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="coatingPrice">{t("coatingPrice")}</Label>
+                <Input
+                  id="coatingPrice"
+                  name="coatingPrice"
+                  type="number"
+                  value={editData.coatingPrice}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <div className="bg-primary/5 p-4 rounded-lg mb-4">
+            <h3 className="text-primary font-medium mb-2 flex items-center">
+              <Frame className="w-4 h-4 mr-2" />
+              {t("frameInformation")}
+            </h3>
+            
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <Label>{t("frameSearch")}</Label>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 px-2 text-xs"
+                  onClick={() => setUseManualFrameInput(!useManualFrameInput)}
+                >
+                  {useManualFrameInput ? t("useSearch") : t("manualInput")}
+                </Button>
+              </div>
+              
+              {!useManualFrameInput ? (
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder={t("searchFrames")}
+                      className="pl-8"
+                      value={frameSearchQuery}
+                      onChange={(e) => setFrameSearchQuery(e.target.value)}
+                    />
                   </div>
-                </CardContent>
-              </Card>
-              
-              {editedWorkOrder.editHistory && editedWorkOrder.editHistory.length > 0 && (
-                <Card className="bg-amber-50">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2 text-amber-700">
-                      <Clock className="h-4 w-4" />
-                      {t('editHistory')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 text-sm">
-                      {editedWorkOrder.editHistory.map((edit: any, index: number) => (
-                        <div key={index} className="flex items-center gap-2 text-muted-foreground">
-                          <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                  
+                  {filteredFrames.length > 0 && (
+                    <div className="border rounded-md max-h-40 overflow-y-auto">
+                      {filteredFrames.map((frame) => (
+                        <div
+                          key={`${frame.brand}-${frame.model}-${frame.color}`}
+                          className={`p-2 cursor-pointer hover:bg-muted flex justify-between items-center ${
+                            selectedFrame === frame ? 'bg-primary/10' : ''
+                          }`}
+                          onClick={() => selectFrame(frame)}
+                        >
                           <div>
-                            {new Date(edit.timestamp).toLocaleString()} - {edit.notes}
+                            <div className="font-medium">{frame.brand} - {frame.model}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {frame.color} {frame.size ? `(${frame.size})` : ''}
+                            </div>
                           </div>
+                          <div className="font-medium">{frame.price.toFixed(2)} {t('kwd')}</div>
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+                  
+                  {frameSearchQuery && filteredFrames.length === 0 && (
+                    <div className="text-center py-2 text-muted-foreground">
+                      {t("noFramesFound")}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="frameBrand">{t("frameBrand")}</Label>
+                    <Input
+                      id="frameBrand"
+                      name="frameBrand"
+                      value={editData.frameBrand}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="frameModel">{t("frameModel")}</Label>
+                    <Input
+                      id="frameModel"
+                      name="frameModel"
+                      value={editData.frameModel}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="frameColor">{t("frameColor")}</Label>
+                    <Input
+                      id="frameColor"
+                      name="frameColor"
+                      value={editData.frameColor}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="frameSize">{t("frameSize")}</Label>
+                    <Input
+                      id="frameSize"
+                      name="frameSize"
+                      value={editData.frameSize}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
               )}
-            </TabsContent>
-          </ScrollArea>
-        </Tabs>
+              
+              <div className="mt-4">
+                <Label htmlFor="framePrice">{t("framePrice")}</Label>
+                <Input
+                  id="framePrice"
+                  name="framePrice"
+                  type="number"
+                  value={editData.framePrice}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  
+  const renderSummaryTab = () => (
+    <div className="grid gap-4 py-4">
+      <div className="bg-primary/5 p-4 rounded-lg mb-4">
+        <h3 className="text-primary font-medium mb-2">{t("orderSummary")}</h3>
         
-        <DialogFooter className="mt-2">
-          <Button variant="outline" onClick={onClose}>
-            {t('cancel')}
-          </Button>
-          <Button onClick={handleSave}>
-            {t('save')}
-          </Button>
-        </DialogFooter>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="discount">{t("discount")}</Label>
+              <Input
+                id="discount"
+                name="discount"
+                type="number"
+                value={editData.discount}
+                onChange={handleChange}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="total">{t("total")}</Label>
+              <Input
+                id="total"
+                name="total"
+                type="number"
+                value={(editData.framePrice + editData.lensPrice + editData.coatingPrice - editData.discount).toFixed(3)}
+                disabled
+              />
+            </div>
+          </div>
+          
+          {workOrder.editHistory && workOrder.editHistory.length > 0 && (
+            <div className="mt-4">
+              <h4 className="text-sm font-medium mb-2 flex items-center">
+                <Clock className="w-4 h-4 mr-1" />
+                {t("editHistory")}
+              </h4>
+              <div className="text-sm text-muted-foreground space-y-1 max-h-32 overflow-y-auto border rounded-md p-2">
+                {workOrder.editHistory.map((edit: any, index: number) => (
+                  <div key={index} className="flex justify-between">
+                    <span>{edit.notes}</span>
+                    <span>{new Date(edit.timestamp).toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className={`${isRtl ? 'rtl' : 'ltr'}`}>
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <Edit className="w-5 h-5 mr-2" />
+            {t("editWorkOrder")}
+          </h2>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="prescription">
+                <Glasses className="w-4 h-4 mr-2" />
+                {t("prescription")}
+              </TabsTrigger>
+              <TabsTrigger value="summary">
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                {t("summary")}
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="prescription">
+              {renderPrescriptionTab()}
+            </TabsContent>
+            
+            <TabsContent value="summary">
+              {renderSummaryTab()}
+            </TabsContent>
+          </Tabs>
+          
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              {t("cancel")}
+            </Button>
+            <Button onClick={handleSaveChanges}>
+              {t("save")}
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
