@@ -47,8 +47,6 @@ export interface Invoice {
   contactLensItems?: ContactLensItem[];
   contactLensRx?: any;
   
-  thickness?: string;
-  
   discount: number;
   deposit: number;
   total: number;

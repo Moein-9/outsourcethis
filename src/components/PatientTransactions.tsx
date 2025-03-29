@@ -1,15 +1,14 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { TabbedTransactions } from "./TabbedTransactions";
 import { Patient } from "@/store/patientStore";
 import { PrintOptionsDialog } from "./PrintOptionsDialog";
 import { Button } from "@/components/ui/button";
-import { Printer, AlertTriangle } from "lucide-react";
+import { Printer } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
 import { CustomPrintWorkOrderButton } from "./CustomPrintWorkOrderButton";
-import { toast } from "sonner";
 
 interface PatientTransactionsProps {
   invoices: Invoice[];
@@ -25,12 +24,6 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   onEditWorkOrder
 }) => {
   const { t } = useLanguageStore();
-  const [refreshKey, setRefreshKey] = useState(0);
-  
-  // Listen for changes in workOrders or invoices and update the component
-  useEffect(() => {
-    setRefreshKey(prev => prev + 1);
-  }, [workOrders, invoices]);
   
   // Filter out active invoices (not refunded)
   const activeInvoices = invoices.filter(invoice => !invoice.isRefunded);
@@ -44,7 +37,6 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     
     console.log("[PatientTransactions] Printing work order:", workOrder.id);
     console.log("[PatientTransactions] Related invoice:", relatedInvoice?.invoiceId);
-    console.log("[PatientTransactions] Edit history:", workOrder.editHistory);
     
     // Call the CustomPrintService with the proper parameters
     CustomPrintService.printWorkOrder(workOrder, relatedInvoice, patient);
@@ -53,33 +45,12 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   const handlePrintInvoice = (invoice: Invoice) => {
     console.log("[PatientTransactions] Printing invoice:", invoice.invoiceId);
     
-    // Get the related work order to ensure edit history is included
-    const relatedWorkOrder = workOrders.find(wo => wo.id === invoice.workOrderId);
-    if (relatedWorkOrder && relatedWorkOrder.editHistory?.length) {
-      console.log("[PatientTransactions] Invoice has edit history from work order:", relatedWorkOrder.editHistory);
-    }
-    
     // Call the CustomPrintService to handle invoice printing
     if (typeof CustomPrintService.printInvoice === 'function') {
       CustomPrintService.printInvoice(invoice);
     } else {
       console.error('CustomPrintService.printInvoice is not implemented');
-      toast.error(t('errorPrintingInvoice'));
     }
-  };
-  
-  // Check for price changes in edit history
-  const hasSignificantPriceChanges = () => {
-    for (const workOrder of workOrders) {
-      if (workOrder.editHistory && workOrder.editHistory.length > 0) {
-        // Check if any edit history contains price change notes
-        const hasPriceChange = workOrder.editHistory.some(
-          edit => edit.notes.includes("price") || edit.notes.includes("amount") || edit.notes.includes("cost")
-        );
-        if (hasPriceChange) return true;
-      }
-    }
-    return false;
   };
   
   return (
@@ -104,18 +75,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
         )}
       </div>
       
-      {hasSignificantPriceChanges() && (
-        <div className="bg-amber-50 border border-amber-200 rounded-md p-3 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-medium text-amber-800">{t('orderPriceChangedNotice')}</p>
-            <p className="text-sm text-amber-700">{t('orderPriceChangedDescription')}</p>
-          </div>
-        </div>
-      )}
-      
       <TabbedTransactions
-        key={refreshKey}
         invoices={activeInvoices}
         workOrders={workOrders}
         refundedInvoices={refundedInvoices}

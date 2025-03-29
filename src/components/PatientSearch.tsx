@@ -135,39 +135,6 @@ export const PatientSearch: React.FC = () => {
   };
   
   const handleSaveWorkOrder = (updatedWorkOrder: InventoryWorkOrder) => {
-    const { updateWorkOrder, updateInvoice } = useInvoiceStore.getState();
-    
-    if (updateWorkOrder) {
-      updateWorkOrder(updatedWorkOrder as any);
-    }
-    
-    if (updatedWorkOrder.id) {
-      const relatedInvoice = patientInvoices.find(inv => inv.workOrderId === updatedWorkOrder.id);
-      if (relatedInvoice) {
-        const now = new Date().toISOString();
-        const updatedInvoice = {
-          ...relatedInvoice,
-          lastEditedAt: now,
-          editHistory: [
-            ...(relatedInvoice.editHistory || []),
-            {
-              timestamp: now,
-              notes: language === 'ar' ? "تم تعديل أمر العمل المرتبط" : "Related work order was edited"
-            }
-          ]
-        };
-        updateInvoice(updatedInvoice);
-      }
-    }
-    
-    if (selectedPatient) {
-      const refreshedInvoices = getInvoicesByPatientId(selectedPatient.patientId);
-      const refreshedWorkOrders = getWorkOrdersByPatientId(selectedPatient.patientId);
-      
-      setPatientInvoices(refreshedInvoices);
-      setPatientWorkOrders(refreshedWorkOrders);
-    }
-    
     toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
     setEditWorkOrderDialogOpen(false);
   };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInventoryStore } from "@/store/inventoryStore";
-import { Search, Edit, Clock, Glasses, CheckCircle2, Eye, Calculator, AlertTriangle } from "lucide-react";
+import { Search, Edit, Clock, Glasses, CheckCircle2, Eye, Calculator } from "lucide-react";
 import { Frame, WorkOrder, WorkOrderEdit } from "@/types/inventory";
 
 interface EditWorkOrderDialogProps {
@@ -28,7 +27,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   onSave
 }) => {
   const { t, language } = useLanguageStore();
-  const { updateWorkOrder, getInvoiceById, updateInvoice } = useInvoiceStore();
+  const { updateWorkOrder, getInvoiceById } = useInvoiceStore();
   const { editWorkOrder, getPatientById } = usePatientStore();
   const { lensTypes, lensCoatings, frames: storeFrames } = useInventoryStore();
   const isRtl = language === 'ar';
@@ -89,7 +88,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     lensPrice: workOrder.lensPrice || 0,
     coating: workOrder.coating || '',
     coatingPrice: workOrder.coatingPrice || 0,
-    thickness: (workOrder as any).thickness || '',
     discount: workOrder.discount || 0,
     total: workOrder.total || 0,
   });
@@ -117,7 +115,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         lensPrice: workOrder.lensPrice || 0,
         coating: workOrder.coating || '',
         coatingPrice: workOrder.coatingPrice || 0,
-        thickness: (workOrder as any).thickness || '',
         discount: workOrder.discount || 0,
         total: workOrder.total || 0,
       });
@@ -240,15 +237,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       
       const currentDateTime = new Date().toISOString();
       
-      // Create a note about price changes if any
-      let editNote = "Order updated";
-      if (priceDifference !== 0) {
-        const formattedDiff = Math.abs(priceDifference).toFixed(3);
-        editNote = priceDifference > 0 
-          ? `Order updated with price increase of ${formattedDiff} KWD` 
-          : `Order updated with price decrease of ${formattedDiff} KWD`;
-      }
-      
       const updatedWorkOrder: WorkOrder = {
         ...workOrder,
         frameBrand: editData.frameBrand,
@@ -263,12 +251,11 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         discount: editData.discount,
         total: newTotal,
         lastEditedAt: currentDateTime,
-        thickness: editData.thickness, // Add thickness property
         editHistory: [
           ...(workOrder.editHistory || []),
           {
             timestamp: currentDateTime,
-            notes: editNote
+            notes: "Order updated"
           }
         ]
       };
@@ -284,35 +271,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         updateWorkOrder(storeWorkOrder);
       }
       
-      // Update related invoice if it exists
-      if (workOrder.invoiceId && originalInvoice) {
-        const updatedInvoice = {
-          ...originalInvoice,
-          frameBrand: editData.frameBrand,
-          frameModel: editData.frameModel,
-          frameColor: editData.frameColor,
-          frameSize: editData.frameSize,
-          framePrice: editData.framePrice,
-          lensType: editData.lensType,
-          lensPrice: editData.lensPrice,
-          coating: editData.coating,
-          coatingPrice: editData.coatingPrice,
-          discount: editData.discount,
-          total: newTotal,
-          lastEditedAt: currentDateTime,
-          thickness: editData.thickness, // Add thickness property
-          editHistory: [
-            ...(originalInvoice.editHistory || []),
-            {
-              timestamp: currentDateTime,
-              notes: editNote
-            }
-          ]
-        };
-        
-        updateInvoice(updatedInvoice);
-      }
-      
       if (workOrder.patientId && editWorkOrder) {
         const workOrderEditData: PatientWorkOrderEdit = {
           patientId: workOrder.patientId,
@@ -323,13 +281,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         editWorkOrder(workOrderEditData);
       }
       
-      const successMessage = priceDifference !== 0
-        ? language === 'ar' 
-          ? `تم تحديث البيانات بنجاح. ${priceDifference > 0 ? 'زيادة' : 'نقص'} في السعر: ${Math.abs(priceDifference).toFixed(3)} د.ك`
-          : `Order updated successfully. Price ${priceDifference > 0 ? 'increased' : 'decreased'} by ${Math.abs(priceDifference).toFixed(3)} KWD`
-        : language === 'ar' ? "تم تحديث البيانات بنجاح" : "Order updated successfully";
-      
-      toast.success(successMessage);
+      toast.success(language === 'ar' ? "تم تحديث البيانات بنجاح" : "Order updated successfully");
       
       onClose();
       onSave(updatedWorkOrder);
@@ -441,6 +393,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                   type="number"
                   value={editData.lensPrice}
                   onChange={handleChange}
+                  readOnly
                   className="bg-muted/20"
                 />
               </div>
@@ -474,34 +427,9 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                   type="number"
                   value={editData.coatingPrice}
                   onChange={handleChange}
+                  readOnly
                   className="bg-muted/20"
                 />
-              </div>
-
-              <div>
-                <Label htmlFor="thickness">{language === 'ar' ? "سماكة العدسة" : "Lens Thickness"}</Label>
-                <Select 
-                  value={editData.thickness} 
-                  onValueChange={(value) => setEditData(prev => ({...prev, thickness: value}))}
-                >
-                  <SelectTrigger id="thickness">
-                    <SelectValue placeholder={language === 'ar' ? "اختر سماكة العدسة" : "Select lens thickness"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Standard">
-                      {language === 'ar' ? "قياسي" : "Standard"}
-                    </SelectItem>
-                    <SelectItem value="Thin">
-                      {language === 'ar' ? "رقيق" : "Thin"}
-                    </SelectItem>
-                    <SelectItem value="Ultra-thin">
-                      {language === 'ar' ? "رقيق جداً" : "Ultra-thin"}
-                    </SelectItem>
-                    <SelectItem value="Super-thin">
-                      {language === 'ar' ? "فائق الرقة" : "Super-thin"}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
           </div>
@@ -583,6 +511,8 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                       name="frameBrand"
                       value={editData.frameBrand}
                       onChange={handleChange}
+                      readOnly
+                      className="bg-muted/20"
                     />
                   </div>
                   
@@ -593,6 +523,8 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                       name="frameModel"
                       value={editData.frameModel}
                       onChange={handleChange}
+                      readOnly
+                      className="bg-muted/20"
                     />
                   </div>
                   
@@ -603,6 +535,8 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                       name="frameColor"
                       value={editData.frameColor}
                       onChange={handleChange}
+                      readOnly
+                      className="bg-muted/20"
                     />
                   </div>
                   
@@ -613,6 +547,8 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                       name="frameSize"
                       value={editData.frameSize}
                       onChange={handleChange}
+                      readOnly
+                      className="bg-muted/20"
                     />
                   </div>
                 </div>
@@ -626,6 +562,8 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                   type="number"
                   value={editData.framePrice}
                   onChange={handleChange}
+                  readOnly
+                  className="bg-muted/20"
                 />
               </div>
             </div>
@@ -666,26 +604,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
                 />
               </div>
             </div>
-            
-            {priceDifference !== 0 && (
-              <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-amber-800">
-                      {language === 'ar' 
-                        ? `تغيير في السعر: ${priceDifference > 0 ? '+' : ''}${priceDifference.toFixed(3)} د.ك`
-                        : `Price change: ${priceDifference > 0 ? '+' : ''}${priceDifference.toFixed(3)} KWD`}
-                    </p>
-                    <p className="text-sm text-amber-700">
-                      {priceDifference > 0 
-                        ? (language === 'ar' ? "العميل سيدفع مبلغ إضافي" : "Customer will pay additional amount") 
-                        : (language === 'ar' ? "العميل سيستلم مبلغ مسترد" : "Customer will receive a refund")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
             
             {workOrder.editHistory && workOrder.editHistory.length > 0 && (
               <div className="mt-4">
@@ -736,28 +654,11 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
             </div>
             
             {priceDifference !== 0 && (
-              <Button 
-                className="w-full mt-2"
-                variant={priceDifference > 0 ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  const message = priceDifference > 0
-                    ? language === 'ar' 
-                      ? `يجب إبلاغ العميل بدفع مبلغ إضافي قدره ${Math.abs(priceDifference).toFixed(3)} د.ك` 
-                      : `Notify customer to pay additional ${Math.abs(priceDifference).toFixed(3)} KWD`
-                    : language === 'ar'
-                      ? `يجب إرجاع مبلغ للعميل قدره ${Math.abs(priceDifference).toFixed(3)} د.ك`
-                      : `Issue refund of ${Math.abs(priceDifference).toFixed(3)} KWD to customer`;
-                  
-                  toast.info(message, {
-                    duration: 5000,
-                  });
-                }}
-              >
+              <div className="text-sm mt-2 p-2 bg-yellow-50 text-yellow-800 rounded border border-yellow-200">
                 {priceDifference > 0 
-                  ? (language === 'ar' ? "إبلاغ العميل بالدفع" : "Notify Customer") 
-                  : (language === 'ar' ? "إصدار استرداد" : "Issue Refund")}
-              </Button>
+                  ? (language === 'ar' ? "العميل سيدفع مبلغ إضافي" : "Customer will pay additional amount") 
+                  : (language === 'ar' ? "العميل سيستلم مبلغ مسترد" : "Customer will receive a refund")}
+              </div>
             )}
           </div>
         </div>
