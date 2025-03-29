@@ -34,26 +34,26 @@ export class CustomPrintService {
             <style>
               @page {
                 size: 80mm auto !important;
-                margin: 2mm !important; /* Added small margins for safety */
+                margin: 3mm !important; /* Increased margins for safety */
                 padding: 0 !important;
               }
               
               body {
-                width: 76mm !important; /* 80mm - 4mm for margins */
+                width: 74mm !important; /* 80mm - 6mm for margins */
                 margin: 0 auto !important;
                 padding: 0 !important;
                 font-family: Cairo, Arial, sans-serif !important;
                 background: white !important;
                 color: black !important;
-                font-size: 12px !important; /* Increased base font size */
+                font-size: 14px !important; /* Increased base font size from 12px */
               }
               
               #work-order-receipt {
-                width: 76mm !important;
-                max-width: 76mm !important;
+                width: 74mm !important;
+                max-width: 74mm !important;
                 page-break-after: always !important;
                 page-break-inside: avoid !important;
-                position: relative !important; /* Changed from absolute to relative */
+                position: relative !important; 
                 left: 0 !important;
                 top: 0 !important;
                 border: none !important;
@@ -95,10 +95,10 @@ export class CustomPrintService {
               .justify-between { justify-content: space-between !important; }
               .text-center { text-align: center !important; }
               .font-bold { font-weight: bold !important; }
-              .text-xs { font-size: 9px !important; }
-              .text-sm { font-size: 11px !important; }
-              .text-base { font-size: 13px !important; }
-              .text-lg { font-size: 15px !important; }
+              .text-xs { font-size: 11px !important; } /* Increased from 9px */
+              .text-sm { font-size: 13px !important; } /* Increased from 11px */
+              .text-base { font-size: 15px !important; } /* Increased from 13px */
+              .text-lg { font-size: 17px !important; } /* Increased from 15px */
               .mb-0 { margin-bottom: 0 !important; }
               .mb-1 { margin-bottom: 0.25rem !important; }
               .mb-2 { margin-bottom: 0.5rem !important; }
@@ -132,7 +132,7 @@ export class CustomPrintService {
               /* Print-specific overrides */
               @media print {
                 html, body {
-                  width: 76mm !important;
+                  width: 74mm !important;
                   height: auto !important;
                   min-height: 0 !important;
                   max-height: none !important;
@@ -160,19 +160,19 @@ export class CustomPrintService {
                 table {
                   width: 100% !important;
                   border-collapse: collapse !important;
-                  font-size: 10px !important;
+                  font-size: 12px !important; /* Increased from 10px */
                   margin: 0 auto !important;
                 }
                 
                 table th, table td {
-                  padding: 2px !important;
+                  padding: 3px !important; /* Increased from 2px */
                   text-align: center !important;
                   border: 1px solid #d1d5db !important;
                 }
                 
                 /* Notes section */
                 div[class*="min-h-"] {
-                  min-height: 40px !important;
+                  min-height: 50px !important; /* Increased from 40px */
                   border: 2px solid #d1d5db !important;
                   background-color: white !important;
                 }
@@ -234,8 +234,8 @@ export class CustomPrintService {
             if (printedReceipt) {
               printedReceipt.setAttribute('id', 'work-order-receipt');
               printedReceipt.setAttribute('style', `
-                width: 76mm !important;
-                max-width: 76mm !important;
+                width: 74mm !important;
+                max-width: 74mm !important;
                 margin: 0 auto !important;
                 padding: 2mm !important;
                 background-color: white !important;
@@ -243,8 +243,28 @@ export class CustomPrintService {
                 font-family: 'Cairo', sans-serif !important;
                 page-break-inside: avoid !important;
                 page-break-after: always !important;
-                font-size: 12px !important;
+                font-size: 14px !important;
               `);
+            }
+            
+            // Ensure all tables have proper text size
+            const tables = printWindow.document.querySelectorAll('table');
+            tables.forEach(table => {
+              table.style.fontSize = '12px';
+              
+              const cells = table.querySelectorAll('th, td');
+              cells.forEach(cell => {
+                (cell as HTMLElement).style.padding = '3px';
+                (cell as HTMLElement).style.fontSize = '12px';
+              });
+            });
+            
+            // Make the notes section more visible
+            const notesSection = printWindow.document.querySelector('.min-h-\\[40px\\]');
+            if (notesSection) {
+              (notesSection as HTMLElement).style.minHeight = '50px';
+              (notesSection as HTMLElement).style.border = '2px solid #d1d5db';
+              (notesSection as HTMLElement).style.backgroundColor = 'white';
             }
           }
           
@@ -315,22 +335,23 @@ export class CustomPrintService {
             <style>
               @page {
                 size: 80mm auto !important;
-                margin: 0 !important;
+                margin: 3mm !important; /* Increased margins for safety */
                 padding: 0 !important;
               }
               
               body {
-                width: 80mm !important;
+                width: 74mm !important; /* 80mm - 6mm for margins */
                 margin: 0 !important;
                 padding: 0 !important;
                 font-family: Cairo, Arial, sans-serif !important;
                 background: white !important;
                 color: black !important;
+                font-size: 14px !important; /* Increased base font size */
               }
               
               #receipt-invoice {
-                width: 80mm !important;
-                max-width: 80mm !important;
+                width: 74mm !important;
+                max-width: 74mm !important;
                 page-break-after: always !important;
                 page-break-inside: avoid !important;
                 position: absolute !important;
@@ -376,10 +397,10 @@ export class CustomPrintService {
               .justify-between { justify-content: space-between !important; }
               .text-center { text-align: center !important; }
               .font-bold { font-weight: bold !important; }
-              .text-xs { font-size: 0.75rem !important; }
-              .text-sm { font-size: 0.875rem !important; }
-              .text-base { font-size: 1rem !important; }
-              .text-lg { font-size: 1.125rem !important; }
+              .text-xs { font-size: 11px !important; } /* Increased from 0.75rem */
+              .text-sm { font-size: 13px !important; } /* Increased from 0.875rem */
+              .text-base { font-size: 15px !important; } /* Increased from 1rem */
+              .text-lg { font-size: 17px !important; } /* Increased from 1.125rem */
               .mb-0 { margin-bottom: 0 !important; }
               .mb-1 { margin-bottom: 0.25rem !important; }
               .mb-2 { margin-bottom: 0.5rem !important; }
@@ -427,7 +448,7 @@ export class CustomPrintService {
               /* Print-specific overrides */
               @media print {
                 html, body {
-                  width: 80mm !important;
+                  width: 74mm !important;
                   height: auto !important;
                   min-height: 0 !important;
                   max-height: none !important;
@@ -466,6 +487,12 @@ export class CustomPrintService {
                 
                 #receipt-invoice .rounded {
                   border-radius: 0.25rem !important;
+                }
+                
+                /* Work order number styling */
+                .work-order-number {
+                  font-size: 14px !important;
+                  font-weight: bold !important;
                 }
               }
             </style>
@@ -517,8 +544,8 @@ export class CustomPrintService {
             if (printedReceipt) {
               printedReceipt.setAttribute('id', 'receipt-invoice');
               printedReceipt.setAttribute('style', `
-                width: 80mm !important;
-                max-width: 80mm !important;
+                width: 74mm !important;
+                max-width: 74mm !important;
                 margin: 0 auto !important;
                 padding: 10px !important;
                 background-color: white !important;
@@ -527,8 +554,19 @@ export class CustomPrintService {
                 page-break-inside: avoid !important;
                 page-break-after: always !important;
                 text-align: center !important;
+                font-size: 14px !important;
               `);
             }
+            
+            // Enhance work order number visibility
+            const workOrderElements = printWindow.document.querySelectorAll('.text-xs');
+            workOrderElements.forEach(el => {
+              if ((el as HTMLElement).textContent && (el as HTMLElement).textContent.includes("ORDER #")) {
+                (el as HTMLElement).classList.add('work-order-number');
+                (el as HTMLElement).style.fontSize = '14px';
+                (el as HTMLElement).style.fontWeight = 'bold';
+              }
+            });
           }
           
           // Close the document to finish loading

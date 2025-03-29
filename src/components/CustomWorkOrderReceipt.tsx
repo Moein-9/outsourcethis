@@ -88,12 +88,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         id="work-order-receipt"
         dir={isRtl ? "rtl" : "ltr"}
         style={{ 
-          width: '80mm', 
-          maxWidth: '80mm',
+          width: '74mm', 
+          maxWidth: '74mm',
           margin: '0 auto',
           backgroundColor: '#FFFBEB',
           padding: '4mm',
-          fontSize: '11px',
+          fontSize: '13px',
           border: '1px solid #FDE68A',
           borderRadius: '4px',
           boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
@@ -118,13 +118,13 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       id="work-order-receipt"
       dir={isRtl ? "rtl" : "ltr"}
       style={{ 
-        width: '78mm', // Slightly reduced from 80mm to ensure it fits within printer margins
-        maxWidth: '78mm',
+        width: '74mm', // Reduced from 78mm for better margin safety
+        maxWidth: '74mm',
         margin: '0 auto',
         backgroundColor: 'white',
         color: 'black',
         padding: '2mm',
-        fontSize: '12px', // Increased from 10px to improve readability
+        fontSize: '14px', // Increased from 12px for better readability
         border: isPrintable ? 'none' : '1px solid #ddd',
         borderRadius: isPrintable ? '0' : '4px',
         boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
@@ -135,22 +135,22 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
     >
       <div className="text-center border-b border-gray-300 pb-2 mb-2">
         <div className="flex justify-center mb-1">
-          <MoenLogo className="w-auto h-12" /> {/* Increased from h-10 */}
+          <MoenLogo className="w-auto h-12" /> 
         </div>
-        <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2> {/* Increased from text-base */}
-        <p className="text-sm font-medium mb-0 text-gray-600">{storeInfo.address}</p> {/* Increased from text-xs */}
-        <p className="text-sm font-medium text-gray-600">{t("phone")}: {storeInfo.phone}</p> {/* Increased from text-xs */}
+        <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
+        <p className="text-sm font-medium mb-0 text-gray-600">{storeInfo.address}</p>
+        <p className="text-sm font-medium text-gray-600">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
       <div className="text-center mb-2">
         <div className="bg-black text-white py-1 px-2 mb-1 font-bold text-base rounded">
           {isRtl ? "أمر عمل | WORK ORDER" : "WORK ORDER | أمر عمل"}
         </div>
-        <p className="text-xs mb-0 text-gray-600">
+        <p className="text-sm mb-0 text-gray-600 font-bold">
           {isRtl ? "ORDER #: " : "رقم الطلب: "}
-          <span className="font-semibold">{orderNumber}</span>
+          <span className="font-bold work-order-number">{orderNumber}</span>
         </p>
-        <p className="text-xs text-gray-600 rx-creation-date">
+        <p className="text-sm text-gray-600 rx-creation-date">
           {format(new Date(), 'yyyy-MM-dd HH:mm', { locale: enUS })}
         </p>
       </div>
@@ -162,7 +162,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Patient Information | معلومات المريض"}
         </div>
         
-        <div className="space-y-1 text-sm px-2"> {/* Increased from text-xs and improved spacing */}
+        <div className="space-y-1 text-sm px-2"> 
           <div className="flex justify-between items-center">
             <span className="font-bold flex items-center gap-1">
               <User className="h-4 w-4" /> {t("customer")}:
@@ -196,7 +196,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         
         {/* RX Table - Always LTR regardless of language setting - Improved sizing */}
-        <table className="w-full border-collapse text-xs" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
+        <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100">
               <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '15%' }}>Eye</th>
@@ -227,7 +227,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           </tbody>
         </table>
         
-        <div className="mt-1 text-xs flex justify-between px-1 font-medium">
+        <div className="mt-1 text-sm flex justify-between px-1 font-medium">
           <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
           <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
         </div>
@@ -240,14 +240,14 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Product Details | تفاصيل المنتج"}
         </div>
         
-        <div className="space-y-2 text-sm px-1"> {/* Increased spacing and font size */}
+        <div className="space-y-2 text-sm px-1">
           {frameData.brand && !isContactLens && (
             <Card className="mb-1 border border-gray-200 rounded-md">
               <CardContent className="p-1">
                 <div className="font-bold border-b border-gray-300 pb-0.5 mb-0.5">
                   {isRtl ? "الإطار (Frame)" : "Frame (الإطار)"}
                 </div>
-                <div className="px-1 space-y-0.5 text-xs">
+                <div className="px-1 space-y-0.5 text-sm">
                   <div className="flex justify-between">
                     <span className="font-semibold">{isRtl ? "الماركة" : "Brand"}:</span>
                     <span>{frameData.brand}</span>
@@ -329,7 +329,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                 <div className="font-bold border-b border-gray-300 pb-0.5 mb-0.5">
                   {isRtl ? "العدسات (Lenses)" : "Lenses (العدسات)"}
                 </div>
-                <div className="px-1 space-y-0.5 text-xs">
+                <div className="px-1 space-y-0.5 text-sm">
                   <div className="flex justify-between">
                     <span className="font-semibold">{isRtl ? "النوع" : "Type"}:</span>
                     <span>{lensName}</span>
@@ -351,7 +351,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                 <div className="font-bold border-b border-gray-300 pb-0.5 mb-0.5">
                   {isRtl ? "الطلاء (Coating)" : "Coating (الطلاء)"}
                 </div>
-                <div className="px-1 space-y-0.5 text-xs">
+                <div className="px-1 space-y-0.5 text-sm">
                   <div className="flex justify-between">
                     <span className="font-semibold">{isRtl ? "النوع" : "Type"}:</span>
                     <span>{coatingName}</span>
@@ -378,7 +378,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         
         <Card className="border border-gray-200 rounded-md">
           <CardContent className="p-1">
-            <div className="space-y-0.5 text-sm"> {/* Increased from text-xs */}
+            <div className="space-y-0.5 text-sm">
               <div className="flex justify-between">
                 <span className="font-bold">{t("subtotal")}:</span>
                 <span className="font-semibold">{subtotal.toFixed(3)} KWD</span>
@@ -407,8 +407,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                     <CheckCircle2 className="w-4 h-4" />
                     <span>{isRtl ? "تم الدفع بالكامل" : "PAID IN FULL"}</span>
                   </div>
-                  {!isRtl ? <div className="text-green-700 text-xs">تم الدفع بالكامل</div> : 
-                           <div className="text-green-700 text-xs">PAID IN FULL</div>}
+                  {!isRtl ? <div className="text-green-700 text-sm">تم الدفع بالكامل</div> : 
+                           <div className="text-green-700 text-sm">PAID IN FULL</div>}
                 </div>
               ) : (
                 <div className="mt-1">
@@ -419,8 +419,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                     <div className="text-base font-bold text-red-800">
                       {remaining.toFixed(3)} KWD
                     </div>
-                    {!isRtl ? <div className="text-red-700 text-xs">المبلغ المتبقي</div> : 
-                             <div className="text-red-700 text-xs">REMAINING AMOUNT</div>}
+                    {!isRtl ? <div className="text-red-700 text-sm">المبلغ المتبقي</div> : 
+                             <div className="text-red-700 text-sm">REMAINING AMOUNT</div>}
                   </div>
                 </div>
               )}
@@ -436,19 +436,19 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Quality Confirmation | تأكيد الجودة"}
         </div>
         
-        <div className="flex gap-1 text-xs mb-0.5">
+        <div className="flex gap-1 text-sm mb-0.5">
           <div className="border border-gray-300 rounded p-0.5 flex-1">
-            <div className="font-bold mb-0.5 text-center border-b border-gray-300 pb-0.5 text-xs">
+            <div className="font-bold mb-0.5 text-center border-b border-gray-300 pb-0.5 text-sm">
               {isRtl ? "Technician Signature | توقيع الفني" : "Technician Signature | توقيع الفني"}
             </div>
-            <div className="h-8 border-dashed border border-gray-200 rounded-sm"></div> {/* Increased from h-7 */}
+            <div className="h-8 border-dashed border border-gray-200 rounded-sm"></div>
           </div>
           
           <div className="border border-gray-300 rounded p-0.5 flex-1">
-            <div className="font-bold mb-0.5 text-center border-b border-gray-300 pb-0.5 text-xs">
+            <div className="font-bold mb-0.5 text-center border-b border-gray-300 pb-0.5 text-sm">
               {isRtl ? "Manager Signature | توقيع المدير" : "Manager Signature | توقيع المدير"}
             </div>
-            <div className="h-8 border-dashed border border-gray-200 rounded-sm"></div> {/* Increased from h-7 */}
+            <div className="h-8 border-dashed border border-gray-200 rounded-sm"></div>
           </div>
         </div>
       </div>
@@ -460,8 +460,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Notes | ملاحظات"}
         </div>
         
-        {/* Improved notes section with clearer border and increased height */}
-        <div className="border-2 border-gray-300 rounded p-1 min-h-[40px] bg-white">
+        {/* Enhanced notes section with clearer border, white background, and increased height */}
+        <div className="border-2 border-gray-300 rounded p-1 min-h-[50px] bg-white">
           {/* Empty space for notes */}
         </div>
       </div>
@@ -471,12 +471,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           @media print {
             @page {
               size: 80mm auto !important;
-              margin: 0 !important;
+              margin: 3mm !important;
               padding: 0 !important;
             }
             
             body {
-              width: 80mm !important;
+              width: 74mm !important;
               margin: 0 !important;
               padding: 0 !important;
               background: white !important;
@@ -484,11 +484,11 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             }
             
             #work-order-receipt {
-              width: 76mm !important; /* 80mm - 4mm for padding */
-              max-width: 76mm !important;
+              width: 74mm !important;
+              max-width: 74mm !important;
               page-break-after: always !important;
               page-break-inside: avoid !important;
-              position: absolute !important;
+              position: relative !important;
               left: 0 !important;
               top: 0 !important;
               border: none !important;
@@ -500,7 +500,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               height: auto !important;
               min-height: 0 !important;
               max-height: none !important;
-              font-size: 12px !important; /* Increased base font size */
+              font-size: 14px !important; 
             }
             
             .print-receipt * {
@@ -555,9 +555,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             }
             
             table th, table td {
-              padding: 2px !important; /* Increased from 0.5px */
+              padding: 3px !important; /* Increased from 2px */
               text-align: center !important;
-              font-size: 10px !important; /* Increased from 8px */
+              font-size: 12px !important; /* Increased from 10px */
               border: 1px solid #d1d5db !important;
             }
             
@@ -574,19 +574,25 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             
             /* Text sizes for printing */
             .text-xs {
-              font-size: 9px !important;
-            }
-            
-            .text-sm {
               font-size: 11px !important;
             }
             
-            .text-base {
+            .text-sm {
               font-size: 13px !important;
             }
             
-            .text-lg {
+            .text-base {
               font-size: 15px !important;
+            }
+            
+            .text-lg {
+              font-size: 17px !important;
+            }
+
+            /* Work order number specific styling */
+            .work-order-number {
+              font-size: 15px !important;
+              font-weight: bold !important;
             }
             
             /* Reduce padding */
@@ -610,8 +616,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             }
             
             /* Make the notes section clearly visible */
-            .min-h-\\[40px\\] {
-              min-height: 40px !important;
+            .min-h-\\[50px\\] {
+              min-height: 50px !important;
               border: 2px solid #d1d5db !important;
               background-color: white !important;
             }

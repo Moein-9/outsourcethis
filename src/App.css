@@ -1,4 +1,3 @@
-
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -137,8 +136,8 @@ table th, table td {
 @media print {
   @page {
     size: auto;
-    margin: 0;
-    padding: 0;
+    margin: 3mm !important;
+    padding: 0 !important;
   }
   
   html, body {
@@ -146,8 +145,8 @@ table th, table td {
     padding: 0 !important;
     height: auto !important;
     width: auto !important;
-    font-size: 9px !important;
-    line-height: 1.1 !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
   }
   
   #root {
@@ -161,159 +160,54 @@ table th, table td {
     display: none !important;
   }
   
-  /* Compact spacing for all elements */
-  h1, h2, h3, h4, p, div, span, td, th {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  
   /* Receipt-specific print styling */
   .print-receipt {
-    width: 80mm !important;
-    max-width: 80mm !important;
+    width: 74mm !important;
+    max-width: 74mm !important;
     margin: 0 !important;
     padding: 2mm !important;
     page-break-after: always !important;
     page-break-inside: avoid !important;
     visibility: visible !important;
-    font-size: 9px !important;
+    font-size: 14px !important;
   }
   
-  /* Ensure page break behavior */
-  .label-container, 
-  .print-container {
-    page-break-inside: avoid;
-    page-break-after: always;
+  /* Ensure all tables are readable */
+  #receipt-invoice table, #work-order-receipt table {
+    margin: 2px 0 !important;
   }
   
-  /* QR code size control */
-  [id^="qr-code-"] svg,
-  .qr-code svg {
-    width: 20px !important;
-    height: 20px !important;
+  #receipt-invoice th, #receipt-invoice td,
+  #work-order-receipt th, #work-order-receipt td {
+    padding: 3px !important;
+    font-size: 12px !important;
   }
   
-  /* Ensure all content is visible and fits in the safe zone */
-  .frame-label {
-    width: 100mm;
-    height: 16mm;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    align-items: center;
+  /* Make notes section more visible */
+  #work-order-receipt .min-h-\\[50px\\],
+  #work-order-receipt div[class*="min-h-"] {
+    min-height: 50px !important;
+    border: 2px solid #d1d5db !important;
+    background-color: white !important;
+    margin-bottom: 5px !important;
   }
   
-  /* Logo sizing */
-  .frame-label img {
-    max-height: 3.5mm;
-    width: auto;
+  /* Ensure better visibility for work order number */
+  .work-order-number {
+    font-size: 15px !important;
+    font-weight: bold !important;
   }
   
-  /* Make sure each label gets its own page */
-  .label-container {
-    page-break-after: always;
-    page-break-inside: avoid;
+  /* Make prescription table more readable */
+  #work-order-receipt table {
+    font-size: 12px !important;
   }
   
-  /* Fix for A4 documents */
-  .print-a4 {
-    width: 210mm;
-    min-height: 297mm;
-    page-break-after: always;
-  }
-  
-  /* Ensure element visibility in print */
-  body * {
-    visibility: hidden;
-  }
-  
-  .print-receipt *, 
-  .print-container *,
-  #receipt-invoice *,
-  #work-order-receipt * {
-    visibility: visible !important;
-  }
-  
-  /* Prevent multiple copies */
-  .hidden {
-    display: none !important;
-  }
-  
-  /* Font fixes for printed content */
-  [dir="rtl"] {
-    font-family: 'Zain', sans-serif !important;
-  }
-  
-  .ltr-print, [dir="ltr"] {
-    font-family: 'Yrsa', serif !important;
-  }
-  
-  /* Fix for print dialog issue - RED FLAG (highest priority) */
-  body.printing {
-    position: relative !important;
-    width: 80mm !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    overflow: visible !important;
-  }
-  
-  body.printing * {
-    visibility: visible !important;
-  }
-  
-  .print-receipt, #receipt-invoice, #work-order-receipt {
-    width: 80mm !important;
-    max-width: 80mm !important;
-    page-break-after: always !important;
-    visibility: visible !important;
-    position: static !important;
-  }
-  
-  /* Compact styles for tables */
-  table {
-    border-collapse: collapse !important;
-    width: 100% !important;
-  }
-  
-  table th, table td {
-    padding: 1px !important;
-    font-size: 7px !important;
-  }
-  
-  /* Reduce margins and paddings for all elements */
-  * {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  
-  /* Compress vertical spacing */
-  .print-receipt > div, 
-  #receipt-invoice > div, 
-  #work-order-receipt > div {
-    margin-bottom: 1px !important;
-    padding: 0 !important;
-  }
-  
-  /* Ensure text is legible even at small sizes */
-  p, span, div, td, th {
-    line-height: 1.1 !important;
-  }
-  
-  /* Make headings more compact */
-  h1, h2, h3 {
-    line-height: 1.2 !important;
-    margin: 1px 0 !important;
-  }
-  
-  /* Keep spacing between sections minimal but clear */
-  hr, .divider, div[style*="border-top"] {
-    margin: 1px 0 !important;
-  }
-  
-  /* Improve legibility of the QR code */
-  svg[viewBox] {
-    width: 30px !important;
-    height: 30px !important;
+  #work-order-receipt table th,
+  #work-order-receipt table td {
+    padding: 3px !important;
+    font-size: 12px !important;
+    border: 1px solid #d1d5db !important;
   }
 }
 
