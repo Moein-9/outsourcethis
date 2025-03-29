@@ -26,7 +26,6 @@ interface PrintWorkOrderButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
-  thermalOnly?: boolean;
   isNewInvoice?: boolean;
   onInvoiceSaved?: (invoiceId: string, workOrderId: string) => void;
 }
@@ -44,13 +43,12 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   className,
   variant = "outline",
   size = "sm",
-  thermalOnly = false,
   isNewInvoice = false,
   onInvoiceSaved,
 }) => {
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
-  const { addInvoice, addExistingInvoice, addWorkOrder } = useInvoiceStore();
+  const { addInvoice, addWorkOrder } = useInvoiceStore();
   
   const handlePrint = () => {
     // If it's a new invoice, save it first to generate an invoice ID
@@ -127,12 +125,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   };
   
   const showPrintSelector = (invoiceToUse: Invoice) => {
-    // Create the print selector with proper styling for printing
-    const selectorContainer = document.createElement('div');
-    selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars
-    document.body.appendChild(selectorContainer);
-    
-    const selector = (
+    return (
       <WorkOrderPrintSelector
         invoice={invoiceToUse}
         patientName={patientName}
@@ -143,11 +136,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         frame={frame}
         contactLenses={contactLenses}
         contactLensRx={contactLensRx}
-        thermalOnly={thermalOnly}
       />
     );
-    
-    return selector;
   };
 
   return (
@@ -174,7 +164,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           frame={frame}
           contactLenses={contactLenses}
           contactLensRx={contactLensRx}
-          thermalOnly={thermalOnly}
           trigger={
             <Button variant={variant} size={size} className={className}>
               <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
