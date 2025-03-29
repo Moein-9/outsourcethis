@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -89,6 +90,9 @@ export interface WorkOrder {
   // Refund related fields
   isRefunded?: boolean;
   refundDate?: string;
+  
+  // Add the missing rx property
+  rx?: any;
 }
 
 interface InvoiceState {
