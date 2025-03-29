@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useToast } from "@/hooks/use-toast";
@@ -72,7 +73,11 @@ export const RemainingPayments: React.FC<RemainingPaymentsProps> = ({ invoiceId 
   const handleSubmitPayment = (invoiceId: string) => {
     const invoice = getInvoiceById(invoiceId);
     if (!invoice) {
-      toast.error(language === 'ar' ? "لم يتم العثور على الفاتورة" : "Invoice not found");
+      toast({
+        variant: "destructive",
+        title: language === 'ar' ? "خطأ" : "Error",
+        description: language === 'ar' ? "لم يتم العثور على الفاتورة" : "Invoice not found"
+      });
       return;
     }
     
@@ -80,7 +85,11 @@ export const RemainingPayments: React.FC<RemainingPaymentsProps> = ({ invoiceId 
     const totalPayment = paymentEntries.reduce((sum, entry) => sum + (entry.amount || 0), 0);
     
     if (totalPayment <= 0) {
-      toast.error(language === 'ar' ? "يرجى إدخال مبلغ الدفع" : "Please enter a payment amount");
+      toast({
+        variant: "destructive",
+        title: language === 'ar' ? "خطأ" : "Error",
+        description: language === 'ar' ? "يرجى إدخال مبلغ الدفع" : "Please enter a payment amount"
+      });
       return;
     }
     
@@ -123,7 +132,10 @@ export const RemainingPayments: React.FC<RemainingPaymentsProps> = ({ invoiceId 
       [invoiceId]: []
     }));
     
-    toast.success(language === 'ar' ? "تم تسجيل الدفع بنجاح" : "Payment recorded successfully");
+    toast({
+      title: language === 'ar' ? "نجاح" : "Success",
+      description: language === 'ar' ? "تم تسجيل الدفع بنجاح" : "Payment recorded successfully"
+    });
     
     if (willCompletePay) {
       setInvoiceForPrint(invoiceId);
