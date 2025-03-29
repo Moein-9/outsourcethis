@@ -8,6 +8,7 @@ import { PrintOptionsDialog } from "./PrintOptionsDialog";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
+import { CustomPrintWorkOrderButton } from "./CustomPrintWorkOrderButton";
 
 interface PatientTransactionsProps {
   invoices: Invoice[];
@@ -46,7 +47,6 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     console.log("[PatientTransactions] Printing invoice:", invoice.invoiceId);
     
     // Call the CustomPrintService to handle invoice printing
-    // Note: We'll need to implement this method when needed
     if (typeof CustomPrintService.printInvoice === 'function') {
       CustomPrintService.printInvoice(invoice);
     } else {
