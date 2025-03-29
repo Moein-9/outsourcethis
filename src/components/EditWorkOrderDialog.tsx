@@ -33,13 +33,9 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   const isRtl = language === 'ar';
   const [activeTab, setActiveTab] = useState('prescription');
   
-  // Get patient information if patientId exists
   const patient = workOrder.patientId ? getPatientById?.(workOrder.patientId) : null;
-  
-  // Get original invoice if it exists
   const originalInvoice = workOrder.invoiceId ? getInvoiceById?.(workOrder.invoiceId) : null;
   
-  // Convert FrameItem[] to Frame[]
   const frames = React.useMemo(() => {
     return storeFrames.map(frame => ({
       id: frame.frameId,
@@ -52,19 +48,16 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     }));
   }, [storeFrames]);
   
-  // State for manual frame input
   const [useManualFrameInput, setUseManualFrameInput] = useState(
     !frames.some(f => f.brand === workOrder.frameBrand && 
                        f.model === workOrder.frameModel &&
                        f.color === workOrder.frameColor)
   );
   
-  // Frame search state
   const [frameSearchQuery, setFrameSearchQuery] = useState('');
   const [filteredFrames, setFilteredFrames] = useState<Frame[]>([]);
   const [selectedFrame, setSelectedFrame] = useState<Frame | null>(null);
   
-  // RX state for editing
   const [rxData, setRxData] = useState({
     sphereOD: patient?.rx?.sphereOD || "—",
     cylOD: patient?.rx?.cylOD || "—",
@@ -79,12 +72,10 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
     pdLeft: patient?.rx?.pdLeft || "—",
   });
   
-  // Pricing and summary calculation
   const [originalTotal, setOriginalTotal] = useState(originalInvoice?.total || workOrder.total || 0);
   const [currentTotal, setCurrentTotal] = useState(workOrder.total || 0);
   const [priceDifference, setPriceDifference] = useState(0);
   
-  // Edit data state
   const [editData, setEditData] = useState({
     frameBrand: workOrder.frameBrand || '',
     frameModel: workOrder.frameModel || '',
@@ -101,18 +92,15 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   
   useEffect(() => {
     if (isOpen) {
-      // Reset the frame search when dialog opens
       setFrameSearchQuery('');
       setFilteredFrames([]);
       
-      // Check if we should start with manual frame input
       setUseManualFrameInput(
         !frames.some(f => f.brand === workOrder.frameBrand && 
                          f.model === workOrder.frameModel &&
                          f.color === workOrder.frameColor)
       );
       
-      // Reset edit data when dialog opens
       setEditData({
         frameBrand: workOrder.frameBrand || '',
         frameModel: workOrder.frameModel || '',
@@ -127,7 +115,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         total: workOrder.total || 0,
       });
       
-      // Initialize RX data
       if (patient?.rx) {
         setRxData({
           sphereOD: patient.rx.sphereOD || "—",
@@ -144,13 +131,11 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         });
       }
       
-      // Set original and current totals
       setOriginalTotal(originalInvoice?.total || workOrder.total || 0);
       setCurrentTotal(workOrder.total || 0);
     }
   }, [isOpen, workOrder, frames, patient, originalInvoice]);
   
-  // Calculate price difference whenever edit data changes
   useEffect(() => {
     const newTotal = editData.framePrice + editData.lensPrice + editData.coatingPrice - editData.discount;
     setCurrentTotal(newTotal);
@@ -158,7 +143,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   }, [editData, originalTotal]);
   
   useEffect(() => {
-    // Filter frames based on search query
     if (frameSearchQuery.trim()) {
       const query = frameSearchQuery.toLowerCase();
       const filtered = frames.filter(frame => 
@@ -249,7 +233,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       
       const currentDateTime = new Date().toISOString();
       
-      // Create updated work order
       const updatedWorkOrder: WorkOrder = {
         ...workOrder,
         frameBrand: editData.frameBrand,
@@ -274,7 +257,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       };
       
       if (updateWorkOrder) {
-        // Convert to invoiceStore WorkOrder type
         const storeWorkOrder = {
           ...updatedWorkOrder,
           lensType: {
@@ -286,47 +268,25 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       }
       
       if (workOrder.patientId && editWorkOrder) {
-        // Update patient RX if needed
-        if (patient) {
-          const workOrderEditData: WorkOrderEdit = {
-            patientId: workOrder.patientId,
-            workOrderId: workOrder.workOrderId || workOrder.invoiceId || workOrder.id,
-            updatedData: updatedWorkOrder,
-            rxData: rxData,
-            frameBrand: updatedWorkOrder.frameBrand,
-            frameModel: updatedWorkOrder.frameModel,
-            frameColor: updatedWorkOrder.frameColor,
-            frameSize: updatedWorkOrder.frameSize,
-            framePrice: updatedWorkOrder.framePrice,
-            lensType: updatedWorkOrder.lensType,
-            lensPrice: updatedWorkOrder.lensPrice,
-            coating: updatedWorkOrder.coating,
-            coatingPrice: updatedWorkOrder.coatingPrice,
-            discount: updatedWorkOrder.discount,
-            total: updatedWorkOrder.total
-          };
-          
-          editWorkOrder(workOrderEditData);
-        } else {
-          const workOrderEditData: WorkOrderEdit = {
-            patientId: workOrder.patientId,
-            workOrderId: workOrder.workOrderId || workOrder.invoiceId || workOrder.id,
-            updatedData: updatedWorkOrder,
-            frameBrand: updatedWorkOrder.frameBrand,
-            frameModel: updatedWorkOrder.frameModel,
-            frameColor: updatedWorkOrder.frameColor,
-            frameSize: updatedWorkOrder.frameSize,
-            framePrice: updatedWorkOrder.framePrice,
-            lensType: updatedWorkOrder.lensType,
-            lensPrice: updatedWorkOrder.lensPrice,
-            coating: updatedWorkOrder.coating,
-            coatingPrice: updatedWorkOrder.coatingPrice,
-            discount: updatedWorkOrder.discount,
-            total: updatedWorkOrder.total
-          };
-          
-          editWorkOrder(workOrderEditData);
-        }
+        const workOrderEditData: WorkOrderEdit = {
+          patientId: workOrder.patientId,
+          workOrderId: workOrder.workOrderId || workOrder.invoiceId || workOrder.id,
+          updatedData: updatedWorkOrder,
+          rxData: rxData,
+          frameBrand: updatedWorkOrder.frameBrand,
+          frameModel: updatedWorkOrder.frameModel,
+          frameColor: updatedWorkOrder.frameColor,
+          frameSize: updatedWorkOrder.frameSize,
+          framePrice: updatedWorkOrder.framePrice,
+          lensType: updatedWorkOrder.lensType,
+          lensPrice: updatedWorkOrder.lensPrice,
+          coating: updatedWorkOrder.coating,
+          coatingPrice: updatedWorkOrder.coatingPrice,
+          discount: updatedWorkOrder.discount,
+          total: updatedWorkOrder.total
+        };
+        
+        editWorkOrder(workOrderEditData);
       }
       
       toast.success(language === 'ar' ? "تم تحديث البيانات بنجاح" : "Order updated successfully");
@@ -341,7 +301,6 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   
   const renderPrescriptionTab = () => (
     <div className="grid gap-4 py-4">
-      {/* RX Table */}
       {patient && (
         <div className="mb-6 bg-primary/5 p-4 rounded-lg">
           <h3 className="text-primary font-medium mb-3 flex items-center">
@@ -747,4 +706,10 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
             </Button>
             <Button onClick={handleSaveChanges} className="bg-primary">
               {language === 'ar' ? "حفظ التغييرات" : "Save Changes"}
-            </Button
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
