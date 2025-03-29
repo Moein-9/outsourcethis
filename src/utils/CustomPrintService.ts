@@ -5,6 +5,7 @@ import { toast } from "@/hooks/use-toast";
 import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
+import { ReceiptInvoice } from "@/components/ReceiptInvoice";
 
 export const CustomPrintService = {
   /**
@@ -414,40 +415,348 @@ export const CustomPrintService = {
     try {
       console.log("[CustomPrintService] Starting invoice print process");
       
-      // Get the invoice template element
-      const invoiceElement = document.getElementById('receipt-invoice');
-      
-      if (!invoiceElement) {
-        console.error('[CustomPrintService] Invoice element not found in DOM');
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
         toast({
-          title: "Print Error",
-          description: "Invoice template could not be found. Please try again.",
+          title: "Error",
+          description: "Unable to open print window. Please allow popups for this site.",
           variant: "destructive",
         });
         return;
       }
       
-      // Clone the element to avoid modifying the displayed version
-      const clonedContent = invoiceElement.cloneNode(true) as HTMLElement;
+      // Add basic HTML structure with styles for the receipt
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Invoice</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;500;600;700&display=swap">
+            <style>
+              @page {
+                size: 80mm auto !important;
+                margin: 0mm !important;
+                padding: 0mm !important;
+              }
+              
+              body {
+                width: 80mm !important;
+                margin: 0mm !important;
+                padding: 0mm !important;
+                background: white !important;
+                color: black !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+              
+              #print-container {
+                width: 80mm !important;
+                max-width: 80mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background-color: white !important;
+              }
+              
+              #receipt-invoice {
+                width: 76mm !important;
+                max-width: 76mm !important;
+                margin: 0mm auto !important;
+                padding: 2mm !important;
+                background-color: white !important;
+                color: black !important;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+                box-shadow: none !important;
+                border: none !important;
+                text-align: center !important;
+                overflow: hidden !important;
+                font-family: 'Yrsa', serif !important;
+              }
+
+              #receipt-invoice[dir="rtl"] {
+                font-family: 'Zain', sans-serif !important;
+              }
+              
+              #receipt-invoice * {
+                visibility: visible !important;
+                opacity: 1 !important;
+                color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              
+              /* Background colors */
+              .bg-black {
+                background-color: black !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                color: white !important;
+              }
+              
+              .text-white {
+                color: white !important;
+              }
+
+              /* Special styled elements */
+              .payment-paid {
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                gap: 2px !important;
+                background-color: #E6F7E6 !important;
+                padding: 2px !important;
+                border-radius: 3px !important;
+                margin: 2px 0 !important;
+                font-weight: bold !important;
+                font-size: 12px !important;
+                border: 1px solid #A3D9A3 !important;
+                color: #1F7A1F !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              
+              .payment-remaining {
+                display: flex !important;
+                justify-content: space-between !important;
+                background-color: #FEE2E2 !important;
+                padding: 2px !important;
+                border-radius: 3px !important;
+                margin: 2px 0 !important;
+                font-weight: bold !important;
+                font-size: 12px !important;
+                border: 1px solid #FECACA !important;
+                color: #B91C1C !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              
+              /* Tailwind-like classes for printing */
+              .flex { display: flex !important; }
+              .flex-col { flex-direction: column !important; }
+              .items-center { align-items: center !important; }
+              .justify-center { justify-content: center !important; }
+              .justify-between { justify-content: space-between !important; }
+              .text-center { text-align: center !important; }
+              .font-bold { font-weight: bold !important; }
+              .text-xs { font-size: 9px !important; }
+              .text-sm { font-size: 10px !important; }
+              .text-base { font-size: 11px !important; }
+              .text-lg { font-size: 12px !important; }
+              .mb-0 { margin-bottom: 0 !important; }
+              .mb-1 { margin-bottom: 1mm !important; }
+              .mb-2 { margin-bottom: 2mm !important; }
+              .pb-1 { padding-bottom: 1mm !important; }
+              .py-1 { padding-top: 1mm !important; padding-bottom: 1mm !important; }
+              .px-2 { padding-left: 2mm !important; padding-right: 2mm !important; }
+              .p-1 { padding: 1mm !important; }
+              .p-1\\.5 { padding: 1.5mm !important; }
+              .p-2 { padding: 2mm !important; }
+              .rounded { border-radius: 0.25rem !important; }
+              .border { border-width: 1px !important; }
+              .border-2 { border-width: 2px !important; }
+              .border-gray-300 { border-color: #d1d5db !important; }
+              .border-black { border-color: black !important; }
+              .border-b { border-bottom-width: 1px !important; }
+              .border-b-2 { border-bottom-width: 2px !important; }
+              .border-t-2 { border-top-width: 2px !important; }
+              .border-gray-400 { border-color: #9ca3af !important; }
+              .space-y-1 > * + * { margin-top: 1mm !important; }
+              .space-y-2 > * + * { margin-top: 2mm !important; }
+              .gap-1 { gap: 1mm !important; }
+              .inline-flex { display: inline-flex !important; }
+              
+              /* Print-specific overrides */
+              @media print {
+                html, body {
+                  width: 80mm !important;
+                  height: auto !important;
+                  min-height: 0 !important;
+                  max-height: none !important;
+                  overflow: visible !important;
+                  background: white !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                  margin: 0mm !important;
+                  padding: 0mm !important;
+                }
+                
+                #print-container {
+                  width: 80mm !important;
+                  max-width: 80mm !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  background-color: white !important;
+                }
+                
+                #receipt-invoice {
+                  width: 76mm !important;
+                  max-width: 76mm !important;
+                  margin: 0mm auto !important;
+                  padding: 2mm !important;
+                  background-color: white !important;
+                  color: black !important;
+                  page-break-after: always !important;
+                  page-break-inside: avoid !important;
+                  box-shadow: none !important;
+                  border: none !important;
+                  text-align: center !important;
+                }
+                
+                .bg-black {
+                  background-color: black !important;
+                  color: white !important;
+                }
+                
+                body * {
+                  visibility: visible !important;
+                }
+                
+                .payment-paid {
+                  background-color: #E6F7E6 !important;
+                  color: #1F7A1F !important;
+                  border-color: #A3D9A3 !important;
+                }
+                
+                .payment-remaining {
+                  background-color: #FEE2E2 !important;
+                  color: #B91C1C !important;
+                  border-color: #FECACA !important;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div id="print-container"></div>
+            <script>
+              window.onload = function() {
+                setTimeout(function() {
+                  window.focus();
+                  window.print();
+                  window.onafterprint = function() {
+                    window.close();
+                  };
+                }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `);
       
-      // Add printable class to ensure proper styling during print
-      clonedContent.classList.add('printable');
+      // Create a div element to hold our component temporarily in the current document
+      const tempDiv = document.createElement('div');
+      document.body.appendChild(tempDiv);
+      tempDiv.style.display = 'none';
       
-      // Use PrintService to print the HTML content
-      const htmlContent = clonedContent.outerHTML;
+      // Render our component to the temp div
+      const root = createRoot(tempDiv);
+      root.render(
+        React.createElement(ReceiptInvoice, {
+          invoice: invoice,
+          isPrintable: true
+        })
+      );
       
-      console.log("[CustomPrintService] Sending invoice to PrintService");
-      
-      // Set a small timeout to ensure the DOM is ready
+      // Wait for React to render the component
       setTimeout(() => {
-        PrintService.printHtml(
-          PrintService.prepareReceiptDocument(htmlContent, 'Invoice'),
-          'receipt',
-          () => {
-            console.log("[CustomPrintService] Invoice print complete");
+        try {
+          // Get the HTML content of the rendered component
+          const contentHtml = tempDiv.innerHTML;
+          
+          // Insert it into the print window
+          const printContainer = printWindow.document.getElementById('print-container');
+          if (printContainer) {
+            printContainer.innerHTML = contentHtml;
+            
+            // Apply specific print styles to colored elements
+            const blackBgElements = printWindow.document.querySelectorAll('.bg-black');
+            blackBgElements.forEach(el => {
+              (el as HTMLElement).style.backgroundColor = 'black';
+              (el as HTMLElement).style.color = 'white';
+              (el as HTMLElement).setAttribute('style', `
+                background-color: black !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              `);
+            });
+            
+            // Ensure paid/remaining elements retain their proper styling
+            const paidElements = printWindow.document.querySelectorAll('.payment-paid');
+            paidElements.forEach(el => {
+              (el as HTMLElement).setAttribute('style', `
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                gap: 2px !important;
+                background-color: #E6F7E6 !important;
+                padding: 2px !important;
+                border-radius: 3px !important;
+                margin: 2px 0 !important;
+                font-weight: bold !important;
+                font-size: 12px !important;
+                border: 1px solid #A3D9A3 !important;
+                color: #1F7A1F !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              `);
+            });
+            
+            const remainingElements = printWindow.document.querySelectorAll('.payment-remaining');
+            remainingElements.forEach(el => {
+              (el as HTMLElement).setAttribute('style', `
+                display: flex !important;
+                justify-content: space-between !important;
+                background-color: #FEE2E2 !important;
+                padding: 2px !important;
+                border-radius: 3px !important;
+                margin: 2px 0 !important;
+                font-weight: bold !important;
+                font-size: 12px !important;
+                border: 1px solid #FECACA !important;
+                color: #B91C1C !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              `);
+            });
           }
-        );
-      }, 100);
+          
+          // Close the document to finish loading
+          printWindow.document.close();
+          
+          // Clean up
+          root.unmount();
+          document.body.removeChild(tempDiv);
+          
+          console.log("[CustomPrintService] Invoice print complete");
+          
+        } catch (err) {
+          console.error("Error in print preparation:", err);
+          
+          // Clean up
+          if (tempDiv && tempDiv.parentNode) {
+            root.unmount();
+            document.body.removeChild(tempDiv);
+          }
+          
+          if (printWindow) {
+            printWindow.close();
+          }
+          
+          toast({
+            title: "Print Error",
+            description: "Failed to prepare the print layout. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }, 300); // Give enough time for the component to render
     } catch (error) {
       console.error('[CustomPrintService] Error printing invoice:', error);
       toast({
