@@ -1,15 +1,15 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, History } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { 
   Card,
   CardContent, 
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface CustomWorkOrderReceiptProps {
   workOrder: any;
@@ -48,7 +48,19 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const lensType = workOrder?.lensType || invoice?.lensType || "";
   const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
   
-  const lensTypeString = typeof lensType === 'object' ? lensType?.type || '' : String(lensType);
+  const lastEditedAt = workOrder?.lastEditedAt || invoice?.lastEditedAt;
+  const hasBeenEdited = !!lastEditedAt;
+  
+  const getLensTypeString = () => {
+    if (!lensType) return '';
+    if (typeof lensType === 'object' && lensType !== null) {
+      return lensType.type || lensType.name || '';
+    }
+    return String(lensType);
+  };
+  
+  const lensTypeString = getLensTypeString();
+  
   const matchingLens = lensTypes.find(lt => {
     const ltType = lt.type ? String(lt.type).toLowerCase() : '';
     return ltType === lensTypeString.toLowerCase();
@@ -118,13 +130,13 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       id="work-order-receipt"
       dir={isRtl ? "rtl" : "ltr"}
       style={{ 
-        width: '74mm', // Reduced from 78mm for better margin safety
+        width: '74mm',
         maxWidth: '74mm',
         margin: '0 auto',
         backgroundColor: 'white',
         color: 'black',
         padding: '2mm',
-        fontSize: '14px', // Increased from 12px for better readability
+        fontSize: '14px',
         border: isPrintable ? 'none' : '1px solid #ddd',
         borderRadius: isPrintable ? '0' : '4px',
         boxShadow: isPrintable ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
@@ -153,6 +165,18 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <p className="text-sm text-gray-600 rx-creation-date">
           {format(new Date(), 'yyyy-MM-dd HH:mm', { locale: enUS })}
         </p>
+        
+        {hasBeenEdited && (
+          <div className="mt-1 inline-block">
+            <Badge variant="outline" className="bg-violet-50 text-violet-700 border-violet-200 flex items-center gap-1 text-xs">
+              <History className="h-3 w-3" />
+              {isRtl ? "تم التعديل" : "Edited"}
+              <span className="text-xs ml-1">
+                {format(new Date(lastEditedAt), 'yyyy-MM-dd HH:mm', { locale: enUS })}
+              </span>
+            </Badge>
+          </div>
+        )}
       </div>
 
       <div className="mb-2">
@@ -195,7 +219,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Prescription Details | تفاصيل الوصفة الطبية"}
         </div>
         
-        {/* RX Table - Always LTR regardless of language setting - Improved sizing */}
         <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100">
@@ -323,7 +346,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </Card>
           )}
           
-          {!isContactLens && lensType && (
+          {!isContactLens && lensTypeString && (
             <Card className="mb-1 border border-gray-200 rounded-md">
               <CardContent className="p-1">
                 <div className="font-bold border-b border-gray-300 pb-0.5 mb-0.5">
@@ -460,7 +483,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Notes | ملاحظات"}
         </div>
         
-        {/* Enhanced notes section with clearer border, white background, and increased height */}
         <div className="border-2 border-gray-300 rounded p-1 min-h-[50px] bg-white">
           {/* Empty space for notes */}
         </div>
@@ -555,24 +577,21 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             }
             
             table th, table td {
-              padding: 3px !important; /* Increased from 2px */
+              padding: 3px !important;
               text-align: center !important;
-              font-size: 12px !important; /* Increased from 10px */
+              font-size: 12px !important;
               border: 1px solid #d1d5db !important;
             }
             
-            /* Fix signature boxes */
             .h-8 {
               height: 2rem !important;
               min-height: 2rem !important;
             }
             
-            /* Reduce margins between sections */
             .mb-2 {
               margin-bottom: 0.3rem !important;
             }
             
-            /* Text sizes for printing */
             .text-xs {
               font-size: 11px !important;
             }
@@ -588,14 +607,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             .text-lg {
               font-size: 17px !important;
             }
-
-            /* Work order number specific styling */
+            
             .work-order-number {
               font-size: 15px !important;
               font-weight: bold !important;
             }
             
-            /* Reduce padding */
             .p-1 {
               padding: 0.2rem !important;
             }
@@ -615,11 +632,20 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               padding-right: 0.5rem !important;
             }
             
-            /* Make the notes section clearly visible */
             .min-h-\\[50px\\] {
               min-height: 50px !important;
               border: 2px solid #d1d5db !important;
               background-color: white !important;
+            }
+            
+            .edited-badge {
+              background-color: #8b5cf6 !important;
+              color: white !important;
+              padding: 2px 6px !important;
+              border-radius: 4px !important;
+              font-size: 10px !important;
+              margin-top: 4px !important;
+              display: inline-block !important;
             }
           }
         `}

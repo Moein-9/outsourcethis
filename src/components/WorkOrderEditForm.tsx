@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -97,27 +98,53 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
       const subtotal = editData.framePrice + editData.lensPrice + editData.coatingPrice;
       const newTotal = subtotal - editData.discount;
       
+      // Create timestamp for the edit
+      const now = new Date().toISOString();
+      
+      // Create edit history entry
+      const editHistoryEntry = {
+        timestamp: now,
+        notes: language === 'ar' ? "تم تعديل أمر العمل" : "Work order has been edited"
+      };
+      
+      // Combine existing history with new entry
+      const existingHistory = workOrder.editHistory || [];
+      const updatedHistory = [...existingHistory, editHistoryEntry];
+      
+      // Update work order with new data and edit history
       const updatedWorkOrder = {
         ...workOrder,
         ...editData,
-        total: newTotal
+        total: newTotal,
+        lastEditedAt: now,
+        editHistory: updatedHistory
       };
       
-      updateInvoice(updatedWorkOrder);
+      // Also update the related invoice if it exists
+      const invoiceToUpdate = {
+        ...updatedWorkOrder,
+        invoiceId: workOrder.invoiceId || workOrder.id,
+      };
       
+      // Update invoice in store
+      updateInvoice(invoiceToUpdate);
+      
+      // Update work order in patient store if patient ID exists
       if (workOrder.patientId) {
         editWorkOrder({
           patientId: workOrder.patientId,
-          workOrderId: workOrder.invoiceId || workOrder.workOrderId,
+          workOrderId: workOrder.invoiceId || workOrder.workOrderId || workOrder.id,
           updatedData: updatedWorkOrder
         });
       }
       
+      // Show success message
       toast({
         title: t("success"),
         description: t("workOrderUpdated")
       });
       
+      // Call the onSave callback
       onSave();
     } catch (error) {
       console.error("Error updating work order:", error);

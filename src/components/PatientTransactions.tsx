@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { TabbedTransactions } from "./TabbedTransactions";
@@ -24,6 +24,29 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   onEditWorkOrder
 }) => {
   const { t } = useLanguageStore();
+  const [lastEditTimestamp, setLastEditTimestamp] = useState<string | null>(null);
+  
+  // Effect to detect changes in work orders (especially edits)
+  useEffect(() => {
+    // Find the most recent edit timestamp across all work orders and invoices
+    let latestEdit: string | null = null;
+    
+    // Check work orders
+    workOrders.forEach(workOrder => {
+      if (workOrder.lastEditedAt && (!latestEdit || new Date(workOrder.lastEditedAt) > new Date(latestEdit))) {
+        latestEdit = workOrder.lastEditedAt;
+      }
+    });
+    
+    // Check invoices
+    invoices.forEach(invoice => {
+      if (invoice.lastEditedAt && (!latestEdit || new Date(invoice.lastEditedAt) > new Date(latestEdit))) {
+        latestEdit = invoice.lastEditedAt;
+      }
+    });
+    
+    setLastEditTimestamp(latestEdit);
+  }, [workOrders, invoices]);
   
   // Filter out active invoices (not refunded)
   const activeInvoices = invoices.filter(invoice => !invoice.isRefunded);
@@ -81,6 +104,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
         refundedInvoices={refundedInvoices}
         patient={patient}
         onEditWorkOrder={onEditWorkOrder}
+        lastEditTimestamp={lastEditTimestamp}
       />
     </div>
   );

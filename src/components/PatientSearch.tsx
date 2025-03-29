@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -31,7 +32,7 @@ interface PatientWithMeta extends Patient {
 
 export const PatientSearch: React.FC = () => {
   const { patients, searchPatients, updatePatientRx } = usePatientStore();
-  const { invoices, workOrders, getInvoicesByPatientId, getWorkOrdersByPatientId } = useInvoiceStore();
+  const { invoices, workOrders, getInvoicesByPatientId, getWorkOrdersByPatientId, updateInvoice, updateWorkOrder } = useInvoiceStore();
   const { language } = useLanguageStore();
   
   const [searchResults, setSearchResults] = useState<PatientWithMeta[]>([]);
@@ -47,6 +48,7 @@ export const PatientSearch: React.FC = () => {
   const [currentWorkOrder, setCurrentWorkOrder] = useState<InventoryWorkOrder | null>(null);
   
   const [isAddRxDialogOpen, setIsAddRxDialogOpen] = useState(false);
+  const [editTimestamp, setEditTimestamp] = useState<string | null>(null);
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
@@ -85,15 +87,17 @@ export const PatientSearch: React.FC = () => {
     setShowResults(false);
   };
   
-  const handlePatientSelect = (patient: PatientWithMeta) => {
-    setSelectedPatient(patient);
-    
-    const patientInvoices = getInvoicesByPatientId(patient.patientId);
-    const invoiceWorkOrders = getWorkOrdersByPatientId(patient.patientId);
+  const refreshPatientData = (patientId: string) => {
+    const patientInvoices = getInvoicesByPatientId(patientId);
+    const invoiceWorkOrders = getWorkOrdersByPatientId(patientId);
     
     setPatientInvoices(patientInvoices);
     setPatientWorkOrders(invoiceWorkOrders);
-    
+  };
+  
+  const handlePatientSelect = (patient: PatientWithMeta) => {
+    setSelectedPatient(patient);
+    refreshPatientData(patient.patientId);
     setIsProfileOpen(true);
   };
   
@@ -109,7 +113,7 @@ export const PatientSearch: React.FC = () => {
       frameColor: '',
       frameSize: '',
       framePrice: 0,
-      lensType: workOrder.lensType,
+      lensType: workOrder.lensType || '',
       lensPrice: 0,
       coating: '',
       coatingPrice: 0,
@@ -135,6 +139,46 @@ export const PatientSearch: React.FC = () => {
   };
   
   const handleSaveWorkOrder = (updatedWorkOrder: InventoryWorkOrder) => {
+    // Set the edit timestamp for UI refresh
+    const now = new Date().toISOString();
+    setEditTimestamp(now);
+    
+    // First, update the local work order state
+    if (updatedWorkOrder.id) {
+      // Update the work order in our store
+      if (typeof updateWorkOrder === 'function') {
+        updateWorkOrder(updatedWorkOrder);
+      }
+      
+      // Create an invoice copy to update the invoice
+      const invoiceToUpdate: Invoice = {
+        ...patientInvoices.find(i => i.workOrderId === updatedWorkOrder.id) || {},
+        invoiceId: updatedWorkOrder.invoiceId || updatedWorkOrder.id,
+        workOrderId: updatedWorkOrder.id,
+        lastEditedAt: now,
+        frameBrand: updatedWorkOrder.frameBrand,
+        frameModel: updatedWorkOrder.frameModel,
+        frameColor: updatedWorkOrder.frameColor,
+        frameSize: updatedWorkOrder.frameSize,
+        framePrice: updatedWorkOrder.framePrice,
+        lensType: updatedWorkOrder.lensType || '',
+        lensPrice: updatedWorkOrder.lensPrice,
+        coating: updatedWorkOrder.coating,
+        coatingPrice: updatedWorkOrder.coatingPrice,
+        discount: updatedWorkOrder.discount,
+        total: updatedWorkOrder.total,
+      };
+      
+      // Update the invoice in the store
+      updateInvoice(invoiceToUpdate);
+      
+      // Refresh patient data to get latest changes
+      if (selectedPatient) {
+        refreshPatientData(selectedPatient.patientId);
+      }
+    }
+    
+    // Show success message
     toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
     setEditWorkOrderDialogOpen(false);
   };
@@ -177,6 +221,16 @@ export const PatientSearch: React.FC = () => {
     toast.success(language === 'ar' ? "تم إضافة الوصفة الطبية بنجاح" : "Prescription added successfully");
   };
   
+  // Effect to refresh data after edits
+  useEffect(() => {
+    if (editTimestamp && selectedPatient) {
+      // Refresh data after a short delay to ensure store has updated
+      setTimeout(() => {
+        refreshPatientData(selectedPatient.patientId);
+      }, 200);
+    }
+  }, [editTimestamp]);
+  
   return (
     <div className="space-y-6">
       <PatientSearchForm 
@@ -198,7 +252,7 @@ export const PatientSearch: React.FC = () => {
               <DialogHeader>
                 <DialogTitle className="text-xl">{language === 'ar' ? "ملف العميل" : "Client Profile"}</DialogTitle>
                 <DialogDescription>
-                  {language === 'ar' ? "تفاصيل بيان��ت العميل وسجل المعاملات" : "Client details and transaction history"}
+                  {language === 'ar' ? "تفاصيل بيانات العميل وسجل المعاملات" : "Client details and transaction history"}
                 </DialogDescription>
               </DialogHeader>
               
