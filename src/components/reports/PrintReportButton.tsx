@@ -1,31 +1,27 @@
 
 import React from 'react';
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
-import { PrintButton } from "../PrintButton";
 
 interface PrintReportButtonProps {
   onPrint: () => void;
   className?: string;
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
-  size?: "default" | "sm" | "lg" | "icon";
 }
 
 export const PrintReportButton: React.FC<PrintReportButtonProps> = ({ 
   onPrint,
-  className = "",
-  variant = "default",
-  size = "sm"
+  className = ""
 }) => {
   const { language } = useLanguageStore();
   
-  // Use the consistent PrintButton component with a debounced click handler
   return (
-    <PrintButton
-      onClick={onPrint}
-      label={language === 'ar' ? 'طباعة التقرير' : 'Print Report'}
-      className={className}
-      variant={variant}
-      size={size}
-    />
+    <Button 
+      onClick={onPrint} 
+      className={`gap-2 bg-primary hover:bg-primary/90 ${className}`}
+    >
+      <Printer size={16} />
+      {language === 'ar' ? 'طباعة التقرير' : 'Print Report'}
+    </Button>
   );
 };

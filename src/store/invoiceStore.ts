@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -64,11 +63,6 @@ export interface Invoice {
   refundReason?: string;
   refundMethod?: string;
   refundId?: string;
-  
-  // Adding both thickness fields to ensure compatibility
-  lensThickness?: string;
-  thickness?: string;
-  lensIndex?: string;
 }
 
 // Define WorkOrder interface
@@ -90,9 +84,6 @@ export interface WorkOrder {
   // Refund related fields
   isRefunded?: boolean;
   refundDate?: string;
-  
-  // Add the missing rx property
-  rx?: any;
 }
 
 interface InvoiceState {

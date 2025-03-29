@@ -1,10 +1,11 @@
 
 import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
-import { toast } from "sonner";
-import { PrintButton } from "./PrintButton";
+import { toast } from "@/hooks/use-toast";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -25,6 +26,7 @@ interface PrintWorkOrderButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
+  thermalOnly?: boolean;
   isNewInvoice?: boolean;
   onInvoiceSaved?: (invoiceId: string, workOrderId: string) => void;
 }
@@ -40,14 +42,15 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   contactLenses,
   contactLensRx,
   className,
-  variant = "default", // Changed to default to match the standard
+  variant = "outline",
   size = "sm",
+  thermalOnly = false,
   isNewInvoice = false,
   onInvoiceSaved,
 }) => {
   const { t } = useLanguageStore();
   const [loading, setLoading] = useState(false);
-  const { addInvoice, addWorkOrder } = useInvoiceStore();
+  const { addInvoice, addExistingInvoice, addWorkOrder } = useInvoiceStore();
   
   const handlePrint = () => {
     // If it's a new invoice, save it first to generate an invoice ID
@@ -100,13 +103,20 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           onInvoiceSaved(invoiceId, workOrderId);
         }
         
-        toast.success(t("invoiceSaved"));
+        toast({
+          title: t("invoiceSaved"),
+          description: t("invoiceNumber") + ": " + invoiceId,
+        });
         
         // Show the print selector with the updated invoice that has an ID
         showPrintSelector(updatedInvoice);
       } catch (error) {
         console.error("Error saving invoice:", error);
-        toast.error(t("errorSavingInvoice"));
+        toast({
+          title: t("error"),
+          description: t("errorSavingInvoice"),
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
@@ -117,7 +127,12 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   };
   
   const showPrintSelector = (invoiceToUse: Invoice) => {
-    return (
+    // Create the print selector with proper styling for printing
+    const selectorContainer = document.createElement('div');
+    selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars
+    document.body.appendChild(selectorContainer);
+    
+    const selector = (
       <WorkOrderPrintSelector
         invoice={invoiceToUse}
         patientName={patientName}
@@ -128,22 +143,27 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         frame={frame}
         contactLenses={contactLenses}
         contactLensRx={contactLensRx}
+        thermalOnly={thermalOnly}
       />
     );
+    
+    return selector;
   };
 
   return (
     <>
-      {isNewInvoice ? (
-        <PrintButton
-          onClick={handlePrint}
-          label={loading ? t("saving") : t("printWorkOrder")}
-          className={className}
-          disabled={loading}
-          variant={variant}
-          size={size}
-        />
-      ) : (
+      <Button 
+        variant={variant} 
+        size={size} 
+        className={className}
+        onClick={handlePrint}
+        disabled={loading}
+      >
+        <Printer className="h-4 w-4 mr-1" /> 
+        {loading ? t("saving") : t("printWorkOrder")}
+      </Button>
+      
+      {!isNewInvoice && (
         <WorkOrderPrintSelector
           invoice={invoice}
           patientName={patientName}
@@ -154,14 +174,11 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           frame={frame}
           contactLenses={contactLenses}
           contactLensRx={contactLensRx}
+          thermalOnly={thermalOnly}
           trigger={
-            <PrintButton
-              onClick={() => {}} // This is just a trigger, the actual handler is in WorkOrderPrintSelector
-              label={t("printWorkOrder")}
-              className={className}
-              variant={variant}
-              size={size}
-            />
+            <Button variant={variant} size={size} className={className}>
+              <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
+            </Button>
           }
         />
       )}

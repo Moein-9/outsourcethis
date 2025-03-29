@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
@@ -11,8 +12,6 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
-import { PrintButton } from './PrintButton';
-import { Button } from '@/components/ui/button';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -29,7 +28,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   invoice,
   patient,
   className = '',
-  variant = "default", // Changed to default to match the standard
+  variant = "outline",
   size = "sm",
   children // This prop holds any custom trigger element
 }) => {
@@ -48,13 +47,14 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   
   // Create a default button if no children are provided or if children is not a valid element
   const defaultButton = (
-    <PrintButton
-      onClick={() => setOpen(true)}
-      label={t('printWorkOrder')}
-      className={className}
+    <Button 
       variant={variant}
       size={size}
-    />
+      className={`gap-1 ${className}`}
+    >
+      <Printer className="h-4 w-4" />
+      {t('printWorkOrder')}
+    </Button>
   );
   
   // Ensure we only pass a single valid element to DialogTrigger
@@ -80,12 +80,10 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
               isPrintable={false}
             />
           </div>
-          <PrintButton
-            onClick={handlePrint}
-            label={t('print')}
-            className="mt-4"
-            variant="default"
-          />
+          <Button onClick={handlePrint} className="mt-4 gap-2">
+            <Printer className="h-4 w-4" />
+            {t('print')}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

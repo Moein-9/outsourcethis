@@ -2,7 +2,6 @@
 import React from 'react';
 import { Glasses, Contact, Receipt } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
-import { ContactLensItem } from '@/components/ContactLensSelector';
 
 interface ProductDetailsDisplayProps {
   invoice: {
@@ -10,14 +9,12 @@ interface ProductDetailsDisplayProps {
     frameBrand?: string;
     frameModel?: string;
     frameColor?: string;
-    frameSize?: string;
     lensType?: string;
-    lensThickness?: string;
-    lensIndex?: string;
-    coating?: string;
-    lensFeatures?: string[];
-    contactLensItems?: ContactLensItem[];
-    thickness?: string;
+    contactLensItems?: Array<{
+      name: string;
+      price: number;
+      quantity?: number;
+    }>;
   };
 }
 
@@ -28,8 +25,6 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
   
   const isGlasses = invoice.invoiceType === 'glasses';
   const isContactLens = invoice.invoiceType === 'contacts';
-  
-  const thicknessValue = invoice.lensThickness || invoice.thickness;
   
   return (
     <div className={`bg-white border border-gray-200 rounded-md p-4 ${textAlign}`}>
@@ -61,45 +56,10 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
             </div>
           )}
           
-          {invoice.frameSize && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-sm text-gray-500">{t('frameSize')}:</div>
-              <div className="text-sm font-medium">{invoice.frameSize}</div>
-            </div>
-          )}
-          
           {invoice.lensType && (
             <div className="grid grid-cols-2 gap-2">
               <div className="text-sm text-gray-500">{t('lensType')}:</div>
               <div className="text-sm font-medium">{invoice.lensType}</div>
-            </div>
-          )}
-          
-          {thicknessValue && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-sm text-gray-500">{t('lensThickness')}:</div>
-              <div className="text-sm font-medium">{thicknessValue}</div>
-            </div>
-          )}
-          
-          {invoice.lensIndex && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-sm text-gray-500">{t('lensIndex')}:</div>
-              <div className="text-sm font-medium">{invoice.lensIndex}</div>
-            </div>
-          )}
-          
-          {invoice.coating && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-sm text-gray-500">{t('coating')}:</div>
-              <div className="text-sm font-medium">{invoice.coating}</div>
-            </div>
-          )}
-          
-          {invoice.lensFeatures && invoice.lensFeatures.length > 0 && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-sm text-gray-500">{t('lensFeatures')}:</div>
-              <div className="text-sm font-medium">{invoice.lensFeatures.join(', ')}</div>
             </div>
           )}
         </div>
@@ -118,9 +78,9 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
             <tbody>
               {invoice.contactLensItems.map((item, index) => (
                 <tr key={index} className="border-t border-gray-100">
-                  <td className="py-1.5 px-2">{item.brand || item.type || t('contactLenses')}</td>
-                  <td className="py-1.5 px-2 text-center">{item.qty || 1}</td>
-                  <td className="py-1.5 px-2 text-right">{item.price.toFixed(3)} {t('kwd')}</td>
+                  <td className="py-1.5 px-2">{item.name}</td>
+                  <td className="py-1.5 px-2 text-center">{item.quantity || 1}</td>
+                  <td className="py-1.5 px-2 text-right">{item.price.toFixed(3)} KWD</td>
                 </tr>
               ))}
             </tbody>

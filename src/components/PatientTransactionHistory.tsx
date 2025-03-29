@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,19 +8,12 @@ import { useLanguageStore } from '@/store/languageStore';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { EditWorkOrderDialog } from './EditWorkOrderDialog';
-import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer, CheckCircle, CreditCard, Package } from 'lucide-react';
+import { Eye, Pencil, Receipt, Calendar, DollarSign, Printer, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PrintOptionsDialog } from './PrintOptionsDialog';
 import { toast } from 'sonner';
 import { usePatientStore } from '@/store/patientStore';
 import { CustomPrintService } from '@/utils/CustomPrintService';
-import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger 
-} from '@/components/ui/accordion';
-import { ProductDetailsDisplay } from './ProductDetailsDisplay';
 
 interface PatientTransactionHistoryProps {
   patientId: string;
@@ -35,7 +29,6 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   const [editingWorkOrder, setEditingWorkOrder] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
   
   const patient = getPatientById(patientId);
   
@@ -120,10 +113,6 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
     setRefreshTrigger(prev => prev + 1);
   };
   
-  const toggleAccordion = (invoiceId: string) => {
-    setExpandedAccordion(expandedAccordion === invoiceId ? null : invoiceId);
-  };
-  
   if (!patientInvoices.length) {
     return (
       <Card className="mt-8">
@@ -178,168 +167,80 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   const remaining = calculateRemaining(invoice);
                   const isPaid = remaining <= 0;
                   const isPickedUp = invoice.isPickedUp;
-                  const paid = invoice.payments 
-                    ? invoice.payments.reduce((sum: number, payment: any) => sum + (payment.amount || 0), 0)
-                    : invoice.deposit || 0;
                   
                   return (
-                    <React.Fragment key={invoice.invoiceId}>
-                      <TableRow className="hover:bg-accent/5 transition-colors cursor-pointer" onClick={() => toggleAccordion(invoice.invoiceId)}>
-                        <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
-                        <TableCell>{formatDate(invoice.createdAt)}</TableCell>
-                        <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            isPickedUp
-                              ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300'
-                              : isPaid 
-                                ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' 
-                                : 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200'
-                          }`}>
-                            {isPickedUp 
-                              ? t("pickedUp") 
-                              : isPaid 
-                                ? t("paid") 
-                                : t("partiallyPaid")}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right space-x-1">
+                    <TableRow key={invoice.invoiceId} className="hover:bg-accent/5 transition-colors">
+                      <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
+                      <TableCell>{formatDate(invoice.createdAt)}</TableCell>
+                      <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          isPickedUp
+                            ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300'
+                            : isPaid 
+                              ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' 
+                              : 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200'
+                        }`}>
+                          {isPickedUp 
+                            ? t("pickedUp") 
+                            : isPaid 
+                              ? t("paid") 
+                              : t("partiallyPaid")}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right space-x-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => viewInvoiceDetails(invoice)}
+                          title={t("view")}
+                          className="hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        
+                        {!invoice.isPickedUp && (
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              viewInvoiceDetails(invoice);
-                            }}
-                            title={t("view")}
-                            className="hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                            onClick={() => handleEdit(invoice)}
+                            title={t("edit")}
+                            className="hover:bg-amber-100 hover:text-amber-700 transition-colors"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Pencil className="h-4 w-4" />
                           </Button>
-                          
-                          {!invoice.isPickedUp && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEdit(invoice);
-                              }}
-                              title={t("edit")}
-                              className="hover:bg-amber-100 hover:text-amber-700 transition-colors"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          )}
-                          
-                          <PrintOptionsDialog
-                            workOrder={invoice}
-                            invoice={invoice}
-                            patient={patient}
-                            onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
-                            onPrintInvoice={() => handlePrintInvoice(invoice)}
+                        )}
+                        
+                        <PrintOptionsDialog
+                          workOrder={invoice}
+                          invoice={invoice}
+                          patient={patient}
+                          onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
+                          onPrintInvoice={() => handlePrintInvoice(invoice)}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-purple-100 hover:text-purple-700 transition-colors"
+                            title={t("print")}
                           >
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="hover:bg-purple-100 hover:text-purple-700 transition-colors"
-                              title={t("print")}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Printer className="h-4 w-4" />
-                            </Button>
-                          </PrintOptionsDialog>
-                          
-                          {!invoice.isPickedUp && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMarkAsPickedUp(invoice.invoiceId, true);
-                              }}
-                              title={language === 'ar' ? "تم الاستلام" : "Mark as Picked Up"}
-                              className="hover:bg-green-100 hover:text-green-700 transition-colors"
-                            >
-                              <CheckCircle className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      
-                      {/* Expandable detail section */}
-                      <TableRow className={expandedAccordion === invoice.invoiceId ? "" : "hidden"}>
-                        <TableCell colSpan={5} className="p-0">
-                          <div className="bg-gray-50 p-4 border-t">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <h3 className="text-sm font-medium mb-2 flex items-center gap-1 text-primary">
-                                  <Package className="h-4 w-4" />
-                                  {t('productDetails')}
-                                </h3>
-                                <ProductDetailsDisplay invoice={invoice} />
-                              </div>
-                              
-                              <div>
-                                <h3 className="text-sm font-medium mb-2 flex items-center gap-1 text-primary">
-                                  <CreditCard className="h-4 w-4" />
-                                  {t('paymentDetails')}
-                                </h3>
-                                <div className="bg-white border border-gray-200 rounded-md p-4">
-                                  <div className="space-y-3">
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <div className="text-sm text-gray-500">{t('total')}:</div>
-                                      <div className="text-sm font-medium">{invoice.total.toFixed(3)} {t('kwd')}</div>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <div className="text-sm text-gray-500">{t('paid')}:</div>
-                                      <div className="text-sm font-medium text-blue-600">{paid.toFixed(3)} {t('kwd')}</div>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <div className="text-sm text-gray-500">{t('remaining')}:</div>
-                                      <div className="text-sm font-medium text-amber-600">{remaining.toFixed(3)} {t('kwd')}</div>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <div className="text-sm text-gray-500">{t('paymentStatus')}:</div>
-                                      <div className="text-sm font-medium">
-                                        {isPaid ? 
-                                          <span className="text-green-600">{t('paid')}</span> : 
-                                          <span className="text-amber-600">{t('partiallyPaid')}</span>
-                                        }
-                                      </div>
-                                    </div>
-                                    
-                                    {invoice.discount > 0 && (
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <div className="text-sm text-gray-500">{t('discount')}:</div>
-                                        <div className="text-sm font-medium text-green-600">{invoice.discount.toFixed(3)} {t('kwd')}</div>
-                                      </div>
-                                    )}
-                                    
-                                    {/* Payment History */}
-                                    {invoice.payments && invoice.payments.length > 0 && (
-                                      <div className="mt-3 pt-3 border-t border-gray-100">
-                                        <h4 className="text-xs font-medium text-gray-600 mb-2">{t('paymentHistory')}:</h4>
-                                        {invoice.payments.map((payment: any, idx: number) => (
-                                          <div key={idx} className="grid grid-cols-3 gap-2 text-xs mb-1">
-                                            <div>{format(new Date(payment.date), 'dd/MM/yyyy')}</div>
-                                            <div className="text-gray-600">{payment.method}</div>
-                                            <div className="font-medium">{payment.amount.toFixed(3)} {t('kwd')}</div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    </React.Fragment>
+                            <Printer className="h-4 w-4" />
+                          </Button>
+                        </PrintOptionsDialog>
+                        
+                        {!invoice.isPickedUp && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleMarkAsPickedUp(invoice.invoiceId, true)}
+                            title={language === 'ar' ? "تم الاستلام" : "Mark as Picked Up"}
+                            className="hover:bg-green-100 hover:text-green-700 transition-colors"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
               </TableBody>
