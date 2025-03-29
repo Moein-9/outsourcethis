@@ -112,7 +112,7 @@ export const InvoiceReceipt: React.FC<InvoiceReceiptProps> = ({
               <td className="py-1 px-1">
                 {typeof invoice.lensType === 'object' && invoice.lensType !== null
                   ? invoice.lensType.name
-                  : invoice.lensType}
+                  : String(invoice.lensType)}
                 {invoice.thickness && ` - ${invoice.thickness}`}
               </td>
               <td className="text-right py-1 px-1">{invoice.lensPrice.toFixed(3)} KWD</td>
