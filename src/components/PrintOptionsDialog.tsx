@@ -32,16 +32,20 @@ export function PrintOptionsDialog({
 
   const handlePrintWorkOrder = () => {
     setOpen(false);
+    // Wait for the dialog to close before printing
     setTimeout(() => {
+      console.log("[PrintOptionsDialog] Triggering work order print");
       onPrintWorkOrder();
-    }, 100);
+    }, 150);
   };
 
   const handlePrintInvoice = () => {
     setOpen(false);
+    // Wait for the dialog to close before printing
     setTimeout(() => {
+      console.log("[PrintOptionsDialog] Triggering invoice print");
       onPrintInvoice();
-    }, 100);
+    }, 150);
   };
 
   return (
@@ -101,7 +105,7 @@ export function PrintOptionsDialog({
                     workOrder={workOrder} 
                     invoice={invoice} 
                     patient={patient}
-                    isPrintable={false}
+                    isPrintable={true}
                   />
                 </div>
               </div>
@@ -124,7 +128,7 @@ export function PrintOptionsDialog({
                   <div id="receipt-invoice">
                     <ReceiptInvoice 
                       invoice={invoice} 
-                      isPrintable={false}
+                      isPrintable={true}
                     />
                   </div>
                 </div>

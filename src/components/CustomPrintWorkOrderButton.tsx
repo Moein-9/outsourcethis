@@ -42,6 +42,8 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     setIsPrinting(true);
     setOpen(false); // Close dialog before printing
     
+    console.log("[CustomPrintWorkOrderButton] Triggering print for workOrder:", workOrder.id);
+    
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
       CustomPrintService.printWorkOrder(workOrder, invoice, patient);
@@ -81,12 +83,14 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
           </DialogDescription>
           
           <div className="w-full max-w-[80mm] bg-white p-0 border rounded shadow-sm mb-4">
-            <CustomWorkOrderReceipt 
-              workOrder={workOrder} 
-              invoice={invoice} 
-              patient={patient}
-              isPrintable={false}
-            />
+            <div id="work-order-receipt">
+              <CustomWorkOrderReceipt 
+                workOrder={workOrder} 
+                invoice={invoice} 
+                patient={patient}
+                isPrintable={true}
+              />
+            </div>
           </div>
           <Button 
             onClick={handlePrint} 
