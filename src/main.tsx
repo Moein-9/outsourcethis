@@ -15,4 +15,8 @@ if (!root) {
   document.body.appendChild(rootDiv);
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

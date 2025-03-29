@@ -10,6 +10,17 @@ export interface Frame {
   stock: number;
 }
 
+export interface FrameItem {
+  frameId: string;
+  brand: string;
+  model: string;
+  color: string;
+  size: string;
+  price: number;
+  qty: number;
+  createdAt: string;
+}
+
 export interface LensType {
   id: string;
   type: string;
@@ -23,4 +34,31 @@ export interface LensCoating {
   name: string;
   price: number;
   description?: string;
+}
+
+// Add WorkOrder type to help with TypeScript errors
+export interface WorkOrder {
+  invoiceId?: string;
+  workOrderId?: string;
+  patientId?: string;
+  frameBrand?: string;
+  frameModel?: string;
+  frameColor?: string;
+  frameSize?: string;
+  framePrice: number;
+  lensType?: string;
+  lensPrice: number;
+  coating?: string;
+  coatingPrice: number;
+  discount: number;
+  total: number;
+  isPaid?: boolean;
+  isPickedUp?: boolean;
+  pickedUpAt?: string;
+  createdAt?: string;
+  editHistory?: Array<{
+    timestamp: string;
+    notes: string;
+  }>;
+  lastEditedAt?: string;
 }

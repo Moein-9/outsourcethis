@@ -11,11 +11,11 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInventoryStore } from "@/store/inventoryStore";
-import { Frame } from "@/types/inventory";
 import { Search, Edit, Clock, Glasses, CheckCircle2 } from "lucide-react";
+import { Frame, WorkOrder } from "@/types/inventory";
 
 interface EditWorkOrderDialogProps {
-  workOrder: any;
+  workOrder: WorkOrder;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSave?: () => void;
@@ -30,9 +30,25 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   const { t, language } = useLanguageStore();
   const { updateInvoice } = useInvoiceStore();
   const { editWorkOrder } = usePatientStore();
-  const { lensTypes, lensCoatings, frames } = useInventoryStore();
+  const { lensTypes, lensCoatings } = useInventoryStore();
   const isRtl = language === 'ar';
   const [activeTab, setActiveTab] = useState('prescription');
+  
+  // Get frames from the store, but convert them to the Frame type
+  const storeFrames = useInventoryStore(state => state.frames);
+  
+  // Convert FrameItem[] to Frame[]
+  const frames = React.useMemo(() => {
+    return storeFrames.map(frame => ({
+      id: frame.frameId,
+      brand: frame.brand,
+      model: frame.model,
+      color: frame.color,
+      size: frame.size,
+      price: frame.price,
+      stock: frame.qty
+    }));
+  }, [storeFrames]);
   
   // State for manual frame input
   const [useManualFrameInput, setUseManualFrameInput] = useState(
@@ -291,7 +307,11 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         <div>
           <div className="bg-primary/5 p-4 rounded-lg mb-4">
             <h3 className="text-primary font-medium mb-2 flex items-center">
-              <Frame className="w-4 h-4 mr-2" />
+              <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M8 12C8 14.5 9 16 12 16C15 16 16 14.5 16 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M8 16H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
               {t("frameInformation")}
             </h3>
             
