@@ -10,10 +10,11 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInventoryStore } from "@/store/inventoryStore";
+import { WorkOrder as InventoryWorkOrder } from "@/types/inventory";
 
 interface WorkOrderEditFormProps {
-  workOrder: any;
-  onSave: () => void;
+  workOrder: InventoryWorkOrder;
+  onSave: (updatedWorkOrder: InventoryWorkOrder) => void;
   onCancel: () => void;
 }
 
@@ -28,14 +29,30 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
   const { lensTypes, lensCoatings, frames } = useInventoryStore();
   const isRtl = language === 'ar';
   
+  // Get proper lensType name from object or string
+  const getLensTypeName = (lensType: string | { name: string; price: number }): string => {
+    if (typeof lensType === 'object' && lensType !== null) {
+      return lensType.name || '';
+    }
+    return lensType || '';
+  };
+  
+  // Get proper lensPrice from object or directly
+  const getLensPrice = (lensType: string | { name: string; price: number }, fallbackPrice: number): number => {
+    if (typeof lensType === 'object' && lensType !== null) {
+      return lensType.price || fallbackPrice;
+    }
+    return fallbackPrice;
+  };
+  
   const [editData, setEditData] = useState({
     frameBrand: workOrder.frameBrand || '',
     frameModel: workOrder.frameModel || '',
     frameColor: workOrder.frameColor || '',
     frameSize: workOrder.frameSize || '',
     framePrice: workOrder.framePrice || 0,
-    lensType: typeof workOrder.lensType === 'object' ? workOrder.lensType.name || '' : workOrder.lensType || '',
-    lensPrice: workOrder.lensPrice || 0,
+    lensType: getLensTypeName(workOrder.lensType),
+    lensPrice: getLensPrice(workOrder.lensType, workOrder.lensPrice || 0),
     coating: workOrder.coating || '',
     coatingPrice: workOrder.coatingPrice || 0,
     discount: workOrder.discount || 0,
@@ -49,17 +66,13 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
     frameColor: workOrder.frameColor || '',
     frameSize: workOrder.frameSize || '',
     framePrice: workOrder.framePrice || 0,
-    lensType: typeof workOrder.lensType === 'object' ? workOrder.lensType.name || '' : workOrder.lensType || '',
-    lensPrice: workOrder.lensPrice || 0,
+    lensType: getLensTypeName(workOrder.lensType),
+    lensPrice: getLensPrice(workOrder.lensType, workOrder.lensPrice || 0),
     coating: workOrder.coating || '',
     coatingPrice: workOrder.coatingPrice || 0,
     discount: workOrder.discount || 0,
     total: workOrder.total || 0,
   });
-  
-  const getLensPrice = (lens: any): number => {
-    return lens && lens.price !== undefined ? lens.price : 0;
-  };
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -88,7 +101,7 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
       if (selectedLens) {
         setEditData(prev => ({
           ...prev,
-          lensPrice: getLensPrice(selectedLens)
+          lensPrice: selectedLens.price || 0
         }));
       }
     } else if (name === 'coating') {
@@ -96,7 +109,7 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
       if (selectedCoating) {
         setEditData(prev => ({
           ...prev,
-          coatingPrice: selectedCoating.price
+          coatingPrice: selectedCoating.price || 0
         }));
       }
     } else if (name === 'frameBrand') {
@@ -180,7 +193,7 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
       };
       
       // Update work order with new data and edit history
-      const updatedWorkOrder = {
+      const updatedWorkOrder: InventoryWorkOrder = {
         ...workOrder,
         frameBrand: editData.frameBrand,
         frameModel: editData.frameModel,
@@ -197,32 +210,14 @@ export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
         editHistory: updatedHistory
       };
       
-      // Also update the related invoice if it exists
-      const invoiceToUpdate = {
-        ...updatedWorkOrder,
-        invoiceId: workOrder.invoiceId || workOrder.id,
-      };
-      
-      // Update invoice in store
-      updateInvoice(invoiceToUpdate);
-      
-      // Update work order in patient store if patient ID exists
-      if (workOrder.patientId) {
-        editWorkOrder({
-          patientId: workOrder.patientId,
-          workOrderId: workOrder.invoiceId || workOrder.workOrderId || workOrder.id,
-          updatedData: updatedWorkOrder
-        });
-      }
+      // Call the onSave callback with the updated work order
+      onSave(updatedWorkOrder);
       
       // Show success message
       toast({
         title: t("success"),
         description: t("workOrderUpdated")
       });
-      
-      // Call the onSave callback
-      onSave();
     } catch (error) {
       console.error("Error updating work order:", error);
       toast({
