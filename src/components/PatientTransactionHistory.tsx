@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +13,7 @@ import { PrintOptionsDialog } from './PrintOptionsDialog';
 import { toast } from 'sonner';
 import { usePatientStore } from '@/store/patientStore';
 import { CustomPrintService } from '@/utils/CustomPrintService';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 interface PatientTransactionHistoryProps {
   patientId: string;
@@ -34,24 +34,19 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   
   const patient = getPatientById(patientId);
   
-  // Filter invoices for this patient
   const patientInvoices = invoices.filter(invoice => 
     invoice.patientId === patientId
   );
   
-  // Filter active invoices (not picked up and not marked in current session)
   const activeInvoices = patientInvoices.filter(invoice => 
     !pickedUpInvoices.includes(invoice.invoiceId) && !invoice.isPickedUp
   );
   
-  // Filter completed invoices (picked up or marked in current session)
   const completedInvoices = patientInvoices.filter(invoice => 
     pickedUpInvoices.includes(invoice.invoiceId) || invoice.isPickedUp
   );
   
-  // Force component to update when marking as picked up
   useEffect(() => {
-    // This is just to force a re-render when refreshTrigger changes
   }, [refreshTrigger]);
   
   const formatDate = (dateString: string) => {
@@ -63,7 +58,6 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   };
   
   const calculateRemaining = (invoice: any) => {
-    // For contact lens orders, calculate total based on qty
     if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
       const contactLensTotal = invoice.contactLensItems.reduce(
         (sum: number, lens: any) => sum + (lens.price || 0) * (lens.qty || 1), 0
@@ -76,7 +70,6 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
       return total - paid;
     }
     
-    // For regular glasses orders
     const total = invoice.total || 0;
     const paid = invoice.payments 
       ? invoice.payments.reduce((sum: number, payment: any) => sum + (payment.amount || 0), 0)
@@ -91,7 +84,6 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   };
   
   const viewInvoiceDetails = (invoice: any) => {
-    // Navigate to invoice details in "Remaining Payments" section
     navigate('/', { state: { section: 'remainingPayments', selectedInvoice: invoice.invoiceId } });
   };
   
@@ -109,7 +101,6 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   const handlePrintInvoice = (invoice: any) => {
     console.log("Printing invoice:", invoice);
     try {
-      // Use the invoice print functionality
       CustomPrintService.printInvoice(invoice);
       toast.success(language === 'ar' ? "تم إرسال الفاتورة للطباعة" : "Invoice sent to printer");
     } catch (error) {
@@ -119,21 +110,12 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   };
   
   const handleMarkAsPickedUp = (id: string, isInvoice: boolean = true) => {
-    // Add to local state immediately to update UI
     setPickedUpInvoices(prev => [...prev, id]);
-    
-    // Mark invoice as picked up in the store
     markAsPickedUp(id, isInvoice);
-    
-    // Show success toast
     toast.success(language === 'ar' ? "تم تسليم الطلب بنجاح" : "Order has been marked as picked up");
-    
-    // Switch to completed tab after a short delay
     setTimeout(() => {
       setActiveTab('completed');
     }, 300);
-    
-    // Force re-render after a delay to reflect the change in the UI
     setTimeout(() => {
       setRefreshTrigger(prev => prev + 1);
     }, 500);
@@ -157,19 +139,16 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
     );
   }
   
-  // Sort displayed invoices by date (newest first)
   const sortedActiveInvoices = [...activeInvoices].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
   
-  // Sort completed invoices by date (newest first)
   const sortedCompletedInvoices = [...completedInvoices].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
   
   return (
     <>
-      {/* Tabs for Active and Completed Transactions */}
       <div className="mt-8">
         <div className="bg-gradient-to-r from-primary/90 to-primary text-primary-foreground p-4 rounded-t-lg flex items-center gap-2">
           <Receipt className="h-5 w-5" />
@@ -386,9 +365,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
           onClose={() => setEditDialogOpen(false)}
           workOrder={editingWorkOrder}
           onSave={(updatedWorkOrder) => {
-            // Handle the save operation here
             setEditDialogOpen(false);
-            // Force re-render to show updated data
             setRefreshTrigger(prev => prev + 1);
           }}
         />
