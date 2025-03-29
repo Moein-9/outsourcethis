@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -68,6 +69,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   });
   
   const coatingName = matchingCoating?.name || getCoatingArabic(coatingString);
+  
+  // Add thickness property
+  const thickness = workOrder?.thickness || invoice?.thickness || "";
   
   const total = invoice?.total || workOrder?.total || 0;
   const deposit = invoice?.deposit || workOrder?.deposit || 0;
@@ -228,19 +232,19 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           <tbody>
             <tr>
               <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.sphereOD || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.cylOD || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.axisOD || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.addOD || rx.add || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.pdRight || rx.pdOD || rx.pd || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.sphereOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.cylOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.axisOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.addOD || rx?.add || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.pdRight || rx?.pdOD || rx?.pd || "—"}</td>
             </tr>
             <tr>
               <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.sphereOS || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.cylOS || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.axisOS || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.addOS || rx.add || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.pdLeft || rx.pdOS || rx.pd || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.sphereOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.cylOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.axisOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.addOS || rx?.add || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.pdLeft || rx?.pdOS || rx?.pd || "—"}</td>
             </tr>
           </tbody>
         </table>
@@ -352,6 +356,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                     <span className="font-semibold">{isRtl ? "النوع" : "Type"}:</span>
                     <span>{lensName}</span>
                   </div>
+                  {thickness && (
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{isRtl ? "السماكة" : "Thickness"}:</span>
+                      <span>{thickness}</span>
+                    </div>
+                  )}
                   {lensPrice > 0 && (
                     <div className="flex justify-between">
                       <span className="font-semibold">{isRtl ? "السعر" : "Price"}:</span>
