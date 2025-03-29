@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
+import { PrintButton } from "../PrintButton";
 
 interface PrintReportButtonProps {
   onPrint: () => void;
@@ -16,12 +15,10 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
   const { language } = useLanguageStore();
   
   return (
-    <Button 
-      onClick={onPrint} 
-      className={`gap-2 bg-primary hover:bg-primary/90 ${className}`}
-    >
-      <Printer size={16} />
-      {language === 'ar' ? 'طباعة التقرير' : 'Print Report'}
-    </Button>
+    <PrintButton
+      onClick={onPrint}
+      label={language === 'ar' ? 'طباعة التقرير' : 'Print Report'}
+      className={className}
+    />
   );
 };

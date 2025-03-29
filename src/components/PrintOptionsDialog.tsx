@@ -2,7 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Printer, FileText, Receipt } from 'lucide-react';
+import { FileText, Receipt } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Invoice } from '@/store/invoiceStore';
 import { Patient } from '@/store/patientStore';
@@ -48,8 +48,8 @@ export function PrintOptionsDialog({
               onPrintWorkOrder();
             }}
           >
-            <FileText className="h-10 w-10 mb-2 text-blue-600" />
-            <span className="text-blue-700 font-medium">{t('workOrder')}</span>
+            <FileText className="h-10 w-10 mb-2 text-indigo-600" />
+            <span className="text-indigo-700 font-medium">{t('workOrder')}</span>
           </Button>
           
           <Button
@@ -61,8 +61,8 @@ export function PrintOptionsDialog({
             }}
             disabled={!invoice}
           >
-            <Receipt className="h-10 w-10 mb-2 text-green-600" />
-            <span className="text-green-700 font-medium">{t('invoice')}</span>
+            <Receipt className="h-10 w-10 mb-2 text-indigo-600" />
+            <span className="text-indigo-700 font-medium">{t('invoice')}</span>
           </Button>
         </div>
         <div className="flex justify-center">

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -6,6 +5,7 @@ import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "sonner";
+import { PrintButton } from "./PrintButton";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -135,18 +135,14 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
 
   return (
     <>
-      <Button 
-        variant={variant} 
-        size={size} 
-        className={className}
-        onClick={handlePrint}
-        disabled={loading}
-      >
-        <Printer className="h-4 w-4 mr-1" /> 
-        {loading ? t("saving") : t("printWorkOrder")}
-      </Button>
-      
-      {!isNewInvoice && (
+      {isNewInvoice ? (
+        <PrintButton
+          onClick={handlePrint}
+          label={loading ? t("saving") : t("printWorkOrder")}
+          className={className}
+          disabled={loading}
+        />
+      ) : (
         <WorkOrderPrintSelector
           invoice={invoice}
           patientName={patientName}
@@ -158,9 +154,10 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           contactLenses={contactLenses}
           contactLensRx={contactLensRx}
           trigger={
-            <Button variant={variant} size={size} className={className}>
-              <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
-            </Button>
+            <PrintButton
+              label={t("printWorkOrder")}
+              className={className}
+            />
           }
         />
       )}

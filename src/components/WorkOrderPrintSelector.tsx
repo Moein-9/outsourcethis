@@ -1,11 +1,10 @@
 
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
-import { Button } from "@/components/ui/button";
-import { PrinterIcon } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "sonner";
 import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
+import { PrintButton } from "./PrintButton";
 
 interface WorkOrderPrintSelectorProps {
   invoice: Invoice;
@@ -77,16 +76,11 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           {trigger}
         </div>
       ) : (
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-1" 
+        <PrintButton
           onClick={handlePrint}
+          label={printingInProgress ? t("printing") : t("printWorkOrder")}
           disabled={printingInProgress}
-        >
-          <PrinterIcon className="h-4 w-4" /> 
-          {printingInProgress ? t("printing") : t("printWorkOrder")}
-        </Button>
+        />
       )}
     </>
   );
