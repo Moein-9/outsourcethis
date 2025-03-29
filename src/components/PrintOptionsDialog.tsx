@@ -2,14 +2,13 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Printer, FileText } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Invoice } from '@/store/invoiceStore';
 import { Patient } from '@/store/patientStore';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ReceiptInvoice } from './ReceiptInvoice';
-import { CustomPrintService } from '@/utils/CustomPrintService';
 
 interface PrintOptionsDialogProps {
   invoice?: Invoice;
@@ -35,7 +34,6 @@ export function PrintOptionsDialog({
     setOpen(false);
     // Wait for the dialog to close before printing
     setTimeout(() => {
-      console.log("[PrintOptionsDialog] Triggering work order print");
       onPrintWorkOrder();
     }, 150);
   };
@@ -44,11 +42,7 @@ export function PrintOptionsDialog({
     setOpen(false);
     // Wait for the dialog to close before printing
     setTimeout(() => {
-      console.log("[PrintOptionsDialog] Triggering invoice print");
-      if (invoice) {
-        // Directly use CustomPrintService instead of the callback
-        CustomPrintService.printInvoice(invoice);
-      }
+      onPrintInvoice();
     }, 150);
   };
 

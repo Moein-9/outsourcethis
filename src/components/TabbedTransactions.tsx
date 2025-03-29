@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
-import { Invoice, WorkOrder } from '@/store/invoiceStore';
+import { Invoice, WorkOrder, useInvoiceStore } from '@/store/invoiceStore';
 import { Patient } from '@/store/patientStore';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,9 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
   onEditWorkOrder
 }) => {
   const { language, t } = useLanguageStore();
+  const { markAsPickedUp } = useInvoiceStore();
+  const [activeTab, setActiveTab] = useState('active');
+  const [pickedUpInvoices, setPickedUpInvoices] = useState<string[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   // Sort invoices by date, newest first
@@ -42,12 +45,21 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
   );
   
   // Filter active (not picked up and not refunded)
-  const activeInvoices = sortedInvoices.filter(invoice => !invoice.isPickedUp && !invoice.isRefunded);
+  const activeInvoices = sortedInvoices
+    .filter(invoice => !invoice.isPickedUp && !invoice.isRefunded)
+    .filter(invoice => !pickedUpInvoices.includes(invoice.invoiceId)); // Also exclude locally picked up invoices
   
   // Filter completed (picked up and not refunded)
-  const completedInvoices = sortedInvoices.filter(invoice => invoice.isPickedUp && !invoice.isRefunded);
+  const completedInvoices = [...sortedInvoices
+    .filter(invoice => invoice.isPickedUp && !invoice.isRefunded),
+    // Also include locally picked up invoices that haven't synced from the store yet
+    ...sortedInvoices.filter(invoice => pickedUpInvoices.includes(invoice.invoiceId))
+  ];
   
-  // We're now using the refundedInvoices prop instead of filtering it here
+  // Remove duplicates from completedInvoices (in case an invoice is in both lists)
+  const uniqueCompletedInvoices = completedInvoices.filter((invoice, index, self) =>
+    index === self.findIndex((i) => i.invoiceId === invoice.invoiceId)
+  );
   
   const formatDate = (dateString: string) => {
     try {
@@ -145,10 +157,24 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
   };
   
   const handleMarkAsPickedUp = (id: string, isInvoice: boolean = true) => {
-    // This function would call the markAsPickedUp function from the invoice store
-    // For now, we'll just update the refresh trigger to force a re-render
-    setRefreshTrigger(prev => prev + 1);
+    // Add to local state immediately to update UI
+    setPickedUpInvoices(prev => [...prev, id]);
+    
+    // Show success toast
     toast.success(language === 'ar' ? "تم تسليم الطلب بنجاح" : "Order has been marked as picked up");
+    
+    // Switch to completed tab after a short delay
+    setTimeout(() => {
+      setActiveTab('completed');
+    }, 300);
+    
+    // Call the store method to persist the change
+    markAsPickedUp(id, isInvoice);
+    
+    // Force a re-render after a delay to reflect changes
+    setTimeout(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, 500);
   };
   
   // Render Active Transactions
@@ -167,7 +193,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     return (
       <div className="divide-y border border-blue-200 rounded-lg overflow-hidden bg-gradient-to-r from-blue-50/30 to-indigo-50/30">
         {transactions.map((invoice) => (
-          <div key={invoice.invoiceId} className="p-4 hover:bg-blue-50/60 transition-all">
+          <div key={invoice.invoiceId} className="p-4 hover:bg-blue-50/60 transition-all animate-fade-in">
             <div className="flex justify-between items-start">
               <div className="space-y-3 flex-1">
                 <div className="flex items-center gap-1.5">
@@ -539,7 +565,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
         </span>
       </div>
 
-      <Tabs defaultValue="active" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="px-4 pt-4">
           <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="active" className="flex items-center gap-2">
@@ -554,9 +580,9 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
             <TabsTrigger value="completed" className="flex items-center gap-2">
               <CheckCheck className="h-4 w-4" />
               {language === 'ar' ? "مكتملة" : "Completed"}
-              {completedInvoices.length > 0 && (
+              {uniqueCompletedInvoices.length > 0 && (
                 <Badge variant="secondary" className="ml-1 bg-green-100 text-green-800">
-                  {completedInvoices.length}
+                  {uniqueCompletedInvoices.length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -576,8 +602,8 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
           {renderActiveTable(activeInvoices)}
         </TabsContent>
         
-        <TabsContent value="completed" className="pb-4 pt-2 px-4">
-          {renderCompletedTable(completedInvoices)}
+        <TabsContent value="completed" className="pb-4 pt-2 px-4 animate-fade-in">
+          {renderCompletedTable(uniqueCompletedInvoices)}
         </TabsContent>
         
         <TabsContent value="refunded" className="pb-4 pt-2 px-4">
