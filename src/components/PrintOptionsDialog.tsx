@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Printer, FileText, Receipt } from 'lucide-react';
+import { Printer, FileText } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Invoice } from '@/store/invoiceStore';
 import { Patient } from '@/store/patientStore';
@@ -59,17 +59,11 @@ export function PrintOptionsDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>{t('printOptions')}</DialogTitle>
-          <DialogDescription>
-            {t('selectDocumentToPrint')}
-          </DialogDescription>
+          <DialogTitle>{t('printPreview')}</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="options" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="options" className="bg-gray-100 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
-              {language === 'ar' ? "خيارات الطباعة" : "Print Options"}
-            </TabsTrigger>
+        <Tabs defaultValue="workorder-preview" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="workorder-preview" className="bg-gray-100 data-[state=active]:bg-green-100 data-[state=active]:text-green-800">
               {language === 'ar' ? "معاينة أمر العمل" : "Work Order Preview"}
             </TabsTrigger>
@@ -77,29 +71,6 @@ export function PrintOptionsDialog({
               {language === 'ar' ? "معاينة الفاتورة" : "Invoice Preview"}
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="options">
-            <div className="grid grid-cols-2 gap-4 py-4">
-              <Button
-                variant="outline"
-                className="flex flex-col items-center justify-center h-32 p-4 bg-blue-50 border-blue-200 hover:bg-blue-100 hover:border-blue-300"
-                onClick={handlePrintWorkOrder}
-              >
-                <FileText className="h-12 w-12 mb-3 text-blue-600" />
-                <span className="text-blue-700 font-medium text-base">{t('workOrder')}</span>
-              </Button>
-              
-              <Button
-                variant="outline"
-                className="flex flex-col items-center justify-center h-32 p-4 bg-green-50 border-green-200 hover:bg-green-100 hover:border-green-300"
-                onClick={handlePrintInvoice}
-                disabled={!invoice}
-              >
-                <Receipt className="h-12 w-12 mb-3 text-green-600" />
-                <span className="text-green-700 font-medium text-base">{t('invoice')}</span>
-              </Button>
-            </div>
-          </TabsContent>
 
           <TabsContent value="workorder-preview">
             <div className="bg-gray-100 p-4 rounded-lg border">

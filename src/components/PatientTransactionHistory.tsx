@@ -29,12 +29,18 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   const [editingWorkOrder, setEditingWorkOrder] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [pickedUpInvoices, setPickedUpInvoices] = useState<string[]>([]);
   
   const patient = getPatientById(patientId);
   
-  // Filter invoices for this patient - ensure we're getting ALL invoices for this patient
+  // Filter invoices for this patient
   const patientInvoices = invoices.filter(invoice => 
     invoice.patientId === patientId
+  );
+  
+  // Filter invoices that haven't been marked as picked up in the current session
+  const displayedInvoices = patientInvoices.filter(invoice => 
+    !pickedUpInvoices.includes(invoice.invoiceId) && !invoice.isPickedUp
   );
   
   // Force component to update when marking as picked up
@@ -98,7 +104,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
     console.log("Printing invoice:", invoice);
     try {
       // Use the invoice print functionality
-      // This would typically use a similar approach to workOrder printing
+      CustomPrintService.printInvoice(invoice);
       toast.success(language === 'ar' ? "تم إرسال الفاتورة للطباعة" : "Invoice sent to printer");
     } catch (error) {
       console.error("Error printing invoice:", error);
@@ -107,10 +113,18 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
   };
   
   const handleMarkAsPickedUp = (id: string, isInvoice: boolean = true) => {
+    // Mark invoice as picked up in the store
     markAsPickedUp(id, isInvoice);
+    
+    // Add to local state to remove from display immediately
+    setPickedUpInvoices(prev => [...prev, id]);
+    
     toast.success(language === 'ar' ? "تم تسليم الطلب بنجاح" : "Order has been marked as picked up");
-    // Force re-render to show updated status
-    setRefreshTrigger(prev => prev + 1);
+    
+    // Force re-render after a delay to reflect the change in the UI
+    setTimeout(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, 300);
   };
   
   if (!patientInvoices.length) {
@@ -131,75 +145,79 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
     );
   }
   
+  // Sort displayed invoices by date (newest first)
+  const sortedInvoices = [...displayedInvoices].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  
+  // Sort picked up invoices by date (newest first)
+  const completedInvoices = patientInvoices
+    .filter(invoice => invoice.isPickedUp || pickedUpInvoices.includes(invoice.invoiceId))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  
   return (
     <>
+      {/* Active Transactions */}
       <Card className="mt-8 overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-primary/90 to-primary text-primary-foreground">
           <CardTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5" />
-            {t("transactionHistory")}
+            {t("activeTransactions")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead>{t("invoiceId")}</TableHead>
-                  <TableHead>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {t("date")}
-                    </div>
-                  </TableHead>
-                  <TableHead>
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="w-3.5 h-3.5" />
-                      {t("total")}
-                    </div>
-                  </TableHead>
-                  <TableHead>{t("status")}</TableHead>
-                  <TableHead className="text-right">{t("actions")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {patientInvoices.map((invoice) => {
-                  const remaining = calculateRemaining(invoice);
-                  const isPaid = remaining <= 0;
-                  const isPickedUp = invoice.isPickedUp;
-                  
-                  return (
-                    <TableRow key={invoice.invoiceId} className="hover:bg-accent/5 transition-colors">
-                      <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
-                      <TableCell>{formatDate(invoice.createdAt)}</TableCell>
-                      <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          isPickedUp
-                            ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300'
-                            : isPaid 
+          {sortedInvoices.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead>{t("invoiceId")}</TableHead>
+                    <TableHead>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {t("date")}
+                      </div>
+                    </TableHead>
+                    <TableHead>
+                      <div className="flex items-center gap-1">
+                        <DollarSign className="w-3.5 h-3.5" />
+                        {t("total")}
+                      </div>
+                    </TableHead>
+                    <TableHead>{t("status")}</TableHead>
+                    <TableHead className="text-right">{t("actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedInvoices.map((invoice) => {
+                    const remaining = calculateRemaining(invoice);
+                    const isPaid = remaining <= 0;
+                    
+                    return (
+                      <TableRow key={invoice.invoiceId} className="hover:bg-accent/5 transition-colors">
+                        <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
+                        <TableCell>{formatDate(invoice.createdAt)}</TableCell>
+                        <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            isPaid 
                               ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' 
                               : 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200'
-                        }`}>
-                          {isPickedUp 
-                            ? t("pickedUp") 
-                            : isPaid 
-                              ? t("paid") 
-                              : t("partiallyPaid")}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right space-x-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => viewInvoiceDetails(invoice)}
-                          title={t("view")}
-                          className="hover:bg-blue-100 hover:text-blue-700 transition-colors"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        
-                        {!invoice.isPickedUp && (
+                          }`}>
+                            {isPaid ? t("paid") : t("partiallyPaid")}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right space-x-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => viewInvoiceDetails(invoice)}
+                            title={t("view")}
+                            className="hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          
                           <Button 
                             variant="ghost" 
                             size="icon"
@@ -209,26 +227,24 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
-                        )}
-                        
-                        <PrintOptionsDialog
-                          workOrder={invoice}
-                          invoice={invoice}
-                          patient={patient}
-                          onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
-                          onPrintInvoice={() => handlePrintInvoice(invoice)}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="hover:bg-purple-100 hover:text-purple-700 transition-colors"
-                            title={t("print")}
+                          
+                          <PrintOptionsDialog
+                            workOrder={invoice}
+                            invoice={invoice}
+                            patient={patient}
+                            onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
+                            onPrintInvoice={() => handlePrintInvoice(invoice)}
                           >
-                            <Printer className="h-4 w-4" />
-                          </Button>
-                        </PrintOptionsDialog>
-                        
-                        {!invoice.isPickedUp && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="hover:bg-purple-100 hover:text-purple-700 transition-colors"
+                              title={t("print")}
+                            >
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                          </PrintOptionsDialog>
+                          
                           <Button 
                             variant="ghost" 
                             size="icon"
@@ -238,16 +254,104 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                           >
                             <CheckCircle className="h-4 w-4" />
                           </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="p-4 text-center text-muted-foreground">
+              {t("noActiveTransactions")}
+            </div>
+          )}
         </CardContent>
       </Card>
+      
+      {/* Completed Transactions */}
+      {completedInvoices.length > 0 && (
+        <Card className="mt-8 overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-green-600/90 to-green-600 text-white">
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5" />
+              {language === 'ar' ? "المعاملات المكتملة" : "Completed Transactions"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-green-50">
+                    <TableHead>{t("invoiceId")}</TableHead>
+                    <TableHead>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {t("date")}
+                      </div>
+                    </TableHead>
+                    <TableHead>
+                      <div className="flex items-center gap-1">
+                        <DollarSign className="w-3.5 h-3.5" />
+                        {t("total")}
+                      </div>
+                    </TableHead>
+                    <TableHead>{t("status")}</TableHead>
+                    <TableHead className="text-right">{t("actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {completedInvoices.map((invoice) => {
+                    const remaining = calculateRemaining(invoice);
+                    const isPaid = remaining <= 0;
+                    
+                    return (
+                      <TableRow key={invoice.invoiceId} className="hover:bg-green-50 transition-colors">
+                        <TableCell className="font-medium">{invoice.invoiceId}</TableCell>
+                        <TableCell>{formatDate(invoice.createdAt)}</TableCell>
+                        <TableCell>{invoice.total.toFixed(3)} KWD</TableCell>
+                        <TableCell>
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300">
+                            {t("pickedUp")}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right space-x-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => viewInvoiceDetails(invoice)}
+                            title={t("view")}
+                            className="hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          
+                          <PrintOptionsDialog
+                            workOrder={invoice}
+                            invoice={invoice}
+                            patient={patient}
+                            onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
+                            onPrintInvoice={() => handlePrintInvoice(invoice)}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="hover:bg-purple-100 hover:text-purple-700 transition-colors"
+                              title={t("print")}
+                            >
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                          </PrintOptionsDialog>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       {editingWorkOrder && (
         <EditWorkOrderDialog
