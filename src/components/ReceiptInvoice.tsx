@@ -91,7 +91,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         margin: '0 auto',
         backgroundColor: 'white',
         padding: '10px',
-        fontSize: '12px',
+        fontSize: '14px', // Increased base font size from 12px to 14px
         border: isPrintable ? 'none' : '1px solid #ddd',
         borderRadius: isPrintable ? '0' : '4px',
         boxShadow: isPrintable ? 'none' : '0 1px 2px rgba(0,0,0,0.05)',
@@ -103,25 +103,25 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
     >
       <div className="mb-3">
         <div className="flex justify-center mb-1">
-          <MoenLogo className="w-auto h-12" />
+          <MoenLogo className="w-auto h-14" /> {/* Increased logo size from h-12 to h-14 */}
         </div>
-        <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
-        <p className="text-xs font-medium mb-0">{storeInfo.address}</p>
-        <p className="text-xs font-medium">{t("phone")}: {storeInfo.phone}</p>
+        <h2 className="font-bold text-xl mb-0">{storeInfo.name}</h2> {/* Increased from text-lg to text-xl */}
+        <p className="text-sm font-medium mb-0">{storeInfo.address}</p> {/* Increased from text-xs to text-sm */}
+        <p className="text-sm font-medium">{t("phone")}: {storeInfo.phone}</p> {/* Increased from text-xs to text-sm */}
       </div>
 
       <div className="mb-3">
-        <div className="inline-flex items-center justify-center gap-1 border-2 border-black px-4 py-1 rounded">
-          <Receipt className="w-5 h-5" />
-          <span className="font-bold text-base">{t("invoice")}</span>
+        <div className="inline-flex items-center justify-center gap-1 border-2 border-black px-5 py-2 rounded"> {/* Increased padding */}
+          <Receipt className="w-6 h-6" /> {/* Increased icon size from w-5/h-5 to w-6/h-6 */}
+          <span className="font-bold text-lg">{t("invoice")}</span> {/* Increased from text-base to text-lg */}
         </div>
       </div>
 
       <div className="mb-3 border-2 border-black rounded p-3">
         <div className="mb-2 border-b border-gray-400 pb-2">
           <div className="flex items-center justify-center gap-1">
-            <User className="w-5 h-5" />
-            <span className="font-bold text-base">
+            <User className="w-6 h-6" /> {/* Increased icon size from w-5/h-5 to w-6/h-6 */}
+            <span className="font-bold text-lg"> {/* Increased from text-base to text-lg */}
               {isRtl ? "معلومات العميل | Customer Info" : "Customer Info | معلومات العميل"}
             </span>
           </div>
@@ -130,19 +130,19 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-1">
-              <UserCircle2 className="w-4 h-4" />
-              <span className="font-semibold text-sm">{t("name")}:</span>
+              <UserCircle2 className="w-5 h-5" /> {/* Increased from w-4/h-4 to w-5/h-5 */}
+              <span className="font-semibold text-base">{t("name")}:</span> {/* Increased from text-sm to text-base */}
             </div>
-            <span className="font-semibold text-sm">{name}</span>
+            <span className="font-semibold text-base">{name}</span> {/* Increased from text-sm to text-base */}
           </div>
           
           {phone && (
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-1">
-                <Phone className="w-4 h-4" />
-                <span className="font-semibold text-sm">{t("phone")}:</span>
+                <Phone className="w-5 h-5" /> {/* Increased from w-4/h-4 to w-5/h-5 */}
+                <span className="font-semibold text-base">{t("phone")}:</span> {/* Increased from text-sm to text-base */}
               </div>
-              <span className="font-semibold text-sm">{phone}</span>
+              <span className="font-semibold text-base">{phone}</span> {/* Increased from text-sm to text-base */}
             </div>
           )}
         </div>
@@ -151,8 +151,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
       <div className="mb-3 border-2 border-black rounded p-3">
         <div className="mb-2 border-b border-gray-400 pb-2">
           <div className="flex items-center justify-center gap-1">
-            <Receipt className="w-5 h-5" />
-            <span className="font-bold text-base">
+            <Receipt className="w-6 h-6" /> {/* Increased icon size from w-5/h-5 to w-6/h-6 */}
+            <span className="font-bold text-lg"> {/* Increased from text-base to text-lg */}
               {isRtl ? "رقم الفاتورة | Invoice Number" : "Invoice Number | رقم الفاتورة"}
             </span>
           </div>
@@ -160,15 +160,15 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         
         <div className="flex justify-between items-center px-2">
           <div className="flex items-center gap-1">
-            <Calendar className="w-4 h-4" />
-            <span className="font-semibold text-sm">{format(new Date(invoice.createdAt), 'dd/MM/yyyy')}</span>
+            <Calendar className="w-5 h-5" /> {/* Increased from w-4/h-4 to w-5/h-5 */}
+            <span className="font-semibold text-base">{format(new Date(invoice.createdAt), 'dd/MM/yyyy')}</span> {/* Increased from text-sm to text-base */}
           </div>
-          <span className="font-semibold text-sm text-primary">#{invoice.invoiceId}</span>
+          <span className="font-semibold text-lg text-primary">#{invoice.invoiceId}</span> {/* Increased from text-sm to text-lg */}
         </div>
       </div>
 
       <div className="mb-3">
-        <div className="py-2 bg-black text-white mb-3 font-bold text-base rounded">
+        <div className="py-2 bg-black text-white mb-3 font-bold text-lg rounded"> {/* Increased from text-base to text-lg */}
           {isRtl ? "المنتجات | Products" : "Products | المنتجات"}
         </div>
         
@@ -177,10 +177,10 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             contactLensItems.map((lens, idx) => (
               <div key={idx} className="p-2 border-2 border-gray-300 rounded">
                 <div className="flex justify-between px-2 mb-1">
-                  <div className="font-bold text-sm">{lens.brand} {lens.type}</div>
-                  <span className="font-bold text-sm">KWD {lens.price.toFixed(3)}</span>
+                  <div className="font-bold text-base">{lens.brand} {lens.type}</div> {/* Increased from text-sm to text-base */}
+                  <span className="font-bold text-base">KWD {lens.price.toFixed(3)}</span> {/* Increased from text-sm to text-base */}
                 </div>
-                <div className="text-xs font-medium text-center">
+                <div className="text-sm font-medium text-center"> {/* Increased from text-xs to text-sm */}
                   {lens.color && <span>{t("color")}: {lens.color} - </span>}
                   <span>{t("quantity")}: {lens.qty || 1}</span>
                 </div>
@@ -191,30 +191,30 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               {lens && (
                 <div className="p-2 border-2 border-gray-300 rounded">
                   <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}</div>
-                    <span className="font-bold text-sm">KWD {lensP.toFixed(3)}</span>
+                    <div className="font-bold text-base">{isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}</div> {/* Increased from text-sm to text-base */}
+                    <span className="font-bold text-base">KWD {lensP.toFixed(3)}</span> {/* Increased from text-sm to text-base */}
                   </div>
-                  <div className="text-xs font-medium text-center">{lens}</div>
+                  <div className="text-sm font-medium text-center">{lens}</div> {/* Increased from text-xs to text-sm */}
                 </div>
               )}
               
               {frameBrand && (
                 <div className="p-2 border-2 border-gray-300 rounded">
                   <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "الإطار | Frame" : "Frame | الإطار"}</div>
-                    <span className="font-bold text-sm">KWD {frameP.toFixed(3)}</span>
+                    <div className="font-bold text-base">{isRtl ? "الإطار | Frame" : "Frame | الإطار"}</div> {/* Increased from text-sm to text-base */}
+                    <span className="font-bold text-base">KWD {frameP.toFixed(3)}</span> {/* Increased from text-sm to text-base */}
                   </div>
-                  <div className="text-xs font-medium text-center">{frameBrand} {frameModel}</div>
+                  <div className="text-sm font-medium text-center">{frameBrand} {frameModel}</div> {/* Increased from text-xs to text-sm */}
                 </div>
               )}
               
               {coat && (
                 <div className="p-2 border-2 border-gray-300 rounded">
                   <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}</div>
-                    <span className="font-bold text-sm">KWD {coatP.toFixed(3)}</span>
+                    <div className="font-bold text-base">{isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}</div> {/* Increased from text-sm to text-base */}
+                    <span className="font-bold text-base">KWD {coatP.toFixed(3)}</span> {/* Increased from text-sm to text-base */}
                   </div>
-                  <div className="text-xs font-medium text-center">{coat}</div>
+                  <div className="text-sm font-medium text-center">{coat}</div> {/* Increased from text-xs to text-sm */}
                 </div>
               )}
             </div>
@@ -223,19 +223,19 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         
         <div className="mt-3 border-2 border-gray-300 rounded p-2">
           <div className="flex justify-between px-2 font-bold">
-            <span>{isRtl ? "المجموع الفرعي" : "Subtotal"}:</span>
-            <span>KWD {tot.toFixed(3)}</span>
+            <span className="text-base">{isRtl ? "المجموع الفرعي" : "Subtotal"}:</span> {/* Increased from default to text-base */}
+            <span className="text-base">KWD {tot.toFixed(3)}</span> {/* Increased from default to text-base */}
           </div>
           
           <div className="flex justify-between px-2 font-bold mt-1">
-            <span>{isRtl ? "المجموع" : "Total"}:</span>
-            <span>KWD {tot.toFixed(3)}</span>
+            <span className="text-base">{isRtl ? "المجموع" : "Total"}:</span> {/* Increased from default to text-base */}
+            <span className="text-base">KWD {tot.toFixed(3)}</span> {/* Increased from default to text-base */}
           </div>
         </div>
       </div>
 
       <div className="mb-3">
-        <div className="py-2 bg-black text-white mb-3 font-bold text-base rounded">
+        <div className="py-2 bg-black text-white mb-3 font-bold text-lg rounded"> {/* Increased from text-base to text-lg */}
           {isRtl ? "الدفع | Payment" : "Payment | الدفع"}
         </div>
         
@@ -243,13 +243,13 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           {invoice.payments?.map((payment, index) => (
             <div key={index} className="border-b border-gray-300 py-2">
               <div className="flex justify-between mb-1">
-                <span className="font-bold text-sm">
+                <span className="font-bold text-base"> {/* Increased from text-sm to text-base */}
                   {format(new Date(payment.date), 'dd/MM/yyyy')}
                 </span>
-                <span className="font-bold text-sm">KWD {payment.amount.toFixed(3)}</span>
+                <span className="font-bold text-base">KWD {payment.amount.toFixed(3)}</span> {/* Increased from text-sm to text-base */}
               </div>
-              <div className="text-xs font-medium flex items-center justify-center gap-1">
-                <CreditCard className="w-4 h-4" />
+              <div className="text-sm font-medium flex items-center justify-center gap-1"> {/* Increased from text-xs to text-sm */}
+                <CreditCard className="w-5 h-5" /> {/* Increased from w-4/h-4 to w-5/h-5 */}
                 {payment.method}
                 {payment.authNumber && <span> - {payment.authNumber}</span>}
               </div>
@@ -257,13 +257,13 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           )) || (
             <div className="border-b border-gray-300 py-2">
               <div className="flex justify-between mb-1">
-                <span className="font-bold text-sm">
+                <span className="font-bold text-base"> {/* Increased from text-sm to text-base */}
                   {format(new Date(invoice.createdAt), 'dd/MM/yyyy')}
                 </span>
-                <span className="font-bold text-sm">KWD {dep.toFixed(3)}</span>
+                <span className="font-bold text-base">KWD {dep.toFixed(3)}</span> {/* Increased from text-sm to text-base */}
               </div>
-              <div className="text-xs font-medium flex items-center justify-center gap-1">
-                <CreditCard className="w-4 h-4" />
+              <div className="text-sm font-medium flex items-center justify-center gap-1"> {/* Increased from text-xs to text-sm */}
+                <CreditCard className="w-5 h-5" /> {/* Increased from w-4/h-4 to w-5/h-5 */}
                 {payMethod}
                 {auth && <span> - {auth}</span>}
               </div>
@@ -272,13 +272,13 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           
           {rem > 0 ? (
             <div className="flex justify-between font-bold mt-2 pt-1">
-              <span className="text-base">{t("remaining")}:</span>
-              <span className="text-base">KWD {rem.toFixed(3)}</span>
+              <span className="text-lg">{t("remaining")}:</span> {/* Increased from text-base to text-lg */}
+              <span className="text-lg">KWD {rem.toFixed(3)}</span> {/* Increased from text-base to text-lg */}
             </div>
           ) : (
             <div className="mt-2 flex items-center justify-center gap-1 font-bold">
-              <CheckCircle2 className="w-5 h-5" />
-              <span className="text-sm">{t("paidInFull")}</span>
+              <CheckCircle2 className="w-6 h-6" /> {/* Increased from w-5/h-5 to w-6/h-6 */}
+              <span className="text-base">{t("paidInFull")}</span> {/* Increased from text-sm to text-base */}
             </div>
           )}
         </div>
@@ -286,11 +286,11 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
 
       <div className="mt-3 pt-2 border-t-2 border-gray-300">
         {isRtl ? (
-          <p className="font-bold text-sm mb-0">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
+          <p className="font-bold text-base mb-0">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p> {/* Increased from text-sm to text-base */}
         ) : (
-          <p className="font-bold text-sm mb-0">Thank you for choosing Moein Optical. We're always delighted to serve you!</p>
+          <p className="font-bold text-base mb-0">Thank you for choosing Moein Optical. We're always delighted to serve you!</p> {/* Increased from text-sm to text-base */}
         )}
-        <div className="text-xs font-medium">
+        <div className="text-sm font-medium"> {/* Increased from text-xs to text-sm */}
           {format(new Date(), 'yyyy-MM-dd')}
         </div>
       </div>
@@ -333,6 +333,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
               color-adjust: exact !important;
+              font-size: 14px !important; /* Increased base font size for printing */
             }
             
             .print-receipt * {
@@ -408,13 +409,22 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             }
             
             .print-receipt img, .print-receipt svg {
-              max-height: 12mm !important;
+              max-height: 14mm !important; /* Increased from 12mm to 14mm */
               width: auto !important;
             }
             
             body {
               font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'} !important;
             }
+            
+            /* Increase text sizes for better readability when printing */
+            .text-base { font-size: 14px !important; }
+            .text-lg { font-size: 16px !important; }
+            .text-xl { font-size: 18px !important; }
+            .text-sm { font-size: 12px !important; }
+            
+            /* Make the invoice number stand out more */
+            .text-primary { font-size: 16px !important; font-weight: bold !important; }
           }
         `}
       </style>

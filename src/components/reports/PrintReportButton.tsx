@@ -28,12 +28,12 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
   return (
     <Button 
       onClick={onPrint} 
-      className={`gap-2 ${variant === "default" ? "bg-green-600 hover:bg-green-700 text-white" : ""} ${className}`}
+      className={`gap-2 text-base ${variant === "default" ? "bg-green-600 hover:bg-green-700 text-white" : ""} ${className}`}
       type="button"
       variant={variant}
       disabled={disabled}
     >
-      {icon || <Printer size={16} />}
+      {icon || <Printer size={18} />}
       {label || defaultLabel}
     </Button>
   );
