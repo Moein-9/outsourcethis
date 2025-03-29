@@ -148,135 +148,136 @@ export const PrintService = {
    * @returns Complete HTML document
    */
   prepareReceiptDocument: (content: string, title: string = 'Receipt') => {
+    console.log("[PrintService] Preparing receipt document");
+    
     return `
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>${title}</title>
-        <meta charset="UTF-8">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap">
         <style>
-          @page {
-            size: 80mm auto !important;
-            margin: 0mm !important;
-          }
-          
-          @font-face {
-            font-family: 'Zain';
-            src: url('https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap');
-            font-weight: normal;
-            font-style: normal;
-          }
-          
-          @font-face {
-            font-family: 'Yrsa';
-            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
-            font-weight: normal;
-            font-style: normal;
-          }
+          @import url('https://fonts.googleapis.com/css2?family=Zain:wght@400;500;600;700&family=Yrsa:wght@400;500;600;700&display=swap');
           
           body {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 80mm !important;
-            font-family: 'Yrsa', serif !important;
-            direction: initial !important;
-            font-size: 10px !important;
-            line-height: 1.1 !important;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            font-family: 'Yrsa', serif;
           }
           
-          /* Ensure Arabic displays correctly */
           [dir="rtl"] {
-            direction: rtl !important;
-            text-align: right !important;
-            font-family: 'Zain', sans-serif !important;
+            font-family: 'Zain', sans-serif;
           }
           
-          .arabic {
-            font-family: 'Zain', sans-serif !important;
-            direction: rtl !important;
-            text-align: right !important;
-          }
-          
-          /* Force single page printing */
-          html, body {
-            height: auto !important;
-            width: 80mm !important;
-          }
-          
-          /* Ensure content is properly contained */
           .receipt-container {
-            width: 74mm !important;
-            padding: 3mm !important;
-            margin: 0 !important;
-            page-break-after: always !important;
-            page-break-inside: avoid !important;
+            width: 80mm;
+            margin: 20px auto;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            background: white;
+            overflow: hidden;
           }
           
-          /* Compact elements */
-          h1, h2, h3, p {
-            margin: 1px 0 !important;
+          @media print {
+            body {
+              margin: 0;
+              padding: 0;
+              background: white;
+              width: 80mm !important;
+            }
+            
+            .receipt-container {
+              width: 80mm;
+              margin: 0;
+              padding: 0;
+              box-shadow: none;
+            }
           }
           
-          /* Remove all unnecessary spacing */
-          table td, table th {
-            padding: 1px !important;
+          #receipt-invoice {
+            width: 80mm !important;
+            max-width: 80mm !important;
           }
           
-          /* Reduce spacing between elements */
-          div {
-            margin-bottom: 2px !important;
-          }
-          
-          /* Black background headers */
           .bg-black {
             background-color: black !important;
             color: white !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            color-adjust: exact !important;
           }
           
-          /* Preserve background colors */
-          [style*="background"] {
+          /* Background colors for different elements */
+          .bg-gray-50 {
+            background-color: #f9fafb !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
           
-          /* Fix for print dialog appearing but not working */
+          .bg-gray-100 {
+            background-color: #f3f4f6 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          .bg-green-50 {
+            background-color: #f0fdf4 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          .bg-amber-50 {
+            background-color: #fffbeb !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          .border-gray-200 {
+            border-color: #e5e7eb !important;
+          }
+          
+          .border-green-200 {
+            border-color: #bbf7d0 !important;
+          }
+          
+          .border-amber-200 {
+            border-color: #fde68a !important;
+          }
+          
+          .text-green-700 {
+            color: #15803d !important;
+          }
+          
+          .text-amber-700 {
+            color: #b45309 !important;
+          }
+          
+          /* Text colors */
+          .text-gray-500 {
+            color: #6b7280 !important;
+          }
+          
+          .text-gray-600 {
+            color: #4b5563 !important;
+          }
+          
+          .text-gray-700 {
+            color: #374151 !important;
+          }
+          
+          .text-gray-800 {
+            color: #1f2937 !important;
+          }
+
           @media print {
-            body {
-              width: 80mm !important;
-              height: auto !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              overflow: visible !important;
-              -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              font-size: 10px !important;
-              line-height: 1.1 !important;
-            }
-            
-            .receipt-container {
-              width: 74mm !important;
-              margin: 0 !important;
-              padding: 3mm !important;
-            }
-            
-            /* Ensure only one copy prints */
             @page {
               size: 80mm auto !important;
-              margin: 0mm !important;
-              margin-left: 0mm !important;
-              margin-right: 0mm !important;
-              margin-top: 0mm !important;
-              margin-bottom: 0mm !important;
+              margin: 0 !important;
+              padding: 0 !important;
             }
             
-            /* Support for inline styles */
-            [style] {
+            body {
               -webkit-print-color-adjust: exact !important;
               color-adjust: exact !important;
               print-color-adjust: exact !important;
@@ -290,6 +291,13 @@ export const PrintService = {
               print-color-adjust: exact !important;
               color-adjust: exact !important;
             }
+            
+            /* Ensure colored backgrounds print */
+            .bg-gray-50, .bg-gray-100, .bg-green-50, .bg-amber-50 {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
           }
         </style>
       </head>
@@ -297,16 +305,34 @@ export const PrintService = {
         <div class="receipt-container">${content}</div>
         <script>
           window.addEventListener('DOMContentLoaded', function() {
-            // Apply the background color for black headers
+            // Apply the background color for elements
             document.querySelectorAll('.bg-black').forEach(function(el) {
               el.style.backgroundColor = 'black';
               el.style.color = 'white';
             });
             
+            document.querySelectorAll('.bg-gray-50').forEach(function(el) {
+              el.style.backgroundColor = '#f9fafb';
+            });
+            
+            document.querySelectorAll('.bg-gray-100').forEach(function(el) {
+              el.style.backgroundColor = '#f3f4f6';
+            });
+            
+            document.querySelectorAll('.bg-green-50').forEach(function(el) {
+              el.style.backgroundColor = '#f0fdf4';
+            });
+            
+            document.querySelectorAll('.bg-amber-50').forEach(function(el) {
+              el.style.backgroundColor = '#fffbeb';
+            });
+            
             // Wait for the content to be fully loaded before focusing and printing
             setTimeout(function() {
               window.parent.postMessage('print-complete', '*');
-            }, 2000);
+              window.focus();
+              window.print();
+            }, 500);
           });
         </script>
       </body>
