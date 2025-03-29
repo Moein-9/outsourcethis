@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { format, isValid } from 'date-fns';
-import { PencilLine, Receipt, Clock, CheckCircle, RefreshCcw, AlertTriangle, ShoppingBag, CheckCheck, Ban } from 'lucide-react';
+import { PencilLine, Receipt, Clock, CheckCircle, RefreshCcw, AlertTriangle, ShoppingBag, CheckCheck, Ban, User, Phone, Calendar } from 'lucide-react';
 import { PrintOptionsDialog } from './PrintOptionsDialog';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { toast } from 'sonner';
@@ -16,6 +16,7 @@ import { PrintReportButton } from './reports/PrintReportButton';
 import { RefundReceiptTemplate } from './RefundReceiptTemplate';
 import * as ReactDOMServer from 'react-dom/server';
 import { PrintService } from '@/utils/PrintService';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 
 interface TabbedTransactionsProps {
   invoices: Invoice[];
@@ -168,10 +169,10 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
         {transactions.map((invoice) => (
           <div key={invoice.invoiceId} className="p-4 hover:bg-blue-50/60 transition-all">
             <div className="flex justify-between items-start">
-              <div>
+              <div className="space-y-3 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <Receipt className="h-4 w-4 text-indigo-600" />
-                  <span className="font-medium text-indigo-900">{invoice.invoiceId}</span>
+                  <Receipt className="h-5 w-5 text-indigo-600" />
+                  <span className="font-semibold text-indigo-900 text-lg">{invoice.invoiceId}</span>
                   
                   {/* Payment Status */}
                   {invoice.isPaid ? (
@@ -191,9 +192,30 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                   </Badge>
                 </div>
                 
-                <div className="text-sm text-gray-500 mt-1">
-                  {formatDate(invoice.createdAt)}
-                </div>
+                {/* Customer Info Card */}
+                <Card className="bg-blue-50/80 border-blue-200 max-w-xs">
+                  <CardHeader className="pb-2 pt-3">
+                    <CardTitle className="text-sm font-medium text-blue-700 flex items-center gap-1.5">
+                      <User className="h-4 w-4" />
+                      {language === 'ar' ? "معلومات العميل" : "Customer Info"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pb-3 pt-0 space-y-1">
+                    <div className="text-sm font-medium">
+                      {invoice.patientName || t('anonymous')}
+                    </div>
+                    {invoice.patientPhone && (
+                      <div className="text-sm text-gray-600 flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {invoice.patientPhone}
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-500 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(invoice.createdAt)}
+                    </div>
+                  </CardContent>
+                </Card>
                 
                 <div className="text-sm mt-1 font-medium text-indigo-700">
                   {invoice.invoiceType === 'glasses' ? (
@@ -209,9 +231,14 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
               </div>
               
               <div className="text-right">
-                <div className="font-semibold text-indigo-900 text-lg">
+                <div className="font-semibold text-indigo-900 text-xl">
                   {invoice.total.toFixed(3)} KWD
                 </div>
+                {invoice.remaining > 0 && (
+                  <div className="text-amber-600 font-medium text-sm mt-1">
+                    {language === 'ar' ? "المتبقي:" : "Remaining:"} {invoice.remaining.toFixed(3)} KWD
+                  </div>
+                )}
                 <div className="flex space-x-2 mt-3 justify-end">
                   {invoice.workOrderId && onEditWorkOrder && (
                     <Button 
@@ -283,10 +310,10 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
         {transactions.map((invoice) => (
           <div key={invoice.invoiceId} className="p-4 hover:bg-green-50/60 transition-all">
             <div className="flex justify-between items-start">
-              <div>
+              <div className="space-y-3 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <Receipt className="h-4 w-4 text-green-600" />
-                  <span className="font-medium text-green-800">{invoice.invoiceId}</span>
+                  <Receipt className="h-5 w-5 text-green-600" />
+                  <span className="font-semibold text-green-800 text-lg">{invoice.invoiceId}</span>
                   
                   {/* Payment Status */}
                   {invoice.isPaid ? (
@@ -306,9 +333,30 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                   </Badge>
                 </div>
                 
-                <div className="text-sm text-gray-500 mt-1">
-                  {formatDate(invoice.createdAt)}
-                </div>
+                {/* Customer Info Card */}
+                <Card className="bg-green-50/80 border-green-200 max-w-xs">
+                  <CardHeader className="pb-2 pt-3">
+                    <CardTitle className="text-sm font-medium text-green-700 flex items-center gap-1.5">
+                      <User className="h-4 w-4" />
+                      {language === 'ar' ? "معلومات العميل" : "Customer Info"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pb-3 pt-0 space-y-1">
+                    <div className="text-sm font-medium">
+                      {invoice.patientName || t('anonymous')}
+                    </div>
+                    {invoice.patientPhone && (
+                      <div className="text-sm text-gray-600 flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {invoice.patientPhone}
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-500 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(invoice.createdAt)}
+                    </div>
+                  </CardContent>
+                </Card>
                 
                 <div className="text-sm mt-1 font-medium text-green-700">
                   {invoice.invoiceType === 'glasses' ? (
@@ -330,9 +378,14 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
               </div>
               
               <div className="text-right">
-                <div className="font-semibold text-green-800 text-lg">
+                <div className="font-semibold text-green-800 text-xl">
                   {invoice.total.toFixed(3)} KWD
                 </div>
+                {invoice.remaining > 0 && (
+                  <div className="text-amber-600 font-medium text-sm mt-1">
+                    {language === 'ar' ? "المتبقي:" : "Remaining:"} {invoice.remaining.toFixed(3)} KWD
+                  </div>
+                )}
                 <div className="mt-3">
                   <PrintOptionsDialog
                     workOrder={invoice}
@@ -377,10 +430,10 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
         {transactions.map((invoice) => (
           <div key={invoice.invoiceId} className="p-4 hover:bg-red-50/40 transition-all">
             <div className="flex justify-between items-start">
-              <div>
+              <div className="space-y-3 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <Receipt className="h-4 w-4 text-red-600" />
-                  <span className="font-medium text-red-800">{invoice.invoiceId}</span>
+                  <Receipt className="h-5 w-5 text-red-600" />
+                  <span className="font-semibold text-red-800 text-lg">{invoice.invoiceId}</span>
                   
                   {/* Refund Status */}
                   <Badge className="bg-red-100 text-red-800 hover:bg-red-200 ml-2 flex items-center gap-1">
@@ -389,9 +442,30 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                   </Badge>
                 </div>
                 
-                <div className="text-sm text-gray-500 mt-1">
-                  {formatDate(invoice.createdAt)}
-                </div>
+                {/* Customer Info Card */}
+                <Card className="bg-red-50/80 border-red-200 max-w-xs">
+                  <CardHeader className="pb-2 pt-3">
+                    <CardTitle className="text-sm font-medium text-red-700 flex items-center gap-1.5">
+                      <User className="h-4 w-4" />
+                      {language === 'ar' ? "معلومات العميل" : "Customer Info"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pb-3 pt-0 space-y-1">
+                    <div className="text-sm font-medium">
+                      {invoice.patientName || t('anonymous')}
+                    </div>
+                    {invoice.patientPhone && (
+                      <div className="text-sm text-gray-600 flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {invoice.patientPhone}
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-500 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(invoice.createdAt)}
+                    </div>
+                  </CardContent>
+                </Card>
                 
                 <div className="text-sm mt-1 font-medium text-red-700">
                   {invoice.invoiceType === 'glasses' ? (
@@ -406,36 +480,36 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                 </div>
                 
                 {/* Refund Information */}
-                <div className="mt-2 text-sm bg-red-50 p-2 rounded-md border border-red-100">
-                  <div className="flex items-center gap-1 text-red-700">
-                    <RefreshCcw className="h-3.5 w-3.5" />
-                    <span className="font-medium">
+                <div className="mt-2 text-sm bg-red-50 p-3 rounded-md border border-red-200 shadow-sm">
+                  <div className="flex items-center gap-1 text-red-700 font-medium mb-2">
+                    <RefreshCcw className="h-4 w-4" />
+                    <span>
                       {language === 'ar' ? "معلومات الاسترداد:" : "Refund Info:"}
                     </span>
                   </div>
-                  <div className="mt-1 text-red-800 grid grid-cols-2 gap-x-2 text-xs">
-                    <div>
-                      {language === 'ar' ? `المبلغ: ${invoice.refundAmount?.toFixed(3)} KWD` : 
-                        `Amount: ${invoice.refundAmount?.toFixed(3)} KWD`}
+                  <div className="grid grid-cols-2 gap-y-2 gap-x-3">
+                    <div className="flex items-center gap-1 text-red-800">
+                      <span className="font-medium text-xs">{language === 'ar' ? "المبلغ:" : "Amount:"}</span>
+                      <span className="font-semibold">{invoice.refundAmount?.toFixed(3)} KWD</span>
                     </div>
-                    <div>
-                      {language === 'ar' ? `التاريخ: ${formatDate(invoice.refundDate || '')}` : 
-                        `Date: ${formatDate(invoice.refundDate || '')}`}
+                    <div className="flex items-center gap-1 text-red-800">
+                      <span className="font-medium text-xs">{language === 'ar' ? "التاريخ:" : "Date:"}</span>
+                      <span>{formatDate(invoice.refundDate || '')}</span>
                     </div>
-                    <div>
-                      {language === 'ar' ? `الطريقة: ${invoice.refundMethod}` : 
-                        `Method: ${invoice.refundMethod}`}
+                    <div className="flex items-center gap-1 text-red-800">
+                      <span className="font-medium text-xs">{language === 'ar' ? "الطريقة:" : "Method:"}</span>
+                      <span>{invoice.refundMethod}</span>
                     </div>
-                    <div>
-                      {language === 'ar' ? `السبب: ${invoice.refundReason}` : 
-                        `Reason: ${invoice.refundReason}`}
+                    <div className="flex items-center gap-1 text-red-800">
+                      <span className="font-medium text-xs">{language === 'ar' ? "السبب:" : "Reason:"}</span>
+                      <span>{invoice.refundReason}</span>
                     </div>
                   </div>
                 </div>
               </div>
               
               <div className="text-right">
-                <div className="font-semibold text-red-800 text-lg">
+                <div className="font-semibold text-red-800 text-xl">
                   {invoice.total.toFixed(3)} KWD
                 </div>
                 <div className="mt-3">
