@@ -45,8 +45,13 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   const handlePrintInvoice = (invoice: Invoice) => {
     console.log("[PatientTransactions] Printing invoice:", invoice.invoiceId);
     
-    // Call the CustomPrintService
-    CustomPrintService.printInvoice(invoice);
+    // Call the CustomPrintService to handle invoice printing
+    // Note: We'll need to implement this method when needed
+    if (typeof CustomPrintService.printInvoice === 'function') {
+      CustomPrintService.printInvoice(invoice);
+    } else {
+      console.error('CustomPrintService.printInvoice is not implemented');
+    }
   };
   
   return (

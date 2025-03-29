@@ -164,7 +164,7 @@ export class CustomPrintService {
         </html>
       `);
       
-      // Create a div element to hold our component temporarily
+      // Create a div element to hold our component temporarily in the current document
       const tempDiv = document.createElement('div');
       document.body.appendChild(tempDiv);
       tempDiv.style.display = 'none';
@@ -191,10 +191,10 @@ export class CustomPrintService {
           if (printContainer) {
             printContainer.innerHTML = contentHtml;
             
-            // Apply any additional styling to printed output
-            const printedReceipt = printWindow.document.querySelector('#work-order-receipt');
+            // Apply specific print styles directly to the element that will be printed
+            const printedReceipt = printWindow.document.querySelector('.print-receipt');
             if (printedReceipt) {
-              // Make sure the styling is properly applied
+              printedReceipt.setAttribute('id', 'work-order-receipt');
               printedReceipt.setAttribute('style', `
                 width: 76mm !important;
                 max-width: 76mm !important;
@@ -215,6 +215,8 @@ export class CustomPrintService {
           // Clean up
           root.unmount();
           document.body.removeChild(tempDiv);
+          
+          console.log("[CustomPrintService] Work order print complete");
           
         } catch (err) {
           console.error("Error in print preparation:", err);
