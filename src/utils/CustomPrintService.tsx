@@ -21,29 +21,31 @@ export class CustomPrintService {
         return;
       }
       
-      // Add basic HTML structure with styles for the receipt
+      // Add basic HTML structure with improved styles for the receipt
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
           <head>
             <title>Work Order</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;500;600;700&display=swap">
             <style>
               @page {
                 size: 80mm auto !important;
-                margin: 0 !important;
+                margin: 2mm !important; /* Added small margins for safety */
                 padding: 0 !important;
               }
               
               body {
-                width: 80mm !important;
-                margin: 0 !important;
+                width: 76mm !important; /* 80mm - 4mm for margins */
+                margin: 0 auto !important;
                 padding: 0 !important;
                 font-family: Cairo, Arial, sans-serif !important;
                 background: white !important;
                 color: black !important;
+                font-size: 12px !important; /* Increased base font size */
               }
               
               #work-order-receipt {
@@ -51,13 +53,13 @@ export class CustomPrintService {
                 max-width: 76mm !important;
                 page-break-after: always !important;
                 page-break-inside: avoid !important;
-                position: absolute !important;
+                position: relative !important; /* Changed from absolute to relative */
                 left: 0 !important;
                 top: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
                 padding: 2mm !important;
-                margin: 0 !important;
+                margin: 0 auto !important;
                 background: white !important;
                 color: black !important;
               }
@@ -93,10 +95,10 @@ export class CustomPrintService {
               .justify-between { justify-content: space-between !important; }
               .text-center { text-align: center !important; }
               .font-bold { font-weight: bold !important; }
-              .text-xs { font-size: 0.75rem !important; }
-              .text-sm { font-size: 0.875rem !important; }
-              .text-base { font-size: 1rem !important; }
-              .text-lg { font-size: 1.125rem !important; }
+              .text-xs { font-size: 9px !important; }
+              .text-sm { font-size: 11px !important; }
+              .text-base { font-size: 13px !important; }
+              .text-lg { font-size: 15px !important; }
               .mb-0 { margin-bottom: 0 !important; }
               .mb-1 { margin-bottom: 0.25rem !important; }
               .mb-2 { margin-bottom: 0.5rem !important; }
@@ -130,7 +132,7 @@ export class CustomPrintService {
               /* Print-specific overrides */
               @media print {
                 html, body {
-                  width: 80mm !important;
+                  width: 76mm !important;
                   height: auto !important;
                   min-height: 0 !important;
                   max-height: none !important;
@@ -154,21 +156,31 @@ export class CustomPrintService {
                   visibility: visible !important;
                 }
                 
-                #receipt-invoice .border-2 {
-                  border-width: 2px !important;
-                  border-style: solid !important;
+                /* Improved table styles */
+                table {
+                  width: 100% !important;
+                  border-collapse: collapse !important;
+                  font-size: 10px !important;
+                  margin: 0 auto !important;
                 }
                 
-                #receipt-invoice .border-black {
-                  border-color: black !important;
+                table th, table td {
+                  padding: 2px !important;
+                  text-align: center !important;
+                  border: 1px solid #d1d5db !important;
                 }
                 
-                #receipt-invoice .border-gray-300, #receipt-invoice .border-gray-400 {
-                  border-color: #d1d5db !important;
+                /* Notes section */
+                div[class*="min-h-"] {
+                  min-height: 40px !important;
+                  border: 2px solid #d1d5db !important;
+                  background-color: white !important;
                 }
                 
-                #receipt-invoice .rounded {
-                  border-radius: 0.25rem !important;
+                /* Logo sizing */
+                img, svg {
+                  max-height: 12mm !important;
+                  width: auto !important;
                 }
               }
             </style>
@@ -225,12 +237,13 @@ export class CustomPrintService {
                 width: 76mm !important;
                 max-width: 76mm !important;
                 margin: 0 auto !important;
-                padding: 10px !important;
+                padding: 2mm !important;
                 background-color: white !important;
                 color: black !important;
                 font-family: 'Cairo', sans-serif !important;
                 page-break-inside: avoid !important;
                 page-break-after: always !important;
+                font-size: 12px !important;
               `);
             }
           }
