@@ -36,11 +36,12 @@ export interface LensCoating {
   description?: string;
 }
 
-// Add WorkOrder type to help with TypeScript errors
+// Update WorkOrder type to include all required properties
 export interface WorkOrder {
   invoiceId?: string;
   workOrderId?: string;
   patientId?: string;
+  id?: string;
   frameBrand?: string;
   frameModel?: string;
   frameColor?: string;
@@ -56,9 +57,9 @@ export interface WorkOrder {
   isPickedUp?: boolean;
   pickedUpAt?: string;
   createdAt?: string;
+  lastEditedAt?: string;
   editHistory?: Array<{
     timestamp: string;
     notes: string;
   }>;
-  lastEditedAt?: string;
 }

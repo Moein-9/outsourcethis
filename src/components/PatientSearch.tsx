@@ -1,6 +1,7 @@
+
 import React, { useState } from "react";
 import { usePatientStore, Patient, RxData } from "@/store/patientStore";
-import { useInvoiceStore, Invoice, WorkOrder } from "@/store/invoiceStore";
+import { useInvoiceStore, Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { printRxReceipt } from "./RxReceiptPrint";
 import { PatientNotes } from "./PatientNotes";
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { PlusCircle } from "lucide-react";
+import { WorkOrder } from "@/types/inventory";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
@@ -97,7 +99,17 @@ export const PatientSearch: React.FC = () => {
   };
   
   const handleEditWorkOrder = (workOrder: WorkOrder) => {
-    setCurrentWorkOrder(workOrder);
+    // Make sure all required properties are present
+    const completeWorkOrder: WorkOrder = {
+      ...workOrder,
+      framePrice: workOrder.framePrice || 0,
+      lensPrice: workOrder.lensPrice || 0,
+      coatingPrice: workOrder.coatingPrice || 0,
+      discount: workOrder.discount || 0,
+      total: workOrder.total || 0
+    };
+    
+    setCurrentWorkOrder(completeWorkOrder);
     setEditWorkOrderDialogOpen(true);
   };
   
@@ -240,7 +252,13 @@ export const PatientSearch: React.FC = () => {
       <EditWorkOrderDialog
         isOpen={editWorkOrderDialogOpen}
         onClose={() => setEditWorkOrderDialogOpen(false)}
-        workOrder={currentWorkOrder || {} as WorkOrder}
+        workOrder={currentWorkOrder || {
+          framePrice: 0,
+          lensPrice: 0,
+          coatingPrice: 0,
+          discount: 0,
+          total: 0
+        } as WorkOrder}
         onSave={handleSaveWorkOrder}
       />
       
@@ -254,4 +272,42 @@ export const PatientSearch: React.FC = () => {
       )}
     </div>
   );
+  
+  function handleDirectPrint(printLanguage?: 'en' | 'ar') {
+    if (!selectedPatient) return;
+    
+    const langToPrint = printLanguage || useLanguageStore.getState().language;
+    
+    printRxReceipt({
+      patientName: selectedPatient.name,
+      patientPhone: selectedPatient.phone,
+      rx: selectedPatient.rx,
+      forcedLanguage: langToPrint
+    });
+  }
+  
+  function handleLanguageSelection(selectedLanguage: 'en' | 'ar') {
+    setIsLanguageDialogOpen(false);
+    handleDirectPrint(selectedLanguage);
+  }
+  
+  function handleSaveRx(rxData: RxData) {
+    if (!selectedPatient) return;
+    
+    updatePatientRx(selectedPatient.patientId, rxData);
+    
+    setSelectedPatient(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        rx: rxData,
+        rxHistory: [
+          ...(prev.rxHistory || []),
+          { ...prev.rx, createdAt: new Date().toISOString() }
+        ]
+      };
+    });
+    
+    toast.success(language === 'ar' ? "تم إضافة الوصفة الطبية بنجاح" : "Prescription added successfully");
+  }
 };

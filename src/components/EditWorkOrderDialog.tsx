@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,7 +7,7 @@ import { useInvoiceStore } from "@/store/invoiceStore";
 import { usePatientStore } from "@/store/patientStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { Search, Edit, Clock, Glasses, CheckCircle2 } from "lucide-react";
@@ -17,18 +16,18 @@ import { Frame, WorkOrder } from "@/types/inventory";
 interface EditWorkOrderDialogProps {
   workOrder: WorkOrder;
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave?: () => void;
+  onClose: () => void;
+  onSave: (updatedWorkOrder: WorkOrder) => void;
 }
 
 export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   workOrder,
   isOpen,
-  onOpenChange,
+  onClose,
   onSave
 }) => {
   const { t, language } = useLanguageStore();
-  const { updateInvoice } = useInvoiceStore();
+  const { updateWorkOrder } = useInvoiceStore();
   const { editWorkOrder } = usePatientStore();
   const { lensTypes, lensCoatings } = useInventoryStore();
   const isRtl = language === 'ar';
@@ -192,7 +191,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
       
       const currentDateTime = new Date().toISOString();
       
-      const updatedWorkOrder = {
+      const updatedWorkOrder: WorkOrder = {
         ...workOrder,
         ...editData,
         total: newTotal,
@@ -207,30 +206,25 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
         ]
       };
       
-      updateInvoice(updatedWorkOrder);
+      if (updateWorkOrder) {
+        updateWorkOrder(updatedWorkOrder);
+      }
       
-      if (workOrder.patientId) {
+      if (workOrder.patientId && editWorkOrder) {
         editWorkOrder({
           patientId: workOrder.patientId,
-          workOrderId: workOrder.invoiceId || workOrder.workOrderId,
+          workOrderId: workOrder.workOrderId || workOrder.invoiceId,
           updatedData: updatedWorkOrder
         });
       }
       
-      toast({
-        title: t("success"),
-        description: t("workOrderUpdated")
-      });
+      toast.success(language === 'ar' ? "تم تحديث البيانات بنجاح" : "Successfully updated");
       
-      onOpenChange(false);
-      if (onSave) onSave();
+      onClose();
+      onSave(updatedWorkOrder);
     } catch (error) {
       console.error("Error updating work order:", error);
-      toast({
-        title: t("error"),
-        description: t("errorUpdatingWorkOrder"),
-        variant: "destructive"
-      });
+      toast.error(language === 'ar' ? "حدث خطأ أثناء التحديث" : "Error updating");
     }
   };
   
@@ -482,7 +476,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
   );
   
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className={`${isRtl ? 'rtl' : 'ltr'}`}>
           <h2 className="text-xl font-bold mb-4 flex items-center">
@@ -512,7 +506,7 @@ export const EditWorkOrderDialog: React.FC<EditWorkOrderDialogProps> = ({
           </Tabs>
           
           <div className="flex justify-end gap-2 mt-6">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" onClick={onClose}>
               {t("cancel")}
             </Button>
             <Button onClick={handleSaveChanges}>
