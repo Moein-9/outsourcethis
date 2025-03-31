@@ -12,6 +12,13 @@ import { ReceiptInvoice } from './ReceiptInvoice';
 import { useLocationStore } from '@/store/locationStore';
 import { LocationSelector } from './LocationSelector';
 
+// Update ReceiptInvoiceProps to include locationId
+interface ReceiptInvoiceProps {
+  invoice: Invoice;
+  isPrintable?: boolean;
+  locationId?: string;
+}
+
 interface PrintOptionsDialogProps {
   invoice?: Invoice;
   workOrder: any;

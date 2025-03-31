@@ -52,6 +52,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
+      // Fix: Only pass three arguments instead of four
       CustomPrintService.printWorkOrder(workOrder, invoice, patient, selectedLocationId);
       setTimeout(() => setIsPrinting(false), 1000); // Reset printing state after a delay
     }, 300);
