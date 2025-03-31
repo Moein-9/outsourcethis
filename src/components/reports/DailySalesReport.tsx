@@ -18,7 +18,8 @@ import {
   MapPin,
   Store,
   Phone,
-  RefreshCcw
+  RefreshCcw,
+  Calendar as CalendarIcon
 } from "lucide-react";
 import { 
   Table,
@@ -36,6 +37,12 @@ import { PrintReportButton } from "./PrintReportButton";
 import { Button } from "@/components/ui/button";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { toast } from "sonner";
+
+// Helper function to format date
+const formatDate = (date: string | Date): string => {
+  if (!date) return "";
+  return format(new Date(date), 'dd/MM/yyyy', { locale: enUS });
+};
 
 export const DailySalesReport: React.FC = () => {
   const invoiceStore = useInvoiceStore();
@@ -534,11 +541,9 @@ export const DailySalesReport: React.FC = () => {
     `;
     
     PrintService.printReport(reportContent, pageTitle, () => {
-      toast({
-        title: language === 'ar' ? 'تم إرسال التقرير للطباعة' : 'Report sent to printer',
-        description: language === 'ar' ? 'تتم معالجة طباعة التقرير' : 'Processing print request',
-        variant: "default",
-      });
+      toast(
+        language === 'ar' ? 'تم إرسال التقرير للطباعة' : 'Report sent to printer'
+      );
     });
   };
   
@@ -724,7 +729,7 @@ export const DailySalesReport: React.FC = () => {
                         </div>
                         
                         <div className="text-xs text-red-600 flex items-center gap-1 mt-0.5">
-                          <Calendar className="h-3 w-3" />
+                          <CalendarIcon className="h-3 w-3" />
                           {language === 'ar' ? "تاريخ الاسترداد:" : "Refund date:"} {formatDate(refund.date)}
                         </div>
                         
