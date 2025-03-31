@@ -103,18 +103,13 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           onInvoiceSaved(invoiceId, workOrderId);
         }
         
-        toast({
-          description: t("invoiceNumber") + ": " + invoiceId,
-        });
+        toast(t("invoiceNumber") + ": " + invoiceId);
         
         // Show the print selector with the updated invoice that has an ID
         showPrintSelector(updatedInvoice);
       } catch (error) {
         console.error("Error saving invoice:", error);
-        toast({
-          description: t("errorSavingInvoice"),
-          variant: "destructive",
-        });
+        toast.error(t("errorSavingInvoice"));
       } finally {
         setLoading(false);
       }
