@@ -72,7 +72,7 @@ const PrintLabelPage: React.FC = () => {
         )}
         
         <div className="bg-white p-4 rounded-lg shadow">
-          <FrameLabelTemplate onPrintError={handlePrintError} />
+          <FrameLabelTemplate onPrintError={handlePrintError} locationId="main-store" />
         </div>
       </div>
     </Layout>
