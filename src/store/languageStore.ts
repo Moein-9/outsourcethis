@@ -347,7 +347,28 @@ const translations: Record<string, Record<string, string>> = {
     axisValidationError: "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.",
     
     // Add the new notesPlaceholder translation
-    notesPlaceholder: "You can add any information about the customer here..."
+    notesPlaceholder: "You can add any information about the customer here...",
+    
+    // Services
+    services: 'Services',
+    serviceManagement: 'Service Management',
+    newService: 'New Service',
+    serviceName: 'Service Name',
+    serviceDescription: 'Service Description',
+    addService: 'Add Service',
+    saveService: 'Save Service',
+    serviceAdded: 'Service added successfully',
+    editService: 'Edit Service',
+    updateService: 'Update Service',
+    serviceUpdated: 'Service updated successfully',
+    serviceDeleted: 'Service deleted successfully',
+    eyeExam: 'Eye Exam',
+    repair: 'Repair',
+    other: 'Other',
+    nameRequired: 'Name is required',
+    selectCategory: 'Select Category',
+    noServices: 'No services available',
+    noExamServiceFound: 'No eye exam service found. Please add one in the Services tab.'
   },
   ar: {
     // General UI
@@ -687,7 +708,28 @@ const translations: Record<string, Record<string, string>> = {
     axisValidationError: "قيم المحور (AXIS) التي أدخلتها غير صحيحة! إذا كانت قيمة الاسطوانة (CYL) موجودة، فيجب تحديد قيمة المحور.",
     
     // Add the new notesPlaceholder translation in Arabic
-    notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا..."
+    notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا...",
+    
+    // Services
+    services: 'الخدمات',
+    serviceManagement: 'إدارة الخدمات',
+    newService: 'خدمة جديدة',
+    serviceName: 'اسم الخدمة',
+    serviceDescription: 'وصف الخدمة',
+    addService: 'إضافة خدمة',
+    saveService: 'حفظ الخدمة',
+    serviceAdded: 'تمت إضافة الخدمة بنجاح',
+    editService: 'تعديل الخدمة',
+    updateService: 'تحديث الخدمة',
+    serviceUpdated: 'تم تحديث الخدمة بنجاح',
+    serviceDeleted: 'تم حذف الخدمة بنجاح',
+    eyeExam: 'فحص العين',
+    repair: 'إصلاح',
+    other: 'أخرى',
+    nameRequired: 'الاسم مطلوب',
+    selectCategory: 'اختر الفئة',
+    noServices: 'لا توجد خدمات متاحة',
+    noExamServiceFound: 'لم يتم العثور على خدمة فحص العين. يرجى إضافة واحدة في علامة التبويب الخدمات.'
   }
 };
 

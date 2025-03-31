@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -28,13 +27,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   // Fetch eye exam service from the store
   const [eyeExamService, setEyeExamService] = useState(() => {
     const examServices = getServicesByCategory("exam");
-    return examServices.length > 0 ? examServices[0] : {
-      id: "service1",
-      name: "Eye Exam",
-      description: "Standard eye examination service to evaluate eye health and vision.",
-      price: 3,
-      category: "exam"
-    };
+    return examServices.length > 0 ? examServices[0] : null;
   });
   
   // Refresh the eye exam service when the inventory changes
@@ -46,7 +39,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   }, [getServicesByCategory]);
   
   useEffect(() => {
-    if (invoiceType === "exam") {
+    if (invoiceType === "exam" && eyeExamService) {
       setValue('total', eyeExamService.price);
       setValue('serviceName', eyeExamService.name);
       setValue('serviceId', eyeExamService.id);
@@ -72,6 +65,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const [newQty, setNewQty] = useState("1");
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const directionClass = language === 'ar' ? 'rtl' : 'ltr';
   
   React.useEffect(() => {
     if (getValues<string>('frameBrand')) {
@@ -263,13 +257,35 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   };
   
   if (invoiceType === "exam") {
+    if (!eyeExamService) {
+      return (
+        <div className="space-y-6 animate-fade-in">
+          <Card className="border-2 border-primary/20">
+            <CardHeader className="bg-primary/10">
+              <CardTitle className={`text-lg flex items-center gap-2 ${textAlignClass}`}>
+                <ScrollText className="w-5 h-5 text-primary" />
+                {t('eyeExam')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="text-center p-4">
+                <p className="text-muted-foreground">
+                  {t('noExamServiceFound')}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+    
     return (
       <div className="space-y-6 animate-fade-in">
         <Card className="border-2 border-primary/20">
           <CardHeader className="bg-primary/10">
             <CardTitle className={`text-lg flex items-center gap-2 ${textAlignClass}`}>
               <ScrollText className="w-5 h-5 text-primary" />
-              {language === 'ar' ? 'فحص العين' : 'Eye Exam'}
+              {t('eyeExam')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -280,11 +296,11 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
                   {eyeExamService.name}
                 </div>
                 <div className="font-semibold text-lg">
-                  {eyeExamService.price.toFixed(3)} {language === 'ar' ? 'د.ك' : 'KWD'}
+                  {eyeExamService.price.toFixed(3)} {t('kwd')}
                 </div>
               </div>
               
-              <p className="mt-4 text-muted-foreground text-sm">
+              <p className={`mt-4 text-muted-foreground text-sm ${textAlignClass}`}>
                 {eyeExamService.description}
               </p>
             </div>
@@ -292,9 +308,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
             <div className="mt-6 flex items-center justify-center">
               <div className="px-4 py-2 bg-green-100 text-green-800 rounded-md flex items-center gap-2">
                 <Check className="w-4 h-4" />
-                {language === 'ar' 
-                  ? `السعر: ${eyeExamService.price.toFixed(3)} د.ك` 
-                  : `Price: ${eyeExamService.price.toFixed(3)} KWD`}
+                {t('price')}: {eyeExamService.price.toFixed(3)} {t('kwd')}
               </div>
             </div>
           </CardContent>
@@ -339,7 +353,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="frameSearchBox" className={`text-muted-foreground block ${textAlignClass}`}>{t('searchTerm')}</Label>
-                  <div className={`flex ${language === 'ar' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
+                  <div className={`flex ${directionClass === 'rtl' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
                     <Input
                       id="frameSearchBox"
                       value={frameSearch}

@@ -39,6 +39,7 @@ export const ServiceManager: React.FC = () => {
   });
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const directionClass = language === 'ar' ? 'rtl' : 'ltr';
   
   const resetNewService = () => {
     setNewService({
@@ -145,7 +146,7 @@ export const ServiceManager: React.FC = () => {
   };
   
   return (
-    <div className={`space-y-6 ${textAlignClass}`}>
+    <div className={`space-y-6 ${textAlignClass}`} dir={directionClass}>
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{t('services')}</h3>
         <Button 
@@ -183,6 +184,7 @@ export const ServiceManager: React.FC = () => {
                   onChange={(e) => setNewService({...newService, name: e.target.value})}
                   className={textAlignClass}
                   placeholder={t('serviceName')}
+                  dir={directionClass}
                 />
               </div>
               
@@ -194,6 +196,7 @@ export const ServiceManager: React.FC = () => {
                   onChange={(e) => setNewService({...newService, description: e.target.value})}
                   className={textAlignClass}
                   placeholder={t('serviceDescription')}
+                  dir={directionClass}
                 />
               </div>
               
@@ -208,6 +211,7 @@ export const ServiceManager: React.FC = () => {
                     value={newService.price}
                     onChange={(e) => setNewService({...newService, price: parseFloat(e.target.value) || 0})}
                     className={textAlignClass}
+                    dir="ltr"
                   />
                 </div>
                 
@@ -217,7 +221,7 @@ export const ServiceManager: React.FC = () => {
                     value={newService.category}
                     onValueChange={(value) => setNewService({...newService, category: value as ServiceItem['category']})}
                   >
-                    <SelectTrigger id="newCategory" className={textAlignClass}>
+                    <SelectTrigger id="newCategory" className={textAlignClass} dir={directionClass}>
                       <SelectValue placeholder={t('selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -282,6 +286,7 @@ export const ServiceManager: React.FC = () => {
                         value={editingService.name}
                         onChange={(e) => setEditingService({...editingService, name: e.target.value})}
                         className={textAlignClass}
+                        dir={directionClass}
                       />
                     </div>
                     
@@ -292,6 +297,7 @@ export const ServiceManager: React.FC = () => {
                         value={editingService.description}
                         onChange={(e) => setEditingService({...editingService, description: e.target.value})}
                         className={textAlignClass}
+                        dir={directionClass}
                       />
                     </div>
                     
@@ -306,6 +312,7 @@ export const ServiceManager: React.FC = () => {
                           value={editingService.price}
                           onChange={(e) => setEditingService({...editingService, price: parseFloat(e.target.value) || 0})}
                           className={textAlignClass}
+                          dir="ltr"
                         />
                       </div>
                       
@@ -315,7 +322,7 @@ export const ServiceManager: React.FC = () => {
                           value={editingService.category}
                           onValueChange={(value) => setEditingService({...editingService, category: value as ServiceItem['category']})}
                         >
-                          <SelectTrigger id={`category-${service.id}`} className={textAlignClass}>
+                          <SelectTrigger id={`category-${service.id}`} className={textAlignClass} dir={directionClass}>
                             <SelectValue placeholder={t('selectCategory')} />
                           </SelectTrigger>
                           <SelectContent>
@@ -366,7 +373,7 @@ export const ServiceManager: React.FC = () => {
                     </div>
                     
                     {service.description && (
-                      <p className="mt-2 text-sm text-muted-foreground">
+                      <p className={`mt-2 text-sm text-muted-foreground ${textAlignClass}`} dir={directionClass}>
                         {service.description}
                       </p>
                     )}

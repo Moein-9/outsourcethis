@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { usePatientStore } from "@/store/patientStore";
 import { Patient } from "@/store/patientStore";
@@ -103,10 +102,11 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
   
   // Calculation helpers
   const calculateTotal = () => {
-    // Handle eye exam flat price
+    // Handle eye exam with service price
     if (getValues<string>('invoiceType') === 'exam') {
+      const servicePrice = getValues<number>('servicePrice') || 0;
       const discount = getValues<number>('discount') || 0;
-      return Math.max(0, 3 - discount); // Eye exam costs 3 KD
+      return Math.max(0, servicePrice - discount);
     }
     
     const lensPrice = getValues<number>('lensPrice') || 0;

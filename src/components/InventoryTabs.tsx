@@ -11,10 +11,11 @@ import { Glasses, Contact, Layers, Paintbrush, Ruler, Wrench } from "lucide-reac
 import { useLanguageStore } from "@/store/languageStore";
 
 export const InventoryTabs: React.FC = () => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
+  const directionClass = language === 'ar' ? 'rtl' : 'ltr';
 
   return (
-    <Tabs defaultValue="frames" className="w-full">
+    <Tabs defaultValue="frames" className="w-full" dir={directionClass}>
       <TabsList className="mb-6 w-full justify-start overflow-x-auto bg-gradient-to-r from-blue-50 to-purple-50 p-1.5 rounded-lg border border-gray-200 shadow-sm">
         <TabsTrigger 
           value="frames" 
@@ -62,7 +63,7 @@ export const InventoryTabs: React.FC = () => {
       
       <TabsContent value="frames" className="mt-0">
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-bold mb-4 text-blue-800 flex items-center gap-2">
+          <h3 className={`text-lg font-bold mb-4 text-blue-800 flex items-center gap-2 ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
             <Glasses className="w-5 h-5" />
             {t('frameManagement')}
           </h3>
@@ -72,7 +73,7 @@ export const InventoryTabs: React.FC = () => {
       
       <TabsContent value="contactLenses" className="mt-0">
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-bold mb-4 text-amber-800 flex items-center gap-2">
+          <h3 className={`text-lg font-bold mb-4 text-amber-800 flex items-center gap-2 ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
             <Contact className="w-5 h-5" />
             {t('contactLensManagement')}
           </h3>
@@ -82,7 +83,7 @@ export const InventoryTabs: React.FC = () => {
       
       <TabsContent value="lensTypes" className="mt-0">
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-bold mb-4 text-purple-800 flex items-center gap-2">
+          <h3 className={`text-lg font-bold mb-4 text-purple-800 flex items-center gap-2 ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
             <Layers className="w-5 h-5" />
             {t('lensTypes')}
           </h3>
@@ -92,7 +93,7 @@ export const InventoryTabs: React.FC = () => {
       
       <TabsContent value="lensCoatings" className="mt-0">
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-bold mb-4 text-teal-800 flex items-center gap-2">
+          <h3 className={`text-lg font-bold mb-4 text-teal-800 flex items-center gap-2 ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
             <Paintbrush className="w-5 h-5" />
             {t('lensCoatings')}
           </h3>
@@ -102,7 +103,7 @@ export const InventoryTabs: React.FC = () => {
       
       <TabsContent value="lensThicknesses" className="mt-0">
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-bold mb-4 text-green-800 flex items-center gap-2">
+          <h3 className={`text-lg font-bold mb-4 text-green-800 flex items-center gap-2 ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
             <Ruler className="w-5 h-5" />
             {t('lensThicknesses')}
           </h3>
@@ -112,7 +113,7 @@ export const InventoryTabs: React.FC = () => {
       
       <TabsContent value="services" className="mt-0">
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-bold mb-4 text-indigo-800 flex items-center gap-2">
+          <h3 className={`text-lg font-bold mb-4 text-indigo-800 flex items-center gap-2 ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
             <Wrench className="w-5 h-5" />
             {t('serviceManagement')}
           </h3>
