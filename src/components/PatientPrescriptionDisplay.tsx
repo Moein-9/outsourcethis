@@ -68,16 +68,16 @@ export const PatientPrescriptionDisplay: React.FC<PatientPrescriptionDisplayProp
           <TabsList className="w-full grid grid-cols-2 rounded-none bg-gradient-to-r from-indigo-50 to-purple-50 p-0 h-10">
             <TabsTrigger 
               value="glasses" 
-              className="rounded-none h-full data-[state=active]:bg-indigo-100 data-[state=active]:text-indigo-800 data-[state=inactive]:text-indigo-600 data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 transition-all flex items-center gap-1.5"
+              className="rounded-none h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=inactive]:text-indigo-600 data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 transition-all flex items-center gap-1.5"
             >
               <Glasses className="h-4 w-4" />
               {language === 'ar' ? "وصفة النظارات" : "Glasses Prescription"}
             </TabsTrigger>
             <TabsTrigger 
               value="contacts" 
-              className="rounded-none h-full data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=inactive]:text-green-600 data-[state=active]:border-b-2 data-[state=active]:border-green-600 transition-all flex items-center gap-1.5"
+              className="rounded-none h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-teal-500 data-[state=active]:text-white data-[state=inactive]:text-green-600 data-[state=active]:border-b-2 data-[state=active]:border-green-600 transition-all flex items-center gap-1.5"
             >
-              <Eye className="h-4 w-4" />
+              <Contact className="h-4 w-4" />
               {language === 'ar' ? "وصفة العدسات اللاصقة" : "Contact Lens Prescription"}
             </TabsTrigger>
           </TabsList>

@@ -20,42 +20,42 @@ export const InventoryTabs: React.FC = () => {
       <TabsList className="mb-6 w-full justify-start overflow-x-auto bg-gradient-to-r from-blue-50 to-purple-50 p-1.5 rounded-lg border border-gray-200 shadow-sm">
         <TabsTrigger 
           value="frames" 
-          className="data-[state=active]:bg-blue-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
+          className="data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Glasses className="w-4 h-4" />
           <span>{t('frames')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="contactLenses" 
-          className="data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
+          className="data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Contact className="w-4 h-4" />
           <span>{t('contactLenses')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="lensTypes" 
-          className="data-[state=active]:bg-purple-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
+          className="data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Layers className="w-4 h-4" />
           <span>{t('lensTypes')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="lensCoatings" 
-          className="data-[state=active]:bg-teal-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
+          className="data-[state=active]:from-teal-500 data-[state=active]:to-teal-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Paintbrush className="w-4 h-4" />
           <span>{t('lensCoatings')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="lensThicknesses" 
-          className="data-[state=active]:bg-green-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
+          className="data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Ruler className="w-4 h-4" />
           <span>{t('lensThicknesses')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="services" 
-          className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
+          className="data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Wrench className="w-4 h-4" />
           <span>{t('services')}</span>
