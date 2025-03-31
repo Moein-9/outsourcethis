@@ -23,6 +23,17 @@ interface LensSelectorProps {
     axis?: { right: string; left: string };
     add?: { right: string; left: string };
     pd?: { right: string; left: string };
+    // Support for direct rx format from store
+    sphereOD?: string;
+    sphereOS?: string;
+    cylOD?: string;
+    cylOS?: string;
+    axisOD?: string;
+    axisOS?: string;
+    addOD?: string;
+    addOS?: string;
+    pdRight?: string;
+    pdLeft?: string;
   };
 }
 
@@ -46,18 +57,26 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(initialThickness);
   const [activeCategory, setActiveCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
   
-  // Check if ADD values are present in the prescription
+  // Enhanced check for ADD values that handles both object formats
   const hasAddValues = React.useMemo(() => {
-    if (!rx || !rx.add) return false;
-    return (rx.add.right && rx.add.right !== '0' && rx.add.right !== '0.00') || 
-           (rx.add.left && rx.add.left !== '0' && rx.add.left !== '0.00');
+    if (!rx) return false;
+    
+    // Check for nested 'add' object format
+    if (rx.add) {
+      return (rx.add.right && rx.add.right !== '0' && rx.add.right !== '0.00') || 
+             (rx.add.left && rx.add.left !== '0' && rx.add.left !== '0.00');
+    }
+    
+    // Check for flat format (addOD, addOS)
+    return (rx.addOD && rx.addOD !== '0' && rx.addOD !== '0.00') || 
+           (rx.addOS && rx.addOS !== '0' && rx.addOS !== '0.00');
   }, [rx]);
 
   // Log rx and ADD values for debugging
   console.log('RX passed to LensSelector:', rx);
   console.log('Has ADD values:', hasAddValues);
-  console.log('ADD right:', rx?.add?.right);
-  console.log('ADD left:', rx?.add?.left);
+  console.log('ADD values check - addOD:', rx?.addOD);
+  console.log('ADD values check - addOS:', rx?.addOS);
   
   // Filter lens types based on ADD values
   const filteredLensTypes = React.useMemo(() => {
