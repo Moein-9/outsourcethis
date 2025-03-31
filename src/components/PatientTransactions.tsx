@@ -104,7 +104,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     setIsDeleteDialogOpen(true);
   };
   
-  const confirmDeleteWorkOrder = async () => {
+  const confirmDeleteWorkOrder = () => {
     if (!workOrderToDelete) return;
     
     try {
@@ -131,36 +131,8 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
         );
       }
       
-      // Manually update local state to reflect changes immediately
-      if (workOrderToDelete) {
-        // Remove from active work orders and add to archived
-        setLocalWorkOrders(prev => prev.filter(wo => wo.id !== workOrderToDelete.id));
-        
-        const updatedWorkOrder = {...workOrderToDelete, isArchived: true, archivedAt: new Date().toISOString()};
-        setArchivedWorkOrders(prev => [...prev, updatedWorkOrder]);
-        
-        // If there's a related invoice, update that too
-        if (relatedInvoice) {
-          setLocalInvoices(prev => prev.filter(inv => inv.invoiceId !== relatedInvoice.invoiceId));
-          
-          const updatedInvoice = {
-            ...relatedInvoice, 
-            isArchived: true, 
-            archivedAt: new Date().toISOString(),
-            remaining: 0
-          };
-          
-          setArchivedInvoices(prev => [...prev, updatedInvoice]);
-        }
-      }
-      
-      // Trigger refresh to update UI anyway for safety
+      // Trigger refresh to update UI
       setRefreshTrigger(prev => prev + 1);
-      
-      // Close the dialog
-      setIsDeleteDialogOpen(false);
-      setWorkOrderToDelete(null);
-      
     } catch (error) {
       console.error("Error deleting work order:", error);
       toast.error(
