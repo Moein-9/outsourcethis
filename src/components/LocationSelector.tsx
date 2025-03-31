@@ -1,104 +1,107 @@
 
 import React from 'react';
-import { useStoreLocation, LocationId } from '@/store/storeLocationStore';
-import { useLanguageStore } from '@/store/languageStore';
-import { Button } from '@/components/ui/button';
-import { Check, MapPin } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Check, MapPin } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useStoreLocation, LocationId, storeLocations } from "@/store/storeLocationStore";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface LocationSelectorProps {
-  mini?: boolean;
   onSelect?: (locationId: string) => void;
   className?: string;
+  mini?: boolean;
 }
 
 export const LocationSelector: React.FC<LocationSelectorProps> = ({
-  mini = false,
   onSelect,
-  className = ''
+  className = "",
+  mini = true,
 }) => {
-  const { selectedLocation, setSelectedLocation, locations } = useStoreLocation();
+  const { selectedLocation, setSelectedLocation } = useStoreLocation();
   const { language, t } = useLanguageStore();
-  const isRtl = language === 'ar';
-
-  const handleLocationSelect = (locationId: string) => {
-    setSelectedLocation(locationId as LocationId);
+  
+  // Use storeLocations directly instead of locations property from context
+  const locations = storeLocations;
+  
+  const handleLocationSelect = (locationId: LocationId) => {
+    setSelectedLocation(locationId);
     if (onSelect) {
       onSelect(locationId);
     }
   };
-
-  const currentLocation = locations[selectedLocation];
-
+  
+  // Mini version (just a button with the location name)
   if (mini) {
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className={`gap-1 ${className}`}>
-            <MapPin className="h-3 w-3" />
-            <span className="max-w-24 truncate text-xs">
-              {isRtl ? currentLocation.name.ar : currentLocation.name.en}
-            </span>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" className={`flex items-center gap-1 ${className}`}>
+            <MapPin className="h-4 w-4" />
+            {language === 'ar' ? 
+              locations[selectedLocation].name.ar : 
+              locations[selectedLocation].name.en
+            }
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align={isRtl ? "end" : "start"}>
-          {Object.values(locations).map((location) => (
-            <DropdownMenuItem
-              key={location.id}
-              className="flex justify-between"
-              onClick={() => handleLocationSelect(location.id)}
-            >
-              <span>{isRtl ? location.name.ar : location.name.en}</span>
-              {selectedLocation === location.id && <Check className="h-4 w-4" />}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverTrigger>
+        <PopoverContent className="w-[240px] p-2">
+          <div className="space-y-2">
+            {Object.entries(locations).map(([id, location]) => (
+              <Button 
+                key={id}
+                variant={id === selectedLocation ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => handleLocationSelect(id as LocationId)}
+              >
+                <div className="flex items-center">
+                  {id === selectedLocation && <Check className="mr-2 h-4 w-4" />}
+                  {language === 'ar' ? location.name.ar : location.name.en}
+                </div>
+              </Button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
     );
   }
-
+  
+  // Full version (location cards with address and phone)
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className={`justify-start gap-2 ${className}`}>
-          <MapPin className="h-4 w-4" />
-          <div className="flex flex-col items-start text-left">
-            <span className="font-medium">
-              {isRtl ? currentLocation.name.ar : currentLocation.name.en}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {t('changeLocation')}
-            </span>
-          </div>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align={isRtl ? "end" : "start"} className="w-56">
-        {Object.values(locations).map((location) => (
-          <DropdownMenuItem
-            key={location.id}
-            className="flex justify-between py-2"
-            onClick={() => handleLocationSelect(location.id)}
+    <div className={`space-y-3 ${className}`}>
+      <h3 className="font-medium text-center">{t('changeLocation')}</h3>
+      <div className="grid grid-cols-1 gap-3">
+        {Object.entries(locations).map(([id, location]) => (
+          <div 
+            key={id}
+            className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+              id === selectedLocation ? 'bg-primary/10 border-primary/50' : 'hover:bg-muted'
+            }`}
+            onClick={() => handleLocationSelect(id as LocationId)}
           >
-            <div className="flex flex-col">
-              <span className="font-medium">
-                {isRtl ? location.name.ar : location.name.en}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {isRtl ? location.address.ar : location.address.en}
-              </span>
-              <span className="text-xs text-muted-foreground">
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-medium">
+                  {language === 'ar' ? location.name.ar : location.name.en}
+                </h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {language === 'ar' ? location.address.ar : location.address.en}
+                </p>
+              </div>
+              <div className="text-sm text-muted-foreground">
                 {t('phone')}: {location.phone}
-              </span>
+              </div>
             </div>
-            {selectedLocation === location.id && <Check className="h-4 w-4" />}
-          </DropdownMenuItem>
+            {id === selectedLocation && (
+              <div className="text-xs text-primary mt-2 text-right">
+                {t('currentLocation')}
+              </div>
+            )}
+          </div>
         ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </div>
+    </div>
   );
 };

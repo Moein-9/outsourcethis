@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { ThemeProvider } from "./components/ThemeProvider";
-import { LanguageProvider } from "./store/languageStore";
+import { useLanguageStore } from "./store/languageStore"; // Import useLanguageStore instead
 import { StoreLocationProvider } from "@/store/storeLocationStore";
 
 // Import your page components
@@ -27,7 +27,18 @@ import ReportsPage from "./pages/ReportsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { AuthProvider } from "@/store/authStore";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { InvoiceProvider } from "./store/invoiceStore";
+import { useInvoiceStore } from "./store/invoiceStore"; // Import useInvoiceStore instead
+
+// Create wrapper components to provide language and invoice context
+const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+  // This is a simple wrapper using the existing useLanguageStore
+  return <>{children}</>;
+};
+
+const InvoiceProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+  // This is a simple wrapper using the existing useInvoiceStore
+  return <>{children}</>;
+};
 
 function App() {
   return (

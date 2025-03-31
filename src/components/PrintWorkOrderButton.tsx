@@ -5,11 +5,46 @@ import { Printer } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { useStoreLocation, LocationId } from "@/store/storeLocationStore";
-import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
+import { useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 
+// Modified Invoice type with locationId property
+interface PrintInvoice {
+  invoiceId: string;
+  patientId?: string;
+  lensType?: string;
+  lensPrice?: number;
+  frameBrand?: string;
+  frameModel?: string;
+  frameColor?: string;
+  frameSize?: string;
+  framePrice?: number;
+  coatingType?: string;
+  coatingPrice?: number;
+  subtotal: number;
+  discount?: number;
+  total: number;
+  deposit?: number;
+  remaining: number;
+  isPaid: boolean;
+  paymentMethod?: string;
+  approvalNumber?: string;
+  createdAt: string;
+  workOrderId?: string;
+  locationId?: LocationId;
+  payments: Payment[];
+}
+
+interface Payment {
+  id: string;
+  amount: number;
+  method: string;
+  date: string;
+  approvalNumber?: string;
+}
+
 interface PrintWorkOrderButtonProps {
-  invoice: Invoice;
+  invoice: PrintInvoice;
   patientName?: string;
   patientPhone?: string;
   rx?: any;
@@ -73,12 +108,12 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
         
         // Save the invoice to get an ID and link to work order
-        // Create a copy without locationId first
-        const { locationId, ...invoiceData } = invoice;
+        // Create a copy without locationId first to avoid type errors
+        const { locationId, ...invoiceWithoutLocation } = invoice;
         
-        // Then add locationId as a separate property
+        // Then add locationId as a separate property in the resulting object
         const invoiceId = addInvoice({
-          ...invoiceData,
+          ...invoiceWithoutLocation,
           workOrderId: workOrderId,
           locationId: selectedLocation
         });
@@ -119,7 +154,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     }
   };
   
-  const showPrintSelector = (invoiceToUse: Invoice) => {
+  const showPrintSelector = (invoiceToUse: PrintInvoice) => {
     // Create the print selector with proper styling for printing
     const selectorContainer = document.createElement('div');
     selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars
