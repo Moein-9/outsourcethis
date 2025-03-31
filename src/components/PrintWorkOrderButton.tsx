@@ -8,8 +8,13 @@ import { useStoreLocation } from "@/store/storeLocationStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 
+// Update the Invoice type to include locationId
+interface ExtendedInvoice extends Invoice {
+  locationId?: string;
+}
+
 interface PrintWorkOrderButtonProps {
-  invoice: Invoice;
+  invoice: ExtendedInvoice;
   patientName?: string;
   patientPhone?: string;
   rx?: any;
@@ -73,26 +78,14 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
         
         // Save the invoice to get an ID and link to work order
+        // Create a copy without locationId first
+        const { locationId, ...invoiceData } = invoice;
+        
+        // Then add locationId as a separate property
         const invoiceId = addInvoice({
-          patientId: invoice.patientId,
-          patientName: invoice.patientName,
-          patientPhone: invoice.patientPhone,
-          lensType: invoice.lensType,
-          lensPrice: invoice.lensPrice,
-          coating: invoice.coating,
-          coatingPrice: invoice.coatingPrice,
-          frameBrand: invoice.frameBrand,
-          frameModel: invoice.frameModel,
-          frameColor: invoice.frameColor,
-          frameSize: invoice.frameSize,
-          framePrice: invoice.framePrice,
-          discount: invoice.discount,
-          deposit: invoice.deposit,
-          total: invoice.total,
-          paymentMethod: invoice.paymentMethod,
-          authNumber: invoice.authNumber,
+          ...invoiceData,
           workOrderId: workOrderId,
-          locationId: selectedLocation // Add location ID to invoice
+          locationId: selectedLocation
         });
         
         // Update the invoice with the new IDs
@@ -131,7 +124,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     }
   };
   
-  const showPrintSelector = (invoiceToUse: Invoice) => {
+  const showPrintSelector = (invoiceToUse: ExtendedInvoice) => {
     // Create the print selector with proper styling for printing
     const selectorContainer = document.createElement('div');
     selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars

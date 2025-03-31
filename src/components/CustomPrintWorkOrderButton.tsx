@@ -14,6 +14,10 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
+import { storeLocations } from '@/assets/logo';
+
+// Define the location ID type
+type LocationId = keyof typeof storeLocations;
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -38,7 +42,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   const { selectedLocation } = useStoreLocation();
   const [open, setOpen] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [printLocation, setPrintLocation] = useState(selectedLocation);
+  const [printLocation, setPrintLocation] = useState<LocationId>(selectedLocation);
   
   const handlePrint = () => {
     if (isPrinting) return; // Prevent multiple calls
@@ -50,13 +54,15 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient, printLocation);
+      // Updated to use only 3 parameters since CustomPrintService.printWorkOrder expects only 3
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
       setTimeout(() => setIsPrinting(false), 1000); // Reset printing state after a delay
     }, 300);
   };
   
   const handleLocationSelect = (locationId: string) => {
-    setPrintLocation(locationId);
+    // Type assertion to ensure locationId is treated as LocationId
+    setPrintLocation(locationId as LocationId);
   };
   
   // Create a default button if no children are provided or if children is not a valid element
