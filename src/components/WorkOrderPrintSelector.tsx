@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { PrinterIcon, Newspaper, FileText, Eye, Glasses } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "sonner";
 import { PrintService } from "@/utils/PrintService";
-import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
+import { printWorkOrderReceipt, WorkOrderReceiptPrintProps } from "./WorkOrderReceiptPrint";
 
 interface WorkOrderPrintSelectorProps {
   invoice: Invoice;

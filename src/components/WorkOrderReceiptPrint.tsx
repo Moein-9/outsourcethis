@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -12,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { CheckCircle2 } from "lucide-react";
 
 interface WorkOrderReceiptPrintProps {
-  invoice: Invoice;
+  invoice: any;
   patientName?: string;
   patientPhone?: string;
   rx?: any;
@@ -27,7 +26,7 @@ interface WorkOrderReceiptPrintProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
-  isEyeExam?: boolean;
+  prescriptionType?: 'glasses' | 'contacts';
 }
 
 export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
@@ -478,7 +477,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   frame,
   contactLenses,
   contactLensRx,
-  isEyeExam,
+  prescriptionType,
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
@@ -913,7 +912,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       </div>
       
       <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", marginTop: "10px", textAlign: "center" }}>
-        <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "2px" }}>
+        <div style={{ fontSize: "10px", fontWeight: "bold", margin-bottom: "2px" }}>
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
         </div>
         <div style={{ fontSize: "7px", color: "#666" }}>

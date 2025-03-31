@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -16,7 +17,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { PatientNote, RxData, usePatientStore, ContactLensRx } from "@/store/patientStore";
+import { PatientNote, RxData, usePatientStore, ContactLensRx, RxHistoryItem, ContactLensRxHistoryItem } from "@/store/patientStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format, parseISO } from "date-fns";
 import { ar } from "date-fns/locale";
@@ -48,9 +49,9 @@ interface PatientRxManagerProps {
   patientName: string;
   patientPhone?: string;
   currentRx: RxData;
-  rxHistory?: RxData[];
+  rxHistory?: RxHistoryItem[];
   contactLensRx?: ContactLensRx;
-  contactLensRxHistory?: ContactLensRx[];
+  contactLensRxHistory?: ContactLensRxHistoryItem[];
   notes?: string;
   patientNotes?: PatientNote[];
   onRxPrintRequest: (language?: 'en' | 'ar', type?: 'glasses' | 'contacts') => void;
@@ -89,7 +90,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   
   const [localCurrentRx, setLocalCurrentRx] = useState(currentRx);
-  const [localRxHistory, setLocalRxHistory] = useState(rxHistory);
+  const [localRxHistory, setLocalRxHistory] = useState<RxHistoryItem[]>(rxHistory);
   const [localPatientNotes, setLocalPatientNotes] = useState(patientNotes);
   const [newNote, setNewNote] = useState("");
   
@@ -149,7 +150,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     updatePatientRx(patientId, timestampedNewRx);
     
     setLocalRxHistory(prev => [
-      { ...localCurrentRx, createdAt: localCurrentRx.createdAt || new Date().toISOString() },
+      { ...localCurrentRx, createdAt: localCurrentRx.createdAt || new Date().toISOString() } as RxHistoryItem,
       ...prev
     ]);
     
