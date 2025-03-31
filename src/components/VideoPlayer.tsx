@@ -1,7 +1,7 @@
 
 import React from "react"
 import { useLanguageStore } from "@/store/languageStore"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, PlayCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TutorialChapter } from "./TutorialSection"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -47,6 +47,9 @@ export function VideoPlayer({ chapter, onBack }: VideoPlayerProps) {
     )
   }
   
+  // Create YouTube thumbnail URL
+  const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+  
   return (
     <div className="flex flex-col space-y-4">
       <Button onClick={onBack} variant="ghost" className={`self-start flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
@@ -54,14 +57,14 @@ export function VideoPlayer({ chapter, onBack }: VideoPlayerProps) {
         {isArabic ? 'العودة إلى الفصول' : 'Back to chapters'}
       </Button>
       
-      <div className="aspect-video w-full">
+      <div className="aspect-video w-full relative group">
         <iframe
           src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
           title={isArabic && chapter.titleAr ? chapter.titleAr : chapter.title}
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
-          className="w-full h-full"
+          className="w-full h-full rounded-lg shadow-md"
         ></iframe>
       </div>
       

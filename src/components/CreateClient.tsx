@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore, ContactLensRx } from "@/store/patientStore";
 import { toast } from "@/components/ui/use-toast";
@@ -40,7 +39,6 @@ export const CreateClient: React.FC = () => {
   const [rxDate, setRxDate] = useState<Date | undefined>(new Date());
   const [notes, setNotes] = useState("");
   
-  // Rx states
   const [sphOD, setSphOD] = useState("");
   const [cylOD, setCylOD] = useState("");
   const [axisOD, setAxisOD] = useState("");
@@ -52,39 +50,32 @@ export const CreateClient: React.FC = () => {
   const [pdRight, setPdRight] = useState("");
   const [pdLeft, setPdLeft] = useState("");
   
-  // Contact lens RX state
   const [contactLensRx, setContactLensRx] = useState<ContactLensRx>({
     rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" },
     leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" }
   });
   
-  // Add validation states for glasses prescription
   const [validationErrors, setValidationErrors] = useState({
     rightEye: { cylinderAxisError: false },
     leftEye: { cylinderAxisError: false }
   });
   
-  // Print RX dialog state
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [savedPatient, setSavedPatient] = useState<any>(null);
+  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   
-  // Direction class based on language
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
 
-  // Check for validation errors
   const hasValidationErrors = validationErrors.rightEye.cylinderAxisError || 
                               validationErrors.leftEye.cylinderAxisError;
   
-  // Validate cylinder/axis relationship on component mount and when cylinder/axis values change
   useEffect(() => {
     validateCylinderAxis('rightEye', cylOD, axisOD);
     validateCylinderAxis('leftEye', cylOS, axisOS);
   }, [cylOD, axisOD, cylOS, axisOS]);
   
-  // Validate that if cylinder has a value, axis must also have a value
   const validateCylinderAxis = (eye: 'rightEye' | 'leftEye', cylinder: string, axis: string) => {
-    // If cylinder has a non-empty value, axis must also have a non-empty value
     const hasCylinder = cylinder !== "";
     const hasAxis = axis !== "";
     
@@ -97,7 +88,6 @@ export const CreateClient: React.FC = () => {
     }));
   };
   
-  // Generate options for select elements
   const generateSphOptions = () => {
     const options = [];
     for (let i = 10; i >= -10; i -= 0.25) {
@@ -161,7 +151,6 @@ export const CreateClient: React.FC = () => {
     return options;
   };
   
-  // Generate day options
   const generateDayOptions = () => {
     const options = [];
     for (let i = 1; i <= 31; i++) {
@@ -174,7 +163,6 @@ export const CreateClient: React.FC = () => {
     return options;
   };
   
-  // Generate month options
   const generateMonthOptions = () => {
     const months = [
       { value: 1, text: t("january") },
@@ -198,7 +186,6 @@ export const CreateClient: React.FC = () => {
     ));
   };
   
-  // Generate year options
   const generateYearOptions = () => {
     const options = [];
     const currentYear = new Date().getFullYear();
@@ -224,7 +211,6 @@ export const CreateClient: React.FC = () => {
       return;
     }
     
-    // Check for validation errors before saving
     if (activeTab === "glasses" && hasValidationErrors) {
       toast({
         title: t("error"),
@@ -234,7 +220,6 @@ export const CreateClient: React.FC = () => {
       return;
     }
     
-    // Format DOB if available
     let dob = "";
     if (!noDob && dobDay && dobMonth && dobYear) {
       dob = `${dobDay}/${dobMonth}/${dobYear}`;
@@ -264,7 +249,6 @@ export const CreateClient: React.FC = () => {
         }
       };
     } else {
-      // Add contact lens patient
       patientData = {
         name,
         phone,
@@ -290,7 +274,6 @@ export const CreateClient: React.FC = () => {
       };
     }
     
-    // Save patient data and store for printing option
     addPatient(patientData);
     setSavedPatient(patientData);
     
@@ -299,10 +282,8 @@ export const CreateClient: React.FC = () => {
       description: t("successMessage")
     });
     
-    // Show the print dialog
     setShowPrintDialog(true);
     
-    // Reset form
     resetForm();
   };
 
@@ -338,19 +319,28 @@ export const CreateClient: React.FC = () => {
   const handlePrintRx = () => {
     if (savedPatient) {
       if (activeTab === "glasses") {
-        printRxReceipt({
-          patientName: savedPatient.name,
-          patientPhone: savedPatient.phone,
-          rx: savedPatient.rx,
-          forcedLanguage: language as 'en' | 'ar'
-        });
+        setShowPrintDialog(false);
+        setShowLanguageDialog(true);
+      } else {
+        setShowPrintDialog(false);
       }
-      setShowPrintDialog(false);
     }
   };
-  
+
+  const printRxWithLanguage = (printLanguage: 'en' | 'ar') => {
+    if (savedPatient) {
+      printRxReceipt({
+        patientName: savedPatient.name,
+        patientPhone: savedPatient.phone,
+        rx: savedPatient.rx,
+        forcedLanguage: printLanguage
+      });
+    }
+    setShowLanguageDialog(false);
+  };
+
   return (
-    <div className={`py-4 ${dirClass}`}>
+    <div className={`space-y-6 ${dirClass}`}>
       <h2 className={`text-2xl font-bold mb-4 ${textAlignClass}`}>{t("createClientTitle")}</h2>
       
       <Tabs defaultValue="glasses" value={activeTab} onValueChange={(value) => setActiveTab(value as "glasses" | "contactLenses")}>
@@ -370,7 +360,6 @@ export const CreateClient: React.FC = () => {
         </TabsList>
       
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left: Patient Information */}
           <div className="bg-card rounded-md p-4 border">
             <div className={`text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary ${textAlignClass}`}>
               {t("personalInfo")}
@@ -469,7 +458,6 @@ export const CreateClient: React.FC = () => {
             </div>
           </div>
           
-          {/* Right: Prescription Content */}
           <div>
             <TabsContent value="glasses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
@@ -685,7 +673,6 @@ export const CreateClient: React.FC = () => {
         {t("saveAndContinue")}
       </Button>
 
-      {/* Print RX Confirmation Dialog */}
       <AlertDialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
         <AlertDialogContent className={dirClass}>
           <AlertDialogHeader>
@@ -705,6 +692,40 @@ export const CreateClient: React.FC = () => {
             <AlertDialogAction onClick={handlePrintRx}>
               {language === 'ar' ? 'نعم، اطبع الآن' : 'Yes, Print Now'}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
+        <AlertDialogContent className={dirClass}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className={textAlignClass}>
+              {language === 'ar' ? 'اختر لغة الطباعة' : 'Select Print Language'}
+            </AlertDialogTitle>
+            <AlertDialogDescription className={textAlignClass}>
+              {language === 'ar' 
+                ? 'اختر اللغة التي ترغب في طباعة الوصفة الطبية بها'
+                : 'Choose the language you want to print the prescription in'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-center gap-4 py-4">
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => printRxWithLanguage('en')}
+            >
+              English
+            </Button>
+            <Button 
+              className="bg-green-600 hover:bg-green-700"
+              onClick={() => printRxWithLanguage('ar')}
+            >
+              العربية
+            </Button>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel className={language === 'ar' ? 'mr-auto' : 'ml-auto'}>
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
