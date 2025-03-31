@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
-import { usePatientStore, Patient, RxData } from "@/store/patientStore";
+import { usePatientStore, Patient, RxData, ContactLensRx } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { printRxReceipt } from "./RxReceiptPrint";
@@ -19,7 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Eye } from "lucide-react";
 import { AddRxDialog } from "./AddRxDialog";
 
 interface PatientWithMeta extends Patient {
@@ -29,7 +29,7 @@ interface PatientWithMeta extends Patient {
 }
 
 export const PatientSearch: React.FC = () => {
-  const { patients, searchPatients, updatePatientRx } = usePatientStore();
+  const { patients, searchPatients, updatePatientRx, updateContactLensRx } = usePatientStore();
   const { 
     invoices, 
     workOrders, 
@@ -52,6 +52,7 @@ export const PatientSearch: React.FC = () => {
   
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   const [isAddRxDialogOpen, setIsAddRxDialogOpen] = useState(false);
+  const [isAddContactLensRxDialogOpen, setIsAddContactLensRxDialogOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
@@ -127,6 +128,22 @@ export const PatientSearch: React.FC = () => {
       forcedLanguage: langToPrint
     });
   };
+
+  const handleContactLensPrint = (printLanguage?: 'en' | 'ar') => {
+    if (!selectedPatient || !selectedPatient.contactLensRx) return;
+    
+    const langToPrint = printLanguage || useLanguageStore.getState().language;
+    
+    // Note: This would need to be implemented in your RxReceiptPrint component
+    printRxReceipt({
+      patientName: selectedPatient.name,
+      patientPhone: selectedPatient.phone,
+      rx: selectedPatient.rx,
+      contactLensRx: selectedPatient.contactLensRx,
+      printContactLens: true,
+      forcedLanguage: langToPrint
+    });
+  };
   
   const handleLanguageSelection = (selectedLanguage: 'en' | 'ar') => {
     setIsLanguageDialogOpen(false);
@@ -151,6 +168,29 @@ export const PatientSearch: React.FC = () => {
     });
     
     toast.success(language === 'ar' ? "تم إضافة الوصفة الطبية بنجاح" : "Prescription added successfully");
+  };
+
+  const handleSaveContactLensRx = (rxData: ContactLensRx) => {
+    if (!selectedPatient) return;
+    
+    updateContactLensRx(selectedPatient.patientId, rxData);
+    
+    setSelectedPatient(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        contactLensRx: rxData,
+        contactLensRxHistory: [
+          ...(prev.contactLensRxHistory || []),
+          { ...(prev.contactLensRx || {
+            rightEye: { sphere: "", cylinder: "", axis: "", bc: "", dia: "" },
+            leftEye: { sphere: "", cylinder: "", axis: "", bc: "", dia: "" }
+          }), createdAt: new Date().toISOString() }
+        ]
+      };
+    });
+    
+    toast.success(language === 'ar' ? "تم إضافة وصفة العدسات اللاصقة بنجاح" : "Contact lens prescription added successfully");
   };
   
   // Effect to refresh data when refresh trigger changes
@@ -199,20 +239,33 @@ export const PatientSearch: React.FC = () => {
                     <h3 className="text-base font-medium text-indigo-700">
                       {language === 'ar' ? "الوصفة الطبية" : "Prescription"}
                     </h3>
-                    <Button 
-                      onClick={() => setIsAddRxDialogOpen(true)}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                      size="sm"
-                    >
-                      <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
-                      {language === 'ar' ? "إضافة وصفة جديدة" : "Add New RX"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => setIsAddRxDialogOpen(true)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                        size="sm"
+                      >
+                        <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
+                        {language === 'ar' ? "إضافة وصفة نظارات" : "Add Glasses RX"}
+                      </Button>
+                      <Button 
+                        onClick={() => setIsAddContactLensRxDialogOpen(true)}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        size="sm"
+                      >
+                        <Eye className="h-3.5 w-3.5 mr-1.5" />
+                        {language === 'ar' ? "إضافة وصفة عدسات" : "Add Contact Lens RX"}
+                      </Button>
+                    </div>
                   </div>
                   
                   <PatientPrescriptionDisplay 
                     rx={selectedPatient.rx}
                     rxHistory={selectedPatient.rxHistory}
+                    contactLensRx={selectedPatient.contactLensRx}
+                    contactLensRxHistory={selectedPatient.contactLensRxHistory}
                     onPrintPrescription={() => setIsLanguageDialogOpen(true)}
+                    onPrintContactLensPrescription={handleContactLensPrint}
                   />
                   
                   <PatientTransactions 
@@ -261,6 +314,8 @@ export const PatientSearch: React.FC = () => {
           initialRx={selectedPatient.rx}
         />
       )}
+
+      {/* Note: You would need to implement AddContactLensRxDialog component separately */}
     </div>
   );
 };

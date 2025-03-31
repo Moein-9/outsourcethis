@@ -30,7 +30,10 @@ const TabsTrigger = React.forwardRef<
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-3 text-sm font-semibold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden",
       "data-[state=inactive]:bg-transparent data-[state=inactive]:hover:bg-accent/30 data-[state=inactive]:hover:text-accent-foreground",
-      "data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/80 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md",
+      "data-[state=active]:bg-gradient-to-r data-[state=active]:shadow-md",
+      // Default color scheme (indigo/purple) for general tabs
+      "data-[state=active]:from-indigo-500/80 data-[state=active]:to-purple-500 data-[state=active]:text-primary-foreground",
+      // Additional color applied by className if needed for specific tabs (e.g., green for contacts)
       "after:absolute after:content-[''] after:w-0 after:h-[2px] after:bg-accent-foreground after:left-1/2 after:-translate-x-1/2 after:bottom-1 after:transition-all after:duration-300 data-[state=inactive]:hover:after:w-1/2",
       "data-[state=inactive]:hover:scale-105 data-[state=active]:scale-105 transform transition-transform",
       className
