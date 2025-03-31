@@ -3,12 +3,13 @@ import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
 import { CheckCircle2, Receipt, CreditCard, Calendar, Phone, User, UserCircle2, RefreshCcw } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
-import { MoenLogo, storeInfo } from "@/assets/logo";
+import { MoenLogo, storeLocations } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
 
 interface ReceiptInvoiceProps {
   invoice: Invoice;
   isPrintable?: boolean;
+  locationId?: string;
   
   patientName?: string;
   patientPhone?: string;
@@ -41,6 +42,7 @@ interface ReceiptInvoiceProps {
 export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ 
   invoice,
   isPrintable = false,
+  locationId,
   patientName,
   patientPhone,
   invoiceType,
@@ -66,6 +68,10 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const isRtl = language === 'ar';
   const dirClass = isRtl ? 'rtl' : 'ltr';
   
+  const location = locationId 
+    ? storeLocations.find(loc => loc.id === locationId) 
+    : storeLocations[0];
+  
   const name = patientName || invoice.patientName;
   const phone = patientPhone || invoice.patientPhone;
   const lens = lensType || invoice.lensType;
@@ -88,7 +94,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const isContactLens = invoiceType === "contacts" || invoice.invoiceType === "contacts" || contactLensItems.length > 0;
   const isEyeExam = invoiceType === "exam" || invoice.invoiceType === "exam";
   
-  // Get service information for eye exam
   const service = {
     name: serviceName || invoice.serviceName || "",
     id: serviceId || invoice.serviceId || "",
@@ -96,7 +101,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
     price: servicePrice !== undefined ? servicePrice : invoice.servicePrice || 0
   };
   
-  // Check if invoice has been refunded
   const isRefunded = invoice.isRefunded;
   const refundAmount = invoice.refundAmount || 0;
   const refundDate = invoice.refundDate;
@@ -128,9 +132,12 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-14" />
         </div>
-        <h2 className="font-bold text-xl mb-0">{storeInfo.name}</h2>
-        <p className="text-sm font-medium mb-0">{storeInfo.address}</p>
-        <p className="text-sm font-medium">{t("phone")}: {storeInfo.phone}</p>
+        <h2 className="font-bold text-xl mb-0">{isRtl ? location?.nameAr : location?.name}</h2>
+        <p className="text-sm font-medium mb-0">
+          <span className="font-bold">{isRtl ? location?.title.ar : location?.title.en}</span>
+        </p>
+        <p className="text-sm font-medium mb-0">{isRtl ? location?.address.ar : location?.address.en}</p>
+        <p className="text-sm font-medium">{t("phone")}: {location?.phone}</p>
       </div>
 
       <div className="mb-3">
