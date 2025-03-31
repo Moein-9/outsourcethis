@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -341,6 +340,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
               initialLensType={selectedLensType}
               initialCoating={selectedCoating}
               initialThickness={selectedThickness}
+              rx={getValues('rx')}
             />
           </div>
 
