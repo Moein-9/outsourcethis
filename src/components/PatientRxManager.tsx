@@ -70,7 +70,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   contactLensRx,
   contactLensRxHistory = []
 }) => {
-  const { updatePatientRx, getPatientById, addPatientNote, updatePatientContactLensRx } = usePatientStore();
+  const { updatePatientRx, getPatientById, addPatientNote, updateContactLensRx } = usePatientStore();
   const { t, language } = useLanguageStore();
   const [isNewRxOpen, setIsNewRxOpen] = useState(false);
   const [isNewContactLensRxOpen, setIsNewContactLensRxOpen] = useState(false);
@@ -213,7 +213,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
       createdAt: new Date().toISOString()
     };
 
-    updatePatientContactLensRx(patientId, timestampedNewContactLensRx);
+    updateContactLensRx(patientId, timestampedNewContactLensRx);
     
     if (localContactLensRx) {
       setLocalContactLensRxHistory(prev => [
