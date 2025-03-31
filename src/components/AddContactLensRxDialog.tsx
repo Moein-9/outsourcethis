@@ -1,10 +1,9 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ContactLensRx } from "@/store/patientStore";
 import { useLanguageStore } from "@/store/languageStore";
+import { ContactLensForm } from "@/components/ContactLensForm";
 import {
   Dialog,
   DialogContent,
@@ -23,18 +22,18 @@ interface AddContactLensRxDialogProps {
 
 const defaultContactLensRx: ContactLensRx = {
   rightEye: {
-    sphere: "",
-    cylinder: "",
-    axis: "",
-    bc: "",
-    dia: ""
+    sphere: "-",
+    cylinder: "-",
+    axis: "-",
+    bc: "-",
+    dia: "14.2"
   },
   leftEye: {
-    sphere: "",
-    cylinder: "",
-    axis: "",
-    bc: "",
-    dia: ""
+    sphere: "-",
+    cylinder: "-",
+    axis: "-",
+    bc: "-",
+    dia: "14.2"
   }
 };
 
@@ -51,6 +50,10 @@ export const AddContactLensRxDialog: React.FC<AddContactLensRxDialogProps> = ({
     initialRx || defaultContactLensRx
   );
   
+  const [validationErrors, setValidationErrors] = useState({
+    cylinderAxisError: false
+  });
+  
   useEffect(() => {
     if (initialRx) {
       setFormData(initialRx);
@@ -58,88 +61,83 @@ export const AddContactLensRxDialog: React.FC<AddContactLensRxDialogProps> = ({
       setFormData(defaultContactLensRx);
     }
   }, [initialRx, isOpen]);
-  
-  const handleChange = (
-    eye: 'rightEye' | 'leftEye', 
-    field: 'sphere' | 'cylinder' | 'axis' | 'bc' | 'dia', 
-    value: string
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [eye]: {
-        ...prev[eye],
-        [field]: value
-      }
-    }));
+
+  const handleRxChange = (rxData: ContactLensRx) => {
+    setFormData(rxData);
+    
+    // Validate cylinder/axis relationship
+    let hasError = false;
+    
+    if (rxData.rightEye.cylinder !== "-" && rxData.rightEye.axis === "-") {
+      hasError = true;
+    }
+    
+    if (rxData.leftEye.cylinder !== "-" && rxData.leftEye.axis === "-") {
+      hasError = true;
+    }
+    
+    setValidationErrors({
+      cylinderAxisError: hasError
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (validationErrors.cylinderAxisError) {
+      return; // Don't save if validation errors exist
+    }
+    
     onSave(formData);
     onClose();
   };
 
-  const renderInputField = (
-    eye: 'rightEye' | 'leftEye',
-    field: 'sphere' | 'cylinder' | 'axis' | 'bc' | 'dia',
-    label: string,
-    placeholder: string = ""
-  ) => (
-    <div className="mb-2">
-      <Label htmlFor={`${eye}-${field}`}>{label}</Label>
-      <Input
-        id={`${eye}-${field}`}
-        value={formData[eye][field]}
-        onChange={(e) => handleChange(eye, field, e.target.value)}
-        placeholder={placeholder}
-      />
-    </div>
-  );
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md" dir={isRtl ? "rtl" : "ltr"}>
-        <DialogHeader>
-          <DialogTitle className="text-center">
+      <DialogContent 
+        className="max-w-3xl bg-white p-0 overflow-hidden" 
+        dir={isRtl ? "rtl" : "ltr"}
+      >
+        <DialogHeader className="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 text-white">
+          <DialogTitle className="text-xl font-bold">
             {language === 'ar' ? "إضافة وصفة عدسات لاصقة" : "Add Contact Lens Prescription"}
           </DialogTitle>
-          <DialogDescription className="text-center">
+          <DialogDescription className="text-white/80">
             {language === 'ar' 
               ? "أدخل تفاصيل وصفة العدسات اللاصقة للعميل" 
               : "Enter the patient's contact lens prescription details"
             }
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-            <div className="space-y-2">
-              <h3 className="font-medium text-center bg-blue-100 py-1 rounded">
-                {language === 'ar' ? "العين اليمنى (OD)" : "Right Eye (OD)"}
-              </h3>
-              {renderInputField('rightEye', 'sphere', language === 'ar' ? "محيط العدسة" : "Sphere", "0.00")}
-              {renderInputField('rightEye', 'cylinder', language === 'ar' ? "الأسطوانة" : "Cylinder", "0.00")}
-              {renderInputField('rightEye', 'axis', language === 'ar' ? "المحور" : "Axis", "0")}
-              {renderInputField('rightEye', 'bc', language === 'ar' ? "تقوس القاعدة" : "Base Curve", "0.00")}
-              {renderInputField('rightEye', 'dia', language === 'ar' ? "القطر" : "Diameter", "0.00")}
-            </div>
+        
+        <form onSubmit={handleSubmit} className="p-6">
+          <div className="space-y-6">
+            <ContactLensForm 
+              rxData={formData} 
+              onChange={handleRxChange} 
+            />
             
-            <div className="space-y-2">
-              <h3 className="font-medium text-center bg-green-100 py-1 rounded">
-                {language === 'ar' ? "العين اليسرى (OS)" : "Left Eye (OS)"}
-              </h3>
-              {renderInputField('leftEye', 'sphere', language === 'ar' ? "محيط العدسة" : "Sphere", "0.00")}
-              {renderInputField('leftEye', 'cylinder', language === 'ar' ? "الأسطوانة" : "Cylinder", "0.00")}
-              {renderInputField('leftEye', 'axis', language === 'ar' ? "المحور" : "Axis", "0")}
-              {renderInputField('leftEye', 'bc', language === 'ar' ? "تقوس القاعدة" : "Base Curve", "0.00")}
-              {renderInputField('leftEye', 'dia', language === 'ar' ? "القطر" : "Diameter", "0.00")}
-            </div>
+            {validationErrors.cylinderAxisError && (
+              <div className="p-3 mt-2 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
+                <p className="text-red-700 text-sm font-medium">
+                  {language === 'ar' 
+                    ? "إذا تم تحديد قيمة الأسطوانة، يجب تحديد قيمة المحور أيضًا." 
+                    : "If a cylinder value is set, an axis value must also be provided."
+                  }
+                </p>
+              </div>
+            )}
           </div>
           
-          <DialogFooter className="flex flex-row justify-end gap-2">
+          <DialogFooter className="flex flex-row justify-end gap-3 mt-8 border-t pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               {language === 'ar' ? "إلغاء" : "Cancel"}
             </Button>
-            <Button type="submit" className="bg-green-600 hover:bg-green-700">
+            <Button 
+              type="submit" 
+              disabled={validationErrors.cylinderAxisError}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
               {language === 'ar' ? "حفظ" : "Save"}
             </Button>
           </DialogFooter>
