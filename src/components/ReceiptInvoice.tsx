@@ -13,7 +13,7 @@ interface ReceiptInvoiceProps {
   
   patientName?: string;
   patientPhone?: string;
-  invoiceType?: "glasses" | "contacts";
+  invoiceType?: "glasses" | "contacts" | "exam";
   lensType?: string;
   lensPrice?: number;
   coating?: string;
@@ -33,6 +33,10 @@ interface ReceiptInvoiceProps {
   paymentMethod?: string;
   authNumber?: string;
   contactLenses?: ContactLensItem[];
+  serviceName?: string;
+  serviceId?: string;
+  serviceDescription?: string;
+  servicePrice?: number;
 }
 
 export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ 
@@ -53,7 +57,11 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   remaining,
   paymentMethod,
   authNumber,
-  contactLenses
+  contactLenses,
+  serviceName,
+  serviceId,
+  serviceDescription,
+  servicePrice
 }) => {
   const { language, t } = useLanguageStore();
   const isRtl = language === 'ar';
@@ -79,6 +87,15 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const contactLensItems = contactLenses || invoice.contactLensItems || [];
   
   const isContactLens = invoiceType === "contacts" || invoice.invoiceType === "contacts" || contactLensItems.length > 0;
+  const isEyeExam = invoiceType === "exam" || invoice.invoiceType === "exam";
+  
+  // Get service information for eye exam
+  const service = {
+    name: serviceName || invoice.serviceName || "",
+    id: serviceId || invoice.serviceId || "",
+    description: serviceDescription || invoice.serviceDescription || "",
+    price: servicePrice !== undefined ? servicePrice : invoice.servicePrice || 0
+  };
   
   // Check if invoice has been refunded
   const isRefunded = invoice.isRefunded;
@@ -180,7 +197,18 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
         
         <div className="space-y-2 px-2">
-          {isContactLens && contactLensItems.length > 0 ? (
+          {isEyeExam ? (
+            <div className="p-2 border-2 border-gray-300 rounded">
+              <div className="flex justify-between px-2 mb-1">
+                <div className="font-bold text-base">{isRtl ? "فحص العين | Eye Exam" : "Eye Exam | فحص العين"}</div>
+                <span className="font-bold text-base">KWD {service.price.toFixed(3)}</span>
+              </div>
+              <div className="text-sm font-medium text-center">
+                {service.name || t("eyeExam")}
+                {service.description && <span> - {service.description}</span>}
+              </div>
+            </div>
+          ) : isContactLens && contactLensItems.length > 0 ? (
             contactLensItems.map((lens, idx) => (
               <div key={idx} className="p-2 border-2 border-gray-300 rounded">
                 <div className="flex justify-between px-2 mb-1">
