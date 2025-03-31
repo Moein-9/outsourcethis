@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { SalesChart } from "./SalesChart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { PrintService } from "@/utils/PrintService";
@@ -117,6 +118,10 @@ export const DailySalesReport: React.FC = () => {
     reason: language === 'ar' ? "السبب" : "Reason",
     salesTab: language === 'ar' ? "المبيعات" : "Sales",
     refundsTab: language === 'ar' ? "المبالغ المستردة" : "Refunds",
+    refundInfo: language === 'ar' ? "معلومات الاسترداد" : "Refund Info",
+    amount: language === 'ar' ? "المبلغ" : "Amount",
+    method: language === 'ar' ? "الطريقة" : "Method",
+    date: language === 'ar' ? "التاريخ" : "Date",
   };
   
   const toggleInvoiceExpansion = (invoiceId: string) => {

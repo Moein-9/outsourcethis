@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Invoice, WorkOrder, useInvoiceStore } from '@/store/invoiceStore';
@@ -128,7 +129,12 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
   };
   
   const handlePrintRefundReceipt = (invoice: Invoice) => {
-    const refundReceiptHTML = ReactDOMServer.renderToString(<RefundReceiptTemplate invoice={invoice} />);
+    if (!invoice) return;
+    
+    const refundReceiptHTML = ReactDOMServer.renderToString(
+      <RefundReceiptTemplate invoice={invoice} />
+    );
+    
     PrintService.printReport(refundReceiptHTML, `Refund Receipt - ${invoice.invoiceId}`);
   };
   
