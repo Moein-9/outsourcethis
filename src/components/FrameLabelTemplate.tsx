@@ -46,10 +46,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     
     if (!frame) {
       const errorMsg = t('frameNotFound');
-      toast({
-        description: errorMsg,
-        variant: "destructive"
-      });
+      toast.error(errorMsg);
       if (onError) onError(errorMsg);
       return;
     }
@@ -67,17 +64,12 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       PrintService.printHtml(htmlDocument, 'label', () => {
         console.log(`[LabelPrinting] Print process completed for frame ${frameId}`);
         setIsPrinting(false);
-        toast({
-          description: t('labelPrintedSuccessfully')
-        });
+        toast.success(t('labelPrintedSuccessfully'));
       });
     } catch (error) {
       console.error('[LabelPrinting] QR code generation error:', error);
       const errorMsg = t('errorGeneratingQRCode');
-      toast({
-        description: errorMsg,
-        variant: "destructive"
-      });
+      toast.error(errorMsg);
       if (onError) onError(errorMsg);
       setIsPrinting(false);
     }
@@ -86,10 +78,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
   const printMultipleLabels = async (frameIds: string[]) => {
     if (frameIds.length === 0) {
       const errorMsg = t('noFramesSelected');
-      toast({
-        description: errorMsg,
-        variant: "destructive"
-      });
+      toast.error(errorMsg);
       if (onError) onError(errorMsg);
       return;
     }
@@ -98,10 +87,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     
     if (selectedFrames.length === 0) {
       const errorMsg = t('noFramesFound');
-      toast({
-        description: errorMsg,
-        variant: "destructive"
-      });
+      toast.error(errorMsg);
       if (onError) onError(errorMsg);
       return;
     }
@@ -123,17 +109,12 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       PrintService.printHtml(htmlDocument, 'label', () => {
         console.log(`[LabelPrinting] Print process completed for ${selectedFrames.length} frames`);
         setIsPrinting(false);
-        toast({
-          description: t('labelsPrintedSuccessfully')
-        });
+        toast.success(t('labelsPrintedSuccessfully'));
       });
     } catch (error) {
       console.error('[LabelPrinting] QR code generation error:', error);
       const errorMsg = t('errorGeneratingQRCodes');
-      toast({
-        description: errorMsg,
-        variant: "destructive"
-      });
+      toast.error(errorMsg);
       if (onError) onError(errorMsg);
       setIsPrinting(false);
     }
