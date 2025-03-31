@@ -434,7 +434,10 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     </div>
     
     <div class="rx-title">
-      ${isRtl ? (printContactLens ? 'وصفة العدسات اللاصقة' : 'وصفة النظارات الطبية') : (printContactLens ? 'CONTACT LENS PRESCRIPTION' : 'GLASSES PRESCRIPTION')}
+      ${isRtl 
+        ? (printContactLens ? 'وصفة العدسات اللاصقة' : 'وصفة النظارات الطبية') 
+        : (printContactLens ? 'CONTACT LENS PRESCRIPTION' : 'GLASSES PRESCRIPTION')
+      }
     </div>
     
     <div class="patient-info">
@@ -543,9 +546,9 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     </div>
     
     <div class="tips-title">
-      ${isRtl 
-        ? (printContactLens ? 'نصائح للعناية بالعدسات اللاصقة' : 'نصائح للعناية بالنظارات') 
-        : (printContactLens ? 'Contact Lens Care Tips' : 'Glasses Care Tips')
+      ${printContactLens 
+        ? (isRtl ? 'نصائح للعناية بالعدسات اللاصقة' : 'Contact Lens Care Tips') 
+        : (isRtl ? 'نصائح للعناية بالنظارات' : 'Glasses Care Tips')
       }
     </div>
 
