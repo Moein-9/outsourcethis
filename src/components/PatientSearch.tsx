@@ -10,8 +10,6 @@ import { PatientSearchResults } from "./PatientSearchResults";
 import { PatientProfileInfo } from "./PatientProfileInfo";
 import { PatientPrescriptionDisplay } from "./PatientPrescriptionDisplay";
 import { PatientTransactions } from "./PatientTransactions";
-import { EditWorkOrderDialog } from "./EditWorkOrderDialog";
-import { AddRxDialog } from "./AddRxDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { PlusCircle } from "lucide-react";
-import { WorkOrder as InventoryWorkOrder } from "@/types/inventory";
+import { AddRxDialog } from "./AddRxDialog";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
@@ -32,7 +30,14 @@ interface PatientWithMeta extends Patient {
 
 export const PatientSearch: React.FC = () => {
   const { patients, searchPatients, updatePatientRx } = usePatientStore();
-  const { invoices, workOrders, getInvoicesByPatientId, getWorkOrdersByPatientId, updateInvoice, updateWorkOrder } = useInvoiceStore();
+  const { 
+    invoices, 
+    workOrders, 
+    getInvoicesByPatientId, 
+    getWorkOrdersByPatientId,
+    getArchivedInvoicesByPatientId,
+    getArchivedWorkOrdersByPatientId
+  } = useInvoiceStore();
   const { language } = useLanguageStore();
   
   const [searchResults, setSearchResults] = useState<PatientWithMeta[]>([]);
@@ -42,13 +47,11 @@ export const PatientSearch: React.FC = () => {
   
   const [patientInvoices, setPatientInvoices] = useState<Invoice[]>([]);
   const [patientWorkOrders, setPatientWorkOrders] = useState<InvoiceWorkOrder[]>([]);
+  const [archivedInvoices, setArchivedInvoices] = useState<Invoice[]>([]);
+  const [archivedWorkOrders, setArchivedWorkOrders] = useState<InvoiceWorkOrder[]>([]);
   
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
-  const [editWorkOrderDialogOpen, setEditWorkOrderDialogOpen] = useState(false);
-  const [currentWorkOrder, setCurrentWorkOrder] = useState<InventoryWorkOrder | null>(null);
-  
   const [isAddRxDialogOpen, setIsAddRxDialogOpen] = useState(false);
-  const [editTimestamp, setEditTimestamp] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
@@ -92,179 +95,24 @@ export const PatientSearch: React.FC = () => {
     console.log("[PatientSearch] Refreshing patient data for ID:", patientId);
     const patientInvoices = getInvoicesByPatientId(patientId);
     const invoiceWorkOrders = getWorkOrdersByPatientId(patientId);
+    const archivedInvs = getArchivedInvoicesByPatientId(patientId);
+    const archivedWOs = getArchivedWorkOrdersByPatientId(patientId);
     
     console.log("[PatientSearch] Updated invoices:", patientInvoices.length);
     console.log("[PatientSearch] Updated work orders:", invoiceWorkOrders.length);
+    console.log("[PatientSearch] Archived invoices:", archivedInvs.length);
+    console.log("[PatientSearch] Archived work orders:", archivedWOs.length);
     
     setPatientInvoices(patientInvoices);
     setPatientWorkOrders(invoiceWorkOrders);
-  }, [getInvoicesByPatientId, getWorkOrdersByPatientId]);
+    setArchivedInvoices(archivedInvs);
+    setArchivedWorkOrders(archivedWOs);
+  }, [getInvoicesByPatientId, getWorkOrdersByPatientId, getArchivedInvoicesByPatientId, getArchivedWorkOrdersByPatientId]);
   
   const handlePatientSelect = (patient: PatientWithMeta) => {
     setSelectedPatient(patient);
     refreshPatientData(patient.patientId);
     setIsProfileOpen(true);
-  };
-  
-  // Create a custom type for the internal work order that has all the needed properties
-  interface ExtendedWorkOrder extends InvoiceWorkOrder {
-    frameBrand?: string;
-    frameModel?: string;
-    frameColor?: string;
-    frameSize?: string;
-    framePrice?: number;
-    lensPrice?: number;
-    coating?: string;
-    coatingPrice?: number;
-    discount?: number;
-    total?: number;
-    isPaid?: boolean;
-  }
-  
-  const convertToInventoryWorkOrder = (workOrder: InvoiceWorkOrder): InventoryWorkOrder => {
-    // Cast to ExtendedWorkOrder to avoid TypeScript errors
-    const extendedWorkOrder = workOrder as ExtendedWorkOrder;
-    
-    // Create a lensType that is compatible with InventoryWorkOrder
-    let lensTypeValue: string | { name: string; price: number };
-    
-    if (typeof extendedWorkOrder.lensType === 'object' && extendedWorkOrder.lensType !== null) {
-      lensTypeValue = extendedWorkOrder.lensType;
-    } else {
-      lensTypeValue = {
-        name: String(extendedWorkOrder.lensType || ''),
-        price: extendedWorkOrder.lensPrice || 0
-      };
-    }
-    
-    return {
-      id: extendedWorkOrder.id,
-      patientId: extendedWorkOrder.patientId,
-      workOrderId: extendedWorkOrder.id, // Use id as workOrderId
-      invoiceId: extendedWorkOrder.id,
-      createdAt: extendedWorkOrder.createdAt || new Date().toISOString(),
-      frameBrand: extendedWorkOrder.frameBrand || '',
-      frameModel: extendedWorkOrder.frameModel || '',
-      frameColor: extendedWorkOrder.frameColor || '',
-      frameSize: extendedWorkOrder.frameSize || '',
-      framePrice: extendedWorkOrder.framePrice || 0,
-      lensType: lensTypeValue,
-      lensPrice: extendedWorkOrder.lensPrice || 0,
-      coating: extendedWorkOrder.coating || '',
-      coatingPrice: extendedWorkOrder.coatingPrice || 0,
-      discount: extendedWorkOrder.discount || 0,
-      total: extendedWorkOrder.total || 0,
-      isPaid: extendedWorkOrder.isPaid || false,
-      isPickedUp: extendedWorkOrder.isPickedUp,
-      pickedUpAt: extendedWorkOrder.pickedUpAt,
-      lastEditedAt: extendedWorkOrder.lastEditedAt,
-      editHistory: extendedWorkOrder.editHistory,
-      isRefunded: extendedWorkOrder.isRefunded,
-      refundDate: extendedWorkOrder.refundDate,
-      contactLenses: extendedWorkOrder.contactLenses,
-      contactLensRx: extendedWorkOrder.contactLensRx
-    };
-  };
-  
-  const handleEditWorkOrder = (workOrder: InvoiceWorkOrder) => {
-    const inventoryWorkOrder = convertToInventoryWorkOrder(workOrder);
-    
-    setCurrentWorkOrder(inventoryWorkOrder);
-    setEditWorkOrderDialogOpen(true);
-  };
-  
-  const handleSaveWorkOrder = (updatedWorkOrder: InventoryWorkOrder) => {
-    // Set the edit timestamp for UI refresh
-    const now = new Date().toISOString();
-    setEditTimestamp(now);
-    
-    // Convert lensType to string or object for invoice update
-    const lensTypeForInvoice = typeof updatedWorkOrder.lensType === 'object' 
-      ? updatedWorkOrder.lensType.name 
-      : updatedWorkOrder.lensType;
-    
-    // First, update the local work order state
-    if (updatedWorkOrder.id) {
-      // Convert to InvoiceWorkOrder type before updating
-      const invoiceWorkOrderUpdate: InvoiceWorkOrder = {
-        id: updatedWorkOrder.id,
-        patientId: updatedWorkOrder.patientId,
-        createdAt: updatedWorkOrder.createdAt,
-        lensType: typeof updatedWorkOrder.lensType === 'object' 
-          ? updatedWorkOrder.lensType 
-          : { name: String(updatedWorkOrder.lensType), price: updatedWorkOrder.lensPrice },
-        isPickedUp: updatedWorkOrder.isPickedUp,
-        pickedUpAt: updatedWorkOrder.pickedUpAt,
-        lastEditedAt: now,
-        editHistory: updatedWorkOrder.editHistory,
-        isRefunded: updatedWorkOrder.isRefunded,
-        refundDate: updatedWorkOrder.refundDate,
-        contactLenses: updatedWorkOrder.contactLenses,
-        contactLensRx: updatedWorkOrder.contactLensRx
-      };
-      
-      // Add the extended properties to the work order update
-      const extendedWorkOrderUpdate = invoiceWorkOrderUpdate as ExtendedWorkOrder;
-      extendedWorkOrderUpdate.frameBrand = updatedWorkOrder.frameBrand;
-      extendedWorkOrderUpdate.frameModel = updatedWorkOrder.frameModel;
-      extendedWorkOrderUpdate.frameColor = updatedWorkOrder.frameColor;
-      extendedWorkOrderUpdate.frameSize = updatedWorkOrder.frameSize;
-      extendedWorkOrderUpdate.framePrice = updatedWorkOrder.framePrice;
-      extendedWorkOrderUpdate.lensPrice = updatedWorkOrder.lensPrice;
-      extendedWorkOrderUpdate.coating = updatedWorkOrder.coating;
-      extendedWorkOrderUpdate.coatingPrice = updatedWorkOrder.coatingPrice;
-      extendedWorkOrderUpdate.discount = updatedWorkOrder.discount;
-      extendedWorkOrderUpdate.total = updatedWorkOrder.total;
-      extendedWorkOrderUpdate.isPaid = updatedWorkOrder.isPaid;
-      
-      // Update the work order in our store
-      if (typeof updateWorkOrder === 'function') {
-        updateWorkOrder(extendedWorkOrderUpdate);
-      }
-      
-      // Find the existing invoice to update
-      const existingInvoice = patientInvoices.find(i => i.workOrderId === updatedWorkOrder.id);
-      
-      // Create an invoice copy to update the invoice
-      const invoiceToUpdate: Invoice = {
-        invoiceId: updatedWorkOrder.invoiceId || updatedWorkOrder.id,
-        workOrderId: updatedWorkOrder.id,
-        lastEditedAt: now,
-        frameBrand: updatedWorkOrder.frameBrand,
-        frameModel: updatedWorkOrder.frameModel,
-        frameColor: updatedWorkOrder.frameColor,
-        frameSize: updatedWorkOrder.frameSize,
-        framePrice: updatedWorkOrder.framePrice,
-        lensType: lensTypeForInvoice,
-        lensPrice: updatedWorkOrder.lensPrice,
-        coating: updatedWorkOrder.coating,
-        coatingPrice: updatedWorkOrder.coatingPrice,
-        discount: updatedWorkOrder.discount,
-        total: updatedWorkOrder.total,
-        editHistory: updatedWorkOrder.editHistory,
-        
-        // Required fields from Invoice type that might not be in the updated work order
-        patientName: existingInvoice?.patientName || 'Unknown',
-        patientPhone: existingInvoice?.patientPhone || '',
-        patientId: updatedWorkOrder.patientId,
-        paymentMethod: existingInvoice?.paymentMethod || 'Cash',
-        deposit: existingInvoice?.deposit || 0,
-        remaining: existingInvoice?.remaining || 0,
-        isPaid: updatedWorkOrder.isPaid || existingInvoice?.isPaid || false,
-        createdAt: existingInvoice?.createdAt || updatedWorkOrder.createdAt
-      };
-      
-      // Update the invoice in the store
-      updateInvoice(invoiceToUpdate);
-      
-      // Trigger an immediate refresh
-      setRefreshTrigger(prev => prev + 1);
-      
-      // Show success message
-      toast.success(language === 'ar' ? "تم تحديث أمر العمل بنجاح" : "Work order updated successfully");
-    }
-    
-    setEditWorkOrderDialogOpen(false);
   };
   
   const handleDirectPrint = (printLanguage?: 'en' | 'ar') => {
@@ -304,18 +152,6 @@ export const PatientSearch: React.FC = () => {
     
     toast.success(language === 'ar' ? "تم إضافة الوصفة الطبية بنجاح" : "Prescription added successfully");
   };
-  
-  // Effect to refresh data after edits
-  useEffect(() => {
-    if (editTimestamp && selectedPatient) {
-      // Refresh data after a short delay to ensure store has updated
-      const timer = setTimeout(() => {
-        refreshPatientData(selectedPatient.patientId);
-      }, 200);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [editTimestamp, selectedPatient, refreshPatientData]);
   
   // Effect to refresh data when refresh trigger changes
   useEffect(() => {
@@ -384,7 +220,6 @@ export const PatientSearch: React.FC = () => {
                     workOrders={patientWorkOrders}
                     invoices={patientInvoices}
                     patient={selectedPatient}
-                    onEditWorkOrder={handleEditWorkOrder}
                   />
                 </div>
               </div>
@@ -417,15 +252,6 @@ export const PatientSearch: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
-
-      {currentWorkOrder && (
-        <EditWorkOrderDialog
-          isOpen={editWorkOrderDialogOpen}
-          onClose={() => setEditWorkOrderDialogOpen(false)}
-          workOrder={currentWorkOrder}
-          onSave={handleSaveWorkOrder}
-        />
-      )}
       
       {selectedPatient && (
         <AddRxDialog 

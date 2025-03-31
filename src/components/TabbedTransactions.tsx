@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { format, isValid, formatDistanceToNow } from 'date-fns';
-import { PencilLine, Receipt, Clock, CheckCircle, RefreshCcw, AlertTriangle, ShoppingBag, CheckCheck, Ban, User, Phone, Calendar, History } from 'lucide-react';
+import { PencilLine, Receipt, Clock, CheckCircle, RefreshCcw, AlertTriangle, ShoppingBag, CheckCheck, Ban, User, Phone, Calendar, History, Archive, Trash2 } from 'lucide-react';
 import { PrintOptionsDialog } from './PrintOptionsDialog';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { toast } from 'sonner';
@@ -16,13 +16,16 @@ import { RefundReceiptTemplate } from './RefundReceiptTemplate';
 import * as ReactDOMServer from 'react-dom/server';
 import { PrintService } from '@/utils/PrintService';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { DeleteOrderConfirmDialog } from './DeleteOrderConfirmDialog';
 
 interface TabbedTransactionsProps {
   invoices: Invoice[];
   workOrders: WorkOrder[];
   refundedInvoices: Invoice[];
+  archivedInvoices: Invoice[];
+  archivedWorkOrders: WorkOrder[];
   patient?: Patient;
-  onEditWorkOrder?: (workOrder: WorkOrder) => void;
+  onDeleteWorkOrder?: (workOrder: WorkOrder) => void;
   lastEditTimestamp?: string | null;
 }
 
@@ -30,8 +33,10 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
   invoices,
   workOrders,
   refundedInvoices,
+  archivedInvoices,
+  archivedWorkOrders,
   patient,
-  onEditWorkOrder,
+  onDeleteWorkOrder,
   lastEditTimestamp
 }) => {
   const { language, t } = useLanguageStore();
@@ -60,6 +65,11 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
   // Remove duplicates from completedInvoices (in case an invoice is in both lists)
   const uniqueCompletedInvoices = completedInvoices.filter((invoice, index, self) =>
     index === self.findIndex((i) => i.invoiceId === invoice.invoiceId)
+  );
+  
+  // Sort archived items by date, newest first
+  const sortedArchivedInvoices = [...archivedInvoices].sort((a, b) => 
+    new Date(b.archivedAt || b.createdAt).getTime() - new Date(a.archivedAt || a.createdAt).getTime()
   );
   
   // Effect to force refresh on lastEditTimestamp change
@@ -195,7 +205,6 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     }, 500);
   };
   
-  // Render Active Transactions
   const renderActiveTable = (transactions: Invoice[]) => {
     if (transactions.length === 0) {
       return (
@@ -213,6 +222,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
         {transactions.map((invoice) => {
           const hasBeenEdited = invoice.lastEditedAt !== undefined;
           const editTimeAgo = invoice.lastEditedAt ? getTimeAgo(invoice.lastEditedAt) : '';
+          const relatedWorkOrder = workOrders.find(wo => wo.id === invoice.workOrderId);
           
           return (
             <div key={invoice.invoiceId} className="p-4 hover:bg-blue-50/60 transition-all animate-fade-in">
@@ -304,20 +314,19 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                     </div>
                   )}
                   <div className="flex space-x-2 mt-3 justify-end">
-                    {invoice.workOrderId && onEditWorkOrder && (
+                    {invoice.workOrderId && onDeleteWorkOrder && relatedWorkOrder && (
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="h-9 text-xs bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100 hover:text-violet-800 hover:border-violet-300"
+                        className="h-9 text-xs bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800 hover:border-red-300"
                         onClick={() => {
-                          const workOrder = workOrders.find(wo => wo.id === invoice.workOrderId);
-                          if (workOrder && onEditWorkOrder) {
-                            onEditWorkOrder(workOrder);
+                          if (onDeleteWorkOrder) {
+                            onDeleteWorkOrder(relatedWorkOrder);
                           }
                         }}
                       >
-                        <PencilLine className="h-3.5 w-3.5 mr-1" />
-                        {language === 'ar' ? "تعديل أمر العمل" : "Edit Work Order"}
+                        <Trash2 className="h-3.5 w-3.5 mr-1" />
+                        {language === 'ar' ? "حذف الطلب" : "Delete Order"}
                       </Button>
                     )}
                     
@@ -357,7 +366,6 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     );
   };
   
-  // Render Completed Transactions
   const renderCompletedTable = (transactions: Invoice[]) => {
     if (transactions.length === 0) {
       return (
@@ -497,7 +505,6 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     );
   };
   
-  // Render Refunded Transactions
   const renderRefundedTable = (transactions: Invoice[]) => {
     if (transactions.length === 0) {
       return (
@@ -624,6 +631,124 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     );
   };
   
+  const renderArchivedTable = (transactions: Invoice[]) => {
+    if (transactions.length === 0) {
+      return (
+        <div className="p-8 text-center text-gray-500 bg-gray-50/30 rounded-lg my-2">
+          <Archive className="h-12 w-12 mx-auto text-gray-300 mb-2" />
+          <p className="font-medium">
+            {language === 'ar' ? "لا توجد معاملات في الأرشيف" : "No archived transactions"}
+          </p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="divide-y border border-gray-200 rounded-lg overflow-hidden bg-gradient-to-r from-gray-50/30 to-neutral-50/30">
+        {transactions.map((invoice) => {
+          return (
+            <div key={invoice.invoiceId} className="p-4 hover:bg-gray-50/60 transition-all">
+              <div className="flex justify-between items-start">
+                <div className="space-y-3 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <Archive className="h-5 w-5 text-gray-600" />
+                    <span className="font-semibold text-gray-800 text-lg">{invoice.invoiceId}</span>
+                    
+                    {/* Archive Status */}
+                    <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200 ml-2 flex items-center gap-1">
+                      <Archive className="h-3 w-3" />
+                      {language === 'ar' ? "مؤرشف" : "Archived"}
+                    </Badge>
+                    
+                    {/* Archive Date */}
+                    {invoice.archivedAt && (
+                      <span className="text-xs text-gray-500 ml-2">
+                        {formatDate(invoice.archivedAt)}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Archive Reason */}
+                  {invoice.archiveReason && (
+                    <div className="text-xs text-gray-600 bg-gray-100 p-2 rounded-md inline-block">
+                      {language === 'ar' ? "سبب الأرشفة:" : "Archive reason:"} {invoice.archiveReason}
+                    </div>
+                  )}
+                  
+                  {/* Customer Info Card */}
+                  <Card className="bg-gray-50/80 border-gray-200 max-w-xs">
+                    <CardHeader className="pb-2 pt-3">
+                      <CardTitle className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                        <User className="h-4 w-4" />
+                        {language === 'ar' ? "معلومات العميل" : "Customer Info"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pb-3 pt-0 space-y-1">
+                      <div className="text-sm font-medium">
+                        {invoice.patientName || t('anonymous')}
+                      </div>
+                      {invoice.patientPhone && (
+                        <div className="text-sm text-gray-600 flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {invoice.patientPhone}
+                        </div>
+                      )}
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {formatDate(invoice.createdAt)}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <div className="text-sm mt-1 font-medium text-gray-700">
+                    {invoice.invoiceType === 'glasses' ? (
+                      <span>
+                        {invoice.frameBrand} {invoice.frameModel} - {invoice.lensType || ''}
+                      </span>
+                    ) : (
+                      <span>
+                        {language === 'ar' ? "عدسات لاصقة" : "Contact Lenses"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="text-right">
+                  <div className="font-semibold text-gray-800 text-xl">
+                    {invoice.total.toFixed(3)} KWD
+                  </div>
+                  {invoice.refundAmount && (
+                    <div className="text-red-600 font-medium text-sm mt-1">
+                      {language === 'ar' ? "المبلغ المسترد:" : "Refunded amount:"} {invoice.refundAmount.toFixed(3)} KWD
+                    </div>
+                  )}
+                  <div className="mt-3">
+                    <PrintOptionsDialog
+                      workOrder={invoice}
+                      invoice={invoice}
+                      patient={patient}
+                      onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
+                      onPrintInvoice={() => handlePrintInvoice(invoice)}
+                    >
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 text-xs bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:text-gray-800 hover:border-gray-300"
+                      >
+                        <Receipt className="h-3.5 w-3.5 mr-1" />
+                        {language === 'ar' ? "طباعة" : "Print"}
+                      </Button>
+                    </PrintOptionsDialog>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+  
   return (
     <div className="mt-4 border rounded-lg overflow-hidden shadow-sm">
       <div className="bg-gradient-to-r from-indigo-100 to-blue-50 p-4 flex justify-between items-center">
@@ -631,13 +756,13 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
           {language === 'ar' ? "سجل المعاملات" : "Transaction History"}
         </h3>
         <span className="text-xs bg-indigo-100 text-indigo-800 py-1 px-3 rounded-full">
-          {sortedInvoices.length + refundedInvoices.length} {language === 'ar' ? "معاملة" : "transactions"}
+          {sortedInvoices.length + refundedInvoices.length + sortedArchivedInvoices.length} {language === 'ar' ? "معاملة" : "transactions"}
         </span>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="px-4 pt-4">
-          <TabsList className="w-full grid grid-cols-3">
+          <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger value="active" className="flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
               {language === 'ar' ? "نشطة" : "Active"}
@@ -665,6 +790,15 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                 </Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="archive" className="flex items-center gap-2">
+              <Archive className="h-4 w-4" />
+              {language === 'ar' ? "أرشيف" : "Archive"}
+              {sortedArchivedInvoices.length > 0 && (
+                <Badge variant="secondary" className="ml-1 bg-gray-100 text-gray-800">
+                  {sortedArchivedInvoices.length}
+                </Badge>
+              )}
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -678,6 +812,10 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
         
         <TabsContent value="refunded" className="pb-4 pt-2 px-4">
           {renderRefundedTable(refundedInvoices)}
+        </TabsContent>
+        
+        <TabsContent value="archive" className="pb-4 pt-2 px-4">
+          {renderArchivedTable(sortedArchivedInvoices)}
         </TabsContent>
       </Tabs>
     </div>

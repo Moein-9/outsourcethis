@@ -72,6 +72,11 @@ export interface Invoice {
   refundReason?: string;
   refundMethod?: string;
   refundId?: string;
+  
+  // Archive related fields
+  isArchived?: boolean;
+  archivedAt?: string;
+  archiveReason?: string;
 }
 
 // Define WorkOrder interface
@@ -97,6 +102,11 @@ export interface WorkOrder {
   // Refund related fields
   isRefunded?: boolean;
   refundDate?: string;
+  
+  // Archive related fields
+  isArchived?: boolean;
+  archivedAt?: string;
+  archiveReason?: string;
 }
 
 interface InvoiceState {
@@ -116,6 +126,11 @@ interface InvoiceState {
   addWorkOrder?: (workOrder: Omit<WorkOrder, "id" | "createdAt">) => string;
   updateInvoice: (updatedInvoice: Invoice) => void;
   updateWorkOrder?: (workOrder: WorkOrder) => void;
+  
+  // New functions for archiving/deleting orders
+  deleteWorkOrder: (workOrderId: string, reason: string) => string | undefined;
+  getArchivedWorkOrdersByPatientId: (patientId: string) => WorkOrder[];
+  getArchivedInvoicesByPatientId: (patientId: string) => Invoice[];
   
   // New refund related functions
   processRefund: (
@@ -313,15 +328,31 @@ export const useInvoiceStore = create<InvoiceState>()(
       },
       
       getUnpaidInvoices: () => {
-        return get().invoices.filter(invoice => !invoice.isPaid);
+        return get().invoices.filter(invoice => !invoice.isPaid && !invoice.isArchived);
       },
       
       getInvoicesByPatientId: (patientId) => {
-        return get().invoices.filter(invoice => invoice.patientId === patientId);
+        return get().invoices.filter(invoice => 
+          invoice.patientId === patientId && !invoice.isArchived
+        );
       },
       
       getWorkOrdersByPatientId: (patientId) => {
-        return get().workOrders.filter(workOrder => workOrder.patientId === patientId);
+        return get().workOrders.filter(workOrder => 
+          workOrder.patientId === patientId && !workOrder.isArchived
+        );
+      },
+      
+      getArchivedWorkOrdersByPatientId: (patientId) => {
+        return get().workOrders.filter(workOrder => 
+          workOrder.patientId === patientId && workOrder.isArchived
+        );
+      },
+      
+      getArchivedInvoicesByPatientId: (patientId) => {
+        return get().invoices.filter(invoice => 
+          invoice.patientId === patientId && invoice.isArchived
+        );
       },
       
       clearInvoices: () => {
@@ -437,6 +468,103 @@ export const useInvoiceStore = create<InvoiceState>()(
             return workOrder;
           })
         }));
+      },
+      
+      deleteWorkOrder: (workOrderId, reason) => {
+        const now = new Date().toISOString();
+        const workOrder = get().workOrders.find(wo => wo.id === workOrderId);
+        
+        if (!workOrder) {
+          console.error(`Work order with ID ${workOrderId} not found`);
+          return undefined;
+        }
+        
+        // Find any associated invoice
+        const relatedInvoice = get().invoices.find(inv => inv.workOrderId === workOrderId);
+        
+        // Check if there are payments to refund
+        if (relatedInvoice && relatedInvoice.deposit > 0) {
+          // Process a refund if there was a deposit
+          const refundId = get().processRefund(
+            relatedInvoice.invoiceId,
+            relatedInvoice.deposit,
+            relatedInvoice.paymentMethod,
+            reason || 'Order deleted',
+            'Automatic refund due to order deletion'
+          );
+          
+          // Mark workOrder as archived
+          set((state) => ({
+            workOrders: state.workOrders.map(wo => {
+              if (wo.id === workOrderId) {
+                return {
+                  ...wo,
+                  isArchived: true,
+                  archivedAt: now,
+                  archiveReason: reason || 'Order deleted'
+                };
+              }
+              return wo;
+            })
+          }));
+          
+          // If there's a related invoice, mark it as archived too
+          if (relatedInvoice) {
+            set((state) => ({
+              invoices: state.invoices.map(inv => {
+                if (inv.invoiceId === relatedInvoice.invoiceId) {
+                  return {
+                    ...inv,
+                    isArchived: true,
+                    archivedAt: now,
+                    archiveReason: reason || 'Order deleted',
+                    // Clear remaining payments
+                    remaining: 0
+                  };
+                }
+                return inv;
+              })
+            }));
+          }
+          
+          return refundId;
+        } else {
+          // No deposit to refund, just mark as archived
+          set((state) => ({
+            workOrders: state.workOrders.map(wo => {
+              if (wo.id === workOrderId) {
+                return {
+                  ...wo,
+                  isArchived: true,
+                  archivedAt: now,
+                  archiveReason: reason || 'Order deleted'
+                };
+              }
+              return wo;
+            })
+          }));
+          
+          // If there's a related invoice, mark it as archived too
+          if (relatedInvoice) {
+            set((state) => ({
+              invoices: state.invoices.map(inv => {
+                if (inv.invoiceId === relatedInvoice.invoiceId) {
+                  return {
+                    ...inv,
+                    isArchived: true,
+                    archivedAt: now,
+                    archiveReason: reason || 'Order deleted',
+                    // Clear remaining payments
+                    remaining: 0
+                  };
+                }
+                return inv;
+              })
+            }));
+          }
+          
+          return undefined; // No refund was processed
+        }
       },
       
       processRefund: (invoiceId, refundAmount, refundMethod, reason, staffNotes) => {

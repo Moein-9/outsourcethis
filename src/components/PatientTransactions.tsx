@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
-import { Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
+import { Invoice, WorkOrder as InvoiceWorkOrder, useInvoiceStore } from "@/store/invoiceStore";
 import { TabbedTransactions } from "./TabbedTransactions";
 import { Patient } from "@/store/patientStore";
 import { PrintOptionsDialog } from "./PrintOptionsDialog";
@@ -9,30 +9,44 @@ import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
 import { CustomPrintWorkOrderButton } from "./CustomPrintWorkOrderButton";
+import { DeleteOrderConfirmDialog } from "./DeleteOrderConfirmDialog";
+import { toast } from "sonner";
 
 interface PatientTransactionsProps {
   invoices: Invoice[];
   workOrders: InvoiceWorkOrder[];
   patient?: Patient;
-  onEditWorkOrder?: (workOrder: InvoiceWorkOrder) => void;
 }
 
 export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   invoices,
   workOrders,
-  patient,
-  onEditWorkOrder
+  patient
 }) => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
+  const { deleteWorkOrder, getArchivedInvoicesByPatientId, getArchivedWorkOrdersByPatientId } = useInvoiceStore();
   const [lastEditTimestamp, setLastEditTimestamp] = useState<string | null>(null);
   const [localInvoices, setLocalInvoices] = useState<Invoice[]>(invoices);
   const [localWorkOrders, setLocalWorkOrders] = useState<InvoiceWorkOrder[]>(workOrders);
+  const [archivedInvoices, setArchivedInvoices] = useState<Invoice[]>([]);
+  const [archivedWorkOrders, setArchivedWorkOrders] = useState<InvoiceWorkOrder[]>([]);
+  
+  // State for delete confirmation dialog
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [workOrderToDelete, setWorkOrderToDelete] = useState<InvoiceWorkOrder | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   
   // Effect to update local state when props change
   useEffect(() => {
     setLocalInvoices(invoices);
     setLocalWorkOrders(workOrders);
-  }, [invoices, workOrders]);
+    
+    // Load archived items if patient ID is available
+    if (patient?.patientId) {
+      setArchivedInvoices(getArchivedInvoicesByPatientId(patient.patientId));
+      setArchivedWorkOrders(getArchivedWorkOrdersByPatientId(patient.patientId));
+    }
+  }, [invoices, workOrders, patient, getArchivedInvoicesByPatientId, getArchivedWorkOrdersByPatientId, refreshTrigger]);
   
   // Effect to detect changes in work orders (especially edits)
   useEffect(() => {
@@ -57,10 +71,10 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   }, [localWorkOrders, localInvoices]);
   
   // Filter out active invoices (not refunded)
-  const activeInvoices = localInvoices.filter(invoice => !invoice.isRefunded);
+  const activeInvoices = localInvoices.filter(invoice => !invoice.isRefunded && !invoice.isArchived);
   
   // Filter out refunded invoices
-  const refundedInvoices = localInvoices.filter(invoice => invoice.isRefunded);
+  const refundedInvoices = localInvoices.filter(invoice => invoice.isRefunded && !invoice.isArchived);
   
   const handlePrintWorkOrder = (workOrder: InvoiceWorkOrder) => {
     // Find related invoice for this work order
@@ -81,6 +95,50 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
       CustomPrintService.printInvoice(invoice);
     } else {
       console.error('CustomPrintService.printInvoice is not implemented');
+    }
+  };
+  
+  const handleDeleteWorkOrder = (workOrder: InvoiceWorkOrder) => {
+    setWorkOrderToDelete(workOrder);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  const confirmDeleteWorkOrder = () => {
+    if (!workOrderToDelete) return;
+    
+    try {
+      // Find related invoice to check payment status
+      const relatedInvoice = localInvoices.find(inv => inv.workOrderId === workOrderToDelete.id);
+      const reason = language === 'ar' ? "تم حذف الطلب من قبل المستخدم" : "Order deleted by user";
+      
+      // Call deleteWorkOrder function
+      const refundId = deleteWorkOrder(workOrderToDelete.id, reason);
+      
+      if (refundId) {
+        // A refund was processed
+        toast.success(
+          language === 'ar' 
+            ? "تم حذف الطلب ومعالجة الاسترداد بنجاح" 
+            : "Order deleted and refund processed successfully"
+        );
+      } else {
+        // No refund was needed
+        toast.success(
+          language === 'ar' 
+            ? "تم حذف الطلب بنجاح" 
+            : "Order deleted successfully"
+        );
+      }
+      
+      // Trigger refresh to update UI
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error("Error deleting work order:", error);
+      toast.error(
+        language === 'ar'
+          ? "حدث خطأ أثناء حذف الطلب"
+          : "Error deleting the order"
+      );
     }
   };
   
@@ -107,13 +165,27 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
       </div>
       
       <TabbedTransactions
+        key={`transactions-${refreshTrigger}`}
         invoices={activeInvoices}
-        workOrders={localWorkOrders}
+        workOrders={localWorkOrders.filter(wo => !wo.isArchived)}
         refundedInvoices={refundedInvoices}
+        archivedInvoices={archivedInvoices}
+        archivedWorkOrders={archivedWorkOrders}
         patient={patient}
-        onEditWorkOrder={onEditWorkOrder}
+        onDeleteWorkOrder={handleDeleteWorkOrder}
         lastEditTimestamp={lastEditTimestamp}
       />
+      
+      {/* Delete Confirmation Dialog */}
+      {workOrderToDelete && (
+        <DeleteOrderConfirmDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          onConfirm={confirmDeleteWorkOrder}
+          hasPaidAmount={!!(localInvoices.find(inv => inv.workOrderId === workOrderToDelete?.id)?.deposit > 0)}
+          amountPaid={localInvoices.find(inv => inv.workOrderId === workOrderToDelete?.id)?.deposit}
+        />
+      )}
     </div>
   );
 };
