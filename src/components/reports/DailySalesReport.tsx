@@ -30,7 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SalesChart } from "./SalesChart";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { PrintService } from "@/utils/PrintService";
 import { PrintReportButton } from "./PrintReportButton";
 import { Button } from "@/components/ui/button";
@@ -276,10 +276,10 @@ export const DailySalesReport: React.FC = () => {
       
       refundsHTML += `
         <tr>
-          <td class="refund-id">${refund.refundId}</td>
-          <td class="refund-customer">${relatedInvoice?.patientName || '-'}</td>
-          <td class="refund-amount">${refund.amount.toFixed(2)} ${t.currency}</td>
-          <td class="refund-method">${refund.method || '-'}</td>
+          <td class="refund-id" style="width: 20%; max-width: 20%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${refund.refundId}</td>
+          <td class="refund-customer" style="width: 30%; max-width: 30%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${relatedInvoice?.patientName || '-'}</td>
+          <td class="refund-amount" style="width: 25%; max-width: 25%;">${refund.amount.toFixed(2)} ${t.currency}</td>
+          <td class="refund-method" style="width: 25%; max-width: 25%;">${refund.method || '-'}</td>
         </tr>
       `;
     });
@@ -381,6 +381,25 @@ export const DailySalesReport: React.FC = () => {
           </table>
         </div>
 
+        ${todaySales.length > 0 ? `
+          <div class="summary-section">
+            <div class="section-header">${language === 'ar' ? 'قائمة الفواتير | Invoice List' : 'Invoice List | قائمة الفواتير'}</div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>${language === 'ar' ? 'العميل | Customer' : 'Customer | العميل'}</th>
+                  <th>${language === 'ar' ? 'المجموع | Total' : 'Total | المجموع'}</th>
+                  <th>${language === 'ar' ? 'المدفوع | Paid' : 'Paid | المدفوع'}</th>
+                  <th>${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${invoicesHTML}
+              </tbody>
+            </table>
+          </div>
+        ` : ''}
+
         ${todayRefunds.length > 0 ? `
           <div class="summary-section">
             <div class="section-header">${language === 'ar' ? 'طرق الاسترداد | Refund Methods' : 'Refund Methods | طرق الاسترداد'}</div>
@@ -404,13 +423,13 @@ export const DailySalesReport: React.FC = () => {
 
           <div class="summary-section">
             <div class="section-header">${language === 'ar' ? 'الفواتير المستردة | Refunded Invoices' : 'Refunded Invoices | الفواتير المستردة'}</div>
-            <table class="data-table">
+            <table class="data-table small-table">
               <thead>
                 <tr>
-                  <th>${language === 'ar' ? 'رقم الاسترداد | Refund ID' : 'Refund ID | رقم الاسترداد'}</th>
-                  <th>${language === 'ar' ? 'العميل | Customer' : 'Customer | العميل'}</th>
-                  <th>${language === 'ar' ? 'المبلغ | Amount' : 'Amount | المبلغ'}</th>
-                  <th>${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
+                  <th style="width: 20%;">${language === 'ar' ? 'رقم | ID' : 'ID | رقم'}</th>
+                  <th style="width: 30%;">${language === 'ar' ? 'العميل | Customer' : 'Customer | العميل'}</th>
+                  <th style="width: 25%;">${language === 'ar' ? 'المبلغ | Amount' : 'Amount | المبلغ'}</th>
+                  <th style="width: 25%;">${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -419,25 +438,6 @@ export const DailySalesReport: React.FC = () => {
                     <td colspan="4" class="no-data">${language === 'ar' ? 'لا توجد استردادات | No refunds' : 'No refunds | لا توجد استردادات'}</td>
                   </tr>
                 `}
-              </tbody>
-            </table>
-          </div>
-        ` : ''}
-
-        ${todaySales.length > 0 ? `
-          <div class="summary-section">
-            <div class="section-header">${language === 'ar' ? 'قائمة الفواتير | Invoice List' : 'Invoice List | قائمة الفواتير'}</div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>${language === 'ar' ? 'العميل | Customer' : 'Customer | العميل'}</th>
-                  <th>${language === 'ar' ? 'المجموع | Total' : 'Total | المجموع'}</th>
-                  <th>${language === 'ar' ? 'المدفوع | Paid' : 'Paid | المدفوع'}</th>
-                  <th>${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${invoicesHTML}
               </tbody>
             </table>
           </div>
@@ -576,16 +576,29 @@ export const DailySalesReport: React.FC = () => {
           width: 100%;
           border-collapse: collapse;
           font-size: 11px;
+          table-layout: fixed;
         }
         
         .data-table th, .data-table td {
           border: 1px solid #000;
-          padding: 4px;
+          padding: 3px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-width: 100%;
         }
         
         .data-table th {
           background-color: #f2f2f2;
           font-weight: bold;
+        }
+        
+        .small-table {
+          font-size: 10px;
+        }
+        
+        .small-table th, .small-table td {
+          padding: 2px;
         }
         
         .payment-method, .invoice-customer, .refund-method, .refund-id, .refund-customer {
@@ -742,96 +755,6 @@ export const DailySalesReport: React.FC = () => {
         </Card>
       </div>
       
-      {/* New section for Refund Methods */}
-      {todayRefunds.length > 0 && (
-        <Card className="border-red-200">
-          <CardHeader className="bg-gradient-to-r from-red-50 to-red-100 rounded-t-lg py-3 px-3 md:p-4">
-            <CardTitle className="text-red-700 text-sm md:text-base">{t.refundMethods}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col space-y-3 md:space-y-4 p-3 md:p-4">
-            {refundBreakdown.map((refund, index) => (
-              <div key={index} className="flex items-center justify-between p-2 md:p-3 rounded-md bg-white shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-2">
-                  {refund.method === 'نقداً' || refund.method === 'Cash' ? (
-                    <Wallet className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-                  ) : refund.method === 'كي نت' || refund.method === 'KNET' ? (
-                    <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-                  ) : refund.method === 'Visa' ? (
-                    <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-                  ) : refund.method === 'MasterCard' ? (
-                    <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-                  ) : (
-                    <RefreshCcw className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-                  )}
-                  <span className="font-medium text-sm md:text-base">{refund.method}</span>
-                </div>
-                <div className="flex items-center gap-2 md:gap-4">
-                  <span className="text-xs md:text-sm text-gray-600 bg-gray-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded-full">
-                    {refund.count} {t.transactions}
-                  </span>
-                  <span className="font-medium text-sm md:text-base text-red-600">{refund.amount.toFixed(2)} {t.currency}</span>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Refunded Items section */}
-      {todayRefunds.length > 0 && (
-        <Card className="border-gray-200">
-          <CardHeader className="bg-gradient-to-r from-red-50 to-red-100 rounded-t-lg py-3 px-3 md:p-4">
-            <CardTitle className="text-red-700 text-sm md:text-base">{t.refundedItems}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0 md:p-4">
-            <div className="divide-y border border-red-200 rounded-lg overflow-hidden bg-gradient-to-r from-red-50/30 to-pink-50/30">
-              {todayRefunds.map((refund) => {
-                // Find the associated invoice
-                const relatedInvoice = invoices.find(inv => inv.invoiceId === refund.associatedInvoiceId);
-                
-                return (
-                  <div key={refund.refundId} className="p-4 hover:bg-red-50/40 transition-all">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-3 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <RefreshCcw className="h-5 w-5 text-red-600" />
-                          <span className="font-semibold text-red-800 text-lg">{refund.refundId}</span>
-                          <span className="text-sm text-gray-500">({t.invoiceStatus}: {relatedInvoice?.invoiceId || 'N/A'})</span>
-                        </div>
-                        
-                        <div className="text-xs text-red-600 flex items-center gap-1 mt-0.5">
-                          <CalendarIcon className="h-3 w-3" />
-                          {language === 'ar' ? "تاريخ الاسترداد:" : "Refund date:"} {formatDate(refund.date)}
-                        </div>
-                        
-                        <div className="text-xs mt-1.5 text-red-600 bg-red-50 rounded-md inline-block px-2 py-0.5">
-                          {t.reason}: {refund.reason}
-                        </div>
-                        
-                        {relatedInvoice && (
-                          <div className="text-sm mt-1 font-medium text-gray-700">
-                            {language === 'ar' ? "اسم العميل:" : "Customer name:"} {relatedInvoice.patientName}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="text-right">
-                        <div className="font-semibold text-red-800 text-xl">
-                          {refund.amount.toFixed(3)} KWD
-                        </div>
-                        <div className="text-sm text-gray-600 mt-1">
-                          {t.paymentMethod}: {refund.method}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
       <Card className="border-gray-200">
         <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg py-3 px-3 md:p-4">
           <CardTitle className="text-gray-700 text-sm md:text-base">{t.todaysInvoiceList}</CardTitle>
@@ -839,27 +762,23 @@ export const DailySalesReport: React.FC = () => {
         <CardContent className="p-0 md:p-4">
           {todaySales.length > 0 ? (
             <div className="space-y-3 md:space-y-4">
-              {todaySales.map((invoice) => (
+              {todaySales
+                .filter(invoice => !invoice.isRefunded)
+                .map((invoice) => (
                 <div key={invoice.invoiceId} 
-                  className={`border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200 ${
-                    invoice.isRefunded ? 'border-red-200' : 'border-gray-200'
-                  }`}>
+                  className="border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200 border-gray-200"
+                >
                   <div 
                     className={`flex flex-wrap md:flex-nowrap justify-between items-start md:items-center p-3 md:p-4 cursor-pointer gap-2 ${
                       expandedInvoices[invoice.invoiceId] ? 'bg-gray-50 border-b' : ''
-                    } ${invoice.isRefunded ? 'bg-red-50/20' : ''}`}
+                    }`}
                     onClick={() => toggleInvoiceExpansion(invoice.invoiceId)}
                   >
                     <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
                       <div className={`p-1.5 md:p-2 rounded-full ${
-                        invoice.isRefunded ? 'bg-red-100 text-red-600' :
                         invoice.isPaid ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
                       }`}>
-                        {invoice.isRefunded ? (
-                          <RefreshCcw size={16} className="md:w-[18px] md:h-[18px]" />
-                        ) : (
-                          <Receipt size={16} className="md:w-[18px] md:h-[18px]" />
-                        )}
+                        <Receipt size={16} className="md:w-[18px] md:h-[18px]" />
                       </div>
                       <div>
                         <h3 className="font-medium text-sm md:text-base">{invoice.patientName}</h3>
@@ -870,11 +789,6 @@ export const DailySalesReport: React.FC = () => {
                       <div className="text-right">
                         <p className="font-medium text-sm md:text-base">
                           {invoice.total.toFixed(2)} {t.currency}
-                          {invoice.isRefunded && invoice.refundAmount && (
-                            <span className="text-red-600 block">
-                              ({language === 'ar' ? "مسترد:" : "Refunded:"} {invoice.refundAmount.toFixed(2)} {t.currency})
-                            </span>
-                          )}
                         </p>
                         <p className="text-xs md:text-sm text-gray-500">{invoice.paymentMethod}</p>
                       </div>
@@ -1005,6 +919,261 @@ export const DailySalesReport: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      
+      {/* Refund sections - moved to bottom and collapsed by default */}
+      {todayRefunds.length > 0 && (
+        <>
+          <CollapsibleCard 
+            title={t.refundMethods}
+            className="border-red-200"
+            headerClassName="bg-gradient-to-r from-red-50 to-red-100"
+            titleClassName="text-red-700"
+            defaultOpen={false}
+          >
+            <div className="flex flex-col space-y-3 md:space-y-4 p-3 md:p-4">
+              {refundBreakdown.map((refund, index) => (
+                <div key={index} className="flex items-center justify-between p-2 md:p-3 rounded-md bg-white shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-2">
+                    {refund.method === 'نقداً' || refund.method === 'Cash' ? (
+                      <Wallet className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+                    ) : refund.method === 'كي نت' || refund.method === 'KNET' ? (
+                      <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+                    ) : refund.method === 'Visa' ? (
+                      <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+                    ) : refund.method === 'MasterCard' ? (
+                      <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+                    ) : (
+                      <RefreshCcw className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+                    )}
+                    <span className="font-medium text-sm md:text-base">{refund.method}</span>
+                  </div>
+                  <div className="flex items-center gap-2 md:gap-4">
+                    <span className="text-xs md:text-sm text-gray-600 bg-gray-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded-full">
+                      {refund.count} {t.transactions}
+                    </span>
+                    <span className="font-medium text-sm md:text-base text-red-600">{refund.amount.toFixed(2)} {t.currency}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CollapsibleCard>
+          
+          <CollapsibleCard 
+            title={t.refundedItems}
+            className="border-red-200"
+            headerClassName="bg-gradient-to-r from-red-50 to-red-100"
+            titleClassName="text-red-700"
+            defaultOpen={false}
+          >
+            <div className="divide-y border border-red-200 rounded-lg overflow-hidden bg-gradient-to-r from-red-50/30 to-pink-50/30 m-4">
+              {todayRefunds.map((refund) => {
+                // Find the associated invoice
+                const relatedInvoice = invoices.find(inv => inv.invoiceId === refund.associatedInvoiceId);
+                
+                return (
+                  <div key={refund.refundId} className="p-4 hover:bg-red-50/40 transition-all">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-3 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <RefreshCcw className="h-5 w-5 text-red-600" />
+                          <span className="font-semibold text-red-800 text-lg">{refund.refundId}</span>
+                          <span className="text-sm text-gray-500">({t.invoiceStatus}: {relatedInvoice?.invoiceId || 'N/A'})</span>
+                        </div>
+                        
+                        <div className="text-xs text-red-600 flex items-center gap-1 mt-0.5">
+                          <CalendarIcon className="h-3 w-3" />
+                          {language === 'ar' ? "تاريخ الاسترداد:" : "Refund date:"} {formatDate(refund.date)}
+                        </div>
+                        
+                        <div className="text-xs mt-1.5 text-red-600 bg-red-50 rounded-md inline-block px-2 py-0.5">
+                          {t.reason}: {refund.reason}
+                        </div>
+                        
+                        {relatedInvoice && (
+                          <div className="text-sm mt-1 font-medium text-gray-700">
+                            {language === 'ar' ? "اسم العميل:" : "Customer name:"} {relatedInvoice.patientName}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className="font-semibold text-red-800 text-xl">
+                          {refund.amount.toFixed(3)} KWD
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          {t.paymentMethod}: {refund.method}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CollapsibleCard>
+        </>
+      )}
+
+      {/* Show refunded invoices in a separate section */}
+      {todaySales.filter(invoice => invoice.isRefunded).length > 0 && (
+        <CollapsibleCard 
+          title={t.refundedInvoices}
+          className="border-red-200"
+          headerClassName="bg-gradient-to-r from-red-50 to-red-100"
+          titleClassName="text-red-700"
+          defaultOpen={false}
+        >
+          <div className="space-y-3 md:space-y-4 p-3 md:p-4">
+            {todaySales
+              .filter(invoice => invoice.isRefunded)
+              .map((invoice) => (
+              <div key={invoice.invoiceId} 
+                className="border border-red-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                <div 
+                  className={`flex flex-wrap md:flex-nowrap justify-between items-start md:items-center p-3 md:p-4 cursor-pointer gap-2 ${
+                    expandedInvoices[invoice.invoiceId] ? 'bg-red-50/20 border-b' : 'bg-red-50/20'
+                  }`}
+                  onClick={() => toggleInvoiceExpansion(invoice.invoiceId)}
+                >
+                  <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
+                    <div className="p-1.5 md:p-2 rounded-full bg-red-100 text-red-600">
+                      <RefreshCcw size={16} className="md:w-[18px] md:h-[18px]" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-sm md:text-base">{invoice.patientName}</h3>
+                      <p className="text-xs md:text-sm text-gray-500">{invoice.invoiceId}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between w-full md:w-auto gap-2 md:gap-6">
+                    <div className="text-right">
+                      <p className="font-medium text-sm md:text-base">
+                        {invoice.total.toFixed(2)} {t.currency}
+                        {invoice.isRefunded && invoice.refundAmount && (
+                          <span className="text-red-600 block">
+                            ({language === 'ar' ? "مسترد:" : "Refunded:"} {invoice.refundAmount.toFixed(2)} {t.currency})
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-500">{invoice.paymentMethod}</p>
+                    </div>
+                    <Button 
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 md:h-8 md:w-8 rounded-full"
+                    >
+                      {expandedInvoices[invoice.invoiceId] ? 
+                        <ChevronUp size={16} className="md:w-[18px] md:h-[18px]" /> : 
+                        <ChevronDown size={16} className="md:w-[18px] md:h-[18px]" />
+                      }
+                    </Button>
+                  </div>
+                </div>
+                
+                {expandedInvoices[invoice.invoiceId] && (
+                  <div className="p-3 md:p-4 bg-gray-50 space-y-3 md:space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                      <div className="bg-white p-2 md:p-3 rounded-md border">
+                        <h4 className="text-xs md:text-sm font-medium text-gray-500 mb-1">
+                          {t.customerInfo}
+                        </h4>
+                        <p className="font-medium text-sm md:text-base">{invoice.patientName}</p>
+                        <p className="text-xs md:text-sm">{invoice.patientPhone}</p>
+                        {invoice.patientId && <p className="text-xs text-gray-500">{t.fileNumber}: {invoice.patientId}</p>}
+                      </div>
+                      
+                      <div className="bg-white p-2 md:p-3 rounded-md border">
+                        <h4 className="text-xs md:text-sm font-medium text-gray-500 mb-1">
+                          {t.paymentInfo}
+                        </h4>
+                        <div className="flex justify-between items-center mt-1">
+                          <span className="font-medium text-sm md:text-base">{t.total}:</span>
+                          <span className="font-bold text-base md:text-lg">{invoice.total.toFixed(2)} {t.currency}</span>
+                        </div>
+                        <div className="flex justify-between items-center mt-1 md:mt-2">
+                          <span className="text-blue-600 font-medium text-sm">{t.paid}:</span>
+                          <span className="font-medium text-blue-600 text-sm">{invoice.deposit.toFixed(2)} {t.currency}</span>
+                        </div>
+                        {invoice.remaining > 0 && (
+                          <div className="flex justify-between items-center mt-1 bg-amber-50 p-1 md:p-1.5 rounded">
+                            <span className="text-amber-700 font-medium text-sm">{t.remaining}:</span>
+                            <span className="font-medium text-amber-700 text-sm">{invoice.remaining.toFixed(2)} {t.currency}</span>
+                          </div>
+                        )}
+                        {invoice.discount > 0 && (
+                          <div className="flex justify-between text-green-600 mt-1 md:mt-2 bg-green-50 p-1 md:p-1.5 rounded">
+                            <span className="flex items-center gap-1 font-medium text-sm">
+                              <Tag size={12} className="md:w-[14px] md:h-[14px]" />
+                              {t.discount}:
+                            </span>
+                            <span className="font-medium text-sm">{invoice.discount.toFixed(2)} {t.currency}</span>
+                          </div>
+                        )}
+                        <div className="mt-2 md:mt-3 pt-1 md:pt-2 border-t">
+                          <span className="text-xs md:text-sm font-medium text-gray-600">{t.paymentMethod}:</span>
+                          <div className="flex items-center gap-1 mt-0.5 md:mt-1">
+                            {invoice.paymentMethod === 'نقداً' || invoice.paymentMethod === 'Cash' ? (
+                              <Wallet className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
+                            ) : invoice.paymentMethod === 'كي نت' || invoice.paymentMethod === 'KNET' ? (
+                              <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-blue-500" />
+                            ) : invoice.paymentMethod === 'Visa' ? (
+                              <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-indigo-500" />
+                            ) : invoice.paymentMethod === 'MasterCard' ? (
+                              <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
+                            ) : (
+                              <Receipt className="h-3 w-3 md:h-4 md:w-4 text-gray-500" />
+                            )}
+                            <span className="text-xs md:text-sm">{invoice.paymentMethod}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-white p-2 md:p-3 rounded-md border">
+                        <h4 className="text-xs md:text-sm font-medium text-gray-500 mb-1">{t.invoiceStatus}</h4>
+                        <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800`}>
+                          {language === 'ar' ? "مسترد" : "Refunded"}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {t.creationDate}: {new Date(invoice.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                      <div className="bg-blue-50 p-2 md:p-3 rounded-md border border-blue-100">
+                        <h4 className="text-xs md:text-sm font-medium text-blue-700 mb-1">{t.lenses}</h4>
+                        <p className="font-medium text-sm md:text-base">{invoice.lensType}</p>
+                        <div className="flex justify-between mt-1">
+                          <span className="text-xs md:text-sm text-blue-600">{t.price}:</span>
+                          <span className="font-medium text-sm md:text-base">{invoice.lensPrice.toFixed(2)} {t.currency}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-purple-50 p-2 md:p-3 rounded-md border border-purple-100">
+                        <h4 className="text-xs md:text-sm font-medium text-purple-700 mb-1">{t.frame}</h4>
+                        <p className="font-medium text-sm md:text-base">{invoice.frameBrand} {invoice.frameModel}</p>
+                        <p className="text-xs md:text-sm text-purple-600">{t.color}: {invoice.frameColor}</p>
+                        <div className="flex justify-between mt-1">
+                          <span className="text-xs md:text-sm text-purple-600">{t.price}:</span>
+                          <span className="font-medium text-sm md:text-base">{invoice.framePrice.toFixed(2)} {t.currency}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-green-50 p-2 md:p-3 rounded-md border border-green-100">
+                        <h4 className="text-xs md:text-sm font-medium text-green-700 mb-1">{t.coating}</h4>
+                        <p className="font-medium text-sm md:text-base">{invoice.coating}</p>
+                        <div className="flex justify-between mt-1">
+                          <span className="text-xs md:text-sm text-green-600">{t.price}:</span>
+                          <span className="font-medium text-sm md:text-base">{invoice.coatingPrice.toFixed(2)} {t.currency}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </CollapsibleCard>
+      )}
     </div>
   );
 };
