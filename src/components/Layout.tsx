@@ -55,49 +55,49 @@ export const Layout: React.FC<LayoutProps> = ({
           <Button 
             variant={activeSection === "dashboard" ? "default" : "outline"} 
             onClick={handleHomeNavigation}
-            className="whitespace-nowrap"
+            className={`whitespace-nowrap ${activeSection === "dashboard" ? "bg-teal-700 hover:bg-teal-800" : ""}`}
           >
             {t('dashboard')}
           </Button>
           <Button 
             variant={activeSection === "createClient" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("createClient")}
-            className="whitespace-nowrap"
+            className={`whitespace-nowrap ${activeSection === "createClient" ? "bg-teal-700 hover:bg-teal-800" : ""}`}
           >
             {t('createClient')}
           </Button>
           <Button 
             variant={activeSection === "createInvoice" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("createInvoice")}
-            className="whitespace-nowrap"
+            className={`whitespace-nowrap ${activeSection === "createInvoice" ? "bg-teal-700 hover:bg-teal-800" : ""}`}
           >
             {t('createInvoice')}
           </Button>
           <Button 
             variant={activeSection === "inventory" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("inventory")}
-            className="whitespace-nowrap"
+            className={`whitespace-nowrap ${activeSection === "inventory" ? "bg-teal-700 hover:bg-teal-800" : ""}`}
           >
             {t('inventory')}
           </Button>
           <Button 
             variant={activeSection === "remainingPayments" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("remainingPayments")}
-            className="whitespace-nowrap"
+            className={`whitespace-nowrap ${activeSection === "remainingPayments" ? "bg-teal-700 hover:bg-teal-800" : ""}`}
           >
             {t('remainingPayments')}
           </Button>
           <Button 
             variant={activeSection === "patientSearch" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("patientSearch")}
-            className="whitespace-nowrap"
+            className={`whitespace-nowrap ${activeSection === "patientSearch" ? "bg-teal-700 hover:bg-teal-800" : ""}`}
           >
             {t('patientSearch')}
           </Button>
           <Button 
             variant={activeSection === "refundManager" ? "default" : "outline"} 
             onClick={() => handleSectionNavigation("refundManager")}
-            className="whitespace-nowrap"
+            className={`whitespace-nowrap ${activeSection === "refundManager" ? "bg-teal-700 hover:bg-teal-800" : ""}`}
           >
             {language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges'}
           </Button>

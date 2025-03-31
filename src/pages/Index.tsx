@@ -11,6 +11,11 @@ import { RefundManager } from "@/components/RefundManager";
 import { useLocation } from "react-router-dom";
 import { useLanguageStore } from "@/store/languageStore";
 
+// Update the primary colors in the document root
+document.documentElement.style.setProperty('--primary', '39.6 73.5% 56.7%'); // Golden color
+document.documentElement.style.setProperty('--sidebar-background', '180 50% 30%'); // Teal/green color
+document.documentElement.style.setProperty('--sidebar-primary', '39.6 73.5% 56.7%'); // Golden color for sidebar
+
 const Index = () => {
   const [activeSection, setActiveSection] = React.useState("dashboard");
   const location = useLocation();
