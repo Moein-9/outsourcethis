@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Eye, AlertTriangle } from "lucide-react";
+import { Eye, AlertTriangle, Lock } from "lucide-react";
 import { ContactLensRx } from "@/store/patientStore";
 import { useLanguageStore } from "@/store/languageStore";
 import {
@@ -19,12 +19,14 @@ interface ContactLensFormProps {
   rxData: ContactLensRx;
   onChange: (data: ContactLensRx) => void;
   showMissingRxWarning?: boolean;
+  readOnly?: boolean;
 }
 
 export const ContactLensForm: React.FC<ContactLensFormProps> = ({ 
   rxData, 
   onChange,
-  showMissingRxWarning = false
+  showMissingRxWarning = false,
+  readOnly = false
 }) => {
   const { language, t } = useLanguageStore();
   const [validationErrors, setValidationErrors] = useState({
@@ -33,6 +35,8 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   });
 
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
+    if (readOnly) return;
+    
     const updatedRx = {
       ...rxData,
       rightEye: {
@@ -49,6 +53,8 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   };
 
   const handleLeftEyeChange = (field: keyof ContactLensRx["leftEye"], value: string) => {
+    if (readOnly) return;
+    
     const updatedRx = {
       ...rxData,
       leftEye: {
@@ -158,6 +164,13 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
           <Eye className="w-4 h-4 text-blue-600" />
           {t("contactLensPrescription")}
         </h4>
+        
+        {readOnly && (
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <Lock className="w-3.5 h-3.5" />
+            {t("readOnly") || "Read Only"}
+          </div>
+        )}
       </div>
 
       {showMissingRxWarning && (
@@ -193,36 +206,40 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               </td>
               <td className={`border border-blue-100 p-2 ${columnWidths.sphere}`}>
                 <select 
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md border border-blue-200 bg-white text-sm ${readOnly ? 'opacity-80 cursor-not-allowed' : ''}`}
                   value={rxData.rightEye.sphere}
                   onChange={(e) => handleRightEyeChange("sphere", e.target.value)}
+                  disabled={readOnly}
                 >
                   {generateSphereOptions()}
                 </select>
               </td>
               <td className={`border border-blue-100 p-2 ${columnWidths.cylinder}`}>
                 <select 
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md border border-blue-200 bg-white text-sm ${readOnly ? 'opacity-80 cursor-not-allowed' : ''}`}
                   value={rxData.rightEye.cylinder}
                   onChange={(e) => handleRightEyeChange("cylinder", e.target.value)}
+                  disabled={readOnly}
                 >
                   {generateCylinderOptions()}
                 </select>
               </td>
               <td className={`border border-blue-100 p-2 ${columnWidths.axis}`}>
                 <select 
-                  className={`w-full p-1 rounded-md border ${validationErrors.rightEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-blue-200 bg-white'} text-sm`}
+                  className={`w-full p-1 rounded-md ${validationErrors.rightEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-blue-200 bg-white'} text-sm ${readOnly ? 'opacity-80 cursor-not-allowed' : ''}`}
                   value={rxData.rightEye.axis}
                   onChange={(e) => handleRightEyeChange("axis", e.target.value)}
+                  disabled={readOnly}
                 >
                   {generateAxisOptions()}
                 </select>
               </td>
               <td className={`border border-blue-100 p-2 ${columnWidths.bc}`}>
                 <select 
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md border border-blue-200 bg-white text-sm ${readOnly ? 'opacity-80 cursor-not-allowed' : ''}`}
                   value={rxData.rightEye.bc}
                   onChange={(e) => handleRightEyeChange("bc", e.target.value)}
+                  disabled={readOnly}
                 >
                   <option value="-">-</option>
                   <option value="8.4">8.4</option>
@@ -234,9 +251,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               </td>
               <td className={`border border-blue-100 p-2 ${columnWidths.dia}`}>
                 <select
-                  className="w-full p-1 rounded-md border border-blue-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md border border-blue-200 bg-white text-sm ${readOnly ? 'opacity-80 cursor-not-allowed' : ''}`}
                   value={rxData.rightEye.dia}
                   onChange={(e) => handleRightEyeChange("dia", e.target.value)}
+                  disabled={readOnly}
                 >
                   <option value="-">-</option>
                   <option value="14.0">14.0</option>
@@ -257,36 +275,40 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               </td>
               <td className={`border border-rose-100 p-2 ${columnWidths.sphere}`}>
                 <select 
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md border border-rose-200 bg-white text-sm ${readOnly ? 'opacity-80 cursor-not-allowed' : ''}`}
                   value={rxData.leftEye.sphere}
                   onChange={(e) => handleLeftEyeChange("sphere", e.target.value)}
+                  disabled={readOnly}
                 >
                   {generateSphereOptions()}
                 </select>
               </td>
               <td className={`border border-rose-100 p-2 ${columnWidths.cylinder}`}>
                 <select 
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md border border-rose-200 bg-white text-sm ${readOnly ? 'opacity-80 cursor-not-allowed' : ''}`}
                   value={rxData.leftEye.cylinder}
                   onChange={(e) => handleLeftEyeChange("cylinder", e.target.value)}
+                  disabled={readOnly}
                 >
                   {generateCylinderOptions()}
                 </select>
               </td>
               <td className={`border border-rose-100 p-2 ${columnWidths.axis}`}>
                 <select 
-                  className={`w-full p-1 rounded-md border ${validationErrors.leftEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-rose-200 bg-white'} text-sm`}
+                  className={`w-full p-1 rounded-md ${validationErrors.leftEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-rose-200 bg-white'} text-sm ${readOnly ? 'opacity-80 cursor-not-allowed' : ''}`}
                   value={rxData.leftEye.axis}
                   onChange={(e) => handleLeftEyeChange("axis", e.target.value)}
+                  disabled={readOnly}
                 >
                   {generateAxisOptions()}
                 </select>
               </td>
               <td className={`border border-rose-100 p-2 ${columnWidths.bc}`}>
                 <select 
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md border border-rose-200 bg-white text-sm ${readOnly ? 'opacity-80 cursor-not-allowed' : ''}`}
                   value={rxData.leftEye.bc}
                   onChange={(e) => handleLeftEyeChange("bc", e.target.value)}
+                  disabled={readOnly}
                 >
                   <option value="-">-</option>
                   <option value="8.4">8.4</option>
@@ -298,9 +320,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               </td>
               <td className={`border border-rose-100 p-2 ${columnWidths.dia}`}>
                 <select
-                  className="w-full p-1 rounded-md border border-rose-200 bg-white text-sm"
+                  className={`w-full p-1 rounded-md border border-rose-200 bg-white text-sm ${readOnly ? 'opacity-80 cursor-not-allowed' : ''}`}
                   value={rxData.leftEye.dia}
                   onChange={(e) => handleLeftEyeChange("dia", e.target.value)}
+                  disabled={readOnly}
                 >
                   <option value="-">-</option>
                   <option value="14.0">14.0</option>
@@ -314,7 +337,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
         </table>
         
         {/* Validation error message */}
-        {hasValidationErrors && (
+        {hasValidationErrors && !readOnly && (
           <div className="p-3 mt-2 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
             <p className="text-red-700 text-sm">
