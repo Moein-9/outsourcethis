@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -10,8 +11,8 @@ import { PrintService } from "@/utils/PrintService";
 import { toast } from "@/hooks/use-toast";
 import { CheckCircle2 } from "lucide-react";
 
-export interface WorkOrderReceiptPrintProps {
-  invoice: any;
+interface WorkOrderReceiptPrintProps {
+  invoice: Invoice;
   patientName?: string;
   patientPhone?: string;
   rx?: any;
@@ -26,7 +27,7 @@ export interface WorkOrderReceiptPrintProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
-  prescriptionType?: 'glasses' | 'contacts';
+  isEyeExam?: boolean;
 }
 
 export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
@@ -477,7 +478,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   frame,
   contactLenses,
   contactLensRx,
-  prescriptionType,
+  isEyeExam,
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
@@ -922,6 +923,24 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           }
         </div>
       </div>
+      
+      {isEyeExam && (
+        <div style={{ marginBottom: "3px" }}>
+          <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
+            {isRtl ? 'فحص العين' : 'Eye Exam'} {isRtl ? <span style={{ fontSize: "10px" }}>(Eye Exam)</span> : <span style={{ fontSize: "10px" }}>(فحص العين)</span>}
+          </h3>
+          <div style={{ marginLeft: "2px" }}>
+            <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+              <span style={{ fontWeight: "bold" }}>{isRtl ? "الخدمة" : "Service"}:</span>
+              <span>{invoice.serviceName || t("eyeExam")}</span>
+            </div>
+            <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+              <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
+              <span>{invoice.servicePrice.toFixed(3)} KWD</span>
+            </div>
+          </div>
+        </div>
+      )}
       
       <style>
         {`

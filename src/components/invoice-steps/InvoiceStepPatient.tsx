@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
 import { usePatientStore } from "@/store/patientStore";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ContactLensForm } from "@/components/ContactLensForm";
 import { 
-  User, Search, Glasses, Eye, EyeOff, ScrollText, Info
+  User, Search, Glasses, Eye, EyeOff, ScrollText
 } from "lucide-react";
 
 interface InvoiceStepPatientProps {
@@ -40,21 +40,11 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
   const [manualName, setManualName] = useState(getValues<string>('patientName'));
   const [manualPhone, setManualPhone] = useState(getValues<string>('patientPhone'));
   const [showMissingRxWarning, setShowMissingRxWarning] = useState(false);
-  const [hasContactLensRx, setHasContactLensRx] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     cylinderAxisError: false
   });
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
-  
-  // Check if the current patient has contact lens RX
-  useEffect(() => {
-    if (currentPatient && currentPatient.contactLensRx) {
-      setHasContactLensRx(true);
-    } else {
-      setHasContactLensRx(false);
-    }
-  }, [currentPatient]);
   
   const handlePatientSearch = () => {
     if (!patientSearch.trim()) {
@@ -90,15 +80,8 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
       if (patient.contactLensRx) {
         setValue('contactLensRx', patient.contactLensRx);
         setShowMissingRxWarning(false);
-        setHasContactLensRx(true);
       } else {
-        // If no contact lens RX, set default empty values
-        setValue('contactLensRx', {
-          rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
-          leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
-        });
         setShowMissingRxWarning(true);
-        setHasContactLensRx(false);
       }
     }
   };
@@ -306,30 +289,14 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                   
                   {rxVisible && invoiceType === "contacts" && (
                     <div className="mt-3">
-                      {hasContactLensRx ? (
-                        <>
-                          <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-md flex items-center gap-2">
-                            <Info className="w-4 h-4 text-blue-500" />
-                            <p className="text-blue-700 text-sm">
-                              {t('usingExistingContactLensRx') || "Using patient's existing contact lens prescription"}
-                            </p>
-                          </div>
-                          <ContactLensForm 
-                            rxData={getValues<any>('contactLensRx')}
-                            onChange={handleContactLensRxChange}
-                            readOnly={true}
-                          />
-                        </>
-                      ) : (
-                        <ContactLensForm 
-                          rxData={getValues<any>('contactLensRx') || {
-                            rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
-                            leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
-                          }}
-                          onChange={handleContactLensRxChange}
-                          showMissingRxWarning={showMissingRxWarning}
-                        />
-                      )}
+                      <ContactLensForm 
+                        rxData={getValues<any>('contactLensRx') || {
+                          rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
+                          leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
+                        }}
+                        onChange={handleContactLensRxChange}
+                        showMissingRxWarning={showMissingRxWarning}
+                      />
                     </div>
                   )}
                 </div>

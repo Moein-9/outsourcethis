@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore, ContactLensRx } from "@/store/patientStore";
 import { toast } from "@/components/ui/use-toast";
@@ -40,7 +39,6 @@ export const CreateClient: React.FC = () => {
   const [rxDate, setRxDate] = useState<Date | undefined>(new Date());
   const [notes, setNotes] = useState("");
   
-  // Glasses RX data
   const [sphOD, setSphOD] = useState("");
   const [cylOD, setCylOD] = useState("");
   const [axisOD, setAxisOD] = useState("");
@@ -52,15 +50,10 @@ export const CreateClient: React.FC = () => {
   const [pdRight, setPdRight] = useState("");
   const [pdLeft, setPdLeft] = useState("");
   
-  // Contact Lens RX data
   const [contactLensRx, setContactLensRx] = useState<ContactLensRx>({
     rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" },
     leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" }
   });
-  
-  // Track if any data has been entered in each tab
-  const [hasGlassesRxData, setHasGlassesRxData] = useState(false);
-  const [hasContactLensRxData, setHasContactLensRxData] = useState(false);
   
   const [validationErrors, setValidationErrors] = useState({
     rightEye: { cylinderAxisError: false },
@@ -76,33 +69,6 @@ export const CreateClient: React.FC = () => {
 
   const hasValidationErrors = validationErrors.rightEye.cylinderAxisError || 
                               validationErrors.leftEye.cylinderAxisError;
-  
-  // Check if glasses RX data has been entered
-  useEffect(() => {
-    const hasGlassesData = 
-      sphOD !== "" || cylOD !== "" || axisOD !== "" || addOD !== "" ||
-      sphOS !== "" || cylOS !== "" || axisOS !== "" || addOS !== "" ||
-      pdRight !== "" || pdLeft !== "";
-    
-    setHasGlassesRxData(hasGlassesData);
-  }, [sphOD, cylOD, axisOD, addOD, sphOS, cylOS, axisOS, addOS, pdRight, pdLeft]);
-  
-  // Check if contact lens RX data has been entered
-  useEffect(() => {
-    const hasContactData = 
-      contactLensRx.rightEye.sphere !== "-" || 
-      contactLensRx.rightEye.cylinder !== "-" || 
-      contactLensRx.rightEye.axis !== "-" ||
-      contactLensRx.rightEye.bc !== "-" || 
-      contactLensRx.rightEye.dia !== "-" ||
-      contactLensRx.leftEye.sphere !== "-" || 
-      contactLensRx.leftEye.cylinder !== "-" || 
-      contactLensRx.leftEye.axis !== "-" ||
-      contactLensRx.leftEye.bc !== "-" || 
-      contactLensRx.leftEye.dia !== "-";
-    
-    setHasContactLensRxData(hasContactData);
-  }, [contactLensRx]);
   
   useEffect(() => {
     validateCylinderAxis('rightEye', cylOD, axisOD);
@@ -259,51 +225,52 @@ export const CreateClient: React.FC = () => {
       dob = `${dobDay}/${dobMonth}/${dobYear}`;
     }
     
-    // Prepare the common patient data
-    const patientData: any = {
-      name,
-      phone,
-      dob,
-      notes: notes.trim(),
-      patientNotes: [],
-    };
+    let patientData;
     
-    // Add glasses RX data if entered
-    if (hasGlassesRxData) {
-      patientData.rx = {
-        sphereOD: sphOD,
-        cylOD,
-        axisOD,
-        addOD,
-        sphereOS: sphOS,
-        cylOS,
-        axisOS,
-        addOS,
-        pdRight,
-        pdLeft,
-        createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
+    if (activeTab === "glasses") {
+      patientData = {
+        name,
+        phone,
+        dob,
+        notes: notes.trim(),
+        patientNotes: [],
+        rx: {
+          sphereOD: sphOD,
+          cylOD,
+          axisOD,
+          addOD,
+          sphereOS: sphOS,
+          cylOS,
+          axisOS,
+          addOS,
+          pdRight,
+          pdLeft,
+          createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
+        }
       };
     } else {
-      // Provide default empty RX data
-      patientData.rx = {
-        sphereOD: "-",
-        cylOD: "-",
-        axisOD: "-",
-        addOD: "-",
-        sphereOS: "-",
-        cylOS: "-",
-        axisOS: "-",
-        addOS: "-",
-        pdRight: "-",
-        pdLeft: "-"
-      };
-    }
-    
-    // Add contact lens RX data if entered
-    if (hasContactLensRxData) {
-      patientData.contactLensRx = {
-        ...contactLensRx,
-        createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
+      patientData = {
+        name,
+        phone,
+        dob,
+        notes: notes.trim(),
+        patientNotes: [],
+        rx: {
+          sphereOD: "-",
+          cylOD: "-",
+          axisOD: "-",
+          addOD: "-",
+          sphereOS: "-",
+          cylOS: "-",
+          axisOS: "-",
+          addOS: "-",
+          pdRight: "-",
+          pdLeft: "-"
+        },
+        contactLensRx: {
+          ...contactLensRx,
+          createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
+        }
       };
     }
     

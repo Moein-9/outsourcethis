@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -10,11 +11,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PrinterIcon, Newspaper, FileText, Eye, Glasses } from "lucide-react";
+import { PrinterIcon, Newspaper, FileText } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "sonner";
 import { PrintService } from "@/utils/PrintService";
-import { printWorkOrderReceipt, WorkOrderReceiptPrintProps } from "./WorkOrderReceiptPrint";
+import { printWorkOrderReceipt } from "./WorkOrderReceiptPrint";
 
 interface WorkOrderPrintSelectorProps {
   invoice: Invoice;
@@ -34,7 +35,6 @@ interface WorkOrderPrintSelectorProps {
   contactLensRx?: any;
   trigger?: React.ReactNode;
   thermalOnly?: boolean;
-  prescriptionType?: 'glasses' | 'contacts';
 }
 
 export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
@@ -48,14 +48,12 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   contactLenses,
   contactLensRx,
   trigger,
-  thermalOnly = false,
-  prescriptionType = 'glasses'
+  thermalOnly = false
 }) => {
   const { t, language } = useLanguageStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<"a4" | "receipt" | null>(thermalOnly ? "receipt" : null);
   const [printingInProgress, setPrintingInProgress] = useState(false);
-  const [selectedPrescriptionType, setSelectedPrescriptionType] = useState<'glasses' | 'contacts'>(prescriptionType);
   const isRtl = language === 'ar';
   
   const handleTriggerClick = () => {
@@ -82,8 +80,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           coating,
           frame,
           contactLenses,
-          contactLensRx,
-          prescriptionType: selectedPrescriptionType
+          contactLensRx
         });
         
         setTimeout(() => {
@@ -92,14 +89,33 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           toast.success(t("printingCompleted"));
         }, 1000);
       } else {
-        const generateGlassesPrescriptionTable = () => {
-          if (!rx) return '';
-          
-          return `
+        const a4Content = `
+          <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
+            <div style="text-align: center; margin-bottom: 10mm;">
+              <h1 style="font-size: 24px; margin-bottom: 5mm;">${t("workOrder")}</h1>
+              <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.workOrderId}</p>
+              <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
+            </div>
+            
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
-              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-                ${t("prescriptionDetails")} - ${t("glasses")}
-              </h2>
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("patientInformation")}</h2>
+              <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
+              <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
+            </div>
+            
+            ${frame ? `
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("frameDetails")}</h2>
+              <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
+              <p><strong>${t("model")}:</strong> ${frame.model}</p>
+              <p><strong>${t("color")}:</strong> ${frame.color}</p>
+              <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} ${t("currency")}</p>
+            </div>
+            ` : ''}
+            
+            ${rx ? `
+            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("prescriptionDetails")}</h2>
               <table style="width: 100%; border-collapse: collapse;">
                 <thead>
                   <tr>
@@ -131,82 +147,9 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
                 </tbody>
               </table>
             </div>
-          `;
-        };
-        
-        const generateContactLensPrescriptionTable = () => {
-          if (!contactLensRx) return '';
-          
-          return `
-            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
-              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-                ${t("prescriptionDetails")} - ${t("contactLenses")}
-              </h2>
-              <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                  <tr>
-                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("eye")}</th>
-                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">SPH</th>
-                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">CYL</th>
-                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">AXIS</th>
-                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">BC</th>
-                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">DIA</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("rightEye")} (OD)</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${contactLensRx.rightEye.sphere || "-"}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${contactLensRx.rightEye.cylinder || "-"}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${contactLensRx.rightEye.axis || "-"}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${contactLensRx.rightEye.bc || "-"}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${contactLensRx.rightEye.dia || "-"}</td>
-                  </tr>
-                  <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t("leftEye")} (OS)</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${contactLensRx.leftEye.sphere || "-"}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${contactLensRx.leftEye.cylinder || "-"}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${contactLensRx.leftEye.axis || "-"}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${contactLensRx.leftEye.bc || "-"}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${contactLensRx.leftEye.dia || "-"}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          `;
-        };
-        
-        const prescriptionTable = selectedPrescriptionType === 'glasses' 
-          ? generateGlassesPrescriptionTable() 
-          : generateContactLensPrescriptionTable();
-          
-        const a4Content = `
-          <div style="font-family: ${isRtl ? 'Zain, sans-serif' : 'Yrsa, serif'}; max-width: 210mm; margin: 0 auto; padding: 20mm 10mm;" dir="${isRtl ? 'rtl' : 'ltr'}">
-            <div style="text-align: center; margin-bottom: 10mm;">
-              <h1 style="font-size: 24px; margin-bottom: 5mm;">${t("workOrder")}</h1>
-              <p style="font-size: 18px; margin-bottom: 2mm;">${t("orderNumber")}: ${invoice.workOrderId}</p>
-              <p style="font-size: 14px;">${new Date(invoice.createdAt).toLocaleDateString()}</p>
-            </div>
-            
-            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
-              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("patientInformation")}</h2>
-              <p><strong>${t("name")}:</strong> ${patientName || invoice.patientName || "-"}</p>
-              <p><strong>${t("phone")}:</strong> ${patientPhone || invoice.patientPhone || "-"}</p>
-            </div>
-            
-            ${frame ? `
-            <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
-              <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("frameDetails")}</h2>
-              <p><strong>${t("brand")}:</strong> ${frame.brand}</p>
-              <p><strong>${t("model")}:</strong> ${frame.model}</p>
-              <p><strong>${t("color")}:</strong> ${frame.color}</p>
-              <p><strong>${t("price")}:</strong> ${frame.price.toFixed(3)} ${t("currency")}</p>
-            </div>
             ` : ''}
             
-            ${prescriptionTable}
-            
-            ${lensType && selectedPrescriptionType === 'glasses' ? `
+            ${lensType ? `
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
               <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("lensDetails")}</h2>
               <p><strong>${t("type")}:</strong> ${lensType}</p>
@@ -294,31 +237,6 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
                 <Newspaper className={`h-8 w-8 ${selectedFormat === "receipt" ? "text-primary" : "text-muted-foreground"}`} />
                 <span className="font-medium">{t("receiptFormat")}</span>
                 <span className="text-xs text-center text-muted-foreground">{t("compactFormat")}</span>
-              </div>
-            </div>
-            
-            <div className="p-3 bg-gray-50 rounded-lg border mt-2">
-              <h3 className="text-sm font-medium mb-2">{t("printingType")}</h3>
-              <div className="flex items-center gap-4">
-                <div 
-                  className={`flex items-center gap-2 p-2 border rounded-md cursor-pointer transition-all ${
-                    selectedPrescriptionType === "glasses" ? "border-primary bg-primary/5" : "border-border"
-                  }`}
-                  onClick={() => setSelectedPrescriptionType('glasses')}
-                >
-                  <Glasses className={`h-4 w-4 ${selectedPrescriptionType === "glasses" ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className="text-sm">{t("glasses")}</span>
-                </div>
-                
-                <div 
-                  className={`flex items-center gap-2 p-2 border rounded-md cursor-pointer transition-all ${
-                    selectedPrescriptionType === "contacts" ? "border-primary bg-primary/5" : "border-border"
-                  }`}
-                  onClick={() => setSelectedPrescriptionType('contacts')}
-                >
-                  <Eye className={`h-4 w-4 ${selectedPrescriptionType === "contacts" ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className="text-sm">{t("contactLenses")}</span>
-                </div>
               </div>
             </div>
             
