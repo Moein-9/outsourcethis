@@ -47,12 +47,21 @@ export interface ContactLensItem {
   color?: string;
 }
 
+export interface ServiceItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: "exam" | "repair" | "other";
+}
+
 interface InventoryState {
   frames: FrameItem[];
   lensTypes: LensType[];
   lensCoatings: LensCoating[];
   lensThicknesses: LensThickness[];
   contactLenses: ContactLensItem[];
+  services: ServiceItem[];
   
   // Frame methods
   addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => string;
@@ -82,6 +91,13 @@ interface InventoryState {
   updateContactLens: (id: string, lens: Partial<Omit<ContactLensItem, "id">>) => void;
   deleteContactLens: (id: string) => void;
   searchContactLenses: (query: string) => ContactLensItem[];
+  
+  // Service methods
+  addService: (service: Omit<ServiceItem, "id">) => string;
+  updateService: (id: string, service: Partial<Omit<ServiceItem, "id">>) => void;
+  deleteService: (id: string) => void;
+  getServiceById: (id: string) => ServiceItem | undefined;
+  getServicesByCategory: (category: ServiceItem['category']) => ServiceItem[];
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -156,6 +172,15 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "cl1", brand: "Acuvue", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 25, qty: 30 },
         { id: "cl2", brand: "Biofinty", type: "Monthly", bc: "8.6", diameter: "14.0", power: "-3.00", price: 20, qty: 12 },
         { id: "cl3", brand: "Air Optix", type: "Monthly", bc: "8.4", diameter: "14.2", power: "+1.50", price: 22, qty: 8 }
+      ],
+      services: [
+        { 
+          id: "service1", 
+          name: "Eye Exam", 
+          description: "Standard eye examination service to evaluate eye health and vision.", 
+          price: 3, 
+          category: "exam" 
+        }
       ],
       
       // Frame methods
@@ -317,6 +342,39 @@ export const useInventoryStore = create<InventoryState>()(
           lens.power.includes(q) || 
           lens.bc.includes(q)
         );
+      },
+      
+      // Service methods
+      addService: (service) => {
+        const id = `service${Date.now()}`;
+        
+        set((state) => ({
+          services: [...state.services, { ...service, id }]
+        }));
+        
+        return id;
+      },
+      
+      updateService: (id, service) => {
+        set((state) => ({
+          services: state.services.map(item => 
+            item.id === id ? { ...item, ...service } : item
+          )
+        }));
+      },
+      
+      deleteService: (id) => {
+        set((state) => ({
+          services: state.services.filter(item => item.id !== id)
+        }));
+      },
+      
+      getServiceById: (id) => {
+        return get().services.find(service => service.id === id);
+      },
+      
+      getServicesByCategory: (category) => {
+        return get().services.filter(service => service.category === category);
       }
     }),
     {

@@ -6,7 +6,7 @@ import {
   ClipboardCheck, Printer, Receipt, 
   Check, ChevronRight, FileText, PartyPopper,
   CreditCard, User, Phone, Calendar, AlertTriangle,
-  Contact
+  Contact, ScrollText
 } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
 
@@ -49,6 +49,10 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     paymentMethod: getValues<string>('paymentMethod') || "",
     isPaid: calculateRemaining() <= 0,
     authNumber: getValues<string>('authNumber') || "",
+    serviceName: getValues<string>('serviceName') || "",
+    serviceId: getValues<string>('serviceId') || "",
+    serviceDescription: getValues<string>('serviceDescription') || "",
+    servicePrice: getValues<number>('servicePrice') || 0,
   };
   
   const patient = {
@@ -56,8 +60,9 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     phone: getValues<string>('patientPhone') || ""
   };
   
-  const hasInvoiceData = !!invoice.invoiceId && !!invoice.workOrderId;
+  const hasInvoiceData = !!invoice.invoiceId;
   const isContactLens = invoice.invoiceType === "contacts";
+  const isEyeExam = invoice.invoiceType === "exam";
   
   if (!hasInvoiceData) {
     return (
@@ -118,24 +123,34 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
               <span className="font-bold text-lg text-amber-500">{invoice.invoiceId}</span>
             </div>
             
-            <div className={`flex justify-between items-center pb-3 border-b border-dashed border-green-200 ${textAlignClass}`}>
-              <div className="flex items-center">
-                <FileText className="w-5 h-5 text-primary mr-2" />
-                <span className="text-gray-600 font-medium">{t('workOrderNumber')}:</span>
+            {!isEyeExam && (
+              <div className={`flex justify-between items-center pb-3 border-b border-dashed border-green-200 ${textAlignClass}`}>
+                <div className="flex items-center">
+                  <FileText className="w-5 h-5 text-primary mr-2" />
+                  <span className="text-gray-600 font-medium">{t('workOrderNumber')}:</span>
+                </div>
+                <span className="font-bold text-lg text-primary">{invoice.workOrderId}</span>
               </div>
-              <span className="font-bold text-lg text-primary">{invoice.workOrderId}</span>
-            </div>
+            )}
 
             <div className={`flex justify-between items-center pb-3 border-b border-dashed border-green-200 ${textAlignClass}`}>
               <div className="flex items-center">
-                {isContactLens ? (
+                {isEyeExam ? (
+                  <ScrollText className="w-5 h-5 text-blue-600 mr-2" />
+                ) : isContactLens ? (
                   <Contact className="w-5 h-5 text-blue-600 mr-2" />
                 ) : (
-                  <FileText className="w-5 h-5 text-blue-600 mr-2" />
+                  <Glasses className="w-5 h-5 text-blue-600 mr-2" />
                 )}
                 <span className="text-gray-600 font-medium">{t('orderType')}:</span>
               </div>
-              <span className="font-medium">{isContactLens ? t('contactLenses') : t('glasses')}</span>
+              <span className="font-medium">
+                {isEyeExam 
+                  ? (language === 'ar' ? 'فحص العين' : 'Eye Exam') 
+                  : isContactLens 
+                    ? t('contactLenses') 
+                    : t('glasses')}
+              </span>
             </div>
             
             <div className={`flex justify-between items-center ${textAlignClass}`}>
@@ -194,24 +209,26 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
         </h3>
         
         <div className="mt-6 space-y-4">
-          <Button 
-            variant="outline"
-            className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-            onClick={() => {
-              setWorkOrderPrintOpen(true);
-            }}
-          >
-            <div className="flex items-center">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
-                <ClipboardCheck className="w-6 h-6 text-blue-600" />
+          {!isEyeExam && (
+            <Button 
+              variant="outline"
+              className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
+              onClick={() => {
+                setWorkOrderPrintOpen(true);
+              }}
+            >
+              <div className="flex items-center">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
+                  <ClipboardCheck className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="text-left">
+                  <div className="font-medium">{t('printWorkOrder')}</div>
+                  <div className="text-xs text-muted-foreground">{t('printWorkOrderDescription')}</div>
+                </div>
               </div>
-              <div className="text-left">
-                <div className="font-medium">{t('printWorkOrder')}</div>
-                <div className="text-xs text-muted-foreground">{t('printWorkOrderDescription')}</div>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-          </Button>
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+            </Button>
+          )}
           
           <Button 
             variant="outline"

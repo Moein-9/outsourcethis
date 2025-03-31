@@ -22,13 +22,30 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const { t, language } = useLanguageStore();
   const searchFrames = useInventoryStore((state) => state.searchFrames);
   const addFrame = useInventoryStore((state) => state.addFrame);
+  const getServicesByCategory = useInventoryStore((state) => state.getServicesByCategory);
   const { getValues, setValue } = useInvoiceForm();
+  
+  // Fetch eye exam service from the store
+  const [eyeExamService] = useState(() => {
+    const examServices = getServicesByCategory("exam");
+    return examServices.length > 0 ? examServices[0] : {
+      id: "service1",
+      name: "Eye Exam",
+      description: "Standard eye examination service to evaluate eye health and vision.",
+      price: 3,
+      category: "exam"
+    };
+  });
   
   useEffect(() => {
     if (invoiceType === "exam") {
-      setValue('total', 3);
+      setValue('total', eyeExamService.price);
+      setValue('serviceName', eyeExamService.name);
+      setValue('serviceId', eyeExamService.id);
+      setValue('serviceDescription', eyeExamService.description);
+      setValue('servicePrice', eyeExamService.price);
     }
-  }, [invoiceType, setValue]);
+  }, [invoiceType, setValue, eyeExamService]);
   
   const [skipFrame, setSkipFrame] = useState(getValues<boolean>('skipFrame'));
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
@@ -252,24 +269,24 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2 text-lg font-medium">
                   <ScrollText className="w-5 h-5 text-primary" />
-                  {language === 'ar' ? 'فحص العين' : 'Eye Exam Service'}
+                  {eyeExamService.name}
                 </div>
                 <div className="font-semibold text-lg">
-                  3.000 {language === 'ar' ? 'د.ك' : 'KWD'}
+                  {eyeExamService.price.toFixed(3)} {language === 'ar' ? 'د.ك' : 'KWD'}
                 </div>
               </div>
               
               <p className="mt-4 text-muted-foreground text-sm">
-                {language === 'ar' 
-                  ? 'خدمة فحص العين القياسية لتقييم صحة العين والنظر.'
-                  : 'Standard eye examination service to evaluate eye health and vision.'}
+                {eyeExamService.description}
               </p>
             </div>
             
             <div className="mt-6 flex items-center justify-center">
               <div className="px-4 py-2 bg-green-100 text-green-800 rounded-md flex items-center gap-2">
                 <Check className="w-4 h-4" />
-                {language === 'ar' ? 'السعر القياسي: 3.000 د.ك' : 'Standard Price: 3.000 KWD'}
+                {language === 'ar' 
+                  ? `السعر: ${eyeExamService.price.toFixed(3)} د.ك` 
+                  : `Price: ${eyeExamService.price.toFixed(3)} KWD`}
               </div>
             </div>
           </CardContent>

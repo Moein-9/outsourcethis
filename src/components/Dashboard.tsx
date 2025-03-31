@@ -11,7 +11,9 @@ import {
   CreditCard, 
   Search, 
   Calendar,
-  Store
+  Store,
+  ScrollText,
+  Eye
 } from "lucide-react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -48,6 +50,26 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  const navigateToEyeExam = () => {
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      // Create an event to navigate to createInvoice
+      const navigateEvent = new CustomEvent('navigate', { 
+        detail: { section: 'createInvoice' } 
+      });
+      rootElement.dispatchEvent(navigateEvent);
+      
+      // Wait a bit for the navigation to complete, then set the invoice type to exam
+      setTimeout(() => {
+        // Find the "exam" radio button and click it
+        const examRadioButton = document.querySelector('input[value="exam"]');
+        if (examRadioButton instanceof HTMLElement) {
+          examRadioButton.click();
+        }
+      }, 100);
+    }
+  };
+
   const quickActions = [
     {
       title: language === 'ar' ? 'إنشاء عميل جديد' : 'New Patient',
@@ -62,6 +84,13 @@ export const Dashboard: React.FC = () => {
       icon: FileText,
       color: 'bg-teal-500',
       onClick: () => navigateToSection('createInvoice')
+    },
+    {
+      title: language === 'ar' ? 'فحص العين' : 'Eye Exam',
+      description: language === 'ar' ? 'إنشاء فاتورة فحص عين' : 'Create an eye exam invoice',
+      icon: Eye,
+      color: 'bg-teal-500',
+      onClick: navigateToEyeExam
     },
     {
       title: language === 'ar' ? 'المدفوعات المتبقية' : 'Remaining Payments',
@@ -117,7 +146,7 @@ export const Dashboard: React.FC = () => {
         defaultOpen={true}
         className="mb-6"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 p-4">
           {quickActions.map((action, index) => (
             <Card 
               key={index} 
