@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore, ContactLensRx } from "@/store/patientStore";
 import { toast } from "@/components/ui/use-toast";
@@ -13,6 +14,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensForm } from "@/components/ContactLensForm";
 import { useLanguageStore } from "@/store/languageStore";
 import { Textarea } from "@/components/ui/textarea";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog";
+import { printRxReceipt } from "@/components/RxReceiptPrint";
 
 export const CreateClient: React.FC = () => {
   const addPatient = usePatientStore((state) => state.addPatient);
@@ -51,6 +63,10 @@ export const CreateClient: React.FC = () => {
     rightEye: { cylinderAxisError: false },
     leftEye: { cylinderAxisError: false }
   });
+  
+  // Print RX dialog state
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [savedPatient, setSavedPatient] = useState<any>(null);
   
   // Direction class based on language
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
@@ -224,8 +240,10 @@ export const CreateClient: React.FC = () => {
       dob = `${dobDay}/${dobMonth}/${dobYear}`;
     }
     
+    let patientData;
+    
     if (activeTab === "glasses") {
-      const patientData = {
+      patientData = {
         name,
         phone,
         dob,
@@ -245,11 +263,9 @@ export const CreateClient: React.FC = () => {
           createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
         }
       };
-      
-      addPatient(patientData);
     } else {
       // Add contact lens patient
-      const patientData = {
+      patientData = {
         name,
         phone,
         dob,
@@ -272,16 +288,25 @@ export const CreateClient: React.FC = () => {
           createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
         }
       };
-      
-      addPatient(patientData);
     }
+    
+    // Save patient data and store for printing option
+    addPatient(patientData);
+    setSavedPatient(patientData);
     
     toast({
       title: t("success"),
       description: t("successMessage")
     });
     
+    // Show the print dialog
+    setShowPrintDialog(true);
+    
     // Reset form
+    resetForm();
+  };
+
+  const resetForm = () => {
     setName("");
     setPhone("");
     setNoDob(false);
@@ -308,6 +333,20 @@ export const CreateClient: React.FC = () => {
       rightEye: { cylinderAxisError: false },
       leftEye: { cylinderAxisError: false }
     });
+  };
+
+  const handlePrintRx = () => {
+    if (savedPatient) {
+      if (activeTab === "glasses") {
+        printRxReceipt({
+          patientName: savedPatient.name,
+          patientPhone: savedPatient.phone,
+          rx: savedPatient.rx,
+          forcedLanguage: language as 'en' | 'ar'
+        });
+      }
+      setShowPrintDialog(false);
+    }
   };
   
   return (
@@ -645,6 +684,30 @@ export const CreateClient: React.FC = () => {
       >
         {t("saveAndContinue")}
       </Button>
+
+      {/* Print RX Confirmation Dialog */}
+      <AlertDialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
+        <AlertDialogContent className={dirClass}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className={textAlignClass}>
+              {language === 'ar' ? 'طباعة الوصفة الطبية' : 'Print Prescription'}
+            </AlertDialogTitle>
+            <AlertDialogDescription className={textAlignClass}>
+              {language === 'ar' 
+                ? 'هل تريد طباعة الوصفة الطبية الآن؟'
+                : 'Do you want to print the RX now?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className={`${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+            <AlertDialogCancel>
+              {language === 'ar' ? 'لا' : 'No'}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handlePrintRx}>
+              {language === 'ar' ? 'نعم، اطبع الآن' : 'Yes, Print Now'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
