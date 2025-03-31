@@ -11,6 +11,31 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+function getLensTypeArabic(type: string): string {
+  const typeMap: Record<string, string> = {
+    'distance': 'نظارات للنظر البعيد',
+    'reading': 'نظارات طبية للقراءة',
+    'progressive': 'عدسات تقدمية',
+    'bifocal': 'عدسات ثنائية',
+    'sunglasses': 'عدسات شمسية'
+  };
+  
+  return typeMap[type.toLowerCase()] || type;
+}
+
+function getCoatingArabic(coating: string): string {
+  const coatingMap: Record<string, string> = {
+    'anti-reflective': 'مضاد للانعكاس',
+    'blue light': 'حماية شاشة',
+    'scratch resistant': 'ضد الخدش',
+    'basic': 'عادي',
+    'filter': 'فلتر',
+    'super filter': 'سوبر فلتر'
+  };
+  
+  return coatingMap[coating.toLowerCase()] || coating;
+}
+
 interface CustomWorkOrderReceiptProps {
   workOrder: any;
   invoice?: any;
@@ -660,32 +685,4 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </style>
     </div>
   );
-};
-
-const getLensTypeArabic = (lensType: string): string => {
-  const lensTypeMap: Record<string, string> = {
-    "Single Vision": "نظارات للنظر",
-    "Progressive": "عدسات متعددة البؤر",
-    "Bifocal": "ثنائية البؤرة",
-    "Reading": "نظارات للقراءة",
-    "Distance": "نظارات للنظر البعيد",
-    "Intermediate": "نظارات للمسافة المتوسطة",
-    // Add more mappings as needed
-  };
-  
-  return lensTypeMap[lensType] || lensType;
-};
-
-const getCoatingArabic = (coating: string): string => {
-  const coatingMap: Record<string, string> = {
-    "Anti-Reflective": "طلاء مضاد للانعكاس",
-    "Blue Light Filter": "فلتر الضوء الأزرق",
-    "Photochromic": "عدسات متغيرة اللون",
-    "Scratch Resistant": "مقاوم للخدش",
-    "UV Protection": "حماية من الأشعة فوق البنفسجية",
-    "Polarized": "استقطاب",
-    // Add more mappings as needed
-  };
-  
-  return coatingMap[coating] || coating;
 };

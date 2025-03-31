@@ -26,7 +26,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const { getValues, setValue } = useInvoiceForm();
   
   // Fetch eye exam service from the store
-  const [eyeExamService] = useState(() => {
+  const [eyeExamService, setEyeExamService] = useState(() => {
     const examServices = getServicesByCategory("exam");
     return examServices.length > 0 ? examServices[0] : {
       id: "service1",
@@ -36,6 +36,14 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
       category: "exam"
     };
   });
+  
+  // Refresh the eye exam service when the inventory changes
+  useEffect(() => {
+    const examServices = getServicesByCategory("exam");
+    if (examServices.length > 0) {
+      setEyeExamService(examServices[0]);
+    }
+  }, [getServicesByCategory]);
   
   useEffect(() => {
     if (invoiceType === "exam") {
