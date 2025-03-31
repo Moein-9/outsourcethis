@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -547,7 +548,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     <ul class="tips-list">
       <li>${isRtl ? 'اغسل يديك جيداً بالصابون قبل لمس العدسات' : 'Always wash your hands thoroughly with soap before touching your lenses'}</li>
       <li>${isRtl ? 'استخدم محلول العدسات اللاصقة المناسب فقط' : 'Use only the appropriate contact lens solution'}</li>
-      <li>${isRtl ? 'لا تنم بالعدسات اللاصقة إلا إذا كانت مصممة للاستخدام أثناء النوم' : 'Don\\'t sleep with your contacts unless they are specifically designed for overnight wear'}</li>
+      <li>${isRtl ? 'لا تنم بالعدسات اللاصقة إلا إذا كانت مصممة للاستخدام أثناء النوم' : "Don't sleep with your contacts unless they are specifically designed for overnight wear"}</li>
       <li>${isRtl ? 'استبدل العدسات وفقاً للجدول الزمني الموصى به' : 'Replace your lenses according to the recommended schedule'}</li>
     </ul>
     ` : `
