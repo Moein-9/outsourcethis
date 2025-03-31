@@ -950,4 +950,252 @@ export const PrintService = {
           
           @font-face {
             font-family: 'Yrsa';
-            src: url('https://fonts.googleapis
+            src: url('https://fonts.googleapis.com/css2?family=Yrsa:wght@400;600;700&display=swap');
+          }
+          
+          body {
+            font-family: 'Yrsa', serif;
+            direction: ltr;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          [dir="rtl"] {
+            direction: rtl;
+            font-family: 'Zain', sans-serif;
+          }
+          
+          .a4-container {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 10mm;
+            background-color: white;
+          }
+          
+          /* Print dialog specific styles */
+          @media print {
+            html, body {
+              width: 210mm;
+              height: 297mm;
+              background: white;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            
+            .a4-container {
+              -webkit-box-shadow: none;
+              box-shadow: none;
+              margin: 0;
+              padding: 0;
+            }
+            
+            @page {
+              size: A4 portrait;
+              margin: 10mm;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="a4-container">${content}</div>
+        <script>
+          window.onload = function() {
+            window.focus();
+            window.print();
+            window.onafterprint = function() {
+              window.parent.postMessage('print-complete', '*');
+            };
+          }
+        </script>
+      </body>
+      </html>
+    `;
+  },
+  
+  /**
+   * Print a report (specific format for reports)
+   * @param reportContent HTML content of the report
+   * @param title Report title
+   * @param onComplete Callback after printing completes
+   */
+  printReport: (
+    reportContent: string,
+    title: string = 'Report',
+    onComplete?: () => void
+  ) => {
+    try {
+      console.log('[PrintService] Starting report print process');
+      
+      // Create a full HTML document for the report
+      const reportDocument = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${title}</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 10mm;
+            }
+            
+            body {
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+              line-height: 1.5;
+              color: #333;
+              margin: 0;
+              padding: 0;
+              background: white;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+            
+            .report-container {
+              max-width: 210mm;
+              margin: 0 auto;
+              padding: 5mm;
+              background: white;
+            }
+            
+            .report-header {
+              text-align: center;
+              margin-bottom: 10mm;
+            }
+            
+            .report-title {
+              font-size: 24px;
+              font-weight: 700;
+              margin-bottom: 2mm;
+            }
+            
+            .report-date {
+              font-size: 14px;
+              color: #666;
+            }
+            
+            .report-section {
+              margin-bottom: 8mm;
+            }
+            
+            .section-title {
+              font-size: 18px;
+              font-weight: 600;
+              margin-bottom: 4mm;
+              padding-bottom: 2mm;
+              border-bottom: 1px solid #e0e0e0;
+            }
+            
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 5mm;
+            }
+            
+            th, td {
+              padding: 2mm;
+              border: 1px solid #e0e0e0;
+              text-align: left;
+            }
+            
+            th {
+              background-color: #f5f5f5;
+              font-weight: 600;
+            }
+            
+            .summary-box {
+              background-color: #f9f9f9;
+              border: 1px solid #e0e0e0;
+              border-radius: 2mm;
+              padding: 3mm;
+              margin-bottom: 5mm;
+            }
+            
+            .chart-container {
+              margin-bottom: 5mm;
+              page-break-inside: avoid;
+            }
+            
+            @media print {
+              body {
+                background: white;
+              }
+              
+              .report-container {
+                width: 100%;
+                max-width: none;
+                padding: 0;
+                margin: 0;
+              }
+              
+              .page-break {
+                page-break-before: always;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="report-container">
+            ${reportContent}
+          </div>
+          <script>
+            window.onload = function() {
+              window.focus();
+              window.print();
+              window.onafterprint = function() {
+                window.close();
+              };
+            };
+          </script>
+        </body>
+        </html>
+      `;
+      
+      // Open a new window for printing
+      const printWindow = window.open('', '_blank');
+      
+      if (!printWindow) {
+        console.error('[PrintService] Failed to open print window');
+        toast({
+          title: "Print Error",
+          description: "Failed to open print window. Please allow popups for this site.",
+          variant: "destructive"
+        });
+        if (onComplete) onComplete();
+        return;
+      }
+      
+      // Write content to the print window
+      printWindow.document.open();
+      printWindow.document.write(reportDocument);
+      printWindow.document.close();
+      
+      // Handle completion
+      printWindow.onafterprint = () => {
+        printWindow.close();
+        if (onComplete) onComplete();
+      };
+      
+      // Set fallback for browsers that don't trigger onafterprint
+      setTimeout(() => {
+        if (printWindow && !printWindow.closed) {
+          printWindow.close();
+          if (onComplete) onComplete();
+        }
+      }, 10000);
+      
+    } catch (error) {
+      console.error('[PrintService] Error printing report:', error);
+      toast({
+        title: "Print Error",
+        description: "An error occurred while printing the report.",
+        variant: "destructive"
+      });
+      if (onComplete) onComplete();
+    }
+  }
+};
