@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -65,6 +66,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const [newQty, setNewQty] = useState("1");
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   
   React.useEffect(() => {
     if (getValues<string>('frameBrand')) {
@@ -354,7 +356,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="frameSearchBox" className={`text-muted-foreground block ${textAlignClass}`}>{t('searchTerm')}</Label>
-                  <div className={`flex ${directionClass === 'rtl' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
+                  <div className={`flex ${dirClass === 'rtl' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
                     <Input
                       id="frameSearchBox"
                       value={frameSearch}
