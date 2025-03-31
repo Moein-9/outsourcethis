@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { DailySalesReport } from "@/components/reports/DailySalesReport";
 import ComparativeAnalysis from "@/components/reports/ComparativeAnalysis";
@@ -118,6 +119,7 @@ const generateMockData = () => {
 const ReportPage: React.FC = () => {
   const invoiceStore = useInvoiceStore();
   const { language } = useLanguageStore();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("daily");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -173,6 +175,18 @@ const ReportPage: React.FC = () => {
     wrongPassword: language === 'ar' ? "كلمة المرور غير صحيحة" : "Incorrect password",
     wrongAnswer: language === 'ar' ? "الإجابة غير صحيحة" : "Incorrect answer",
     passwordRevealed: language === 'ar' ? `كلمة المرور هي: ${correctPassword}` : `The password is: ${correctPassword}`,
+    backToDashboard: language === 'ar' ? "العودة إلى لوحة التحكم" : "Back to Dashboard",
+  };
+  
+  const handleNavigate = (section: string) => {
+    navigate("/");
+    setTimeout(() => {
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        const event = new CustomEvent('navigate', { detail: { section } });
+        rootElement.dispatchEvent(event);
+      }
+    }, 100);
   };
   
   useEffect(() => {
@@ -243,9 +257,18 @@ const ReportPage: React.FC = () => {
   };
   
   return (
-    <Layout activeSection="reports" onNavigate={() => {}}>
+    <Layout activeSection="reports" onNavigate={handleNavigate}>
       <div className="container px-4 py-6 md:px-6">
-        <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">{translations.reportsTitle}</h1>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl md:text-3xl font-bold">{translations.reportsTitle}</h1>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-600 border-teal-200"
+            onClick={() => handleNavigate("dashboard")}
+          >
+            {language === 'ar' ? "←" : "←"} {translations.backToDashboard}
+          </Button>
+        </div>
         
         <div className="flex flex-wrap gap-2 mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
           <Button 

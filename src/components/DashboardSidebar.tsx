@@ -77,12 +77,17 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
     {
       icon: BarChart3,
       label: t('reportsPage'),
+      section: "reports",
       action: () => navigate("/reports"),
     },
   ];
 
-  const handleNavigation = (section: string) => {
-    onNavigate(section);
+  const handleNavigation = (section: string, customAction?: () => void) => {
+    if (customAction) {
+      customAction();
+    } else {
+      onNavigate(section);
+    }
   };
 
   return (
@@ -105,7 +110,7 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
                       <SidebarMenuButton
                         tooltip={item.label}
                         isActive={item.section === activeSection}
-                        onClick={() => item.action ? item.action() : handleNavigation(item.section)}
+                        onClick={() => handleNavigation(item.section, item.action)}
                       >
                         <item.icon className="w-5 h-5" />
                         <span>{item.label}</span>
@@ -147,6 +152,8 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
                 activeSection === "patientSearch" ? t('patientSearch') :
                 activeSection === "refundManager" ? 
                   (language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges') :
+                activeSection === "reports" ? 
+                  (language === 'ar' ? 'التقارير' : 'Reports') :
                 t('dashboard')
               }</h1>
             </div>
