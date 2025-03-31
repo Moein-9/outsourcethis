@@ -1,24 +1,22 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Printer, Store } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Invoice } from '@/store/invoiceStore';
 import { Patient } from '@/store/patientStore';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ReceiptInvoice } from './ReceiptInvoice';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { storeLocations } from '@/assets/logo';
 
 interface PrintOptionsDialogProps {
   invoice?: Invoice;
   workOrder: any;
   patient?: Patient;
   children: React.ReactNode;
-  onPrintWorkOrder: (storeLocation: string) => void;
-  onPrintInvoice: (storeLocation: string) => void;
+  onPrintWorkOrder: () => void;
+  onPrintInvoice: () => void;
 }
 
 export function PrintOptionsDialog({
@@ -30,14 +28,13 @@ export function PrintOptionsDialog({
   onPrintInvoice
 }: PrintOptionsDialogProps) {
   const { t, language } = useLanguageStore();
-  const [open, setOpen] = useState(false);
-  const [storeLocation, setStoreLocation] = useState<string>("alSomait");
+  const [open, setOpen] = React.useState(false);
 
   const handlePrintWorkOrder = () => {
     setOpen(false);
     // Wait for the dialog to close before printing
     setTimeout(() => {
-      onPrintWorkOrder(storeLocation);
+      onPrintWorkOrder();
     }, 150);
   };
 
@@ -45,11 +42,9 @@ export function PrintOptionsDialog({
     setOpen(false);
     // Wait for the dialog to close before printing
     setTimeout(() => {
-      onPrintInvoice(storeLocation);
+      onPrintInvoice();
     }, 150);
   };
-  
-  const isRtl = language === 'ar';
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -60,26 +55,6 @@ export function PrintOptionsDialog({
         <DialogHeader>
           <DialogTitle>{t('printPreview')}</DialogTitle>
         </DialogHeader>
-        
-        <div className="w-full max-w-md flex items-center gap-2 mb-4">
-          <Store className="h-4 w-4 text-blue-600" />
-          <Select 
-            value={storeLocation}
-            onValueChange={setStoreLocation}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={isRtl ? "اختر الفرع" : "Select Location"} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="alSomait">
-                {isRtl ? storeLocations.alSomait.locationAr : storeLocations.alSomait.locationEn}
-              </SelectItem>
-              <SelectItem value="alArbid">
-                {isRtl ? storeLocations.alArbid.locationAr : storeLocations.alArbid.locationEn}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
         <Tabs defaultValue="workorder-preview" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -100,7 +75,6 @@ export function PrintOptionsDialog({
                     invoice={invoice} 
                     patient={patient}
                     isPrintable={true}
-                    storeLocation={storeLocation}
                   />
                 </div>
               </div>
@@ -124,7 +98,6 @@ export function PrintOptionsDialog({
                     <ReceiptInvoice 
                       invoice={invoice} 
                       isPrintable={true}
-                      storeLocation={storeLocation}
                     />
                   </div>
                 </div>

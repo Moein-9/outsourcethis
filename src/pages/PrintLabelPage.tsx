@@ -3,22 +3,13 @@ import React, { useState } from 'react';
 import { FrameLabelTemplate } from '@/components/FrameLabelTemplate';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Printer, Store } from 'lucide-react';
+import { AlertCircle, Printer } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useLanguageStore } from '@/store/languageStore';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { storeLocations } from '@/assets/logo';
 
 const PrintLabelPage: React.FC = () => {
   const { t, language } = useLanguageStore();
   const [printError, setPrintError] = useState<string | null>(null);
-  const [storeLocation, setStoreLocation] = useState<string>("alSomait");
   
   const handlePrintError = (errorMessage: string) => {
     console.error(`[PrintLabelPage] Print error: ${errorMessage}`);
@@ -43,26 +34,6 @@ const PrintLabelPage: React.FC = () => {
           </h1>
           
           <div className="flex gap-2">
-            <div className="flex items-center gap-2">
-              <Store className="h-4 w-4 text-blue-600" />
-              <Select 
-                value={storeLocation}
-                onValueChange={setStoreLocation}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder={isRtl ? "اختر الفرع" : "Select Location"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alSomait">
-                    {isRtl ? storeLocations.alSomait.locationAr : storeLocations.alSomait.locationEn}
-                  </SelectItem>
-                  <SelectItem value="alArbid">
-                    {isRtl ? storeLocations.alArbid.locationAr : storeLocations.alArbid.locationEn}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
             <Button variant="secondary" size="sm" className="gap-2" onClick={() => window.location.reload()}>
               <Printer className="h-4 w-4" />
               {isRtl ? "تحديث صفحة الطباعة" : "Refresh Print Page"}
@@ -101,7 +72,7 @@ const PrintLabelPage: React.FC = () => {
         )}
         
         <div className="bg-white p-4 rounded-lg shadow">
-          <FrameLabelTemplate onPrintError={handlePrintError} storeLocation={storeLocation} />
+          <FrameLabelTemplate onPrintError={handlePrintError} />
         </div>
       </div>
     </Layout>

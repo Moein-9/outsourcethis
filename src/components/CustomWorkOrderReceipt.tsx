@@ -1,7 +1,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { MoenLogo, getStoreInfo } from "@/assets/logo";
+import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
 import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, History } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -41,15 +41,13 @@ interface CustomWorkOrderReceiptProps {
   invoice?: any;
   patient?: any;
   isPrintable?: boolean;
-  storeLocation?: string;
 }
 
 export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   workOrder,
   invoice,
   patient,
-  isPrintable = false,
-  storeLocation = "alSomait"
+  isPrintable = false
 }) => {
   const { language, t } = useLanguageStore();
   const { lensTypes, lensCoatings } = useInventoryStore();
@@ -121,8 +119,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const isPaid = remaining <= 0;
   
   const orderNumber = workOrder?.id || invoice?.workOrderId || `WO${Date.now().toString().slice(-6)}`;
-  
-  const storeInfoData = getStoreInfo(storeLocation, language);
 
   if (!workOrder && !invoice) {
     return (
@@ -180,10 +176,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-12" /> 
         </div>
-        <h2 className="font-bold text-lg mb-0">{storeInfoData.name}</h2>
-        <p className="text-sm font-medium mb-0 text-gray-600">{storeInfoData.location}</p>
-        <p className="text-sm font-medium mb-0 text-gray-600">{storeInfoData.address}</p>
-        <p className="text-sm font-medium text-gray-600">{t("phone")}: {storeInfoData.phoneFormatted}</p>
+        <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
+        <p className="text-sm font-medium mb-0 text-gray-600">{storeInfo.address}</p>
+        <p className="text-sm font-medium text-gray-600">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
       <div className="text-center mb-2">
@@ -225,23 +220,28 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         
         <div className="space-y-1 text-sm px-2"> 
-          <div className="flex justify-between items-center border-b border-gray-200 pb-0.5">
-            <div className="flex items-center gap-1">
-              <User className="h-3 w-3 text-gray-500" />
-              <span className="font-medium">{isRtl ? "الاسم:" : "Name:"}</span>
-            </div>
-            <span className="font-semibold">{patientName}</span>
+          <div className="flex justify-between items-center">
+            <span className="font-bold flex items-center gap-1">
+              <User className="h-4 w-4" /> {t("customer")}:
+            </span>
+            <span className="font-medium">{patientName}</span>
           </div>
           
           {patientPhone && (
-            <div className="flex justify-between items-center border-b border-gray-200 pb-0.5">
-              <div className="flex items-center gap-1">
-                <Phone className="h-3 w-3 text-gray-500" />
-                <span className="font-medium">{isRtl ? "الهاتف:" : "Phone:"}</span>
-              </div>
-              <span className="font-semibold">{patientPhone}</span>
+            <div className="flex justify-between items-center">
+              <span className="font-bold flex items-center gap-1">
+                <Phone className="h-4 w-4" /> {t("phone")}:
+              </span>
+              <span>{patientPhone}</span>
             </div>
           )}
+          
+          <div className="flex justify-between items-center">
+            <span className="font-bold flex items-center gap-1">
+              <Calendar className="h-4 w-4" /> {t("date")}:
+            </span>
+            <span>{format(new Date(), 'dd/MM/yyyy')}</span>
+          </div>
         </div>
       </div>
 

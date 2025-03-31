@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Refund } from '@/store/invoiceStore';
 import { usePatientStore } from '@/store/patientStore';
@@ -20,7 +21,7 @@ import {
   Package,
   CheckCircle
 } from 'lucide-react';
-import { MoenLogo, getStoreInfo, storeLocations } from "@/assets/logo";
+import { MoenLogo, storeInfo } from "@/assets/logo";
 import { Card, CardContent } from './ui/card';
 import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
@@ -49,23 +50,15 @@ interface RefundReceiptTemplateProps {
     staffNotes?: string;
   };
   language: string;
-  storeLocation?: string;
 }
 
-export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ 
-  refund, 
-  language,
-  storeLocation = "alSomait"
-}) => {
+export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ refund, language }) => {
   const isArabic = language === 'ar';
   const direction = isArabic ? 'rtl' : 'ltr';
   const textAlign = isArabic ? 'right' : 'left';
   
   // Format the date using date-fns
   const formattedDate = format(new Date(refund.refundDate), 'dd/MM/yyyy hh:mm a');
-  
-  // Get the store information based on language and location
-  const storeInfoData = getStoreInfo(storeLocation, language);
   
   return (
     <div 
@@ -96,16 +89,9 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '4px' }}>
           <MoenLogo className="w-auto h-8" />
         </div>
-        <h2 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '1px', textAlign: 'center' }}>
-          {isArabic ? storeInfoData.nameAr : storeInfoData.nameEn}
-        </h2>
-        <p style={{ fontSize: '9px', marginBottom: '1px', textAlign: 'center' }}>
-          {isArabic ? storeInfoData.locationAr : storeInfoData.locationEn}
-        </p>
-        <p style={{ fontSize: '9px', marginBottom: '1px', textAlign: 'center' }}>
-          {isArabic ? storeInfoData.addressAr : storeInfoData.addressEn}
-        </p>
-        <p style={{ fontSize: '9px', textAlign: 'center' }}>{isArabic ? "هاتف" : "Phone"}: {storeInfoData.phoneFormatted}</p>
+        <h2 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '1px', textAlign: 'center' }}>{storeInfo.name}</h2>
+        <p style={{ fontSize: '9px', marginBottom: '1px', textAlign: 'center' }}>{storeInfo.address}</p>
+        <p style={{ fontSize: '9px', textAlign: 'center' }}>{isArabic ? "هاتف" : "Phone"}: {storeInfo.phone}</p>
       </div>
       
       {/* Receipt Type Badge */}
