@@ -15,6 +15,7 @@ import {
 import { useLanguageStore } from "@/store/languageStore";
 import { MoenLogo } from "@/assets/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import {
   Sidebar,
   SidebarContent,
@@ -123,42 +124,52 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
           </SidebarContent>
           
           <SidebarFooter className="border-t border-sidebar-border p-4">
-            <div className="flex items-center gap-3">
-              <Avatar className="w-10 h-10 border-2 border-sidebar-primary">
-                <AvatarImage src="/lovable-uploads/d1f7203d-68c5-44fb-b0a8-41330d9b48fc.png" />
-                <AvatarFallback className="bg-teal-500 text-white">MO</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <p className="text-sm font-medium text-sidebar-foreground">Admin User</p>
-                <p className="text-xs text-sidebar-foreground/70">Moen Optical</p>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-10 h-10 border-2 border-sidebar-primary">
+                  <AvatarImage src="/lovable-uploads/d1f7203d-68c5-44fb-b0a8-41330d9b48fc.png" />
+                  <AvatarFallback className="bg-teal-500 text-white">MO</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <p className="text-sm font-medium text-sidebar-foreground">Admin User</p>
+                  <p className="text-xs text-sidebar-foreground/70">Moen Optical</p>
+                </div>
+                <button className="ml-auto text-sidebar-foreground/70 hover:text-sidebar-foreground">
+                  <Settings className="w-5 h-5" />
+                </button>
               </div>
-              <button className="ml-auto text-sidebar-foreground/70 hover:text-sidebar-foreground">
-                <Settings className="w-5 h-5" />
-              </button>
+              <LanguageToggle />
             </div>
           </SidebarFooter>
         </Sidebar>
         
-        <div className="flex-1 p-4 md:p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="text-primary" />
-              <h1 className="text-xl font-bold text-primary">{
-                activeSection === "dashboard" ? t('dashboard') :
-                activeSection === "createClient" ? t('createClient') :
-                activeSection === "createInvoice" ? t('createInvoice') :
-                activeSection === "inventory" ? t('inventory') :
-                activeSection === "remainingPayments" ? t('remainingPayments') :
-                activeSection === "patientSearch" ? t('patientSearch') :
-                activeSection === "refundManager" ? 
-                  (language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges') :
-                activeSection === "reports" ? 
-                  (language === 'ar' ? 'التقارير' : 'Reports') :
-                t('dashboard')
-              }</h1>
+        <div className="flex-1 overflow-auto">
+          <div className="p-3 md:p-5 lg:p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger className="text-primary" />
+                <h1 className="text-xl font-bold text-primary">{
+                  activeSection === "dashboard" ? t('dashboard') :
+                  activeSection === "createClient" ? t('createClient') :
+                  activeSection === "createInvoice" ? t('createInvoice') :
+                  activeSection === "inventory" ? t('inventory') :
+                  activeSection === "remainingPayments" ? t('remainingPayments') :
+                  activeSection === "patientSearch" ? t('patientSearch') :
+                  activeSection === "refundManager" ? 
+                    (language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges') :
+                  activeSection === "reports" ? 
+                    (language === 'ar' ? 'التقارير' : 'Reports') :
+                  t('dashboard')
+                }</h1>
+              </div>
+              <div className="hidden md:block">
+                <LanguageToggle />
+              </div>
+            </div>
+            <div className="w-full">
+              {children}
             </div>
           </div>
-          {children}
         </div>
       </div>
     </SidebarProvider>
