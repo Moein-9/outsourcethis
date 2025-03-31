@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { DailySalesReport } from "@/components/reports/DailySalesReport";
@@ -38,6 +39,7 @@ const generateMockData = () => {
   const coatings = ["مضاد للانعكاس", "مضاد للماء", "مضاد للخدش", "حماية من الأشعة الزرقاء"];
   const frameBrands = ["Ray-Ban", "Gucci", "Prada", "Oakley", "Dior", "Chanel"];
   
+  // Generate today's data
   for (let i = 0; i < 5; i++) {
     const lensPrice = Math.floor(Math.random() * 50 + 20) * 5;
     const framePrice = Math.floor(Math.random() * 80 + 40) * 5;
@@ -47,7 +49,9 @@ const generateMockData = () => {
     const finalTotal = total - discount;
     const deposit = Math.random() > 0.3 ? finalTotal : Math.floor(finalTotal * 0.7);
     
-    mockData.push({
+    // Create invoice with current date
+    const invoice = {
+      invoiceId: `INV${Date.now() + i}`,
       patientName: `عميل ${i + 1}`,
       patientPhone: `9665${Math.floor(Math.random() * 10000000)}`,
       lensType: lensTypes[Math.floor(Math.random() * lensTypes.length)],
@@ -61,10 +65,16 @@ const generateMockData = () => {
       discount,
       total: finalTotal,
       deposit,
-      paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)]
-    });
+      paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
+      createdAt: new Date().toISOString(),
+      remaining: Math.max(0, finalTotal - deposit),
+      isPaid: deposit >= finalTotal
+    };
+    
+    mockData.push(invoice);
   }
   
+  // Generate data for previous days
   for (let d = 1; d < 60; d++) {
     const date = new Date();
     date.setDate(today.getDate() - d);
@@ -80,7 +90,9 @@ const generateMockData = () => {
       const finalTotal = total - discount;
       const deposit = Math.random() > 0.3 ? finalTotal : Math.floor(finalTotal * 0.7);
       
+      // Create invoice with past date
       const invoice = {
+        invoiceId: `INV${Date.now() - d * 86400000 - i}`,
         patientName: `عميل ${d}${i}`,
         patientPhone: `9665${Math.floor(Math.random() * 10000000)}`,
         lensType: lensTypes[Math.floor(Math.random() * lensTypes.length)],
@@ -94,21 +106,24 @@ const generateMockData = () => {
         discount,
         total: finalTotal,
         deposit,
-        paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)]
+        paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
+        createdAt: date.toISOString(),
+        remaining: Math.max(0, finalTotal - deposit),
+        isPaid: deposit >= finalTotal
       };
       
-      const id = `INV${Date.now() - d * 86400000 - i}`;
-      const createdAt = date.toISOString();
-      const remaining = Math.max(0, finalTotal - deposit);
-      const isPaid = remaining === 0;
+      // Add some refunds to get data in reports
+      if (Math.random() < 0.2) { // 20% chance of refund
+        const refundAmount = Math.floor(invoice.total * 0.5); // Partial refund
+        invoice.isRefunded = true;
+        invoice.refundDate = new Date(new Date(invoice.createdAt).getTime() + 86400000).toISOString(); // 1 day after creation
+        invoice.refundAmount = refundAmount;
+        invoice.refundReason = "Customer Dissatisfied";
+        invoice.refundMethod = invoice.paymentMethod;
+        invoice.refundId = `RF${Date.now() - d * 86400000 - i}`;
+      }
       
-      mockData.push({
-        ...invoice,
-        invoiceId: id,
-        createdAt,
-        remaining,
-        isPaid
-      });
+      mockData.push(invoice);
     }
   }
   
@@ -116,7 +131,7 @@ const generateMockData = () => {
 };
 
 const ReportPage: React.FC = () => {
-  const invoiceStore = useInvoiceStore();
+  const { invoices, refunds, clearInvoices, addExistingInvoice, processRefund } = useInvoiceStore();
   const { language } = useLanguageStore();
   const [activeTab, setActiveTab] = useState("daily");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -225,20 +240,38 @@ const ReportPage: React.FC = () => {
   };
   
   const handleGenerateMockData = () => {
-    invoiceStore.clearInvoices && invoiceStore.clearInvoices();
+    if (clearInvoices) {
+      clearInvoices();
+    }
+    
     const mockData = generateMockData();
+    
+    // Add invoices and create refunds
     mockData.forEach(invoice => {
-      if (invoice.invoiceId) {
-        invoiceStore.addExistingInvoice && invoiceStore.addExistingInvoice(invoice);
-      } else {
-        invoiceStore.addInvoice(invoice);
+      if (addExistingInvoice) {
+        // First add the invoice
+        addExistingInvoice(invoice);
+        
+        // If this invoice has refund data, create a proper refund record
+        if (invoice.isRefunded && invoice.refundAmount && processRefund) {
+          processRefund(
+            invoice.invoiceId,
+            invoice.refundAmount,
+            invoice.refundMethod || invoice.paymentMethod,
+            invoice.refundReason || "Customer Dissatisfied",
+            "Generated test refund"
+          );
+        }
       }
     });
+    
     toast.success(translations.mockDataCreated);
   };
   
   const handleClearMockData = () => {
-    invoiceStore.clearInvoices && invoiceStore.clearInvoices();
+    if (clearInvoices) {
+      clearInvoices();
+    }
     toast.success(translations.mockDataCleared);
   };
   

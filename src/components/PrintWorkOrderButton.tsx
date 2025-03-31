@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
-import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
+import WorkOrderPrintSelector from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface PrintWorkOrderButtonProps {
   invoice: Invoice;
@@ -132,7 +132,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars
     document.body.appendChild(selectorContainer);
     
-    const selector = (
+    // Return a proper React component with all the needed props
+    return (
       <WorkOrderPrintSelector
         invoice={invoiceToUse}
         patientName={patientName}
@@ -146,8 +147,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         thermalOnly={thermalOnly}
       />
     );
-    
-    return selector;
   };
 
   return (
@@ -175,11 +174,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           contactLenses={contactLenses}
           contactLensRx={contactLensRx}
           thermalOnly={thermalOnly}
-          trigger={
-            <Button variant={variant} size={size} className={className}>
-              <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
-            </Button>
-          }
         />
       )}
     </>
