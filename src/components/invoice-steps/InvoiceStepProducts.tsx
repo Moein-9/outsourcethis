@@ -19,6 +19,7 @@ interface InvoiceStepProductsProps {
 
 export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoiceType }) => {
   const { t, language } = useLanguageStore();
+  const isRtl = language === 'ar';
   const searchFrames = useInventoryStore((state) => state.searchFrames);
   const addFrame = useInventoryStore((state) => state.addFrame);
   const getServicesByCategory = useInventoryStore((state) => state.getServicesByCategory);
@@ -64,7 +65,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const [newQty, setNewQty] = useState("1");
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
-  const directionClass = language === 'ar' ? 'rtl' : 'ltr';
   
   React.useEffect(() => {
     if (getValues<string>('frameBrand')) {
@@ -284,7 +284,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
           <CardHeader className="bg-primary/10">
             <CardTitle className={`text-lg flex items-center gap-2 ${textAlignClass}`}>
               <ScrollText className="w-5 h-5 text-primary" />
-              {t('eyeExam')}
+              {isRtl ? "فحص العين" : "Eye Exam"}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -292,22 +292,24 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2 text-lg font-medium">
                   <ScrollText className="w-5 h-5 text-primary" />
-                  {eyeExamService.name}
+                  {isRtl ? "فحص العين" : "Eye Exam"}
                 </div>
                 <div className="font-semibold text-lg">
-                  {eyeExamService.price.toFixed(3)} {t('kwd')}
+                  {eyeExamService.price.toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}
                 </div>
               </div>
               
               <p className={`mt-4 text-muted-foreground text-sm ${textAlignClass}`}>
-                {eyeExamService.description}
+                {isRtl 
+                  ? "خدمة فحص العين القياسية لتقييم صحة العين والرؤية." 
+                  : "Standard eye examination service to evaluate eye health and vision."}
               </p>
             </div>
             
             <div className="mt-6 flex items-center justify-center">
               <div className="px-4 py-2 bg-green-100 text-green-800 rounded-md flex items-center gap-2">
                 <Check className="w-4 h-4" />
-                {t('price')}: {eyeExamService.price.toFixed(3)} {t('kwd')}
+                {isRtl ? "السعر: " : "Price: "} {eyeExamService.price.toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}
               </div>
             </div>
           </CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, ServiceItem } from "@/store/inventoryStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -21,6 +20,7 @@ import {
 
 export const ServiceManager: React.FC = () => {
   const { t, language } = useLanguageStore();
+  const isRtl = language === 'ar';
   const { 
     services, 
     addService, 
@@ -38,8 +38,8 @@ export const ServiceManager: React.FC = () => {
     category: "exam"
   });
   
-  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
-  const directionClass = language === 'ar' ? 'rtl' : 'ltr';
+  const textAlignClass = isRtl ? 'text-right' : 'text-left';
+  const directionClass = isRtl ? 'rtl' : 'ltr';
   
   const resetNewService = () => {
     setNewService({
@@ -137,11 +137,11 @@ export const ServiceManager: React.FC = () => {
   const getCategoryName = (category: string) => {
     switch (category) {
       case 'exam':
-        return t('eyeExam');
+        return isRtl ? "فحص العين" : t('eyeExam');
       case 'repair':
-        return t('repair');
+        return isRtl ? "إصلاح" : t('repair');
       default:
-        return t('other');
+        return isRtl ? "أخرى" : t('other');
     }
   };
   
@@ -183,7 +183,7 @@ export const ServiceManager: React.FC = () => {
                   value={newService.name}
                   onChange={(e) => setNewService({...newService, name: e.target.value})}
                   className={textAlignClass}
-                  placeholder={t('serviceName')}
+                  placeholder={isRtl ? "فحص العين" : "Eye Exam"}
                   dir={directionClass}
                 />
               </div>
@@ -195,7 +195,7 @@ export const ServiceManager: React.FC = () => {
                   value={newService.description}
                   onChange={(e) => setNewService({...newService, description: e.target.value})}
                   className={textAlignClass}
-                  placeholder={t('serviceDescription')}
+                  placeholder={isRtl ? "خدمة فحص العين القياسية لتقييم صحة العين والرؤية." : "Standard eye examination service to evaluate eye health and vision."}
                   dir={directionClass}
                 />
               </div>
@@ -228,19 +228,19 @@ export const ServiceManager: React.FC = () => {
                       <SelectItem value="exam">
                         <div className="flex items-center gap-2">
                           <Stethoscope className="w-4 h-4" />
-                          <span>{t('eyeExam')}</span>
+                          <span>{isRtl ? "فحص العين" : t('eyeExam')}</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="repair">
                         <div className="flex items-center gap-2">
                           <Wrench className="w-4 h-4" />
-                          <span>{t('repair')}</span>
+                          <span>{isRtl ? "إصلاح" : t('repair')}</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="other">
                         <div className="flex items-center gap-2">
                           <FileText className="w-4 h-4" />
-                          <span>{t('other')}</span>
+                          <span>{isRtl ? "أخرى" : t('other')}</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -329,19 +329,19 @@ export const ServiceManager: React.FC = () => {
                             <SelectItem value="exam">
                               <div className="flex items-center gap-2">
                                 <Stethoscope className="w-4 h-4" />
-                                <span>{t('eyeExam')}</span>
+                                <span>{isRtl ? "فحص العين" : t('eyeExam')}</span>
                               </div>
                             </SelectItem>
                             <SelectItem value="repair">
                               <div className="flex items-center gap-2">
                                 <Wrench className="w-4 h-4" />
-                                <span>{t('repair')}</span>
+                                <span>{isRtl ? "إصلاح" : t('repair')}</span>
                               </div>
                             </SelectItem>
                             <SelectItem value="other">
                               <div className="flex items-center gap-2">
                                 <FileText className="w-4 h-4" />
-                                <span>{t('other')}</span>
+                                <span>{isRtl ? "أخرى" : t('other')}</span>
                               </div>
                             </SelectItem>
                           </SelectContent>
@@ -368,7 +368,7 @@ export const ServiceManager: React.FC = () => {
                       </div>
                       
                       <div className="flex items-center">
-                        <div className="font-semibold text-base">{service.price.toFixed(3)} {t('kwd')}</div>
+                        <div className="font-semibold text-base">{service.price.toFixed(3)} {isRtl ? 'د.ك' : t('kwd')}</div>
                       </div>
                     </div>
                     
