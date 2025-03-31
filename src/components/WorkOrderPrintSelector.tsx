@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -56,6 +55,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<"a4" | "receipt" | null>(thermalOnly ? "receipt" : null);
   const [printingInProgress, setPrintingInProgress] = useState(false);
+  const [selectedPrescriptionType, setSelectedPrescriptionType] = useState<'glasses' | 'contacts'>(prescriptionType);
   const isRtl = language === 'ar';
   
   const handleTriggerClick = () => {
@@ -83,7 +83,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           frame,
           contactLenses,
           contactLensRx,
-          prescriptionType
+          prescriptionType: selectedPrescriptionType
         });
         
         setTimeout(() => {
@@ -176,7 +176,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
           `;
         };
         
-        const prescriptionTable = prescriptionType === 'glasses' 
+        const prescriptionTable = selectedPrescriptionType === 'glasses' 
           ? generateGlassesPrescriptionTable() 
           : generateContactLensPrescriptionTable();
           
@@ -206,7 +206,7 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
             
             ${prescriptionTable}
             
-            ${lensType && prescriptionType === 'glasses' ? `
+            ${lensType && selectedPrescriptionType === 'glasses' ? `
             <div style="margin-bottom: 10mm; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
               <h2 style="font-size: 18px; margin-bottom: 5mm; border-bottom: 1px solid #eee; padding-bottom: 5px;">${t("lensDetails")}</h2>
               <p><strong>${t("type")}:</strong> ${lensType}</p>
@@ -302,21 +302,21 @@ export const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({
               <div className="flex items-center gap-4">
                 <div 
                   className={`flex items-center gap-2 p-2 border rounded-md cursor-pointer transition-all ${
-                    prescriptionType === "glasses" ? "border-primary bg-primary/5" : "border-border"
+                    selectedPrescriptionType === "glasses" ? "border-primary bg-primary/5" : "border-border"
                   }`}
-                  onClick={() => setPrescriptionType('glasses')}
+                  onClick={() => setSelectedPrescriptionType('glasses')}
                 >
-                  <Glasses className={`h-4 w-4 ${prescriptionType === "glasses" ? "text-primary" : "text-muted-foreground"}`} />
+                  <Glasses className={`h-4 w-4 ${selectedPrescriptionType === "glasses" ? "text-primary" : "text-muted-foreground"}`} />
                   <span className="text-sm">{t("glasses")}</span>
                 </div>
                 
                 <div 
                   className={`flex items-center gap-2 p-2 border rounded-md cursor-pointer transition-all ${
-                    prescriptionType === "contacts" ? "border-primary bg-primary/5" : "border-border"
+                    selectedPrescriptionType === "contacts" ? "border-primary bg-primary/5" : "border-border"
                   }`}
-                  onClick={() => setPrescriptionType('contacts')}
+                  onClick={() => setSelectedPrescriptionType('contacts')}
                 >
-                  <Eye className={`h-4 w-4 ${prescriptionType === "contacts" ? "text-primary" : "text-muted-foreground"}`} />
+                  <Eye className={`h-4 w-4 ${selectedPrescriptionType === "contacts" ? "text-primary" : "text-muted-foreground"}`} />
                   <span className="text-sm">{t("contactLenses")}</span>
                 </div>
               </div>

@@ -95,7 +95,12 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
   
   useEffect(() => {
     setLocalCurrentRx(currentRx);
-    setLocalRxHistory(rxHistory);
+    // Need to ensure rxHistory items all have createdAt as a required property
+    setLocalRxHistory(rxHistory.map(item => ({
+      ...item,
+      createdAt: item.createdAt || new Date().toISOString()
+    })));
+    // Need to ensure contactLensRxHistory items all have createdAt as a required property 
     setLocalPatientNotes(patientNotes);
   }, [currentRx, rxHistory, patientNotes]);
 
