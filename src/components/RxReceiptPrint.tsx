@@ -1,7 +1,8 @@
+
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { RxData } from "@/store/patientStore";
+import { RxData, ContactLensRx } from "@/store/patientStore";
 import { Eye, Calendar, User, Phone } from "lucide-react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
@@ -11,7 +12,9 @@ interface RxReceiptPrintProps {
   patientPhone?: string;
   rx: RxData;
   isPrintable?: boolean;
-  forcedLanguage?: 'en' | 'ar'; // For forced language printing
+  forcedLanguage?: 'en' | 'ar';
+  contactLensRx?: ContactLensRx;
+  printContactLens?: boolean;
 }
 
 export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
@@ -19,7 +22,9 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   patientPhone,
   rx,
   isPrintable = false,
-  forcedLanguage
+  forcedLanguage,
+  contactLensRx,
+  printContactLens = false
 }) => {
   const { language: appLanguage, t } = useLanguageStore();
   const language = forcedLanguage || appLanguage;
@@ -56,11 +61,14 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
       <div className="bg-gray-800 text-white py-1 px-2 text-center font-bold text-sm mb-2 rounded-sm print:bg-black print:text-white">
         <div className="flex items-center justify-center gap-1">
           <Eye className="h-3 w-3" /> 
-          {isRtl ? "وصفة النظارات الطبية" : "GLASSES PRESCRIPTION"}
+          {isRtl 
+            ? (printContactLens ? "وصفة العدسات اللاصقة" : "وصفة النظارات الطبية") 
+            : (printContactLens ? "CONTACT LENS PRESCRIPTION" : "GLASSES PRESCRIPTION")
+          }
         </div>
       </div>
 
-      {/* Patient info - Adjusted inward by adding more padding */}
+      {/* Patient info */}
       <div className="px-6 mb-2 text-[11px]">
         <div className="flex justify-between border-b pb-0.5 mb-0.5">
           <span className="font-semibold flex items-center">
@@ -86,36 +94,69 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
 
       {/* Prescription table - Always in LTR format with English headers */}
       <div className="px-5 mb-3">
-        <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "62mm", direction: "ltr" }}>
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-400 p-0.5 text-center"></th>
-              <th className="border border-gray-400 p-0.5 text-center">SPH</th>
-              <th className="border border-gray-400 p-0.5 text-center">CYL</th>
-              <th className="border border-gray-400 p-0.5 text-center">AXIS</th>
-              <th className="border border-gray-400 p-0.5 text-center">ADD</th>
-              <th className="border border-gray-400 p-0.5 text-center">PD</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border border-gray-400 p-0.5 text-center font-medium">OD</td>
-              <td className="border border-gray-400 p-0.5 text-center">{rx.sphereOD || "-"}</td>
-              <td className="border border-gray-400 p-0.5 text-center">{rx.cylOD || "-"}</td>
-              <td className="border border-gray-400 p-0.5 text-center">{rx.axisOD || "-"}</td>
-              <td className="border border-gray-400 p-0.5 text-center">{rx.addOD || "-"}</td>
-              <td className="border border-gray-400 p-0.5 text-center">{rx.pdRight || "-"}</td>
-            </tr>
-            <tr>
-              <td className="border border-gray-400 p-0.5 text-center font-medium">OS</td>
-              <td className="border border-gray-400 p-0.5 text-center">{rx.sphereOS || "-"}</td>
-              <td className="border border-gray-400 p-0.5 text-center">{rx.cylOS || "-"}</td>
-              <td className="border border-gray-400 p-0.5 text-center">{rx.axisOS || "-"}</td>
-              <td className="border border-gray-400 p-0.5 text-center">{rx.addOS || "-"}</td>
-              <td className="border border-gray-400 p-0.5 text-center">{rx.pdLeft || "-"}</td>
-            </tr>
-          </tbody>
-        </table>
+        {printContactLens && contactLensRx ? (
+          <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "62mm", direction: "ltr" }}>
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-400 p-0.5 text-center"></th>
+                <th className="border border-gray-400 p-0.5 text-center">SPH</th>
+                <th className="border border-gray-400 p-0.5 text-center">CYL</th>
+                <th className="border border-gray-400 p-0.5 text-center">AXIS</th>
+                <th className="border border-gray-400 p-0.5 text-center">BC</th>
+                <th className="border border-gray-400 p-0.5 text-center">DIA</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-gray-400 p-0.5 text-center font-medium">OD</td>
+                <td className="border border-gray-400 p-0.5 text-center">{contactLensRx.rightEye.sphere || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{contactLensRx.rightEye.cylinder || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{contactLensRx.rightEye.axis || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{contactLensRx.rightEye.bc || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{contactLensRx.rightEye.dia || "-"}</td>
+              </tr>
+              <tr>
+                <td className="border border-gray-400 p-0.5 text-center font-medium">OS</td>
+                <td className="border border-gray-400 p-0.5 text-center">{contactLensRx.leftEye.sphere || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{contactLensRx.leftEye.cylinder || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{contactLensRx.leftEye.axis || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{contactLensRx.leftEye.bc || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{contactLensRx.leftEye.dia || "-"}</td>
+              </tr>
+            </tbody>
+          </table>
+        ) : (
+          <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "62mm", direction: "ltr" }}>
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-400 p-0.5 text-center"></th>
+                <th className="border border-gray-400 p-0.5 text-center">SPH</th>
+                <th className="border border-gray-400 p-0.5 text-center">CYL</th>
+                <th className="border border-gray-400 p-0.5 text-center">AXIS</th>
+                <th className="border border-gray-400 p-0.5 text-center">ADD</th>
+                <th className="border border-gray-400 p-0.5 text-center">PD</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-gray-400 p-0.5 text-center font-medium">OD</td>
+                <td className="border border-gray-400 p-0.5 text-center">{rx.sphereOD || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{rx.cylOD || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{rx.axisOD || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{rx.addOD || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{rx.pdRight || "-"}</td>
+              </tr>
+              <tr>
+                <td className="border border-gray-400 p-0.5 text-center font-medium">OS</td>
+                <td className="border border-gray-400 p-0.5 text-center">{rx.sphereOS || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{rx.cylOS || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{rx.axisOS || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{rx.addOS || "-"}</td>
+                <td className="border border-gray-400 p-0.5 text-center">{rx.pdLeft || "-"}</td>
+              </tr>
+            </tbody>
+          </table>
+        )}
         <div className="mt-1 text-[10px] flex justify-between px-2 font-medium">
           <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
           <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
@@ -125,14 +166,26 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
       {/* Care tips */}
       <div className="px-5 mb-2">
         <div className="bg-gray-800 text-white py-0.5 px-1 font-semibold text-[12px] mb-1 text-center print:bg-black print:text-white">
-          {t("glassesCareTips")}
+          {printContactLens 
+            ? (isRtl ? "نصائح للعناية بالعدسات اللاصقة" : "Contact Lens Care Tips") 
+            : (isRtl ? "نصائح للعناية بالنظارات" : "Glasses Care Tips")
+          }
         </div>
-        <ul className={`list-disc px-6 space-y-0.5 text-[12px] font-bold ${dirClass}`}>
-          <li>{t("tip1")}</li>
-          <li>{t("tip2")}</li>
-          <li>{t("tip3")}</li>
-          <li>{t("tip4")}</li>
-        </ul>
+        {printContactLens ? (
+          <ul className={`list-disc px-6 space-y-0.5 text-[12px] font-bold ${dirClass}`}>
+            <li>{isRtl ? "اغسل يديك جيداً بالصابون قبل لمس العدسات" : "Always wash your hands thoroughly with soap before touching your lenses"}</li>
+            <li>{isRtl ? "استخدم محلول العدسات اللاصقة المناسب فقط" : "Use only the appropriate contact lens solution"}</li>
+            <li>{isRtl ? "لا تنم بالعدسات اللاصقة إلا إذا كانت مصممة للاستخدام أثناء النوم" : "Don't sleep with your contacts unless they are specifically designed for overnight wear"}</li>
+            <li>{isRtl ? "استبدل العدسات وفقاً للجدول الزمني الموصى به" : "Replace your lenses according to the recommended schedule"}</li>
+          </ul>
+        ) : (
+          <ul className={`list-disc px-6 space-y-0.5 text-[12px] font-bold ${dirClass}`}>
+            <li>{t("tip1")}</li>
+            <li>{t("tip2")}</li>
+            <li>{t("tip3")}</li>
+            <li>{t("tip4")}</li>
+          </ul>
+        )}
       </div>
 
       {/* Footer */}
@@ -189,7 +242,7 @@ export const RxLanguageDialog: React.FC<{
 };
 
 export const printRxReceipt = (props: RxReceiptPrintProps) => {
-  const { patientName, patientPhone, rx, forcedLanguage } = props;
+  const { patientName, patientPhone, rx, forcedLanguage, contactLensRx, printContactLens } = props;
   const { language: appLanguage, t } = useLanguageStore.getState();
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
@@ -204,7 +257,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>${isRtl ? 'وصفة النظارات' : 'Glasses Prescription'}</title>
+  <title>${isRtl ? (printContactLens ? 'وصفة العدسات اللاصقة' : 'وصفة النظارات') : (printContactLens ? 'Contact Lens Prescription' : 'Glasses Prescription')}</title>
   <style>
     @page {
       size: 80mm auto;
@@ -381,7 +434,7 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     </div>
     
     <div class="rx-title">
-      ${isRtl ? 'وصفة النظارات الطبية' : 'GLASSES PRESCRIPTION'}
+      ${isRtl ? (printContactLens ? 'وصفة العدسات اللاصقة' : 'وصفة النظارات الطبية') : (printContactLens ? 'CONTACT LENS PRESCRIPTION' : 'GLASSES PRESCRIPTION')}
     </div>
     
     <div class="patient-info">
@@ -420,6 +473,38 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
       ` : ''}
     </div>
     
+    ${printContactLens && contactLensRx ? `
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>SPH</th>
+          <th>CYL</th>
+          <th>AXIS</th>
+          <th>BC</th>
+          <th>DIA</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: bold;">OD</td>
+          <td>${contactLensRx.rightEye.sphere || "-"}</td>
+          <td>${contactLensRx.rightEye.cylinder || "-"}</td>
+          <td>${contactLensRx.rightEye.axis || "-"}</td>
+          <td>${contactLensRx.rightEye.bc || "-"}</td>
+          <td>${contactLensRx.rightEye.dia || "-"}</td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;">OS</td>
+          <td>${contactLensRx.leftEye.sphere || "-"}</td>
+          <td>${contactLensRx.leftEye.cylinder || "-"}</td>
+          <td>${contactLensRx.leftEye.axis || "-"}</td>
+          <td>${contactLensRx.leftEye.bc || "-"}</td>
+          <td>${contactLensRx.leftEye.dia || "-"}</td>
+        </tr>
+      </tbody>
+    </table>
+    ` : `
     <table>
       <thead>
         <tr>
@@ -450,19 +535,35 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
         </tr>
       </tbody>
     </table>
+    `}
     
     <div class="eye-legend">
       <span>OD = ${isRtl ? 'العين اليمنى' : 'Right Eye'}</span>
       <span>OS = ${isRtl ? 'العين اليسرى' : 'Left Eye'}</span>
     </div>
     
-    <div class="tips-title">${isRtl ? 'نصائح للعناية بالنظارات' : 'Glasses Care Tips'}</div>
+    <div class="tips-title">
+      ${isRtl 
+        ? (printContactLens ? 'نصائح للعناية بالعدسات اللاصقة' : 'نصائح للعناية بالنظارات') 
+        : (printContactLens ? 'Contact Lens Care Tips' : 'Glasses Care Tips')
+      }
+    </div>
+
+    ${printContactLens ? `
+    <ul class="tips-list">
+      <li>${isRtl ? 'اغسل يديك جيداً بالصابون قبل لمس العدسات' : 'Always wash your hands thoroughly with soap before touching your lenses'}</li>
+      <li>${isRtl ? 'استخدم محلول العدسات اللاصقة المناسب فقط' : 'Use only the appropriate contact lens solution'}</li>
+      <li>${isRtl ? 'لا تنم بالعدسات اللاصقة إلا إذا كانت مصممة للاستخدام أثناء النوم' : 'Don\\'t sleep with your contacts unless they are specifically designed for overnight wear'}</li>
+      <li>${isRtl ? 'استبدل العدسات وفقاً للجدول الزمني الموصى به' : 'Replace your lenses according to the recommended schedule'}</li>
+    </ul>
+    ` : `
     <ul class="tips-list">
       <li>${isRtl ? 'استخدم دائماً كلتا اليدين عند وضع النظارات أو إزالتها' : 'Always use both hands to put on or remove your glasses'}</li>
       <li>${isRtl ? 'نظف العدسات بقطعة قماش نظيفة وناعمة وبمنظف مناسب للعدسات' : 'Clean lenses with a clean, soft cloth and proper lens cleaner'}</li>
       <li>${isRtl ? 'احفظ النظارات في علبتها عندما لا تكون قيد الاستعمال' : 'Store your glasses in their case when not in use'}</li>
       <li>${isRtl ? 'تجنب وضع النظارات على الوجه المقلوب على الأسطح' : 'Avoid placing your glasses face down on surfaces'}</li>
     </ul>
+    `}
     
     <div class="footer">
       <div class="thank-you">${isRtl ? 'شكرًا على دعمكم، ونشوفكم على خير قريبًا!' : 'Thank you so much for your support—we look forward to seeing you again soon!'}</div>

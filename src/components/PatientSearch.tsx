@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { usePatientStore, Patient, RxData, ContactLensRx } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
@@ -21,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { PlusCircle, Eye } from "lucide-react";
 import { AddRxDialog } from "./AddRxDialog";
+import { AddContactLensRxDialog } from "./AddContactLensRxDialog";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
@@ -134,7 +134,6 @@ export const PatientSearch: React.FC = () => {
     
     const langToPrint = printLanguage || useLanguageStore.getState().language;
     
-    // Note: This would need to be implemented in your RxReceiptPrint component
     printRxReceipt({
       patientName: selectedPatient.name,
       patientPhone: selectedPatient.phone,
@@ -193,7 +192,6 @@ export const PatientSearch: React.FC = () => {
     toast.success(language === 'ar' ? "تم إضافة وصفة العدسات اللاصقة بنجاح" : "Contact lens prescription added successfully");
   };
   
-  // Effect to refresh data when refresh trigger changes
   useEffect(() => {
     if (refreshTrigger > 0 && selectedPatient) {
       refreshPatientData(selectedPatient.patientId);
@@ -307,15 +305,22 @@ export const PatientSearch: React.FC = () => {
       </Dialog>
       
       {selectedPatient && (
-        <AddRxDialog 
-          isOpen={isAddRxDialogOpen}
-          onClose={() => setIsAddRxDialogOpen(false)}
-          onSave={handleSaveRx}
-          initialRx={selectedPatient.rx}
-        />
+        <>
+          <AddRxDialog 
+            isOpen={isAddRxDialogOpen}
+            onClose={() => setIsAddRxDialogOpen(false)}
+            onSave={handleSaveRx}
+            initialRx={selectedPatient.rx}
+          />
+          
+          <AddContactLensRxDialog 
+            isOpen={isAddContactLensRxDialogOpen}
+            onClose={() => setIsAddContactLensRxDialogOpen(false)}
+            onSave={handleSaveContactLensRx}
+            initialRx={selectedPatient.contactLensRx}
+          />
+        </>
       )}
-
-      {/* Note: You would need to implement AddContactLensRxDialog component separately */}
     </div>
   );
 };
