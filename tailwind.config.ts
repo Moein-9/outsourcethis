@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -66,6 +67,33 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// New teal color from reference
+				teal: {
+					DEFAULT: '#2d4f4d',
+					50: '#e6f0ef',
+					100: '#cce0df',
+					200: '#99c2be',
+					300: '#66a39e',
+					400: '#33857d',
+					500: '#2d4f4d',
+					600: '#25403e',
+					700: '#1c302e',
+					800: '#12201f',
+					900: '#09100f'
+				},
+				gold: {
+					DEFAULT: '#d4a037',
+					50: '#fcf8ed',
+					100: '#f8f1db',
+					200: '#f1e3b7',
+					300: '#ead493',
+					400: '#e3c66f',
+					500: '#d4a037',
+					600: '#aa802c',
+					700: '#7f6021',
+					800: '#554016',
+					900: '#2a200b'
 				}
 			},
 			borderRadius: {

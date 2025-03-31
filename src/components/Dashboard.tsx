@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Clock, RefreshCcw } from "lucide-react";
+import { Clock, RefreshCcw, ArrowRight, Users, FileText, Package, CreditCard, Search, Calendar } from "lucide-react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { Link } from "react-router-dom";
@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { MoenLogoGreen } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 
 export const Dashboard: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -24,66 +25,187 @@ export const Dashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const navigateToSection = (section: string) => {
+    // Find the closest parent component with id "root" and dispatch a custom event
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      const event = new CustomEvent('navigate', { detail: { section } });
+      rootElement.dispatchEvent(event);
+    }
+  };
+
+  const statCards = [
+    {
+      title: language === 'ar' ? 'العملاء' : 'Patients',
+      value: patients.length,
+      icon: Users,
+      color: 'bg-teal-50 text-teal-500',
+      onClick: () => navigateToSection('patientSearch')
+    },
+    {
+      title: language === 'ar' ? 'الإطارات' : 'Frames',
+      value: frames.length,
+      icon: Package,
+      color: 'bg-teal-50 text-teal-500',
+      onClick: () => navigateToSection('inventory')
+    },
+    {
+      title: language === 'ar' ? 'المواعيد اليوم' : 'Today\'s Appointments',
+      value: 5, // Example value
+      icon: Calendar,
+      color: 'bg-teal-50 text-teal-500',
+      onClick: () => {}
+    },
+  ];
+
+  const quickActions = [
+    {
+      title: language === 'ar' ? 'إنشاء عميل جديد' : 'New Patient',
+      description: language === 'ar' ? 'إضافة عميل جديد إلى النظام' : 'Add a new patient to the system',
+      icon: Users,
+      color: 'bg-teal-500',
+      onClick: () => navigateToSection('createClient')
+    },
+    {
+      title: language === 'ar' ? 'إنشاء فاتورة' : 'New Invoice',
+      description: language === 'ar' ? 'إنشاء فاتورة جديدة' : 'Create a new invoice',
+      icon: FileText,
+      color: 'bg-teal-500',
+      onClick: () => navigateToSection('createInvoice')
+    },
+    {
+      title: language === 'ar' ? 'المدفوعات المتبقية' : 'Remaining Payments',
+      description: language === 'ar' ? 'عرض المدفوعات المتبقية' : 'View remaining payments',
+      icon: CreditCard,
+      color: 'bg-teal-500',
+      onClick: () => navigateToSection('remainingPayments')
+    },
+    {
+      title: language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges',
+      description: language === 'ar' ? 'معالجة استرداد الأموال واستبدال المنتجات' : 'Process refunds and exchanges',
+      icon: RefreshCcw,
+      color: 'bg-teal-500',
+      onClick: () => navigateToSection('refundManager')
+    },
+  ];
+
+  const rtlClass = language === 'ar' ? 'rtl' : 'ltr';
+
   return (
-    <div className="py-4 space-y-6">
-      <div className="flex justify-between items-center bg-gradient-to-r from-primary/15 to-primary/5 rounded-lg p-6">
-        <div>
-          <div className="flex items-center gap-4 mb-3">
-            <h2 className="text-3xl font-bold text-primary">{t('welcome')}</h2>
-            <LanguageToggle />
-          </div>
-          <p className="mt-2 text-gray-600">
-            {t('systemDescription')}
-          </p>
-          <div className="mt-4">
-            <Link to="/reports">
-              <Button>{t('reportsPage')}</Button>
-            </Link>
-          </div>
-        </div>
-        <div className="flex flex-col items-center">
-          <MoenLogoGreen className="w-auto h-32 mb-4" />
-          <div className="flex items-center gap-3 bg-white/80 px-4 py-2 rounded-md shadow-sm">
-            <Clock className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-xs text-gray-500">{t('currentTime')}</p>
-              <p className="text-lg font-semibold force-ltr-numbers">{currentTime.toLocaleTimeString('en-US')}</p>
-            </div>
-          </div>
-        </div>
+    <div className={`py-4 space-y-6 ${rtlClass}`}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {statCards.map((card, index) => (
+          <Card 
+            key={index} 
+            className="hover:shadow-md transition-shadow duration-300 cursor-pointer"
+            onClick={card.onClick}
+          >
+            <CardContent className="p-6 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">{card.title}</p>
+                <p className="text-3xl font-bold force-ltr-numbers">{card.value}</p>
+              </div>
+              <div className={`${card.color} p-3 rounded-full`}>
+                <card.icon className="h-6 w-6" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Quick Access Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-        <Card className="hover:shadow-md transition-shadow duration-300">
+      <CollapsibleCard 
+        title={language === 'ar' ? 'الإجراءات السريعة' : 'Quick Actions'} 
+        defaultOpen={true}
+        className="mb-6"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4">
+          {quickActions.map((action, index) => (
+            <Card 
+              key={index} 
+              className="hover:shadow-md transition-shadow duration-300 cursor-pointer border-2 border-transparent hover:border-teal-100"
+              onClick={action.onClick}
+            >
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className={`${action.color} p-3 rounded-full mb-4 text-white`}>
+                  <action.icon className="h-6 w-6" />
+                </div>
+                <h3 className="font-semibold mb-1">{action.title}</h3>
+                <p className="text-sm text-muted-foreground">{action.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </CollapsibleCard>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="md:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">
-              {language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges'}
+            <CardTitle className="text-lg flex justify-between items-center">
+              <span>{language === 'ar' ? 'آخر المعاملات' : 'Recent Transactions'}</span>
+              <Button variant="ghost" size="sm" className="text-primary">
+                <span>{language === 'ar' ? 'عرض الكل' : 'View All'}</span>
+                <ArrowRight className={`h-4 w-4 ml-1 ${language === 'ar' ? 'rotate-180' : ''}`} />
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              {language === 'ar' 
-                ? 'معالجة استرداد الأموال واستبدال المنتجات للعملاء' 
-                : 'Process refunds and product exchanges for customers'}
-            </p>
+            <div className="space-y-2">
+              {[...Array(4)].map((_, index) => (
+                <div key={index} className="border p-3 rounded-md flex justify-between items-center">
+                  <div>
+                    <p className="font-medium">Patient {index + 1}</p>
+                    <p className="text-sm text-muted-foreground">Invoice #{1000 + index}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold force-ltr-numbers">$299.99</p>
+                    <p className="text-xs text-muted-foreground">{new Date().toLocaleDateString()}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">
+              {language === 'ar' ? 'التقارير السريعة' : 'Quick Reports'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
             <Button 
-              onClick={() => {
-                // Find the closest parent component with id "root" and dispatch a custom event
-                const rootElement = document.getElementById('root');
-                if (rootElement) {
-                  const event = new CustomEvent('navigate', { detail: { section: 'refundManager' } });
-                  rootElement.dispatchEvent(event);
-                }
-                // Alternatively, you can use window.location.hash = '#refundManager';
-              }}
-              className="w-full flex gap-2 items-center justify-center"
-              variant="default"
+              variant="outline" 
+              className="w-full justify-start text-left"
+              onClick={() => navigate("/reports")}
             >
-              <RefreshCcw className="h-4 w-4" />
-              {language === 'ar' ? 'إدارة الاسترداد' : 'Manage Refunds'}
+              <BarChart3 className="h-4 w-4 mr-2" />
+              {language === 'ar' ? 'تقرير المبيعات اليومية' : 'Daily Sales Report'}
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start text-left"
+              onClick={() => navigate("/reports")}
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              {language === 'ar' ? 'تحليل مقارن' : 'Comparative Analysis'}
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start text-left"
+              onClick={() => navigate("/reports")}
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              {language === 'ar' ? 'تقرير المخزون' : 'Inventory Report'}
             </Button>
           </CardContent>
+          <CardFooter>
+            <Button 
+              className="w-full bg-gold-500 hover:bg-gold-600"
+              onClick={() => navigate("/reports")}
+            >
+              {language === 'ar' ? 'جميع التقارير' : 'All Reports'}
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     </div>
