@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Home, 
@@ -10,12 +10,14 @@ import {
   Search, 
   RefreshCcw, 
   BarChart3, 
-  Settings 
+  Settings,
+  HelpCircle
 } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { MoenLogo } from "@/assets/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { HelpCenter } from "@/components/HelpCenter";
 import {
   Sidebar,
   SidebarContent,
@@ -39,6 +41,7 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
   const { t, language } = useLanguageStore();
   const navigate = useNavigate();
   const isRtl = language === 'ar';
+  const [helpOpen, setHelpOpen] = useState(false);
   
   const menuItems = [
     {
@@ -137,9 +140,19 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
                   <p className="text-sm font-medium text-sidebar-foreground">Admin User</p>
                   <p className="text-xs text-sidebar-foreground/70">Moen Optical</p>
                 </div>
-                <button className={`${isRtl ? 'mr-auto' : 'ml-auto'} text-sidebar-foreground/70 hover:text-sidebar-foreground`}>
-                  <Settings className="w-5 h-5" />
-                </button>
+                <div className={`${isRtl ? 'mr-auto' : 'ml-auto'} flex gap-2`}>
+                  <button 
+                    className="text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                    onClick={() => setHelpOpen(true)}
+                    aria-label="Help"
+                    title={isRtl ? "مساعدة" : "Help"}
+                  >
+                    <HelpCircle className="w-5 h-5" />
+                  </button>
+                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground">
+                    <Settings className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
               <LanguageToggle />
             </div>
@@ -175,6 +188,9 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
           </div>
         </div>
       </div>
+      
+      {/* Help Dialog */}
+      <HelpCenter open={helpOpen} onOpenChange={setHelpOpen} />
     </SidebarProvider>
   );
 };
