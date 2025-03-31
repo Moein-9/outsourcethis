@@ -1,22 +1,14 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Printer, MapPin } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Invoice } from '@/store/invoiceStore';
 import { Patient } from '@/store/patientStore';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ReceiptInvoice } from './ReceiptInvoice';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { storeLocations } from '@/assets/logo';
 
 interface PrintOptionsDialogProps {
   invoice?: Invoice;
@@ -37,7 +29,6 @@ export function PrintOptionsDialog({
 }: PrintOptionsDialogProps) {
   const { t, language } = useLanguageStore();
   const [open, setOpen] = React.useState(false);
-  const [selectedLocationId, setSelectedLocationId] = useState(storeLocations[0].id);
 
   const handlePrintWorkOrder = () => {
     setOpen(false);
@@ -65,22 +56,6 @@ export function PrintOptionsDialog({
           <DialogTitle>{t('printPreview')}</DialogTitle>
         </DialogHeader>
 
-        <div className="mb-4 flex items-center gap-3">
-          <MapPin className="h-4 w-4 text-gray-500" />
-          <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
-            <SelectTrigger className="w-full md:w-[300px]">
-              <SelectValue placeholder={language === 'ar' ? "اختر الموقع" : "Select location"} />
-            </SelectTrigger>
-            <SelectContent>
-              {storeLocations.map(location => (
-                <SelectItem key={location.id} value={location.id}>
-                  {language === 'ar' ? location.title.ar : location.title.en}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         <Tabs defaultValue="workorder-preview" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="workorder-preview" className="bg-gray-100 data-[state=active]:bg-green-100 data-[state=active]:text-green-800">
@@ -100,7 +75,6 @@ export function PrintOptionsDialog({
                     invoice={invoice} 
                     patient={patient}
                     isPrintable={true}
-                    locationId={selectedLocationId}
                   />
                 </div>
               </div>
@@ -124,7 +98,6 @@ export function PrintOptionsDialog({
                     <ReceiptInvoice 
                       invoice={invoice} 
                       isPrintable={true}
-                      locationId={selectedLocationId}
                     />
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Refund } from '@/store/invoiceStore';
 import { usePatientStore } from '@/store/patientStore';
@@ -20,7 +21,7 @@ import {
   Package,
   CheckCircle
 } from 'lucide-react';
-import { MoenLogo, storeLocations } from "@/assets/logo";
+import { MoenLogo, storeInfo } from "@/assets/logo";
 import { Card, CardContent } from './ui/card';
 import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
@@ -49,22 +50,12 @@ interface RefundReceiptTemplateProps {
     staffNotes?: string;
   };
   language: string;
-  locationId?: string;
 }
 
-export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ 
-  refund, 
-  language,
-  locationId
-}) => {
+export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ refund, language }) => {
   const isArabic = language === 'ar';
   const direction = isArabic ? 'rtl' : 'ltr';
   const textAlign = isArabic ? 'right' : 'left';
-  
-  // Find the appropriate store location
-  const location = locationId 
-    ? storeLocations.find(loc => loc.id === locationId) 
-    : storeLocations[0]; // Default to the first location
   
   // Format the date using date-fns
   const formattedDate = format(new Date(refund.refundDate), 'dd/MM/yyyy hh:mm a');
@@ -98,18 +89,9 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '4px' }}>
           <MoenLogo className="w-auto h-8" />
         </div>
-        <h2 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '1px', textAlign: 'center' }}>
-          {isArabic ? location?.nameAr : location?.name}
-        </h2>
-        <p style={{ fontSize: '10px', fontWeight: 'bold', marginBottom: '1px', textAlign: 'center' }}>
-          {isArabic ? location?.title.ar : location?.title.en}
-        </p>
-        <p style={{ fontSize: '9px', marginBottom: '1px', textAlign: 'center' }}>
-          {isArabic ? location?.address.ar : location?.address.en}
-        </p>
-        <p style={{ fontSize: '9px', textAlign: 'center' }}>
-          {isArabic ? "هاتف" : "Phone"}: {location?.phone}
-        </p>
+        <h2 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '1px', textAlign: 'center' }}>{storeInfo.name}</h2>
+        <p style={{ fontSize: '9px', marginBottom: '1px', textAlign: 'center' }}>{storeInfo.address}</p>
+        <p style={{ fontSize: '9px', textAlign: 'center' }}>{isArabic ? "هاتف" : "Phone"}: {storeInfo.phone}</p>
       </div>
       
       {/* Receipt Type Badge */}

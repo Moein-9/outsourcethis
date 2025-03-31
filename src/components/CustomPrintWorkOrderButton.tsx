@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer, MapPin } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
 import { 
@@ -12,14 +12,6 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
-import { storeLocations } from '@/assets/logo';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -40,10 +32,9 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   size = "sm",
   children // This prop holds any custom trigger element
 }) => {
-  const { t, language } = useLanguageStore();
+  const { t } = useLanguageStore();
   const [open, setOpen] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [selectedLocationId, setSelectedLocationId] = useState(storeLocations[0].id);
   
   const handlePrint = () => {
     if (isPrinting) return; // Prevent multiple calls
@@ -55,7 +46,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient, selectedLocationId);
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
       setTimeout(() => setIsPrinting(false), 1000); // Reset printing state after a delay
     }, 300);
   };
@@ -91,22 +82,6 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
             {t('previewBeforePrinting')}
           </DialogDescription>
           
-          <div className="mb-4 flex items-center gap-3">
-            <MapPin className="h-4 w-4 text-gray-500" />
-            <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
-              <SelectTrigger className="w-full md:w-[300px]">
-                <SelectValue placeholder={language === 'ar' ? "اختر الموقع" : "Select location"} />
-              </SelectTrigger>
-              <SelectContent>
-                {storeLocations.map(location => (
-                  <SelectItem key={location.id} value={location.id}>
-                    {language === 'ar' ? location.title.ar : location.title.en}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
           <div className="w-full max-w-[80mm] bg-white p-0 border rounded shadow-sm mb-4">
             <div id="work-order-receipt">
               <CustomWorkOrderReceipt 
@@ -114,7 +89,6 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
                 invoice={invoice} 
                 patient={patient}
                 isPrintable={true}
-                locationId={selectedLocationId}
               />
             </div>
           </div>
