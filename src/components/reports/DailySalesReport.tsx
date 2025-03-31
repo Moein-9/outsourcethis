@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { useInvoiceStore, Invoice } from "@/store/invoiceStore";
+import { useInvoiceStore, Invoice, Refund } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -17,7 +17,8 @@ import {
   Tag,
   MapPin,
   Store,
-  Phone
+  Phone,
+  RefreshCcw
 } from "lucide-react";
 import { 
   Table,
@@ -34,15 +35,22 @@ import { PrintService } from "@/utils/PrintService";
 import { PrintReportButton } from "./PrintReportButton";
 import { Button } from "@/components/ui/button";
 import { MoenLogo, storeInfo } from "@/assets/logo";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export const DailySalesReport: React.FC = () => {
   const invoiceStore = useInvoiceStore();
   const { language } = useLanguageStore();
   const invoices: Invoice[] = invoiceStore?.invoices || [];
+  const refunds: Refund[] = invoiceStore?.refunds || [];
   
   const [todaySales, setTodaySales] = useState<Invoice[]>([]);
+  const [todayRefunds, setTodayRefunds] = useState<Refund[]>([]);
   const [paymentBreakdown, setPaymentBreakdown] = useState<{
+    method: string;
+    amount: number;
+    count: number;
+  }[]>([]);
+  const [refundBreakdown, setRefundBreakdown] = useState<{
     method: string;
     amount: number;
     count: number;
@@ -53,6 +61,8 @@ export const DailySalesReport: React.FC = () => {
   const [totalFrameRevenue, setTotalFrameRevenue] = useState(0);
   const [totalCoatingRevenue, setTotalCoatingRevenue] = useState(0);
   const [totalDeposit, setTotalDeposit] = useState(0);
+  const [totalRefunds, setTotalRefunds] = useState(0);
+  const [netRevenue, setNetRevenue] = useState(0);
   
   const [expandedInvoices, setExpandedInvoices] = useState<Record<string, boolean>>({});
   
@@ -94,6 +104,16 @@ export const DailySalesReport: React.FC = () => {
     color: language === 'ar' ? "اللون" : "Color",
     coating: language === 'ar' ? "الطلاء" : "Coating",
     currency: language === 'ar' ? "د.ك" : "KWD",
+    totalRefunds: language === 'ar' ? "إجمالي المبالغ المستردة" : "Total Refunds",
+    todaysRefunds: language === 'ar' ? "المبالغ المستردة اليوم" : "Today's refunds",
+    refundMethods: language === 'ar' ? "طرق الاسترداد" : "Refund Methods",
+    netRevenue: language === 'ar' ? "صافي الإيرادات" : "Net Revenue",
+    afterRefunds: language === 'ar' ? "بعد الاستردادات" : "After refunds",
+    refundedItems: language === 'ar' ? "العناصر المستردة" : "Refunded Items",
+    refundedInvoices: language === 'ar' ? "الفواتير المستردة" : "Refunded Invoices",
+    noRefunds: language === 'ar' ? "لا توجد استردادات" : "No Refunds",
+    noRefundsToday: language === 'ar' ? "لم يتم إجراء أي استردادات لليوم الحالي" : "No refunds have been processed for today",
+    reason: language === 'ar' ? "السبب" : "Reason",
   };
   
   const toggleInvoiceExpansion = (invoiceId: string) => {
@@ -107,55 +127,89 @@ export const DailySalesReport: React.FC = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
+    // Get today's sales
     const todaySalesData = invoices.filter(invoice => {
       const invoiceDate = new Date(invoice.createdAt);
       invoiceDate.setHours(0, 0, 0, 0);
       return invoiceDate.getTime() === today.getTime();
     });
     
+    // Get today's refunds
+    const todayRefundsData = refunds.filter(refund => {
+      const refundDate = new Date(refund.date);
+      refundDate.setHours(0, 0, 0, 0);
+      return refundDate.getTime() === today.getTime();
+    });
+    
     setTodaySales(todaySalesData);
+    setTodayRefunds(todayRefundsData);
     
-    const revenue = todaySalesData.reduce((sum, invoice) => {
-      if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
-        const contactLensTotal = invoice.contactLensItems.reduce(
-          (lensSum, lens) => lensSum + (lens.price || 0) * (lens.qty || 1), 0
-        );
-        return sum + Math.max(0, contactLensTotal - (invoice.discount || 0));
-      }
-      return sum + invoice.total;
-    }, 0);
+    // Calculate total revenue (excluding refunded invoices)
+    const revenue = todaySalesData
+      .filter(invoice => !invoice.isRefunded)
+      .reduce((sum, invoice) => {
+        if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
+          const contactLensTotal = invoice.contactLensItems.reduce(
+            (lensSum, lens) => lensSum + (lens.price || 0) * (lens.qty || 1), 0
+          );
+          return sum + Math.max(0, contactLensTotal - (invoice.discount || 0));
+        }
+        return sum + invoice.total;
+      }, 0);
     
-    const lensRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.lensPrice, 0);
-    const frameRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.framePrice, 0);
-    const coatingRevenue = todaySalesData.reduce((sum, invoice) => sum + invoice.coatingPrice, 0);
+    // Calculate product type revenues
+    const lensRevenue = todaySalesData
+      .filter(invoice => !invoice.isRefunded)
+      .reduce((sum, invoice) => sum + invoice.lensPrice, 0);
+      
+    const frameRevenue = todaySalesData
+      .filter(invoice => !invoice.isRefunded)
+      .reduce((sum, invoice) => sum + invoice.framePrice, 0);
+      
+    const coatingRevenue = todaySalesData
+      .filter(invoice => !invoice.isRefunded)
+      .reduce((sum, invoice) => sum + invoice.coatingPrice, 0);
+      
+    const contactLensRevenue = todaySalesData
+      .filter(invoice => !invoice.isRefunded)
+      .reduce((sum, invoice) => {
+        if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
+          return sum + invoice.contactLensItems.reduce(
+            (lensSum, lens) => lensSum + (lens.price || 0) * (lens.qty || 1), 0
+          );
+        }
+        return sum;
+      }, 0);
     
-    const contactLensRevenue = todaySalesData.reduce((sum, invoice) => {
-      if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
-        return sum + invoice.contactLensItems.reduce(
-          (lensSum, lens) => lensSum + (lens.price || 0) * (lens.qty || 1), 0
-        );
-      }
-      return sum;
-    }, 0);
+    // Calculate deposits
+    const deposits = todaySalesData
+      .filter(invoice => !invoice.isRefunded)
+      .reduce((sum, invoice) => sum + invoice.deposit, 0);
     
-    const deposits = todaySalesData.reduce((sum, invoice) => sum + invoice.deposit, 0);
+    // Calculate total refunds
+    const refundTotal = todayRefundsData.reduce((sum, refund) => sum + refund.amount, 0);
     
+    // Set state values
     setTotalRevenue(revenue);
     setTotalLensRevenue(lensRevenue + contactLensRevenue);
     setTotalFrameRevenue(frameRevenue);
     setTotalCoatingRevenue(coatingRevenue);
     setTotalDeposit(deposits);
+    setTotalRefunds(refundTotal);
+    setNetRevenue(revenue - refundTotal);
     
+    // Calculate payment method breakdown
     const paymentMethods: Record<string, { amount: number; count: number }> = {};
-    
-    todaySalesData.forEach(invoice => {
-      const method = invoice.paymentMethod || 'غير محدد';
-      if (!paymentMethods[method]) {
-        paymentMethods[method] = { amount: 0, count: 0 };
-      }
-      paymentMethods[method].amount += invoice.deposit;
-      paymentMethods[method].count += 1;
-    });
+    todaySalesData
+      .filter(invoice => !invoice.isRefunded && invoice.deposit > 0)
+      .forEach(invoice => {
+        const method = invoice.paymentMethod || 'غير محدد';
+        if (!paymentMethods[method]) {
+          paymentMethods[method] = { amount: 0, count: 0 };
+        }
+        paymentMethods[method].amount += invoice.deposit;
+        paymentMethods[method].count += 1;
+      });
     
     const breakdownData = Object.entries(paymentMethods).map(([method, data]) => ({
       method,
@@ -164,7 +218,27 @@ export const DailySalesReport: React.FC = () => {
     }));
     
     setPaymentBreakdown(breakdownData);
-  }, [invoices]);
+    
+    // Calculate refund method breakdown
+    const refundMethods: Record<string, { amount: number; count: number }> = {};
+    todayRefundsData.forEach(refund => {
+      const method = refund.method || 'غير محدد';
+      if (!refundMethods[method]) {
+        refundMethods[method] = { amount: 0, count: 0 };
+      }
+      refundMethods[method].amount += refund.amount;
+      refundMethods[method].count += 1;
+    });
+    
+    const refundBreakdownData = Object.entries(refundMethods).map(([method, data]) => ({
+      method,
+      amount: data.amount,
+      count: data.count
+    }));
+    
+    setRefundBreakdown(refundBreakdownData);
+    
+  }, [invoices, refunds]);
   
   const handlePrintReport = () => {
     const today = format(new Date(), 'MM/dd/yyyy', { locale: enUS });
@@ -496,6 +570,20 @@ export const DailySalesReport: React.FC = () => {
           </CardContent>
         </Card>
         
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardHeader className="pb-2 px-3 md:px-4">
+            <CardTitle className="text-xs md:text-sm font-medium text-green-700">
+              {t.netRevenue}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-3 md:px-4">
+            <div className="text-xl md:text-2xl font-bold text-green-900">{netRevenue.toFixed(2)} {t.currency}</div>
+            <p className="text-xs text-green-600 mt-1">
+              {t.afterRefunds}
+            </p>
+          </CardContent>
+        </Card>
+        
         <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
           <CardHeader className="pb-2 px-3 md:px-4">
             <CardTitle className="text-xs md:text-sm font-medium text-purple-700">
@@ -510,30 +598,16 @@ export const DailySalesReport: React.FC = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
           <CardHeader className="pb-2 px-3 md:px-4">
-            <CardTitle className="text-xs md:text-sm font-medium text-green-700">
-              {t.totalPayments}
+            <CardTitle className="text-xs md:text-sm font-medium text-red-700">
+              {t.totalRefunds}
             </CardTitle>
           </CardHeader>
           <CardContent className="px-3 md:px-4">
-            <div className="text-xl md:text-2xl font-bold text-green-900">{totalDeposit.toFixed(2)} {t.currency}</div>
-            <p className="text-xs text-green-600 mt-1">
-              {t.actuallyReceived}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
-          <CardHeader className="pb-2 px-3 md:px-4">
-            <CardTitle className="text-xs md:text-sm font-medium text-amber-700">
-              {t.remainingAmounts}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 md:px-4">
-            <div className="text-xl md:text-2xl font-bold text-amber-900">{(totalRevenue - totalDeposit).toFixed(2)} {t.currency}</div>
-            <p className="text-xs text-amber-600 mt-1">
-              {t.deferredAmounts}
+            <div className="text-xl md:text-2xl font-bold text-red-900">{totalRefunds.toFixed(2)} {t.currency}</div>
+            <p className="text-xs text-red-600 mt-1">
+              {t.todaysRefunds}
             </p>
           </CardContent>
         </Card>
@@ -584,13 +658,103 @@ export const DailySalesReport: React.FC = () => {
             ))}
             
             {paymentBreakdown.length === 0 && (
-              <p className="text-center text-m-text-xs md:text-smuted-foreground py-4">
+              <p className="text-center text-muted-foreground py-4">
                 {t.noInvoices}
               </p>
             )}
           </CardContent>
         </Card>
       </div>
+      
+      {/* New section for Refund Methods */}
+      {todayRefunds.length > 0 && (
+        <Card className="border-red-200">
+          <CardHeader className="bg-gradient-to-r from-red-50 to-red-100 rounded-t-lg py-3 px-3 md:p-4">
+            <CardTitle className="text-red-700 text-sm md:text-base">{t.refundMethods}</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col space-y-3 md:space-y-4 p-3 md:p-4">
+            {refundBreakdown.map((refund, index) => (
+              <div key={index} className="flex items-center justify-between p-2 md:p-3 rounded-md bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2">
+                  {refund.method === 'نقداً' || refund.method === 'Cash' ? (
+                    <Wallet className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+                  ) : refund.method === 'كي نت' || refund.method === 'KNET' ? (
+                    <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+                  ) : refund.method === 'Visa' ? (
+                    <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+                  ) : refund.method === 'MasterCard' ? (
+                    <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+                  ) : (
+                    <RefreshCcw className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+                  )}
+                  <span className="font-medium text-sm md:text-base">{refund.method}</span>
+                </div>
+                <div className="flex items-center gap-2 md:gap-4">
+                  <span className="text-xs md:text-sm text-gray-600 bg-gray-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded-full">
+                    {refund.count} {t.transactions}
+                  </span>
+                  <span className="font-medium text-sm md:text-base text-red-600">{refund.amount.toFixed(2)} {t.currency}</span>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Refunded Items section */}
+      {todayRefunds.length > 0 && (
+        <Card className="border-gray-200">
+          <CardHeader className="bg-gradient-to-r from-red-50 to-red-100 rounded-t-lg py-3 px-3 md:p-4">
+            <CardTitle className="text-red-700 text-sm md:text-base">{t.refundedItems}</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 md:p-4">
+            <div className="divide-y border border-red-200 rounded-lg overflow-hidden bg-gradient-to-r from-red-50/30 to-pink-50/30">
+              {todayRefunds.map((refund) => {
+                // Find the associated invoice
+                const relatedInvoice = invoices.find(inv => inv.invoiceId === refund.associatedInvoiceId);
+                
+                return (
+                  <div key={refund.refundId} className="p-4 hover:bg-red-50/40 transition-all">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-3 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <RefreshCcw className="h-5 w-5 text-red-600" />
+                          <span className="font-semibold text-red-800 text-lg">{refund.refundId}</span>
+                          <span className="text-sm text-gray-500">({t.invoiceStatus}: {relatedInvoice?.invoiceId || 'N/A'})</span>
+                        </div>
+                        
+                        <div className="text-xs text-red-600 flex items-center gap-1 mt-0.5">
+                          <Calendar className="h-3 w-3" />
+                          {language === 'ar' ? "تاريخ الاسترداد:" : "Refund date:"} {formatDate(refund.date)}
+                        </div>
+                        
+                        <div className="text-xs mt-1.5 text-red-600 bg-red-50 rounded-md inline-block px-2 py-0.5">
+                          {t.reason}: {refund.reason}
+                        </div>
+                        
+                        {relatedInvoice && (
+                          <div className="text-sm mt-1 font-medium text-gray-700">
+                            {language === 'ar' ? "اسم العميل:" : "Customer name:"} {relatedInvoice.patientName}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className="font-semibold text-red-800 text-xl">
+                          {refund.amount.toFixed(3)} KWD
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          {t.paymentMethod}: {refund.method}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <Card className="border-gray-200">
         <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg py-3 px-3 md:p-4">
@@ -601,16 +765,25 @@ export const DailySalesReport: React.FC = () => {
             <div className="space-y-3 md:space-y-4">
               {todaySales.map((invoice) => (
                 <div key={invoice.invoiceId} 
-                  className="border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200">
+                  className={`border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200 ${
+                    invoice.isRefunded ? 'border-red-200' : 'border-gray-200'
+                  }`}>
                   <div 
                     className={`flex flex-wrap md:flex-nowrap justify-between items-start md:items-center p-3 md:p-4 cursor-pointer gap-2 ${
                       expandedInvoices[invoice.invoiceId] ? 'bg-gray-50 border-b' : ''
-                    }`}
+                    } ${invoice.isRefunded ? 'bg-red-50/20' : ''}`}
                     onClick={() => toggleInvoiceExpansion(invoice.invoiceId)}
                   >
                     <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
-                      <div className={`p-1.5 md:p-2 rounded-full ${invoice.isPaid ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'}`}>
-                        <Receipt size={16} className="md:w-[18px] md:h-[18px]" />
+                      <div className={`p-1.5 md:p-2 rounded-full ${
+                        invoice.isRefunded ? 'bg-red-100 text-red-600' :
+                        invoice.isPaid ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
+                      }`}>
+                        {invoice.isRefunded ? (
+                          <RefreshCcw size={16} className="md:w-[18px] md:h-[18px]" />
+                        ) : (
+                          <Receipt size={16} className="md:w-[18px] md:h-[18px]" />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-medium text-sm md:text-base">{invoice.patientName}</h3>
@@ -619,7 +792,14 @@ export const DailySalesReport: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between w-full md:w-auto gap-2 md:gap-6">
                       <div className="text-right">
-                        <p className="font-medium text-sm md:text-base">{invoice.total.toFixed(2)} {t.currency}</p>
+                        <p className="font-medium text-sm md:text-base">
+                          {invoice.total.toFixed(2)} {t.currency}
+                          {invoice.isRefunded && invoice.refundAmount && (
+                            <span className="text-red-600 block">
+                              ({language === 'ar' ? "مسترد:" : "Refunded:"} {invoice.refundAmount.toFixed(2)} {t.currency})
+                            </span>
+                          )}
+                        </p>
                         <p className="text-xs md:text-sm text-gray-500">{invoice.paymentMethod}</p>
                       </div>
                       <Button 

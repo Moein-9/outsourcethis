@@ -115,6 +115,30 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
       // Call deleteWorkOrder function
       const refundId = deleteWorkOrder(workOrderToDelete.id, reason);
       
+      // Immediately update local state with the deleted work order marked as archived
+      setLocalWorkOrders(prev => prev.map(wo => {
+        if (wo.id === workOrderToDelete.id) {
+          return { ...wo, isArchived: true, archivedAt: new Date().toISOString() };
+        }
+        return wo;
+      }));
+      
+      // If there's a related invoice, update it too
+      if (relatedInvoice) {
+        setLocalInvoices(prev => prev.map(inv => {
+          if (inv.invoiceId === relatedInvoice.invoiceId) {
+            return { ...inv, isArchived: true, archivedAt: new Date().toISOString() };
+          }
+          return inv;
+        }));
+      }
+      
+      // Update archived items immediately
+      if (patient?.patientId) {
+        setArchivedInvoices(getArchivedInvoicesByPatientId(patient.patientId));
+        setArchivedWorkOrders(getArchivedWorkOrdersByPatientId(patient.patientId));
+      }
+      
       if (refundId) {
         // A refund was processed
         toast.success(
@@ -130,6 +154,10 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
             : "Order deleted successfully"
         );
       }
+      
+      // Close the dialog and reset the work order to delete
+      setIsDeleteDialogOpen(false);
+      setWorkOrderToDelete(null);
       
       // Trigger refresh to update UI
       setRefreshTrigger(prev => prev + 1);

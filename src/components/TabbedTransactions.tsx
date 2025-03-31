@@ -72,12 +72,37 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     new Date(b.archivedAt || b.createdAt).getTime() - new Date(a.archivedAt || a.createdAt).getTime()
   );
   
-  // Effect to force refresh on lastEditTimestamp change
+  const sortedArchivedWorkOrders = [...archivedWorkOrders].sort((a, b) => 
+    new Date(b.archivedAt || b.createdAt).getTime() - new Date(a.archivedAt || a.createdAt).getTime()
+  );
+  
+  // Effect to force refresh on lastEditTimestamp change or when archived items change
   useEffect(() => {
     if (lastEditTimestamp) {
       setRefreshTrigger(prev => prev + 1);
     }
   }, [lastEditTimestamp]);
+  
+  // Effect to auto-switch to archive tab when a new item is archived
+  useEffect(() => {
+    if (archivedInvoices.length > 0 || archivedWorkOrders.length > 0) {
+      // Only switch if the most recent item was archived in the last 5 seconds
+      const latestArchivedItem = [...archivedInvoices, ...archivedWorkOrders].sort((a, b) => 
+        new Date(b.archivedAt || '').getTime() - new Date(a.archivedAt || '').getTime()
+      )[0];
+      
+      if (latestArchivedItem && latestArchivedItem.archivedAt) {
+        const archivedTime = new Date(latestArchivedItem.archivedAt).getTime();
+        const now = new Date().getTime();
+        const timeDiff = now - archivedTime;
+        
+        // If archived in the last 5 seconds, switch to archive tab
+        if (timeDiff < 5000) {
+          setActiveTab('archived');
+        }
+      }
+    }
+  }, [archivedInvoices, archivedWorkOrders]);
   
   const formatDate = (dateString: string) => {
     try {
@@ -631,193 +656,235 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     );
   };
   
-  const renderArchivedTable = (transactions: Invoice[]) => {
-    if (transactions.length === 0) {
+  const renderArchivedTable = (invoices: Invoice[], workOrders: WorkOrder[]) => {
+    if (invoices.length === 0 && workOrders.length === 0) {
       return (
         <div className="p-8 text-center text-gray-500 bg-gray-50/30 rounded-lg my-2">
           <Archive className="h-12 w-12 mx-auto text-gray-300 mb-2" />
           <p className="font-medium">
-            {language === 'ar' ? "لا توجد معاملات في الأرشيف" : "No archived transactions"}
+            {language === 'ar' ? "لا توجد عناصر مؤرشفة" : "No archived items"}
           </p>
         </div>
       );
     }
     
     return (
-      <div className="divide-y border border-gray-200 rounded-lg overflow-hidden bg-gradient-to-r from-gray-50/30 to-neutral-50/30">
-        {transactions.map((invoice) => {
-          return (
-            <div key={invoice.invoiceId} className="p-4 hover:bg-gray-50/60 transition-all">
-              <div className="flex justify-between items-start">
-                <div className="space-y-3 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <Archive className="h-5 w-5 text-gray-600" />
-                    <span className="font-semibold text-gray-800 text-lg">{invoice.invoiceId}</span>
-                    
-                    {/* Archive Status */}
-                    <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200 ml-2 flex items-center gap-1">
-                      <Archive className="h-3 w-3" />
-                      {language === 'ar' ? "مؤرشف" : "Archived"}
-                    </Badge>
-                    
-                    {/* Archive Date */}
-                    {invoice.archivedAt && (
-                      <span className="text-xs text-gray-500 ml-2">
-                        {formatDate(invoice.archivedAt)}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Archive Reason */}
-                  {invoice.archiveReason && (
-                    <div className="text-xs text-gray-600 bg-gray-100 p-2 rounded-md inline-block">
-                      {language === 'ar' ? "سبب الأرشفة:" : "Archive reason:"} {invoice.archiveReason}
-                    </div>
-                  )}
-                  
-                  {/* Customer Info Card */}
-                  <Card className="bg-gray-50/80 border-gray-200 max-w-xs">
-                    <CardHeader className="pb-2 pt-3">
-                      <CardTitle className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-                        <User className="h-4 w-4" />
-                        {language === 'ar' ? "معلومات العميل" : "Customer Info"}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pb-3 pt-0 space-y-1">
-                      <div className="text-sm font-medium">
-                        {invoice.patientName || t('anonymous')}
-                      </div>
-                      {invoice.patientPhone && (
-                        <div className="text-sm text-gray-600 flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {invoice.patientPhone}
-                        </div>
+      <div className="space-y-4">
+        {invoices.length > 0 && (
+          <div className="divide-y border border-gray-200 rounded-lg overflow-hidden bg-gradient-to-r from-gray-50/30 to-slate-50/30">
+            {invoices.map((invoice) => (
+              <div key={invoice.invoiceId} className="p-4 hover:bg-gray-50/60 transition-all">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-3 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <Receipt className="h-5 w-5 text-gray-600" />
+                      <span className="font-semibold text-gray-800 text-lg">{invoice.invoiceId}</span>
+                      
+                      <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200 ml-2 flex items-center gap-1">
+                        <Archive className="h-3 w-3" />
+                        {language === 'ar' ? "مؤرشف" : "Archived"}
+                      </Badge>
+                      
+                      {invoice.isRefunded && (
+                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 ml-2 flex items-center gap-1">
+                          <RefreshCcw className="h-3 w-3" />
+                          {language === 'ar' ? "مسترد" : "Refunded"}
+                        </Badge>
                       )}
-                      <div className="text-xs text-gray-500 flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(invoice.createdAt)}
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <div className="text-sm mt-1 font-medium text-gray-700">
-                    {invoice.invoiceType === 'glasses' ? (
-                      <span>
-                        {invoice.frameBrand} {invoice.frameModel} - {invoice.lensType || ''}
-                      </span>
-                    ) : (
-                      <span>
-                        {language === 'ar' ? "عدسات لاصقة" : "Contact Lenses"}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="text-right">
-                  <div className="font-semibold text-gray-800 text-xl">
-                    {invoice.total.toFixed(3)} KWD
-                  </div>
-                  {invoice.refundAmount && (
-                    <div className="text-red-600 font-medium text-sm mt-1">
-                      {language === 'ar' ? "المبلغ المسترد:" : "Refunded amount:"} {invoice.refundAmount.toFixed(3)} KWD
                     </div>
-                  )}
-                  <div className="mt-3">
-                    <PrintOptionsDialog
-                      workOrder={invoice}
-                      invoice={invoice}
-                      patient={patient}
-                      onPrintWorkOrder={() => handlePrintWorkOrder(invoice)}
-                      onPrintInvoice={() => handlePrintInvoice(invoice)}
-                    >
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-8 text-xs bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:text-gray-800 hover:border-gray-300"
-                      >
-                        <Receipt className="h-3.5 w-3.5 mr-1" />
-                        {language === 'ar' ? "طباعة" : "Print"}
-                      </Button>
-                    </PrintOptionsDialog>
+                    
+                    {invoice.archivedAt && (
+                      <div className="text-xs text-gray-600 flex items-center gap-1 mt-0.5">
+                        <Calendar className="h-3 w-3" />
+                        {language === 'ar' ? "تاريخ الأرشفة:" : "Archived date:"} {formatDate(invoice.archivedAt)}
+                      </div>
+                    )}
+                    
+                    {invoice.archiveReason && (
+                      <div className="text-xs text-gray-600 mt-1 bg-gray-50 p-1 rounded">
+                        {language === 'ar' ? "سبب الأرشفة:" : "Archive reason:"} {invoice.archiveReason}
+                      </div>
+                    )}
+                    
+                    <Card className="bg-gray-50/80 border-gray-200 max-w-xs">
+                      <CardHeader className="pb-2 pt-3">
+                        <CardTitle className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                          <User className="h-4 w-4" />
+                          {language === 'ar' ? "معلومات العميل" : "Customer Info"}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pb-3 pt-0 space-y-1">
+                        <div className="text-sm font-medium">
+                          {invoice.patientName || t('anonymous')}
+                        </div>
+                        {invoice.patientPhone && (
+                          <div className="text-sm text-gray-600 flex items-center gap-1">
+                            <Phone className="h-3 w-3" />
+                            {invoice.patientPhone}
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-500 flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDate(invoice.createdAt)}
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <div className="text-sm mt-1 font-medium text-gray-700">
+                      {invoice.invoiceType === 'glasses' ? (
+                        <span>
+                          {invoice.frameBrand} {invoice.frameModel} - {invoice.lensType || ''}
+                        </span>
+                      ) : (
+                        <span>
+                          {language === 'ar' ? "عدسات لاصقة" : "Contact Lenses"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <div className="font-semibold text-gray-800 text-xl">
+                      {invoice.total.toFixed(3)} KWD
+                    </div>
+                    {invoice.isRefunded && invoice.refundAmount && (
+                      <div className="text-red-600 font-medium text-sm mt-1">
+                        {language === 'ar' ? "المسترد:" : "Refunded:"} {invoice.refundAmount.toFixed(3)} KWD
+                      </div>
+                    )}
+                    <div className="mt-3">
+                      {invoice.isRefunded && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8 text-xs bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800 hover:border-red-300"
+                          onClick={() => handlePrintRefundReceipt(invoice)}
+                        >
+                          <Receipt className="h-3.5 w-3.5 mr-1" />
+                          {language === 'ar' ? "طباعة إيصال الاسترداد" : "Print Refund Receipt"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            ))}
+          </div>
+        )}
+        
+        {workOrders.length > 0 && (
+          <div className="divide-y border border-gray-200 rounded-lg overflow-hidden bg-gradient-to-r from-gray-50/30 to-slate-50/30 mt-4">
+            {workOrders.map((workOrder) => (
+              <div key={workOrder.id} className="p-4 hover:bg-gray-50/60 transition-all">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-3 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <ShoppingBag className="h-5 w-5 text-gray-600" />
+                      <span className="font-semibold text-gray-800 text-lg">{workOrder.id}</span>
+                      
+                      <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200 ml-2 flex items-center gap-1">
+                        <Archive className="h-3 w-3" />
+                        {language === 'ar' ? "مؤرشف" : "Archived"}
+                      </Badge>
+                      
+                      {workOrder.isRefunded && (
+                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 ml-2 flex items-center gap-1">
+                          <RefreshCcw className="h-3 w-3" />
+                          {language === 'ar' ? "مسترد" : "Refunded"}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    {workOrder.archivedAt && (
+                      <div className="text-xs text-gray-600 flex items-center gap-1 mt-0.5">
+                        <Calendar className="h-3 w-3" />
+                        {language === 'ar' ? "تاريخ الأرشفة:" : "Archived date:"} {formatDate(workOrder.archivedAt)}
+                      </div>
+                    )}
+                    
+                    {workOrder.archiveReason && (
+                      <div className="text-xs text-gray-600 mt-1 bg-gray-50 p-1 rounded">
+                        {language === 'ar' ? "سبب الأرشفة:" : "Archive reason:"} {workOrder.archiveReason}
+                      </div>
+                    )}
+                    
+                    <div className="text-sm mt-1 font-medium text-gray-700">
+                      {workOrder.lensType?.name && (
+                        <span>
+                          {workOrder.lensType.name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    {workOrder.lensType?.price && (
+                      <div className="font-semibold text-gray-800 text-lg">
+                        {workOrder.lensType.price.toFixed(3)} KWD
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
   
   return (
-    <div className="mt-4 border rounded-lg overflow-hidden shadow-sm">
-      <div className="bg-gradient-to-r from-indigo-100 to-blue-50 p-4 flex justify-between items-center">
-        <h3 className="font-medium text-indigo-900 text-lg">
-          {language === 'ar' ? "سجل المعاملات" : "Transaction History"}
-        </h3>
-        <span className="text-xs bg-indigo-100 text-indigo-800 py-1 px-3 rounded-full">
-          {sortedInvoices.length + refundedInvoices.length + sortedArchivedInvoices.length} {language === 'ar' ? "معاملة" : "transactions"}
-        </span>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="px-4 pt-4">
-          <TabsList className="w-full grid grid-cols-4">
-            <TabsTrigger value="active" className="flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4" />
-              {language === 'ar' ? "نشطة" : "Active"}
-              {activeInvoices.length > 0 && (
-                <Badge variant="secondary" className="ml-1 bg-blue-100 text-blue-800">
-                  {activeInvoices.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="flex items-center gap-2">
-              <CheckCheck className="h-4 w-4" />
-              {language === 'ar' ? "مكتملة" : "Completed"}
-              {uniqueCompletedInvoices.length > 0 && (
-                <Badge variant="secondary" className="ml-1 bg-green-100 text-green-800">
-                  {uniqueCompletedInvoices.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="refunded" className="flex items-center gap-2">
-              <RefreshCcw className="h-4 w-4" />
-              {language === 'ar' ? "مستردة" : "Refunded"}
-              {refundedInvoices.length > 0 && (
-                <Badge variant="secondary" className="ml-1 bg-red-100 text-red-800">
-                  {refundedInvoices.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="archive" className="flex items-center gap-2">
-              <Archive className="h-4 w-4" />
-              {language === 'ar' ? "أرشيف" : "Archive"}
-              {sortedArchivedInvoices.length > 0 && (
-                <Badge variant="secondary" className="ml-1 bg-gray-100 text-gray-800">
-                  {sortedArchivedInvoices.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="active" className="pb-4 pt-2 px-4">
-          {renderActiveTable(activeInvoices)}
-        </TabsContent>
-        
-        <TabsContent value="completed" className="pb-4 pt-2 px-4 animate-fade-in">
-          {renderCompletedTable(uniqueCompletedInvoices)}
-        </TabsContent>
-        
-        <TabsContent value="refunded" className="pb-4 pt-2 px-4">
-          {renderRefundedTable(refundedInvoices)}
-        </TabsContent>
-        
-        <TabsContent value="archive" className="pb-4 pt-2 px-4">
-          {renderArchivedTable(sortedArchivedInvoices)}
-        </TabsContent>
-      </Tabs>
-    </div>
+    <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab}>
+      <TabsList className="grid w-full grid-cols-4">
+        <TabsTrigger value="active" className="relative">
+          {language === 'ar' ? "نشط" : "Active"}
+          {activeInvoices.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {activeInvoices.length}
+            </span>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="completed">
+          {language === 'ar' ? "مكتمل" : "Completed"}
+          {uniqueCompletedInvoices.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {uniqueCompletedInvoices.length}
+            </span>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="refunded">
+          {language === 'ar' ? "مسترد" : "Refunded"}
+          {refundedInvoices.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {refundedInvoices.length}
+            </span>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="archived">
+          {language === 'ar' ? "أرشيف" : "Archived"}
+          {(archivedInvoices.length > 0 || archivedWorkOrders.length > 0) && (
+            <span className="absolute -top-1 -right-1 bg-gray-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {archivedInvoices.length + archivedWorkOrders.length}
+            </span>
+          )}
+        </TabsTrigger>
+      </TabsList>
+      
+      <TabsContent value="active" className="mt-4">
+        {renderActiveTable(activeInvoices)}
+      </TabsContent>
+      
+      <TabsContent value="completed" className="mt-4">
+        {renderCompletedTable(uniqueCompletedInvoices)}
+      </TabsContent>
+      
+      <TabsContent value="refunded" className="mt-4">
+        {renderRefundedTable(refundedInvoices)}
+      </TabsContent>
+      
+      <TabsContent value="archived" className="mt-4">
+        {renderArchivedTable(sortedArchivedInvoices, sortedArchivedWorkOrders)}
+      </TabsContent>
+    </Tabs>
   );
 };
