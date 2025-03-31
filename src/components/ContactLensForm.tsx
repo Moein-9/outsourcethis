@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Eye, AlertTriangle } from "lucide-react";
@@ -32,7 +31,6 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     };
     onChange(updatedRx);
     
-    // Validate cylinder/axis relationship on change
     if (field === 'cylinder' || field === 'axis') {
       validateCylinderAxis('rightEye', updatedRx.rightEye.cylinder, updatedRx.rightEye.axis);
     }
@@ -48,15 +46,12 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     };
     onChange(updatedRx);
     
-    // Validate cylinder/axis relationship on change
     if (field === 'cylinder' || field === 'axis') {
       validateCylinderAxis('leftEye', updatedRx.leftEye.cylinder, updatedRx.leftEye.axis);
     }
   };
   
-  // Validate that if cylinder has a value, axis must also have a value
   const validateCylinderAxis = (eye: 'rightEye' | 'leftEye', cylinder: string, axis: string) => {
-    // If cylinder has a non-empty value that's not "-", axis must also have a non-empty value that's not "-"
     const hasCylinder = cylinder !== "-" && cylinder !== "";
     const hasAxis = axis !== "-" && axis !== "";
     
@@ -69,18 +64,15 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     }));
   };
   
-  // Initial validation on component mount and when rxData changes
   useEffect(() => {
     validateCylinderAxis('rightEye', rxData.rightEye.cylinder, rxData.rightEye.axis);
     validateCylinderAxis('leftEye', rxData.leftEye.cylinder, rxData.leftEye.axis);
   }, [rxData]);
 
-  // Generate sphere options from +4.00 to -9.00
   const generateSphereOptions = () => {
     const options = [];
     options.push(<option key="sph-none" value="-">-</option>);
     
-    // Add positive values from +4.00 to +0.25
     for (let i = 4.00; i >= 0.25; i -= 0.25) {
       const value = i.toFixed(2);
       options.push(
@@ -88,10 +80,8 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       );
     }
     
-    // Add 0.00
     options.push(<option key="sph-zero" value="0.00">0.00</option>);
     
-    // Add negative values from -0.25 to -9.00
     for (let i = -0.25; i >= -9.00; i -= 0.25) {
       const value = i.toFixed(2);
       options.push(
@@ -102,7 +92,6 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     return options;
   };
 
-  // Generate cylinder options: -0.75, -1.25, -1.75, -2.25
   const generateCylinderOptions = () => {
     const cylValues = ["-", "-0.75", "-1.25", "-1.75", "-2.25"];
     return cylValues.map(value => (
@@ -110,12 +99,11 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     ));
   };
 
-  // Generate axis options from 10° to 180° in increments of 10°
   const generateAxisOptions = () => {
     const options = [];
     options.push(<option key="axis-none" value="-">-</option>);
     
-    for (let i = 10; i <= 180; i += 10) {
+    for (let i = 1; i <= 180; i += 1) {
       options.push(
         <option key={`axis-${i}`} value={i.toString()}>{i}°</option>
       );
@@ -127,16 +115,14 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
-  // Check if there are any validation errors
   const hasValidationErrors = validationErrors.rightEye.cylinderAxisError || 
                               validationErrors.leftEye.cylinderAxisError;
 
-  // Column widths - making AXIS column wider
   const columnWidths = {
     label: "w-[15%]",
     sphere: "w-[17%]",
     cylinder: "w-[17%]",
-    axis: "w-[20%]", // Increased width for better readability
+    axis: "w-[20%]",
     bc: "w-[15%]",
     dia: "w-[16%]"
   };
@@ -160,7 +146,6 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       )}
 
       <div className="space-y-6">
-        {/* Always left-to-right table regardless of language */}
         <table className="w-full border-collapse ltr">
           <thead>
             <tr className="bg-purple-50">
@@ -173,7 +158,6 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
             </tr>
           </thead>
           <tbody>
-            {/* Right Eye Row */}
             <tr className="bg-purple-50/30">
               <td className={`border border-purple-100 p-2 ${columnWidths.label}`}>
                 <div className="flex items-center gap-1.5">
@@ -237,7 +221,6 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
               </td>
             </tr>
             
-            {/* Left Eye Row */}
             <tr className="bg-indigo-50/30">
               <td className={`border border-indigo-100 p-2 ${columnWidths.label}`}>
                 <div className="flex items-center gap-1.5">
@@ -303,13 +286,12 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
           </tbody>
         </table>
         
-        {/* Validation error message */}
         {hasValidationErrors && (
           <div className="p-3 mt-2 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
             <p className="text-red-700 text-sm">
               {language === 'ar' 
-                ? "إذا تم تحديد قيمة الأسطوانة، يجب تحديد قيمة المحور أيضًا." 
+                ? "إذا تم تحديد قيمة الأسطوانة، يجب تحديد قيمة المحور أيضًا."
                 : "If cylinder value is provided, axis value is required."
               }
             </p>
