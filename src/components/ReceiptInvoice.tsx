@@ -2,7 +2,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
-import { CheckCircle2, Receipt, CreditCard, Calendar, Phone, User, UserCircle2 } from "lucide-react";
+import { CheckCircle2, Receipt, CreditCard, Calendar, Phone, User, UserCircle2, RefreshCcw } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
@@ -79,6 +79,13 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const contactLensItems = contactLenses || invoice.contactLensItems || [];
   
   const isContactLens = invoiceType === "contacts" || invoice.invoiceType === "contacts" || contactLensItems.length > 0;
+  
+  // Check if invoice has been refunded
+  const isRefunded = invoice.isRefunded;
+  const refundAmount = invoice.refundAmount || 0;
+  const refundDate = invoice.refundDate;
+  const refundMethod = invoice.refundMethod;
+  const refundReason = invoice.refundReason;
   
   return (
     <div 
@@ -283,6 +290,48 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           )}
         </div>
       </div>
+      
+      {/* Add Refund section if the invoice has been refunded */}
+      {isRefunded && (
+        <div className="mb-3">
+          <div className="py-2 bg-red-600 text-white mb-3 font-bold text-lg rounded">
+            {isRtl ? "استرداد | Refund" : "Refund | استرداد"}
+          </div>
+          
+          <div className="p-2 border-2 border-red-300 rounded space-y-2">
+            <div className="flex items-center justify-center gap-1 mb-2">
+              <RefreshCcw className="w-5 h-5 text-red-600" />
+              <span className="font-bold text-lg text-red-600">
+                {isRtl ? "تم استرداد هذه الفاتورة" : "This invoice has been refunded"}
+              </span>
+            </div>
+            
+            <div className="flex justify-between px-2">
+              <span className="font-semibold text-base">{isRtl ? "مبلغ الاسترداد" : "Refund Amount"}:</span>
+              <span className="font-bold text-base text-red-600">KWD {refundAmount.toFixed(3)}</span>
+            </div>
+            
+            <div className="flex justify-between px-2">
+              <span className="font-semibold text-base">{isRtl ? "تاريخ الاسترداد" : "Refund Date"}:</span>
+              <span className="font-semibold text-base">
+                {refundDate ? format(new Date(refundDate), 'dd/MM/yyyy') : 'N/A'}
+              </span>
+            </div>
+            
+            <div className="flex justify-between px-2">
+              <span className="font-semibold text-base">{isRtl ? "طريقة الاسترداد" : "Refund Method"}:</span>
+              <span className="font-semibold text-base">{refundMethod || 'N/A'}</span>
+            </div>
+            
+            {refundReason && (
+              <div className="px-2 pt-1 border-t border-red-200">
+                <div className="font-semibold text-base text-center">{isRtl ? "سبب الاسترداد" : "Refund Reason"}:</div>
+                <div className="text-sm font-medium text-center">{refundReason}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="mt-3 pt-2 border-t-2 border-gray-300">
         {isRtl ? (
@@ -342,7 +391,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               color: black !important;
             }
             
-            .bg-black {
+            .bg-black, .bg-red-600 {
               background-color: black !important;
               color: white !important;
               -webkit-print-color-adjust: exact !important;
@@ -354,8 +403,29 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               color: white !important;
             }
             
-            .bg-black * {
+            .bg-black *, .bg-red-600 * {
               color: white !important;
+            }
+            
+            .text-red-600 {
+              color: #dc2626 !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+            
+            .border-red-300 {
+              border-color: #fca5a5 !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+            
+            .border-red-200 {
+              border-color: #fecaca !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
             
             #receipt-invoice .border-2 {

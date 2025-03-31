@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { format, subDays, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
-import { useInvoiceStore, Invoice } from "@/store/invoiceStore";
+import { useInvoiceStore, Invoice, Refund } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +28,7 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BarChart3, LineChart as LineChartIcon, MapPin, Store, Phone } from "lucide-react";
+import { BarChart3, LineChart as LineChartIcon, MapPin, Store, Phone, RefreshCcw, CreditCard, Receipt } from "lucide-react";
 import { PrintService } from "@/utils/PrintService";
 import { PrintReportButton } from "./PrintReportButton";
 import { MoenLogo } from "@/assets/logo";
@@ -53,6 +54,7 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
   const invoiceStore = useInvoiceStore();
   const { language } = useLanguageStore();
   const invoices: Invoice[] = invoiceStore?.invoices || [];
+  const refunds: Refund[] = invoiceStore?.refunds || [];
   const isRtl = language === 'ar';
   
   const [date, setDate] = useState<DateRange | undefined>({
@@ -63,8 +65,11 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
   const [salesData, setSalesData] = useState<any[]>([]);
   const [productSalesData, setProductSalesData] = useState<any[]>([]);
   const [totalSales, setTotalSales] = useState(0);
+  const [totalRefunds, setTotalRefunds] = useState(0);
+  const [netRevenue, setNetRevenue] = useState(0);
   const [averageDailySales, setAverageDailySales] = useState(0);
   const [transactionCount, setTransactionCount] = useState(0);
+  const [refundCount, setRefundCount] = useState(0);
   
   const translations = {
     comparativeAnalysis: language === 'ar' ? "التحليل المقارن | Comparative Analysis" : "Comparative Analysis | التحليل المقارن",
@@ -84,6 +89,9 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
     currency: language === 'ar' ? "د.ك | KWD" : "KWD | د.ك",
     printReport: language === 'ar' ? "طباعة التقرير | Print Report" : "Print Report | طباعة التقرير",
     noDataAvailable: language === 'ar' ? "لا توجد بيانات متاحة | No data available" : "No data available | لا توجد بيانات متاحة",
+    totalRefunds: language === 'ar' ? "إجمالي المستردات | Total Refunds" : "Total Refunds | إجمالي المستردات",
+    refundCount: language === 'ar' ? "عدد المستردات | Refund Count" : "Refund Count | عدد المستردات",
+    netRevenue: language === 'ar' ? "صافي الإيرادات | Net Revenue" : "Net Revenue | صافي الإيرادات",
   };
   
   useEffect(() => {
@@ -110,13 +118,26 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
       return isWithinInterval(invoiceDate, { start: startDate, end: endDate });
     });
     
+    const filteredRefunds = refunds.filter(refund => {
+      const refundDate = parseISO(refund.date);
+      return isWithinInterval(refundDate, { start: startDate, end: endDate });
+    });
+    
     const dailySales: { [key: string]: number } = {};
     let total = 0;
+    let refundTotal = 0;
     
     filteredInvoices.forEach(invoice => {
       const dateKey = format(parseISO(invoice.createdAt), 'yyyy-MM-dd');
       dailySales[dateKey] = (dailySales[dateKey] || 0) + invoice.total;
       total += invoice.total;
+    });
+    
+    // Calculate refund totals
+    filteredRefunds.forEach(refund => {
+      const dateKey = format(parseISO(refund.date), 'yyyy-MM-dd');
+      dailySales[dateKey] = (dailySales[dateKey] || 0) - refund.amount; // Subtract refunds from daily sales
+      refundTotal += refund.amount;
     });
     
     const chartData = Object.entries(dailySales).map(([date, sales]) => ({
@@ -137,13 +158,16 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
     ]);
     
     setTotalSales(total);
+    setTotalRefunds(refundTotal);
+    setNetRevenue(total - refundTotal);
     setTransactionCount(filteredInvoices.length);
+    setRefundCount(filteredRefunds.length);
     
     const numberOfDays = Math.ceil(
       (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
     );
-    setAverageDailySales(total / numberOfDays);
-  }, [date, invoices, selectedTimeRange, translations]);
+    setAverageDailySales((total - refundTotal) / numberOfDays);
+  }, [date, invoices, refunds, selectedTimeRange, translations]);
   
   const handleTimeRangeChange = (value: "week" | "month" | "custom") => {
     setSelectedTimeRange(value);
@@ -191,6 +215,21 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
       </div>
     `;
     
+    // Add refund section
+    const refundAnalysis = `
+      <div class="section-title">${language === 'ar' ? 'معلومات المستردات | Refund Information' : 'Refund Information | معلومات المستردات'}</div>
+      <div class="summary-item">
+        <div class="summary-item-row">
+          <span class="summary-item-title">${language === 'ar' ? 'إجمالي المستردات | Total Refunds' : 'Total Refunds | إجمالي المستردات'}:</span>
+          <span class="summary-item-value">${totalRefunds.toFixed(2)} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
+        </div>
+        <div class="summary-item-row">
+          <span class="summary-item-title">${language === 'ar' ? 'عدد المستردات | Refund Count' : 'Refund Count | عدد المستردات'}:</span>
+          <span class="summary-item-value">${refundCount}</span>
+        </div>
+      </div>
+    `;
+    
     const reportContent = `
       ${storeInfo}
       
@@ -218,6 +257,10 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
             <span class="summary-item-title">${language === 'ar' ? 'إجمالي المبيعات | Total Sales' : 'Total Sales | إجمالي المبيعات'}:</span>
             <span class="summary-item-value">${totalSales.toFixed(2)} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
           </div>
+          <div class="summary-item-row highlight-row">
+            <span class="summary-item-title">${language === 'ar' ? 'صافي الإيرادات | Net Revenue' : 'Net Revenue | صافي الإيرادات'}:</span>
+            <span class="summary-item-value">${netRevenue.toFixed(2)} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
+          </div>
           <div class="summary-item-row">
             <span class="summary-item-title">${language === 'ar' ? 'متوسط ​​المبيعات اليومي | Average Daily Sales' : 'Average Daily Sales | متوسط ​​المبيعات اليومي'}:</span>
             <span class="summary-item-value">${averageDailySales.toFixed(2)} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
@@ -227,6 +270,12 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
             <span class="summary-item-value">${transactionCount}</span>
           </div>
         </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="summary-section">
+        ${refundAnalysis}
       </div>
       
       <div class="divider"></div>
@@ -331,6 +380,14 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
           justify-content: space-between;
           margin-bottom: 8px;
           font-size: 14px;
+        }
+        
+        .highlight-row {
+          font-weight: bold;
+          font-size: 16px;
+          background-color: #f3f3f3;
+          padding: 3px 5px;
+          border-radius: 3px;
         }
         
         .summary-item-title {
@@ -486,7 +543,7 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
           <CardTitle>{translations.totalSales}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="p-4 border rounded-lg bg-white shadow-sm">
               <p className="text-sm font-semibold mb-1">{translations.totalSales}</p>
               <p className="text-3xl font-bold">
@@ -502,6 +559,29 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
             <div className="p-4 border rounded-lg bg-white shadow-sm">
               <p className="text-sm font-semibold mb-1">{translations.transactionCount}</p>
               <p className="text-3xl font-bold">{transactionCount}</p>
+            </div>
+          </div>
+          
+          {/* Added Refund and Net Revenue Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 border rounded-lg bg-white shadow-sm border-red-200">
+              <div className="flex items-center gap-1 text-sm font-semibold mb-1 text-red-600">
+                <RefreshCcw className="h-4 w-4" />
+                <p>{translations.totalRefunds}</p>
+              </div>
+              <p className="text-3xl font-bold text-red-600">
+                -{totalRefunds.toFixed(2)} {translations.currency}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">{translations.refundCount}: {refundCount}</p>
+            </div>
+            <div className="md:col-span-2 p-4 border rounded-lg bg-white shadow-sm border-green-200">
+              <div className="flex items-center gap-1 text-sm font-semibold mb-1 text-green-600">
+                <Receipt className="h-4 w-4" />
+                <p>{translations.netRevenue}</p>
+              </div>
+              <p className="text-3xl font-bold text-green-600">
+                {netRevenue.toFixed(2)} {translations.currency}
+              </p>
             </div>
           </div>
         </CardContent>
