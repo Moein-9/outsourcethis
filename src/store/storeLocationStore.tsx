@@ -1,48 +1,90 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getDefaultLocationId, storeLocations } from '@/assets/logo';
 
-type LocationId = keyof typeof storeLocations;
+// Define the available store locations
+export type LocationId = 'arbid' | 'somait';
 
-interface StoreLocationContextType {
-  selectedLocation: LocationId;
-  setSelectedLocation: (locationId: LocationId) => void;
-  locations: typeof storeLocations;
+interface StoreLocation {
+  id: LocationId;
+  name: {
+    en: string;
+    ar: string;
+  };
+  address: {
+    en: string;
+    ar: string;
+  };
+  phone: string;
 }
 
-const StoreLocationContext = createContext<StoreLocationContextType | undefined>(undefined);
+export const storeLocations: Record<LocationId, StoreLocation> = {
+  arbid: {
+    id: 'arbid',
+    name: {
+      en: 'Al Arbid Gallery Mall',
+      ar: 'مجمع العربيد جاليري'
+    },
+    address: {
+      en: 'Habeeb Munawer Street, Al Farwaniyah, Kuwait',
+      ar: 'شارع حبيب مناور، الفروانية، الكويت'
+    },
+    phone: '24748201'
+  },
+  somait: {
+    id: 'somait',
+    name: {
+      en: 'Al-Somait Plaza',
+      ar: 'مجمع الصميط بلازا'
+    },
+    address: {
+      en: 'Habeeb Munawer Street, Al Farwaniyah, Kuwait',
+      ar: 'شارع حبيب مناور، الفروانية، الكويت'
+    },
+    phone: '24759016'
+  }
+};
+
+interface LocationContextType {
+  selectedLocation: LocationId;
+  setSelectedLocation: (locationId: LocationId) => void;
+  getLocationData: (locationId?: LocationId) => StoreLocation;
+}
+
+const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
 export const StoreLocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [selectedLocation, setSelectedLocation] = useState<LocationId>(getDefaultLocationId() as LocationId);
-
-  // Load saved location from localStorage if available
+  // Default to Arbid or get from localStorage if available
+  const [selectedLocation, setSelectedLocation] = useState<LocationId>(() => {
+    const savedLocation = localStorage.getItem('storeLocation') as LocationId;
+    return savedLocation && (savedLocation === 'arbid' || savedLocation === 'somait') 
+      ? savedLocation 
+      : 'arbid';
+  });
+  
+  // Save location preference to localStorage when it changes
   useEffect(() => {
-    const savedLocation = localStorage.getItem('selectedLocation');
-    if (savedLocation && storeLocations[savedLocation as LocationId]) {
-      setSelectedLocation(savedLocation as LocationId);
-    }
-  }, []);
-
-  // Save location to localStorage when changed
-  useEffect(() => {
-    localStorage.setItem('selectedLocation', selectedLocation);
+    localStorage.setItem('storeLocation', selectedLocation);
   }, [selectedLocation]);
-
+  
+  // Get location data function
+  const getLocationData = (locationId?: LocationId): StoreLocation => {
+    const id = locationId || selectedLocation;
+    return storeLocations[id];
+  };
+  
   return (
-    <StoreLocationContext.Provider 
-      value={{ 
-        selectedLocation, 
-        setSelectedLocation, 
-        locations: storeLocations 
-      }}
-    >
+    <LocationContext.Provider value={{ 
+      selectedLocation, 
+      setSelectedLocation,
+      getLocationData
+    }}>
       {children}
-    </StoreLocationContext.Provider>
+    </LocationContext.Provider>
   );
 };
 
-export const useStoreLocation = (): StoreLocationContextType => {
-  const context = useContext(StoreLocationContext);
+export const useStoreLocation = (): LocationContextType => {
+  const context = useContext(LocationContext);
   if (context === undefined) {
     throw new Error('useStoreLocation must be used within a StoreLocationProvider');
   }

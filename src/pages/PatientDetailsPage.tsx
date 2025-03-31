@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
+import { useParams } from 'react-router-dom';
 
 const PatientDetailsPage: React.FC = () => {
   const { patientId } = useParams<{ patientId: string }>();
@@ -10,7 +10,7 @@ const PatientDetailsPage: React.FC = () => {
     <Layout activeSection="patients" onNavigate={() => {}}>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-4">Patient Details</h1>
-        <p>Details for patient ID: {patientId}</p>
+        <p>Viewing patient ID: {patientId}</p>
       </div>
     </Layout>
   );

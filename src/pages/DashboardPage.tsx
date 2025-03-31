@@ -7,7 +7,7 @@ const DashboardPage: React.FC = () => {
     <Layout activeSection="dashboard" onNavigate={() => {}}>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-        <p>Welcome to the dashboard!</p>
+        <p>Welcome to the Dashboard</p>
       </div>
     </Layout>
   );

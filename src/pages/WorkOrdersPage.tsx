@@ -4,10 +4,10 @@ import { Layout } from '@/components/Layout';
 
 const WorkOrdersPage: React.FC = () => {
   return (
-    <Layout activeSection="work-orders" onNavigate={() => {}}>
+    <Layout activeSection="sales" onNavigate={() => {}}>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-4">Work Orders</h1>
-        <p>Manage work orders</p>
+        <p>Work orders management page</p>
       </div>
     </Layout>
   );
