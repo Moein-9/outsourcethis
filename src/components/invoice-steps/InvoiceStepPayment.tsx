@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -15,7 +14,6 @@ import { toast } from "@/components/ui/use-toast";
 
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
-  const isRtl = language === 'ar';
   const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
   const addWorkOrder = useInvoiceStore(state => state.addWorkOrder);
   const addInvoice = useInvoiceStore(state => state.addInvoice);
@@ -128,11 +126,6 @@ export const InvoiceStepPayment: React.FC = () => {
     } else if (invoiceType === 'contacts') {
       invoiceData.contactLensItems = formData.contactLensItems || [];
       invoiceData.contactLensRx = formData.contactLensRx || null;
-    } else if (invoiceType === 'exam') {
-      invoiceData.serviceId = formData.serviceId;
-      invoiceData.serviceName = formData.serviceName;
-      invoiceData.serviceDescription = formData.serviceDescription;
-      invoiceData.servicePrice = formData.servicePrice;
     }
     
     const invoiceId = addInvoice(invoiceData);
@@ -151,10 +144,9 @@ export const InvoiceStepPayment: React.FC = () => {
   };
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
-  const dirClass = isRtl ? 'rtl' : 'ltr';
   
   return (
-    <div className={`space-y-6 animate-fade-in ${dirClass}`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="space-y-6 animate-fade-in">
       <div className="border rounded-lg p-5 bg-card shadow-sm">
         <div className="border-b border-primary/30 pb-3 mb-4">
           <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
@@ -201,8 +193,8 @@ export const InvoiceStepPayment: React.FC = () => {
             onClick={handlePayInFull} 
             className="w-full border-primary/20 hover:bg-primary/5 text-primary hover:text-primary/80"
           >
-            <Banknote className={`w-5 h-5 ${isRtl ? 'ml-2' : 'mr-2'} text-green-500`} />
-            {t('payInFull')} ({total.toFixed(2)} {isRtl ? 'د.ك' : t('kwd')})
+            <Banknote className={`w-5 h-5 ${language === 'ar' ? 'ml-2' : 'mr-2'} text-green-500`} />
+            {t('payInFull')} ({total.toFixed(2)} {t('kwd')})
           </Button>
         </div>
       </div>
@@ -218,11 +210,11 @@ export const InvoiceStepPayment: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div 
             className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
-              paymentMethod === (isRtl ? "نقداً" : "Cash")
+              paymentMethod === (language === 'ar' ? "نقداً" : "Cash")
                 ? "border-primary bg-primary/5 shadow-sm" 
                 : "hover:border-primary/30 hover:bg-muted/10"
             }`}
-            onClick={() => selectPaymentMethod(isRtl ? "نقداً" : "Cash")}
+            onClick={() => selectPaymentMethod(language === 'ar' ? "نقداً" : "Cash")}
           >
             <img 
               src="https://cdn-icons-png.flaticon.com/512/7083/7083125.png" 
@@ -235,11 +227,11 @@ export const InvoiceStepPayment: React.FC = () => {
           
           <div 
             className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
-              paymentMethod === (isRtl ? "كي نت" : "KNET")
+              paymentMethod === (language === 'ar' ? "كي نت" : "KNET")
                 ? "border-primary bg-primary/5 shadow-sm" 
                 : "hover:border-primary/30 hover:bg-muted/10"
             }`}
-            onClick={() => selectPaymentMethod(isRtl ? "كي نت" : "KNET")}
+            onClick={() => selectPaymentMethod(language === 'ar' ? "كي نت" : "KNET")}
           >
             <img 
               src="https://kabkg.com/staticsite/images/knet.png" 
@@ -306,17 +298,17 @@ export const InvoiceStepPayment: React.FC = () => {
         <div className="mt-6 p-4 border rounded-lg bg-primary/5">
           <div className={`flex justify-between text-lg font-medium ${textAlignClass}`}>
             <span>{t('totalInvoice')}:</span>
-            <span>{total.toFixed(2)} {isRtl ? 'د.ك' : t('kwd')}</span>
+            <span>{total.toFixed(2)} {t('kwd')}</span>
           </div>
           
           <div className={`flex justify-between mt-2 text-green-600 ${textAlignClass}`}>
             <span>{t('deposit')}:</span>
-            <span>{deposit.toFixed(2)} {isRtl ? 'د.ك' : t('kwd')}</span>
+            <span>{deposit.toFixed(2)} {t('kwd')}</span>
           </div>
           
           <div className={`flex justify-between mt-2 ${remaining > 0 ? 'text-amber-600' : 'text-green-600'} font-medium ${textAlignClass}`}>
             <span>{t('remaining')}:</span>
-            <span>{remaining.toFixed(2)} {isRtl ? 'د.ك' : t('kwd')}</span>
+            <span>{remaining.toFixed(2)} {t('kwd')}</span>
           </div>
         </div>
         
@@ -327,8 +319,8 @@ export const InvoiceStepPayment: React.FC = () => {
               size="lg"
               onClick={saveOrder}
             >
-              <Save className={`w-5 h-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-              {isRtl ? 'حفظ الطلب' : 'Save Order'}
+              <Save className="w-5 h-5 mr-2" />
+              {language === 'ar' ? 'حفظ الطلب' : 'Save Order'}
             </Button>
           </motion.div>
         ) : (
@@ -337,9 +329,9 @@ export const InvoiceStepPayment: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <Check className={`w-5 h-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
+            <Check className="w-5 h-5 mr-2" />
             <span className="font-medium">
-              {isRtl ? 'تم حفظ الطلب بنجاح' : 'Order saved successfully'}
+              {language === 'ar' ? 'تم حفظ الطلب بنجاح' : 'Order saved successfully'}
             </span>
           </motion.div>
         )}

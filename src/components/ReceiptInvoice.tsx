@@ -41,7 +41,6 @@ interface ReceiptInvoiceProps {
 export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ 
   invoice,
   isPrintable = false,
-  
   patientName,
   patientPhone,
   invoiceType,
@@ -89,6 +88,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const isContactLens = invoiceType === "contacts" || invoice.invoiceType === "contacts" || contactLensItems.length > 0;
   const isEyeExam = invoiceType === "exam" || invoice.invoiceType === "exam";
   
+  // Get service information for eye exam
   const service = {
     name: serviceName || invoice.serviceName || "",
     id: serviceId || invoice.serviceId || "",
@@ -96,6 +96,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
     price: servicePrice !== undefined ? servicePrice : invoice.servicePrice || 0
   };
   
+  // Check if invoice has been refunded
   const isRefunded = invoice.isRefunded;
   const refundAmount = invoice.refundAmount || 0;
   const refundDate = invoice.refundDate;
@@ -199,10 +200,10 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             <div className="p-2 border-2 border-gray-300 rounded">
               <div className="flex justify-between px-2 mb-1">
                 <div className="font-bold text-base">{isRtl ? "فحص العين | Eye Exam" : "Eye Exam | فحص العين"}</div>
-                <span className="font-bold text-base">{isRtl ? 'د.ك' : 'KWD'} {service.price.toFixed(3)}</span>
+                <span className="font-bold text-base">KWD {service.price.toFixed(3)}</span>
               </div>
               <div className="text-sm font-medium text-center">
-                {isRtl ? 'خدمة فحص العين' : 'Eye examination service'}
+                {service.name || t("eyeExam")}
                 {service.description && <span> - {service.description}</span>}
               </div>
             </div>
@@ -211,7 +212,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               <div key={idx} className="p-2 border-2 border-gray-300 rounded">
                 <div className="flex justify-between px-2 mb-1">
                   <div className="font-bold text-base">{lens.brand} {lens.type}</div>
-                  <span className="font-bold text-base">{isRtl ? 'د.ك' : 'KWD'} {lens.price.toFixed(3)}</span>
+                  <span className="font-bold text-base">KWD {lens.price.toFixed(3)}</span>
                 </div>
                 <div className="text-sm font-medium text-center">
                   {lens.color && <span>{t("color")}: {lens.color} - </span>}
@@ -225,7 +226,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                 <div className="p-2 border-2 border-gray-300 rounded">
                   <div className="flex justify-between px-2 mb-1">
                     <div className="font-bold text-base">{isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}</div>
-                    <span className="font-bold text-base">{isRtl ? 'د.ك' : 'KWD'} {lensP.toFixed(3)}</span>
+                    <span className="font-bold text-base">KWD {lensP.toFixed(3)}</span>
                   </div>
                   <div className="text-sm font-medium text-center">{lens}</div>
                 </div>
@@ -235,7 +236,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                 <div className="p-2 border-2 border-gray-300 rounded">
                   <div className="flex justify-between px-2 mb-1">
                     <div className="font-bold text-base">{isRtl ? "الإطار | Frame" : "Frame | الإطار"}</div>
-                    <span className="font-bold text-base">{isRtl ? 'د.ك' : 'KWD'} {frameP.toFixed(3)}</span>
+                    <span className="font-bold text-base">KWD {frameP.toFixed(3)}</span>
                   </div>
                   <div className="text-sm font-medium text-center">{frameBrand} {frameModel}</div>
                 </div>
@@ -245,7 +246,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                 <div className="p-2 border-2 border-gray-300 rounded">
                   <div className="flex justify-between px-2 mb-1">
                     <div className="font-bold text-base">{isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}</div>
-                    <span className="font-bold text-base">{isRtl ? 'د.ك' : 'KWD'} {coatP.toFixed(3)}</span>
+                    <span className="font-bold text-base">KWD {coatP.toFixed(3)}</span>
                   </div>
                   <div className="text-sm font-medium text-center">{coat}</div>
                 </div>
@@ -257,12 +258,12 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         <div className="mt-3 border-2 border-gray-300 rounded p-2">
           <div className="flex justify-between px-2 font-bold">
             <span className="text-base">{isRtl ? "المجموع الفرعي" : "Subtotal"}:</span>
-            <span className="text-base">{isRtl ? 'د.ك' : 'KWD'} {tot.toFixed(3)}</span>
+            <span className="text-base">KWD {tot.toFixed(3)}</span>
           </div>
           
           <div className="flex justify-between px-2 font-bold mt-1">
             <span className="text-base">{isRtl ? "المجموع" : "Total"}:</span>
-            <span className="text-base">{isRtl ? 'د.ك' : 'KWD'} {tot.toFixed(3)}</span>
+            <span className="text-base">KWD {tot.toFixed(3)}</span>
           </div>
         </div>
       </div>
@@ -279,7 +280,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                 <span className="font-bold text-base">
                   {format(new Date(payment.date), 'dd/MM/yyyy')}
                 </span>
-                <span className="font-bold text-base">{isRtl ? 'د.ك' : 'KWD'} {payment.amount.toFixed(3)}</span>
+                <span className="font-bold text-base">KWD {payment.amount.toFixed(3)}</span>
               </div>
               <div className="text-sm font-medium flex items-center justify-center gap-1">
                 <CreditCard className="w-5 h-5" />
@@ -293,7 +294,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                 <span className="font-bold text-base">
                   {format(new Date(invoice.createdAt), 'dd/MM/yyyy')}
                 </span>
-                <span className="font-bold text-base">{isRtl ? 'د.ك' : 'KWD'} {dep.toFixed(3)}</span>
+                <span className="font-bold text-base">KWD {dep.toFixed(3)}</span>
               </div>
               <div className="text-sm font-medium flex items-center justify-center gap-1">
                 <CreditCard className="w-5 h-5" />
@@ -306,7 +307,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           {rem > 0 ? (
             <div className="flex justify-between font-bold mt-2 pt-1">
               <span className="text-lg">{t("remaining")}:</span>
-              <span className="text-lg">{isRtl ? 'د.ك' : 'KWD'} {rem.toFixed(3)}</span>
+              <span className="text-lg">KWD {rem.toFixed(3)}</span>
             </div>
           ) : (
             <div className="mt-2 flex items-center justify-center gap-1 font-bold">
@@ -333,7 +334,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             
             <div className="flex justify-between px-2">
               <span className="font-semibold text-base">{isRtl ? "مبلغ الاسترداد" : "Refund Amount"}:</span>
-              <span className="font-bold text-base text-red-600">{isRtl ? 'د.ك' : 'KWD'} {refundAmount.toFixed(3)}</span>
+              <span className="font-bold text-base text-red-600">KWD {refundAmount.toFixed(3)}</span>
             </div>
             
             <div className="flex justify-between px-2">

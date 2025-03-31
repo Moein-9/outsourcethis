@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -23,7 +22,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFo
 
 const CreateInvoiceContent: React.FC = () => {
   const { t, language } = useLanguageStore();
-  const isRtl = language === 'ar';
   const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts" | "exam">("glasses");
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
@@ -97,126 +95,15 @@ const CreateInvoiceContent: React.FC = () => {
       ? (getValues("contactLensItems")?.length > 0)
       : true; // For exam type, product data is always available
 
-  // Render glasses-related items
-  const renderGlassesItems = () => {
-    return (
-      <>
-        {!getValues("skipFrame") && getValues("frameBrand") && (
-          <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-amber-100 rounded-bl-full opacity-20"></div>
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium text-amber-700 flex items-center gap-1">
-                  <Tag className="w-3 h-3" /> {t('frame')}
-                </p>
-                <p className="text-sm text-gray-600 mt-1">
-                  {getValues("frameBrand")} {getValues("frameModel")}
-                </p>
-              </div>
-              <p className="font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-md text-sm">
-                {getValues("framePrice")?.toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}
-              </p>
-            </div>
-          </div>
-        )}
-        
-        {getValues("lensType") && (
-          <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full opacity-20"></div>
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium text-blue-700 flex items-center gap-1">
-                  <Tag className="w-3 h-3" /> {t('lensType')}
-                </p>
-                <p className="text-sm text-gray-600 mt-1">
-                  {getValues("lensType")}
-                </p>
-              </div>
-              <p className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-sm">
-                {getValues("lensPrice")?.toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}
-              </p>
-            </div>
-          </div>
-        )}
-        
-        {getValues("coating") && (
-          <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 rounded-bl-full opacity-20"></div>
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium text-purple-700 flex items-center gap-1">
-                  <Paintbrush className="w-3 h-3" /> {t('coating')}
-                </p>
-                <p className="text-sm text-gray-600 mt-1">
-                  {getValues("coating")}
-                </p>
-              </div>
-              <p className="font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-md text-sm">
-                {getValues("coatingPrice")?.toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}
-              </p>
-            </div>
-          </div>
-        )}
-        
-        {getValues("thickness") && (
-          <div className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-bl-full opacity-20"></div>
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium text-green-700 flex items-center gap-1">
-                  <Ruler className="w-3 h-3" /> {t('thickness') || "Thickness"}
-                </p>
-                <p className="text-sm text-gray-600 mt-1">
-                  {getValues("thickness")}
-                </p>
-              </div>
-              <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md text-sm">
-                {getValues("thicknessPrice")?.toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}
-              </p>
-            </div>
-          </div>
-        )}
-      </>
-    );
-  };
-
-  // Render contact lens items
-  const renderContactLensItems = () => {
-    return (
-      <div className="space-y-2">
-        {(getValues("contactLensItems") || []).map((lens, index) => (
-          <div key={index} className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-bl-full opacity-20"></div>
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium text-green-700 flex items-center gap-1">
-                  <Tag className="w-3 h-3" /> {lens.brand} {lens.type}
-                </p>
-                {lens.qty > 1 && (
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {t('quantity')}: {lens.qty}
-                  </p>
-                )}
-              </div>
-              <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md text-sm">
-                {(lens.price * (lens.qty || 1)).toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
-    <div className={`py-6 max-w-7xl mx-auto ${dirClass}`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="py-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className={`text-2xl font-bold flex items-center gap-2 ${textAlignClass}`}>
           <FileText className="w-6 h-6 text-primary" />
           {t('invoiceTitle')}
         </h2>
         
-        <div className={`flex items-center ${isRtl ? 'space-x-reverse' : 'space-x-3'}`}>
+        <div className="flex items-center space-x-3">
           <Button 
             onClick={handlePrintInvoice} 
             variant="outline" 
@@ -430,21 +317,115 @@ const CreateInvoiceContent: React.FC = () => {
                           <div className="flex justify-between items-start">
                             <div>
                               <p className="font-medium text-blue-700 flex items-center gap-1">
-                                <ScrollText className="w-3 h-3" /> {isRtl ? 'فحص العين' : 'Eye Exam'}
+                                <ScrollText className="w-3 h-3" /> {language === 'ar' ? 'فحص العين' : 'Eye Exam'}
                               </p>
                               <p className="text-sm text-gray-600 mt-1">
-                                {isRtl ? 'خدمة فحص العين' : 'Eye examination service'}
+                                {language === 'ar' ? 'خدمة فحص العين' : 'Eye examination service'}
                               </p>
                             </div>
                             <p className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-sm">
-                              {getValues("servicePrice")?.toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}
+                              {getValues("servicePrice")?.toFixed(3)} KWD
                             </p>
                           </div>
                         </div>
                       ) : invoiceType === "glasses" ? (
-                        renderGlassesItems()
+                        <div>
+                          {!getValues("skipFrame") && getValues("frameBrand") && (
+                            <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
+                              <div className="absolute top-0 right-0 w-16 h-16 bg-amber-100 rounded-bl-full opacity-20"></div>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="font-medium text-amber-700 flex items-center gap-1">
+                                    <Tag className="w-3 h-3" /> {t('frame')}
+                                  </p>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    {getValues("frameBrand")} {getValues("frameModel")}
+                                  </p>
+                                </div>
+                                <p className="font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-md text-sm">
+                                  {getValues("framePrice")?.toFixed(3)} KWD
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {getValues("lensType") && (
+                            <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
+                              <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full opacity-20"></div>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="font-medium text-blue-700 flex items-center gap-1">
+                                    <Tag className="w-3 h-3" /> {t('lensType')}
+                                  </p>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    {getValues("lensType")}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {getValues("coating") && (
+                            <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
+                              <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 rounded-bl-full opacity-20"></div>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="font-medium text-purple-700 flex items-center gap-1">
+                                    <Paintbrush className="w-3 h-3" /> {t('coating')}
+                                  </p>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    {getValues("coating")}
+                                  </p>
+                                </div>
+                                <p className="font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-md text-sm">
+                                  {getValues("coatingPrice")?.toFixed(3)} KWD
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {getValues("thickness") && (
+                            <div className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
+                              <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-bl-full opacity-20"></div>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="font-medium text-green-700 flex items-center gap-1">
+                                    <Ruler className="w-3 h-3" /> {t('thickness') || "Thickness"}
+                                  </p>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    {getValues("thickness")}
+                                  </p>
+                                </div>
+                                <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md text-sm">
+                                  {getValues("thicknessPrice")?.toFixed(3)} KWD
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       ) : (
-                        renderContactLensItems()
+                        <div className="space-y-2">
+                          {(getValues("contactLensItems") || []).map((lens, index) => (
+                            <div key={index} className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
+                              <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-bl-full opacity-20"></div>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="font-medium text-green-700 flex items-center gap-1">
+                                    <Tag className="w-3 h-3" /> {lens.brand} {lens.type}
+                                  </p>
+                                  {lens.qty > 1 && (
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                      {t('quantity')}: {lens.qty}
+                                    </p>
+                                  )}
+                                </div>
+                                <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md text-sm">
+                                  {(lens.price * (lens.qty || 1)).toFixed(3)} KWD
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
                   ) : (
@@ -465,7 +446,7 @@ const CreateInvoiceContent: React.FC = () => {
                     <div className="p-3 bg-white rounded-lg shadow-sm space-y-2">
                       <div className="flex justify-between items-center py-1">
                         <span className="text-sm text-gray-600">{t('subtotal')}</span>
-                        <span className="font-medium">{(total + (getValues("discount") || 0)).toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}</span>
+                        <span className="font-medium">{(total + (getValues("discount") || 0)).toFixed(3)} KWD</span>
                       </div>
                       
                       {(getValues("discount") || 0) > 0 && (
@@ -473,24 +454,24 @@ const CreateInvoiceContent: React.FC = () => {
                           <span className="text-sm flex items-center gap-1">
                             <Calculator className="w-3 h-3" /> {t('discount')}
                           </span>
-                          <span className="font-medium">-{(getValues("discount") || 0).toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}</span>
+                          <span className="font-medium">-{(getValues("discount") || 0).toFixed(3)} KWD</span>
                         </div>
                       )}
                       
                       <div className="flex justify-between items-center py-2 border-t border-dashed border-amber-200">
                         <span className="font-medium text-gray-800">{t('total')}</span>
-                        <span className="text-lg font-bold text-amber-600">{total.toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}</span>
+                        <span className="text-lg font-bold text-amber-600">{total.toFixed(3)} KWD</span>
                       </div>
                       
                       <div className="flex justify-between items-center py-1">
                         <span className="text-sm text-gray-600">{t('deposit')}</span>
-                        <span className="font-medium text-green-600">{(getValues("deposit") || 0).toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}</span>
+                        <span className="font-medium text-green-600">{(getValues("deposit") || 0).toFixed(3)} KWD</span>
                       </div>
                       
                       <div className="flex justify-between items-center py-2 border-t border-dashed border-amber-200">
                         <span className="font-medium text-gray-800">{t('remaining')}</span>
                         <span className={`text-lg font-bold ${remaining <= 0 ? "text-green-600" : "text-amber-600"}`}>
-                          {remaining.toFixed(3)} {isRtl ? 'د.ك' : 'KWD'}
+                          {remaining.toFixed(3)} KWD
                         </span>
                       </div>
                       
