@@ -1,13 +1,20 @@
-
 import React, { useState, useEffect, CSSProperties } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import QRCodeReact from 'qrcode.react';
 import QRCode from 'qrcode';
 import { Button } from "@/components/ui/button";
 import { useInventoryStore, FrameItem } from '@/store/inventoryStore';
-import { Check, AlertTriangle } from 'lucide-react';
+import { Check, AlertTriangle, Calendar, SortDesc, SortAsc, Search, ListFilter } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 import { PrintService } from '@/utils/PrintService';
+import { Input } from '@/components/ui/input';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 
 interface FrameLabelTemplateProps {
   onPrintError?: (errorMessage: string) => void;
@@ -21,7 +28,6 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
   const { t } = useLanguageStore();
   const [isPrinting, setIsPrinting] = useState(false);
   
-  // Generate QR code as data URL
   const generateQRCodeDataURL = (text: string): Promise<string> => {
     return QRCode.toDataURL(text, {
       width: 200,
@@ -35,14 +41,12 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     });
   };
   
-  // Function to print a single frame label by ID
   const printSingleLabel = async (frameId: string) => {
     const frame = frames.find(f => f.frameId === frameId);
     
     if (!frame) {
       const errorMsg = t('frameNotFound');
       toast({
-        title: t('error'),
         description: errorMsg,
         variant: "destructive"
       });
@@ -64,7 +68,6 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
         console.log(`[LabelPrinting] Print process completed for frame ${frameId}`);
         setIsPrinting(false);
         toast({
-          title: t('success'),
           description: t('labelPrintedSuccessfully')
         });
       });
@@ -72,7 +75,6 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       console.error('[LabelPrinting] QR code generation error:', error);
       const errorMsg = t('errorGeneratingQRCode');
       toast({
-        title: t('error'),
         description: errorMsg,
         variant: "destructive"
       });
@@ -81,12 +83,10 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     }
   };
   
-  // Function to print multiple frame labels
   const printMultipleLabels = async (frameIds: string[]) => {
     if (frameIds.length === 0) {
       const errorMsg = t('noFramesSelected');
       toast({
-        title: t('error'),
         description: errorMsg,
         variant: "destructive"
       });
@@ -99,7 +99,6 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     if (selectedFrames.length === 0) {
       const errorMsg = t('noFramesFound');
       toast({
-        title: t('error'),
         description: errorMsg,
         variant: "destructive"
       });
@@ -113,7 +112,6 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       
       let allLabelsContent = '';
       
-      // Process frames sequentially to ensure all QR codes are generated properly
       for (const frame of selectedFrames) {
         console.log(`[LabelPrinting] Generating label content for frame ${frame.frameId}`);
         const qrCodeDataURL = await generateQRCodeDataURL(frame.frameId);
@@ -126,7 +124,6 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
         console.log(`[LabelPrinting] Print process completed for ${selectedFrames.length} frames`);
         setIsPrinting(false);
         toast({
-          title: t('success'),
           description: t('labelsPrintedSuccessfully')
         });
       });
@@ -134,7 +131,6 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       console.error('[LabelPrinting] QR code generation error:', error);
       const errorMsg = t('errorGeneratingQRCodes');
       toast({
-        title: t('error'),
         description: errorMsg,
         variant: "destructive"
       });
@@ -143,9 +139,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     }
   };
   
-  // Helper function to create frame label HTML content with pre-generated QR code
   const createFrameLabelContent = (frame: FrameItem, qrCodeDataURL: string) => {
-    // Format price to remove decimal places if they're all zeros
     const formattedPrice = Number.isInteger(frame.price) 
       ? Math.floor(frame.price)
       : frame.price.toFixed(3);
@@ -179,9 +173,44 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
 export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintError }) => {
   const { frames } = useInventoryStore();
   const { printMultipleLabels, isPrinting } = usePrintLabel(onPrintError);
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   const [selectedFrames, setSelectedFrames] = useState<string[]>([]);
   
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'priceHigh' | 'priceLow'>('newest');
+  const [filteredFrames, setFilteredFrames] = useState(frames);
+  
+  useEffect(() => {
+    let results = [...frames];
+    
+    if (searchTerm) {
+      const lowercasedTerm = searchTerm.toLowerCase();
+      results = results.filter(frame => 
+        frame.brand.toLowerCase().includes(lowercasedTerm) ||
+        frame.model.toLowerCase().includes(lowercasedTerm) ||
+        frame.color?.toLowerCase().includes(lowercasedTerm) ||
+        frame.size?.toLowerCase().includes(lowercasedTerm)
+      );
+    }
+    
+    switch (sortOrder) {
+      case 'newest':
+        results.sort((a, b) => b.frameId.localeCompare(a.frameId));
+        break;
+      case 'oldest':
+        results.sort((a, b) => a.frameId.localeCompare(b.frameId));
+        break;
+      case 'priceHigh':
+        results.sort((a, b) => b.price - a.price);
+        break;
+      case 'priceLow':
+        results.sort((a, b) => a.price - b.price);
+        break;
+    }
+    
+    setFilteredFrames(results);
+  }, [frames, searchTerm, sortOrder]);
+
   const toggleFrameSelection = (frameId: string) => {
     if (selectedFrames.includes(frameId)) {
       setSelectedFrames(prev => prev.filter(id => id !== frameId));
@@ -191,7 +220,7 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
   };
   
   const selectAllFrames = () => {
-    setSelectedFrames(frames.map(f => f.frameId));
+    setSelectedFrames(filteredFrames.map(f => f.frameId));
   };
   
   const deselectAllFrames = () => {
@@ -203,7 +232,6 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
     printMultipleLabels(selectedFrames);
   };
   
-  // CSS styles for the preview
   const previewStyles: Record<string, React.CSSProperties> = {
     container: {
       width: '200px',
@@ -271,7 +299,6 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
   };
   
   const PreviewLabel = ({ frame }: { frame: FrameItem }) => {
-    // Format price to remove decimal places if they're all zeros
     const formattedPrice = Number.isInteger(frame.price) 
       ? Math.floor(frame.price)
       : frame.price.toFixed(3);
@@ -302,27 +329,72 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
     );
   };
   
+  const isRtl = language === 'ar';
+  const dirClass = isRtl ? 'rtl' : 'ltr';
+  
   return (
-    <div className="space-y-3">
-      <div className="flex justify-between items-center">
-        <div>
-          <span className="font-medium">{t('selectedFrames')}: {selectedFrames.length}</span>
+    <div className={`space-y-4 ${dirClass}`}>
+      <div className="flex flex-col md:flex-row justify-between items-start gap-3">
+        <div className="md:w-1/2 w-full">
+          <h2 className="text-lg font-semibold mb-2">
+            {isRtl ? "طباعة ملصقات الإطارات" : "Print Frame Labels"}
+          </h2>
+          <div className="relative w-full">
+            <Search className={`absolute ${isRtl ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
+            <Input 
+              placeholder={isRtl ? "بحث عن إطار..." : "Search frames..."}
+              className={`${isRtl ? 'pr-9' : 'pl-9'} w-full`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
-        <div className="flex gap-2">
+        <div className="w-full md:w-auto flex flex-wrap gap-2 items-center justify-end">
+          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-none">
+            {isRtl ? `الإطارات المحددة: ${selectedFrames.length}` : `Selected Frames: ${selectedFrames.length}`}
+          </Badge>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <ListFilter className="h-4 w-4" />
+                {isRtl ? "ترتيب" : "Sort"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setSortOrder('newest')} className="gap-2">
+                <SortDesc className="h-4 w-4" />
+                {isRtl ? "الأحدث أولاً" : "Newest First"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortOrder('oldest')} className="gap-2">
+                <SortAsc className="h-4 w-4" />
+                {isRtl ? "الأقدم أولاً" : "Oldest First"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortOrder('priceHigh')} className="gap-2">
+                <SortDesc className="h-4 w-4" />
+                {isRtl ? "السعر: من الأعلى للأدنى" : "Price: High to Low"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortOrder('priceLow')} className="gap-2">
+                <SortAsc className="h-4 w-4" />
+                {isRtl ? "السعر: من الأدنى للأعلى" : "Price: Low to High"} 
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           <Button variant="outline" size="sm" onClick={selectAllFrames} disabled={isPrinting}>
-            {t('selectAll')}
+            {isRtl ? "تحديد الكل" : "Select All"}
           </Button>
           <Button variant="outline" size="sm" onClick={deselectAllFrames} disabled={isPrinting}>
-            {t('deselectAll')}
+            {isRtl ? "إلغاء التحديد" : "Deselect All"}
           </Button>
           <Button 
-            variant="secondary" 
+            variant="default" 
             size="sm" 
             onClick={handlePrintSelected} 
             disabled={selectedFrames.length === 0 || isPrinting}
             className="relative"
           >
-            {isPrinting ? t('printing') : t('printSelected')}
+            {isPrinting ? (isRtl ? "جاري الطباعة..." : "Printing...") : (isRtl ? "طباعة المحدد" : "Print Selected")}
             {isPrinting && (
               <span className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -332,23 +404,31 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
         </div>
       </div>
       
-      {selectedFrames.length === 0 && frames.length > 0 && (
+      {selectedFrames.length === 0 && filteredFrames.length > 0 && (
         <div className="p-3 bg-amber-50 text-amber-800 rounded border border-amber-200 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-amber-500" />
-          <span>{t('selectFramesToPrint')}</span>
+          <span>{isRtl ? "يرجى تحديد الإطارات المراد طباعة ملصقات لها" : "Please select frames to print labels"}</span>
         </div>
       )}
       
-      {/* Preview of the first selected frame */}
-      {selectedFrames.length > 0 && frames.length > 0 && (
+      {selectedFrames.length > 0 && filteredFrames.length > 0 && (
         <div className="mb-4 p-3 border rounded-md">
-          <h3 className="text-sm font-medium mb-2">{t('labelPreview')}</h3>
-          <PreviewLabel frame={frames.find(f => f.frameId === selectedFrames[0]) || frames[0]} />
+          <h3 className="text-sm font-medium mb-2">{isRtl ? "معاينة الملصق" : "Label Preview"}</h3>
+          <div className="flex items-center">
+            <PreviewLabel frame={filteredFrames.find(f => f.frameId === selectedFrames[0]) || filteredFrames[0]} />
+            {selectedFrames.length > 1 && (
+              <div className="ml-3 text-sm text-gray-500">
+                {isRtl 
+                  ? `+ ${selectedFrames.length - 1} ملصق إضافي سيتم طباعته` 
+                  : `+ ${selectedFrames.length - 1} more label(s) will be printed`}
+              </div>
+            )}
+          </div>
         </div>
       )}
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-        {frames.map(frame => (
+        {filteredFrames.map(frame => (
           <div 
             key={frame.frameId}
             className={`border rounded p-2 cursor-pointer hover:bg-gray-50 transition-colors ${
@@ -360,7 +440,7 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
               <div>
                 <div className="font-medium text-sm">{frame.brand} {frame.model}</div>
                 <div className="text-xs text-gray-500">
-                  {frame.color}, {frame.size || '-'}
+                  {isRtl ? `اللون: ${frame.color || '-'}، المقاس: ${frame.size || '-'}` : `${frame.color || '-'}, ${frame.size || '-'}`}
                 </div>
                 <div className="text-xs font-medium">{frame.price.toFixed(3)} KWD</div>
               </div>
@@ -372,9 +452,11 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
         ))}
       </div>
       
-      {frames.length === 0 && (
+      {filteredFrames.length === 0 && (
         <div className="text-center py-6 text-gray-500">
-          {t('noFramesAvailable')}
+          {searchTerm 
+            ? (isRtl ? "لم يتم العثور على إطارات تطابق معايير البحث" : "No frames found matching search criteria") 
+            : (isRtl ? "لا توجد إطارات متاحة" : "No frames available")}
         </div>
       )}
     </div>

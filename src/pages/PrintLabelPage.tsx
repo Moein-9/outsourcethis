@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useLanguageStore } from '@/store/languageStore';
 
 const PrintLabelPage: React.FC = () => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   const [printError, setPrintError] = useState<string | null>(null);
   
   const handlePrintError = (errorMessage: string) => {
@@ -20,19 +20,23 @@ const PrintLabelPage: React.FC = () => {
     setPrintError(null);
   };
   
+  const isRtl = language === 'ar';
+  
   return (
     <Layout 
       activeSection="print-labels" 
       onNavigate={() => {}}
     >
-      <div className="container mx-auto py-6">
+      <div className={`container mx-auto py-6 ${isRtl ? 'rtl' : 'ltr'}`}>
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Frame Label Printing</h1>
+          <h1 className="text-2xl font-bold">
+            {isRtl ? "طباعة ملصقات الإطارات" : "Frame Label Printing"}
+          </h1>
           
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" className="gap-2" onClick={() => window.location.reload()}>
               <Printer className="h-4 w-4" />
-              {t('refreshPrintPage')}
+              {isRtl ? "تحديث صفحة الطباعة" : "Refresh Print Page"}
             </Button>
           </div>
         </div>
@@ -40,7 +44,7 @@ const PrintLabelPage: React.FC = () => {
         {printError && (
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Printing Error</AlertTitle>
+            <AlertTitle>{isRtl ? "خطأ في الطباعة" : "Printing Error"}</AlertTitle>
             <AlertDescription>
               {printError}
               <div className="mt-2">
@@ -50,7 +54,7 @@ const PrintLabelPage: React.FC = () => {
                   className="mr-2"
                   onClick={clearPrintError}
                 >
-                  Dismiss
+                  {isRtl ? "تجاهل" : "Dismiss"}
                 </Button>
                 <Button 
                   variant="default" 
@@ -60,7 +64,7 @@ const PrintLabelPage: React.FC = () => {
                     window.location.reload();
                   }}
                 >
-                  Retry
+                  {isRtl ? "إعادة المحاولة" : "Retry"}
                 </Button>
               </div>
             </AlertDescription>
