@@ -27,12 +27,12 @@ export function CollapsibleCard({
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
   
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <Card className={className}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <CardHeader 
             className={cn(
-              "py-3 px-3 md:p-4 cursor-pointer transition-all", 
+              "bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg py-3 px-3 md:p-4 cursor-pointer hover:bg-gray-100 transition-all", 
               headerClassName
             )}
           >
@@ -41,15 +41,15 @@ export function CollapsibleCard({
                 {title}
               </CardTitle>
               {isOpen ? (
-                <ChevronUp className="h-5 w-5 text-current opacity-80" />
+                <ChevronUp className="h-5 w-5 text-gray-500" />
               ) : (
-                <ChevronDown className="h-5 w-5 text-current opacity-80" />
+                <ChevronDown className="h-5 w-5 text-gray-500" />
               )}
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className={cn("p-0", contentClassName)}>
+          <CardContent className={cn("p-0 md:p-4", contentClassName)}>
             {children}
           </CardContent>
         </CollapsibleContent>
