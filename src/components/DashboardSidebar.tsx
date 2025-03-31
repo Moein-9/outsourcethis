@@ -96,7 +96,7 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
     <SidebarProvider defaultOpen={true}>
       <div className={`min-h-screen flex w-full ${isRtl ? 'rtl-language' : 'ltr-language'}`} 
            style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
-        <Sidebar>
+        <Sidebar side={isRtl ? 'right' : 'left'}>
           <SidebarHeader className="flex items-center justify-center py-4">
             <MoenLogo className="h-10 w-auto" />
           </SidebarHeader>
@@ -114,6 +114,7 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
                         tooltip={item.label}
                         isActive={item.section === activeSection}
                         onClick={() => handleNavigation(item.section, item.action)}
+                        className={isRtl ? "flex-row-reverse" : ""}
                       >
                         <item.icon className="w-5 h-5" />
                         <span>{item.label}</span>
@@ -127,7 +128,7 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
           
           <SidebarFooter className="border-t border-sidebar-border p-4">
             <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
+              <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
                 <Avatar className="w-10 h-10 border-2 border-sidebar-primary">
                   <AvatarImage src="/lovable-uploads/d1f7203d-68c5-44fb-b0a8-41330d9b48fc.png" />
                   <AvatarFallback className="bg-teal-500 text-white">MO</AvatarFallback>

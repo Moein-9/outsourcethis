@@ -52,9 +52,9 @@ export const PatientSearchForm: React.FC<PatientSearchFormProps> = ({
   };
   
   return (
-    <Card>
+    <Card className={isRtl ? "text-right" : "text-left"}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className={`flex items-center gap-2 ${isRtl ? "flex-row-reverse" : ""}`}>
           <UserSearch className="h-5 w-5 text-primary" />
           {t('searchClient')}
         </CardTitle>
@@ -73,7 +73,7 @@ export const PatientSearchForm: React.FC<PatientSearchFormProps> = ({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={isRtl ? "ابحث عن عميل..." : "Search for a client..."}
-                className={isRtl ? "pr-9" : "pl-9"}
+                className={isRtl ? "pr-9 text-right" : "pl-9 text-left"}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
             </div>
@@ -89,13 +89,13 @@ export const PatientSearchForm: React.FC<PatientSearchFormProps> = ({
             </div>
           </div>
           
-          <div className={`flex flex-col sm:flex-row gap-3 pt-2 ${isRtl ? 'rtl-flex-row-reverse' : ''}`}>
+          <div className={`flex flex-col sm:flex-row gap-3 pt-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
             <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
               <Label htmlFor="visitDateFilter" className="whitespace-nowrap">
                 {isRtl ? "تاريخ الزيارة:" : "Visit Date:"}
               </Label>
               <Select value={visitDateFilter} onValueChange={setVisitDateFilter}>
-                <SelectTrigger id="visitDateFilter" className="w-[140px]">
+                <SelectTrigger id="visitDateFilter" className={`w-[140px] ${isRtl ? "text-right" : "text-left"}`}>
                   <SelectValue placeholder={isRtl ? "جميع الزيارات" : "All Visits"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -110,7 +110,7 @@ export const PatientSearchForm: React.FC<PatientSearchFormProps> = ({
             <Button 
               variant="outline" 
               size="icon" 
-              className={isRtl ? "rtl-mr-auto" : "ml-auto"}
+              className={isRtl ? "mr-auto" : "ml-auto"}
             >
               <Filter className="h-4 w-4" />
             </Button>
