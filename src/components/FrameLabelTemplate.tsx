@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { toast } from 'sonner';
 import QRCodeReact from 'qrcode.react';
@@ -19,7 +18,6 @@ import { Badge } from '@/components/ui/badge';
 
 interface FrameLabelTemplateProps {
   onPrintError?: (errorMessage: string) => void;
-  locationId?: string;
 }
 
 /**
@@ -48,7 +46,10 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     
     if (!frame) {
       const errorMsg = t('frameNotFound');
-      toast(errorMsg);
+      toast({
+        description: errorMsg,
+        variant: "destructive"
+      });
       if (onError) onError(errorMsg);
       return;
     }
@@ -66,12 +67,17 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       PrintService.printHtml(htmlDocument, 'label', () => {
         console.log(`[LabelPrinting] Print process completed for frame ${frameId}`);
         setIsPrinting(false);
-        toast(t('labelPrintedSuccessfully'));
+        toast({
+          description: t('labelPrintedSuccessfully')
+        });
       });
     } catch (error) {
       console.error('[LabelPrinting] QR code generation error:', error);
       const errorMsg = t('errorGeneratingQRCode');
-      toast(errorMsg);
+      toast({
+        description: errorMsg,
+        variant: "destructive"
+      });
       if (onError) onError(errorMsg);
       setIsPrinting(false);
     }
@@ -80,7 +86,10 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
   const printMultipleLabels = async (frameIds: string[]) => {
     if (frameIds.length === 0) {
       const errorMsg = t('noFramesSelected');
-      toast(errorMsg);
+      toast({
+        description: errorMsg,
+        variant: "destructive"
+      });
       if (onError) onError(errorMsg);
       return;
     }
@@ -89,7 +98,10 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     
     if (selectedFrames.length === 0) {
       const errorMsg = t('noFramesFound');
-      toast(errorMsg);
+      toast({
+        description: errorMsg,
+        variant: "destructive"
+      });
       if (onError) onError(errorMsg);
       return;
     }
@@ -111,12 +123,17 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       PrintService.printHtml(htmlDocument, 'label', () => {
         console.log(`[LabelPrinting] Print process completed for ${selectedFrames.length} frames`);
         setIsPrinting(false);
-        toast(t('labelsPrintedSuccessfully'));
+        toast({
+          description: t('labelsPrintedSuccessfully')
+        });
       });
     } catch (error) {
       console.error('[LabelPrinting] QR code generation error:', error);
       const errorMsg = t('errorGeneratingQRCodes');
-      toast(errorMsg);
+      toast({
+        description: errorMsg,
+        variant: "destructive"
+      });
       if (onError) onError(errorMsg);
       setIsPrinting(false);
     }
@@ -153,7 +170,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
 /**
  * Frame Label Template Component
  */
-export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintError, locationId }) => {
+export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintError }) => {
   const { frames } = useInventoryStore();
   const { printMultipleLabels, isPrinting } = usePrintLabel(onPrintError);
   const { t, language } = useLanguageStore();

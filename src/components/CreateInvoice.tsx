@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -18,7 +17,7 @@ import { InvoiceStepPayment } from "@/components/invoice-steps/InvoiceStepPaymen
 import { InvoiceStepSummary } from "@/components/invoice-steps/InvoiceStepSummary";
 import { InvoiceFormProvider, useInvoiceForm } from "@/components/invoice-steps/InvoiceFormContext";
 import { ReceiptInvoice } from "@/components/ReceiptInvoice";
-import { CustomWorkOrderReceipt } from "@/components/CustomWorkOrderReceipt";
+import { WorkOrderPrint } from "@/components/WorkOrderPrint";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 
 const CreateInvoiceContent: React.FC = () => {
@@ -524,7 +523,7 @@ const CreateInvoiceContent: React.FC = () => {
       </Sheet>
       
       <Sheet open={workOrderPrintOpen} onOpenChange={setWorkOrderPrintOpen}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto print:w-full print:max-w-none">
+        <SheetContent className="w-full sm:max-w-3xl overflow-y-auto print:w-full print:!px-1 print:max-w-none">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2 hide-print">
               <FileText className="w-5 h-5" />
@@ -538,25 +537,23 @@ const CreateInvoiceContent: React.FC = () => {
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6 print:mt-0">
-            <CustomWorkOrderReceipt 
-              workOrder={{
-                id: previewInvoice.workOrderId,
-                createdAt: previewInvoice.createdAt,
-                patientId: previewInvoice.patientId,
-                lensType: {
-                  name: previewInvoice.lensType,
-                  price: previewInvoice.lensPrice
-                }
-              }}
+            <WorkOrderPrint 
               invoice={previewInvoice}
-              patient={{
-                id: previewInvoice.patientId || "",
-                name: previewInvoice.patientName,
-                phone: previewInvoice.patientPhone,
-                email: "",
-                address: ""
+              patientName={getValues("patientName") || ""}
+              patientPhone={getValues("patientPhone") || ""}
+              rx={getValues("rx")}
+              lensType={getValues("lensType") || ""}
+              coating={getValues("coating") || ""}
+              thickness={getValues("thickness") || ""}
+              frame={getValues("skipFrame") ? undefined : {
+                brand: getValues("frameBrand") || "",
+                model: getValues("frameModel") || "",
+                color: getValues("frameColor") || "",
+                size: getValues("frameSize") || "",
+                price: getValues("framePrice") || 0
               }}
-              isPrintable={true}
+              contactLenses={getValues("contactLensItems") || []}
+              contactLensRx={getValues("contactLensRx")}
             />
           </div>
           <SheetFooter className="print:hidden mt-4">

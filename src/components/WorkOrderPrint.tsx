@@ -78,9 +78,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   
   const orderNumber = invoice.workOrderId || "NEW ORDER";
 
-  // Create a safe reference for rx data
-  const safeRx = rx || {};
-
   return (
     <div className="print-wrapper">
       <style>
@@ -311,19 +308,19 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 <tbody>
                   <tr>
                     <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
-                    <td style={{ textAlign: "center" }}>{safeRx.sphereOD || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{safeRx.cylOD || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{safeRx.axisOD || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{safeRx.addOD || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{safeRx.pdRight || safeRx.pd || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.sphereOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.cylOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.axisOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.addOD || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.pdRight || rx?.pd || "_____"}</td>
                   </tr>
                   <tr>
                     <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
-                    <td style={{ textAlign: "center" }}>{safeRx.sphereOS || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{safeRx.cylOS || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{safeRx.axisOS || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{safeRx.addOS || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{safeRx.pdLeft || safeRx.pd || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.sphereOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.cylOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.axisOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.addOS || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{rx?.pdLeft || rx?.pd || "_____"}</td>
                   </tr>
                 </tbody>
               </table>
@@ -352,19 +349,19 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 <tbody>
                   <tr>
                     <td style={{ textAlign: "center", fontWeight: "bold" }}>OD {language === 'ar' ? '(يمين)' : 'R'}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye?.sphere || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye?.cylinder || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye?.axis || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye?.bc || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye?.dia || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.rightEye.dia || "_____"}</td>
                   </tr>
                   <tr>
                     <td style={{ textAlign: "center", fontWeight: "bold" }}>OS {language === 'ar' ? '(يسار)' : 'L'}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye?.sphere || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye?.cylinder || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye?.axis || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye?.bc || "_____"}</td>
-                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye?.dia || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.sphere || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.cylinder || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.axis || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.bc || "_____"}</td>
+                    <td style={{ textAlign: "center" }}>{contactLensRxData.leftEye.dia || "_____"}</td>
                   </tr>
                 </tbody>
               </table>
