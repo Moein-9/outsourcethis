@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -325,7 +324,7 @@ const CreateInvoiceContent: React.FC = () => {
                               </p>
                             </div>
                             <p className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-sm">
-                              3.000 KWD
+                              {getValues("servicePrice")?.toFixed(3)} KWD
                             </p>
                           </div>
                         </div>
