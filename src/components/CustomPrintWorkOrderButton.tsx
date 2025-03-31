@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer } from 'lucide-react';
+import { Printer, Store } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
 import { 
@@ -9,9 +9,12 @@ import {
   DialogContent, 
   DialogTrigger,
   DialogTitle,
-  DialogDescription
+  DialogDescription,
+  DialogFooter
 } from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { storeLocations } from '@/assets/logo';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -32,9 +35,10 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   size = "sm",
   children // This prop holds any custom trigger element
 }) => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   const [open, setOpen] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [storeLocation, setStoreLocation] = useState<string>("alSomait");
   
   const handlePrint = () => {
     if (isPrinting) return; // Prevent multiple calls
@@ -46,7 +50,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient, storeLocation);
       setTimeout(() => setIsPrinting(false), 1000); // Reset printing state after a delay
     }, 300);
   };
@@ -67,6 +71,8 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   // Ensure we only pass a single valid element to DialogTrigger
   const triggerElement = React.isValidElement(children) ? children : defaultButton;
   
+  const isRtl = language === 'ar';
+  
   return (
     <Dialog open={open} onOpenChange={(newOpen) => {
       if (isPrinting) return; // Don't toggle if printing
@@ -77,10 +83,30 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto p-0">
         <div className="p-6 flex flex-col items-center">
-          <DialogTitle className="sr-only">{t('workOrderPreview')}</DialogTitle>
-          <DialogDescription className="sr-only">
+          <DialogTitle className="mb-4">{t('workOrderPreview')}</DialogTitle>
+          <DialogDescription className="mb-4 text-center">
             {t('previewBeforePrinting')}
           </DialogDescription>
+          
+          <div className="w-full max-w-md flex items-center gap-2 mb-4">
+            <Store className="h-4 w-4 text-blue-600" />
+            <Select 
+              value={storeLocation}
+              onValueChange={setStoreLocation}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={isRtl ? "اختر الفرع" : "Select Location"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="alSomait">
+                  {isRtl ? storeLocations.alSomait.locationAr : storeLocations.alSomait.locationEn}
+                </SelectItem>
+                <SelectItem value="alArbid">
+                  {isRtl ? storeLocations.alArbid.locationAr : storeLocations.alArbid.locationEn}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
           <div className="w-full max-w-[80mm] bg-white p-0 border rounded shadow-sm mb-4">
             <div id="work-order-receipt">
@@ -89,17 +115,29 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
                 invoice={invoice} 
                 patient={patient}
                 isPrintable={true}
+                storeLocation={storeLocation}
               />
             </div>
           </div>
-          <Button 
-            onClick={handlePrint} 
-            className="mt-4 gap-2"
-            disabled={isPrinting}
-          >
-            <Printer className="h-4 w-4" />
-            {isPrinting ? t('printing') : t('print')}
-          </Button>
+          
+          <DialogFooter className="w-full flex justify-center mt-4">
+            <Button 
+              onClick={handlePrint} 
+              className="gap-2"
+              disabled={isPrinting}
+            >
+              <Printer className="h-4 w-4" />
+              {isPrinting ? t('printing') : t('print')}
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={() => setOpen(false)}
+              className="ml-2"
+            >
+              {t('cancel')}
+            </Button>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>

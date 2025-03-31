@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { toast } from 'sonner';
 import QRCodeReact from 'qrcode.react';
@@ -15,17 +16,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { getStoreInfo, storeLocations } from '@/assets/logo';
 
 interface FrameLabelTemplateProps {
   onPrintError?: (errorMessage: string) => void;
+  storeLocation?: string;
 }
 
 /**
  * Custom hook for frame label printing functionality
  */
-export const usePrintLabel = (onError?: (message: string) => void) => {
+export const usePrintLabel = (onError?: (message: string) => void, storeLocation?: string) => {
   const { frames } = useInventoryStore();
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   const [isPrinting, setIsPrinting] = useState(false);
   
   const generateQRCodeDataURL = (text: string): Promise<string> => {
@@ -46,10 +49,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     
     if (!frame) {
       const errorMsg = t('frameNotFound');
-      toast({
-        description: errorMsg,
-        variant: "destructive"
-      });
+      toast(errorMsg);
       if (onError) onError(errorMsg);
       return;
     }
@@ -67,17 +67,12 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       PrintService.printHtml(htmlDocument, 'label', () => {
         console.log(`[LabelPrinting] Print process completed for frame ${frameId}`);
         setIsPrinting(false);
-        toast({
-          description: t('labelPrintedSuccessfully')
-        });
+        toast(t('labelPrintedSuccessfully'));
       });
     } catch (error) {
       console.error('[LabelPrinting] QR code generation error:', error);
       const errorMsg = t('errorGeneratingQRCode');
-      toast({
-        description: errorMsg,
-        variant: "destructive"
-      });
+      toast(errorMsg);
       if (onError) onError(errorMsg);
       setIsPrinting(false);
     }
@@ -86,10 +81,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
   const printMultipleLabels = async (frameIds: string[]) => {
     if (frameIds.length === 0) {
       const errorMsg = t('noFramesSelected');
-      toast({
-        description: errorMsg,
-        variant: "destructive"
-      });
+      toast(errorMsg);
       if (onError) onError(errorMsg);
       return;
     }
@@ -98,10 +90,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     
     if (selectedFrames.length === 0) {
       const errorMsg = t('noFramesFound');
-      toast({
-        description: errorMsg,
-        variant: "destructive"
-      });
+      toast(errorMsg);
       if (onError) onError(errorMsg);
       return;
     }
@@ -123,17 +112,12 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       PrintService.printHtml(htmlDocument, 'label', () => {
         console.log(`[LabelPrinting] Print process completed for ${selectedFrames.length} frames`);
         setIsPrinting(false);
-        toast({
-          description: t('labelsPrintedSuccessfully')
-        });
+        toast(t('labelsPrintedSuccessfully'));
       });
     } catch (error) {
       console.error('[LabelPrinting] QR code generation error:', error);
       const errorMsg = t('errorGeneratingQRCodes');
-      toast({
-        description: errorMsg,
-        variant: "destructive"
-      });
+      toast(errorMsg);
       if (onError) onError(errorMsg);
       setIsPrinting(false);
     }
@@ -143,6 +127,8 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     const formattedPrice = Number.isInteger(frame.price) 
       ? Math.floor(frame.price)
       : frame.price.toFixed(3);
+    
+    const storeInfoData = getStoreInfo(storeLocation || 'alSomait', language);
     
     return `
       <div class="label-container">
@@ -170,9 +156,9 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
 /**
  * Frame Label Template Component
  */
-export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintError }) => {
+export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintError, storeLocation = "alSomait" }) => {
   const { frames } = useInventoryStore();
-  const { printMultipleLabels, isPrinting } = usePrintLabel(onPrintError);
+  const { printMultipleLabels, isPrinting } = usePrintLabel(onPrintError, storeLocation);
   const { t, language } = useLanguageStore();
   const [selectedFrames, setSelectedFrames] = useState<string[]>([]);
   
@@ -331,6 +317,7 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
   
   const isRtl = language === 'ar';
   const dirClass = isRtl ? 'rtl' : 'ltr';
+  const storeInfoData = getStoreInfo(storeLocation, language);
   
   return (
     <div className={`space-y-4 ${dirClass}`}>
@@ -402,6 +389,15 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
             )}
           </Button>
         </div>
+      </div>
+      
+      <div className="bg-blue-50 p-3 rounded border border-blue-200 text-blue-800 flex items-center gap-2 text-sm">
+        <Calendar className="h-4 w-4 text-blue-500" />
+        <span>
+          {isRtl 
+            ? `الفرع المختار للطباعة: ${storeLocations[storeLocation as keyof typeof storeLocations].locationAr}`
+            : `Selected location: ${storeLocations[storeLocation as keyof typeof storeLocations].locationEn}`}
+        </span>
       </div>
       
       {selectedFrames.length === 0 && filteredFrames.length > 0 && (

@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
 import { Eye, Ruler, CircleDot, ClipboardCheck, User, Glasses, BadgeCheck, Contact } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
-import { MoenLogo, storeInfo } from "@/assets/logo";
+import { MoenLogo, getStoreInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
 
 interface WorkOrderPrintProps {
@@ -39,6 +39,7 @@ interface WorkOrderPrintProps {
       dia: string;
     };
   };
+  storeLocation?: string;
 }
 
 export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ 
@@ -51,7 +52,8 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   thickness,
   frame,
   contactLenses,
-  contactLensRx
+  contactLensRx,
+  storeLocation = "alSomait"
 }) => {
   const { language, t } = useLanguageStore();
   const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
@@ -77,6 +79,8 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const invoiceType = (invoice as any).invoiceType || 'glasses';
   
   const orderNumber = invoice.workOrderId || "NEW ORDER";
+  
+  const storeInfoData = getStoreInfo(storeLocation, language);
 
   return (
     <div className="print-wrapper">
@@ -208,8 +212,9 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
           </p>
           <div style={{ fontSize: "9pt", textAlign: "center", marginTop: "1mm" }}>
-            <p style={{ margin: "0" }}>{storeInfo.address}</p>
-            <p style={{ margin: "0" }}>{t("phone")}: {storeInfo.phone}</p>
+            <p style={{ margin: "0" }}>{language === 'ar' ? storeInfoData.locationAr : storeInfoData.locationEn}</p>
+            <p style={{ margin: "0" }}>{language === 'ar' ? storeInfoData.addressAr : storeInfoData.addressEn}</p>
+            <p style={{ margin: "0" }}>{t("phone")}: {storeInfoData.phoneFormatted}</p>
           </div>
         </div>
 
