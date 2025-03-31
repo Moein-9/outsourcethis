@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
-import WorkOrderPrintSelector from "./WorkOrderPrintSelector";
+import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "sonner";
@@ -104,7 +104,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         }
         
         toast({
-          title: t("invoiceSaved"),
           description: t("invoiceNumber") + ": " + invoiceId,
         });
         
@@ -113,7 +112,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
       } catch (error) {
         console.error("Error saving invoice:", error);
         toast({
-          title: t("error"),
           description: t("errorSavingInvoice"),
           variant: "destructive",
         });
@@ -133,20 +131,18 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     document.body.appendChild(selectorContainer);
     
     // Return a proper React component with all the needed props
-    return (
-      <WorkOrderPrintSelector
-        invoice={invoiceToUse}
-        patientName={patientName}
-        patientPhone={patientPhone}
-        rx={rx}
-        lensType={lensType}
-        coating={coating}
-        frame={frame}
-        contactLenses={contactLenses}
-        contactLensRx={contactLensRx}
-        thermalOnly={thermalOnly}
-      />
-    );
+    return React.createElement(WorkOrderPrintSelector, {
+      invoice: invoiceToUse,
+      patientName: patientName,
+      patientPhone: patientPhone,
+      rx: rx,
+      lensType: lensType,
+      coating: coating,
+      frame: frame,
+      contactLenses: contactLenses,
+      contactLensRx: contactLensRx,
+      thermalOnly: thermalOnly
+    });
   };
 
   return (

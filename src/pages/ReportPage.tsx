@@ -91,7 +91,7 @@ const generateMockData = () => {
       const deposit = Math.random() > 0.3 ? finalTotal : Math.floor(finalTotal * 0.7);
       
       // Create invoice with past date
-      const invoice = {
+      const invoice: any = {
         invoiceId: `INV${Date.now() - d * 86400000 - i}`,
         patientName: `عميل ${d}${i}`,
         patientPhone: `9665${Math.floor(Math.random() * 10000000)}`,
