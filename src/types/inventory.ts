@@ -59,6 +59,12 @@ export interface WorkOrder {
   coating: string;
   coatingPrice: number;
   
+  // Service information for eye exams
+  serviceName?: string;
+  serviceId?: string;
+  serviceDescription?: string;
+  servicePrice?: number;
+  
   // Pricing
   discount: number;
   total: number;

@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -46,6 +47,12 @@ export interface Invoice {
   
   contactLensItems?: ContactLensItem[];
   contactLensRx?: any;
+  
+  // Service information for eye exams
+  serviceName?: string;
+  serviceId?: string;
+  serviceDescription?: string;
+  servicePrice?: number;
   
   discount: number;
   deposit: number;
