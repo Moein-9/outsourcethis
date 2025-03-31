@@ -22,7 +22,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const searchFrames = useInventoryStore((state) => state.searchFrames);
   const addFrame = useInventoryStore((state) => state.addFrame);
   const getServicesByCategory = useInventoryStore((state) => state.getServicesByCategory);
-  const { getValues, setValue } = useInvoiceForm();
+  const { getValues, setValue, updateServicePrice } = useInvoiceForm();
   
   // Fetch eye exam service from the store
   const [eyeExamService, setEyeExamService] = useState(() => {
@@ -40,13 +40,12 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   
   useEffect(() => {
     if (invoiceType === "exam" && eyeExamService) {
-      setValue('total', eyeExamService.price);
+      updateServicePrice(eyeExamService.price);
       setValue('serviceName', eyeExamService.name);
       setValue('serviceId', eyeExamService.id);
       setValue('serviceDescription', eyeExamService.description);
-      setValue('servicePrice', eyeExamService.price);
     }
-  }, [invoiceType, setValue, eyeExamService]);
+  }, [invoiceType, setValue, eyeExamService, updateServicePrice]);
   
   const [skipFrame, setSkipFrame] = useState(getValues<boolean>('skipFrame'));
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);

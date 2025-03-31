@@ -26,6 +26,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const { getValues, calculateTotal, calculateRemaining } = useInvoiceForm();
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const directionClass = language === 'ar' ? 'rtl' : 'ltr';
   
   const invoice = {
     invoiceId: getValues<string>('invoiceId') || "",

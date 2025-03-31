@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { usePatientStore } from "@/store/patientStore";
 import { Patient } from "@/store/patientStore";
@@ -20,6 +21,7 @@ interface InvoiceFormContextType {
   // Calculation helpers
   calculateTotal: () => number;
   calculateRemaining: () => number;
+  updateServicePrice: (price: number) => void;
 }
 
 const InvoiceFormContext = createContext<InvoiceFormContextType | undefined>(undefined);
@@ -100,6 +102,18 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     return true;
   };
   
+  // Service price update function
+  const updateServicePrice = (price: number) => {
+    setValue('servicePrice', price);
+    if (getValues<string>('invoiceType') === 'exam') {
+      const discount = getValues<number>('discount') || 0;
+      const newTotal = Math.max(0, price - discount);
+      setValue('total', newTotal);
+      const deposit = getValues<number>('deposit') || 0;
+      setValue('remaining', Math.max(0, newTotal - deposit));
+    }
+  };
+  
   // Calculation helpers
   const calculateTotal = () => {
     // Handle eye exam with service price
@@ -145,7 +159,8 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     setCurrentPatient,
     validateCurrentStep,
     calculateTotal,
-    calculateRemaining
+    calculateRemaining,
+    updateServicePrice
   };
   
   return (

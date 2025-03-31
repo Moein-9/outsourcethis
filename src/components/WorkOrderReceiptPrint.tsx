@@ -26,6 +26,7 @@ interface WorkOrderReceiptPrintProps {
   };
   contactLenses?: any[];
   contactLensRx?: any;
+  isEyeExam?: boolean;
 }
 
 export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
@@ -476,6 +477,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   frame,
   contactLenses,
   contactLensRx,
+  isEyeExam,
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
@@ -747,7 +749,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
                 <span style={{ fontWeight: "bold" }}>{isRtl ? "النوع" : "Type"}:</span>
                 <span>{coating}</span>
               </div>
-              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+              <div style={{ marginBottom: "1px", display: "flex", justify-content: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
                 <span>{invoice.coatingPrice.toFixed(3)} KWD</span>
               </div>
@@ -910,7 +912,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       </div>
       
       <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", marginTop: "10px", textAlign: "center" }}>
-        <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "2px" }}>
+        <div style={{ fontSize: "10px", fontWeight: "bold", margin-bottom: "2px" }}>
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
         </div>
         <div style={{ fontSize: "7px", color: "#666" }}>
@@ -920,6 +922,24 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           }
         </div>
       </div>
+      
+      {isEyeExam && (
+        <div style={{ marginBottom: "3px" }}>
+          <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
+            {isRtl ? 'فحص العين' : 'Eye Exam'} {isRtl ? <span style={{ fontSize: "10px" }}>(Eye Exam)</span> : <span style={{ fontSize: "10px" }}>(فحص العين)</span>}
+          </h3>
+          <div style={{ marginLeft: "2px" }}>
+            <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+              <span style={{ fontWeight: "bold" }}>{isRtl ? "الخدمة" : "Service"}:</span>
+              <span>{invoice.serviceName || t("eyeExam")}</span>
+            </div>
+            <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+              <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
+              <span>{invoice.servicePrice.toFixed(3)} KWD</span>
+            </div>
+          </div>
+        </div>
+      )}
       
       <style>
         {`
