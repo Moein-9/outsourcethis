@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
 import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store/inventoryStore";
@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { LensSelector } from "@/components/LensSelector";
 import { ContactLensSelector, ContactLensSelection } from "@/components/ContactLensSelector";
 import { 
-  Search, Package, Plus, PackageCheck, Eye, Glasses
+  Search, Package, Plus, PackageCheck, Eye, Glasses, ScrollText
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface InvoiceStepProductsProps {
-  invoiceType: "glasses" | "contacts";
+  invoiceType: "glasses" | "contacts" | "exam";
 }
 
 export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoiceType }) => {
@@ -21,6 +22,12 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const searchFrames = useInventoryStore((state) => state.searchFrames);
   const addFrame = useInventoryStore((state) => state.addFrame);
   const { getValues, setValue } = useInvoiceForm();
+  
+  useEffect(() => {
+    if (invoiceType === "exam") {
+      setValue('total', 3);
+    }
+  }, [invoiceType, setValue]);
   
   const [skipFrame, setSkipFrame] = useState(getValues<boolean>('skipFrame'));
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
@@ -229,6 +236,47 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     }
   };
   
+  if (invoiceType === "exam") {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <Card className="border-2 border-primary/20">
+          <CardHeader className="bg-primary/10">
+            <CardTitle className={`text-lg flex items-center gap-2 ${textAlignClass}`}>
+              <ScrollText className="w-5 h-5 text-primary" />
+              {language === 'ar' ? 'فحص العين' : 'Eye Exam'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="p-4 bg-muted/20 rounded-lg">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2 text-lg font-medium">
+                  <ScrollText className="w-5 h-5 text-primary" />
+                  {language === 'ar' ? 'فحص العين' : 'Eye Exam Service'}
+                </div>
+                <div className="font-semibold text-lg">
+                  3.000 {language === 'ar' ? 'د.ك' : 'KWD'}
+                </div>
+              </div>
+              
+              <p className="mt-4 text-muted-foreground text-sm">
+                {language === 'ar' 
+                  ? 'خدمة فحص العين القياسية لتقييم صحة العين والنظر.'
+                  : 'Standard eye examination service to evaluate eye health and vision.'}
+              </p>
+            </div>
+            
+            <div className="mt-6 flex items-center justify-center">
+              <div className="px-4 py-2 bg-green-100 text-green-800 rounded-md flex items-center gap-2">
+                <Check className="w-4 h-4" />
+                {language === 'ar' ? 'السعر القياسي: 3.000 د.ك' : 'Standard Price: 3.000 KWD'}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {invoiceType === "glasses" ? (

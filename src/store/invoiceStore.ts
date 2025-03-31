@@ -30,7 +30,7 @@ export interface Invoice {
   patientName: string;
   patientPhone: string;
   
-  invoiceType?: 'glasses' | 'contacts';
+  invoiceType?: 'glasses' | 'contacts' | 'exam';
   
   lensType: string;
   lensPrice: number;

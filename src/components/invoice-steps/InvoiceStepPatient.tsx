@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -10,12 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ContactLensForm } from "@/components/ContactLensForm";
 import { 
-  User, Search, Glasses, Eye, EyeOff
+  User, Search, Glasses, Eye, EyeOff, ScrollText
 } from "lucide-react";
 
 interface InvoiceStepPatientProps {
-  invoiceType: "glasses" | "contacts";
-  onInvoiceTypeChange: (type: "glasses" | "contacts") => void;
+  invoiceType: "glasses" | "contacts" | "exam";
+  onInvoiceTypeChange: (type: "glasses" | "contacts" | "exam") => void;
 }
 
 export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({ 
@@ -128,7 +129,7 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
       <Tabs 
         value={invoiceType} 
         onValueChange={(v) => {
-          onInvoiceTypeChange(v as "glasses" | "contacts");
+          onInvoiceTypeChange(v as "glasses" | "contacts" | "exam");
           setValue('invoiceType', v);
         }}
         className="w-auto mb-6"
@@ -147,6 +148,13 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
           >
             <Eye className="w-5 h-5" />
             {t('contacts')}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="exam" 
+            className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+          >
+            <ScrollText className="w-5 h-5" />
+            {language === 'ar' ? 'فحص العين' : 'Eye Exam'}
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -224,23 +232,25 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                     </div>
                   </div>
                   
-                  <Button 
-                    variant="outline" 
-                    className="mt-3 w-full" 
-                    onClick={() => setRxVisible(!rxVisible)}
-                  >
-                    {rxVisible ? (
-                      <>
-                        <EyeOff className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
-                        {t('hideRx')}
-                      </>
-                    ) : (
-                      <>
-                        <Eye className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
-                        {t('showRx')}
-                      </>
-                    )}
-                  </Button>
+                  {(invoiceType === "glasses" || invoiceType === "contacts") && (
+                    <Button 
+                      variant="outline" 
+                      className="mt-3 w-full" 
+                      onClick={() => setRxVisible(!rxVisible)}
+                    >
+                      {rxVisible ? (
+                        <>
+                          <EyeOff className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                          {t('hideRx')}
+                        </>
+                      ) : (
+                        <>
+                          <Eye className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                          {t('showRx')}
+                        </>
+                      )}
+                    </Button>
+                  )}
                   
                   {rxVisible && invoiceType === "glasses" && currentPatient.rx && (
                     <div className="p-3 mt-3 bg-white border rounded-lg">

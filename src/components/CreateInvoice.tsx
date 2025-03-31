@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -6,7 +7,7 @@ import { motion } from "framer-motion";
 import { 
   FileText, Printer, Receipt, User, PackageCheck, CreditCard,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
-  MessageCircleDashed, Loader, Check, Ruler, Paintbrush
+  MessageCircleDashed, Loader, Check, Ruler, Paintbrush, ScrollText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +23,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFo
 
 const CreateInvoiceContent: React.FC = () => {
   const { t, language } = useLanguageStore();
-  const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts">("glasses");
+  const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts" | "exam">("glasses");
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("patient");
@@ -91,7 +92,9 @@ const CreateInvoiceContent: React.FC = () => {
   const hasPatientData = !!getValues("patientName");
   const hasProductData = invoiceType === "glasses" 
     ? (!!getValues("lensType") || (!getValues("skipFrame") && !!getValues("frameBrand")))
-    : (getValues("contactLensItems")?.length > 0);
+    : invoiceType === "contacts" 
+      ? (getValues("contactLensItems")?.length > 0)
+      : true; // For exam type, product data is always available
 
   return (
     <div className="py-6 max-w-7xl mx-auto">
@@ -111,14 +114,16 @@ const CreateInvoiceContent: React.FC = () => {
             {t('printInvoice')}
           </Button>
           
-          <Button 
-            onClick={handlePrintWorkOrder} 
-            variant="outline" 
-            className="flex items-center gap-2"
-          >
-            <Printer className="w-4 h-4" />
-            {t('printWorkOrder')}
-          </Button>
+          {invoiceType !== "exam" && (
+            <Button 
+              onClick={handlePrintWorkOrder} 
+              variant="outline" 
+              className="flex items-center gap-2"
+            >
+              <Printer className="w-4 h-4" />
+              {t('printWorkOrder')}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -132,8 +137,14 @@ const CreateInvoiceContent: React.FC = () => {
                   {t('clientSection')}
                 </TabsTrigger>
                 <TabsTrigger value="products" className="flex items-center gap-2">
-                  <PackageCheck className="w-4 h-4" />
-                  {t('productSection')}
+                  {invoiceType === "exam" ? (
+                    <ScrollText className="w-4 h-4" />
+                  ) : (
+                    <PackageCheck className="w-4 h-4" />
+                  )}
+                  {invoiceType === "exam" 
+                    ? (language === 'ar' ? 'خدمة الفحص' : 'Exam Service') 
+                    : t('productSection')}
                 </TabsTrigger>
                 <TabsTrigger value="payment" className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4" />
@@ -301,7 +312,24 @@ const CreateInvoiceContent: React.FC = () => {
                   
                   {hasProductData ? (
                     <div className="space-y-3">
-                      {invoiceType === "glasses" ? (
+                      {invoiceType === "exam" ? (
+                        <div className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
+                          <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full opacity-20"></div>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium text-blue-700 flex items-center gap-1">
+                                <ScrollText className="w-3 h-3" /> {language === 'ar' ? 'فحص العين' : 'Eye Exam'}
+                              </p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {language === 'ar' ? 'خدمة فحص العين' : 'Eye examination service'}
+                              </p>
+                            </div>
+                            <p className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-sm">
+                              3.000 KWD
+                            </p>
+                          </div>
+                        </div>
+                      ) : invoiceType === "glasses" ? (
                         <div>
                           {!getValues("skipFrame") && getValues("frameBrand") && (
                             <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
