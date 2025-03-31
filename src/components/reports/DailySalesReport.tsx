@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -37,12 +36,7 @@ import { PrintReportButton } from "./PrintReportButton";
 import { Button } from "@/components/ui/button";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { toast } from "sonner";
-
-// Helper function to format date
-const formatDate = (date: string | Date): string => {
-  if (!date) return "";
-  return format(new Date(date), 'dd/MM/yyyy', { locale: enUS });
-};
+import { formatDate } from "@/lib/utils";
 
 export const DailySalesReport: React.FC = () => {
   const invoiceStore = useInvoiceStore();
@@ -264,6 +258,32 @@ export const DailySalesReport: React.FC = () => {
       `;
     });
     
+    let refundBreakdownHTML = '';
+    refundBreakdown.forEach(refund => {
+      refundBreakdownHTML += `
+        <tr>
+          <td class="refund-method">${refund.method}</td>
+          <td class="refund-count">${refund.count}</td>
+          <td class="refund-amount">${refund.amount.toFixed(2)} ${t.currency}</td>
+        </tr>
+      `;
+    });
+    
+    let refundsHTML = '';
+    todayRefunds.forEach(refund => {
+      // Find the associated invoice
+      const relatedInvoice = invoices.find(inv => inv.invoiceId === refund.associatedInvoiceId);
+      
+      refundsHTML += `
+        <tr>
+          <td class="refund-id">${refund.refundId}</td>
+          <td class="refund-customer">${relatedInvoice?.patientName || '-'}</td>
+          <td class="refund-amount">${refund.amount.toFixed(2)} ${t.currency}</td>
+          <td class="refund-method">${refund.method || '-'}</td>
+        </tr>
+      `;
+    });
+    
     let invoicesHTML = '';
     todaySales.forEach(invoice => {
       invoicesHTML += `
@@ -303,6 +323,14 @@ export const DailySalesReport: React.FC = () => {
             <tr>
               <td class="summary-label">${t.totalSales} | Total Sales:</td>
               <td class="summary-value">${totalRevenue.toFixed(2)} ${t.currency}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">${t.totalRefunds} | Total Refunds:</td>
+              <td class="summary-value">${totalRefunds.toFixed(2)} ${t.currency}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">${t.netRevenue} | Net Revenue:</td>
+              <td class="summary-value">${netRevenue.toFixed(2)} ${t.currency}</td>
             </tr>
             <tr>
               <td class="summary-label">${t.totalPayments} | Total Payments:</td>
@@ -352,6 +380,49 @@ export const DailySalesReport: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        ${todayRefunds.length > 0 ? `
+          <div class="summary-section">
+            <div class="section-header">${language === 'ar' ? 'طرق الاسترداد | Refund Methods' : 'Refund Methods | طرق الاسترداد'}</div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
+                  <th>${language === 'ar' ? 'العدد | Count' : 'Count | العدد'}</th>
+                  <th>${language === 'ar' ? 'المبلغ | Amount' : 'Amount | المبلغ'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${refundBreakdownHTML || `
+                  <tr>
+                    <td colspan="3" class="no-data">${language === 'ar' ? 'لا توجد بيانات | No data' : 'No data | لا توجد بيانات'}</td>
+                  </tr>
+                `}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="summary-section">
+            <div class="section-header">${language === 'ar' ? 'الفواتير المستردة | Refunded Invoices' : 'Refunded Invoices | الفواتير المستردة'}</div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>${language === 'ar' ? 'رقم الاسترداد | Refund ID' : 'Refund ID | رقم الاسترداد'}</th>
+                  <th>${language === 'ar' ? 'العميل | Customer' : 'Customer | العميل'}</th>
+                  <th>${language === 'ar' ? 'المبلغ | Amount' : 'Amount | المبلغ'}</th>
+                  <th>${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${refundsHTML || `
+                  <tr>
+                    <td colspan="4" class="no-data">${language === 'ar' ? 'لا توجد استردادات | No refunds' : 'No refunds | لا توجد استردادات'}</td>
+                  </tr>
+                `}
+              </tbody>
+            </table>
+          </div>
+        ` : ''}
 
         ${todaySales.length > 0 ? `
           <div class="summary-section">
@@ -517,11 +588,11 @@ export const DailySalesReport: React.FC = () => {
           font-weight: bold;
         }
         
-        .payment-method, .invoice-customer {
+        .payment-method, .invoice-customer, .refund-method, .refund-id, .refund-customer {
           text-align: left;
         }
         
-        .payment-count, .payment-amount, .invoice-total, .invoice-paid, .invoice-method {
+        .payment-count, .payment-amount, .invoice-total, .invoice-paid, .invoice-method, .refund-count, .refund-amount {
           text-align: right;
         }
         

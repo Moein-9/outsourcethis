@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { toast } from '@/hooks/use-toast';
 import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 import { ReceiptInvoice } from '@/components/ReceiptInvoice';
+import { formatDate } from '@/lib/utils';
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
