@@ -38,6 +38,7 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
 }) => {
   const { t, language } = useLanguageStore();
   const navigate = useNavigate();
+  const isRtl = language === 'ar';
   
   const menuItems = [
     {
@@ -93,7 +94,8 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full">
+      <div className={`min-h-screen flex w-full ${isRtl ? 'rtl-language' : 'ltr-language'}`} 
+           style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
         <Sidebar>
           <SidebarHeader className="flex items-center justify-center py-4">
             <MoenLogo className="h-10 w-auto" />
@@ -134,7 +136,7 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
                   <p className="text-sm font-medium text-sidebar-foreground">Admin User</p>
                   <p className="text-xs text-sidebar-foreground/70">Moen Optical</p>
                 </div>
-                <button className="ml-auto text-sidebar-foreground/70 hover:text-sidebar-foreground">
+                <button className={`${isRtl ? 'mr-auto' : 'ml-auto'} text-sidebar-foreground/70 hover:text-sidebar-foreground`}>
                   <Settings className="w-5 h-5" />
                 </button>
               </div>
@@ -145,8 +147,8 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
         
         <div className="flex-1 overflow-auto">
           <div className="p-3 md:p-5 lg:p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
+            <div className={`flex items-center ${isRtl ? 'flex-row-reverse' : 'flex-row'} justify-between mb-6`}>
+              <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
                 <SidebarTrigger className="text-primary" />
                 <h1 className="text-xl font-bold text-primary">{
                   activeSection === "dashboard" ? t('dashboard') :
@@ -166,7 +168,7 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
                 <LanguageToggle />
               </div>
             </div>
-            <div className="w-full">
+            <div className={`w-full ${isRtl ? 'rtl-content' : 'ltr-content'}`}>
               {children}
             </div>
           </div>

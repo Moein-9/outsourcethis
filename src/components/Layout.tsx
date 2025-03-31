@@ -1,6 +1,7 @@
 
 import React from "react";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,12 +14,17 @@ export const Layout: React.FC<LayoutProps> = ({
   activeSection, 
   onNavigate 
 }) => {
+  const { language } = useLanguageStore();
+  const isRtl = language === 'ar';
+  
   return (
-    <DashboardSidebar
-      activeSection={activeSection}
-      onNavigate={onNavigate}
-    >
-      {children}
-    </DashboardSidebar>
+    <div className={isRtl ? 'rtl-language' : 'ltr-language'}>
+      <DashboardSidebar
+        activeSection={activeSection}
+        onNavigate={onNavigate}
+      >
+        {children}
+      </DashboardSidebar>
+    </div>
   );
 };

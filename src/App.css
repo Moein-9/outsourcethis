@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -130,6 +131,43 @@ table th, table td {
 
 .ltr-language label {
   text-align: left;
+}
+
+/* RTL-specific layout fixes */
+.rtl-language .sidebar-content-container {
+  padding-right: 1rem;
+  padding-left: 0;
+}
+
+.ltr-language .sidebar-content-container {
+  padding-left: 1rem;
+  padding-right: 0;
+}
+
+/* Fix RTL flex containers */
+.rtl-language .rtl-flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
+.rtl-language .rtl-mr-auto {
+  margin-right: auto;
+  margin-left: 0 !important;
+}
+
+.rtl-language .rtl-ml-auto {
+  margin-left: auto;
+  margin-right: 0 !important;
+}
+
+/* Fix RTL-specific padding */
+.rtl-language .rtl-pad-right {
+  padding-right: 2rem;
+  padding-left: 0;
+}
+
+.rtl-language .rtl-pad-left {
+  padding-left: 2rem;
+  padding-right: 0;
 }
 
 /* Frame label print styling */

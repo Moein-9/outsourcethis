@@ -34,7 +34,7 @@ export const PatientSearchForm: React.FC<PatientSearchFormProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [visitDateFilter, setVisitDateFilter] = useState<string>("all_visits");
   
-  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  const isRtl = language === 'ar';
   
   const handleSearch = () => {
     if (!searchTerm.trim()) {
@@ -68,46 +68,50 @@ export const PatientSearchForm: React.FC<PatientSearchFormProps> = ({
         <div className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
+              <Search className={`absolute ${isRtl ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={language === 'ar' ? "ابحث عن عميل..." : "Search for a client..."}
-                className={language === 'ar' ? "pr-9" : "pl-9"}
+                placeholder={isRtl ? "ابحث عن عميل..." : "Search for a client..."}
+                className={isRtl ? "pr-9" : "pl-9"}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
             </div>
             
-            <div className="flex gap-2">
+            <div className={`flex gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
               <Button onClick={handleSearch} className="shrink-0">
-                <Search className={`h-4 w-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                <Search className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} />
                 {t('search')}
               </Button>
               <Button variant="outline" onClick={handleClear} className="shrink-0">
-                {language === 'ar' ? "مسح" : "Clear"}
+                {isRtl ? "مسح" : "Clear"}
               </Button>
             </div>
           </div>
           
-          <div className={`flex flex-col sm:flex-row gap-3 pt-2 ${dirClass}`}>
-            <div className="flex items-center gap-2">
+          <div className={`flex flex-col sm:flex-row gap-3 pt-2 ${isRtl ? 'rtl-flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
               <Label htmlFor="visitDateFilter" className="whitespace-nowrap">
-                {language === 'ar' ? "تاريخ الزيارة:" : "Visit Date:"}
+                {isRtl ? "تاريخ الزيارة:" : "Visit Date:"}
               </Label>
               <Select value={visitDateFilter} onValueChange={setVisitDateFilter}>
                 <SelectTrigger id="visitDateFilter" className="w-[140px]">
-                  <SelectValue placeholder={language === 'ar' ? "جميع الزيارات" : "All Visits"} />
+                  <SelectValue placeholder={isRtl ? "جميع الزيارات" : "All Visits"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all_visits">{language === 'ar' ? "جميع الزيارات" : "All Visits"}</SelectItem>
-                  <SelectItem value="last_week">{language === 'ar' ? "الأسبوع الماضي" : "Last Week"}</SelectItem>
-                  <SelectItem value="last_month">{language === 'ar' ? "الشهر الماضي" : "Last Month"}</SelectItem>
-                  <SelectItem value="last_year">{language === 'ar' ? "السنة الماضية" : "Last Year"}</SelectItem>
+                  <SelectItem value="all_visits">{isRtl ? "جميع الزيارات" : "All Visits"}</SelectItem>
+                  <SelectItem value="last_week">{isRtl ? "الأسبوع الماضي" : "Last Week"}</SelectItem>
+                  <SelectItem value="last_month">{isRtl ? "الشهر الماضي" : "Last Month"}</SelectItem>
+                  <SelectItem value="last_year">{isRtl ? "السنة الماضية" : "Last Year"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
-            <Button variant="outline" size="icon" className={language === 'ar' ? "mr-auto" : "ml-auto"}>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className={isRtl ? "rtl-mr-auto" : "ml-auto"}
+            >
               <Filter className="h-4 w-4" />
             </Button>
           </div>
