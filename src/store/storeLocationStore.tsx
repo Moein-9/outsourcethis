@@ -48,6 +48,7 @@ interface LocationContextType {
   selectedLocation: LocationId;
   setSelectedLocation: (locationId: LocationId) => void;
   getLocationData: (locationId?: LocationId) => StoreLocation;
+  locations: typeof storeLocations; // Add locations property to expose storeLocations
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
@@ -76,7 +77,8 @@ export const StoreLocationProvider: React.FC<{ children: React.ReactNode }> = ({
     <LocationContext.Provider value={{ 
       selectedLocation, 
       setSelectedLocation,
-      getLocationData
+      getLocationData,
+      locations: storeLocations // Expose storeLocations in the context
     }}>
       {children}
     </LocationContext.Provider>

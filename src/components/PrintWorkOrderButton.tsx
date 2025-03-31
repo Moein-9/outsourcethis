@@ -4,17 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
-import { useStoreLocation } from "@/store/storeLocationStore";
+import { useStoreLocation, LocationId } from "@/store/storeLocationStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 
-// Update the Invoice type to include locationId
-interface ExtendedInvoice extends Invoice {
-  locationId?: string;
-}
-
 interface PrintWorkOrderButtonProps {
-  invoice: ExtendedInvoice;
+  invoice: Invoice;
   patientName?: string;
   patientPhone?: string;
   rx?: any;
@@ -124,7 +119,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     }
   };
   
-  const showPrintSelector = (invoiceToUse: ExtendedInvoice) => {
+  const showPrintSelector = (invoiceToUse: Invoice) => {
     // Create the print selector with proper styling for printing
     const selectorContainer = document.createElement('div');
     selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars

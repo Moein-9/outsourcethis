@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
-import { useStoreLocation } from '@/store/storeLocationStore';
+import { useStoreLocation, LocationId } from '@/store/storeLocationStore';
 import { LocationSelector } from './LocationSelector';
 import { 
   Dialog, 
@@ -14,10 +14,6 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
-import { storeLocations } from '@/assets/logo';
-
-// Define the location ID type
-type LocationId = keyof typeof storeLocations;
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;

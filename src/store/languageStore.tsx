@@ -10,66 +10,101 @@ interface Translations {
   };
 }
 
-interface LanguageContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
-  translations: Translations;
-}
-
-// Add translations for English and Arabic
+// Basic translations
 const translations: Translations = {
-  submit: {
-    en: 'Submit',
-    ar: 'إرسال'
-  },
-  cancel: {
-    en: 'Cancel',
-    ar: 'إلغاء'
-  },
-  // Add new location translations
   changeLocation: {
     en: 'Change location',
     ar: 'تغيير الموقع'
   },
   phone: {
     en: 'Phone',
-    ar: 'هاتف'
+    ar: 'الهاتف'
   },
-  
-  // ... Add other translations here
-  // More translations will be added here
+  printWorkOrder: {
+    en: 'Print Work Order',
+    ar: 'طباعة أمر العمل'
+  },
+  printing: {
+    en: 'Printing...',
+    ar: 'جاري الطباعة...'
+  },
+  print: {
+    en: 'Print',
+    ar: 'طباعة'
+  },
+  workOrderPreview: {
+    en: 'Work Order Preview',
+    ar: 'معاينة أمر العمل'
+  },
+  previewBeforePrinting: {
+    en: 'Preview before printing',
+    ar: 'معاينة قبل الطباعة'
+  },
+  invoiceSaved: {
+    en: 'Invoice Saved',
+    ar: 'تم حفظ الفاتورة'
+  },
+  invoiceNumber: {
+    en: 'Invoice Number',
+    ar: 'رقم الفاتورة'
+  },
+  error: {
+    en: 'Error',
+    ar: 'خطأ'
+  },
+  errorSavingInvoice: {
+    en: 'Error saving invoice',
+    ar: 'خطأ في حفظ الفاتورة'
+  },
+  saving: {
+    en: 'Saving...',
+    ar: 'جاري الحفظ...'
+  },
+  anonymous: {
+    en: 'Anonymous',
+    ar: 'مجهول'
+  },
+  // Add more translations as needed
 };
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
+  dir: 'ltr' | 'rtl';
+}
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Default to English or get from localStorage if available
   const [language, setLanguage] = useState<Language>(() => {
-    const savedLang = localStorage.getItem('language') as Language;
-    return savedLang && (savedLang === 'en' || savedLang === 'ar') ? savedLang : 'en';
+    const savedLanguage = localStorage.getItem('language') as Language;
+    return savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ar') 
+      ? savedLanguage 
+      : 'en';
   });
   
-  // Save language preference to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('language', language);
-    // Set document direction based on language
+    document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-    // Add language-specific class to body for global styling
-    document.body.className = language === 'ar' ? 'font-arabic' : 'font-english';
   }, [language]);
   
-  // Translation function
   const t = (key: string): string => {
     if (translations[key]) {
       return translations[key][language];
     }
-    console.warn(`Translation key not found: ${key}`);
-    return key; // fallback to key if translation not found
+    console.warn(`Translation missing for key: ${key}`);
+    return key;
   };
   
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, translations }}>
+    <LanguageContext.Provider value={{ 
+      language, 
+      setLanguage,
+      t,
+      dir: language === 'ar' ? 'rtl' : 'ltr'
+    }}>
       {children}
     </LanguageContext.Provider>
   );

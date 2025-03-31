@@ -4,11 +4,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { ThemeProvider } from "./components/ThemeProvider";
-import { LanguageProvider } from "./components/LanguageProvider";
+import { LanguageProvider } from "./store/languageStore";
 import { StoreLocationProvider } from "@/store/storeLocationStore";
 
 // Import your page components
-import HomePage from "./pages/index";
+import HomePage from "./pages/home"; // Changed from index to home to avoid casing issues
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import InventoryPage from "./pages/InventoryPage";
@@ -26,7 +26,7 @@ import ReportsPage from "./pages/ReportsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { AuthProvider } from "@/store/authStore";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { InvoiceProvider } from "@/store/invoiceStore";
+import { InvoiceProvider } from "./store/invoiceStore";
 
 function App() {
   return (

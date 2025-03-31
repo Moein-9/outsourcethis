@@ -50,7 +50,7 @@ interface WorkOrder {
 interface InvoiceContextType {
   invoices: Invoice[];
   workOrders: WorkOrder[];
-  addInvoice: (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments" | "locationId"> & { locationId?: LocationId }) => string;
+  addInvoice: (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments"> & { locationId?: LocationId }) => string;
   addExistingInvoice: (invoice: Invoice) => void;
   getInvoice: (id: string) => Invoice | undefined;
   updateInvoice: (id: string, updates: Partial<Invoice>) => void;
@@ -66,7 +66,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
 
-  const addInvoice = (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments" | "locationId"> & { locationId?: LocationId }): string => {
+  const addInvoice = (invoice: Omit<Invoice, "invoiceId" | "createdAt" | "remaining" | "isPaid" | "payments"> & { locationId?: LocationId }): string => {
     const invoiceId = `INV${Date.now()}`;
     const createdAt = new Date().toISOString();
     const remaining = invoice.total - (invoice.deposit || 0);

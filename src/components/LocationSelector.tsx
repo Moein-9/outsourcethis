@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { useStoreLocation } from '@/store/storeLocationStore';
+import { useStoreLocation, LocationId } from '@/store/storeLocationStore';
 import { useLanguageStore } from '@/store/languageStore';
-import { storeLocations } from '@/assets/logo';
 import { Button } from '@/components/ui/button';
 import { Check, MapPin } from 'lucide-react';
 import {
@@ -28,7 +27,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   const isRtl = language === 'ar';
 
   const handleLocationSelect = (locationId: string) => {
-    setSelectedLocation(locationId as keyof typeof storeLocations);
+    setSelectedLocation(locationId as LocationId);
     if (onSelect) {
       onSelect(locationId);
     }
@@ -43,7 +42,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           <Button variant="outline" size="sm" className={`gap-1 ${className}`}>
             <MapPin className="h-3 w-3" />
             <span className="max-w-24 truncate text-xs">
-              {isRtl ? currentLocation.nameAr : currentLocation.nameEn}
+              {isRtl ? currentLocation.name.ar : currentLocation.name.en}
             </span>
           </Button>
         </DropdownMenuTrigger>
@@ -54,7 +53,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
               className="flex justify-between"
               onClick={() => handleLocationSelect(location.id)}
             >
-              <span>{isRtl ? location.nameAr : location.nameEn}</span>
+              <span>{isRtl ? location.name.ar : location.name.en}</span>
               {selectedLocation === location.id && <Check className="h-4 w-4" />}
             </DropdownMenuItem>
           ))}
@@ -70,7 +69,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           <MapPin className="h-4 w-4" />
           <div className="flex flex-col items-start text-left">
             <span className="font-medium">
-              {isRtl ? currentLocation.nameAr : currentLocation.nameEn}
+              {isRtl ? currentLocation.name.ar : currentLocation.name.en}
             </span>
             <span className="text-xs text-muted-foreground">
               {t('changeLocation')}
@@ -87,10 +86,10 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           >
             <div className="flex flex-col">
               <span className="font-medium">
-                {isRtl ? location.nameAr : location.nameEn}
+                {isRtl ? location.name.ar : location.name.en}
               </span>
               <span className="text-xs text-muted-foreground">
-                {isRtl ? location.addressAr : location.addressEn}
+                {isRtl ? location.address.ar : location.address.en}
               </span>
               <span className="text-xs text-muted-foreground">
                 {t('phone')}: {location.phone}
