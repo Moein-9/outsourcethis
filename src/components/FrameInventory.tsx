@@ -38,6 +38,7 @@ import {
 import { FrameLabelTemplate, usePrintLabel } from "./FrameLabelTemplate";
 import { useLanguageStore } from "@/store/languageStore";
 
+// Frame Item Component
 const FrameItemCard = ({ frame, index, onPrintLabel }: { 
   frame: FrameItem; 
   index: number;
@@ -120,7 +121,7 @@ export const FrameInventory: React.FC = () => {
     setSearchResults(results);
     
     if (results.length === 0) {
-      toast(t('noFramesMatchingSearch'));
+      toast.info(t('noFramesMatchingSearch'));
     }
   };
   
@@ -152,7 +153,7 @@ export const FrameInventory: React.FC = () => {
       qty
     });
     
-    toast.success(t("frameAddedSuccessfully"));
+    toast.success(t("frameAddedSuccessfully", { brand: frameBrand, model: frameModel }));
     
     setFrameBrand("");
     setFrameModel("");
@@ -169,9 +170,6 @@ export const FrameInventory: React.FC = () => {
     setSearchResults(frames);
   }, [frames]);
   
-  // Filter frames based on search term if provided
-  const filteredFrames = frameSearchTerm.trim() ? searchResults : frames;
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-stretch gap-4">

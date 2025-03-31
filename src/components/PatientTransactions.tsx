@@ -36,7 +36,6 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [workOrderToDelete, setWorkOrderToDelete] = useState<InvoiceWorkOrder | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<string>("active");
   
   // Effect to update local state when props change
   useEffect(() => {
@@ -113,39 +112,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
       const relatedInvoice = localInvoices.find(inv => inv.workOrderId === workOrderToDelete?.id);
       const reason = language === 'ar' ? "تم حذف الطلب من قبل المستخدم" : "Order deleted by user";
       
-      // Optimistically update UI before the actual deletion
-      // Remove from local work orders and add to archived
-      const updatedWorkOrders = localWorkOrders.filter(wo => wo.id !== workOrderToDelete.id);
-      const archivedWorkOrder = {
-        ...workOrderToDelete,
-        isArchived: true,
-        archivedAt: new Date().toISOString(),
-        archiveReason: reason
-      };
-      
-      // Update local state for immediate UI update
-      setLocalWorkOrders(updatedWorkOrders);
-      setArchivedWorkOrders(prev => [...prev, archivedWorkOrder]);
-      
-      // If there's a related invoice, update it too
-      if (relatedInvoice) {
-        const updatedInvoices = localInvoices.filter(inv => inv.invoiceId !== relatedInvoice.invoiceId);
-        const archivedInvoice = {
-          ...relatedInvoice,
-          isArchived: true,
-          archivedAt: new Date().toISOString(),
-          archiveReason: reason,
-          remaining: 0
-        };
-        
-        setLocalInvoices(updatedInvoices);
-        setArchivedInvoices(prev => [...prev, archivedInvoice]);
-      }
-      
-      // Switch to archive tab
-      setActiveTab("archive");
-      
-      // Call deleteWorkOrder function to perform the actual changes in the store
+      // Call deleteWorkOrder function
       const refundId = deleteWorkOrder(workOrderToDelete.id, reason);
       
       if (refundId) {
@@ -164,7 +131,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
         );
       }
       
-      // Trigger refresh to update UI with data from the store
+      // Trigger refresh to update UI
       setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error("Error deleting work order:", error);
@@ -178,6 +145,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   
   return (
     <div className="space-y-4">
+      {/* Add a visible alert to show the feature is working */}
       <Alert variant="default" className="bg-amber-50 border-amber-200">
         <AlertCircle className="h-4 w-4 text-amber-600" />
         <AlertTitle className="text-amber-800">
@@ -221,8 +189,6 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
         patient={patient}
         onDeleteWorkOrder={handleDeleteWorkOrder}
         lastEditTimestamp={lastEditTimestamp}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
       />
       
       {/* Delete Confirmation Dialog */}
