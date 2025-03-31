@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { LensSelector } from "@/components/LensSelector";
 import { ContactLensSelector, ContactLensSelection } from "@/components/ContactLensSelector";
 import { 
-  Search, Package, Plus, PackageCheck, Eye, Glasses, ScrollText
+  Search, Package, Plus, PackageCheck, Eye, Glasses, ScrollText, Check
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
