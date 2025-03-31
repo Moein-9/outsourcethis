@@ -4,9 +4,12 @@ import { HelpDialog } from "@/components/ui/help-dialog"
 import { TutorialSection, TutorialChapter } from "@/components/TutorialSection"
 import { VideoPlayer } from "@/components/VideoPlayer"
 import { useLanguageStore } from "@/store/languageStore"
+import { Plus, Edit } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { TutorialEditor } from "@/components/TutorialEditor"
 
-// Sample tutorial chapters data
-const tutorialChapters: TutorialChapter[] = [
+// Sample tutorial chapters data - this can be replaced with localStorage or API data
+const defaultTutorialChapters: TutorialChapter[] = [
   {
     id: "getting-started",
     title: "Getting Started with Moen Optical",
@@ -69,14 +72,36 @@ const tutorialChapters: TutorialChapter[] = [
   }
 ];
 
+// Function to get chapters from localStorage or use defaults
+const getSavedChapters = (): TutorialChapter[] => {
+  try {
+    const saved = localStorage.getItem('tutorialChapters');
+    return saved ? JSON.parse(saved) : defaultTutorialChapters;
+  } catch (e) {
+    console.error("Error loading tutorial chapters from localStorage:", e);
+    return defaultTutorialChapters;
+  }
+};
+
+// Function to save chapters to localStorage
+const saveChapters = (chapters: TutorialChapter[]) => {
+  try {
+    localStorage.setItem('tutorialChapters', JSON.stringify(chapters));
+  } catch (e) {
+    console.error("Error saving tutorial chapters to localStorage:", e);
+  }
+};
+
 interface HelpCenterProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
-  const { t, language } = useLanguageStore();
+  const { language } = useLanguageStore();
   const [selectedChapter, setSelectedChapter] = useState<TutorialChapter | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [chapters, setChapters] = useState<TutorialChapter[]>(getSavedChapters());
   
   const handleSelectChapter = (chapter: TutorialChapter) => {
     setSelectedChapter(chapter);
@@ -85,13 +110,31 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
   const handleBack = () => {
     setSelectedChapter(null);
   };
+
+  const handleEnterEditMode = () => {
+    setIsEditing(true);
+    setSelectedChapter(null);
+  };
+
+  const handleExitEditMode = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveChapters = (updatedChapters: TutorialChapter[]) => {
+    setChapters(updatedChapters);
+    saveChapters(updatedChapters);
+    setIsEditing(false);
+  };
   
   return (
     <HelpDialog 
       open={open} 
       onOpenChange={(newOpen) => {
         // Reset selected chapter when closing the dialog
-        if (!newOpen) setSelectedChapter(null);
+        if (!newOpen) {
+          setSelectedChapter(null);
+          setIsEditing(false);
+        }
         onOpenChange(newOpen);
       }}
       title={language === 'ar' ? "مركز المساعدة" : "Help Center"}
@@ -101,13 +144,31 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
           : "Browse through our tutorial videos to learn how to use the system."
       }
     >
-      {selectedChapter ? (
+      {isEditing ? (
+        <TutorialEditor 
+          chapters={chapters} 
+          onSave={handleSaveChapters} 
+          onCancel={handleExitEditMode}
+        />
+      ) : selectedChapter ? (
         <VideoPlayer chapter={selectedChapter} onBack={handleBack} />
       ) : (
-        <TutorialSection 
-          chapters={tutorialChapters} 
-          onSelectChapter={handleSelectChapter} 
-        />
+        <>
+          <div className="flex justify-end mb-4">
+            <Button 
+              onClick={handleEnterEditMode} 
+              variant="outline"
+              className="gap-1"
+            >
+              <Edit className="h-4 w-4" />
+              {language === 'ar' ? "تحرير الفصول" : "Edit Chapters"}
+            </Button>
+          </div>
+          <TutorialSection 
+            chapters={chapters} 
+            onSelectChapter={handleSelectChapter} 
+          />
+        </>
       )}
     </HelpDialog>
   );

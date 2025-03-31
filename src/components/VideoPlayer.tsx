@@ -4,6 +4,8 @@ import { useLanguageStore } from "@/store/languageStore"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TutorialChapter } from "./TutorialSection"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 interface VideoPlayerProps {
   chapter: TutorialChapter
@@ -16,6 +18,9 @@ export function VideoPlayer({ chapter, onBack }: VideoPlayerProps) {
   
   // Extract video ID from YouTube URL
   const getYoutubeVideoId = (url: string) => {
+    if (!url) return null
+    
+    // Handle both youtube.com and youtu.be URLs
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
     const match = url.match(regExp)
     return (match && match[2].length === 11) ? match[2] : null
@@ -26,7 +31,14 @@ export function VideoPlayer({ chapter, onBack }: VideoPlayerProps) {
   if (!videoId) {
     return (
       <div className="flex flex-col items-center justify-center py-8">
-        <p className="text-destructive">Invalid YouTube URL</p>
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {isArabic 
+              ? 'رابط يوتيوب غير صالح. يرجى التحقق من عنوان URL ومحاولة مرة أخرى.'
+              : 'Invalid YouTube URL. Please check the URL and try again.'}
+          </AlertDescription>
+        </Alert>
         <Button onClick={onBack} variant="ghost" className="mt-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
           {isArabic ? 'العودة إلى الفصول' : 'Back to chapters'}
