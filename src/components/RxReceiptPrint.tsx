@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -36,7 +35,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
   
   const dirClass = isRtl ? 'rtl text-right' : 'ltr text-left';
 
-  // Format the prescription date from the RX object - using original RX date and English format
   const formattedRxDate = rx.createdAt 
     ? format(parseISO(rx.createdAt), 'MM/dd/yyyy HH:mm', { locale: enUS })
     : format(new Date(), 'MM/dd/yyyy HH:mm', { locale: enUS });
@@ -47,7 +45,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
       dir={isRtl ? "rtl" : "ltr"}
       style={{ fontFamily: 'Cairo, sans-serif' }}
     >
-      {/* Header with logo */}
       <div className="text-center border-b pb-2 mb-2">
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-12" />
@@ -57,7 +54,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
         <p className="text-[10px] text-muted-foreground">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
-      {/* Prescription title */}
       <div className="bg-gray-800 text-white py-1 px-2 text-center font-bold text-sm mb-2 rounded-sm print:bg-black print:text-white">
         <div className="flex items-center justify-center gap-1">
           <Eye className="h-3 w-3" /> 
@@ -68,7 +64,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
         </div>
       </div>
 
-      {/* Patient info */}
       <div className="px-6 mb-2 text-[11px]">
         <div className="flex justify-between border-b pb-0.5 mb-0.5">
           <span className="font-semibold flex items-center">
@@ -92,7 +87,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
         )}
       </div>
 
-      {/* Prescription table - Always in LTR format with English headers */}
       <div className="px-5 mb-3">
         {printContactLens && contactLensRx ? (
           <table className="w-full border-collapse text-[10px] ltr" style={{ maxWidth: "62mm", direction: "ltr" }}>
@@ -163,7 +157,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
         </div>
       </div>
 
-      {/* Care tips */}
       <div className="px-5 mb-2">
         <div className="bg-gray-800 text-white py-0.5 px-1 font-semibold text-[12px] mb-1 text-center print:bg-black print:text-white">
           {printContactLens 
@@ -188,7 +181,6 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
         )}
       </div>
 
-      {/* Footer */}
       <div className="text-center mt-2 pt-2 border-t px-3">
         <p className="font-semibold text-[10px]">
           {isRtl 
@@ -243,11 +235,10 @@ export const RxLanguageDialog: React.FC<{
 
 export const printRxReceipt = (props: RxReceiptPrintProps) => {
   const { patientName, patientPhone, rx, forcedLanguage, contactLensRx, printContactLens } = props;
-  const { language: appLanguage, t } = useLanguageStore.getState();
+  const { language: appLanguage } = useLanguageStore.getState();
   const language = forcedLanguage || appLanguage;
   const isRtl = language === 'ar';
   
-  // Format the prescription date from the RX object - using original RX date
   const formattedRxDate = rx.createdAt 
     ? format(parseISO(rx.createdAt), 'dd/MM/yyyy HH:mm')
     : format(new Date(), 'dd/MM/yyyy HH:mm');
