@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -298,7 +299,7 @@ export const DailySalesReport: React.FC = () => {
     
     const reportDate = format(new Date(), 'dd/MM/yyyy', { locale: enUS });
     
-    // Create the report content with improved styling for thermal printer and bilingual support
+    // Create the report content with improved styling for thermal printer and bilingual support with vertical stacking
     const reportContent = `
       <div class="report-container">
         <div class="report-header">
@@ -313,68 +314,153 @@ export const DailySalesReport: React.FC = () => {
         </div>
 
         <div class="report-title-box">
-          <div class="report-title">${t.dailySalesReport} | Daily Sales Report</div>
-          <div class="report-date">${language === 'ar' ? 'التاريخ:' : 'Date:'} ${reportDate}</div>
+          <div class="report-title">
+            <div class="bilingual-text">
+              <div class="ar-text">${t.dailySalesReport}</div>
+              <div class="en-text">Daily Sales Report</div>
+            </div>
+          </div>
+          <div class="report-date">
+            <div class="bilingual-text">
+              <div class="ar-text">التاريخ: ${reportDate}</div>
+              <div class="en-text">Date: ${reportDate}</div>
+            </div>
+          </div>
         </div>
 
         <div class="summary-section">
-          <div class="section-header">${language === 'ar' ? 'ملخص المبيعات | Sales Summary' : 'Sales Summary | ملخص المبيعات'}</div>
+          <div class="section-header">
+            <div class="bilingual-text">
+              <div class="ar-text">ملخص المبيعات</div>
+              <div class="en-text">Sales Summary</div>
+            </div>
+          </div>
           <table class="summary-table">
             <tr>
-              <td class="summary-label">${t.totalSales} | Total Sales:</td>
+              <td class="summary-label">
+                <div class="bilingual-text">
+                  <div class="ar-text">${t.totalSales}:</div>
+                  <div class="en-text">Total Sales:</div>
+                </div>
+              </td>
               <td class="summary-value">${totalRevenue.toFixed(2)} ${t.currency}</td>
             </tr>
             <tr>
-              <td class="summary-label">${t.totalRefunds} | Total Refunds:</td>
+              <td class="summary-label">
+                <div class="bilingual-text">
+                  <div class="ar-text">${t.totalRefunds}:</div>
+                  <div class="en-text">Total Refunds:</div>
+                </div>
+              </td>
               <td class="summary-value">${totalRefunds.toFixed(2)} ${t.currency}</td>
             </tr>
             <tr>
-              <td class="summary-label">${t.netRevenue} | Net Revenue:</td>
+              <td class="summary-label">
+                <div class="bilingual-text">
+                  <div class="ar-text">${t.netRevenue}:</div>
+                  <div class="en-text">Net Revenue:</div>
+                </div>
+              </td>
               <td class="summary-value">${netRevenue.toFixed(2)} ${t.currency}</td>
             </tr>
             <tr>
-              <td class="summary-label">${t.totalPayments} | Total Payments:</td>
+              <td class="summary-label">
+                <div class="bilingual-text">
+                  <div class="ar-text">${t.totalPayments}:</div>
+                  <div class="en-text">Total Payments:</div>
+                </div>
+              </td>
               <td class="summary-value">${totalDeposit.toFixed(2)} ${t.currency}</td>
             </tr>
             <tr>
-              <td class="summary-label">${language === 'ar' ? 'عدد الفواتير | Invoice Count:' : 'Invoice Count | عدد الفواتير:'}</td>
+              <td class="summary-label">
+                <div class="bilingual-text">
+                  <div class="ar-text">عدد الفواتير:</div>
+                  <div class="en-text">Invoice Count:</div>
+                </div>
+              </td>
               <td class="summary-value">${todaySales.length}</td>
             </tr>
           </table>
         </div>
 
         <div class="summary-section">
-          <div class="section-header">${language === 'ar' ? 'تفاصيل المبيعات | Sales Details' : 'Sales Details | تفاصيل المبيعات'}</div>
+          <div class="section-header">
+            <div class="bilingual-text">
+              <div class="ar-text">تفاصيل المبيعات</div>
+              <div class="en-text">Sales Details</div>
+            </div>
+          </div>
           <table class="summary-table">
             <tr>
-              <td class="summary-label">${t.lensRevenue} | Lens Revenue:</td>
+              <td class="summary-label">
+                <div class="bilingual-text">
+                  <div class="ar-text">${t.lensRevenue}:</div>
+                  <div class="en-text">Lens Revenue:</div>
+                </div>
+              </td>
               <td class="summary-value">${totalLensRevenue.toFixed(2)} ${t.currency}</td>
             </tr>
             <tr>
-              <td class="summary-label">${t.frameRevenue} | Frame Revenue:</td>
+              <td class="summary-label">
+                <div class="bilingual-text">
+                  <div class="ar-text">${t.frameRevenue}:</div>
+                  <div class="en-text">Frame Revenue:</div>
+                </div>
+              </td>
               <td class="summary-value">${totalFrameRevenue.toFixed(2)} ${t.currency}</td>
             </tr>
             <tr>
-              <td class="summary-label">${t.coatingRevenue} | Coating Revenue:</td>
+              <td class="summary-label">
+                <div class="bilingual-text">
+                  <div class="ar-text">${t.coatingRevenue}:</div>
+                  <div class="en-text">Coating Revenue:</div>
+                </div>
+              </td>
               <td class="summary-value">${totalCoatingRevenue.toFixed(2)} ${t.currency}</td>
             </tr>
           </table>
         </div>
 
         <div class="summary-section">
-          <div class="section-header">${language === 'ar' ? 'طرق الدفع | Payment Methods' : 'Payment Methods | طرق الدفع'}</div>
+          <div class="section-header">
+            <div class="bilingual-text">
+              <div class="ar-text">طرق الدفع</div>
+              <div class="en-text">Payment Methods</div>
+            </div>
+          </div>
           <table class="data-table">
             <thead>
               <tr>
-                <th>${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
-                <th>${language === 'ar' ? 'العدد | Count' : 'Count | العدد'}</th>
-                <th>${language === 'ar' ? 'المبلغ | Amount' : 'Amount | المبلغ'}</th>
+                <th>
+                  <div class="bilingual-text">
+                    <div class="ar-text">الطريقة</div>
+                    <div class="en-text">Method</div>
+                  </div>
+                </th>
+                <th>
+                  <div class="bilingual-text">
+                    <div class="ar-text">العدد</div>
+                    <div class="en-text">Count</div>
+                  </div>
+                </th>
+                <th>
+                  <div class="bilingual-text">
+                    <div class="ar-text">المبلغ</div>
+                    <div class="en-text">Amount</div>
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody>
               ${paymentBreakdownHTML || `
                 <tr>
-                  <td colspan="3" class="no-data">${language === 'ar' ? 'لا توجد بيانات | No data' : 'No data | لا توجد بيانات'}</td>
+                  <td colspan="3" class="no-data">
+                    <div class="bilingual-text">
+                      <div class="ar-text">لا توجد بيانات</div>
+                      <div class="en-text">No data</div>
+                    </div>
+                  </td>
                 </tr>
               `}
             </tbody>
@@ -383,14 +469,39 @@ export const DailySalesReport: React.FC = () => {
 
         ${todaySales.length > 0 ? `
           <div class="summary-section">
-            <div class="section-header">${language === 'ar' ? 'قائمة الفواتير | Invoice List' : 'Invoice List | قائمة الفواتير'}</div>
+            <div class="section-header">
+              <div class="bilingual-text">
+                <div class="ar-text">قائمة الفواتير</div>
+                <div class="en-text">Invoice List</div>
+              </div>
+            </div>
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>${language === 'ar' ? 'العميل | Customer' : 'Customer | العميل'}</th>
-                  <th>${language === 'ar' ? 'المجموع | Total' : 'Total | المجموع'}</th>
-                  <th>${language === 'ar' ? 'المدفوع | Paid' : 'Paid | المدفوع'}</th>
-                  <th>${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
+                  <th>
+                    <div class="bilingual-text">
+                      <div class="ar-text">العميل</div>
+                      <div class="en-text">Customer</div>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="bilingual-text">
+                      <div class="ar-text">المجموع</div>
+                      <div class="en-text">Total</div>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="bilingual-text">
+                      <div class="ar-text">المدفوع</div>
+                      <div class="en-text">Paid</div>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="bilingual-text">
+                      <div class="ar-text">الطريقة</div>
+                      <div class="en-text">Method</div>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -402,19 +513,44 @@ export const DailySalesReport: React.FC = () => {
 
         ${todayRefunds.length > 0 ? `
           <div class="summary-section">
-            <div class="section-header">${language === 'ar' ? 'طرق الاسترداد | Refund Methods' : 'Refund Methods | طرق الاسترداد'}</div>
+            <div class="section-header">
+              <div class="bilingual-text">
+                <div class="ar-text">طرق الاسترداد</div>
+                <div class="en-text">Refund Methods</div>
+              </div>
+            </div>
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
-                  <th>${language === 'ar' ? 'العدد | Count' : 'Count | العدد'}</th>
-                  <th>${language === 'ar' ? 'المبلغ | Amount' : 'Amount | المبلغ'}</th>
+                  <th>
+                    <div class="bilingual-text">
+                      <div class="ar-text">الطريقة</div>
+                      <div class="en-text">Method</div>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="bilingual-text">
+                      <div class="ar-text">العدد</div>
+                      <div class="en-text">Count</div>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="bilingual-text">
+                      <div class="ar-text">المبلغ</div>
+                      <div class="en-text">Amount</div>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 ${refundBreakdownHTML || `
                   <tr>
-                    <td colspan="3" class="no-data">${language === 'ar' ? 'لا توجد بيانات | No data' : 'No data | لا توجد بيانات'}</td>
+                    <td colspan="3" class="no-data">
+                      <div class="bilingual-text">
+                        <div class="ar-text">لا توجد بيانات</div>
+                        <div class="en-text">No data</div>
+                      </div>
+                    </td>
                   </tr>
                 `}
               </tbody>
@@ -422,20 +558,50 @@ export const DailySalesReport: React.FC = () => {
           </div>
 
           <div class="summary-section">
-            <div class="section-header">${language === 'ar' ? 'الفواتير المستردة | Refunded Invoices' : 'Refunded Invoices | الفواتير المستردة'}</div>
+            <div class="section-header">
+              <div class="bilingual-text">
+                <div class="ar-text">الفواتير المستردة</div>
+                <div class="en-text">Refunded Invoices</div>
+              </div>
+            </div>
             <table class="data-table small-table">
               <thead>
                 <tr>
-                  <th style="width: 20%;">${language === 'ar' ? 'رقم | ID' : 'ID | رقم'}</th>
-                  <th style="width: 30%;">${language === 'ar' ? 'العميل | Customer' : 'Customer | العميل'}</th>
-                  <th style="width: 25%;">${language === 'ar' ? 'المبلغ | Amount' : 'Amount | المبلغ'}</th>
-                  <th style="width: 25%;">${language === 'ar' ? 'الطريقة | Method' : 'Method | الطريقة'}</th>
+                  <th style="width: 20%;">
+                    <div class="bilingual-text">
+                      <div class="ar-text">رقم</div>
+                      <div class="en-text">ID</div>
+                    </div>
+                  </th>
+                  <th style="width: 30%;">
+                    <div class="bilingual-text">
+                      <div class="ar-text">العميل</div>
+                      <div class="en-text">Customer</div>
+                    </div>
+                  </th>
+                  <th style="width: 25%;">
+                    <div class="bilingual-text">
+                      <div class="ar-text">المبلغ</div>
+                      <div class="en-text">Amount</div>
+                    </div>
+                  </th>
+                  <th style="width: 25%;">
+                    <div class="bilingual-text">
+                      <div class="ar-text">الطريقة</div>
+                      <div class="en-text">Method</div>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 ${refundsHTML || `
                   <tr>
-                    <td colspan="4" class="no-data">${language === 'ar' ? 'لا توجد استردادات | No refunds' : 'No refunds | لا توجد استردادات'}</td>
+                    <td colspan="4" class="no-data">
+                      <div class="bilingual-text">
+                        <div class="ar-text">لا توجد استردادات</div>
+                        <div class="en-text">No refunds</div>
+                      </div>
+                    </td>
                   </tr>
                 `}
               </tbody>
@@ -537,6 +703,25 @@ export const DailySalesReport: React.FC = () => {
           font-size: 12px;
         }
         
+        /* Bilingual text styling for vertical stacking */
+        .bilingual-text {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .ar-text {
+          font-weight: bold;
+          margin-bottom: 1px;
+          direction: rtl;
+        }
+        
+        .en-text {
+          font-size: 90%;
+          direction: ltr;
+        }
+        
         .section-header {
           background-color: #000;
           color: #fff;
@@ -584,13 +769,15 @@ export const DailySalesReport: React.FC = () => {
           padding: 3px;
           overflow: hidden;
           text-overflow: ellipsis;
-          white-space: nowrap;
+          white-space: normal;
           max-width: 100%;
+          word-break: break-word;
         }
         
         .data-table th {
           background-color: #f2f2f2;
           font-weight: bold;
+          padding: 5px 2px;
         }
         
         .small-table {
