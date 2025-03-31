@@ -10,7 +10,7 @@ import { PrintService } from "@/utils/PrintService";
 import { toast } from "@/hooks/use-toast";
 import { CheckCircle2 } from "lucide-react";
 
-interface WorkOrderReceiptPrintProps {
+export interface WorkOrderReceiptPrintProps {
   invoice: any;
   patientName?: string;
   patientPhone?: string;
@@ -912,7 +912,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       </div>
       
       <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", marginTop: "10px", textAlign: "center" }}>
-        <div style={{ fontSize: "10px", fontWeight: "bold", margin-bottom: "2px" }}>
+        <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "2px" }}>
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
         </div>
         <div style={{ fontSize: "7px", color: "#666" }}>
@@ -922,24 +922,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           }
         </div>
       </div>
-      
-      {isEyeExam && (
-        <div style={{ marginBottom: "3px" }}>
-          <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
-            {isRtl ? 'فحص العين' : 'Eye Exam'} {isRtl ? <span style={{ fontSize: "10px" }}>(Eye Exam)</span> : <span style={{ fontSize: "10px" }}>(فحص العين)</span>}
-          </h3>
-          <div style={{ marginLeft: "2px" }}>
-            <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-              <span style={{ fontWeight: "bold" }}>{isRtl ? "الخدمة" : "Service"}:</span>
-              <span>{invoice.serviceName || t("eyeExam")}</span>
-            </div>
-            <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-              <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
-              <span>{invoice.servicePrice.toFixed(3)} KWD</span>
-            </div>
-          </div>
-        </div>
-      )}
       
       <style>
         {`
