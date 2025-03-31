@@ -91,7 +91,7 @@ export const Dashboard: React.FC = () => {
           <div className="bg-gradient-to-r from-teal-500 to-teal-700 p-6 text-white">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <MoenLogoGreen className="w-16 h-16 bg-white rounded-full p-2" />
+                <MoenLogoGreen className="w-24 h-24 bg-white rounded-full p-3 shadow-lg" />
                 <div>
                   <h2 className="text-2xl font-bold">{welcomeMessage}</h2>
                   <p className="text-teal-100">{language === 'ar' ? 'مؤين للبصريات' : 'Moen Optician'}</p>
