@@ -11,7 +11,7 @@ import {
   CreditCard, 
   Search, 
   Calendar,
-  BarChart3
+  Store
 } from "lucide-react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -22,6 +22,7 @@ import { useLanguageStore } from "@/store/languageStore";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
+import { format } from "date-fns";
 
 export const Dashboard: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -46,30 +47,6 @@ export const Dashboard: React.FC = () => {
       rootElement.dispatchEvent(event);
     }
   };
-
-  const statCards = [
-    {
-      title: language === 'ar' ? 'العملاء' : 'Patients',
-      value: patients.length,
-      icon: Users,
-      color: 'bg-teal-50 text-teal-500',
-      onClick: () => navigateToSection('patientSearch')
-    },
-    {
-      title: language === 'ar' ? 'الإطارات' : 'Frames',
-      value: frames.length,
-      icon: Package,
-      color: 'bg-teal-50 text-teal-500',
-      onClick: () => navigateToSection('inventory')
-    },
-    {
-      title: language === 'ar' ? 'المواعيد اليوم' : 'Today\'s Appointments',
-      value: 5, // Example value
-      icon: Calendar,
-      color: 'bg-teal-50 text-teal-500',
-      onClick: () => {}
-    },
-  ];
 
   const quickActions = [
     {
@@ -103,28 +80,37 @@ export const Dashboard: React.FC = () => {
   ];
 
   const rtlClass = language === 'ar' ? 'rtl' : 'ltr';
+  const welcomeMessage = language === 'ar' ? 'مرحباً بكم في متجرنا' : 'Welcome to Our Store';
+  const dateFormatted = format(currentTime, 'EEEE, MMMM do, yyyy');
+  const timeFormatted = format(currentTime, 'h:mm:ss a');
 
   return (
     <div className={`py-4 space-y-6 ${rtlClass}`}>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {statCards.map((card, index) => (
-          <Card 
-            key={index} 
-            className="hover:shadow-md transition-shadow duration-300 cursor-pointer"
-            onClick={card.onClick}
-          >
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">{card.title}</p>
-                <p className="text-3xl font-bold force-ltr-numbers">{card.value}</p>
+      <Card className="mb-6 overflow-hidden">
+        <CardContent className="p-0">
+          <div className="bg-gradient-to-r from-teal-500 to-teal-700 p-6 text-white">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <MoenLogoGreen className="w-16 h-16 bg-white rounded-full p-2" />
+                <div>
+                  <h2 className="text-2xl font-bold">{welcomeMessage}</h2>
+                  <p className="text-teal-100">{language === 'ar' ? 'مؤين للبصريات' : 'Moen Optician'}</p>
+                </div>
               </div>
-              <div className={`${card.color} p-3 rounded-full`}>
-                <card.icon className="h-6 w-6" />
+              <div className="text-right flex flex-col items-end">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  <span className="text-xl font-mono force-ltr-numbers">{timeFormatted}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Calendar className="h-5 w-5" />
+                  <span className="text-sm">{dateFormatted}</span>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <CollapsibleCard 
         title={language === 'ar' ? 'الإجراءات السريعة' : 'Quick Actions'} 
