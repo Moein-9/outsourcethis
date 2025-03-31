@@ -4,7 +4,8 @@ import QRCodeReact from 'qrcode.react';
 import QRCode from 'qrcode';
 import { Button } from "@/components/ui/button";
 import { useInventoryStore, FrameItem } from '@/store/inventoryStore';
-import { Check, AlertTriangle, Calendar, SortDesc, SortAsc, Search, ListFilter } from 'lucide-react';
+import { useStoreLocation } from '@/store/storeLocationStore';
+import { Check, AlertTriangle, Calendar, SortDesc, SortAsc, Search, ListFilter, MapPin } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 import { PrintService } from '@/utils/PrintService';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { LocationSelector } from './LocationSelector';
+import { getStoreInfo } from '@/assets/logo';
 
 interface FrameLabelTemplateProps {
   onPrintError?: (errorMessage: string) => void;
@@ -26,6 +29,7 @@ interface FrameLabelTemplateProps {
 export const usePrintLabel = (onError?: (message: string) => void) => {
   const { frames } = useInventoryStore();
   const { t } = useLanguageStore();
+  const { selectedLocation } = useStoreLocation();
   const [isPrinting, setIsPrinting] = useState(false);
   
   const generateQRCodeDataURL = (text: string): Promise<string> => {
@@ -41,7 +45,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     });
   };
   
-  const printSingleLabel = async (frameId: string) => {
+  const printSingleLabel = async (frameId: string, locationId?: string) => {
     const frame = frames.find(f => f.frameId === frameId);
     
     if (!frame) {
@@ -56,7 +60,8 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       console.log(`[LabelPrinting] Starting single label print for frame ${frameId}`);
       
       const qrCodeDataURL = await generateQRCodeDataURL(frame.frameId);
-      const labelContent = createFrameLabelContent(frame, qrCodeDataURL);
+      const printLocationId = locationId || selectedLocation;
+      const labelContent = createFrameLabelContent(frame, qrCodeDataURL, printLocationId);
       const htmlDocument = PrintService.prepareLabelDocument(labelContent);
       
       console.log("[LabelPrinting] Generated QR code data URL length:", qrCodeDataURL.length);
@@ -75,7 +80,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     }
   };
   
-  const printMultipleLabels = async (frameIds: string[]) => {
+  const printMultipleLabels = async (frameIds: string[], locationId?: string) => {
     if (frameIds.length === 0) {
       const errorMsg = t('noFramesSelected');
       toast.error(errorMsg);
@@ -97,11 +102,12 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       console.log(`[LabelPrinting] Starting multi-label print for ${selectedFrames.length} frames`);
       
       let allLabelsContent = '';
+      const printLocationId = locationId || selectedLocation;
       
       for (const frame of selectedFrames) {
         console.log(`[LabelPrinting] Generating label content for frame ${frame.frameId}`);
         const qrCodeDataURL = await generateQRCodeDataURL(frame.frameId);
-        allLabelsContent += createFrameLabelContent(frame, qrCodeDataURL);
+        allLabelsContent += createFrameLabelContent(frame, qrCodeDataURL, printLocationId);
       }
       
       const htmlDocument = PrintService.prepareLabelDocument(allLabelsContent);
@@ -120,16 +126,22 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
     }
   };
   
-  const createFrameLabelContent = (frame: FrameItem, qrCodeDataURL: string) => {
+  const createFrameLabelContent = (frame: FrameItem, qrCodeDataURL: string, locationId: string) => {
     const formattedPrice = Number.isInteger(frame.price) 
       ? Math.floor(frame.price)
       : frame.price.toFixed(3);
+    
+    const { language } = useLanguageStore.getState();
+    const storeData = getStoreInfo(locationId, language);
     
     return `
       <div class="label-container">
         <div class="left-section">
           <div class="store-logo">
-            <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" />
+            <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Moen Optician" />
+          </div>
+          <div class="store-location" style="font-size: 6px; text-align: center; margin-bottom: 2px;">
+            ${storeData.location}
           </div>
           <div class="qr-code">
             <img src="${qrCodeDataURL}" alt="QR Code" class="qr-image" />
@@ -155,8 +167,9 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
   const { frames } = useInventoryStore();
   const { printMultipleLabels, isPrinting } = usePrintLabel(onPrintError);
   const { t, language } = useLanguageStore();
-  const [selectedFrames, setSelectedFrames] = useState<string[]>([]);
+  const { selectedLocation, setSelectedLocation } = useStoreLocation();
   
+  const [selectedFrames, setSelectedFrames] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'priceHigh' | 'priceLow'>('newest');
   const [filteredFrames, setFilteredFrames] = useState(frames);
@@ -210,7 +223,7 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
   
   const handlePrintSelected = () => {
     console.log(`[FrameLabelTemplate] Attempting to print ${selectedFrames.length} selected frames`);
-    printMultipleLabels(selectedFrames);
+    printMultipleLabels(selectedFrames, selectedLocation);
   };
   
   const previewStyles: Record<string, React.CSSProperties> = {
@@ -250,6 +263,11 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
       height: '10px',
       width: 'auto'
     },
+    storeLocation: {
+      fontSize: '4px',
+      textAlign: 'center',
+      marginBottom: '1px',
+    },
     qrCode: {
       display: 'flex',
       justifyContent: 'center'
@@ -284,11 +302,16 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
       ? Math.floor(frame.price)
       : frame.price.toFixed(3);
       
+    const storeData = getStoreInfo(selectedLocation, language);
+    
     return (
       <div style={previewStyles.container}>
         <div style={previewStyles.leftSection}>
           <div style={previewStyles.storeLogo}>
             <img src="/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png" alt="Store Logo" style={previewStyles.storeLogoImg} />
+          </div>
+          <div style={previewStyles.storeLocation}>
+            {storeData.location}
           </div>
           <div style={previewStyles.qrCode}>
             <QRCodeReact 
@@ -331,6 +354,8 @@ export const FrameLabelTemplate: React.FC<FrameLabelTemplateProps> = ({ onPrintE
           </div>
         </div>
         <div className="w-full md:w-auto flex flex-wrap gap-2 items-center justify-end">
+          <LocationSelector mini className="h-8" />
+          
           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-none">
             {isRtl ? `الإطارات المحددة: ${selectedFrames.length}` : `Selected Frames: ${selectedFrames.length}`}
           </Badge>

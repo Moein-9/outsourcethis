@@ -1,9 +1,10 @@
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { MoenLogo, storeInfo } from "@/assets/logo";
+import { MoenLogo, getStoreInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, History } from "lucide-react";
+import { useStoreLocation } from "@/store/storeLocationStore";
+import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, History, MapPin } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { 
   Card,
@@ -41,18 +42,24 @@ interface CustomWorkOrderReceiptProps {
   invoice?: any;
   patient?: any;
   isPrintable?: boolean;
+  locationId?: string;
 }
 
 export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   workOrder,
   invoice,
   patient,
-  isPrintable = false
+  isPrintable = false,
+  locationId
 }) => {
   const { language, t } = useLanguageStore();
+  const { selectedLocation } = useStoreLocation();
   const { lensTypes, lensCoatings } = useInventoryStore();
   const isRtl = language === 'ar';
   const dirClass = isRtl ? "rtl" : "ltr";
+  
+  const storeLocationId = locationId || selectedLocation;
+  const storeData = getStoreInfo(storeLocationId, language);
   
   const patientName = patient?.name || invoice?.patientName || workOrder?.patientName || t("anonymous");
   const patientPhone = patient?.phone || invoice?.patientPhone || workOrder?.patientPhone;
@@ -176,9 +183,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-12" /> 
         </div>
-        <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
-        <p className="text-sm font-medium mb-0 text-gray-600">{storeInfo.address}</p>
-        <p className="text-sm font-medium text-gray-600">{t("phone")}: {storeInfo.phone}</p>
+        <h2 className="font-bold text-lg mb-0">Moen Optician</h2>
+        <p className="font-medium mb-0 text-sm">{storeData.location}</p>
+        <p className="text-sm font-medium mb-0 text-gray-600">{storeData.address}</p>
+        <p className="text-sm font-medium text-gray-600">
+          {isRtl ? `هاتف: ${storeData.phone}` : `Tel: ${storeData.phone}`}
+        </p>
       </div>
 
       <div className="text-center mb-2">

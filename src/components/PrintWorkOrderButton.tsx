@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
+import { useStoreLocation } from "@/store/storeLocationStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 
@@ -49,6 +50,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   onInvoiceSaved,
 }) => {
   const { t } = useLanguageStore();
+  const { selectedLocation } = useStoreLocation();
   const [loading, setLoading] = useState(false);
   const { addInvoice, addExistingInvoice, addWorkOrder } = useInvoiceStore();
   
@@ -63,7 +65,8 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           lensType: {
             name: invoice.lensType,
             price: invoice.lensPrice
-          }
+          },
+          locationId: selectedLocation // Add location ID to work order
         };
         
         // Generate work order ID
@@ -88,14 +91,16 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           total: invoice.total,
           paymentMethod: invoice.paymentMethod,
           authNumber: invoice.authNumber,
-          workOrderId: workOrderId
+          workOrderId: workOrderId,
+          locationId: selectedLocation // Add location ID to invoice
         });
         
         // Update the invoice with the new IDs
         const updatedInvoice = { 
           ...invoice, 
           invoiceId, 
-          workOrderId 
+          workOrderId,
+          locationId: selectedLocation
         };
         
         // If callback provided, call it with the new IDs
@@ -144,6 +149,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         contactLenses={contactLenses}
         contactLensRx={contactLensRx}
         thermalOnly={thermalOnly}
+        locationId={invoiceToUse.locationId || selectedLocation}
       />
     );
     
@@ -175,6 +181,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           contactLenses={contactLenses}
           contactLensRx={contactLensRx}
           thermalOnly={thermalOnly}
+          locationId={invoice.locationId || selectedLocation}
           trigger={
             <Button variant={variant} size={size} className={className}>
               <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}

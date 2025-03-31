@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle, Printer } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useLanguageStore } from '@/store/languageStore';
+import { LocationSelector } from '@/components/LocationSelector';
 
 const PrintLabelPage: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -34,6 +35,7 @@ const PrintLabelPage: React.FC = () => {
           </h1>
           
           <div className="flex gap-2">
+            <LocationSelector mini className="h-9" />
             <Button variant="secondary" size="sm" className="gap-2" onClick={() => window.location.reload()}>
               <Printer className="h-4 w-4" />
               {isRtl ? "تحديث صفحة الطباعة" : "Refresh Print Page"}

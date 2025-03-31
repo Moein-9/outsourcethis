@@ -1,11 +1,11 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
-import { Eye, Ruler, CircleDot, ClipboardCheck, User, Glasses, BadgeCheck, Contact } from "lucide-react";
+import { Eye, Ruler, CircleDot, ClipboardCheck, User, Glasses, BadgeCheck, Contact, MapPin } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
-import { MoenLogo, storeInfo } from "@/assets/logo";
+import { MoenLogo, getStoreInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
+import { useStoreLocation } from "@/store/storeLocationStore";
 
 interface WorkOrderPrintProps {
   invoice: Invoice;
@@ -39,6 +39,7 @@ interface WorkOrderPrintProps {
       dia: string;
     };
   };
+  locationId?: string;
 }
 
 export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({ 
@@ -51,10 +52,15 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   thickness,
   frame,
   contactLenses,
-  contactLensRx
+  contactLensRx,
+  locationId
 }) => {
   const { language, t } = useLanguageStore();
+  const { selectedLocation } = useStoreLocation();
   const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
+  
+  const storeLocationId = locationId || selectedLocation;
+  const storeData = getStoreInfo(storeLocationId, language);
   
   const name = patientName || invoice.patientName;
   const phone = patientPhone || invoice.patientPhone;
@@ -208,8 +214,9 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             {format(new Date(invoice.createdAt), 'dd/MM/yyyy HH:mm')}
           </p>
           <div style={{ fontSize: "9pt", textAlign: "center", marginTop: "1mm" }}>
-            <p style={{ margin: "0" }}>{storeInfo.address}</p>
-            <p style={{ margin: "0" }}>{t("phone")}: {storeInfo.phone}</p>
+            <p style={{ margin: "0", fontWeight: "bold" }}>{storeData.location}</p>
+            <p style={{ margin: "0" }}>{storeData.address}</p>
+            <p style={{ margin: "0" }}>{language === 'ar' ? `هاتف: ${storeData.phone}` : `Tel: ${storeData.phone}`}</p>
           </div>
         </div>
 

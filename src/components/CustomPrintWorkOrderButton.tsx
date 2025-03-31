@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
+import { useStoreLocation } from '@/store/storeLocationStore';
+import { LocationSelector } from './LocationSelector';
 import { 
   Dialog, 
   DialogContent, 
@@ -33,8 +35,10 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   children // This prop holds any custom trigger element
 }) => {
   const { t } = useLanguageStore();
+  const { selectedLocation } = useStoreLocation();
   const [open, setOpen] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [printLocation, setPrintLocation] = useState(selectedLocation);
   
   const handlePrint = () => {
     if (isPrinting) return; // Prevent multiple calls
@@ -42,13 +46,17 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     setIsPrinting(true);
     setOpen(false); // Close dialog before printing
     
-    console.log("[CustomPrintWorkOrderButton] Triggering print for workOrder:", workOrder.id);
+    console.log("[CustomPrintWorkOrderButton] Triggering print for workOrder:", workOrder.id, "with location:", printLocation);
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient, printLocation);
       setTimeout(() => setIsPrinting(false), 1000); // Reset printing state after a delay
     }, 300);
+  };
+  
+  const handleLocationSelect = (locationId: string) => {
+    setPrintLocation(locationId);
   };
   
   // Create a default button if no children are provided or if children is not a valid element
@@ -71,6 +79,10 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     <Dialog open={open} onOpenChange={(newOpen) => {
       if (isPrinting) return; // Don't toggle if printing
       setOpen(newOpen);
+      // Reset the print location to the current selected location when opening the dialog
+      if (newOpen) {
+        setPrintLocation(selectedLocation);
+      }
     }}>
       <DialogTrigger asChild>
         {triggerElement}
@@ -82,6 +94,14 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
             {t('previewBeforePrinting')}
           </DialogDescription>
           
+          <div className="w-full flex justify-center mb-4">
+            <LocationSelector 
+              mini={false}
+              className="w-full max-w-xs"
+              onSelect={handleLocationSelect}
+            />
+          </div>
+          
           <div className="w-full max-w-[80mm] bg-white p-0 border rounded shadow-sm mb-4">
             <div id="work-order-receipt">
               <CustomWorkOrderReceipt 
@@ -89,6 +109,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
                 invoice={invoice} 
                 patient={patient}
                 isPrintable={true}
+                locationId={printLocation}
               />
             </div>
           </div>
