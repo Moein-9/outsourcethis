@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -6,7 +7,7 @@ import {
   ClipboardCheck, Printer, Receipt, 
   Check, ChevronRight, FileText, PartyPopper,
   CreditCard, User, Phone, Calendar, AlertTriangle,
-  Contact, ScrollText
+  Contact, ScrollText, Glasses
 } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
 
