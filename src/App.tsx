@@ -8,7 +8,8 @@ import { LanguageProvider } from "./store/languageStore";
 import { StoreLocationProvider } from "@/store/storeLocationStore";
 
 // Import your page components
-import HomePage from "./pages/home"; // Changed from index to home to avoid casing issues
+import HomePage from "./pages/home"; // Using home.tsx directly
+import Index from "./pages/Index"; // Using proper casing for Index
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import InventoryPage from "./pages/InventoryPage";
