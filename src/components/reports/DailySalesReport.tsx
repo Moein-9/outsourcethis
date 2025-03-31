@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
 import { useInvoiceStore, Invoice, Payment, Refund } from '@/store/invoiceStore';
@@ -6,8 +7,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { format, isValid, parseISO, isAfter, isBefore, isEqual, subDays } from 'date-fns';
+import { format, isValid, parseISO, isAfter, isBefore, isEqual, subDays, addDays } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface DailySalesReportProps {
   className?: string;
@@ -83,12 +85,6 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
     return refundsInRange.reduce((sum, refund) => sum + refund.amount, 0);
   }, [refundsInRange]);
   
-  function addDays(date: Date, days: number): Date {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
-  }
-  
   return (
     <div className={`space-y-6 ${className || ''}`}>
       <div className="md:flex items-center justify-between">
@@ -96,7 +92,7 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
           <h2 className="text-2xl font-bold">{t('dailySalesReport')}</h2>
           <p className="text-muted-foreground">{t('overviewOfSales')}</p>
         </div>
-        <DateRangePicker date={dateRange} onDateChange={setDateRange} />
+        <DateRangePicker date={dateRange} onSelect={setDateRange} />
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -172,7 +168,7 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
                         </TableCell>
                       </TableRow>
                     ))
-                  ) || null}
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
