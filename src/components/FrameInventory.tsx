@@ -121,7 +121,7 @@ export const FrameInventory: React.FC = () => {
     setSearchResults(results);
     
     if (results.length === 0) {
-      toast.info(t('noFramesMatchingSearch'));
+      toast(t('noFramesMatchingSearch'));
     }
   };
   
