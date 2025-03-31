@@ -3,51 +3,85 @@ import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 
 export interface RefundReceiptTemplateProps {
-  invoice: Invoice;
+  invoice?: Invoice;
+  refund?: {
+    refundId: string;
+    invoiceId: string;
+    patientName: string;
+    patientPhone: string;
+    patientId?: string;
+    refundAmount: number;
+    refundMethod: string;
+    refundReason: string;
+    refundDate: string;
+    originalTotal?: number;
+    frameBrand?: string;
+    frameModel?: string;
+    frameColor?: string;
+    lensType?: string;
+    invoiceItems?: Array<{name: string; price: number; quantity: number}>;
+    staffNotes?: string;
+  };
+  language?: string;
 }
 
-export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ invoice }) => {
+export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ 
+  invoice, 
+  refund,
+  language
+}) => {
+  // Use refund data if provided, otherwise fall back to invoice data
+  const refundId = refund?.refundId || invoice?.refundId || 'N/A';
+  const invoiceId = refund?.invoiceId || invoice?.invoiceId || 'N/A';
+  const customerName = refund?.patientName || invoice?.patientName || 'N/A';
+  const refundDate = refund?.refundDate || invoice?.refundDate || new Date().toISOString();
+  const refundAmount = refund?.refundAmount || invoice?.refundAmount || 0;
+  const refundMethod = refund?.refundMethod || invoice?.refundMethod || 'N/A';
+  const refundReason = refund?.refundReason || invoice?.refundReason || '';
+  const isRtl = language === 'ar';
+  
   return (
-    <div className="receipt-container">
+    <div className="receipt-container" dir={isRtl ? "rtl" : "ltr"}>
       <div className="receipt-header">
-        <h2>Refund Receipt</h2>
-        <div className="receipt-id">#{invoice.refundId || 'N/A'}</div>
+        <h2>{isRtl ? "إيصال استرداد" : "Refund Receipt"}</h2>
+        <div className="receipt-id">#{refundId}</div>
       </div>
       
       <div className="receipt-details">
         <div className="detail-row">
-          <span className="detail-label">Invoice ID:</span>
-          <span className="detail-value">{invoice.invoiceId}</span>
+          <span className="detail-label">{isRtl ? "رقم الفاتورة:" : "Invoice ID:"}</span>
+          <span className="detail-value">{invoiceId}</span>
         </div>
         <div className="detail-row">
-          <span className="detail-label">Customer:</span>
-          <span className="detail-value">{invoice.patientName}</span>
+          <span className="detail-label">{isRtl ? "العميل:" : "Customer:"}</span>
+          <span className="detail-value">{customerName}</span>
         </div>
         <div className="detail-row">
-          <span className="detail-label">Date:</span>
-          <span className="detail-value">{new Date(invoice.refundDate || new Date()).toLocaleDateString()}</span>
+          <span className="detail-label">{isRtl ? "التاريخ:" : "Date:"}</span>
+          <span className="detail-value">{new Date(refundDate).toLocaleDateString()}</span>
         </div>
         <div className="detail-row">
-          <span className="detail-label">Amount Refunded:</span>
-          <span className="detail-value">{invoice.refundAmount?.toFixed(3) || '0.000'} KWD</span>
+          <span className="detail-label">{isRtl ? "المبلغ المسترد:" : "Amount Refunded:"}</span>
+          <span className="detail-value">{refundAmount.toFixed(3)} KWD</span>
         </div>
         <div className="detail-row">
-          <span className="detail-label">Refund Method:</span>
-          <span className="detail-value">{invoice.refundMethod || 'N/A'}</span>
+          <span className="detail-label">{isRtl ? "طريقة الاسترداد:" : "Refund Method:"}</span>
+          <span className="detail-value">{refundMethod}</span>
         </div>
-        {invoice.refundReason && (
+        {refundReason && (
           <div className="detail-row">
-            <span className="detail-label">Reason:</span>
-            <span className="detail-value">{invoice.refundReason}</span>
+            <span className="detail-label">{isRtl ? "السبب:" : "Reason:"}</span>
+            <span className="detail-value">{refundReason}</span>
           </div>
         )}
       </div>
       
       <div className="receipt-footer">
-        <p>Thank you for your business</p>
+        <p>{isRtl ? "شكراً لتعاملكم معنا" : "Thank you for your business"}</p>
       </div>
       
-      <style jsx>{`
+      <style>
+        {`
         .receipt-container {
           font-family: 'Arial', sans-serif;
           width: 300px;
@@ -90,7 +124,8 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ in
           border-top: 1px dashed #ccc;
           padding-top: 10px;
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };

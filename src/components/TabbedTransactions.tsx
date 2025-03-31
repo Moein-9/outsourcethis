@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Invoice, WorkOrder, useInvoiceStore } from '@/store/invoiceStore';
@@ -50,10 +49,8 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
   const [pickedUpInvoices, setPickedUpInvoices] = useState<string[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   
-  // Use either external (controlled) or internal (uncontrolled) active tab
   const activeTab = externalActiveTab || internalActiveTab;
   
-  // Handle tab change, either through external handler or internal state
   const handleTabChange = (value: string) => {
     if (onTabChange) {
       onTabChange(value);
@@ -62,34 +59,27 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     }
   };
   
-  // Sort invoices by date, newest first
   const sortedInvoices = [...invoices].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
   
-  // Filter active (not picked up and not refunded)
   const activeInvoices = sortedInvoices
     .filter(invoice => !invoice.isPickedUp && !invoice.isRefunded)
-    .filter(invoice => !pickedUpInvoices.includes(invoice.invoiceId)); // Also exclude locally picked up invoices
+    .filter(invoice => !pickedUpInvoices.includes(invoice.invoiceId));
   
-  // Filter completed (picked up and not refunded)
   const completedInvoices = [...sortedInvoices
     .filter(invoice => invoice.isPickedUp && !invoice.isRefunded),
-    // Also include locally picked up invoices that haven't synced from the store yet
     ...sortedInvoices.filter(invoice => pickedUpInvoices.includes(invoice.invoiceId))
   ];
   
-  // Remove duplicates from completedInvoices (in case an invoice is in both lists)
   const uniqueCompletedInvoices = completedInvoices.filter((invoice, index, self) =>
     index === self.findIndex((i) => i.invoiceId === invoice.invoiceId)
   );
   
-  // Sort archived items by date, newest first
   const sortedArchivedInvoices = [...archivedInvoices].sort((a, b) => 
     new Date(b.archivedAt || b.createdAt).getTime() - new Date(a.archivedAt || a.createdAt).getTime()
   );
   
-  // Effect to force refresh on lastEditTimestamp change
   useEffect(() => {
     if (lastEditTimestamp) {
       setRefreshTrigger(prev => prev + 1);
@@ -132,7 +122,10 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     if (!invoice) return;
     
     const refundReceiptHTML = ReactDOMServer.renderToString(
-      <RefundReceiptTemplate invoice={invoice} />
+      <RefundReceiptTemplate 
+        invoice={invoice} 
+        language={language}
+      />
     );
     
     PrintService.printReport(refundReceiptHTML, `Refund Receipt - ${invoice.invoiceId}`);
@@ -291,7 +284,6 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                     </Badge>
                   </div>
                   
-                  {/* Refund Details */}
                   <Card className="bg-red-50/80 border-red-200 max-w-xs">
                     <CardHeader className="pb-2 pt-3">
                       <CardTitle className="text-sm font-medium text-red-700 flex items-center gap-1.5">
