@@ -37,28 +37,30 @@ export const PatientSearchResults: React.FC<PatientSearchResultsProps> = ({
   onSelectPatient
 }) => {
   const { language, t } = useLanguageStore();
+  const isRtl = language === 'ar';
+  const dirClass = isRtl ? 'rtl' : 'ltr';
   
   const formatDate = (dateString?: string) => {
-    if (!dateString) return language === 'ar' ? "تاريخ غير متوفر" : "Date not available";
+    if (!dateString) return isRtl ? "تاريخ غير متوفر" : "Date not available";
     try {
-      return format(parseISO(dateString), "PPP", { locale: language === 'ar' ? ar : enUS });
+      return format(parseISO(dateString), "PPP", { locale: isRtl ? ar : enUS });
     } catch (error) {
-      return language === 'ar' ? "تاريخ غير صالح" : "Invalid date";
+      return isRtl ? "تاريخ غير صالح" : "Invalid date";
     }
   };
   
   const getPatientAge = (dateOfBirth?: string) => {
-    if (!dateOfBirth) return language === 'ar' ? "غير معروف" : "Unknown";
+    if (!dateOfBirth) return isRtl ? "غير معروف" : "Unknown";
     const age = differenceInYears(new Date(), new Date(dateOfBirth));
     return age;
   };
   
   return (
-    <Card className="mb-6 border-amber-200 shadow-md">
+    <Card className={`mb-6 border-amber-200 shadow-md ${dirClass}`}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">{t('searchResults')}</CardTitle>
+        <CardTitle className="text-lg">{isRtl ? "نتائج البحث" : "Search Results"}</CardTitle>
         <CardDescription>
-          {language === 'ar' 
+          {isRtl 
             ? `تم العثور على ${searchResults.length} عميل`
             : `Found ${searchResults.length} client${searchResults.length !== 1 ? 's' : ''}`}
         </CardDescription>
@@ -70,12 +72,12 @@ export const PatientSearchResults: React.FC<PatientSearchResultsProps> = ({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">#</TableHead>
-                  <TableHead>{t('name')}</TableHead>
-                  <TableHead>{t('phoneNumber')}</TableHead>
-                  <TableHead>{t('dateOfBirth')}</TableHead>
-                  <TableHead>{t('age')}</TableHead>
-                  <TableHead>{language === 'ar' ? "آخر زيارة" : "Last Visit"}</TableHead>
-                  <TableHead className={language === 'ar' ? "text-right" : "text-right"}>{t('actions')}</TableHead>
+                  <TableHead>{isRtl ? "الاسم" : "Name"}</TableHead>
+                  <TableHead>{isRtl ? "رقم الهاتف" : "Phone Number"}</TableHead>
+                  <TableHead>{isRtl ? "تاريخ الميلاد" : "Date of Birth"}</TableHead>
+                  <TableHead>{isRtl ? "العمر" : "Age"}</TableHead>
+                  <TableHead>{isRtl ? "آخر زيارة" : "Last Visit"}</TableHead>
+                  <TableHead className={isRtl ? "text-right" : "text-right"}>{isRtl ? "الإجراءات" : "Actions"}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -87,7 +89,7 @@ export const PatientSearchResults: React.FC<PatientSearchResultsProps> = ({
                     <TableCell>{formatDate(patient.dob)}</TableCell>
                     <TableCell>{getPatientAge(patient.dob)}</TableCell>
                     <TableCell>
-                      {patient.lastVisit ? formatDate(patient.lastVisit) : (language === 'ar' ? 'لا توجد زيارات' : 'No visits')}
+                      {patient.lastVisit ? formatDate(patient.lastVisit) : (isRtl ? 'لا توجد زيارات' : 'No visits')}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button 
@@ -95,8 +97,8 @@ export const PatientSearchResults: React.FC<PatientSearchResultsProps> = ({
                         size="sm"
                         onClick={() => onSelectPatient(patient)}
                       >
-                        <Eye className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
-                        {language === 'ar' ? "ملف العميل" : "Client File"}
+                        <Eye className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
+                        {isRtl ? "ملف العميل" : "Client File"}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -107,9 +109,9 @@ export const PatientSearchResults: React.FC<PatientSearchResultsProps> = ({
         ) : (
           <div className="text-center py-6">
             <UserSearch className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <h3 className="text-lg font-medium mb-1">{t('noResults')}</h3>
+            <h3 className="text-lg font-medium mb-1">{isRtl ? "لا توجد نتائج" : "No Results"}</h3>
             <p className="text-muted-foreground mb-4">
-              {language === 'ar' 
+              {isRtl 
                 ? "لم يتم العثور على نتائج مطابقة لمعايير البحث. جرب استخدام كلمات بحث مختلفة."
                 : "No results match your search criteria. Try using different search terms."}
             </p>

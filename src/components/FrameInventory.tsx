@@ -57,7 +57,7 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
           </div>
         </div>
         <Badge variant="destructive" className="text-xs rounded-full">
-          {language === 'ar' ? `في المخزون:${frame.qty}` : `In Stock: ${frame.qty}`}
+          {language === 'ar' ? `في المخزون: ${frame.qty}` : `In Stock: ${frame.qty}`}
         </Badge>
       </CardHeader>
       <CardContent className="p-3 pt-2 text-sm">
@@ -170,22 +170,25 @@ export const FrameInventory: React.FC = () => {
     setSearchResults(frames);
   }, [frames]);
   
+  const isRtl = language === 'ar';
+  const dirClass = isRtl ? 'rtl' : 'ltr';
+  
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${dirClass}`}>
       <div className="flex flex-col md:flex-row justify-between items-stretch gap-4">
         <div className="flex-1 flex items-center gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className={`absolute ${isRtl ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
             <Input
               value={frameSearchTerm}
               onChange={(e) => setFrameSearchTerm(e.target.value)}
-              placeholder={t('searchForFrame')}
-              className="pl-9 w-full"
+              placeholder={isRtl ? "بحث عن إطار" : "Search for frame"}
+              className={`${isRtl ? 'pr-9 text-right' : 'pl-9 text-left'} w-full`}
               onKeyDown={(e) => e.key === 'Enter' && handleFrameSearch()}
             />
           </div>
           <Button onClick={handleFrameSearch} variant="secondary" className="shrink-0">
-            <Search className="h-4 w-4 mr-1" /> {t('search')}
+            <Search className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} /> {t('search')}
           </Button>
         </div>
         
@@ -195,20 +198,22 @@ export const FrameInventory: React.FC = () => {
             onClick={() => setIsLabelDialogOpen(true)}
             className="shrink-0"
           >
-            <Tag className="h-4 w-4 mr-1" /> {t('printLabels')}
+            <Tag className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} /> 
+            {isRtl ? "طباعة الملصقات" : "Print Labels"}
           </Button>
           
           <Dialog open={isAddFrameDialogOpen} onOpenChange={setIsAddFrameDialogOpen}>
             <DialogTrigger asChild>
               <Button className="shrink-0">
-                <Plus className="h-4 w-4 mr-1" /> {t('addNewFrame')}
+                <Plus className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} /> 
+                {isRtl ? "إضافة إطار جديد" : "Add New Frame"}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className={`max-w-md ${dirClass}`}>
               <DialogHeader>
-                <DialogTitle>{t('addNewFrameTitle')}</DialogTitle>
+                <DialogTitle>{isRtl ? "إضافة إطار جديد" : "Add New Frame"}</DialogTitle>
                 <DialogDescription>
-                  {t('addNewFrameDescription')}
+                  {isRtl ? "أدخل بيانات الإطار الجديد لإضافته إلى المخزون" : "Enter the new frame details to add it to inventory"}
                 </DialogDescription>
               </DialogHeader>
               
@@ -220,7 +225,8 @@ export const FrameInventory: React.FC = () => {
                       id="frameBrand"
                       value={frameBrand}
                       onChange={(e) => setFrameBrand(e.target.value)}
-                      placeholder={t('brandExample')}
+                      placeholder={isRtl ? "مثال: ريبان" : "Example: RayBan"}
+                      className={isRtl ? "text-right" : ""}
                     />
                   </div>
                   
@@ -230,7 +236,8 @@ export const FrameInventory: React.FC = () => {
                       id="frameModel"
                       value={frameModel}
                       onChange={(e) => setFrameModel(e.target.value)}
-                      placeholder={t('modelExample')}
+                      placeholder={isRtl ? "مثال: واي فيرر" : "Example: Wayfarer"}
+                      className={isRtl ? "text-right" : ""}
                     />
                   </div>
                 </div>
@@ -242,7 +249,8 @@ export const FrameInventory: React.FC = () => {
                       id="frameColor"
                       value={frameColor}
                       onChange={(e) => setFrameColor(e.target.value)}
-                      placeholder={t('colorExample')}
+                      placeholder={isRtl ? "مثال: أسود" : "Example: Black"}
+                      className={isRtl ? "text-right" : ""}
                     />
                   </div>
                   
@@ -252,14 +260,15 @@ export const FrameInventory: React.FC = () => {
                       id="frameSize"
                       value={frameSize}
                       onChange={(e) => setFrameSize(e.target.value)}
-                      placeholder={t('sizeExample')}
+                      placeholder={isRtl ? "مثال: 52-18-145" : "Example: 52-18-145"}
+                      className={isRtl ? "text-right" : ""}
                     />
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="framePrice">{t('price')} (KWD)</Label>
+                    <Label htmlFor="framePrice">{isRtl ? "السعر (د.ك)" : "Price (KWD)"}</Label>
                     <Input
                       id="framePrice"
                       type="number"
@@ -268,6 +277,7 @@ export const FrameInventory: React.FC = () => {
                       value={framePrice}
                       onChange={(e) => setFramePrice(e.target.value)}
                       placeholder="0.00"
+                      className={isRtl ? "text-right" : ""}
                     />
                   </div>
                   
@@ -280,17 +290,19 @@ export const FrameInventory: React.FC = () => {
                       min="1"
                       value={frameQty}
                       onChange={(e) => setFrameQty(e.target.value)}
+                      className={isRtl ? "text-right" : ""}
                     />
                   </div>
                 </div>
               </div>
               
-              <DialogFooter>
+              <DialogFooter className={isRtl ? "flex-row-reverse" : ""}>
                 <Button variant="outline" onClick={() => setIsAddFrameDialogOpen(false)}>
-                  {t('cancel')}
+                  {isRtl ? "إلغاء" : "Cancel"}
                 </Button>
                 <Button onClick={handleAddFrame}>
-                  <Save className="h-4 w-4 mr-1" /> {t('saveFrame')}
+                  <Save className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} /> 
+                  {isRtl ? "حفظ الإطار" : "Save Frame"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -312,25 +324,25 @@ export const FrameInventory: React.FC = () => {
       ) : (
         <div className="bg-muted/30 rounded-lg p-12 text-center">
           <Package className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-          <h3 className="text-lg font-medium mb-1">{t('noFramesFound')}</h3>
+          <h3 className="text-lg font-medium mb-1">{isRtl ? "لم يتم العثور على إطارات" : "No frames found"}</h3>
           <p className="text-muted-foreground mb-4">
-            {t('noFramesMatchingSearch')}
+            {isRtl ? "لم يتم العثور على إطارات مطابقة لمعايير البحث." : "No frames matching search criteria found."}
           </p>
           <Button variant="outline" onClick={() => {
             setFrameSearchTerm("");
             setSearchResults(frames);
           }}>
-            {t('showAllFrames')}
+            {isRtl ? "عرض جميع الإطارات" : "Show all frames"}
           </Button>
         </div>
       )}
       
       <Dialog open={isLabelDialogOpen} onOpenChange={setIsLabelDialogOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh]">
+        <DialogContent className={`max-w-5xl max-h-[90vh] ${dirClass}`}>
           <DialogHeader>
-            <DialogTitle>{t('printFrameLabels')}</DialogTitle>
+            <DialogTitle>{isRtl ? "طباعة ملصقات الإطارات" : "Print Frame Labels"}</DialogTitle>
             <DialogDescription>
-              {t('selectFramesForLabels')}
+              {isRtl ? "اختر الإطارات المراد طباعة ملصقات لها" : "Select frames for label printing"}
             </DialogDescription>
           </DialogHeader>
           
@@ -338,9 +350,9 @@ export const FrameInventory: React.FC = () => {
             <FrameLabelTemplate />
           </div>
           
-          <DialogFooter>
+          <DialogFooter className={isRtl ? "flex-row-reverse" : ""}>
             <Button variant="outline" onClick={() => setIsLabelDialogOpen(false)}>
-              {t('close')}
+              {isRtl ? "إغلاق" : "Close"}
             </Button>
           </DialogFooter>
         </DialogContent>

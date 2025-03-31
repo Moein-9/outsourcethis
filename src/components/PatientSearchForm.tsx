@@ -35,10 +35,11 @@ export const PatientSearchForm: React.FC<PatientSearchFormProps> = ({
   const [visitDateFilter, setVisitDateFilter] = useState<string>("all_visits");
   
   const isRtl = language === 'ar';
+  const dirClass = isRtl ? 'rtl' : 'ltr';
   
   const handleSearch = () => {
     if (!searchTerm.trim()) {
-      toast.error(language === 'ar' ? "الرجاء إدخال مصطلح البحث" : "Please enter a search term");
+      toast.error(isRtl ? "الرجاء إدخال مصطلح البحث" : "Please enter a search term");
       return;
     }
     
@@ -52,14 +53,14 @@ export const PatientSearchForm: React.FC<PatientSearchFormProps> = ({
   };
   
   return (
-    <Card className={isRtl ? "text-right" : "text-left"}>
+    <Card className={dirClass}>
       <CardHeader>
         <CardTitle className={`flex items-center gap-2 ${isRtl ? "flex-row-reverse" : ""}`}>
           <UserSearch className="h-5 w-5 text-primary" />
-          {t('searchClient')}
+          {isRtl ? "بحث عن عميل" : "Search Client"}
         </CardTitle>
         <CardDescription>
-          {language === 'ar' 
+          {isRtl 
             ? "ابحث عن العملاء بواسطة الاسم، رقم الهاتف، أو أي معلومات شخصية"
             : "Search for clients by name, phone number, or any personal information"}
         </CardDescription>
@@ -81,7 +82,7 @@ export const PatientSearchForm: React.FC<PatientSearchFormProps> = ({
             <div className={`flex gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
               <Button onClick={handleSearch} className="shrink-0">
                 <Search className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} />
-                {t('search')}
+                {isRtl ? "بحث" : "Search"}
               </Button>
               <Button variant="outline" onClick={handleClear} className="shrink-0">
                 {isRtl ? "مسح" : "Clear"}
@@ -89,7 +90,7 @@ export const PatientSearchForm: React.FC<PatientSearchFormProps> = ({
             </div>
           </div>
           
-          <div className={`flex flex-col sm:flex-row gap-3 pt-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex flex-col sm:flex-row gap-3 pt-2 ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
             <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
               <Label htmlFor="visitDateFilter" className="whitespace-nowrap">
                 {isRtl ? "تاريخ الزيارة:" : "Visit Date:"}
