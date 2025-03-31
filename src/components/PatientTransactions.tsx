@@ -6,11 +6,12 @@ import { TabbedTransactions } from "./TabbedTransactions";
 import { Patient } from "@/store/patientStore";
 import { PrintOptionsDialog } from "./PrintOptionsDialog";
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { Printer, AlertCircle } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
 import { CustomPrintWorkOrderButton } from "./CustomPrintWorkOrderButton";
 import { DeleteOrderConfirmDialog } from "./DeleteOrderConfirmDialog";
 import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface PatientTransactionsProps {
   invoices: Invoice[];
@@ -108,7 +109,7 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
     
     try {
       // Find related invoice to check payment status
-      const relatedInvoice = localInvoices.find(inv => inv.workOrderId === workOrderToDelete.id);
+      const relatedInvoice = localInvoices.find(inv => inv.workOrderId === workOrderToDelete?.id);
       const reason = language === 'ar' ? "تم حذف الطلب من قبل المستخدم" : "Order deleted by user";
       
       // Call deleteWorkOrder function
@@ -144,6 +145,20 @@ export const PatientTransactions: React.FC<PatientTransactionsProps> = ({
   
   return (
     <div className="space-y-4">
+      {/* Add a visible alert to show the feature is working */}
+      <Alert variant="default" className="bg-amber-50 border-amber-200">
+        <AlertCircle className="h-4 w-4 text-amber-600" />
+        <AlertTitle className="text-amber-800">
+          {language === 'ar' ? "ميزة حذف الطلبات" : "Order Deletion Feature"}
+        </AlertTitle>
+        <AlertDescription className="text-amber-700">
+          {language === 'ar' 
+            ? "يمكنك الآن حذف الطلبات وسيتم نقلها تلقائيًا إلى تبويب الأرشيف. سيتم إرجاع أي مدفوعات سابقة."
+            : "You can now delete orders. They will be automatically moved to the Archive tab. Any previous payments will be refunded."
+          }
+        </AlertDescription>
+      </Alert>
+      
       <div className="flex justify-end">
         {localWorkOrders.length > 0 && localInvoices.length > 0 && (
           <PrintOptionsDialog
