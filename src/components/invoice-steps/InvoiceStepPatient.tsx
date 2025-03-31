@@ -137,21 +137,21 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
         <TabsList className="p-1 bg-primary/10 border border-primary/20 rounded-lg shadow-sm text-base">
           <TabsTrigger 
             value="glasses" 
-            className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-700 data-[state=active]:text-white"
+            className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             <Glasses className="w-5 h-5" />
             {t('glasses')}
           </TabsTrigger>
           <TabsTrigger 
             value="contacts" 
-            className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-700 data-[state=active]:text-white"
+            className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             <Eye className="w-5 h-5" />
             {t('contacts')}
           </TabsTrigger>
           <TabsTrigger 
             value="exam" 
-            className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-700 data-[state=active]:text-white"
+            className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             <ScrollText className="w-5 h-5" />
             {language === 'ar' ? 'فحص العين' : 'Eye Exam'}
