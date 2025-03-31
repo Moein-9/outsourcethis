@@ -53,6 +53,12 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
            (rx.add.left && rx.add.left !== '0' && rx.add.left !== '0.00');
   }, [rx]);
 
+  // Log rx and ADD values for debugging
+  console.log('RX passed to LensSelector:', rx);
+  console.log('Has ADD values:', hasAddValues);
+  console.log('ADD right:', rx?.add?.right);
+  console.log('ADD left:', rx?.add?.left);
+  
   // Filter lens types based on ADD values
   const filteredLensTypes = React.useMemo(() => {
     if (hasAddValues) {
@@ -163,6 +169,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const availableCoatings = getLensCoatingsByCategory(activeCategory);
   const availableThicknesses = getLensThicknessesByCategory(activeCategory);
   
+  console.log('Available lensTypes:', filteredLensTypes);
   console.log('Has ADD values:', hasAddValues);
   console.log('Available coatings for category', activeCategory, ':', availableCoatings);
   console.log('Available thicknesses for category', activeCategory, ':', availableThicknesses);
