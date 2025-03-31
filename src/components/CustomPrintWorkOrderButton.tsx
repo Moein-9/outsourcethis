@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { CustomPrintService } from '@/utils/CustomPrintService';
 import { useLanguageStore } from '@/store/languageStore';
-import { useLocationStore } from '@/store/locationStore';
 import { 
   Dialog, 
   DialogContent, 
@@ -13,7 +12,6 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
-import { LocationSelector } from './LocationSelector';
 
 interface PrintWorkOrderButtonProps {
   workOrder: any;
@@ -35,12 +33,8 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   children // This prop holds any custom trigger element
 }) => {
   const { t } = useLanguageStore();
-  const { selectedLocation } = useLocationStore();
   const [open, setOpen] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [selectedLocationId, setSelectedLocationId] = useState<string>(
-    invoice?.locationId || workOrder?.locationId || selectedLocation.id
-  );
   
   const handlePrint = () => {
     if (isPrinting) return; // Prevent multiple calls
@@ -52,8 +46,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
-      // Fix: Only pass three arguments instead of four
-      CustomPrintService.printWorkOrder(workOrder, invoice, patient, selectedLocationId);
+      CustomPrintService.printWorkOrder(workOrder, invoice, patient);
       setTimeout(() => setIsPrinting(false), 1000); // Reset printing state after a delay
     }, 300);
   };
@@ -96,19 +89,9 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
                 invoice={invoice} 
                 patient={patient}
                 isPrintable={true}
-                locationId={selectedLocationId}
               />
             </div>
           </div>
-          
-          <div className="w-full max-w-[80mm] mb-4">
-            <LocationSelector 
-              selectedLocationId={selectedLocationId}
-              onLocationChange={setSelectedLocationId}
-              inline={true}
-            />
-          </div>
-          
           <Button 
             onClick={handlePrint} 
             className="mt-4 gap-2"

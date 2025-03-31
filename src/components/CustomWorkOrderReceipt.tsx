@@ -1,12 +1,14 @@
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { MoenLogo, storeLocations } from "@/assets/logo";
+import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
 import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, History } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
-import { useLocationStore } from "@/store/locationStore";
-import { Card, CardContent } from "@/components/ui/card";
+import { 
+  Card,
+  CardContent, 
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 function getLensTypeArabic(type: string): string {
@@ -39,24 +41,18 @@ interface CustomWorkOrderReceiptProps {
   invoice?: any;
   patient?: any;
   isPrintable?: boolean;
-  locationId?: string;
 }
 
 export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   workOrder,
   invoice,
   patient,
-  isPrintable = false,
-  locationId
+  isPrintable = false
 }) => {
   const { language, t } = useLanguageStore();
   const { lensTypes, lensCoatings } = useInventoryStore();
-  const { getLocationById } = useLocationStore();
   const isRtl = language === 'ar';
   const dirClass = isRtl ? "rtl" : "ltr";
-  
-  const selectedLocationId = locationId || invoice?.locationId || workOrder?.locationId || storeLocations[0].id;
-  const storeLocation = getLocationById(selectedLocationId) || storeLocations[0];
   
   const patientName = patient?.name || invoice?.patientName || workOrder?.patientName || t("anonymous");
   const patientPhone = patient?.phone || invoice?.patientPhone || workOrder?.patientPhone;
@@ -180,16 +176,9 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <div className="flex justify-center mb-1">
           <MoenLogo className="w-auto h-12" /> 
         </div>
-        <h2 className="font-bold text-lg mb-0">Moen Optician</h2>
-        <p className="text-sm font-medium mb-0 text-gray-600">
-          {isRtl ? storeLocation.nameAr : storeLocation.nameEn}
-        </p>
-        <p className="text-sm font-medium mb-0 text-gray-600">
-          {isRtl ? storeLocation.addressAr : storeLocation.addressEn}
-        </p>
-        <p className="text-sm font-medium text-gray-600">
-          {isRtl ? `هاتف: ${storeLocation.phone}` : `Tel: ${storeLocation.phone}`}
-        </p>
+        <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
+        <p className="text-sm font-medium mb-0 text-gray-600">{storeInfo.address}</p>
+        <p className="text-sm font-medium text-gray-600">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
       <div className="text-center mb-2">

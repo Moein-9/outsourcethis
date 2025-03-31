@@ -73,33 +73,9 @@ export const MoenLogoBlack: React.FC<{
   );
 };
 
-// Store locations with full information in both languages
-export const storeLocations = [
-  {
-    id: "somait",
-    name: "Al-Somait Plaza | مجمع الصميط بلازا",
-    nameEn: "Al-Somait Plaza",
-    nameAr: "مجمع الصميط بلازا",
-    addressEn: "Habeeb Munawer Street, Al Farwaniyah, Kuwait",
-    addressAr: "شارع حبيب مناور، الفروانية، الكويت",
-    phone: "24759016",
-    isDefault: true
-  },
-  {
-    id: "arbid",
-    name: "Al Arbid Gallery Mall | مجمع العربيد جاليري",
-    nameEn: "Al Arbid Gallery Mall",
-    nameAr: "مجمع العربيد جاليري",
-    addressEn: "Habeeb Munawer Street, Al Farwaniyah, Kuwait",
-    addressAr: "شارع حبيب مناور، الفروانية، الكويت",
-    phone: "24748201",
-    isDefault: false
-  }
-];
-
-// For backward compatibility
+// Updated store information based on invoice details
 export const storeInfo = {
   name: "Moen Optician",
-  address: storeLocations[0].addressEn,
-  phone: storeLocations[0].phone
+  address: "al-somait plaza, Habeeb Munawer St, Al Farwaniyah",
+  phone: "2475 9016"
 };

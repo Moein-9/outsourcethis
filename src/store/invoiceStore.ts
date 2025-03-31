@@ -68,9 +68,6 @@ export interface Invoice {
   authNumber?: string;
   workOrderId?: string;
   
-  // Location information
-  locationId?: string;
-  
   // Edit tracking
   lastEditedAt?: string;
   editHistory?: EditHistory[];

@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle, Printer } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useLanguageStore } from '@/store/languageStore';
-import { LocationSelector } from '@/components/LocationSelector';
-import { Card, CardContent } from '@/components/ui/card';
 
 const PrintLabelPage: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -73,16 +71,8 @@ const PrintLabelPage: React.FC = () => {
           </Alert>
         )}
         
-        <div className="grid md:grid-cols-[300px_1fr] gap-6">
-          <Card className="h-fit">
-            <CardContent className="pt-6">
-              <LocationSelector />
-            </CardContent>
-          </Card>
-          
-          <div className="bg-white p-4 rounded-lg shadow">
-            <FrameLabelTemplate onPrintError={handlePrintError} />
-          </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <FrameLabelTemplate onPrintError={handlePrintError} />
         </div>
       </div>
     </Layout>
