@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -9,6 +10,7 @@ interface LanguageState {
 }
 
 interface Translations {
+  description: string;
   invoice: string;
   patient: string;
   date: string;
@@ -282,7 +284,6 @@ interface Translations {
   addNewCoatingDescription: string;
   coatingName: string;
   coatingNameExample: string;
-  description: string;
   coatingDescription: string;
   category: string;
   chooseCategory: string;
@@ -381,18 +382,6 @@ interface Translations {
   item: string;
   noProductDetails: string;
   duePayments: string;
-  january: string;
-  february: string;
-  march: string;
-  april: string;
-  may: string;
-  june: string;
-  july: string;
-  august: string;
-  september: string;
-  october: string;
-  november: string;
-  december: string;
   selectLanguageForPrinting: string;
   workOrderUpdated: string;
   errorUpdatingWorkOrder: string;
@@ -400,7 +389,6 @@ interface Translations {
   selectFrameBrand: string;
   selectFrameModel: string;
   selectFrameColor: string;
-  selectLensType: string;
   selectCoating: string;
   patientId: string;
   patientInformation: string;
@@ -463,14 +451,18 @@ interface Translations {
   nextSteps: string;
   printWorkOrderDescription: string;
   printInvoiceDescription: string;
-  refundMethod: string;
-  refundId: string;
   goToClientSection: string;
   refreshPrintPage: string;
+  paymentInformation: string;
+  from: string;
+  to: string;
+  addNewThicknessTitle: string;
+  addNewThicknessDescription: string;
 }
 
 const translations: { [key: string]: Translations } = {
   en: {
+    description: 'English descriptions',
     invoice: 'Invoice',
     patient: 'Patient',
     date: 'Date',
@@ -849,7 +841,6 @@ const translations: { [key: string]: Translations } = {
     selectFrameBrand: 'Select Frame Brand',
     selectFrameModel: 'Select Frame Model',
     selectFrameColor: 'Select Frame Color',
-    selectLensType: 'Select Lens Type',
     selectCoating: 'Select Coating',
     patientId: 'Patient ID',
     patientInformation: 'Patient Information',
@@ -912,12 +903,16 @@ const translations: { [key: string]: Translations } = {
     nextSteps: 'Next Steps',
     printWorkOrderDescription: 'Print the work order for production',
     printInvoiceDescription: 'Print a copy of the invoice for the customer',
-    refundMethod: 'Refund Method',
-    refundId: 'Refund ID',
     goToClientSection: 'Go to Client Section',
     refreshPrintPage: 'Refresh Print Page',
+    paymentInformation: 'Payment Information',
+    from: 'From',
+    to: 'To',
+    addNewThicknessTitle: 'Add New Lens Thickness',
+    addNewThicknessDescription: 'Enter the details for the new lens thickness option.',
   },
   ar: {
+    description: 'Arabic descriptions',
     invoice: 'فاتورة',
     patient: 'مريض',
     date: 'تاريخ',
@@ -1296,7 +1291,6 @@ const translations: { [key: string]: Translations } = {
     selectFrameBrand: 'اختر ماركة الإطار',
     selectFrameModel: 'اختر موديل الإطار',
     selectFrameColor: 'اختر لون الإطار',
-    selectLensType: 'اختر نوع العدسة',
     selectCoating: 'اختر الطلاء',
     patientId: 'رقم المريض',
     patientInformation: 'معلومات المريض',
@@ -1306,7 +1300,7 @@ const translations: { [key: string]: Translations } = {
     thicknessPrice: 'سعر السماكة',
     technicianSignature: 'توقيع الفني',
     qualityConfirmation: 'تأكيد الجودة',
-    orderNumber: 'رقم الط��ب',
+    orderNumber: 'رقم الطلب',
     printingCompleted: 'اكتملت الطباعة',
     printingFailed: 'فشلت الطباعة',
     selectPrintFormat: 'اختر تنسيق الطباعة',
@@ -1359,10 +1353,13 @@ const translations: { [key: string]: Translations } = {
     nextSteps: 'الخطوات التالية',
     printWorkOrderDescription: 'طباعة أمر العمل للإنتاج',
     printInvoiceDescription: 'طباعة نسخة من الفاتورة للعميل',
-    refundMethod: 'طريقة الاسترداد',
-    refundId: 'رقم الاسترداد',
     goToClientSection: 'الذهاب إلى قسم العميل',
     refreshPrintPage: 'تحديث صفحة الطباعة',
+    paymentInformation: 'معلومات الدفع',
+    from: 'من',
+    to: 'إلى',
+    addNewThicknessTitle: 'إضافة سمك عدسة جديد',
+    addNewThicknessDescription: 'أدخل تفاصيل سمك العدسة الجديد.',
   },
 };
 

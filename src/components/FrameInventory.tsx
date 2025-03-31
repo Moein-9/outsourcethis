@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
@@ -38,7 +37,6 @@ import {
 import { FrameLabelTemplate, usePrintLabel } from "./FrameLabelTemplate";
 import { useLanguageStore } from "@/store/languageStore";
 
-// Frame Item Component
 const FrameItemCard = ({ frame, index, onPrintLabel }: { 
   frame: FrameItem; 
   index: number;
@@ -170,6 +168,8 @@ export const FrameInventory: React.FC = () => {
     setSearchResults(frames);
   }, [frames]);
   
+  const filteredFrames = searchTerm ? frames.filter(frame => searchInFrame(frame)) : frames;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-stretch gap-4">

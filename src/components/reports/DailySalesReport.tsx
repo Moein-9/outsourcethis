@@ -94,14 +94,18 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
         </div>
         <div className="flex space-x-2">
           <DatePicker 
-            selected={dateRange.from} 
-            onSelect={(date) => setDateRange(prev => ({ ...prev, from: date }))} 
-            placeholderText={t('from')}
+            date={dateRange}
+            onSelect={(range) => {
+              if (range?.from) setDateRange(prev => ({ ...prev, from: range.from }));
+            }}
+            placeholderText="From"
           />
           <DatePicker 
-            selected={dateRange.to} 
-            onSelect={(date) => setDateRange(prev => ({ ...prev, to: date }))} 
-            placeholderText={t('to')}
+            date={dateRange}
+            onSelect={(range) => {
+              if (range?.to) setDateRange(prev => ({ ...prev, to: range.to }));
+            }}
+            placeholderText="To"
           />
         </div>
       </div>
