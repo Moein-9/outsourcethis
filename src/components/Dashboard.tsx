@@ -1,6 +1,18 @@
 
 import React, { useState, useEffect } from "react";
-import { Clock, RefreshCcw, ArrowRight, Users, FileText, Package, CreditCard, Search, Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { 
+  Clock, 
+  RefreshCcw, 
+  ArrowRight, 
+  Users, 
+  FileText, 
+  Package, 
+  CreditCard, 
+  Search, 
+  Calendar,
+  BarChart3
+} from "lucide-react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { Link } from "react-router-dom";
@@ -16,6 +28,7 @@ export const Dashboard: React.FC = () => {
   const { patients } = usePatientStore();
   const { frames } = useInventoryStore();
   const { t, language } = useLanguageStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setInterval(() => {
