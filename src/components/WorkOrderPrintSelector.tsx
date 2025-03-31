@@ -16,6 +16,22 @@ import { logoBase64 } from '@/components/ui/logo';
 
 interface WorkOrderPrintSelectorProps {
   invoice: Invoice;
+  patientName?: string;
+  patientPhone?: string;
+  rx?: any;
+  lensType?: string;
+  coating?: string;
+  frame?: {
+    brand: string;
+    model: string;
+    color: string;
+    size: string;
+    price: number;
+  };
+  contactLenses?: any[];
+  contactLensRx?: any;
+  thermalOnly?: boolean;
+  trigger?: React.ReactNode;
 }
 
 // Register font
@@ -138,7 +154,19 @@ const styles = StyleSheet.create({
   }
 });
 
-const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({ invoice }) => {
+const WorkOrderPrintSelector: React.FC<WorkOrderPrintSelectorProps> = ({ 
+  invoice,
+  patientName,
+  patientPhone,
+  rx,
+  lensType,
+  coating,
+  frame,
+  contactLenses,
+  contactLensRx,
+  thermalOnly,
+  trigger
+}) => {
   const { t } = useLanguageStore();
 
   const formatDate = (dateString: string) => {

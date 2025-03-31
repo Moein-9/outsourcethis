@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
@@ -151,7 +152,7 @@ export const FrameInventory: React.FC = () => {
       qty
     });
     
-    toast.success(t("frameAddedSuccessfully", { brand: frameBrand, model: frameModel }));
+    toast.success(t("frameAddedSuccessfully"));
     
     setFrameBrand("");
     setFrameModel("");
@@ -168,7 +169,8 @@ export const FrameInventory: React.FC = () => {
     setSearchResults(frames);
   }, [frames]);
   
-  const filteredFrames = searchTerm ? frames.filter(frame => searchInFrame(frame)) : frames;
+  // Filter frames based on search term if provided
+  const filteredFrames = frameSearchTerm.trim() ? searchResults : frames;
 
   return (
     <div className="space-y-6">

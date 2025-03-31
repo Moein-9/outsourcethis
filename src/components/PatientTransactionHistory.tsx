@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
 import { useInvoiceStore, Invoice } from '@/store/invoiceStore';
@@ -67,9 +68,22 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
     invoice.patientId === patient.patientId && invoice.isPaid && invoice.isPickedUp
   );
   
+  // Filter invoices with refunds property that exists and has elements
   const refundedInvoices = invoices.filter(invoice => 
-    invoice.patientId === patient.patientId && invoice.refunds && invoice.refunds.length > 0
+    invoice.patientId === patient.patientId && 
+    invoice.hasRefunds === true
   );
+
+  // Helper function to render lens type safely
+  const renderLensType = (lensType: any) => {
+    if (typeof lensType === 'string') {
+      return lensType;
+    }
+    if (lensType && typeof lensType === 'object') {
+      return lensType.name || '-';
+    }
+    return '-';
+  };
 
   return (
     <div className="space-y-6 mt-4">
@@ -91,7 +105,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-base flex items-center">
-                        {invoice.invoiceType === 'contactLens' ? (
+                        {invoice.invoiceType === 'contacts' ? (
                           <Contact size={16} className="mr-1" />
                         ) : (
                           <Glasses size={16} className="mr-1" />
@@ -107,7 +121,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                         {invoice.isPaid ? t('paid') : t('unpaid')}
                       </Badge>
                       <Badge variant="outline" className="border-blue-200 text-blue-700">
-                        {formatCurrency(invoice.total)} {t('kwd')}
+                        {formatCurrency(invoice.total)}
                       </Badge>
                     </div>
                   </div>
@@ -129,12 +143,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   
                   <div className="mt-2 text-sm text-muted-foreground flex items-center gap-1">
                     <Tag size={14} />
-                    {t('lens')}: {
-                      // Safely render the lens information
-                      typeof invoice.lensType === 'string' 
-                        ? invoice.lensType 
-                        : invoice.lensType?.name || '-'
-                    }
+                    {t('lens')}: {renderLensType(invoice.lensType)}
                   </div>
                 </CardContent>
                 
@@ -210,7 +219,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-base flex items-center">
-                        {invoice.invoiceType === 'contactLens' ? (
+                        {invoice.invoiceType === 'contacts' ? (
                           <Contact size={16} className="mr-1" />
                         ) : (
                           <Glasses size={16} className="mr-1" />
@@ -222,13 +231,13 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      {invoice.edits && invoice.edits.length > 0 && (
+                      {invoice.hasEdits && (
                         <Badge variant="outline" className="border-amber-200 text-amber-700">
                           {t('edited')}
                         </Badge>
                       )}
                       <Badge variant="outline" className="border-blue-200 text-blue-700">
-                        {formatCurrency(invoice.total)} {t('kwd')}
+                        {formatCurrency(invoice.total)}
                       </Badge>
                     </div>
                   </div>
@@ -247,12 +256,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   
                   <div className="mt-2 text-sm text-muted-foreground flex items-center gap-1">
                     <Tag size={14} />
-                    {t('lens')}: {
-                      // Safely render the lens information
-                      typeof invoice.lensType === 'string' 
-                        ? invoice.lensType 
-                        : invoice.lensType?.name || '-'
-                    }
+                    {t('lens')}: {renderLensType(invoice.lensType)}
                   </div>
                 </CardContent>
                 
@@ -307,7 +311,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-base flex items-center">
-                        {invoice.invoiceType === 'contactLens' ? (
+                        {invoice.invoiceType === 'contacts' ? (
                           <Contact size={16} className="mr-1" />
                         ) : (
                           <Glasses size={16} className="mr-1" />
@@ -321,7 +325,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary">{t('archived')}</Badge>
                       <Badge variant="outline" className="border-blue-200 text-blue-700">
-                        {formatCurrency(invoice.total)} {t('kwd')}
+                        {formatCurrency(invoice.total)}
                       </Badge>
                     </div>
                   </div>
@@ -340,12 +344,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   
                   <div className="mt-2 text-sm text-muted-foreground flex items-center gap-1">
                     <Tag size={14} />
-                    {t('lens')}: {
-                      // Safely render the lens information
-                      typeof invoice.lensType === 'string' 
-                        ? invoice.lensType 
-                        : invoice.lensType?.name || '-'
-                    }
+                    {t('lens')}: {renderLensType(invoice.lensType)}
                   </div>
                 </CardContent>
                 
@@ -400,7 +399,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-base flex items-center">
-                        {invoice.invoiceType === 'contactLens' ? (
+                        {invoice.invoiceType === 'contacts' ? (
                           <Contact size={16} className="mr-1" />
                         ) : (
                           <Glasses size={16} className="mr-1" />
@@ -414,7 +413,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                     <div className="flex items-center gap-2">
                       <Badge variant="destructive">{t('refunded')}</Badge>
                       <Badge variant="outline" className="border-blue-200 text-blue-700">
-                        {formatCurrency(invoice.total)} {t('kwd')}
+                        {formatCurrency(invoice.total)}
                       </Badge>
                     </div>
                   </div>
@@ -433,12 +432,7 @@ export const PatientTransactionHistory: React.FC<PatientTransactionHistoryProps>
                   
                   <div className="mt-2 text-sm text-muted-foreground flex items-center gap-1">
                     <Tag size={14} />
-                    {t('lens')}: {
-                      // Safely render the lens information
-                      typeof invoice.lensType === 'string' 
-                        ? invoice.lensType 
-                        : invoice.lensType?.name || '-'
-                    }
+                    {t('lens')}: {renderLensType(invoice.lensType)}
                   </div>
                 </CardContent>
                 

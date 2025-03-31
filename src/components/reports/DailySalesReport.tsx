@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
-import { useInvoiceStore, Invoice, Payment, Refund } from '@/store/invoiceStore';
+import { useInvoiceStore, Invoice, Payment } from '@/store/invoiceStore';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -95,17 +95,8 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
         <div className="flex space-x-2">
           <DatePicker 
             date={dateRange}
-            onSelect={(range) => {
-              if (range?.from) setDateRange(prev => ({ ...prev, from: range.from }));
-            }}
-            placeholderText="From"
-          />
-          <DatePicker 
-            date={dateRange}
-            onSelect={(range) => {
-              if (range?.to) setDateRange(prev => ({ ...prev, to: range.to }));
-            }}
-            placeholderText="To"
+            onSelect={setDateRange}
+            placeholder="From - To"
           />
         </div>
       </div>

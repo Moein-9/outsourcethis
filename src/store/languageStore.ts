@@ -1,165 +1,111 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface LanguageState {
-  language: 'en' | 'ar';
-  t: (key: keyof Translations) => string;
-  toggleLanguage: () => void;
-  setLanguage: (lang: 'en' | 'ar') => void;
-}
-
-interface Translations {
-  description: string;
-  invoice: string;
-  patient: string;
-  date: string;
-  totalAmount: string;
-  paymentMethod: string;
-  paymentStatus: string;
-  paid: string;
-  unpaid: string;
-  invoiceId: string;
-  customerName: string;
-  customerPhone: string;
-  amountPaid: string;
-  remainingAmount: string;
-  makePayment: string;
-  selectPaymentMethod: string;
-  cash: string;
-  knet: string;
-  creditCard: string;
-  paymentSuccessful: string;
-  paymentFailed: string;
-  printReceipt: string;
-  enterAmount: string;
-  enterAuthNumber: string;
-  authNumber: string;
-  depositReceived: string;
-  addPayment: string;
-  editInvoice: string;
-  saveChanges: string;
+export interface Translations {
+  home: string;
+  patients: string;
+  inventory: string;
+  reports: string;
+  settings: string;
+  login: string;
+  logout: string;
+  register: string;
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  submit: string;
+  resetPassword: string;
+  enterYourEmail: string;
+  newPassword: string;
+  saveNewPassword: string;
+  currentLanguage: string;
+  selectLanguage: string;
+  english: string;
+  arabic: string;
+  general: string;
+  account: string;
+  security: string;
+  appearance: string;
+  system: string;
+  light: string;
+  dark: string;
+  auto: string;
+  language: string;
+  save: string;
   cancel: string;
-  invoiceDetails: string;
-  workOrderDetails: string;
-  additionalNotes: string;
-  contactLens: string;
-  lensType: string;
-  lensPrice: string;
-  frame: string;
-  frameBrand: string;
-  frameModel: string;
-  frameColor: string;
-  frameSize: string;
-  framePrice: string;
-  coating: string;
-  coatingPrice: string;
-  discount: string;
-  total: string;
-  deposit: string;
-  remaining: string;
-  payment: string;
-  createdAt: string;
-  isPaid: string;
-  isPickedUp: string;
-  pickedUpAt: string;
-  lastEditedAt: string;
-  editHistory: string;
-  timestamp: string;
-  notes: string;
-  glasses: string;
-  contacts: string;
-  search: string;
-  noResults: string;
-  select: string;
-  refundAmount: string;
-  refundMethod: string;
-  refundReason: string;
-  additionalNotesForRefund: string;
-  processRefund: string;
-  refundProcessedSuccessfully: string;
-  errorProcessingRefund: string;
-  missingData: string;
-  selectRefundMethod: string;
-  enterRefundReason: string;
-  refund: string;
-  refundReceipt: string;
-  thankYou: string;
-  refundId: string;
-  invoiceIdLabel: string;
-  customerLabel: string;
-  dateLabel: string;
-  amountRefunded: string;
-  refundMethodLabel: string;
-  reasonLabel: string;
-  refundProcessed: string;
-  receiptSentToPrinter: string;
-  processingPrintRequest: string;
-  refundInformation: string;
-  totalInvoiceAmount: string;
-  selectReason: string;
-  customerDissatisfied: string;
-  productDefect: string;
-  incorrectPrescription: string;
-  frameExchange: string;
-  billingError: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  updateProfile: string;
+  changePassword: string;
+  oldPassword: string;
+  newPasswordAgain: string;
+  updatePassword: string;
+  deleteAccount: string;
+  deleteAccountConfirmation: string;
+  iUnderstand: string;
+  deleteMyAccount: string;
+  patientDetails: string;
+  addNewPatient: string;
+  editPatient: string;
+  patientName: string;
+  dateOfBirth: string;
+  gender: string;
+  male: string;
+  female: string;
   other: string;
-  staffNotes: string;
-  archive: string;
-  deleteOrder: string;
-  reasonForDeletion: string;
-  confirmDeletion: string;
-  orderDeletedSuccessfully: string;
-  orderDeletionFailed: string;
-  workOrder: string;
-  workOrders: string;
-  active: string;
-  completed: string;
-  transactionHistory: string;
-  transactions: string;
-  noActiveOrders: string;
-  noCompletedOrders: string;
-  noRefundedTransactions: string;
-  noArchivedOrders: string;
-  printInvoice: string;
-  printWorkOrder: string;
-  markAsPickedUp: string;
-  orderPickedUpSuccessfully: string;
-  anonymous: string;
-  areYouSure: string;
-  thisActionCannotBeUndone: string;
-  delete: string;
-  deleted: string;
-  archived: string;
-  refunded: string;
-  refundInfo: string;
-  amount: string;
+  medicalHistory: string;
+  allergies: string;
+  medications: string;
+  notes: string;
+  updatePatient: string;
+  createPatient: string;
+  searchPatient: string;
+  noPatientsFound: string;
+  brand: string;
+  model: string;
+  color: string;
+  size: string;
+  price: string;
+  quantity: string;
+  addNewFrame: string;
+  editFrame: string;
+  updateFrame: string;
+  createFrame: string;
+  searchForFrame: string;
+  noFramesFound: string;
   dailySalesReport: string;
   overviewOfSales: string;
-  sales: string;
-  payments: string;
   salesInfo: string;
-  totalSales: string;
-  patientName: string;
   paymentInfo: string;
-  totalPayments: string;
-  paymentDate: string;
-  invoiceNumber: string;
-  workOrderNumber: string;
-  refundDate: string;
-  refundsTab: string;
+  refundInfo: string;
+  invoiceId: string;
+  patientNameLabel: string;
+  date: string;
+  amount: string;
+  paymentMethod: string;
+  refundMethod: string;
+  refundId: string;
   method: string;
-  kwd: string;
-  currency: string;
-  name: string;
-  phone: string;
-  phoneNumber: string;
-  dateOfBirth: string;
-  axisValidationError: string;
-  contactLensPrescription: string;
-  noContactLensRx: string;
-  rightEye: string;
-  leftEye: string;
+  refundDate: string;
+  totalSales: string;
+  totalPayments: string;
+  refundAmount: string;
+  reportsPageTitle: string;
+  selectReportType: string;
+  daily: string;
+  monthly: string;
+  yearly: string;
+  custom: string;
+  generateReport: string;
+  printReport: string;
+  noDataAvailable: string;
   january: string;
   february: string;
   march: string;
@@ -172,86 +118,25 @@ interface Translations {
   october: string;
   november: string;
   december: string;
-  error: string;
-  requiredField: string;
-  success: string;
-  successMessage: string;
-  createClientTitle: string;
-  prescriptionGlasses: string;
-  contactLensesTab: string;
-  personalInfo: string;
-  fullName: string;
-  day: string;
-  month: string;
   year: string;
-  clientDidntShareDOB: string;
-  notesPlaceholder: string;
-  glassesPrescription: string;
-  prescriptionDate: string;
-  choosePrescriptionDate: string;
-  choose: string;
-  saveAndContinue: string;
-  invoiceTitle: string;
-  clientSection: string;
-  productSection: string;
-  paymentSection: string;
-  summarySection: string;
-  next: string;
-  previous: string;
-  invoiceSummary: string;
-  clientInformation: string;
-  waitingForClientData: string;
-  thickness: string;
-  quantity: string;
-  waitingForProductData: string;
-  subtotal: string;
-  paidInFull: string;
-  waitingForPaymentData: string;
-  print: string;
-  close: string;
-  printing: string;
-  workOrderPreview: string;
-  previewBeforePrinting: string;
-  startBySelectingClient: string;
-  customer: string;
-  welcome: string;
-  systemDescription: string;
-  reportsPage: string;
-  currentTime: string;
-  eye: string;
-  rightEyeAbbr: string;
-  leftEyeAbbr: string;
-  color: string;
-  size: string;
-  edit: string;
-  copy: string;
-  noFramesMatchingSearch: string;
-  pleaseEnterCompleteFrameDetails: string;
-  pleaseEnterValidPrice: string;
-  pleaseEnterValidQuantity: string;
-  searchForFrame: string;
-  printLabels: string;
-  addNewFrame: string;
+  loading: string;
   addNewFrameTitle: string;
   addNewFrameDescription: string;
-  brand: string;
   brandExample: string;
-  model: string;
   modelExample: string;
   colorExample: string;
   sizeExample: string;
-  price: string;
+  quantityLabel: string;
   saveFrame: string;
-  noFramesFound: string;
-  showAllFrames: string;
+  pleaseEnterCompleteFrameDetails: string;
+  pleaseEnterValidPrice: string;
+  pleaseEnterValidQuantity: string;
+  frameAddedSuccessfully: string;
+  search: string;
+  printLabels: string;
   printFrameLabels: string;
   selectFramesForLabels: string;
-  frameNotFound: string;
-  labelPrintedSuccessfully: string;
-  errorGeneratingQRCode: string;
-  noFramesSelected: string;
-  labelsPrintedSuccessfully: string;
-  errorGeneratingQRCodes: string;
+  close: string;
   selectedFrames: string;
   selectAll: string;
   deselectAll: string;
@@ -259,1137 +144,687 @@ interface Translations {
   selectFramesToPrint: string;
   labelPreview: string;
   noFramesAvailable: string;
-  frames: string;
-  contactLenses: string;
-  lensTypes: string;
-  lensCoatings: string;
-  lensThicknesses: string;
-  frameManagement: string;
-  contactLensManagement: string;
-  dashboard: string;
-  createClient: string;
-  createInvoice: string;
-  inventory: string;
-  remainingPayments: string;
-  patientSearch: string;
-  fillRequiredFields: string;
-  coatingAddedSuccess: string;
-  coatingUpdatedSuccess: string;
-  coatingDeletedSuccess: string;
-  distanceReading: string;
-  progressive: string;
-  bifocal: string;
-  addCoating: string;
-  addNewCoatingTitle: string;
-  addNewCoatingDescription: string;
-  coatingName: string;
-  coatingNameExample: string;
-  coatingDescription: string;
-  category: string;
-  chooseCategory: string;
-  save: string;
-  noCoatings: string;
-  editCoating: string;
-  updateCoatingDetails: string;
-  skipLens: string;
-  selectLensType: string;
-  selectCoatings: string;
-  selectThickness: string;
-  noCoating: string;
-  noCoatingDesc: string;
-  selectLensTypeFirst: string;
-  noThickness: string;
-  noThicknessDesc: string;
-  lensSkipped: string;
-  addLens: string;
-  thicknessAddedSuccess: string;
-  thicknessUpdatedSuccess: string;
-  thicknessDeletedSuccess: string;
-  thicknessName: string;
-  thicknessNameExample: string;
-  thicknessDescription: string;
-  noThicknessesInCategory: string;
-  addThickness: string;
-  editThickness: string;
-  updateThicknessDetails: string;
-  lensAddedSuccess: string;
-  lensUpdatedSuccess: string;
-  lensDeletedSuccess: string;
-  distance: string;
-  reading: string;
-  sunglasses: string;
-  addNewLensTitle: string;
-  addNewLensDescription: string;
-  lensName: string;
-  lensNameExample: string;
-  type: string;
-  chooseType: string;
-  noLensesInCategory: string;
-  editLensType: string;
-  updateLensDetails: string;
-  noteEmpty: string;
-  noteAdded: string;
-  noteDeleted: string;
-  noteUpdated: string;
-  patientNotes: string;
-  noNotesYet: string;
-  addNoteBelow: string;
-  addNoteHere: string;
-  addNote: string;
-  dataError: string;
-  fillAllRequiredFields: string;
-  noteCannotBeEmpty: string;
-  noteAddedSuccessfully: string;
-  rxAndCareInstructions: string;
-  printPrescription: string;
-  newRx: string;
-  currentRx: string;
-  addNewNote: string;
-  enterNoteAboutPatient: string;
-  noNotes: string;
-  addNotesToTrackInfo: string;
-  rxHistory: string;
-  pupillaryDistance: string;
-  actions: string;
-  right: string;
-  left: string;
-  view: string;
-  noPreviousRx: string;
-  noPreviousRxDescription: string;
-  glassesCareTips: string;
-  tip1: string;
-  tip2: string;
-  tip3: string;
-  tip4: string;
-  addNewRx: string;
-  addNewRxFor: string;
-  viewPrescription: string;
-  searchClient: string;
-  searchResults: string;
-  age: string;
+  lensDetails: string;
+  lensType: string;
+  coating: string;
+  lensPrice: string;
+  frameDetails: string;
+  frameBrand: string;
+  frameModel: string;
+  frameColor: string;
+  frameSize: string;
+  framePrice: string;
+  workOrderDetails: string;
+  invoiceNumber: string;
+  orderNumber: string;
+  thankYou: string;
+  paymentSection: string;
+  paymentMethodLabel: string;
+  amountLabel: string;
+  printWorkOrder: string;
+  workOrderPreview: string;
+  previewBeforePrinting: string;
+  print: string;
+  printing: string;
+  saving: string;
+  invoiceSaved: string;
+  error: string;
+  errorSavingInvoice: string;
+  kwd: string;
+  deposit: string;
+  discount: string;
+  total: string;
+  authNumber: string;
+  paymentInformation: string;
+  description: string;
+  edit: string;
+  copy: string;
+  noFramesMatchingSearch: string;
+  showAllFrames: string;
+  frameNotFound: string;
+  errorGeneratingQRCode: string;
+  labelPrintedSuccessfully: string;
+  noFramesSelected: string;
+  noFramesFound: string;
+  errorGeneratingQRCodes: string;
+  labelsPrintedSuccessfully: string;
   pendingOrders: string;
   completedOrders: string;
+  archived: string;
+  workOrders: string;
+  transactions: string;
   noPendingOrders: string;
+  noCompletedOrders: string;
+  noArchivedOrders: string;
+  noRefundedTransactions: string;
   notPickedUp: string;
-  lens: string;
   edited: string;
-  printPreview: string;
-  invoiceSaved: string;
-  errorSavingInvoice: string;
-  saving: string;
-  glassesDetails: string;
+  unpaid: string;
+  paid: string;
+  markAsPickedUp: string;
+  printInvoice: string;
+  printWorkOrderLabel: string;
+  contactLens: string;
+  glasses: string;
+  contactLenses: string;
+  rxDetails: string;
+  power: string;
+  bc: string;
+  diameter: string;
+  cylinder: string;
+  axis: string;
+  add: string;
+  visualAcuity: string;
+  contactLensSolution: string;
+  contactLensType: string;
+  contactLensBrand: string;
+  contactLensPrice: string;
+  contactLensCoating: string;
+  contactLensCoatingPrice: string;
   contactLensDetails: string;
-  item: string;
-  noProductDetails: string;
-  duePayments: string;
-  selectLanguageForPrinting: string;
-  workOrderUpdated: string;
-  errorUpdatingWorkOrder: string;
-  editWorkOrder: string;
-  selectFrameBrand: string;
-  selectFrameModel: string;
-  selectFrameColor: string;
-  selectCoating: string;
-  patientId: string;
-  patientInformation: string;
-  frameDetails: string;
-  prescriptionDetails: string;
-  lensDetails: string;
-  thicknessPrice: string;
-  technicianSignature: string;
-  qualityConfirmation: string;
-  orderNumber: string;
-  printingCompleted: string;
-  printingFailed: string;
-  selectPrintFormat: string;
-  choosePrintFormatDescription: string;
-  paper: string;
-  standardFormat: string;
-  receiptFormat: string;
-  compactFormat: string;
-  notSpecified: string;
-  phoneSearchError: string;
-  noClientsFound: string;
-  noClientFile: string;
-  phoneColon: string;
-  typeToSearch: string;
-  clientName: string;
-  clientPhone: string;
-  patientID: string;
-  hideRx: string;
-  showRx: string;
-  optional: string;
-  paymentMethodError: string;
-  orderSavedSuccess: string;
-  discountSection: string;
-  discountColon: string;
-  depositColon: string;
-  payInFull: string;
-  visa: string;
-  mastercard: string;
-  approvalNumber: string;
-  totalInvoice: string;
-  searchTermError: string;
-  frameDetailsError: string;
-  priceError: string;
-  quantityError: string;
-  frameAddedSuccess: string;
-  contactLensesTotal: string;
-  lensCount: string;
-  lensSection: string;
-  frameSection: string;
-  searchTerm: string;
-  searchExample: string;
-  selectedFrame: string;
-  addFrameButton: string;
-  newFrameDetails: string;
-  pieces: string;
-  invoiceCreated: string;
-  invoiceSuccessMessage: string;
-  orderType: string;
-  partiallyPaid: string;
-  nextSteps: string;
-  printWorkOrderDescription: string;
-  printInvoiceDescription: string;
-  goToClientSection: string;
-  refreshPrintPage: string;
-  paymentInformation: string;
-  from: string;
-  to: string;
-  addNewThicknessTitle: string;
-  addNewThicknessDescription: string;
+  addNewContactLens: string;
+  editContactLens: string;
+  updateContactLens: string;
+  createContactLens: string;
+  searchForContactLens: string;
+  noContactLensesFound: string;
+  contactLensAddedSuccessfully: string;
+  pleaseEnterCompleteContactLensDetails: string;
+  pleaseEnterValidContactLensPrice: string;
+  contactLensBrandExample: string;
+  contactLensTypeExample: string;
+  contactLensSolutionExample: string;
+  contactLensPriceExample: string;
+  contactLensCoatingExample: string;
+  contactLensPowerExample: string;
+  contactLensDiameterExample: string;
+  contactLensBcExample: string;
+  contactLensCylinderExample: string;
+  contactLensAxisExample: string;
+  contactLensAddExample: string;
+  contactLensVisualAcuityExample: string;
+  contactLensDetailsTitle: string;
+  contactLensDetailsDescription: string;
+  contactLensBrandLabel: string;
+  contactLensTypeLabel: string;
+  contactLensSolutionLabel: string;
+  contactLensPriceLabel: string;
+  contactLensCoatingLabel: string;
+  contactLensPowerLabel: string;
+  contactLensDiameterLabel: string;
+  contactLensBcLabel: string;
+  contactLensCylinderLabel: string;
+  contactLensAxisLabel: string;
+  contactLensAddLabel: string;
+  contactLensVisualAcuityLabel: string;
+  contactLensPrintLabel: string;
+  contactLensLabelPreview: string;
+  contactLensSelectContactLensesToPrint: string;
+  contactLensNoContactLensesAvailable: string;
+  contactLensSelectedContactLenses: string;
+  contactLensSelectAll: string;
+  contactLensDeselectAll: string;
+  contactLensPrintSelected: string;
+  contactLensNoContactLensesMatchingSearch: string;
+  contactLensShowAllContactLenses: string;
+  contactLensNotFound: string;
+  contactLensErrorGeneratingQRCode: string;
+  contactLensLabelPrintedSuccessfully: string;
+  contactLensNoContactLensesSelected: string;
+  contactLensNoContactLensesFound: string;
+  contactLensErrorGeneratingQRCodes: string;
+  contactLensLabelsPrintedSuccessfully: string;
+  contactLensPrintLabelsTitle: string;
+  contactLensPrintLabelsDescription: string;
+  contactLensPrintLabelPreview: string;
+  contactLensSelectContactLenses: string;
+  contactLensSelectContactLensesToPrintLabel: string;
+  contactLensNoContactLensesAvailableToPrint: string;
+  contactLensSelectedContactLensesCount: string;
+  contactLensSelectAllContactLenses: string;
+  contactLensDeselectAllContactLenses: string;
+  contactLensPrintSelectedContactLenses: string;
+  contactLensNoContactLensesMatchingSearchFound: string;
+  contactLensShowAllContactLensesAvailable: string;
+  contactLensContactLensNotFound: string;
+  contactLensErrorGeneratingContactLensQRCode: string;
+  contactLensContactLensLabelPrintedSuccessfully: string;
+  contactLensNoContactLensesSelectedToPrint: string;
+  contactLensNoContactLensesFoundToPrint: string;
+  contactLensErrorGeneratingContactLensQRCodes: string;
+  contactLensContactLensLabelsPrintedSuccessfully: string;
+  contactLensPrintContactLensLabels: string;
+  contactLensPrintContactLensLabel: string;
 }
 
-const translations: { [key: string]: Translations } = {
-  en: {
-    description: 'English descriptions',
-    invoice: 'Invoice',
-    patient: 'Patient',
-    date: 'Date',
-    totalAmount: 'Total Amount',
-    paymentMethod: 'Payment Method',
-    paymentStatus: 'Payment Status',
-    paid: 'Paid',
-    unpaid: 'Unpaid',
-    invoiceId: 'Invoice ID',
-    customerName: 'Customer Name',
-    customerPhone: 'Customer Phone',
-    amountPaid: 'Amount Paid',
-    remainingAmount: 'Remaining Amount',
-    makePayment: 'Make Payment',
-    selectPaymentMethod: 'Select Payment Method',
-    cash: 'Cash',
-    knet: 'KNET',
-    creditCard: 'Credit Card',
-    paymentSuccessful: 'Payment Successful',
-    paymentFailed: 'Payment Failed',
-    printReceipt: 'Print Receipt',
-    enterAmount: 'Enter Amount',
-    enterAuthNumber: 'Enter Auth Number',
-    authNumber: 'Auth Number',
-    depositReceived: 'Deposit Received',
-    addPayment: 'Add Payment',
-    editInvoice: 'Edit Invoice',
-    saveChanges: 'Save Changes',
-    cancel: 'Cancel',
-    invoiceDetails: 'Invoice Details',
-    workOrderDetails: 'Work Order Details',
-    additionalNotes: 'Additional Notes',
-    contactLens: 'Contact Lens',
-    lensType: 'Lens Type',
-    lensPrice: 'Lens Price',
-    frame: 'Frame',
-    frameBrand: 'Frame Brand',
-    frameModel: 'Frame Model',
-    frameColor: 'Frame Color',
-    frameSize: 'Frame Size',
-    framePrice: 'Frame Price',
-    coating: 'Coating',
-    coatingPrice: 'Coating Price',
-    discount: 'Discount',
-    total: 'Total',
-    deposit: 'Deposit',
-    remaining: 'Remaining',
-    payment: 'Payment',
-    createdAt: 'Created At',
-    isPaid: 'Is Paid',
-    isPickedUp: 'Is Picked Up',
-    pickedUpAt: 'Picked Up At',
-    lastEditedAt: 'Last Edited At',
-    editHistory: 'Edit History',
-    timestamp: 'Timestamp',
-    notes: 'Notes',
-    glasses: 'Glasses',
-    contacts: 'Contacts',
-    search: 'Search',
-    noResults: 'No Results',
-    select: 'Select',
-    refundAmount: 'Refund Amount',
-    refundMethod: 'Refund Method',
-    refundReason: 'Refund Reason',
-    additionalNotesForRefund: 'Additional Notes for Refund',
-    processRefund: 'Process Refund',
-    refundProcessedSuccessfully: 'Refund Processed Successfully',
-    errorProcessingRefund: 'Error Processing Refund',
-    missingData: 'Missing Data',
-    selectRefundMethod: 'Select Refund Method',
-    enterRefundReason: 'Enter Refund Reason',
-    refund: 'Refund',
-    refundReceipt: 'Refund Receipt',
-    thankYou: 'Thank you for your business',
-    refundId: 'Refund ID',
-    invoiceIdLabel: 'Invoice ID:',
-    customerLabel: 'Customer:',
-    dateLabel: 'Date:',
-    amountRefunded: 'Amount Refunded:',
-    refundMethodLabel: 'Refund Method:',
-    reasonLabel: 'Reason:',
-    refundProcessed: 'Refund Processed',
-    receiptSentToPrinter: 'Receipt sent to printer',
-    processingPrintRequest: 'Processing print request',
-    refundInformation: 'Refund Information',
-    totalInvoiceAmount: 'Total Invoice Amount',
-    selectReason: 'Select Reason',
-    customerDissatisfied: 'Customer Dissatisfied',
-    productDefect: 'Product Defect',
-    incorrectPrescription: 'Incorrect Prescription',
-    frameExchange: 'Frame Exchange',
-    billingError: 'Billing Error',
-    other: 'Other',
-    staffNotes: 'Staff Notes',
-    archive: 'Archive',
-    deleteOrder: 'Delete Order',
-    reasonForDeletion: 'Reason for Deletion',
-    confirmDeletion: 'Confirm Deletion',
-    orderDeletedSuccessfully: 'Order Deleted Successfully',
-    orderDeletionFailed: 'Order Deletion Failed',
-    workOrder: 'Work Order',
-    workOrders: 'Work Orders',
-    active: 'Active',
-    completed: 'Completed',
-    transactionHistory: 'Transaction History',
-    transactions: 'Transactions',
-    noActiveOrders: 'No active orders',
-    noCompletedOrders: 'No completed orders',
-    noRefundedTransactions: 'No refunded transactions',
-    noArchivedOrders: 'No archived orders',
-    printInvoice: 'Print Invoice',
-    printWorkOrder: 'Print Work Order',
-    markAsPickedUp: 'Mark as Picked Up',
-    orderPickedUpSuccessfully: 'Order has been marked as picked up',
-    anonymous: 'Anonymous',
-    areYouSure: 'Are you sure?',
-    thisActionCannotBeUndone: 'This action cannot be undone.',
-    delete: 'Delete',
-    deleted: 'Deleted',
-    archived: 'Archived',
-    refunded: 'Refunded',
-    refundInfo: 'Refund Info',
-    amount: 'Amount',
-    dailySalesReport: 'Daily Sales Report',
-    overviewOfSales: 'Overview of Sales',
-    sales: 'Sales',
-    payments: 'Payments',
-    salesInfo: 'Sales Information',
-    totalSales: 'Total Sales',
-    patientName: 'Patient Name',
-    paymentInfo: 'Payment Information',
-    totalPayments: 'Total Payments',
-    paymentDate: 'Payment Date',
-    invoiceNumber: 'Invoice Number',
-    workOrderNumber: 'Work Order Number',
-    refundDate: 'Refund Date',
-    refundsTab: 'Refunds',
-    method: 'Method',
-    kwd: 'KWD',
-    currency: 'KWD',
-    name: 'Name',
-    phone: 'Phone',
-    phoneNumber: 'Phone Number',
-    dateOfBirth: 'Date of Birth',
-    axisValidationError: 'If cylinder value is provided, axis value is required',
-    contactLensPrescription: 'Contact Lens Prescription',
-    noContactLensRx: 'No contact lens prescription has been added yet',
-    rightEye: 'Right Eye',
-    leftEye: 'Left Eye',
-    january: 'January',
-    february: 'February',
-    march: 'March',
-    april: 'April',
-    may: 'May',
-    june: 'June',
-    july: 'July',
-    august: 'August',
-    september: 'September',
-    october: 'October',
-    november: 'November',
-    december: 'December',
-    error: 'Error',
-    requiredField: 'This field is required',
-    success: 'Success',
-    successMessage: 'Operation completed successfully',
-    createClientTitle: 'Create New Client',
-    prescriptionGlasses: 'Prescription Glasses',
-    contactLensesTab: 'Contact Lenses',
-    personalInfo: 'Personal Information',
-    fullName: 'Full Name',
-    day: 'Day',
-    month: 'Month',
-    year: 'Year',
-    clientDidntShareDOB: 'Client did not share date of birth',
-    notesPlaceholder: 'Add notes about the client here...',
-    glassesPrescription: 'Glasses Prescription',
-    prescriptionDate: 'Prescription Date',
-    choosePrescriptionDate: 'Choose a prescription date',
-    choose: 'Choose',
-    saveAndContinue: 'Save and Continue',
-    invoiceTitle: 'Create Invoice',
-    clientSection: 'Client',
-    productSection: 'Products',
-    paymentSection: 'Payment',
-    summarySection: 'Summary',
-    next: 'Next',
-    previous: 'Previous',
-    invoiceSummary: 'Invoice Summary',
-    clientInformation: 'Client Information',
-    waitingForClientData: 'Waiting for client data',
-    thickness: 'Thickness',
-    quantity: 'Quantity',
-    waitingForProductData: 'Waiting for product data',
-    subtotal: 'Subtotal',
-    paidInFull: 'Paid in Full',
-    waitingForPaymentData: 'Waiting for payment data',
-    print: 'Print',
-    close: 'Close',
-    printing: 'Printing...',
-    workOrderPreview: 'Work Order Preview',
-    previewBeforePrinting: 'Preview before printing',
-    startBySelectingClient: 'Start by selecting a client',
-    customer: 'Customer',
-    welcome: 'Welcome',
-    systemDescription: 'Optical shop management system',
-    reportsPage: 'Reports Page',
-    currentTime: 'Current Time',
-    eye: 'Eye',
-    rightEyeAbbr: 'OD',
-    leftEyeAbbr: 'OS',
-    color: 'Color',
-    size: 'Size',
-    edit: 'Edit',
-    copy: 'Copy',
-    noFramesMatchingSearch: 'No frames matching your search',
-    pleaseEnterCompleteFrameDetails: 'Please enter complete frame details',
-    pleaseEnterValidPrice: 'Please enter a valid price',
-    pleaseEnterValidQuantity: 'Please enter a valid quantity',
-    searchForFrame: 'Search for frame',
-    printLabels: 'Print Labels',
-    addNewFrame: 'Add New Frame',
-    addNewFrameTitle: 'Add New Frame',
-    addNewFrameDescription: 'Enter frame details below',
-    brand: 'Brand',
-    brandExample: 'e.g., Ray-Ban, Oakley',
-    model: 'Model',
-    modelExample: 'e.g., Wayfarer, Aviator',
-    colorExample: 'e.g., Black, Tortoise',
-    sizeExample: 'e.g., 52-18-140',
-    price: 'Price',
-    saveFrame: 'Save Frame',
-    noFramesFound: 'No frames found',
-    showAllFrames: 'Show All Frames',
-    printFrameLabels: 'Print Frame Labels',
-    selectFramesForLabels: 'Select frames for labels',
-    frameNotFound: 'Frame not found',
-    labelPrintedSuccessfully: 'Label printed successfully',
-    errorGeneratingQRCode: 'Error generating QR code',
-    noFramesSelected: 'No frames selected',
-    labelsPrintedSuccessfully: 'Labels printed successfully',
-    errorGeneratingQRCodes: 'Error generating QR codes',
-    selectedFrames: 'Selected Frames',
-    selectAll: 'Select All',
-    deselectAll: 'Deselect All',
-    printSelected: 'Print Selected',
-    selectFramesToPrint: 'Select frames to print',
-    labelPreview: 'Label Preview',
-    noFramesAvailable: 'No frames available',
-    frames: 'Frames',
-    contactLenses: 'Contact Lenses',
-    lensTypes: 'Lens Types',
-    lensCoatings: 'Lens Coatings',
-    lensThicknesses: 'Lens Thicknesses',
-    frameManagement: 'Frame Management',
-    contactLensManagement: 'Contact Lens Management',
-    dashboard: 'Dashboard',
-    createClient: 'Create Client',
-    createInvoice: 'Create Invoice',
-    inventory: 'Inventory',
-    remainingPayments: 'Remaining Payments',
-    patientSearch: 'Patient Search',
-    fillRequiredFields: 'Please fill all required fields',
-    coatingAddedSuccess: 'Coating added successfully',
-    coatingUpdatedSuccess: 'Coating updated successfully',
-    coatingDeletedSuccess: 'Coating deleted successfully',
-    distanceReading: 'Distance Reading',
-    progressive: 'Progressive',
-    bifocal: 'Bifocal',
-    addCoating: 'Add Coating',
-    addNewCoatingTitle: 'Add New Coating',
-    addNewCoatingDescription: 'Enter coating details below',
-    coatingName: 'Coating Name',
-    coatingNameExample: 'e.g., Anti-Glare, Blue Light',
-    coatingDescription: 'Coating Description',
-    category: 'Category',
-    chooseCategory: 'Choose a category',
-    save: 'Save',
-    noCoatings: 'No coatings found',
-    editCoating: 'Edit Coating',
-    updateCoatingDetails: 'Update coating details',
-    skipLens: 'Skip Lens',
-    selectLensType: 'Select Lens Type',
-    selectCoatings: 'Select Coatings',
-    selectThickness: 'Select Thickness',
-    noCoating: 'No Coating',
-    noCoatingDesc: 'No coating selected',
-    selectLensTypeFirst: 'Select lens type first',
-    noThickness: 'No Thickness',
-    noThicknessDesc: 'No thickness selected',
-    lensSkipped: 'Lens Skipped',
-    addLens: 'Add Lens',
-    thicknessAddedSuccess: 'Thickness added successfully',
-    thicknessUpdatedSuccess: 'Thickness updated successfully',
-    thicknessDeletedSuccess: 'Thickness deleted successfully',
-    thicknessName: 'Thickness Name',
-    thicknessNameExample: 'e.g., Ultra Thin, Standard',
-    thicknessDescription: 'Thickness Description',
-    noThicknessesInCategory: 'No thicknesses found in this category',
-    addThickness: 'Add Thickness',
-    editThickness: 'Edit Thickness',
-    updateThicknessDetails: 'Update thickness details',
-    lensAddedSuccess: 'Lens added successfully',
-    lensUpdatedSuccess: 'Lens updated successfully',
-    lensDeletedSuccess: 'Lens deleted successfully',
-    distance: 'Distance',
-    reading: 'Reading',
-    sunglasses: 'Sunglasses',
-    addNewLensTitle: 'Add New Lens',
-    addNewLensDescription: 'Enter lens details below',
-    lensName: 'Lens Name',
-    lensNameExample: 'e.g., Premium Single Vision',
-    type: 'Type',
-    chooseType: 'Choose a type',
-    noLensesInCategory: 'No lenses found in this category',
-    editLensType: 'Edit Lens Type',
-    updateLensDetails: 'Update lens details',
-    noteEmpty: 'Note cannot be empty',
-    noteAdded: 'Note added successfully',
-    noteDeleted: 'Note deleted successfully',
-    noteUpdated: 'Note updated successfully',
-    patientNotes: 'Patient Notes',
-    noNotesYet: 'No notes yet',
-    addNoteBelow: 'Add a note below',
-    addNoteHere: 'Add note here...',
-    addNote: 'Add Note',
-    dataError: 'Data Error',
-    fillAllRequiredFields: 'Please fill all required fields',
-    noteCannotBeEmpty: 'Note cannot be empty',
-    noteAddedSuccessfully: 'Note added successfully',
-    rxAndCareInstructions: 'Rx and Care Instructions',
-    printPrescription: 'Print Prescription',
-    newRx: 'New Rx',
-    currentRx: 'Current Rx',
-    addNewNote: 'Add New Note',
-    enterNoteAboutPatient: 'Enter a note about the patient',
-    noNotes: 'No notes',
-    addNotesToTrackInfo: 'Add notes to track patient information',
-    rxHistory: 'Rx History',
-    pupillaryDistance: 'Pupillary Distance',
-    actions: 'Actions',
-    right: 'Right',
-    left: 'Left',
-    view: 'View',
-    noPreviousRx: 'No Previous Rx',
-    noPreviousRxDescription: 'No previous prescriptions found',
-    glassesCareTips: 'Glasses Care Tips',
-    tip1: 'Clean lenses with a microfiber cloth',
-    tip2: 'Use both hands when putting on glasses',
-    tip3: 'Store glasses in a case when not in use',
-    tip4: 'Avoid placing glasses face down on surfaces',
-    addNewRx: 'Add New Rx',
-    addNewRxFor: 'Add New Rx for',
-    viewPrescription: 'View Prescription',
-    searchClient: 'Search Client',
-    searchResults: 'Search Results',
-    age: 'Age',
-    pendingOrders: 'Pending Orders',
-    completedOrders: 'Completed Orders',
-    noPendingOrders: 'No pending orders',
-    notPickedUp: 'Not Picked Up',
-    lens: 'Lens',
-    edited: 'Edited',
-    printPreview: 'Print Preview',
-    invoiceSaved: 'Invoice Saved',
-    errorSavingInvoice: 'Error saving invoice',
-    saving: 'Saving...',
-    glassesDetails: 'Glasses Details',
-    contactLensDetails: 'Contact Lens Details',
-    item: 'Item',
-    noProductDetails: 'No product details',
-    duePayments: 'Due Payments',
-    selectLanguageForPrinting: 'Select language for printing',
-    workOrderUpdated: 'Work order updated successfully',
-    errorUpdatingWorkOrder: 'Error updating work order',
-    editWorkOrder: 'Edit Work Order',
-    selectFrameBrand: 'Select Frame Brand',
-    selectFrameModel: 'Select Frame Model',
-    selectFrameColor: 'Select Frame Color',
-    selectCoating: 'Select Coating',
-    patientId: 'Patient ID',
-    patientInformation: 'Patient Information',
-    frameDetails: 'Frame Details',
-    prescriptionDetails: 'Prescription Details',
-    lensDetails: 'Lens Details',
-    thicknessPrice: 'Thickness Price',
-    technicianSignature: 'Technician Signature',
-    qualityConfirmation: 'Quality Confirmation',
-    orderNumber: 'Order Number',
-    printingCompleted: 'Printing Completed',
-    printingFailed: 'Printing Failed',
-    selectPrintFormat: 'Select Print Format',
-    choosePrintFormatDescription: 'Choose the format for printing',
-    paper: 'Paper',
-    standardFormat: 'Standard Format',
-    receiptFormat: 'Receipt Format',
-    compactFormat: 'Compact Format',
-    notSpecified: 'Not Specified',
-    phoneSearchError: 'Please enter a phone number to search',
-    noClientsFound: 'No clients found',
-    noClientFile: 'No Client File',
-    phoneColon: 'Phone:',
-    typeToSearch: 'Type to search',
-    clientName: 'Client Name',
-    clientPhone: 'Client Phone',
-    patientID: 'Patient ID',
-    hideRx: 'Hide Rx',
-    showRx: 'Show Rx',
-    optional: 'Optional',
-    paymentMethodError: 'Please select a payment method',
-    orderSavedSuccess: 'Order saved successfully',
-    discountSection: 'Discount Section',
-    discountColon: 'Discount:',
-    depositColon: 'Deposit:',
-    payInFull: 'Pay in Full',
-    visa: 'Visa',
-    mastercard: 'MasterCard',
-    approvalNumber: 'Approval Number',
-    totalInvoice: 'Total Invoice',
-    searchTermError: 'Please enter a search term',
-    frameDetailsError: 'Please enter frame details',
-    priceError: 'Please enter a valid price',
-    quantityError: 'Please enter a valid quantity',
-    frameAddedSuccess: 'Frame added successfully',
-    contactLensesTotal: 'Contact Lenses Total',
-    lensCount: 'Lens Count',
-    lensSection: 'Lens Section',
-    frameSection: 'Frame Section',
-    searchTerm: 'Search Term',
-    searchExample: 'e.g., Ray-Ban, Oakley',
-    selectedFrame: 'Selected Frame',
-    addFrameButton: 'Add Frame',
-    newFrameDetails: 'New Frame Details',
-    pieces: 'pieces',
-    invoiceCreated: 'Invoice Created',
-    invoiceSuccessMessage: 'Your invoice has been created successfully',
-    orderType: 'Order Type',
-    partiallyPaid: 'Partially Paid',
-    nextSteps: 'Next Steps',
-    printWorkOrderDescription: 'Print the work order for production',
-    printInvoiceDescription: 'Print a copy of the invoice for the customer',
-    goToClientSection: 'Go to Client Section',
-    refreshPrintPage: 'Refresh Print Page',
-    paymentInformation: 'Payment Information',
-    from: 'From',
-    to: 'To',
-    addNewThicknessTitle: 'Add New Lens Thickness',
-    addNewThicknessDescription: 'Enter the details for the new lens thickness option.',
-  },
-  ar: {
-    description: 'Arabic descriptions',
-    invoice: 'فاتورة',
-    patient: 'مريض',
-    date: 'تاريخ',
-    totalAmount: 'المبلغ الإجمالي',
-    paymentMethod: 'طريقة الدفع',
-    paymentStatus: 'حالة الدفع',
-    paid: 'مدفوع',
-    unpaid: 'غير مدفوع',
-    invoiceId: 'رقم الفاتورة',
-    customerName: 'اسم العميل',
-    customerPhone: 'رقم هاتف العميل',
-    amountPaid: 'المبلغ المدفوع',
-    remainingAmount: 'المبلغ المتبقي',
-    makePayment: 'إجراء الدفع',
-    selectPaymentMethod: 'اختر طريقة الدفع',
-    cash: 'نقداً',
-    knet: 'كي نت',
-    creditCard: 'بطاقة ائتمان',
-    paymentSuccessful: 'تم الدفع بنجاح',
-    paymentFailed: 'فشل الدفع',
-    printReceipt: 'طباعة الإيصال',
-    enterAmount: 'أدخل المبلغ',
-    enterAuthNumber: 'أدخل رقم التفويض',
-    authNumber: 'رقم التفويض',
-    depositReceived: 'تم استلام الإيداع',
-    addPayment: 'إضافة دفعة',
-    editInvoice: 'تعديل الفاتورة',
-    saveChanges: 'حفظ التغييرات',
-    cancel: 'إلغاء',
-    invoiceDetails: 'تفاصيل الفاتورة',
-    workOrderDetails: 'تفاصيل أمر العمل',
-    additionalNotes: 'ملاحظات إضافية',
-    contactLens: 'عدسة لاصقة',
-    lensType: 'نوع العدسة',
-    lensPrice: 'سعر العدسة',
-    frame: 'إطار',
-    frameBrand: 'ماركة الإطار',
-    frameModel: 'موديل الإطار',
-    frameColor: 'لون الإطار',
-    frameSize: 'حجم الإطار',
-    framePrice: 'سعر الإطار',
-    coating: 'طلاء',
-    coatingPrice: 'سعر الطلاء',
-    discount: 'خصم',
-    total: 'المجموع',
-    deposit: 'إيداع',
-    remaining: 'المتبقي',
-    payment: 'دفع',
-    createdAt: 'أنشئت في',
-    isPaid: 'تم الدفع',
-    isPickedUp: 'تم الاستلام',
-    pickedUpAt: 'تم الاستلام في',
-    lastEditedAt: 'آخر تعديل في',
-    editHistory: 'سجل التعديلات',
-    timestamp: 'الطابع الزمني',
-    notes: 'ملاحظات',
-    glasses: 'نظارات',
-    contacts: 'عدسات',
-    search: 'بحث',
-    noResults: 'لا يوجد نتائج',
-    select: 'اختر',
-    refundAmount: 'مبلغ الاسترداد',
-    refundMethod: 'طريقة الاسترداد',
-    refundReason: 'سبب الاسترداد',
-    additionalNotesForRefund: 'ملاحظات إضافية للاسترداد',
-    processRefund: 'معالجة الاسترداد',
-    refundProcessedSuccessfully: 'تمت معالجة الاسترداد بنجاح',
-    errorProcessingRefund: 'خطأ في معالجة الاسترداد',
-    missingData: 'بيانات مفقودة',
-    selectRefundMethod: 'اختر طريقة الاسترداد',
-    enterRefundReason: 'أدخل سبب الاسترداد',
-    refund: 'استرداد',
-    refundReceipt: 'إيصال استرداد',
-    thankYou: 'شكراً لتعاملكم معنا',
-    refundId: 'رقم الاسترداد',
-    invoiceIdLabel: 'رقم الفاتورة:',
-    customerLabel: 'العميل:',
-    dateLabel: 'التاريخ:',
-    amountRefunded: 'المبلغ المسترد:',
-    refundMethodLabel: 'طريقة الاسترداد:',
-    reasonLabel: 'السبب:',
-    refundProcessed: 'تم استرداد المبلغ',
-    receiptSentToPrinter: 'تم إرسال الإيصال إلى الطابعة',
-    processingPrintRequest: 'جاري معالجة طلب الطباعة',
-    refundInformation: 'معلومات الاسترداد',
-    totalInvoiceAmount: 'إجمالي مبلغ الفاتورة',
-    selectReason: 'اختر السبب',
-    customerDissatisfied: 'العميل غير راضٍ',
-    productDefect: 'عيب في المنتج',
-    incorrectPrescription: 'وصفة طبية غير صحيحة',
-    frameExchange: 'استبدال الإطار',
-    billingError: 'خطأ في الفواتير',
-    other: 'آخر',
-    staffNotes: 'ملاحظات الموظفين',
-    archive: 'أرشيف',
-    deleteOrder: 'حذف الطلب',
-    reasonForDeletion: 'سبب الحذف',
-    confirmDeletion: 'تأكيد الحذف',
-    orderDeletedSuccessfully: 'تم حذف الطلب بنجاح',
-    orderDeletionFailed: 'فشل حذف الطلب',
-    workOrder: 'أمر عمل',
-    workOrders: 'أوامر العمل',
-    active: 'نشط',
-    completed: 'مكتمل',
-    transactionHistory: 'سجل المعاملات',
-    transactions: 'المعاملات',
-    noActiveOrders: 'لا توجد طلبات نشطة',
-    noCompletedOrders: 'لا توجد طلبات مكتملة',
-    noRefundedTransactions: 'لا توجد مبالغ مستردة',
-    noArchivedOrders: 'لا توجد طلبات مؤرشفة',
-    printInvoice: 'طباعة الفاتورة',
-    printWorkOrder: 'طباعة أمر العمل',
-    markAsPickedUp: 'تأكيد الاستلام',
-    orderPickedUpSuccessfully: 'تم تأكيد استلام الطلب بنجاح',
-    anonymous: 'مجهول',
-    areYouSure: 'هل أنت متأكد؟',
-    thisActionCannotBeUndone: 'لا يمكن التراجع عن هذا الإجراء.',
-    delete: 'حذف',
-    deleted: 'تم الحذف',
-    archived: 'مؤرشف',
-    refunded: 'مسترد',
-    refundInfo: 'معلومات الاسترداد',
-    amount: 'المبلغ',
-    dailySalesReport: 'تقرير المبيعات اليومية',
-    overviewOfSales: 'نظرة عامة على المبيعات',
-    sales: 'المبيعات',
-    payments: 'المدفوعات',
-    salesInfo: 'معلومات المبيعات',
-    totalSales: 'إجمالي المبيعات',
-    patientName: 'اسم المريض',
-    paymentInfo: 'معلومات الدفع',
-    totalPayments: 'إجمالي المدفوعات',
-    paymentDate: 'تاريخ الدفع',
-    invoiceNumber: 'رقم الفاتورة',
-    workOrderNumber: 'رقم أمر العمل',
-    refundDate: 'تاريخ الاسترداد',
-    refundsTab: 'المبالغ المستردة',
-    method: 'الطريقة',
-    kwd: 'د.ك',
-    currency: 'د.ك',
-    name: 'الاسم',
-    phone: 'الهاتف',
-    phoneNumber: 'رقم الهاتف',
-    dateOfBirth: 'تاريخ الميلاد',
-    axisValidationError: 'إذا تم توفير قيمة الأسطوانة، فإن قيمة المحور مطلوبة',
-    contactLensPrescription: 'وصفة العدسات اللاصقة',
-    noContactLensRx: 'لم تتم إضافة وصفة للعدسات اللاصقة بعد',
-    rightEye: 'العين اليمنى',
-    leftEye: 'العين اليسرى',
-    january: 'يناير',
-    february: 'فبراير',
-    march: 'مارس',
-    april: 'أبريل',
-    may: 'مايو',
-    june: 'يونيو',
-    july: 'يوليو',
-    august: 'أغسطس',
-    september: 'سبتمبر',
-    october: 'أكتوبر',
-    november: 'نوفمبر',
-    december: 'ديسمبر',
-    error: 'خطأ',
-    requiredField: 'هذا الحقل مطلوب',
-    success: 'نجاح',
-    successMessage: 'تمت العملية بنجاح',
-    createClientTitle: 'إنشاء عميل جديد',
-    prescriptionGlasses: 'نظارات طبية',
-    contactLensesTab: 'عدسات لاصقة',
-    personalInfo: 'معلومات شخصية',
-    fullName: 'الاسم الكامل',
-    day: 'اليوم',
-    month: 'الشهر',
-    year: 'السنة',
-    clientDidntShareDOB: 'لم يشارك العميل تاريخ الميلاد',
-    notesPlaceholder: 'أضف ملاحظات حول العميل هنا...',
-    glassesPrescription: 'وصفة النظارات',
-    prescriptionDate: 'تاريخ الوصفة',
-    choosePrescriptionDate: 'اختر تاريخ الوصفة',
-    choose: 'اختر',
-    saveAndContinue: 'حفظ ومتابعة',
-    invoiceTitle: 'إنشاء فاتورة',
-    clientSection: 'العميل',
-    productSection: 'المنتجات',
-    paymentSection: 'الدفع',
-    summarySection: 'الملخص',
-    next: 'التالي',
-    previous: 'السابق',
-    invoiceSummary: 'ملخص الفاتورة',
-    clientInformation: 'معلومات العميل',
-    waitingForClientData: 'في انتظار بيانات العميل',
-    thickness: 'السمك',
-    quantity: 'الكمية',
-    waitingForProductData: 'في انتظار بيانات المنتج',
-    subtotal: 'المجموع الفرعي',
-    paidInFull: 'مدفوع بالكامل',
-    waitingForPaymentData: 'في انتظار بيانات الدفع',
-    print: 'طباعة',
-    close: 'إغلاق',
-    printing: 'جاري الطباعة...',
-    workOrderPreview: 'معاينة أمر العمل',
-    previewBeforePrinting: 'معاينة قبل الطباعة',
-    startBySelectingClient: 'ابدأ باختيار عميل',
-    customer: 'العميل',
-    welcome: 'مرحبًا',
-    systemDescription: 'نظام إدارة محل النظارات',
-    reportsPage: 'صفحة التقارير',
-    currentTime: 'الوقت الحالي',
-    eye: 'العين',
-    rightEyeAbbr: 'يمنى',
-    leftEyeAbbr: 'يسرى',
-    color: 'اللون',
-    size: 'الحجم',
-    edit: 'تعديل',
-    copy: 'نسخ',
-    noFramesMatchingSearch: 'لا توجد إطارات مطابقة للبحث',
-    pleaseEnterCompleteFrameDetails: 'الرجاء إدخال تفاصيل الإطار كاملة',
-    pleaseEnterValidPrice: 'الرجاء إدخال سعر صحيح',
-    pleaseEnterValidQuantity: 'الرجاء إدخال كمية صحيحة',
-    searchForFrame: 'البحث عن إطار',
-    printLabels: 'طباعة الملصقات',
-    addNewFrame: 'إضافة إطار جديد',
-    addNewFrameTitle: 'إضافة إطار جديد',
-    addNewFrameDescription: 'أدخل تفاصيل الإطار أدناه',
-    brand: 'الماركة',
-    brandExample: 'مثال: راي بان، أوكلي',
-    model: 'الموديل',
-    modelExample: 'مثال: ويفرير، أفياتور',
-    colorExample: 'مثال: أسود، كهرماني',
-    sizeExample: 'مثال: 52-18-140',
-    price: 'السعر',
-    saveFrame: 'حفظ الإطار',
-    noFramesFound: 'لم يتم العثور على إطارات',
-    showAllFrames: 'عرض جميع الإطارات',
-    printFrameLabels: 'طباعة ملصقات الإطارات',
-    selectFramesForLabels: 'اختر الإطارات للملصقات',
-    frameNotFound: 'لم يتم العثور على الإطار',
-    labelPrintedSuccessfully: 'تمت طباعة الملصق بنجاح',
-    errorGeneratingQRCode: 'خطأ في إنشاء رمز الاستجابة السريعة',
-    noFramesSelected: 'لم يتم اختيار إطارات',
-    labelsPrintedSuccessfully: 'تمت طباعة الملصقات بنجاح',
-    errorGeneratingQRCodes: 'خطأ في إنشاء رموز الاستجابة السريعة',
-    selectedFrames: 'الإطارات المختارة',
-    selectAll: 'اختيار الكل',
-    deselectAll: 'إلغاء اختيار الكل',
-    printSelected: 'طباعة المحدد',
-    selectFramesToPrint: 'اختر الإطارات للطباعة',
-    labelPreview: 'معاينة الملصق',
-    noFramesAvailable: 'لا توجد إطارات متاحة',
-    frames: 'الإطارات',
-    contactLenses: 'عدسات لاصقة',
-    lensTypes: 'أنواع العدسات',
-    lensCoatings: 'طلاءات العدسات',
-    lensThicknesses: 'سماكات العدسات',
-    frameManagement: 'إدارة الإطارات',
-    contactLensManagement: 'إدارة العدسات اللاصقة',
-    dashboard: 'لوحة التحكم',
-    createClient: 'إنشاء عميل',
-    createInvoice: 'إنشاء فاتورة',
-    inventory: 'المخزون',
-    remainingPayments: 'المدفوعات المتبقية',
-    patientSearch: 'بحث عن مريض',
-    fillRequiredFields: 'الرجاء ملء جميع الحقول المطلوبة',
-    coatingAddedSuccess: 'تمت إضافة الطلاء بنجاح',
-    coatingUpdatedSuccess: 'تم تحديث الطلاء بنجاح',
-    coatingDeletedSuccess: 'تم حذف الطلاء بنجاح',
-    distanceReading: 'قراءة المسافة',
-    progressive: 'تدريجي',
-    bifocal: 'ثنائي البؤرة',
-    addCoating: 'إضافة طلاء',
-    addNewCoatingTitle: 'إضافة طلاء جديد',
-    addNewCoatingDescription: 'أدخل تفاصيل الطلاء أدناه',
-    coatingName: 'اسم الطلاء',
-    coatingNameExample: 'مثال: مضاد للوهج، ضوء أزرق',
-    coatingDescription: 'وصف الطلاء',
-    category: 'الفئة',
-    chooseCategory: 'اختر فئة',
-    save: 'حفظ',
-    noCoatings: 'لم يتم العثور على طلاءات',
-    editCoating: 'تعديل الطلاء',
-    updateCoatingDetails: 'تحديث تفاصيل الطلاء',
-    skipLens: 'تخطي العدسة',
-    selectLensType: 'اختر نوع العدسة',
-    selectCoatings: 'اختر الطلاءات',
-    selectThickness: 'اختر السماكة',
-    noCoating: 'بدون طلاء',
-    noCoatingDesc: 'لم يتم اختيار طلاء',
-    selectLensTypeFirst: 'اختر نوع العدسة أولاً',
-    noThickness: 'بدون سماكة',
-    noThicknessDesc: 'لم يتم اختيار سماكة',
-    lensSkipped: 'تم تخطي العدسة',
-    addLens: 'إضافة عدسة',
-    thicknessAddedSuccess: 'تمت إضافة السماكة بنجاح',
-    thicknessUpdatedSuccess: 'تم تحديث السماكة بنجاح',
-    thicknessDeletedSuccess: 'تم حذف السماكة بنجاح',
-    thicknessName: 'اسم السماكة',
-    thicknessNameExample: 'مثال: رفيعة جداً، قياسية',
-    thicknessDescription: 'وصف السماكة',
-    noThicknessesInCategory: 'لم يتم العثور على سماكات في هذه الفئة',
-    addThickness: 'إضافة سماكة',
-    editThickness: 'تعديل السماكة',
-    updateThicknessDetails: 'تحديث تفاصيل السماكة',
-    lensAddedSuccess: 'تمت إضافة العدسة بنجاح',
-    lensUpdatedSuccess: 'تم تحديث العدسة بنجاح',
-    lensDeletedSuccess: 'تم حذف العدسة بنجاح',
-    distance: 'مسافة',
-    reading: 'قراءة',
-    sunglasses: 'نظارات شمسية',
-    addNewLensTitle: 'إضافة عدسة جديدة',
-    addNewLensDescription: 'أدخل تفاصيل العدسة أدناه',
-    lensName: 'اسم العدسة',
-    lensNameExample: 'مثال: رؤية أحادية ممتازة',
-    type: 'النوع',
-    chooseType: 'اختر نوعًا',
-    noLensesInCategory: 'لم يتم العثور على عدسات في هذه الفئة',
-    editLensType: 'تعديل نوع العدسة',
-    updateLensDetails: 'تحديث تفاصيل العدسة',
-    noteEmpty: 'الملاحظة لا يمكن أن تكون فارغة',
-    noteAdded: 'تمت إضافة الملاحظة بنجاح',
-    noteDeleted: 'تم حذف الملاحظة بنجاح',
-    noteUpdated: 'تم تحديث الملاحظة بنجاح',
-    patientNotes: 'ملاحظات المريض',
-    noNotesYet: 'لا توجد ملاحظات بعد',
-    addNoteBelow: 'أضف ملاحظة أدناه',
-    addNoteHere: 'أضف ملاحظة هنا...',
-    addNote: 'إضافة ملاحظة',
-    dataError: 'خطأ في البيانات',
-    fillAllRequiredFields: 'الرجاء ملء جميع الحقول المطلوبة',
-    noteCannotBeEmpty: 'الملاحظة لا يمكن أن تكون فارغة',
-    noteAddedSuccessfully: 'تمت إضافة الملاحظة بنجاح',
-    rxAndCareInstructions: 'الوصفة الطبية وتعليمات العناية',
-    printPrescription: 'طباعة الوصفة الطبية',
-    newRx: 'وصفة طبية جديدة',
-    currentRx: 'الوصفة الطبية الحالية',
-    addNewNote: 'إضافة ملاحظة جديدة',
-    enterNoteAboutPatient: 'أدخل ملاحظة عن المريض',
-    noNotes: 'لا توجد ملاحظات',
-    addNotesToTrackInfo: 'أضف ملاحظات لتتبع معلومات المريض',
-    rxHistory: 'سجل الوصفات الطبية',
-    pupillaryDistance: 'المسافة البؤبوية',
-    actions: 'الإجراءات',
-    right: 'يمين',
-    left: 'يسار',
-    view: 'عرض',
-    noPreviousRx: 'لا توجد وصفات طبية سابقة',
-    noPreviousRxDescription: 'لم يتم العثور على وصفات طبية سابقة',
-    glassesCareTips: 'نصائح العناية بالنظارات',
-    tip1: 'نظف العدسات بقطعة قماش من الألياف الدقيقة',
-    tip2: 'استخدم كلتا اليدين عند وضع النظارات',
-    tip3: 'احفظ النظارات في علبة عندما لا تكون قيد الاستخدام',
-    tip4: 'تجنب وضع النظارات على الأسطح ووجهها للأسفل',
-    addNewRx: 'إضافة وصفة طبية جديدة',
-    addNewRxFor: 'إضافة وصفة طبية جديدة لـ',
-    viewPrescription: 'عرض الوصفة الطبية',
-    searchClient: 'البحث عن عميل',
-    searchResults: 'نتائج البحث',
-    age: 'العمر',
-    pendingOrders: 'الطلبات المعلقة',
-    completedOrders: 'الطلبات المكتملة',
-    noPendingOrders: 'لا توجد طلبات معلقة',
-    notPickedUp: 'لم يتم الاستلام',
-    lens: 'عدسة',
-    edited: 'تم التعديل',
-    printPreview: 'معاينة الطباعة',
-    invoiceSaved: 'تم حفظ الفاتورة',
-    errorSavingInvoice: 'خطأ في حفظ الفاتورة',
-    saving: 'جاري الحفظ...',
-    glassesDetails: 'تفاصيل النظارات',
-    contactLensDetails: 'تفاصيل العدسات اللاصقة',
-    item: 'العنصر',
-    noProductDetails: 'لا توجد تفاصيل منتج',
-    duePayments: 'المدفوعات المستحقة',
-    selectLanguageForPrinting: 'اختر اللغة للطباعة',
-    workOrderUpdated: 'تم تحديث أمر العمل بنجاح',
-    errorUpdatingWorkOrder: 'خطأ في تحديث أمر العمل',
-    editWorkOrder: 'تعديل أمر العمل',
-    selectFrameBrand: 'اختر ماركة الإطار',
-    selectFrameModel: 'اختر موديل الإطار',
-    selectFrameColor: 'اختر لون الإطار',
-    selectCoating: 'اختر الطلاء',
-    patientId: 'رقم المريض',
-    patientInformation: 'معلومات المريض',
-    frameDetails: 'تفاصيل الإطار',
-    prescriptionDetails: 'تفاصيل الوصفة الطبية',
-    lensDetails: 'تفاصيل العدسة',
-    thicknessPrice: 'سعر السماكة',
-    technicianSignature: 'توقيع الفني',
-    qualityConfirmation: 'تأكيد الجودة',
-    orderNumber: 'رقم الطلب',
-    printingCompleted: 'اكتملت الطباعة',
-    printingFailed: 'فشلت الطباعة',
-    selectPrintFormat: 'اختر تنسيق الطباعة',
-    choosePrintFormatDescription: 'اختر تنسيق الطباعة',
-    paper: 'ورق',
-    standardFormat: 'التنسيق القياسي',
-    receiptFormat: 'تنسيق الإيصال',
-    compactFormat: 'تنسيق مدمج',
-    notSpecified: 'غير محدد',
-    phoneSearchError: 'الرجاء إدخال رقم هاتف للبحث',
-    noClientsFound: 'لم يتم العثور على عملاء',
-    noClientFile: 'لا يوجد ملف عميل',
-    phoneColon: 'الهاتف:',
-    typeToSearch: 'اكتب للبحث',
-    clientName: 'اسم العميل',
-    clientPhone: 'هاتف العميل',
-    patientID: 'رقم المريض',
-    hideRx: 'إخفاء الوصفة',
-    showRx: 'عرض الوصفة',
-    optional: 'اختياري',
-    paymentMethodError: 'الرجاء اختيار طريقة الدفع',
-    orderSavedSuccess: 'تم حفظ الطلب بنجاح',
-    discountSection: 'قسم الخصم',
-    discountColon: 'الخصم:',
-    depositColon: 'الإيداع:',
-    payInFull: 'دفع بالكامل',
-    visa: 'فيزا',
-    mastercard: 'ماستركارد',
-    approvalNumber: 'رقم الموافقة',
-    totalInvoice: 'إجمالي الفاتورة',
-    searchTermError: 'الرجاء إدخال مصطلح البحث',
-    frameDetailsError: 'الرجاء إدخال تفاصيل الإطار',
-    priceError: 'الرجاء إدخال سعر صحيح',
-    quantityError: 'الرجاء إدخال كمية صحيحة',
-    frameAddedSuccess: 'تمت إضافة الإطار بنجاح',
-    contactLensesTotal: 'إجمالي العدسات اللاصقة',
-    lensCount: 'عدد العدسات',
-    lensSection: 'قسم العدسات',
-    frameSection: 'قسم الإطار',
-    searchTerm: 'مصطلح البحث',
-    searchExample: 'مثال: راي بان، أوكلي',
-    selectedFrame: 'الإطار المحدد',
-    addFrameButton: 'إضافة إطار',
-    newFrameDetails: 'تفاصيل الإطار الجديد',
-    pieces: 'قطع',
-    invoiceCreated: 'تم إنشاء الفاتورة',
-    invoiceSuccessMessage: 'تم إنشاء فاتورتك بنجاح',
-    orderType: 'نوع الطلب',
-    partiallyPaid: 'مدفوع جزئياً',
-    nextSteps: 'الخطوات التالية',
-    printWorkOrderDescription: 'طباعة أمر العمل للإنتاج',
-    printInvoiceDescription: 'طباعة نسخة من الفاتورة للعميل',
-    goToClientSection: 'الذهاب إلى قسم العميل',
-    refreshPrintPage: 'تحديث صفحة الطباعة',
-    paymentInformation: 'معلومات الدفع',
-    from: 'من',
-    to: 'إلى',
-    addNewThicknessTitle: 'إضافة سمك عدسة جديد',
-    addNewThicknessDescription: 'أدخل تفاصيل سمك العدسة الجديد.',
-  },
+const en: Translations = {
+  home: "Home",
+  patients: "Patients",
+  inventory: "Inventory",
+  reports: "Reports",
+  settings: "Settings",
+  login: "Login",
+  logout: "Logout",
+  register: "Register",
+  name: "Name",
+  email: "Email",
+  password: "Password",
+  confirmPassword: "Confirm Password",
+  submit: "Submit",
+  resetPassword: "Reset Password",
+  enterYourEmail: "Enter your email",
+  newPassword: "New Password",
+  saveNewPassword: "Save New Password",
+  currentLanguage: "Current Language",
+  selectLanguage: "Select Language",
+  english: "English",
+  arabic: "Arabic",
+  general: "General",
+  account: "Account",
+  security: "Security",
+  appearance: "Appearance",
+  system: "System",
+  light: "Light",
+  dark: "Dark",
+  auto: "Auto",
+  language: "Language",
+  save: "Save",
+  cancel: "Cancel",
+  firstName: "First Name",
+  lastName: "Last Name",
+  phoneNumber: "Phone Number",
+  address: "Address",
+  city: "City",
+  state: "State",
+  zipCode: "Zip Code",
+  country: "Country",
+  updateProfile: "Update Profile",
+  changePassword: "Change Password",
+  oldPassword: "Old Password",
+  newPasswordAgain: "New Password Again",
+  updatePassword: "Update Password",
+  deleteAccount: "Delete Account",
+  deleteAccountConfirmation: "Are you sure you want to delete your account?",
+  iUnderstand: "I understand that this action is irreversible.",
+  deleteMyAccount: "Delete My Account",
+  patientDetails: "Patient Details",
+  addNewPatient: "Add New Patient",
+  editPatient: "Edit Patient",
+  patientName: "Patient Name",
+  dateOfBirth: "Date of Birth",
+  gender: "Gender",
+  male: "Male",
+  female: "Female",
+  other: "Other",
+  medicalHistory: "Medical History",
+  allergies: "Allergies",
+  medications: "Medications",
+  notes: "Notes",
+  updatePatient: "Update Patient",
+  createPatient: "Create Patient",
+  searchPatient: "Search Patient",
+  noPatientsFound: "No patients found.",
+  brand: "Brand",
+  model: "Model",
+  color: "Color",
+  size: "Size",
+  price: "Price",
+  quantity: "Quantity",
+  addNewFrame: "Add New Frame",
+  editFrame: "Edit Frame",
+  updateFrame: "Update Frame",
+  createFrame: "Create Frame",
+  searchForFrame: "Search for frame...",
+  noFramesFound: "No frames found.",
+  dailySalesReport: "Daily Sales Report",
+  overviewOfSales: "Overview of sales for the current day",
+  salesInfo: "Sales Information",
+  paymentInfo: "Payment Information",
+  refundInfo: "Refund Information",
+  invoiceId: "Invoice ID",
+  patientNameLabel: "Patient Name",
+  date: "Date",
+  amount: "Amount",
+  paymentMethod: "Payment Method",
+  refundMethod: "Refund Method",
+  refundId: "Refund ID",
+  method: "Method",
+  refundDate: "Refund Date",
+  totalSales: "Total Sales",
+  totalPayments: "Total Payments",
+  refundAmount: "Refund Amount",
+  reportsPageTitle: "Reports",
+  selectReportType: "Select Report Type",
+  daily: "Daily",
+  monthly: "Monthly",
+  yearly: "Yearly",
+  custom: "Custom",
+  generateReport: "Generate Report",
+  printReport: "Print Report",
+  noDataAvailable: "No data available for the selected period.",
+  january: "January",
+  february: "February",
+  march: "March",
+  april: "April",
+  may: "May",
+  june: "June",
+  july: "July",
+  august: "August",
+  september: "September",
+  october: "October",
+  november: "November",
+  december: "December",
+  year: "Year",
+  loading: "Loading...",
+  addNewFrameTitle: "Add a new frame",
+  addNewFrameDescription:
+    "Enter the details for the new frame to add it to the inventory.",
+  brandExample: "e.g., Ray-Ban",
+  modelExample: "e.g., RB3447",
+  colorExample: "e.g., Gold",
+  sizeExample: "e.g., 50-21",
+  quantityLabel: "Quantity",
+  saveFrame: "Save Frame",
+  pleaseEnterCompleteFrameDetails:
+    "Please enter complete frame details including brand, model, color and price.",
+  pleaseEnterValidPrice: "Please enter a valid price.",
+  pleaseEnterValidQuantity: "Please enter a valid quantity.",
+  frameAddedSuccessfully: "Frame {brand} {model} added successfully!",
+  search: "Search",
+  printLabels: "Print Labels",
+  printFrameLabels: "Print Frame Labels",
+  selectFramesForLabels: "Select frames for generating labels",
+  close: "Close",
+  selectedFrames: "Selected Frames",
+  selectAll: "Select All",
+  deselectAll: "Deselect All",
+  printSelected: "Print Selected",
+  selectFramesToPrint: "Select frames to print labels.",
+  labelPreview: "Label Preview",
+  noFramesAvailable: "No frames available.",
+  lensDetails: "Lens Details",
+  lensType: "Lens Type",
+  coating: "Coating",
+  lensPrice: "Lens Price",
+  frameDetails: "Frame Details",
+  frameBrand: "Frame Brand",
+  frameModel: "Frame Model",
+  frameColor: "Frame Color",
+  frameSize: "Frame Size",
+  framePrice: "Frame Price",
+  workOrderDetails: "Work Order Details",
+  invoiceNumber: "Invoice Number",
+  orderNumber: "Order Number",
+  thankYou: "Thank you!",
+  paymentSection: "Payment Section",
+  paymentMethodLabel: "Payment Method",
+  amountLabel: "Amount",
+  printWorkOrder: "Print Work Order",
+  workOrderPreview: "Work Order Preview",
+  previewBeforePrinting: "Preview before printing",
+  print: "Print",
+  printing: "Printing...",
+  saving: "Saving...",
+  invoiceSaved: "Invoice saved!",
+  error: "Error!",
+  errorSavingInvoice: "Error saving invoice.",
+  kwd: "KWD",
+  deposit: "Deposit",
+  discount: "Discount",
+  total: "Total",
+  authNumber: "Auth Number",
+  paymentInformation: "Payment Information",
+  description: "Description",
+  edit: "Edit",
+  copy: "Copy",
+  noFramesMatchingSearch: "No frames matching the search criteria.",
+  showAllFrames: "Show All Frames",
+  frameNotFound: "Frame not found.",
+  errorGeneratingQRCode: "Error generating QR code.",
+  labelPrintedSuccessfully: "Label printed successfully!",
+  noFramesSelected: "No frames selected.",
+  noFramesFound: "No frames found.",
+  errorGeneratingQRCodes: "Error generating QR codes.",
+  labelsPrintedSuccessfully: "Labels printed successfully!",
+  pendingOrders: "Pending Orders",
+  completedOrders: "Completed Orders",
+  archived: "Archived",
+  workOrders: "Work Orders",
+  transactions: "Transactions",
+  noPendingOrders: "No pending orders.",
+  noCompletedOrders: "No completed orders.",
+  noArchivedOrders: "No archived orders.",
+  noRefundedTransactions: "No refunded transactions.",
+  notPickedUp: "Not Picked Up",
+  edited: "Edited",
+  unpaid: "Unpaid",
+  paid: "Paid",
+  markAsPickedUp: "Mark as Picked Up",
+  printInvoice: "Print Invoice",
+  printWorkOrderLabel: "Print Work Order Label",
+  contactLens: "Contact Lens",
+  glasses: "Glasses",
+  contactLenses: "Contact Lenses",
+  rxDetails: "Rx Details",
+  power: "Power",
+  bc: "BC",
+  diameter: "Diameter",
+  cylinder: "Cylinder",
+  axis: "Axis",
+  add: "Add",
+  visualAcuity: "Visual Acuity",
+  contactLensSolution: "Contact Lens Solution",
+  contactLensType: "Contact Lens Type",
+  contactLensBrand: "Contact Lens Brand",
+  contactLensPrice: "Contact Lens Price",
+  contactLensCoating: "Contact Lens Coating",
+  contactLensCoatingPrice: "Contact Lens Coating Price",
+  contactLensDetails: "Contact Lens Details",
+  addNewContactLens: "Add New Contact Lens",
+  editContactLens: "Edit Contact Lens",
+  updateContactLens: "Update Contact Lens",
+  createContactLens: "Create Contact Lens",
+  searchForContactLens: "Search for contact lens...",
+  noContactLensesFound: "No contact lenses found.",
+  contactLensAddedSuccessfully: "Contact lens added successfully!",
+  pleaseEnterCompleteContactLensDetails:
+    "Please enter complete contact lens details.",
+  pleaseEnterValidContactLensPrice: "Please enter a valid contact lens price.",
+  contactLensBrandExample: "e.g., Acuvue",
+  contactLensTypeExample: "e.g., Daily",
+  contactLensSolutionExample: "e.g., Opti-Free",
+  contactLensPriceExample: "e.g., 15.000",
+  contactLensCoatingExample: "e.g., HydraGlyde",
+  contactLensPowerExample: "e.g., -2.75",
+  contactLensDiameterExample: "e.g., 14.2",
+  contactLensBcExample: "e.g., 8.5",
+  contactLensCylinderExample: "e.g., -0.75",
+  contactLensAxisExample: "e.g., 180",
+  contactLensAddExample: "e.g., +2.50",
+  contactLensVisualAcuityExample: "e.g., 20/20",
+  contactLensDetailsTitle: "Contact Lens Details",
+  contactLensDetailsDescription: "Enter the details for the contact lens.",
+  contactLensBrandLabel: "Contact Lens Brand",
+  contactLensTypeLabel: "Contact Lens Type",
+  contactLensSolutionLabel: "Contact Lens Solution",
+  contactLensPriceLabel: "Contact Lens Price",
+  contactLensCoatingLabel: "Contact Lens Coating",
+  contactLensPowerLabel: "Contact Lens Power",
+  contactLensDiameterLabel: "Contact Lens Diameter",
+  contactLensBcLabel: "Contact Lens BC",
+  contactLensCylinderLabel: "Contact Lens Cylinder",
+  contactLensAxisLabel: "Contact Lens Axis",
+  contactLensAddLabel: "Contact Lens Add",
+  contactLensVisualAcuityLabel: "Contact Lens Visual Acuity",
+  contactLensPrintLabel: "Print Contact Lens Label",
+  contactLensLabelPreview: "Contact Lens Label Preview",
+  contactLensSelectContactLensesToPrint:
+    "Select contact lenses for generating labels",
+  contactLensNoContactLensesAvailable: "No contact lenses available.",
+  contactLensSelectedContactLenses: "Selected Contact Lenses",
+  contactLensSelectAll: "Select All",
+  contactLensDeselectAll: "Deselect All",
+  contactLensPrintSelected: "Print Selected",
+  contactLensNoContactLensesMatchingSearch:
+    "No contact lenses matching the search criteria.",
+  contactLensShowAllContactLenses: "Show All Contact Lenses",
+  contactLensNotFound: "Contact lens not found.",
+  contactLensErrorGeneratingQRCode: "Error generating QR code.",
+  contactLensLabelPrintedSuccessfully: "Contact lens label printed successfully!",
+  contactLensNoContactLensesSelected: "No contact lenses selected.",
+  contactLensNoContactLensesFound: "No contact lenses found.",
+  contactLensErrorGeneratingQRCodes: "Error generating QR codes.",
+  contactLensLabelsPrintedSuccessfully: "Contact lens labels printed successfully!",
+  contactLensPrintContactLensLabels: "Print Contact Lens Labels",
+  contactLensPrintContactLensLabel: "Print Contact Lens Label",
+  contactLensPrintLabelsTitle: "Print Contact Lens Labels",
+  contactLensPrintLabelsDescription: "Select contact lenses for generating labels",
+  contactLensPrintLabelPreview: "Contact Lens Label Preview",
+  contactLensSelectContactLenses: "Select contact lenses",
+  contactLensSelectContactLensesToPrintLabel: "Select contact lenses to print labels.",
+  contactLensNoContactLensesAvailableToPrint: "No contact lenses available to print.",
+  contactLensSelectedContactLensesCount: "Selected Contact Lenses",
+  contactLensSelectAllContactLenses: "Select All Contact Lenses",
+  contactLensDeselectAllContactLenses: "Deselect All Contact Lenses",
+  contactLensPrintSelectedContactLenses: "Print Selected Contact Lenses",
+  contactLensNoContactLensesMatchingSearchFound: "No contact lenses matching the search criteria.",
+  contactLensShowAllContactLensesAvailable: "Show All Contact Lenses",
+  contactLensContactLensNotFound: "Contact lens not found.",
+  contactLensErrorGeneratingContactLensQRCode: "Error generating QR code.",
+  contactLensContactLensLabelPrintedSuccessfully: "Contact lens label printed successfully!",
+  contactLensNoContactLensesSelectedToPrint: "No contact lenses selected.",
+  contactLensNoContactLensesFoundToPrint: "No contact lenses found.",
+  contactLensErrorGeneratingContactLensQRCodes: "Error generating QR codes.",
+  contactLensContactLensLabelsPrintedSuccessfully: "Contact lens labels printed successfully!",
 };
 
-export const useLanguageStore = create<LanguageState>()(
-  persist(
-    (set, get) => ({
-      language: 'en' as 'en' | 'ar',
-      t: (key) => translations[get().language][key] || key,
-      toggleLanguage: () => {
-        set((state) => {
-          const newLanguage = state.language === 'en' ? 'ar' : 'en';
-          return { language: newLanguage };
-        });
-      },
-      setLanguage: (lang: 'en' | 'ar') => {
-        set({ language: lang });
-      },
-    }),
-    {
-      name: 'language-storage',
-      storage: {
-        getItem: (name) => {
-          const item = localStorage.getItem(name);
-          return item ? JSON.parse(item) : null;
-        },
-        setItem: (name, value) => {
-          localStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: (name) => localStorage.removeItem(name),
-      },
-    }
-  )
-);
+const ar: Translations = {
+  home: "الرئيسية",
+  patients: "المرضى",
+  inventory: "المخزون",
+  reports: "التقارير",
+  settings: "الإعدادات",
+  login: "تسجيل الدخول",
+  logout: "تسجيل الخروج",
+  register: "تسجيل",
+  name: "الاسم",
+  email: "البريد الإلكتروني",
+  password: "كلمة المرور",
+  confirmPassword: "تأكيد كلمة المرور",
+  submit: "إرسال",
+  resetPassword: "إعادة تعيين كلمة المرور",
+  enterYourEmail: "أدخل بريدك الإلكتروني",
+  newPassword: "كلمة المرور الجديدة",
+  saveNewPassword: "حفظ كلمة المرور الجديدة",
+  currentLanguage: "اللغة الحالية",
+  selectLanguage: "اختر اللغة",
+  english: "الإنجليزية",
+  arabic: "العربية",
+  general: "عام",
+  account: "الحساب",
+  security: "الأمان",
+  appearance: "المظهر",
+  system: "النظام",
+  light: "فاتح",
+  dark: "داكن",
+  auto: "تلقائي",
+  language: "اللغة",
+  save: "حفظ",
+  cancel: "إلغاء",
+  firstName: "الاسم الأول",
+  lastName: "الاسم الأخير",
+  phoneNumber: "رقم الهاتف",
+  address: "العنوان",
+  city: "المدينة",
+  state: "الولاية",
+  zipCode: "الرمز البريدي",
+  country: "الدولة",
+  updateProfile: "تحديث الملف الشخصي",
+  changePassword: "تغيير كلمة المرور",
+  oldPassword: "كلمة المرور القديمة",
+  newPasswordAgain: "تأكيد كلمة المرور الجديدة",
+  updatePassword: "تحديث كلمة المرور",
+  deleteAccount: "حذف الحساب",
+  deleteAccountConfirmation: "هل أنت متأكد أنك تريد حذف حسابك؟",
+  iUnderstand: "أنا أفهم أن هذا الإجراء لا رجعة فيه.",
+  deleteMyAccount: "حذف حسابي",
+  patientDetails: "تفاصيل المريض",
+  addNewPatient: "إضافة مريض جديد",
+  editPatient: "تعديل مريض",
+  patientName: "اسم المريض",
+  dateOfBirth: "تاريخ الميلاد",
+  gender: "الجنس",
+  male: "ذكر",
+  female: "أنثى",
+  other: "آخر",
+  medicalHistory: "التاريخ الطبي",
+  allergies: "الحساسية",
+  medications: "الأدوية",
+  notes: "ملاحظات",
+  updatePatient: "تحديث المريض",
+  createPatient: "إنشاء مريض",
+  searchPatient: "البحث عن مريض",
+  noPatientsFound: "لم يتم العثور على مرضى.",
+  brand: "العلامة التجارية",
+  model: "النموذج",
+  color: "اللون",
+  size: "الحجم",
+  price: "السعر",
+  quantity: "الكمية",
+  addNewFrame: "إضافة إطار جديد",
+  editFrame: "تعديل إطار",
+  updateFrame: "تحديث إطار",
+  createFrame: "إنشاء إطار",
+  searchForFrame: "البحث عن إطار...",
+  noFramesFound: "لم يتم العثور على إطارات.",
+  dailySalesReport: "تقرير المبيعات اليومية",
+  overviewOfSales: "نظرة عامة على مبيعات اليوم الحالي",
+  salesInfo: "معلومات المبيعات",
+  paymentInfo: "معلومات الدفع",
+  refundInfo: "معلومات الاسترداد",
+  invoiceId: "رقم الفاتورة",
+  patientNameLabel: "اسم المريض",
+  date: "التاريخ",
+  amount: "المبلغ",
+  paymentMethod: "طريقة الدفع",
+  refundMethod: "طريقة الاسترداد",
+  refundId: "رقم الاسترداد",
+  method: "الطريقة",
+  refundDate: "تاريخ الاسترداد",
+  totalSales: "إجمالي المبيعات",
+  totalPayments: "إجمالي المدفوعات",
+  refundAmount: "مبلغ الاسترداد",
+  reportsPageTitle: "التقارير",
+  selectReportType: "اختر نوع التقرير",
+  daily: "يومي",
+  monthly: "شهري",
+  yearly: "سنوي",
+  custom: "مخصص",
+  generateReport: "إنشاء تقرير",
+  printReport: "طباعة تقرير",
+  noDataAvailable: "لا توجد بيانات متاحة للفترة المحددة.",
+  january: "يناير",
+  february: "فبراير",
+  march: "مارس",
+  april: "أبريل",
+  may: "مايو",
+  june: "يونيو",
+  july: "يوليو",
+  august: "أغسطس",
+  september: "سبتمبر",
+  october: "أكتوبر",
+  november: "نوفمبر",
+  december: "ديسمبر",
+  year: "السنة",
+  loading: "جار التحميل...",
+  addNewFrameTitle: "إضافة إطار جديد",
+  addNewFrameDescription: "أدخل تفاصيل الإطار الجديد لإضافته إلى المخزون.",
+  brandExample: "مثال: Ray-Ban",
+  modelExample: "مثال: RB3447",
+  colorExample: "مثال: ذهبي",
+  sizeExample: "مثال: 50-21",
+  quantityLabel: "الكمية",
+  saveFrame: "حفظ الإطار",
+  pleaseEnterCompleteFrameDetails:
+    "الرجاء إدخال تفاصيل الإطار كاملة بما في ذلك العلامة التجارية والنموذج واللون والسعر.",
+  pleaseEnterValidPrice: "الرجاء إدخال سعر صالح.",
+  pleaseEnterValidQuantity: "الرجاء إدخال كمية صالحة.",
+  frameAddedSuccessfully: "تمت إضافة الإطار {brand} {model} بنجاح!",
+  search: "بحث",
+  printLabels: "طباعة الملصقات",
+  printFrameLabels: "طباعة ملصقات الإطار",
+  selectFramesForLabels: "حدد إطارات لإنشاء ملصقات",
+  close: "إغلاق",
+  selectedFrames: "الإطارات المحددة",
+  selectAll: "تحديد الكل",
+  deselectAll: "إلغاء تحديد الكل",
+  printSelected: "طباعة المحدد",
+  selectFramesToPrint: "حدد إطارات لطباعة الملصقات.",
+  labelPreview: "معاينة الملصق",
+  noFramesAvailable: "لا توجد إطارات متاحة.",
+  lensDetails: "تفاصيل العدسة",
+  lensType: "نوع العدسة",
+  coating: "الطلاء",
+  lensPrice: "سعر العدسة",
+  frameDetails: "تفاصيل الإطار",
+  frameBrand: "العلامة التجارية للإطار",
+  frameModel: "نموذج الإطار",
+  frameColor: "لون الإطار",
+  frameSize: "حجم الإطار",
+  framePrice: "سعر الإطار",
+  workOrderDetails: "تفاصيل أمر العمل",
+  invoiceNumber: "رقم الفاتورة",
+  orderNumber: "رقم الطلب",
+  thankYou: "شكرا لك!",
+  paymentSection: "قسم الدفع",
+  paymentMethodLabel: "طريقة الدفع",
+  amountLabel: "المبلغ",
+  printWorkOrder: "طباعة أمر العمل",
+  workOrderPreview: "معاينة أمر العمل",
+  previewBeforePrinting: "معاينة قبل الطباعة",
+  print: "طباعة",
+  printing: "جار الطباعة...",
+  saving: "جار الحفظ...",
+  invoiceSaved: "تم حفظ الفاتورة!",
+  error: "خطأ!",
+  errorSavingInvoice: "خطأ في حفظ الفاتورة.",
+  kwd: "د.ك",
+  deposit: "إيداع",
+  discount: "خصم",
+  total: "المجموع",
+  authNumber: "رقم التفويض",
+  paymentInformation: "معلومات الدفع",
+  description: "وصف",
+  edit: "تعديل",
+  copy: "نسخ",
+  noFramesMatchingSearch: "لا توجد إطارات تطابق معايير البحث.",
+  showAllFrames: "عرض جميع الإطارات",
+  frameNotFound: "الإطار غير موجود.",
+  errorGeneratingQRCode: "خطأ في إنشاء رمز الاستجابة السريعة.",
+  labelPrintedSuccessfully: "تمت طباعة الملصق بنجاح!",
+  noFramesSelected: "لم يتم تحديد أي إطارات.",
+  noFramesFound: "لم يتم العثور على إطارات.",
+  errorGeneratingQRCodes: "خطأ في إنشاء رموز الاستجابة السريعة.",
+  labelsPrintedSuccessfully: "تمت طباعة الملصقات بنجاح!",
+  pendingOrders: "الطلبات المعلقة",
+  completedOrders: "الطلبات المكتملة",
+  archived: "أرشيف",
+  workOrders: "أوامر العمل",
+  transactions: "المعاملات",
+  noPendingOrders: "لا توجد طلبات معلقة.",
+  noCompletedOrders: "لا توجد طلبات مكتملة.",
+  noArchivedOrders: "لا توجد طلبات مؤرشفة.",
+  noRefundedTransactions: "لا توجد معاملات مستردة.",
+  notPickedUp: "لم يتم الاستلام",
+  edited: "تم التعديل",
+  unpaid: "غير مدفوع",
+  paid: "مدفوع",
+  markAsPickedUp: "تحديد كتم الاستلام",
+  printInvoice: "طباعة الفاتورة",
+  printWorkOrderLabel: "طباعة ملصق أمر العمل",
+  contactLens: "عدسة لاصقة",
+  glasses: "نظارات",
+  contactLenses: "العدسات اللاصقة",
+   rxDetails: "تفاصيل الروشتة",
+    power: "القوة",
+    bc: "BC",
+    diameter: "القطر",
+    cylinder: "اسطوانة",
+    axis: "محور",
+    add: "إضافة",
+    visualAcuity: "حدة البصر",
+    contactLensSolution: "محلول العدسات اللاصقة",
+    contactLensType: "نوع العدسة اللاصقة",
+    contactLensBrand: "العلامة التجارية للعدسات اللاصقة",
+    contactLensPrice: "سعر العدسات اللاصقة",
+    contactLensCoating: "طلاء العدسات اللاصقة",
+    contactLensCoatingPrice: "سعر طلاء العدسات اللاصقة",
+    contactLensDetails: "تفاصيل العدسات اللاصقة",
+    addNewContactLens: "إضافة عدسة لاصقة جديدة",
+    editContactLens: "تعديل العدسة اللاصقة",
+    updateContactLens: "تحديث العدسة اللاصقة",
+    createContactLens: "إنشاء العدسة اللاصقة",
+    searchForContactLens: "البحث عن العدسات اللاصقة...",
+    noContactLensesFound: "لم يتم العثور على العدسات اللاصقة.",
+    contactLensAddedSuccessfully: "تمت إضافة العدسة اللاصقة بنجاح!",
+    pleaseEnterCompleteContactLensDetails: "الرجاء إدخال تفاصيل العدسة
