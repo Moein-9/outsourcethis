@@ -4,14 +4,10 @@ import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 import { ReceiptInvoice } from '@/components/ReceiptInvoice';
 import { formatDate } from '@/lib/utils';
-import { getDefaultLocationId } from '@/assets/logo';
 
 export class CustomPrintService {
-  static printWorkOrder(workOrder: any, invoice?: any, patient?: any, locationId?: string) {
-    console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient, locationId });
-    
-    // Use provided locationId or get from the workOrder/invoice, or use default
-    const printLocationId = locationId || workOrder?.locationId || invoice?.locationId || getDefaultLocationId();
+  static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
+    console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
     
     try {
       // Create a new window for printing
@@ -219,7 +215,6 @@ export class CustomPrintService {
           invoice={invoice}
           patient={patient}
           isPrintable={true}
-          locationId={printLocationId}
         />
       );
       
@@ -313,11 +308,8 @@ export class CustomPrintService {
     }
   }
   
-  static printInvoice(invoice: any, locationId?: string) {
-    console.log("CustomPrintService: Printing invoice", { invoice, locationId });
-    
-    // Use provided locationId or get from invoice, or use default
-    const printLocationId = locationId || invoice?.locationId || getDefaultLocationId();
+  static printInvoice(invoice: any) {
+    console.log("CustomPrintService: Printing invoice", { invoice });
     
     try {
       // Create a new window for printing
@@ -533,7 +525,6 @@ export class CustomPrintService {
         <ReceiptInvoice
           invoice={invoice}
           isPrintable={true}
-          locationId={printLocationId}
         />
       );
       

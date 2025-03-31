@@ -4,47 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
-import { useStoreLocation, LocationId } from "@/store/storeLocationStore";
-import { useInvoiceStore } from "@/store/invoiceStore";
+import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/hooks/use-toast";
 
-// Modified Invoice type with locationId property
-interface PrintInvoice {
-  invoiceId: string;
-  patientId?: string;
-  lensType?: string;
-  lensPrice?: number;
-  frameBrand?: string;
-  frameModel?: string;
-  frameColor?: string;
-  frameSize?: string;
-  framePrice?: number;
-  coatingType?: string;
-  coatingPrice?: number;
-  subtotal: number;
-  discount?: number;
-  total: number;
-  deposit?: number;
-  remaining: number;
-  isPaid: boolean;
-  paymentMethod?: string;
-  approvalNumber?: string;
-  createdAt: string;
-  workOrderId?: string;
-  locationId?: LocationId;
-  payments: Payment[];
-}
-
-interface Payment {
-  id: string;
-  amount: number;
-  method: string;
-  date: string;
-  approvalNumber?: string;
-}
-
 interface PrintWorkOrderButtonProps {
-  invoice: PrintInvoice;
+  invoice: Invoice;
   patientName?: string;
   patientPhone?: string;
   rx?: any;
@@ -85,7 +49,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   onInvoiceSaved,
 }) => {
   const { t } = useLanguageStore();
-  const { selectedLocation } = useStoreLocation();
   const [loading, setLoading] = useState(false);
   const { addInvoice, addExistingInvoice, addWorkOrder } = useInvoiceStore();
   
@@ -100,30 +63,39 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           lensType: {
             name: invoice.lensType,
             price: invoice.lensPrice
-          },
-          locationId: selectedLocation // Add location ID to work order
+          }
         };
         
         // Generate work order ID
         const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
         
         // Save the invoice to get an ID and link to work order
-        // Create a copy without locationId first to avoid type errors
-        const { locationId, ...invoiceWithoutLocation } = invoice;
-        
-        // Then add locationId as a separate property in the resulting object
         const invoiceId = addInvoice({
-          ...invoiceWithoutLocation,
-          workOrderId: workOrderId,
-          locationId: selectedLocation
+          patientId: invoice.patientId,
+          patientName: invoice.patientName,
+          patientPhone: invoice.patientPhone,
+          lensType: invoice.lensType,
+          lensPrice: invoice.lensPrice,
+          coating: invoice.coating,
+          coatingPrice: invoice.coatingPrice,
+          frameBrand: invoice.frameBrand,
+          frameModel: invoice.frameModel,
+          frameColor: invoice.frameColor,
+          frameSize: invoice.frameSize,
+          framePrice: invoice.framePrice,
+          discount: invoice.discount,
+          deposit: invoice.deposit,
+          total: invoice.total,
+          paymentMethod: invoice.paymentMethod,
+          authNumber: invoice.authNumber,
+          workOrderId: workOrderId
         });
         
         // Update the invoice with the new IDs
         const updatedInvoice = { 
           ...invoice, 
           invoiceId, 
-          workOrderId,
-          locationId: selectedLocation
+          workOrderId 
         };
         
         // If callback provided, call it with the new IDs
@@ -154,7 +126,7 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     }
   };
   
-  const showPrintSelector = (invoiceToUse: PrintInvoice) => {
+  const showPrintSelector = (invoiceToUse: Invoice) => {
     // Create the print selector with proper styling for printing
     const selectorContainer = document.createElement('div');
     selectorContainer.style.overflow = 'hidden'; // Prevent scrollbars
@@ -172,7 +144,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
         contactLenses={contactLenses}
         contactLensRx={contactLensRx}
         thermalOnly={thermalOnly}
-        locationId={invoiceToUse.locationId || selectedLocation}
       />
     );
     
@@ -204,7 +175,6 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           contactLenses={contactLenses}
           contactLensRx={contactLensRx}
           thermalOnly={thermalOnly}
-          locationId={invoice.locationId || selectedLocation}
           trigger={
             <Button variant={variant} size={size} className={className}>
               <Printer className="h-4 w-4 mr-1" /> {t("printWorkOrder")}
