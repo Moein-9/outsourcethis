@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -127,6 +128,11 @@ export const InvoiceStepPayment: React.FC = () => {
     } else if (invoiceType === 'contacts') {
       invoiceData.contactLensItems = formData.contactLensItems || [];
       invoiceData.contactLensRx = formData.contactLensRx || null;
+    } else if (invoiceType === 'exam') {
+      invoiceData.serviceId = formData.serviceId;
+      invoiceData.serviceName = formData.serviceName;
+      invoiceData.serviceDescription = formData.serviceDescription;
+      invoiceData.servicePrice = formData.servicePrice;
     }
     
     const invoiceId = addInvoice(invoiceData);
@@ -145,9 +151,10 @@ export const InvoiceStepPayment: React.FC = () => {
   };
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const dirClass = isRtl ? 'rtl' : 'ltr';
   
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className={`space-y-6 animate-fade-in ${dirClass}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="border rounded-lg p-5 bg-card shadow-sm">
         <div className="border-b border-primary/30 pb-3 mb-4">
           <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
@@ -194,7 +201,7 @@ export const InvoiceStepPayment: React.FC = () => {
             onClick={handlePayInFull} 
             className="w-full border-primary/20 hover:bg-primary/5 text-primary hover:text-primary/80"
           >
-            <Banknote className={`w-5 h-5 ${language === 'ar' ? 'ml-2' : 'mr-2'} text-green-500`} />
+            <Banknote className={`w-5 h-5 ${isRtl ? 'ml-2' : 'mr-2'} text-green-500`} />
             {t('payInFull')} ({total.toFixed(2)} {isRtl ? 'د.ك' : t('kwd')})
           </Button>
         </div>
@@ -211,11 +218,11 @@ export const InvoiceStepPayment: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div 
             className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
-              paymentMethod === (language === 'ar' ? "نقداً" : "Cash")
+              paymentMethod === (isRtl ? "نقداً" : "Cash")
                 ? "border-primary bg-primary/5 shadow-sm" 
                 : "hover:border-primary/30 hover:bg-muted/10"
             }`}
-            onClick={() => selectPaymentMethod(language === 'ar' ? "نقداً" : "Cash")}
+            onClick={() => selectPaymentMethod(isRtl ? "نقداً" : "Cash")}
           >
             <img 
               src="https://cdn-icons-png.flaticon.com/512/7083/7083125.png" 
@@ -228,11 +235,11 @@ export const InvoiceStepPayment: React.FC = () => {
           
           <div 
             className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
-              paymentMethod === (language === 'ar' ? "كي نت" : "KNET")
+              paymentMethod === (isRtl ? "كي نت" : "KNET")
                 ? "border-primary bg-primary/5 shadow-sm" 
                 : "hover:border-primary/30 hover:bg-muted/10"
             }`}
-            onClick={() => selectPaymentMethod(language === 'ar' ? "كي نت" : "KNET")}
+            onClick={() => selectPaymentMethod(isRtl ? "كي نت" : "KNET")}
           >
             <img 
               src="https://kabkg.com/staticsite/images/knet.png" 
@@ -320,8 +327,8 @@ export const InvoiceStepPayment: React.FC = () => {
               size="lg"
               onClick={saveOrder}
             >
-              <Save className="w-5 h-5 mr-2" />
-              {language === 'ar' ? 'حفظ الطلب' : 'Save Order'}
+              <Save className={`w-5 h-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
+              {isRtl ? 'حفظ الطلب' : 'Save Order'}
             </Button>
           </motion.div>
         ) : (
@@ -330,9 +337,9 @@ export const InvoiceStepPayment: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <Check className="w-5 h-5 mr-2" />
+            <Check className={`w-5 h-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
             <span className="font-medium">
-              {language === 'ar' ? 'تم حفظ الطلب بنجاح' : 'Order saved successfully'}
+              {isRtl ? 'تم حفظ الطلب بنجاح' : 'Order saved successfully'}
             </span>
           </motion.div>
         )}
