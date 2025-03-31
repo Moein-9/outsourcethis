@@ -5,11 +5,7 @@ import { useLanguageStore } from "@/store/languageStore";
 import { Globe } from "lucide-react";
 
 export const LanguageToggle: React.FC = () => {
-  const { language, setLanguage } = useLanguageStore();
-
-  const toggleLanguage = () => {
-    setLanguage(language === 'ar' ? 'en' : 'ar');
-  };
+  const { language, toggleLanguage } = useLanguageStore();
 
   return (
     <Button 

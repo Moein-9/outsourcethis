@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
 import { useInvoiceStore, Invoice, Payment, Refund } from '@/store/invoiceStore';
-import { DateRangePicker } from '@/components/ui/date-picker';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -92,7 +92,18 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
           <h2 className="text-2xl font-bold">{t('dailySalesReport')}</h2>
           <p className="text-muted-foreground">{t('overviewOfSales')}</p>
         </div>
-        <DateRangePicker date={dateRange} onSelect={setDateRange} />
+        <div className="flex space-x-2">
+          <DatePicker 
+            selected={dateRange.from} 
+            onSelect={(date) => setDateRange(prev => ({ ...prev, from: date }))} 
+            placeholderText={t('from')}
+          />
+          <DatePicker 
+            selected={dateRange.to} 
+            onSelect={(date) => setDateRange(prev => ({ ...prev, to: date }))} 
+            placeholderText={t('to')}
+          />
+        </div>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -107,7 +118,7 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
                 {t('salesInfo')}
               </CardTitle>
               <CardDescription className="text-blue-700">
-                {t('totalSales')}: {totalSales.toFixed(3)} KWD
+                {t('totalSales')}: {totalSales.toFixed(3)} {t('kwd')}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -127,7 +138,7 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
                       <TableCell>{invoice.patientName}</TableCell>
                       <TableCell>{formatDate(invoice.createdAt)}</TableCell>
                       <TableCell className="text-right font-medium text-blue-700">
-                        {invoice.total.toFixed(3)} KWD
+                        {invoice.total.toFixed(3)} {t('kwd')}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -143,7 +154,7 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
                 {t('paymentInfo')}
               </CardTitle>
               <CardDescription className="text-green-700">
-                {t('totalPayments')}: {totalPayments.toFixed(3)} KWD
+                {t('totalPayments')}: {totalPayments.toFixed(3)} {t('kwd')}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -164,7 +175,7 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
                         <TableCell>{payment.method}</TableCell>
                         <TableCell>{formatDate(payment.date)}</TableCell>
                         <TableCell className="text-right font-medium text-green-700">
-                          {payment.amount.toFixed(3)} KWD
+                          {payment.amount.toFixed(3)} {t('kwd')}
                         </TableCell>
                       </TableRow>
                     ))
@@ -183,7 +194,7 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
               {t('refundInfo')}
             </CardTitle>
             <CardDescription className="text-red-700">
-              {t('refundAmount')}: {totalRefundAmount.toFixed(3)} KWD
+              {t('refundAmount')}: {totalRefundAmount.toFixed(3)} {t('kwd')}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
@@ -191,7 +202,7 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
               <TableHeader className="bg-red-50/30">
                 <TableRow>
                   <TableHead>{t('refundId')}</TableHead>
-                  <TableHead>{t('refundMethod')}</TableHead>
+                  <TableHead>{t('method')}</TableHead>
                   <TableHead>{t('refundDate')}</TableHead>
                   <TableHead className="text-right">{t('amount')}</TableHead>
                 </TableRow>
@@ -203,7 +214,7 @@ export const DailySalesReport: React.FC<DailySalesReportProps> = ({ className })
                     <TableCell>{refund.method}</TableCell>
                     <TableCell>{formatDate(refund.date)}</TableCell>
                     <TableCell className="text-right font-medium text-red-700">
-                      {refund.amount.toFixed(3)} KWD
+                      {refund.amount.toFixed(3)} {t('kwd')}
                     </TableCell>
                   </TableRow>
                 ))}
