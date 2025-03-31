@@ -6,8 +6,8 @@ import { ReceiptInvoice } from '@/components/ReceiptInvoice';
 import { formatDate } from '@/lib/utils';
 
 export class CustomPrintService {
-  static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
-    console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
+  static printWorkOrder(workOrder: any, invoice?: any, patient?: any, locationId?: string) {
+    console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient, locationId });
     
     try {
       // Create a new window for printing
@@ -215,6 +215,7 @@ export class CustomPrintService {
           invoice={invoice}
           patient={patient}
           isPrintable={true}
+          locationId={locationId}
         />
       );
       
@@ -308,8 +309,8 @@ export class CustomPrintService {
     }
   }
   
-  static printInvoice(invoice: any) {
-    console.log("CustomPrintService: Printing invoice", { invoice });
+  static printInvoice(invoice: any, locationId?: string) {
+    console.log("CustomPrintService: Printing invoice", { invoice, locationId });
     
     try {
       // Create a new window for printing
@@ -525,6 +526,7 @@ export class CustomPrintService {
         <ReceiptInvoice
           invoice={invoice}
           isPrintable={true}
+          locationId={locationId}
         />
       );
       

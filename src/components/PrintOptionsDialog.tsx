@@ -9,14 +9,16 @@ import { Patient } from '@/store/patientStore';
 import { CustomWorkOrderReceipt } from './CustomWorkOrderReceipt';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ReceiptInvoice } from './ReceiptInvoice';
+import { useLocationStore } from '@/store/locationStore';
+import { LocationSelector } from './LocationSelector';
 
 interface PrintOptionsDialogProps {
   invoice?: Invoice;
   workOrder: any;
   patient?: Patient;
   children: React.ReactNode;
-  onPrintWorkOrder: () => void;
-  onPrintInvoice: () => void;
+  onPrintWorkOrder: (locationId?: string) => void;
+  onPrintInvoice: (locationId?: string) => void;
 }
 
 export function PrintOptionsDialog({
@@ -28,13 +30,17 @@ export function PrintOptionsDialog({
   onPrintInvoice
 }: PrintOptionsDialogProps) {
   const { t, language } = useLanguageStore();
+  const { selectedLocation } = useLocationStore();
   const [open, setOpen] = React.useState(false);
+  const [selectedLocationId, setSelectedLocationId] = React.useState<string>(
+    invoice?.locationId || workOrder?.locationId || selectedLocation.id
+  );
 
   const handlePrintWorkOrder = () => {
     setOpen(false);
     // Wait for the dialog to close before printing
     setTimeout(() => {
-      onPrintWorkOrder();
+      onPrintWorkOrder(selectedLocationId);
     }, 150);
   };
 
@@ -42,7 +48,7 @@ export function PrintOptionsDialog({
     setOpen(false);
     // Wait for the dialog to close before printing
     setTimeout(() => {
-      onPrintInvoice();
+      onPrintInvoice(selectedLocationId);
     }, 150);
   };
 
@@ -55,6 +61,14 @@ export function PrintOptionsDialog({
         <DialogHeader>
           <DialogTitle>{t('printPreview')}</DialogTitle>
         </DialogHeader>
+
+        <div className="mb-4">
+          <LocationSelector
+            selectedLocationId={selectedLocationId}
+            onLocationChange={setSelectedLocationId}
+            inline={true}
+          />
+        </div>
 
         <Tabs defaultValue="workorder-preview" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -75,6 +89,7 @@ export function PrintOptionsDialog({
                     invoice={invoice} 
                     patient={patient}
                     isPrintable={true}
+                    locationId={selectedLocationId}
                   />
                 </div>
               </div>
@@ -98,6 +113,7 @@ export function PrintOptionsDialog({
                     <ReceiptInvoice 
                       invoice={invoice} 
                       isPrintable={true}
+                      locationId={selectedLocationId}
                     />
                   </div>
                 </div>
