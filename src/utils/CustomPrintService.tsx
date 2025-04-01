@@ -24,7 +24,8 @@ export class CustomPrintService {
       // Check if this is a contact lens order
       const isContactLens = workOrder?.contactLenses?.length > 0 || 
                           invoice?.contactLensItems?.length > 0 ||
-                          workOrder?.isContactLens === true;
+                          workOrder?.isContactLens === true ||
+                          invoice?.invoiceType === 'contacts';
                           
       console.log("Is contact lens order:", isContactLens);
       
