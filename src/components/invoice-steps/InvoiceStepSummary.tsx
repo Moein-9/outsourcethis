@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -70,7 +69,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     createdAt: currentTimestamp,
   } as Invoice;
   
-  // Get the RX data from form values
   const rxData = getValues('rx') || {
     sphereOD: "",
     cylOD: "",
@@ -97,8 +95,8 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     phone: getValues<string>('patientPhone') || "",
     dob: "",
     notes: "",
-    rx: rxData, // Fix: Use rxData directly instead of wrapping in an array
-    createdAt: currentTimestamp
+    rx: rxData,
+    contactLensRx: getValues('contactLensRx') || null
   };
   
   const hasInvoiceData = !!invoice.invoiceId;
@@ -117,7 +115,9 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     lensType: lensTypeObject,
     contactLenses: invoice.contactLensItems,
     isPaid: invoice.isPaid,
-    rx: rxData, // Add RX data directly to workOrder for consistency
+    rx: rxData,
+    isContactLens: isContactLens,
+    contactLensRx: getValues('contactLensRx'),
     ...(invoice.discount ? { discount: invoice.discount } : {})
   } as any;
   
@@ -278,12 +278,10 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
         
         <CardContent className="p-4 space-y-4">
           {!isEyeExam && (
-            <PrintOptionsDialog
-              invoice={invoice}
+            <CustomPrintWorkOrderButton
               workOrder={workOrder}
+              invoice={invoice}
               patient={patient}
-              onPrintWorkOrder={handlePrintWorkOrder}
-              onPrintInvoice={handlePrintInvoice}
             >
               <div className="group cursor-pointer rounded-lg border hover:border-blue-400 transition-all duration-300 overflow-hidden hover:shadow-md">
                 <div className="flex items-center">
@@ -299,7 +297,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
                   </div>
                 </div>
               </div>
-            </PrintOptionsDialog>
+            </CustomPrintWorkOrderButton>
           )}
           
           <div 

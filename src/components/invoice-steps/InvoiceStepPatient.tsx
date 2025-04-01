@@ -114,6 +114,11 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
   const handleContactLensRxChange = (rxData: any) => {
     setValue('contactLensRx', rxData);
     
+    // Make sure to set isContactLens flag when dealing with contact lens prescriptions
+    if (invoiceType === "contacts") {
+      setValue('isContactLens', true);
+    }
+    
     let hasError = false;
     
     if (rxData.rightEye.cylinder !== "-" && rxData.rightEye.axis === "-") {
