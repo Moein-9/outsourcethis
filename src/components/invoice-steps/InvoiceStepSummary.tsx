@@ -43,6 +43,8 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     lensPrice: getValues<number>('lensPrice') || 0,
     coating: getValues<string>('coating') || "",
     coatingPrice: getValues<number>('coatingPrice') || 0,
+    thickness: getValues<string>('thickness') || "",
+    thicknessPrice: getValues<number>('thicknessPrice') || 0,
     frameBrand: getValues<string>('frameBrand') || "",
     frameModel: getValues<string>('frameModel') || "",
     frameColor: getValues<string>('frameColor') || "",
@@ -88,16 +90,15 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     createdAt: currentTimestamp,
     lensType: lensTypeObject,
     contactLenses: invoice.contactLensItems,
-    framePrice: invoice.framePrice,
-    lensPrice: invoice.lensPrice,
-    coatingPrice: invoice.coatingPrice,
+    // Remove framePrice and other properties that don't exist in WorkOrder type
     discount: invoice.discount,
     total: invoice.total,
     isPaid: invoice.isPaid,
     frameBrand: invoice.frameBrand,
     frameModel: invoice.frameModel,
-    frameColor: invoice.frameColor
-    // Note: We've removed 'coating' as it's not in the WorkOrder interface
+    frameColor: invoice.frameColor,
+    lensPrice: invoice.lensPrice,
+    coatingPrice: invoice.coatingPrice
   };
   
   const handlePrintInvoice = () => {

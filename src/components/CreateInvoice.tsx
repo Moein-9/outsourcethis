@@ -103,27 +103,7 @@ const CreateInvoiceContent: React.FC = () => {
           {t('invoiceTitle')}
         </h2>
         
-        <div className="flex items-center space-x-3">
-          <Button 
-            onClick={handlePrintInvoice} 
-            variant="outline" 
-            className="flex items-center gap-2"
-          >
-            <Receipt className="w-4 h-4" />
-            {t('printInvoice')}
-          </Button>
-          
-          {invoiceType !== "exam" && (
-            <Button 
-              onClick={handlePrintWorkOrder} 
-              variant="outline" 
-              className="flex items-center gap-2"
-            >
-              <Printer className="w-4 h-4" />
-              {t('printWorkOrder')}
-            </Button>
-          )}
-        </div>
+        {/* Removed the Print Invoice and Print Work Order buttons */}
       </div>
 
       <div className="grid grid-cols-3 gap-5">
