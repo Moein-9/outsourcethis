@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -65,13 +66,34 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     createdAt: currentTimestamp,
   } as Invoice;
   
+  // Get the RX data from form values
+  const rxData = getValues('rx') || {
+    sphereOD: "",
+    cylOD: "",
+    axisOD: "",
+    sphereOS: "",
+    cylOS: "",
+    axisOS: "",
+    add: "",
+    pd: "",
+    pdRight: "",
+    pdLeft: "",
+    addOD: "",
+    addOS: "",
+    prism: "",
+    base: "",
+    va: "",
+    notes: "",
+    optometrist: ""
+  };
+  
   const patient = {
     patientId: getValues<string>('patientId') || "",
     name: getValues<string>('patientName') || "",
     phone: getValues<string>('patientPhone') || "",
     dob: "",
     notes: "",
-    rx: [],
+    rx: [rxData], // Use the RX data from form values
     createdAt: currentTimestamp
   };
   
@@ -91,6 +113,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     lensType: lensTypeObject,
     contactLenses: invoice.contactLensItems,
     isPaid: invoice.isPaid,
+    rx: rxData, // Add RX data directly to workOrder for consistency
     ...(invoice.discount ? { discount: invoice.discount } : {})
   } as any;
   
