@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { toast } from '@/hooks/use-toast';
 import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 import { ReceiptInvoice } from '@/components/ReceiptInvoice';
+import { storeInfo, formatStoreAddress } from '@/assets/logo';
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
@@ -27,6 +27,15 @@ export class CustomPrintService {
                           workOrder?.isContactLens === true;
                           
       console.log("Is contact lens order:", isContactLens);
+      
+      // Format store addresses
+      const formattedAddresses = formatStoreAddress('en');
+      const addressesHTML = formattedAddresses.map((address, index) => `
+        <p style="font-size: 9px; margin: 0; font-weight: bold;">${address.title}</p>
+        <p style="font-size: 9px; margin: 0;">${address.street}</p>
+        <p style="font-size: 9px; margin: 0; direction: ltr; text-align: center;">${address.phone}</p>
+        ${index < formattedAddresses.length - 1 ? '<div style="width: 50%; margin: 2px auto; border-top: 1px solid #ddd;"></div>' : ''}
+      `).join('');
       
       // Add basic HTML structure with improved styles for the receipt
       printWindow.document.write(`
@@ -80,6 +89,11 @@ export class CustomPrintService {
               .print-receipt * {
                 visibility: visible !important;
                 opacity: 1 !important;
+              }
+              
+              .ltr {
+                direction: ltr !important;
+                text-align: center !important;
               }
               
               .bg-black {
@@ -140,11 +154,6 @@ export class CustomPrintService {
               .rtl {
                 direction: rtl !important;
                 font-family: 'Zain', sans-serif !important;
-              }
-              
-              .ltr {
-                direction: ltr !important;
-                font-family: 'Yrsa', serif !important;
               }
               
               /* Print-specific overrides */
@@ -355,6 +364,15 @@ export class CustomPrintService {
         return;
       }
       
+      // Format store addresses
+      const formattedAddresses = formatStoreAddress('en');
+      const addressesHTML = formattedAddresses.map((address, index) => `
+        <p style="font-size: 9px; margin: 0; font-weight: bold;">${address.title}</p>
+        <p style="font-size: 9px; margin: 0;">${address.street}</p>
+        <p style="font-size: 9px; margin: 0; direction: ltr; text-align: center;">${address.phone}</p>
+        ${index < formattedAddresses.length - 1 ? '<div style="width: 50%; margin: 2px auto; border-top: 1px solid #ddd;"></div>' : ''}
+      `).join('');
+      
       // Add basic HTML structure with styles for the receipt
       printWindow.document.write(`
         <!DOCTYPE html>
@@ -407,6 +425,11 @@ export class CustomPrintService {
               .print-receipt * {
                 visibility: visible !important;
                 opacity: 1 !important;
+              }
+              
+              .ltr {
+                direction: ltr !important;
+                text-align: center !important;
               }
               
               .bg-black {
@@ -470,11 +493,6 @@ export class CustomPrintService {
               .rtl {
                 direction: rtl !important;
                 font-family: 'Zain', sans-serif !important;
-              }
-              
-              .ltr {
-                direction: ltr !important;
-                font-family: 'Yrsa', serif !important;
               }
               
               /* Print-specific overrides */
