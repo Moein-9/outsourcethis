@@ -99,7 +99,15 @@ export const storeInfo = {
       },
       phone: "24759016"
     }
-  ]
+  ],
+  // Backward compatibility properties
+  get address() {
+    // Format as combined address string
+    return `${this.addresses[0].title.en} | ${this.addresses[0].title.ar}, ${this.addresses[0].street.en}`;
+  },
+  get phone() {
+    return this.addresses[0].phone;
+  }
 };
 
 export const formatStoreAddress = (language: string = 'en', includePhone: boolean = true) => {
