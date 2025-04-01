@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -28,8 +29,10 @@ const CreateInvoiceContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState("patient");
   const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
   
+  // Improved event listener for navigation
   useEffect(() => {
     const handleNavigateToSummary = () => {
+      console.log("Navigate to summary event triggered");
       setActiveTab("summary");
     };
     
@@ -111,11 +114,11 @@ const CreateInvoiceContent: React.FC = () => {
           <Card className="border border-muted-foreground/10 shadow-md h-full">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-4 w-full rounded-none">
-                <TabsTrigger value="patient" className="flex items-center gap-2">
+                <TabsTrigger value="patient" className="flex items-center gap-2" data-value="patient">
                   <User className="w-4 h-4" />
                   {t('clientSection')}
                 </TabsTrigger>
-                <TabsTrigger value="products" className="flex items-center gap-2">
+                <TabsTrigger value="products" className="flex items-center gap-2" data-value="products">
                   {invoiceType === "exam" ? (
                     <ScrollText className="w-4 h-4" />
                   ) : (
@@ -125,11 +128,11 @@ const CreateInvoiceContent: React.FC = () => {
                     ? (language === 'ar' ? 'خدمة الفحص' : 'Exam Service') 
                     : t('productSection')}
                 </TabsTrigger>
-                <TabsTrigger value="payment" className="flex items-center gap-2">
+                <TabsTrigger value="payment" className="flex items-center gap-2" data-value="payment">
                   <CreditCard className="w-4 h-4" />
                   {t('paymentSection')}
                 </TabsTrigger>
-                <TabsTrigger value="summary" className="flex items-center gap-2">
+                <TabsTrigger value="summary" className="flex items-center gap-2" data-value="summary">
                   <FileText className="w-4 h-4" />
                   {t('summarySection')}
                 </TabsTrigger>

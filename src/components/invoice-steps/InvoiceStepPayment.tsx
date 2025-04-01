@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -94,7 +95,11 @@ export const InvoiceStepPayment: React.FC = () => {
       workOrder.contactLensRx = getValues('contactLensRx') || null;
     }
     
-    const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
+    // Make sure addWorkOrder is a function before calling it
+    const workOrderId = typeof addWorkOrder === 'function' 
+      ? addWorkOrder(workOrder) 
+      : `WO${Date.now()}`;
+      
     setValue('workOrderId', workOrderId);
     
     const formData = getValues();
@@ -127,9 +132,19 @@ export const InvoiceStepPayment: React.FC = () => {
     } else if (invoiceType === 'contacts') {
       invoiceData.contactLensItems = formData.contactLensItems || [];
       invoiceData.contactLensRx = formData.contactLensRx || null;
+    } else if (invoiceType === 'exam') {
+      // Handle eye exam services
+      invoiceData.serviceName = formData.serviceName;
+      invoiceData.serviceId = formData.serviceId;
+      invoiceData.serviceDescription = formData.serviceDescription;
+      invoiceData.servicePrice = formData.servicePrice;
     }
     
-    const invoiceId = addInvoice(invoiceData);
+    // Make sure addInvoice is a function before calling it
+    const invoiceId = typeof addInvoice === 'function' 
+      ? addInvoice(invoiceData)
+      : `IN${Date.now()}`;
+      
     setValue('invoiceId', invoiceId);
     
     setOrderSaved(true);
@@ -139,8 +154,21 @@ export const InvoiceStepPayment: React.FC = () => {
       description: `${t('orderSavedSuccess')}`,
     });
 
-    if (window && window.dispatchEvent) {
-      window.dispatchEvent(new CustomEvent('navigateToSummary'));
+    // Ensure we use a safer way to dispatch the event
+    try {
+      if (typeof window !== 'undefined') {
+        const navigateEvent = new CustomEvent('navigateToSummary');
+        window.dispatchEvent(navigateEvent);
+        
+        // Add a fallback in case event doesn't work
+        setTimeout(() => {
+          if (document.querySelector('[data-value="summary"]')) {
+            (document.querySelector('[data-value="summary"]') as HTMLElement)?.click();
+          }
+        }, 300);
+      }
+    } catch (error) {
+      console.error("Failed to navigate after save:", error);
     }
   };
   
@@ -322,7 +350,7 @@ export const InvoiceStepPayment: React.FC = () => {
               onClick={saveOrder}
             >
               <Save className="w-5 h-5 mr-2" />
-              {isRtl ? 'حفظ الطلب' : 'Save Order'}
+              {isRtl ? 'حفظ ومتابعة' : 'Save and Continue'}
             </Button>
           </motion.div>
         ) : (
