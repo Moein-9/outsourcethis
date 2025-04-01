@@ -1,410 +1,480 @@
-
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import React, { useState, useEffect } from "react";
+import { useInventoryStore, FrameItem, ContactLensItem } from "@/store/inventoryStore";
+import { usePatientStore, ContactLensRx, Patient } from "@/store/patientStore";
+import { useInvoiceStore } from "@/store/invoiceStore";
+import { useLanguageStore } from "@/store/languageStore";
+import { toast } from "sonner";
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useInvoiceStore } from "@/store/invoiceStore";
-import { usePatientStore } from "@/store/patientStore";
-import { useLanguageStore } from "@/store/languageStore";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useInventoryStore } from "@/store/inventoryStore";
-import { WorkOrder as InventoryWorkOrder } from "@/types/inventory";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Search, Plus, Contact, Edit, Save, Check, Eye } from "lucide-react";
+import { InputWithUnits } from "@/components/ui/input-with-units";
+import { Textarea } from "@/components/ui/textarea";
 
 interface WorkOrderEditFormProps {
-  workOrder: InventoryWorkOrder;
-  onSave: (updatedWorkOrder: InventoryWorkOrder) => void;
-  onCancel: () => void;
+  invoiceId?: string;
+  onClose?: () => void;
 }
 
-export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({
-  workOrder,
-  onSave,
-  onCancel
-}) => {
-  const { t, language } = useLanguageStore();
-  const { updateInvoice } = useInvoiceStore();
-  const { editWorkOrder } = usePatientStore();
-  const { lensTypes, lensCoatings, frames } = useInventoryStore();
-  const isRtl = language === 'ar';
-  
-  // Fix: Update the getLensTypeName function to handle type correctly
-  const getLensTypeName = (lensType: any): string => {
-    if (typeof lensType === 'object' && lensType !== null && 'name' in lensType) {
-      return lensType.name || '';
+export const WorkOrderEditForm: React.FC<WorkOrderEditFormProps> = ({ invoiceId, onClose }) => {
+  const { frames, contactLenses } = useInventoryStore();
+  const { patients } = usePatientStore();
+  const { getInvoice, updateInvoice } = useInvoiceStore();
+  const { t } = useLanguageStore();
+  const router = useRouter();
+
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [rx, setRx] = useState<{
+    sphere?: { right: string; left: string };
+    cylinder?: { right: string; left: string };
+    axis?: { right: string; left: string };
+    add?: { right: string; left: string };
+    pd?: { right: string; left: string };
+  }>({});
+  const [contactLensRx, setContactLensRx] = useState<ContactLensRx | null>(null);
+  const [lensType, setLensType] = useState("");
+  const [coating, setCoating] = useState("");
+  const [thickness, setThickness] = useState("");
+  const [selectedFrame, setSelectedFrame] = useState<FrameItem | null>(null);
+  const [contactLensItems, setContactLensItems] = useState<ContactLensItem[]>([]);
+  const [notes, setNotes] = useState("");
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<FrameItem[]>([]);
+
+  const [isContactLensDialogOpen, setIsContactLensDialogOpen] = useState(false);
+  const [contactLensSearchTerm, setContactLensSearchTerm] = useState("");
+  const [contactLensSearchResults, setContactLensSearchResults] = useState<ContactLensItem[]>([]);
+
+  const [filterBrand, setFilterBrand] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("all");
+  const brands = [...new Set(frames.map(frame => frame.brand))];
+  const types = [...new Set(frames.map(frame => frame.type))];
+
+  const [contactLensFilterBrand, setContactLensFilterBrand] = useState<string>("all");
+  const [contactLensFilterType, setContactLensFilterType] = useState<string>("all");
+  const contactLensBrands = [...new Set(contactLenses.map(lens => lens.brand))];
+  const contactLensTypes = [...new Set(contactLenses.map(lens => lens.type))];
+
+  useEffect(() => {
+    if (invoiceId) {
+      const invoice = getInvoice(invoiceId);
+      if (invoice) {
+        setPatient(patients.find(p => p.id === invoice.patientId) || null);
+        setRx(invoice.rx || {});
+        setContactLensRx(invoice.contactLensRx || null);
+        setLensType(invoice.lensType || "");
+        setCoating(invoice.coating || "");
+        setThickness(invoice.thickness || "");
+        setSelectedFrame(frames.find(f => f.frameId === invoice.frameId) || null);
+        setContactLensItems(invoice.contactLensItems || []);
+        setNotes(invoice.notes || "");
+      }
     }
-    return typeof lensType === 'string' ? lensType : '';
-  };
-  
-  // Fix: Update the getLensPrice function to ensure it handles all possible input types
-  const getLensPrice = (lensType: any, fallbackPrice: number): number => {
-    if (typeof lensType === 'object' && lensType !== null && 'price' in lensType) {
-      return lensType.price || fallbackPrice;
+  }, [invoiceId, getInvoice, frames, patients]);
+
+  const handleFrameSearch = () => {
+    let results = frames;
+
+    if (searchTerm) {
+      const lowercasedTerm = searchTerm.toLowerCase();
+      results = frames.filter(frame =>
+        frame.brand.toLowerCase().includes(lowercasedTerm) ||
+        frame.model.toLowerCase().includes(lowercasedTerm) ||
+        frame.color?.toLowerCase().includes(lowercasedTerm) ||
+        frame.size?.toLowerCase().includes(lowercasedTerm)
+      );
     }
-    return fallbackPrice;
-  };
-  
-  const [editData, setEditData] = useState({
-    frameBrand: workOrder.frameBrand || '',
-    frameModel: workOrder.frameModel || '',
-    frameColor: workOrder.frameColor || '',
-    frameSize: workOrder.frameSize || '',
-    framePrice: workOrder.framePrice || 0,
-    lensType: getLensTypeName(workOrder.lensType),
-    lensPrice: getLensPrice(workOrder.lensType, workOrder.lensPrice || 0),
-    coating: workOrder.coating || '',
-    coatingPrice: workOrder.coatingPrice || 0,
-    discount: workOrder.discount || 0,
-    total: workOrder.total || 0,
-  });
-  
-  // Track original values to identify what changed
-  const [originalData] = useState({
-    frameBrand: workOrder.frameBrand || '',
-    frameModel: workOrder.frameModel || '',
-    frameColor: workOrder.frameColor || '',
-    frameSize: workOrder.frameSize || '',
-    framePrice: workOrder.framePrice || 0,
-    lensType: getLensTypeName(workOrder.lensType),
-    lensPrice: getLensPrice(workOrder.lensType, workOrder.lensPrice || 0),
-    coating: workOrder.coating || '',
-    coatingPrice: workOrder.coatingPrice || 0,
-    discount: workOrder.discount || 0,
-    total: workOrder.total || 0,
-  });
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    if (name === 'framePrice' || name === 'lensPrice' || name === 'coatingPrice' || name === 'discount' || name === 'total') {
-      setEditData({
-        ...editData,
-        [name]: parseFloat(value) || 0
-      });
-    } else {
-      setEditData({
-        ...editData,
-        [name]: value
-      });
+
+    if (filterBrand && filterBrand !== "all") {
+      results = results.filter(frame => frame.brand === filterBrand);
     }
+
+    if (filterType && filterType !== "all") {
+      results = results.filter(frame => frame.type === filterType);
+    }
+
+    setSearchResults(results);
   };
-  
-  const handleSelectChange = (name: string, value: string) => {
-    setEditData({
-      ...editData,
-      [name]: value
+
+  const handleContactLensSearch = () => {
+    let results = contactLenses;
+
+    if (contactLensSearchTerm) {
+      const lowercasedTerm = contactLensSearchTerm.toLowerCase();
+      results = contactLenses.filter(lens =>
+        lens.brand.toLowerCase().includes(lowercasedTerm) ||
+        lens.type.toLowerCase().includes(lowercasedTerm)
+      );
+    }
+
+    if (contactLensFilterBrand && contactLensFilterBrand !== "all") {
+      results = results.filter(lens => lens.brand === contactLensFilterBrand);
+    }
+
+    if (contactLensFilterType && contactLensFilterType !== "all") {
+      results = results.filter(lens => lens.type === contactLensFilterType);
+    }
+
+    setContactLensSearchResults(results);
+  };
+
+  useEffect(() => {
+    handleFrameSearch();
+  }, [searchTerm, filterBrand, filterType, frames]);
+
+  useEffect(() => {
+    handleContactLensSearch();
+  }, [contactLensSearchTerm, contactLensFilterBrand, contactLensFilterType, contactLenses]);
+
+  const handleSelectFrame = (frame: FrameItem) => {
+    setSelectedFrame(frame);
+    setIsDialogOpen(false);
+  };
+
+  const handleSelectContactLens = (lens: ContactLensItem) => {
+    setContactLensItems([...contactLensItems, lens]);
+    setIsContactLensDialogOpen(false);
+  };
+
+  const handleRemoveContactLens = (lensId: string) => {
+    setContactLensItems(contactLensItems.filter(lens => lens.id !== lensId));
+  };
+
+  const handleSave = () => {
+    if (!invoiceId) {
+      toast.error("Invoice ID is missing.");
+      return;
+    }
+
+    updateInvoice(invoiceId, {
+      patientId: patient?.id,
+      rx,
+      contactLensRx,
+      lensType,
+      coating,
+      thickness,
+      frameId: selectedFrame?.frameId,
+      contactLensItems,
+      notes
     });
-    
-    if (name === 'lensType') {
-      const selectedLens = lensTypes.find(lens => lens.type === value);
-      if (selectedLens) {
-        setEditData(prev => ({
-          ...prev,
-          lensPrice: selectedLens.price || 0
-        }));
-      }
-    } else if (name === 'coating') {
-      const selectedCoating = lensCoatings.find(coating => coating.name === value);
-      if (selectedCoating) {
-        setEditData(prev => ({
-          ...prev,
-          coatingPrice: selectedCoating.price || 0
-        }));
-      }
-    } else if (name === 'frameBrand') {
-      setEditData(prev => ({
-        ...prev,
-        frameModel: '',
-        frameColor: ''
-      }));
-    }
+
+    toast.success("Work order updated successfully!");
+    onClose?.();
+    router.refresh();
   };
-  
-  const getChanges = (): string[] => {
-    const changes: string[] = [];
-    
-    if (editData.frameBrand !== originalData.frameBrand) {
-      changes.push(`${t("frameBrand")}: ${originalData.frameBrand} → ${editData.frameBrand}`);
-    }
-    if (editData.frameModel !== originalData.frameModel) {
-      changes.push(`${t("frameModel")}: ${originalData.frameModel} → ${editData.frameModel}`);
-    }
-    if (editData.frameColor !== originalData.frameColor) {
-      changes.push(`${t("frameColor")}: ${originalData.frameColor} → ${editData.frameColor}`);
-    }
-    if (editData.frameSize !== originalData.frameSize) {
-      changes.push(`${t("frameSize")}: ${originalData.frameSize} → ${editData.frameSize}`);
-    }
-    if (editData.framePrice !== originalData.framePrice) {
-      changes.push(`${t("framePrice")}: ${originalData.framePrice} → ${editData.framePrice}`);
-    }
-    if (editData.lensType !== originalData.lensType) {
-      changes.push(`${t("lensType")}: ${originalData.lensType} → ${editData.lensType}`);
-    }
-    if (editData.lensPrice !== originalData.lensPrice) {
-      changes.push(`${t("lensPrice")}: ${originalData.lensPrice} → ${editData.lensPrice}`);
-    }
-    if (editData.coating !== originalData.coating) {
-      changes.push(`${t("coating")}: ${originalData.coating} → ${editData.coating}`);
-    }
-    if (editData.coatingPrice !== originalData.coatingPrice) {
-      changes.push(`${t("coatingPrice")}: ${originalData.coatingPrice} → ${editData.coatingPrice}`);
-    }
-    if (editData.discount !== originalData.discount) {
-      changes.push(`${t("discount")}: ${originalData.discount} → ${editData.discount}`);
-    }
-    
-    return changes;
-  };
-  
-  const handleSaveChanges = () => {
-    try {
-      const subtotal = editData.framePrice + editData.lensPrice + editData.coatingPrice;
-      const newTotal = subtotal - editData.discount;
-      
-      // Create timestamp for the edit
-      const now = new Date().toISOString();
-      
-      // Generate detailed notes about what changed
-      const changes = getChanges();
-      const changeNotes = changes.length > 0 
-        ? language === 'ar' 
-          ? `تم تعديل أمر العمل: ${changes.join('، ')}` 
-          : `Work order edited: ${changes.join(', ')}`
-        : language === 'ar' 
-          ? "تم تعديل أمر العمل" 
-          : "Work order has been edited";
-      
-      // Create edit history entry
-      const editHistoryEntry = {
-        timestamp: now,
-        notes: changeNotes
-      };
-      
-      // Combine existing history with new entry
-      const existingHistory = workOrder.editHistory || [];
-      const updatedHistory = [...existingHistory, editHistoryEntry];
-      
-      // Prepare lensType in the correct format for the WorkOrder
-      const lensTypeForWorkOrder = {
-        name: editData.lensType,
-        price: editData.lensPrice
-      };
-      
-      // Update work order with new data and edit history
-      const updatedWorkOrder: InventoryWorkOrder = {
-        ...workOrder,
-        frameBrand: editData.frameBrand,
-        frameModel: editData.frameModel,
-        frameColor: editData.frameColor,
-        frameSize: editData.frameSize,
-        framePrice: editData.framePrice,
-        lensType: lensTypeForWorkOrder,
-        lensPrice: editData.lensPrice,
-        coating: editData.coating,
-        coatingPrice: editData.coatingPrice,
-        discount: editData.discount,
-        total: newTotal,
-        lastEditedAt: now,
-        editHistory: updatedHistory
-      };
-      
-      // Call the onSave callback with the updated work order
-      onSave(updatedWorkOrder);
-      
-      // Show success message
-      toast({
-        title: t("success"),
-        description: t("workOrderUpdated")
-      });
-    } catch (error) {
-      console.error("Error updating work order:", error);
-      toast({
-        title: t("error"),
-        description: t("errorUpdatingWorkOrder"),
-        variant: "destructive"
-      });
-    }
-  };
-  
-  const availableBrands = [...new Set(frames.map(frame => frame.brand))];
-  
-  const availableModels = frames
-    .filter(frame => frame.brand === editData.frameBrand)
-    .map(frame => frame.model);
-  
-  const availableColors = frames
-    .filter(frame => 
-      frame.brand === editData.frameBrand && 
-      frame.model === editData.frameModel
-    )
-    .map(frame => frame.color);
-  
+
   return (
-    <div className={`p-4 ${isRtl ? 'rtl' : 'ltr'}`}>
-      <h3 className="text-lg font-medium mb-4">{t("editWorkOrder")}</h3>
-      
-      <div className="grid gap-4">
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <Label htmlFor="frameBrand">{t("frameBrand")}</Label>
-            <Select 
-              value={editData.frameBrand} 
-              onValueChange={(value) => handleSelectChange('frameBrand', value)}
-            >
-              <SelectTrigger id="frameBrand">
-                <SelectValue placeholder={t("selectFrameBrand")} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableBrands.map(brand => (
-                  <SelectItem key={brand} value={brand}>{brand}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="frameModel">{t("frameModel")}</Label>
-            <Select 
-              value={editData.frameModel} 
-              onValueChange={(value) => handleSelectChange('frameModel', value)}
-              disabled={!editData.frameBrand}
-            >
-              <SelectTrigger id="frameModel">
-                <SelectValue placeholder={t("selectFrameModel")} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableModels.map(model => (
-                  <SelectItem key={model} value={model}>{model}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="frameColor">{t("frameColor")}</Label>
-            <Select 
-              value={editData.frameColor} 
-              onValueChange={(value) => handleSelectChange('frameColor', value)}
-              disabled={!editData.frameModel}
-            >
-              <SelectTrigger id="frameColor">
-                <SelectValue placeholder={t("selectFrameColor")} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableColors.map(color => (
-                  <SelectItem key={color} value={color}>{color}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <div>
-          <Label htmlFor="framePrice">{t("framePrice")}</Label>
-          <Input
-            id="framePrice"
-            name="framePrice"
-            type="number"
-            value={editData.framePrice}
-            onChange={handleChange}
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Patient Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>{patient?.name}</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Prescription Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <InputWithUnits
+            label="Sphere (Right)"
+            value={rx.sphere?.right || ""}
+            onChange={value => setRx(prev => ({ ...prev, sphere: { ...prev.sphere, right: value } }))}
+            unit="diopter"
           />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="lensType">{t("lensType")}</Label>
-            <Select 
-              value={editData.lensType} 
-              onValueChange={(value) => handleSelectChange('lensType', value)}
-            >
-              <SelectTrigger id="lensType">
-                <SelectValue placeholder={t("selectLensType")} />
-              </SelectTrigger>
-              <SelectContent>
-                {lensTypes.map(lens => (
-                  <SelectItem key={lens.id} value={lens.type}>{lens.name}</SelectItem>
+          <InputWithUnits
+            label="Sphere (Left)"
+            value={rx.sphere?.left || ""}
+            onChange={value => setRx(prev => ({ ...prev, sphere: { ...prev.sphere, left: value } }))}
+            unit="diopter"
+          />
+          <InputWithUnits
+            label="Cylinder (Right)"
+            value={rx.cylinder?.right || ""}
+            onChange={value => setRx(prev => ({ ...prev, cylinder: { ...prev.cylinder, right: value } }))}
+            unit="diopter"
+          />
+          <InputWithUnits
+            label="Cylinder (Left)"
+            value={rx.cylinder?.left || ""}
+            onChange={value => setRx(prev => ({ ...prev, cylinder: { ...prev.cylinder, left: value } }))}
+            unit="diopter"
+          />
+          <InputWithUnits
+            label="Axis (Right)"
+            value={rx.axis?.right || ""}
+            onChange={value => setRx(prev => ({ ...prev, axis: { ...prev.axis, right: value } }))}
+            unit="degrees"
+          />
+          <InputWithUnits
+            label="Axis (Left)"
+            value={rx.axis?.left || ""}
+            onChange={value => setRx(prev => ({ ...prev, axis: { ...prev.axis, left: value } }))}
+            unit="degrees"
+          />
+          <InputWithUnits
+            label="Add (Right)"
+            value={rx.add?.right || ""}
+            onChange={value => setRx(prev => ({ ...prev, add: { ...prev.add, right: value } }))}
+            unit="diopter"
+          />
+          <InputWithUnits
+            label="Add (Left)"
+            value={rx.add?.left || ""}
+            onChange={value => setRx(prev => ({ ...prev, add: { ...prev.add, left: value } }))}
+            unit="diopter"
+          />
+          <InputWithUnits
+            label="PD"
+            value={rx.pd || {}}
+            onChange={value => setRx(prev => ({ ...prev, pd: value }))}
+            unit="mm"
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Lens Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Label htmlFor="lensType">Lens Type</Label>
+          <Input
+            id="lensType"
+            type="text"
+            value={lensType}
+            onChange={e => setLensType(e.target.value)}
+          />
+          <Label htmlFor="coating">Coating</Label>
+          <Input
+            id="coating"
+            type="text"
+            value={coating}
+            onChange={e => setCoating(e.target.value)}
+          />
+          <Label htmlFor="thickness">Thickness</Label>
+          <Input
+            id="thickness"
+            type="text"
+            value={thickness}
+            onChange={e => setThickness(e.target.value)}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Frame Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {selectedFrame ? (
+            <div>
+              <p>Brand: {selectedFrame.brand}</p>
+              <p>Model: {selectedFrame.model}</p>
+              <Button onClick={() => {
+                setSelectedFrame(null);
+              }}>Remove Frame</Button>
+            </div>
+          ) : (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>Select Frame</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>Select Frame</DialogTitle>
+                  <DialogDescription>Search and select a frame for the work order.</DialogDescription>
+                </DialogHeader>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="searchTerm">Search</Label>
+                    <Input
+                      id="searchTerm"
+                      type="text"
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="filterBrand">Brand</Label>
+                    <Select value={filterBrand} onValueChange={setFilterBrand}>
+                      <SelectTrigger id="filterBrand" className="w-full">
+                        <SelectValue placeholder="Select Brand" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Brands</SelectItem>
+                        {brands.map((brand: string) => (
+                          <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="filterType">Type</Label>
+                    <Select value={filterType} onValueChange={setFilterType}>
+                      <SelectTrigger id="filterType" className="w-full">
+                        <SelectValue placeholder="Select Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        {types.map((type: string) => (
+                          <SelectItem key={type} value={type}>{type}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <Button onClick={handleFrameSearch}>Search</Button>
+
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                  {searchResults.map(frame => (
+                    <Card key={frame.frameId} onClick={() => handleSelectFrame(frame)} className="cursor-pointer">
+                      <CardContent>
+                        <p>{frame.brand} {frame.model}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                <DialogFooter>
+                  <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Contact Lens Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={() => setIsContactLensDialogOpen(true)}>Select Contact Lenses</Button>
+
+          {contactLensItems.length > 0 && (
+            <ul>
+              {contactLensItems.map(lens => (
+                <li key={lens.id} className="flex items-center justify-between">
+                  {lens.brand} {lens.type}
+                  <Button onClick={() => handleRemoveContactLens(lens.id)} variant="ghost" size="sm">
+                    Remove
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <Dialog open={isContactLensDialogOpen} onOpenChange={setIsContactLensDialogOpen}>
+            <DialogContent className="max-w-4xl">
+              <DialogHeader>
+                <DialogTitle>Select Contact Lenses</DialogTitle>
+                <DialogDescription>Search and select contact lenses for the work order.</DialogDescription>
+              </DialogHeader>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="contactLensSearchTerm">Search</Label>
+                  <Input
+                    id="contactLensSearchTerm"
+                    type="text"
+                    value={contactLensSearchTerm}
+                    onChange={e => setContactLensSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contactLensFilterBrand">Brand</Label>
+                  <Select value={contactLensFilterBrand} onValueChange={setContactLensFilterBrand}>
+                    <SelectTrigger id="contactLensFilterBrand" className="w-full">
+                      <SelectValue placeholder="Select Brand" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Brands</SelectItem>
+                      {contactLensBrands.map((brand: string) => (
+                        <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="contactLensFilterType">Type</Label>
+                  <Select value={contactLensFilterType} onValueChange={setContactLensFilterType}>
+                    <SelectTrigger id="contactLensFilterType" className="w-full">
+                      <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      {contactLensTypes.map((type: string) => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <Button onClick={handleContactLensSearch}>Search</Button>
+
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                {contactLensSearchResults.map(lens => (
+                  <Card key={lens.id} onClick={() => handleSelectContactLens(lens)} className="cursor-pointer">
+                    <CardContent>
+                      <p>{lens.brand} {lens.type}</p>
+                    </CardContent>
+                  </Card>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="lensPrice">{t("lensPrice")}</Label>
-            <Input
-              id="lensPrice"
-              name="lensPrice"
-              type="number"
-              value={editData.lensPrice}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="coating">{t("coating")}</Label>
-            <Select 
-              value={editData.coating} 
-              onValueChange={(value) => handleSelectChange('coating', value)}
-            >
-              <SelectTrigger id="coating">
-                <SelectValue placeholder={t("selectCoating")} />
-              </SelectTrigger>
-              <SelectContent>
-                {lensCoatings.map(coating => (
-                  <SelectItem key={coating.id} value={coating.name}>{coating.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="coatingPrice">{t("coatingPrice")}</Label>
-            <Input
-              id="coatingPrice"
-              name="coatingPrice"
-              type="number"
-              value={editData.coatingPrice}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="discount">{t("discount")}</Label>
-            <Input
-              id="discount"
-              name="discount"
-              type="number"
-              value={editData.discount}
-              onChange={handleChange}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="total">{t("total")}</Label>
-            <Input
-              id="total"
-              name="total"
-              type="number"
-              value={(editData.framePrice + editData.lensPrice + editData.coatingPrice - editData.discount).toFixed(3)}
-              disabled
-            />
-          </div>
-        </div>
-      </div>
-      
-      <div className="flex justify-end gap-2 mt-6">
-        <Button variant="outline" onClick={onCancel}>
-          {t("cancel")}
-        </Button>
-        <Button onClick={handleSaveChanges}>
-          {t("save")}
-        </Button>
-      </div>
+              </div>
+
+              <DialogFooter>
+                <Button onClick={() => setIsContactLensDialogOpen(false)}>Close</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Notes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Textarea value={notes} onChange={e => setNotes(e.target.value)} />
+        </CardContent>
+      </Card>
+
+      <Button onClick={handleSave}>Save</Button>
     </div>
   );
 };
