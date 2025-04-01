@@ -133,8 +133,7 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
             <div className="flex flex-col gap-3">
               <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
                 <Avatar className="w-10 h-10 border-2 border-sidebar-primary">
-                  <AvatarImage src="/lovable-uploads/d1f7203d-68c5-44fb-b0a8-41330d9b48fc.png" />
-                  <AvatarFallback className="bg-teal-500 text-white">MO</AvatarFallback>
+                  <AvatarFallback className="bg-teal-500 text-white">MH</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <p className="text-sm font-medium text-sidebar-foreground">Admin User</p>

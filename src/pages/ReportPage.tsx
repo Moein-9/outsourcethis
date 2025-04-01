@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
@@ -31,91 +32,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { LockKeyhole, Unlock, Eye, EyeOff } from "lucide-react";
 
-const generateMockData = () => {
-  const mockData = [];
-  const today = new Date();
-  const paymentMethods = ["نقداً", "كي نت", "Visa", "MasterCard"];
-  const lensTypes = ["متعددة البؤر", "أحادية البؤر", "قراءة", "بعيدة المدى"];
-  const coatings = ["مضاد للانعكاس", "مضاد للماء", "مضاد للخدش", "حماية من الأشعة الزرقاء"];
-  const frameBrands = ["Ray-Ban", "Gucci", "Prada", "Oakley", "Dior", "Chanel"];
-  
-  for (let i = 0; i < 5; i++) {
-    const lensPrice = Math.floor(Math.random() * 50 + 20) * 5;
-    const framePrice = Math.floor(Math.random() * 80 + 40) * 5;
-    const coatingPrice = Math.floor(Math.random() * 15 + 5) * 5;
-    const total = lensPrice + framePrice + coatingPrice;
-    const discount = Math.floor(Math.random() * 10) * 5;
-    const finalTotal = total - discount;
-    const deposit = Math.random() > 0.3 ? finalTotal : Math.floor(finalTotal * 0.7);
-    
-    mockData.push({
-      patientName: `عميل ${i + 1}`,
-      patientPhone: `9665${Math.floor(Math.random() * 10000000)}`,
-      lensType: lensTypes[Math.floor(Math.random() * lensTypes.length)],
-      lensPrice,
-      coating: coatings[Math.floor(Math.random() * coatings.length)],
-      coatingPrice,
-      frameBrand: frameBrands[Math.floor(Math.random() * frameBrands.length)],
-      frameModel: `موديل ${String.fromCharCode(65 + i)}`,
-      frameColor: ["أسود", "بني", "أزرق", "ذهبي"][Math.floor(Math.random() * 4)],
-      framePrice,
-      discount,
-      total: finalTotal,
-      deposit,
-      paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)]
-    });
-  }
-  
-  for (let d = 1; d < 60; d++) {
-    const date = new Date();
-    date.setDate(today.getDate() - d);
-    
-    const invoiceCount = Math.floor(Math.random() * 5) + 1;
-    
-    for (let i = 0; i < invoiceCount; i++) {
-      const lensPrice = Math.floor(Math.random() * 50 + 20) * 5;
-      const framePrice = Math.floor(Math.random() * 80 + 40) * 5;
-      const coatingPrice = Math.floor(Math.random() * 15 + 5) * 5;
-      const total = lensPrice + framePrice + coatingPrice;
-      const discount = Math.floor(Math.random() * 10) * 5;
-      const finalTotal = total - discount;
-      const deposit = Math.random() > 0.3 ? finalTotal : Math.floor(finalTotal * 0.7);
-      
-      const invoice = {
-        patientName: `عميل ${d}${i}`,
-        patientPhone: `9665${Math.floor(Math.random() * 10000000)}`,
-        lensType: lensTypes[Math.floor(Math.random() * lensTypes.length)],
-        lensPrice,
-        coating: coatings[Math.floor(Math.random() * coatings.length)],
-        coatingPrice,
-        frameBrand: frameBrands[Math.floor(Math.random() * frameBrands.length)],
-        frameModel: `موديل ${String.fromCharCode(65 + i)}`,
-        frameColor: ["أسود", "بني", "أزرق", "ذهبي"][Math.floor(Math.random() * 4)],
-        framePrice,
-        discount,
-        total: finalTotal,
-        deposit,
-        paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)]
-      };
-      
-      const id = `INV${Date.now() - d * 86400000 - i}`;
-      const createdAt = date.toISOString();
-      const remaining = Math.max(0, finalTotal - deposit);
-      const isPaid = remaining === 0;
-      
-      mockData.push({
-        ...invoice,
-        invoiceId: id,
-        createdAt,
-        remaining,
-        isPaid
-      });
-    }
-  }
-  
-  return mockData;
-};
-
 const ReportPage: React.FC = () => {
   const invoiceStore = useInvoiceStore();
   const { language } = useLanguageStore();
@@ -139,11 +55,6 @@ const ReportPage: React.FC = () => {
   
   const translations = {
     reportsTitle: language === 'ar' ? "تقارير النظام" : "System Reports",
-    createMockData: language === 'ar' ? "إنشاء بيانات تجريبية" : "Create Test Data",
-    clearMockData: language === 'ar' ? "مسح البيانات التجريبية" : "Clear Test Data",
-    mockDataNote: language === 'ar' 
-      ? "ملاحظة: هذا الشريط للعرض فقط ويمكن إزالته عند استخدام بيانات حقيقية" 
-      : "Note: This strip is for display only and can be removed when using real data",
     dailyReport: language === 'ar' ? "التقرير اليومي" : "Daily Report",
     comparativeAnalysis: language === 'ar' ? "التحليل المقارن" : "Comparative Analysis",
     signOut: language === 'ar' ? "تسجيل الخروج" : "Sign Out",
@@ -170,8 +81,6 @@ const ReportPage: React.FC = () => {
     restore: language === 'ar' ? "استعادة" : "Restore",
     loginSuccess: language === 'ar' ? "تم تسجيل الدخول بنجاح" : "Logged in successfully",
     logoutSuccess: language === 'ar' ? "تم تسجيل الخروج بنجاح" : "Logged out successfully",
-    mockDataCreated: language === 'ar' ? "تم إنشاء بيانات تجريبية بنجاح" : "Test data created successfully",
-    mockDataCleared: language === 'ar' ? "تم مسح البيانات التجريبية" : "Test data cleared successfully",
     wrongPassword: language === 'ar' ? "كلمة المرور غير صحيحة" : "Incorrect password",
     wrongAnswer: language === 'ar' ? "الإجابة غير صحيحة" : "Incorrect answer",
     passwordRevealed: language === 'ar' ? `كلمة المرور هي: ${correctPassword}` : `The password is: ${correctPassword}`,
@@ -238,24 +147,6 @@ const ReportPage: React.FC = () => {
     toast.success(translations.logoutSuccess);
   };
   
-  const handleGenerateMockData = () => {
-    invoiceStore.clearInvoices && invoiceStore.clearInvoices();
-    const mockData = generateMockData();
-    mockData.forEach(invoice => {
-      if (invoice.invoiceId) {
-        invoiceStore.addExistingInvoice && invoiceStore.addExistingInvoice(invoice);
-      } else {
-        invoiceStore.addInvoice(invoice);
-      }
-    });
-    toast.success(translations.mockDataCreated);
-  };
-  
-  const handleClearMockData = () => {
-    invoiceStore.clearInvoices && invoiceStore.clearInvoices();
-    toast.success(translations.mockDataCleared);
-  };
-  
   return (
     <Layout activeSection="reports" onNavigate={handleNavigate}>
       <div className="container px-4 py-6 md:px-6">
@@ -268,26 +159,6 @@ const ReportPage: React.FC = () => {
           >
             {language === 'ar' ? "←" : "←"} {translations.backToDashboard}
           </Button>
-        </div>
-        
-        <div className="flex flex-wrap gap-2 mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
-          <Button 
-            variant="outline" 
-            className="bg-amber-100 hover:bg-amber-200 border-amber-200 text-xs md:text-sm w-full sm:w-auto" 
-            onClick={handleGenerateMockData}
-          >
-            {translations.createMockData}
-          </Button>
-          <Button 
-            variant="outline" 
-            className="bg-red-100 hover:bg-red-200 border-red-200 text-xs md:text-sm w-full sm:w-auto" 
-            onClick={handleClearMockData}
-          >
-            {translations.clearMockData}
-          </Button>
-          <div className="flex-1 flex items-center text-amber-700 text-xs md:text-sm mx-2 mt-2 sm:mt-0">
-            {translations.mockDataNote}
-          </div>
         </div>
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
