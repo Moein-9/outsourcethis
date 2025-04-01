@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { 
   PieChart, 
@@ -16,24 +17,19 @@ interface SalesChartProps {
 }
 
 export const SalesChart: React.FC<SalesChartProps> = ({ 
-  lensRevenue = 0, 
-  frameRevenue = 0, 
-  coatingRevenue = 0 
+  lensRevenue, 
+  frameRevenue, 
+  coatingRevenue 
 }) => {
-  // Debugging logs - always keep this hook regardless of data
-  useEffect(() => {
-    console.log("SalesChart props received:", { lensRevenue, frameRevenue, coatingRevenue });
-  }, [lensRevenue, frameRevenue, coatingRevenue]);
-
-  // Ensure all values are numbers (not undefined) and at least 0
-  const safeValues = {
-    lensRevenue: Math.max(0, lensRevenue || 0),
-    frameRevenue: Math.max(0, frameRevenue || 0),
-    coatingRevenue: Math.max(0, coatingRevenue || 0)
-  };
-  
   // Check if we have any data
-  const hasData = safeValues.lensRevenue > 0 || safeValues.frameRevenue > 0 || safeValues.coatingRevenue > 0;
+  const hasData = lensRevenue > 0 || frameRevenue > 0 || coatingRevenue > 0;
+  
+  // Ensure all values are at least 0 (not negative)
+  const safeValues = {
+    lensRevenue: Math.max(0, lensRevenue),
+    frameRevenue: Math.max(0, frameRevenue),
+    coatingRevenue: Math.max(0, coatingRevenue)
+  };
   
   // Create data array, filtering out zero values
   const data = [
@@ -54,12 +50,6 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     percent, 
     index 
   }: any) => {
-    if (typeof cx !== 'number' || typeof cy !== 'number' || 
-        typeof innerRadius !== 'number' || typeof outerRadius !== 'number' || 
-        typeof percent !== 'number') {
-      return null;
-    }
-    
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -77,34 +67,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   };
   
-  // Custom legend rendering with icons
-  const renderCustomLegend = (props: any) => {
-    const { payload } = props;
-    
-    if (!payload || !Array.isArray(payload) || payload.length === 0) {
-      return null;
-    }
-    
-    return (
-      <ul className="flex justify-center gap-6 mt-2">
-        {payload.map((entry: any, index: number) => {
-          // Safeguard against invalid data
-          if (!entry || index >= data.length || !data[index]) return null;
-          
-          return (
-            <li key={`item-${index}`} className="flex items-center gap-1">
-              <div style={{ color: entry.color }} className="mr-1">
-                {data[index].icon}
-              </div>
-              <span className="text-sm">{entry.value}</span>
-            </li>
-          );
-        })}
-      </ul>
-    );
-  };
-  
-  // Show placeholder if no data or all values are zero - moved before the second useEffect
+  // Show placeholder if no data or all values are zero
   if (!hasData || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[300px]">
@@ -115,8 +78,25 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   }
   
-  // Add a useEffect to log data - BUT only if we actually have data to show
-  // This ensures this hook is always called when the component renders with data
+  // Custom legend rendering with icons
+  const renderCustomLegend = (props: any) => {
+    const { payload } = props;
+    
+    return (
+      <ul className="flex justify-center gap-6 mt-2">
+        {payload.map((entry: any, index: number) => (
+          <li key={`item-${index}`} className="flex items-center gap-1">
+            <div style={{ color: entry.color }} className="mr-1">
+              {data[index].icon}
+            </div>
+            <span className="text-sm">{entry.value}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+  
+  // Add a useEffect to log data - for debugging
   useEffect(() => {
     console.log("SalesChart data:", data);
     console.log("Has data:", hasData);
@@ -141,10 +121,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
           ))}
         </Pie>
         <Tooltip 
-          formatter={(value: number) => {
-            // Ensure value is a number before calling toFixed
-            return typeof value === 'number' ? `${value.toFixed(2)} KWD` : 'N/A';
-          }}
+          formatter={(value: number) => `${value.toFixed(2)} KWD`}
         />
         <Legend 
           content={renderCustomLegend}

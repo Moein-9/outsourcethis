@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -128,12 +129,14 @@ export const DailySalesReport: React.FC = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
+    // Get today's sales
     const todaySalesData = invoices.filter(invoice => {
       const invoiceDate = new Date(invoice.createdAt);
       invoiceDate.setHours(0, 0, 0, 0);
       return invoiceDate.getTime() === today.getTime();
     });
     
+    // Get today's refunds
     const todayRefundsData = refunds.filter(refund => {
       const refundDate = new Date(refund.date);
       refundDate.setHours(0, 0, 0, 0);
@@ -143,6 +146,7 @@ export const DailySalesReport: React.FC = () => {
     setTodaySales(todaySalesData);
     setTodayRefunds(todayRefundsData);
     
+    // Calculate total revenue (excluding refunded invoices)
     const revenue = todaySalesData
       .filter(invoice => !invoice.isRefunded)
       .reduce((sum, invoice) => {
@@ -152,20 +156,21 @@ export const DailySalesReport: React.FC = () => {
           );
           return sum + Math.max(0, contactLensTotal - (invoice.discount || 0));
         }
-        return sum + (invoice.total || 0);
+        return sum + invoice.total;
       }, 0);
     
+    // Calculate product type revenues
     const lensRevenue = todaySalesData
       .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + (invoice.lensPrice || 0), 0);
+      .reduce((sum, invoice) => sum + invoice.lensPrice, 0);
       
     const frameRevenue = todaySalesData
       .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + (invoice.framePrice || 0), 0);
+      .reduce((sum, invoice) => sum + invoice.framePrice, 0);
       
     const coatingRevenue = todaySalesData
       .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + (invoice.coatingPrice || 0), 0);
+      .reduce((sum, invoice) => sum + invoice.coatingPrice, 0);
       
     const contactLensRevenue = todaySalesData
       .filter(invoice => !invoice.isRefunded)
@@ -178,12 +183,15 @@ export const DailySalesReport: React.FC = () => {
         return sum;
       }, 0);
     
+    // Calculate deposits
     const deposits = todaySalesData
       .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + (invoice.deposit || 0), 0);
+      .reduce((sum, invoice) => sum + invoice.deposit, 0);
     
-    const refundTotal = todayRefundsData.reduce((sum, refund) => sum + (refund.amount || 0), 0);
+    // Calculate total refunds
+    const refundTotal = todayRefundsData.reduce((sum, refund) => sum + refund.amount, 0);
     
+    // Set state values
     setTotalRevenue(revenue);
     setTotalLensRevenue(lensRevenue + contactLensRevenue);
     setTotalFrameRevenue(frameRevenue);
@@ -192,15 +200,16 @@ export const DailySalesReport: React.FC = () => {
     setTotalRefunds(refundTotal);
     setNetRevenue(revenue - refundTotal);
     
+    // Calculate payment method breakdown
     const paymentMethods: Record<string, { amount: number; count: number }> = {};
     todaySalesData
-      .filter(invoice => !invoice.isRefunded && (invoice.deposit || 0) > 0)
+      .filter(invoice => !invoice.isRefunded && invoice.deposit > 0)
       .forEach(invoice => {
         const method = invoice.paymentMethod || 'غير محدد';
         if (!paymentMethods[method]) {
           paymentMethods[method] = { amount: 0, count: 0 };
         }
-        paymentMethods[method].amount += (invoice.deposit || 0);
+        paymentMethods[method].amount += invoice.deposit;
         paymentMethods[method].count += 1;
       });
     
@@ -212,13 +221,14 @@ export const DailySalesReport: React.FC = () => {
     
     setPaymentBreakdown(breakdownData);
     
+    // Calculate refund method breakdown
     const refundMethods: Record<string, { amount: number; count: number }> = {};
     todayRefundsData.forEach(refund => {
       const method = refund.method || 'غير محدد';
       if (!refundMethods[method]) {
         refundMethods[method] = { amount: 0, count: 0 };
       }
-      refundMethods[method].amount += (refund.amount || 0);
+      refundMethods[method].amount += refund.amount;
       refundMethods[method].count += 1;
     });
     
@@ -239,69 +249,57 @@ export const DailySalesReport: React.FC = () => {
       : `Daily Sales Report - ${today}`;
     
     let paymentBreakdownHTML = '';
-    if (paymentBreakdown && paymentBreakdown.length > 0) {
-      paymentBreakdown.forEach(payment => {
-        if (payment && payment.method && typeof payment.amount === 'number') {
-          paymentBreakdownHTML += `
-            <tr>
-              <td class="payment-method">${payment.method}</td>
-              <td class="payment-count">${payment.count}</td>
-              <td class="payment-amount">${payment.amount.toFixed(2)} ${t.currency}</td>
-            </tr>
-          `;
-        }
-      });
-    }
+    paymentBreakdown.forEach(payment => {
+      paymentBreakdownHTML += `
+        <tr>
+          <td class="payment-method">${payment.method}</td>
+          <td class="payment-count">${payment.count}</td>
+          <td class="payment-amount">${payment.amount.toFixed(2)} ${t.currency}</td>
+        </tr>
+      `;
+    });
     
     let refundBreakdownHTML = '';
-    if (refundBreakdown && refundBreakdown.length > 0) {
-      refundBreakdown.forEach(refund => {
-        if (refund && refund.method && typeof refund.amount === 'number') {
-          refundBreakdownHTML += `
-            <tr>
-              <td class="refund-method">${refund.method}</td>
-              <td class="refund-count">${refund.count}</td>
-              <td class="refund-amount">${refund.amount.toFixed(2)} ${t.currency}</td>
-            </tr>
-          `;
-        }
-      });
-    }
+    refundBreakdown.forEach(refund => {
+      refundBreakdownHTML += `
+        <tr>
+          <td class="refund-method">${refund.method}</td>
+          <td class="refund-count">${refund.count}</td>
+          <td class="refund-amount">${refund.amount.toFixed(2)} ${t.currency}</td>
+        </tr>
+      `;
+    });
     
     let refundsHTML = '';
-    if (todayRefunds && todayRefunds.length > 0) {
-      todayRefunds.forEach(refund => {
-        if (!refund) return;
-        const relatedInvoice = invoices.find(inv => inv && inv.invoiceId === refund.associatedInvoiceId);
-        
-        refundsHTML += `
-          <tr>
-            <td class="refund-id" style="width: 20%; max-width: 20%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${refund.refundId || '-'}</td>
-            <td class="refund-customer" style="width: 30%; max-width: 30%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${relatedInvoice?.patientName || '-'}</td>
-            <td class="refund-amount" style="width: 25%; max-width: 25%;">${typeof refund.amount === 'number' ? refund.amount.toFixed(2) : '0.00'} ${t.currency}</td>
-            <td class="refund-method" style="width: 25%; max-width: 25%;">${refund.method || '-'}</td>
-          </tr>
-        `;
-      });
-    }
+    todayRefunds.forEach(refund => {
+      // Find the associated invoice
+      const relatedInvoice = invoices.find(inv => inv.invoiceId === refund.associatedInvoiceId);
+      
+      refundsHTML += `
+        <tr>
+          <td class="refund-id" style="width: 20%; max-width: 20%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${refund.refundId}</td>
+          <td class="refund-customer" style="width: 30%; max-width: 30%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${relatedInvoice?.patientName || '-'}</td>
+          <td class="refund-amount" style="width: 25%; max-width: 25%;">${refund.amount.toFixed(2)} ${t.currency}</td>
+          <td class="refund-method" style="width: 25%; max-width: 25%;">${refund.method || '-'}</td>
+        </tr>
+      `;
+    });
     
     let invoicesHTML = '';
-    if (todaySales && todaySales.length > 0) {
-      todaySales.forEach(invoice => {
-        if (!invoice) return;
-        invoicesHTML += `
-          <tr>
-            <td class="invoice-customer">${invoice.patientName || '-'}</td>
-            <td class="invoice-total">${typeof invoice.total === 'number' ? invoice.total.toFixed(2) : '0.00'} ${t.currency}</td>
-            <td class="invoice-paid">${typeof invoice.deposit === 'number' ? invoice.deposit.toFixed(2) : '0.00'} ${t.currency}</td>
-            <td class="invoice-method">${invoice.paymentMethod || '-'}</td>
-          </tr>
-        `;
-      });
-    }
+    todaySales.forEach(invoice => {
+      invoicesHTML += `
+        <tr>
+          <td class="invoice-customer">${invoice.patientName}</td>
+          <td class="invoice-total">${invoice.total.toFixed(2)} ${t.currency}</td>
+          <td class="invoice-paid">${invoice.deposit.toFixed(2)} ${t.currency}</td>
+          <td class="invoice-method">${invoice.paymentMethod || '-'}</td>
+        </tr>
+      `;
+    });
     
     const reportDate = format(new Date(), 'dd/MM/yyyy', { locale: enUS });
     
+    // Create the report content with improved styling for thermal printer and bilingual support with vertical stacking
     const reportContent = `
       <div class="report-container">
         <div class="report-header">
