@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { usePatientStore } from "@/store/patientStore";
 import { Patient } from "@/store/patientStore";
@@ -24,9 +25,7 @@ interface InvoiceFormContextType {
   calculateRemaining: () => number;
   updateServicePrice: (price: number) => void;
   
-  // Final price input handling
-  isFinalPriceMode: boolean;
-  setIsFinalPriceMode: React.Dispatch<React.SetStateAction<boolean>>;
+  // Final price handling
   finalPrice: number;
   setFinalPrice: React.Dispatch<React.SetStateAction<number>>;
   updateFinalPrice: (price: number) => void;
@@ -92,8 +91,7 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
   const [patientSearchResults, setPatientSearchResults] = useState<Patient[]>([]);
   const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
   
-  // Final price mode state
-  const [isFinalPriceMode, setIsFinalPriceMode] = useState<boolean>(false);
+  // Final price state
   const [finalPrice, setFinalPrice] = useState<number>(0);
   
   // Form value getters and setters
@@ -292,8 +290,6 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     calculateTotal,
     calculateRemaining,
     updateServicePrice,
-    isFinalPriceMode,
-    setIsFinalPriceMode,
     finalPrice,
     setFinalPrice,
     updateFinalPrice

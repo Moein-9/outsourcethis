@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -5,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Switch } from "@/components/ui/switch";
 import { 
   BadgePercent, Banknote, CreditCard, Check,
   CreditCard as CardIcon, Save, RefreshCw
@@ -20,7 +20,7 @@ export const InvoiceStepPayment: React.FC = () => {
   const isRtl = language === 'ar';
   const { 
     getValues, setValue, calculateTotal, calculateRemaining,
-    isFinalPriceMode, setIsFinalPriceMode, finalPrice, updateFinalPrice,
+    finalPrice, updateFinalPrice,
     validateCurrentStep
   } = useInvoiceForm();
   const addWorkOrder = useInvoiceStore(state => state.addWorkOrder);
@@ -32,6 +32,7 @@ export const InvoiceStepPayment: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState(getValues<string>('paymentMethod') || "");
   const [authNumber, setAuthNumber] = useState(getValues<string>('authNumber') || "");
   const [orderSaved, setOrderSaved] = useState(!!getValues<string>('workOrderId') && !!getValues<string>('invoiceId'));
+  const [showPaymentError, setShowPaymentError] = useState(false);
   
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
@@ -56,10 +57,12 @@ export const InvoiceStepPayment: React.FC = () => {
   const subtotal = calculateSubtotal();
   
   useEffect(() => {
-    if (isFinalPriceMode) {
-      const currentTotal = calculateTotal();
-      setFinalPriceInput(currentTotal);
-    }
+    // Initialize the final price input with the calculated total
+    const currentTotal = calculateTotal();
+    setFinalPriceInput(currentTotal);
+    
+    // Make sure we're always in "final price" mode
+    setValue('isFinalPriceMode', true);
   }, []);
   
   useEffect(() => {
@@ -74,23 +77,15 @@ export const InvoiceStepPayment: React.FC = () => {
     setValue('isPaid', newRemaining <= 0);
   }, [discount, deposit, calculateTotal]);
   
-  const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    setDiscount(value);
-    setValue('discount', value);
-    
-    if (isFinalPriceMode) {
-      setFinalPriceInput(Math.max(0, subtotal - value));
-    }
-  };
-  
   const handleFinalPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setFinalPriceInput(value);
     
+    // Calculate discount as the difference between subtotal and final price
     const newDiscount = Math.max(0, subtotal - value);
     setDiscount(newDiscount);
     setValue('discount', newDiscount);
+    updateFinalPrice(value);
   };
   
   const handleDepositChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,23 +102,26 @@ export const InvoiceStepPayment: React.FC = () => {
   const selectPaymentMethod = (method: string) => {
     setPaymentMethod(method);
     setValue('paymentMethod', method);
+    if (showPaymentError) setShowPaymentError(false);
   };
   
   const handleAuthNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAuthNumber(e.target.value);
     setValue('authNumber', e.target.value);
   };
-  
-  const toggleDiscountMode = () => {
-    const newMode = !isFinalPriceMode;
-    setIsFinalPriceMode(newMode);
-    
-    if (newMode) {
-      setFinalPriceInput(Math.max(0, subtotal - discount));
-    }
-  };
 
   const saveOrder = () => {
+    // First check if payment method is selected
+    if (!paymentMethod) {
+      setShowPaymentError(true);
+      toast({
+        title: t('validationError'),
+        description: t('paymentMethodRequired'),
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (!validateCurrentStep('payment')) {
       return;
     }
@@ -190,7 +188,9 @@ export const InvoiceStepPayment: React.FC = () => {
       description: `${t('orderSavedSuccess')}`,
     });
 
-    navigate('/invoices');
+    // Use custom event to navigate to summary tab instead of redirecting to invoices page
+    const event = new CustomEvent('navigateToSummary');
+    window.dispatchEvent(event);
   };
   
   const textAlignClass = isRtl ? 'text-right' : 'text-left';
@@ -207,61 +207,29 @@ export const InvoiceStepPayment: React.FC = () => {
         </div>
         
         <div className="space-y-5">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium text-gray-700">
-              {isRtl ? 'نمط الخصم:' : 'Discount Mode:'}
-            </span>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500">
-                {isRtl ? 'مبلغ الخصم' : 'Discount Amount'}
-              </span>
-              <Switch 
-                checked={isFinalPriceMode}
-                onCheckedChange={toggleDiscountMode}
-              />
-              <span className="text-sm text-gray-500">
-                {isRtl ? 'المبلغ النهائي' : 'Final Amount'}
-              </span>
-            </div>
-          </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {isFinalPriceMode ? (
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <BadgePercent className="w-5 h-5 text-primary" />
-                </div>
-                <Label htmlFor="finalPrice" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>
-                  {isRtl ? 'المبلغ النهائي:' : 'Final Amount:'}
-                </Label>
-                <Input
-                  id="finalPrice"
-                  type="number"
-                  step="0.01"
-                  value={finalPriceInput || ""}
-                  onChange={handleFinalPriceChange}
-                  className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
-                />
-                <div className="mt-1 text-xs text-gray-500">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <BadgePercent className="w-5 h-5 text-primary" />
+              </div>
+              <Label htmlFor="finalPrice" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>
+                {isRtl ? 'المبلغ النهائي:' : 'Final Amount:'}
+              </Label>
+              <Input
+                id="finalPrice"
+                type="number"
+                step="0.01"
+                value={finalPriceInput || ""}
+                onChange={handleFinalPriceChange}
+                className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
+                placeholder={isRtl ? "أدخل السعر النهائي للعميل" : "Enter the final price for the customer"}
+              />
+              {discount > 0 && (
+                <div className="mt-1 text-xs text-red-500">
                   {isRtl ? `الخصم: ${discount.toFixed(3)} د.ك` : `Discount: ${discount.toFixed(3)} KWD`}
                 </div>
-              </div>
-            ) : (
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <BadgePercent className="w-5 h-5 text-primary" />
-                </div>
-                <Label htmlFor="discount" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>{t('discountColon')}</Label>
-                <Input
-                  id="discount"
-                  type="number"
-                  step="0.01"
-                  value={discount || ""}
-                  onChange={handleDiscountChange}
-                  className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
-                />
-              </div>
-            )}
+              )}
+            </div>
             
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -298,7 +266,7 @@ export const InvoiceStepPayment: React.FC = () => {
           </h3>
         </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 ${showPaymentError ? 'border-2 border-red-500 rounded-md p-2' : ''}`}>
           <div 
             className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
               paymentMethod === (isRtl ? "نقداً" : "Cash")
@@ -367,6 +335,12 @@ export const InvoiceStepPayment: React.FC = () => {
             <span className="text-sm font-medium">{t('mastercard')}</span>
           </div>
         </div>
+        
+        {showPaymentError && (
+          <div className="mt-2 text-red-500 text-sm">
+            {isRtl ? 'يرجى اختيار طريقة الدفع' : 'Please select a payment method'}
+          </div>
+        )}
         
         {(paymentMethod === "Visa" || paymentMethod === "MasterCard" || paymentMethod === "كي نت" || paymentMethod === "KNET") && (
           <div className="mt-4 space-y-2">
