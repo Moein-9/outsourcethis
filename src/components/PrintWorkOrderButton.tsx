@@ -1,6 +1,7 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { Printer, ChevronRight, ClipboardCheck } from "lucide-react";
 import { WorkOrderPrintSelector } from "./WorkOrderPrintSelector";
 import { useLanguageStore } from "@/store/languageStore";
 import { Invoice, useInvoiceStore } from "@/store/invoiceStore";
@@ -47,9 +48,10 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
   isNewInvoice = false,
   onInvoiceSaved,
 }) => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   const [loading, setLoading] = useState(false);
   const { addInvoice, addExistingInvoice, addWorkOrder } = useInvoiceStore();
+  const isRtl = language === 'ar';
   
   const handlePrint = () => {
     // If it's a new invoice, save it first to generate an invoice ID
@@ -146,6 +148,30 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     return selector;
   };
 
+  // Full-width version with description for detailed buttons
+  if (className?.includes("w-full")) {
+    return (
+      <Button 
+        variant={variant} 
+        className={`w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto ${className}`}
+        onClick={handlePrint}
+        disabled={loading}
+      >
+        <div className={`flex items-center ${isRtl ? 'flex-row-reverse' : ''}`}>
+          <div className={`w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center ${isRtl ? 'ml-4' : 'mr-4'} group-hover:bg-blue-200 transition-colors`}>
+            <ClipboardCheck className="w-6 h-6 text-blue-600" />
+          </div>
+          <div className={`text-${isRtl ? 'right' : 'left'}`}>
+            <div className="font-medium">{loading ? t("saving") : t("printWorkOrder")}</div>
+            <div className="text-xs text-muted-foreground">{t("printWorkOrderDescription")}</div>
+          </div>
+        </div>
+        <ChevronRight className={`w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
+      </Button>
+    );
+  }
+
+  // Original compact version
   return (
     <>
       <Button 

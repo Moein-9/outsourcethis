@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { Printer, ChevronRight } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 
 interface PrintReportButtonProps {
@@ -11,6 +11,7 @@ interface PrintReportButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   icon?: React.ReactNode;
   disabled?: boolean;
+  description?: string;
 }
 
 export const PrintReportButton: React.FC<PrintReportButtonProps> = ({ 
@@ -19,11 +20,15 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
   label,
   variant = "default",
   icon,
-  disabled = false
+  disabled = false,
+  description
 }) => {
-  const { language } = useLanguageStore();
+  const { t, language } = useLanguageStore();
+  const isRtl = language === 'ar';
   
   const defaultLabel = language === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice';
+  const buttonLabel = label || defaultLabel;
+  const buttonDescription = description || (language === 'ar' ? 'طباعة نسخة من الفاتورة' : 'Print a copy of the invoice');
   
   const handlePrint = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,14 +42,23 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
   
   return (
     <Button 
-      onClick={handlePrint} 
-      className={`gap-2 text-base font-medium ${variant === "default" ? "bg-green-600 hover:bg-green-700 text-white" : ""} ${className}`}
-      type="button"
+      onClick={handlePrint}
       variant={variant}
       disabled={disabled}
+      className={`w-full justify-between group hover:shadow-sm p-4 h-auto transition-all duration-300 ${
+        variant === "default" ? "bg-green-600 hover:bg-green-700 text-white" : ""
+      } ${className}`}
     >
-      {icon || <Printer size={20} />}
-      {label || defaultLabel}
+      <div className={`flex items-center ${isRtl ? 'flex-row-reverse' : ''}`}>
+        <div className={`w-12 h-12 rounded-full ${variant === "default" ? "bg-green-500" : "bg-green-100"} flex items-center justify-center ${isRtl ? 'ml-4' : 'mr-4'} group-hover:${variant === "default" ? "bg-green-400" : "bg-green-200"} transition-colors`}>
+          {icon || <Printer className={`w-6 h-6 ${variant === "default" ? "text-white" : "text-green-600"}`} />}
+        </div>
+        <div className={`text-${isRtl ? 'right' : 'left'}`}>
+          <div className="font-medium">{buttonLabel}</div>
+          <div className="text-xs text-muted-foreground">{buttonDescription}</div>
+        </div>
+      </div>
+      <ChevronRight className={`w-5 h-5 ${variant === "default" ? "text-white/70" : "text-muted-foreground"} group-hover:translate-x-1 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
     </Button>
   );
 };
