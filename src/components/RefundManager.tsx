@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useInvoiceStore, Invoice } from '@/store/invoiceStore';
 import { usePatientStore } from '@/store/patientStore';
@@ -9,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { toast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { useLanguageStore } from '@/store/languageStore';
 import { RefreshCw, Search, AlertTriangle, CheckCircle2, ArrowLeft, Receipt, ShoppingBag, RefreshCcw, Phone, Calendar, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -49,12 +48,10 @@ export const RefundManager: React.FC = () => {
   
   const handleSearch = () => {
     if (!searchTerm.trim()) {
-      toast({
-        title: language === 'ar' ? 'خطأ' : 'Error',
-        description: language === 'ar' ? 'يرجى إدخال رقم الفاتورة أو اسم العميل أو رقم الهاتف' : 
-          'Please enter an invoice number, customer name, or phone number',
-        variant: "destructive",
-      });
+      toast.error(
+        language === 'ar' ? 'يرجى إدخال رقم الفاتورة أو اسم العميل أو رقم الهاتف' : 
+          'Please enter an invoice number, customer name, or phone number'
+      );
       return;
     }
     
@@ -72,11 +69,9 @@ export const RefundManager: React.FC = () => {
     setIsSearching(false);
     
     if (results.length === 0) {
-      toast({
-        title: language === 'ar' ? 'لم يتم العثور على نتائج' : 'No Results',
-        description: language === 'ar' ? 'لم يتم العثور على فواتير' : 'No invoices found',
-        variant: "destructive",
-      });
+      toast.error(
+        language === 'ar' ? 'لم يتم العثور على فواتير' : 'No invoices found'
+      );
     }
   };
   
@@ -96,62 +91,50 @@ export const RefundManager: React.FC = () => {
       setRefundAmount(value);
       
       if (selectedInvoice && value > selectedInvoice.deposit) {
-        toast({
-          title: language === 'ar' ? 'خطأ في المبلغ' : 'Amount Error',
-          description: language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز المبلغ المدفوع' : 
-            'Refund amount cannot exceed the amount paid',
-          variant: "destructive",
-        });
+        toast.warning(
+          language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز المبلغ المدفوع' : 
+            'Refund amount cannot exceed the amount paid'
+        );
       }
     }
   };
   
   const validateRefund = () => {
     if (!selectedInvoice) {
-      toast({
-        title: language === 'ar' ? 'خطأ' : 'Error',
-        description: language === 'ar' ? 'يرجى اختيار فاتورة أولاً' : 'Please select an invoice first',
-        variant: "destructive",
-      });
+      toast.error(
+        language === 'ar' ? 'يرجى اختيار فاتورة أولاً' : 'Please select an invoice first'
+      );
       return false;
     }
     
     if (refundAmount <= 0) {
-      toast({
-        title: language === 'ar' ? 'خطأ في المبلغ' : 'Amount Error',
-        description: language === 'ar' ? 'يجب أن يكون مبلغ الاسترداد أكبر من 0' : 
-          'Refund amount must be greater than 0',
-        variant: "destructive",
-      });
+      toast.error(
+        language === 'ar' ? 'يجب أن يكون مبلغ الاسترداد أكبر من 0' : 
+          'Refund amount must be greater than 0'
+      );
       return false;
     }
     
     // Validate against deposit (amount paid) instead of total
     if (refundAmount > selectedInvoice.deposit) {
-      toast({
-        title: language === 'ar' ? 'خطأ في المبلغ' : 'Amount Error',
-        description: language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز المبلغ المدفوع' : 
-          'Refund amount cannot exceed the amount paid',
-        variant: "destructive",
-      });
+      toast.error(
+        language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز المبلغ المدفوع' : 
+          'Refund amount cannot exceed the amount paid'
+      );
       return false;
     }
     
     if (!refundMethod) {
-      toast({
-        title: language === 'ar' ? 'بيانات مفقودة' : 'Missing Data',
-        description: language === 'ar' ? 'يرجى اختيار طريقة الاسترداد' : 'Please select a refund method',
-        variant: "destructive",
-      });
+      toast.error(
+        language === 'ar' ? 'يرجى اختيار طريقة الاسترداد' : 'Please select a refund method'
+      );
       return false;
     }
     
     if (!refundReason.trim()) {
-      toast({
-        title: language === 'ar' ? 'بيانات مفقودة' : 'Missing Data',
-        description: language === 'ar' ? 'يرجى إدخال سبب الاسترداد' : 'Please enter a reason for the refund',
-        variant: "destructive",
-      });
+      toast.error(
+        language === 'ar' ? 'يرجى إدخال سبب الاسترداد' : 'Please enter a reason for the refund'
+      );
       return false;
     }
     
@@ -171,11 +154,9 @@ export const RefundManager: React.FC = () => {
       );
       
       setSuccess(language === 'ar' ? 'تم معالجة استرداد الأموال بنجاح' : 'Refund processed successfully');
-      toast({
-        title: language === 'ar' ? 'تم استرداد الأموال' : 'Refund Processed',
-        description: language === 'ar' ? 'تمت معالجة استرداد الأموال بنجاح' : 'The refund has been processed successfully',
-        variant: "default",
-      });
+      toast.success(
+        language === 'ar' ? 'تمت معالجة استرداد الأموال بنجاح' : 'The refund has been processed successfully'
+      );
       
       const contactLensItemsFormatted = selectedInvoice.contactLensItems 
         ? selectedInvoice.contactLensItems.map(item => ({
@@ -221,26 +202,26 @@ export const RefundManager: React.FC = () => {
         staffNotes
       };
       
-      const receiptElement = (
-        <RefundReceiptTemplate
-          refund={refundInfo}
-          language={language}
-        />
-      );
-      
-      const receiptHtml = ReactDOMServer.renderToString(receiptElement);
-      
-      PrintService.printHtml(
-        PrintService.prepareReceiptDocument(receiptHtml, language === 'ar' ? `إيصال استرداد - ${refundId}` : `Refund Receipt - ${refundId}`),
-        'receipt',
-        () => {
-          toast({
-            title: language === 'ar' ? 'تم إرسال الإيصال للطباعة' : 'Receipt sent to printer',
-            description: language === 'ar' ? 'تتم معالجة طباعة الإيصال' : 'Processing print request',
-            variant: "default",
-          });
-        }
-      );
+      setTimeout(() => {
+        const receiptElement = (
+          <RefundReceiptTemplate
+            refund={refundInfo}
+            language={language}
+          />
+        );
+        
+        const receiptHtml = ReactDOMServer.renderToString(receiptElement);
+        
+        PrintService.printHtml(
+          PrintService.prepareReceiptDocument(receiptHtml, language === 'ar' ? `إيصال استرداد - ${refundId}` : `Refund Receipt - ${refundId}`),
+          'receipt',
+          () => {
+            toast.success(
+              language === 'ar' ? 'تتم معالجة طباعة الإيصال' : 'Processing print request'
+            );
+          }
+        );
+      }, 300);
       
       setTimeout(() => {
         setSelectedInvoice(null);
@@ -254,11 +235,9 @@ export const RefundManager: React.FC = () => {
       
     } catch (error: any) {
       setErrorMessage(error.message || (language === 'ar' ? 'حدث خطأ أثناء معالجة الاسترداد' : 'An error occurred while processing the refund'));
-      toast({
-        title: language === 'ar' ? 'خطأ' : 'Error',
-        description: error.message || (language === 'ar' ? 'حدث خطأ أثناء معالجة الاسترداد' : 'An error occurred while processing the refund'),
-        variant: "destructive",
-      });
+      toast.error(
+        error.message || (language === 'ar' ? 'حدث خطأ أثناء معالجة الاسترداد' : 'An error occurred while processing the refund')
+      );
     }
   };
   
