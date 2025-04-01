@@ -45,22 +45,22 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
       onClick={handlePrint}
       variant={variant}
       disabled={disabled}
-      className={`w-full justify-between group hover:shadow-sm p-4 h-auto transition-all duration-300 ${
-        variant === "default" ? "bg-green-600 hover:bg-green-700 text-white" : ""
-      } ${className}`}
+      className={`w-full justify-between group hover:shadow-md p-5 h-auto transition-all duration-300 ${
+        variant === "default" ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" : ""
+      } ${className} rounded-lg`}
     >
-      <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
-        <div className={`flex items-center justify-center ${
+      <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-center justify-center p-2 rounded-full bg-white/20 shadow-inner ${
           variant === "default" ? "text-white" : "text-green-600"
         }`}>
-          {icon || <Printer className="w-5 h-5" />}
+          {icon || <Printer className="w-6 h-6" />}
         </div>
         <div className={`text-${isRtl ? 'right' : 'left'}`}>
-          <div className="font-medium">{buttonLabel}</div>
-          <div className="text-xs text-muted-foreground">{buttonDescription}</div>
+          <div className="font-bold text-lg">{buttonLabel}</div>
+          <div className="text-sm font-medium opacity-90">{buttonDescription}</div>
         </div>
       </div>
-      <ChevronRight className={`w-5 h-5 ${variant === "default" ? "text-white/70" : "text-muted-foreground"} group-hover:translate-x-1 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
+      <ChevronRight className={`w-6 h-6 ${variant === "default" ? "text-white/80" : "text-muted-foreground"} group-hover:translate-x-1 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
     </Button>
   );
 };

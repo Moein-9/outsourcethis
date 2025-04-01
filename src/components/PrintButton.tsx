@@ -39,15 +39,15 @@ export const PrintButton: React.FC<PrintButtonProps> = ({
       variant={variant}
       disabled={disabled || isLoading}
       onClick={onClick}
-      className={`w-full justify-between group transition-all duration-300 p-4 h-auto ${className}`}
+      className={`w-full justify-between group transition-all duration-300 p-4 h-auto rounded-lg hover:shadow-md ${className}`}
     >
       <div className={`flex items-center ${isRtl ? 'flex-row-reverse' : ''}`}>
-        <div className="w-12 h-12 rounded-full bg-opacity-20 flex items-center justify-center mx-4 transition-colors">
-          <Icon className={`w-6 h-6 ${iconColor || 'text-primary'}`} />
+        <div className="w-14 h-14 rounded-full bg-opacity-20 flex items-center justify-center mx-4 transition-colors">
+          <Icon className={`w-7 h-7 ${iconColor || 'text-primary'}`} />
         </div>
         <div className={`text-${isRtl ? 'right' : 'left'}`}>
-          <div className="font-medium">{isLoading && loadingText ? loadingText : label}</div>
-          {description && <div className="text-xs text-muted-foreground">{description}</div>}
+          <div className="font-medium text-lg">{isLoading && loadingText ? loadingText : label}</div>
+          {description && <div className="text-sm text-muted-foreground">{description}</div>}
         </div>
       </div>
       {children}
