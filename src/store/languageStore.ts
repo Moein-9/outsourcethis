@@ -137,6 +137,7 @@ const translations: Record<string, Record<string, string>> = {
     printInvoiceDescription: 'Print the customer invoice receipt',
     printCustomWorkOrder: 'Print Custom Work Order',
     printCustomWorkOrderDescription: 'Print a specialized work order with custom format',
+    coating: 'Coating',
     
     // Tab sections in Create Invoice
     clientSection: '1) Client Information',
@@ -505,6 +506,7 @@ const translations: Record<string, Record<string, string>> = {
     printInvoiceDescription: 'طباعة إيصال الفاتورة للعميل',
     printCustomWorkOrder: 'طباعة أمر عمل مخصص',
     printCustomWorkOrderDescription: 'طباعة أمر عمل متخصص بتنسيق مخصص',
+    coating: 'طلاء',
     
     // Tab sections in Create Invoice
     clientSection: '١) بيانات العميل',
