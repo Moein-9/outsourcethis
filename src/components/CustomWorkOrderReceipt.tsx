@@ -497,14 +497,14 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             <div className="font-bold mb-0.5 text-center border-b border-gray-300 pb-0.5 text-sm">
               {isRtl ? "Technician Signature | توقيع الفني" : "Technician Signature | توقيع الفني"}
             </div>
-            <div className="h-8 border-dashed border border-gray-200 rounded-sm"></div>
+            <div className="h-14 border-dashed border border-gray-200 rounded-sm bg-yellow-50"></div>
           </div>
           
           <div className="border border-gray-300 rounded p-0.5 flex-1">
             <div className="font-bold mb-0.5 text-center border-b border-gray-300 pb-0.5 text-sm">
               {isRtl ? "Manager Signature | توقيع المدير" : "Manager Signature | توقيع المدير"}
             </div>
-            <div className="h-8 border-dashed border border-gray-200 rounded-sm"></div>
+            <div className="h-14 border-dashed border border-gray-200 rounded-sm bg-yellow-50"></div>
           </div>
         </div>
       </div>

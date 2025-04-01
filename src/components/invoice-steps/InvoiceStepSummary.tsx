@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -10,8 +9,8 @@ import {
   Contact, ScrollText, Glasses
 } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
-import { PrintOptionsDialog } from "@/components/PrintOptionsDialog";
 import { WorkOrder, Invoice } from "@/store/invoiceStore";
+import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -60,14 +59,13 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     serviceId: getValues<string>('serviceId') || "",
     serviceDescription: getValues<string>('serviceDescription') || "",
     servicePrice: getValues<number>('servicePrice') || 0,
-    createdAt: currentTimestamp, // Add required createdAt field
-  } as Invoice; // Use type assertion to satisfy the Invoice type
+    createdAt: currentTimestamp,
+  } as Invoice;
   
   const patient = {
     patientId: getValues<string>('patientId') || "",
     name: getValues<string>('patientName') || "",
     phone: getValues<string>('patientPhone') || "",
-    // Add required fields to match Patient type
     dob: "",
     notes: "",
     rx: [],
@@ -78,11 +76,10 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const isContactLens = invoice.invoiceType === "contacts";
   const isEyeExam = invoice.invoiceType === "exam";
   
-  // Data for work order - ensure it has all required fields
   const workOrder: WorkOrder = {
     id: invoice.workOrderId || "",
-    patientId: patient.patientId || "",  // Add required patientId
-    createdAt: currentTimestamp,         // Add required createdAt
+    patientId: patient.patientId || "",
+    createdAt: currentTimestamp,
     invoiceId: invoice.invoiceId,
     workOrderId: invoice.workOrderId || "",
     date: currentTimestamp,
@@ -95,17 +92,12 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     frameColor: invoice.frameColor,
     invoiceType: invoice.invoiceType,
     contactLenses: invoice.contactLensItems,
-    // Add required fields for WorkOrder
     framePrice: invoice.framePrice,
     lensPrice: invoice.lensPrice,
     coatingPrice: invoice.coatingPrice,
     discount: invoice.discount,
     total: invoice.total,
     isPaid: invoice.isPaid
-  };
-  
-  const handlePrintWorkOrder = () => {
-    CustomPrintService.printWorkOrder(workOrder, invoice, patient);
   };
   
   const handlePrintInvoice = () => {
@@ -258,29 +250,24 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
         
         <div className="mt-6 space-y-4">
           {!isEyeExam && (
-            <PrintOptionsDialog
-              invoice={invoice}
+            <CustomPrintWorkOrderButton
               workOrder={workOrder}
+              invoice={invoice}
               patient={patient}
-              onPrintWorkOrder={handlePrintWorkOrder}
-              onPrintInvoice={handlePrintInvoice}
+              variant="outline"
+              className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
             >
-              <Button 
-                variant="outline"
-                className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-              >
-                <div className="flex items-center">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
-                    <ClipboardCheck className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-medium">{t('printWorkOrder')}</div>
-                    <div className="text-xs text-muted-foreground">{t('printWorkOrderDescription')}</div>
-                  </div>
+              <div className="flex items-center">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
+                  <ClipboardCheck className="w-6 h-6 text-blue-600" />
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </PrintOptionsDialog>
+                <div className="text-left">
+                  <div className="font-medium">{t('printWorkOrder')}</div>
+                  <div className="text-xs text-muted-foreground">{t('printWorkOrderDescription')}</div>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+            </CustomPrintWorkOrderButton>
           )}
           
           <Button 
@@ -306,4 +293,3 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     </div>
   );
 };
-
