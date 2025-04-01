@@ -17,18 +17,18 @@ interface SalesChartProps {
 }
 
 export const SalesChart: React.FC<SalesChartProps> = ({ 
-  lensRevenue, 
-  frameRevenue, 
-  coatingRevenue 
+  lensRevenue = 0, 
+  frameRevenue = 0, 
+  coatingRevenue = 0 
 }) => {
   // Check if we have any data
-  const hasData = lensRevenue > 0 || frameRevenue > 0 || coatingRevenue > 0;
+  const hasData = (lensRevenue || 0) > 0 || (frameRevenue || 0) > 0 || (coatingRevenue || 0) > 0;
   
-  // Ensure all values are at least 0 (not negative)
+  // Ensure all values are at least 0 (not negative) and handle undefined
   const safeValues = {
-    lensRevenue: Math.max(0, lensRevenue),
-    frameRevenue: Math.max(0, frameRevenue),
-    coatingRevenue: Math.max(0, coatingRevenue)
+    lensRevenue: Math.max(0, lensRevenue || 0),
+    frameRevenue: Math.max(0, frameRevenue || 0),
+    coatingRevenue: Math.max(0, coatingRevenue || 0)
   };
   
   // Create data array, filtering out zero values
@@ -50,6 +50,12 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     percent, 
     index 
   }: any) => {
+    if (typeof cx !== 'number' || typeof cy !== 'number' || 
+        typeof innerRadius !== 'number' || typeof outerRadius !== 'number' || 
+        typeof percent !== 'number') {
+      return null;
+    }
+    
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -82,16 +88,25 @@ export const SalesChart: React.FC<SalesChartProps> = ({
   const renderCustomLegend = (props: any) => {
     const { payload } = props;
     
+    if (!payload || !Array.isArray(payload) || payload.length === 0) {
+      return null;
+    }
+    
     return (
       <ul className="flex justify-center gap-6 mt-2">
-        {payload.map((entry: any, index: number) => (
-          <li key={`item-${index}`} className="flex items-center gap-1">
-            <div style={{ color: entry.color }} className="mr-1">
-              {data[index].icon}
-            </div>
-            <span className="text-sm">{entry.value}</span>
-          </li>
-        ))}
+        {payload.map((entry: any, index: number) => {
+          // Safeguard against invalid data
+          if (!entry || index >= data.length || !data[index]) return null;
+          
+          return (
+            <li key={`item-${index}`} className="flex items-center gap-1">
+              <div style={{ color: entry.color }} className="mr-1">
+                {data[index].icon}
+              </div>
+              <span className="text-sm">{entry.value}</span>
+            </li>
+          );
+        })}
       </ul>
     );
   };
