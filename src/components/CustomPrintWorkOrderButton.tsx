@@ -55,6 +55,11 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     }
   }
   
+  // If this is a contact lens order, make sure workOrder has the isContactLens flag set
+  if (isContactLens && !workOrder.isContactLens) {
+    workOrder = { ...workOrder, isContactLens: true };
+  }
+  
   const handlePrint = () => {
     if (isPrinting) return; // Prevent multiple calls
     

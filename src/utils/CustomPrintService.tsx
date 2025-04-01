@@ -234,6 +234,11 @@ export class CustomPrintService {
         }
       }
       
+      // Make sure workOrder has isContactLens flag set properly
+      if (isContactLens && !workOrder.isContactLens) {
+        workOrder = { ...workOrder, isContactLens: true };
+      }
+      
       // Render our component to the temp div
       const root = createRoot(tempDiv);
       root.render(
