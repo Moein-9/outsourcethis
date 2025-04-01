@@ -408,9 +408,9 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         </div>
       )}
 
-      <div className="mt-3 pt-2 border-t-2 border-gray-300">
+      <div className="mt-3 pt-2 border-t-2 border-gray-300 text-center">
         {isRtl ? (
-          <p className="font-bold text-sm mb-0">شكراً لاختياركم نظارات المعين. يس��دنا خدمتكم دائماً!</p>
+          <p className="font-bold text-sm mb-0">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
         ) : (
           <p className="font-bold text-sm mb-0">Thank you for choosing Moein Optical. We're always delighted to serve you!</p>
         )}

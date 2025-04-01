@@ -78,7 +78,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const orderNumber = invoice.workOrderId || "NEW ORDER";
   const date = format(new Date(invoice.createdAt), "dd/MM/yyyy");
 
-  // Split the address into lines for better display
   const addressLines = storeInfo.address.split('\n');
 
   return (
@@ -474,7 +473,13 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         <div className="mt-4 pt-3 border-t border-gray-300 text-center text-xs text-gray-500">
           <p>{storeInfo.name}</p>
           <p>{storeInfo.address}</p>
-          <p>{t("phone")}: {storeInfo.phone}</p>
+          <p className="ltr">{t("phone")}: {storeInfo.phone}</p>
+          <p className="mt-2 font-medium">
+            {t("thankYouMessage")}
+          </p>
+          <p className="text-xs mt-1">
+            {format(new Date(), 'yyyy-MM-dd')}
+          </p>
         </div>
       </div>
     </div>

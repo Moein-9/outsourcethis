@@ -440,13 +440,13 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
         
         <div style="border-top: 1px dashed #000; padding-top: 5px; margin-top: 10px; text-align: center;">
           <div style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">
-            ${isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
+            ${isRtl ? "شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!" : "Thank you for choosing Moein Optical. We're always delighted to serve you!"}
           </div>
-          <div style="font-size: 7px; color: #666;">
-            ${isRtl ? 
-              "هذا الإيصال دليل طلب فقط وليس إيصال دفع" : 
-              "This receipt is proof of order only and not a payment receipt"
-            }
+          <div style="font-size: 8px; margin: 2px 0;">
+            ${format(new Date(), 'yyyy-MM-dd')}
+          </div>
+          <div style="margin-top: 2px; font-size: 10px;">
+            ${'•'.repeat(12)}
           </div>
         </div>
       </div>
@@ -921,15 +921,15 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </div>
       </div>
       
-      <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", marginTop: "10px", textAlign: "center" }}>
-        <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "2px" }}>
-          {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
+      <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", margin-top: 10px, text-align: "center" }}>
+        <div style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">
+          ${isRtl ? "شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!" : "Thank you for choosing Moein Optical. We're always delighted to serve you!"}
         </div>
-        <div style={{ fontSize: "7px", color: "#666" }}>
-          {isRtl ? 
-            "هذا الإيصال دليل طلب فقط وليس إيصال دفع" : 
-            "This receipt is proof of order only and not a payment receipt"
-          }
+        <div style="font-size: 8px; margin: 2px 0;">
+          ${format(new Date(), 'yyyy-MM-dd')}
+        </div>
+        <div style="margin-top: 2px; font-size: 10px;">
+          ${'•'.repeat(12)}
         </div>
       </div>
       

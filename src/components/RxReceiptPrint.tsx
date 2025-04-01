@@ -185,9 +185,10 @@ export const RxReceiptPrint: React.FC<RxReceiptPrintProps> = ({
       <div className="text-center mt-2 pt-2 border-t px-3">
         <p className="font-semibold text-[10px]">
           {isRtl 
-            ? "شكرًا على دعمكم، ونشوفكم على خير قريبًا!" 
-            : "Thank you so much for your support—we look forward to seeing you again soon!"}
+            ? "شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!" 
+            : "Thank you for choosing Moein Optical. We're always delighted to serve you!"}
         </p>
+        <p className="text-[9px] mt-1">{format(new Date(), 'yyyy-MM-dd')}</p>
         <div className="mt-1 text-[12px] flex gap-1 justify-center">
           <span>{'•'.repeat(12)}</span>
         </div>
@@ -561,7 +562,14 @@ export const printRxReceipt = (props: RxReceiptPrintProps) => {
     `}
     
     <div class="footer">
-      <div class="thank-you">${isRtl ? 'شكرًا على دعمكم، ونشوفكم على خير قريبًا!' : 'Thank you so much for your support—we look forward to seeing you again soon!'}</div>
+      <div class="thank-you">
+        ${isRtl 
+          ? "شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!" 
+          : "Thank you for choosing Moein Optical. We're always delighted to serve you!"}
+      </div>
+      <div style="margin-top: 1mm; font-size: 9px;">
+        ${format(new Date(), 'yyyy-MM-dd')}
+      </div>
       <div class="dots">•••••••••••</div>
     </div>
   </div>
