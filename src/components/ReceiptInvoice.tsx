@@ -39,6 +39,42 @@ interface ReceiptInvoiceProps {
   servicePrice?: number;
 }
 
+// Helper function to format payment method in both languages
+const getFormattedPaymentMethod = (method: string): string => {
+  if (!method) return "";
+  
+  // Map of English to Arabic translations
+  const paymentMethodMap: Record<string, string> = {
+    "Cash": "نقداً",
+    "KNET": "كي نت",
+    "Credit Card": "بطاقة ائتمان",
+    "Debit Card": "بطاقة سحب",
+    "Bank Transfer": "تحويل بنكي"
+  };
+  
+  // Map of Arabic to English translations
+  const reversePaymentMethodMap: Record<string, string> = {
+    "نقداً": "Cash",
+    "كي نت": "KNET",
+    "بطاقة ائتمان": "Credit Card",
+    "بطاقة سحب": "Debit Card",
+    "تحويل بنكي": "Bank Transfer"
+  };
+  
+  // Check if the method is already in English or Arabic
+  const arabicEquivalent = paymentMethodMap[method];
+  const englishEquivalent = reversePaymentMethodMap[method];
+  
+  if (arabicEquivalent) {
+    return `${method} | ${arabicEquivalent}`;
+  } else if (englishEquivalent) {
+    return `${englishEquivalent} | ${method}`;
+  }
+  
+  // If not found in either map, return the original method
+  return method;
+};
+
 export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({ 
   invoice,
   isPrintable = false,
@@ -289,7 +325,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               </div>
               <div className="text-xs font-medium flex items-center justify-center gap-1">
                 <CreditCard className="w-4 h-4" />
-                <span>{isRtl ? `${payment.method} | ${payment.method}` : `${payment.method} | ${payment.method}`}</span>
+                <span>{getFormattedPaymentMethod(payment.method)}</span>
                 {payment.authNumber && <span> - {payment.authNumber}</span>}
               </div>
             </div>
@@ -303,7 +339,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
               </div>
               <div className="text-xs font-medium flex items-center justify-center gap-1">
                 <CreditCard className="w-4 h-4" />
-                <span>{isRtl ? `${payMethod} | ${payMethod}` : `${payMethod} | ${payMethod}`}</span>
+                <span>{getFormattedPaymentMethod(payMethod)}</span>
                 {auth && <span> - {auth}</span>}
               </div>
             </div>
@@ -351,7 +387,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             
             <div className="flex justify-between px-2">
               <span className="font-semibold text-sm">{isRtl ? "طريقة الاسترداد | Refund Method" : "Refund Method | طريقة الاسترداد"}:</span>
-              <span className="font-semibold text-sm">{refundMethod || 'N/A'}</span>
+              <span className="font-semibold text-sm">{getFormattedPaymentMethod(refundMethod || '')}</span>
             </div>
             
             {refundReason && (
