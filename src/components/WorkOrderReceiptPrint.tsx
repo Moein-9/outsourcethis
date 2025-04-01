@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -921,15 +922,15 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </div>
       </div>
       
-      <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", margin-top: 10px, text-align: "center" }}>
-        <div style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">
-          ${isRtl ? "شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!" : "Thank you for choosing Moein Optical. We're always delighted to serve you!"}
+      <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", marginTop: "10px", textAlign: "center" }}>
+        <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "2px" }}>
+          {isRtl ? "شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!" : "Thank you for choosing Moein Optical. We're always delighted to serve you!"}
         </div>
-        <div style="font-size: 8px; margin: 2px 0;">
-          ${format(new Date(), 'yyyy-MM-dd')}
+        <div style={{ fontSize: "8px", margin: "2px 0" }}>
+          {format(new Date(), 'yyyy-MM-dd')}
         </div>
-        <div style="margin-top: 2px; font-size: 10px;">
-          ${'•'.repeat(12)}
+        <div style={{ marginTop: "2px", fontSize: "10px" }}>
+          {'•'.repeat(12)}
         </div>
       </div>
       
@@ -969,3 +970,5 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     </div>
   );
 };
+
+export default WorkOrderReceiptPrint;
