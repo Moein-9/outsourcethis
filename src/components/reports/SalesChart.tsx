@@ -21,15 +21,20 @@ export const SalesChart: React.FC<SalesChartProps> = ({
   frameRevenue = 0, 
   coatingRevenue = 0 
 }) => {
-  // Check if we have any data
-  const hasData = (lensRevenue || 0) > 0 || (frameRevenue || 0) > 0 || (coatingRevenue || 0) > 0;
-  
-  // Ensure all values are at least 0 (not negative) and handle undefined
+  // Add debugging logs
+  useEffect(() => {
+    console.log("SalesChart props received:", { lensRevenue, frameRevenue, coatingRevenue });
+  }, [lensRevenue, frameRevenue, coatingRevenue]);
+
+  // Ensure all values are numbers (not undefined) and at least 0
   const safeValues = {
     lensRevenue: Math.max(0, lensRevenue || 0),
     frameRevenue: Math.max(0, frameRevenue || 0),
     coatingRevenue: Math.max(0, coatingRevenue || 0)
   };
+  
+  // Check if we have any data
+  const hasData = safeValues.lensRevenue > 0 || safeValues.frameRevenue > 0 || safeValues.coatingRevenue > 0;
   
   // Create data array, filtering out zero values
   const data = [
@@ -136,7 +141,10 @@ export const SalesChart: React.FC<SalesChartProps> = ({
           ))}
         </Pie>
         <Tooltip 
-          formatter={(value: number) => `${value.toFixed(2)} KWD`}
+          formatter={(value: number) => {
+            // Ensure value is a number before calling toFixed
+            return typeof value === 'number' ? `${value.toFixed(2)} KWD` : 'N/A';
+          }}
         />
         <Legend 
           content={renderCustomLegend}

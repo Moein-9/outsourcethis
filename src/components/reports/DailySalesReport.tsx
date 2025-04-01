@@ -152,20 +152,20 @@ export const DailySalesReport: React.FC = () => {
           );
           return sum + Math.max(0, contactLensTotal - (invoice.discount || 0));
         }
-        return sum + invoice.total;
+        return sum + (invoice.total || 0);
       }, 0);
     
     const lensRevenue = todaySalesData
       .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + invoice.lensPrice, 0);
+      .reduce((sum, invoice) => sum + (invoice.lensPrice || 0), 0);
       
     const frameRevenue = todaySalesData
       .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + invoice.framePrice, 0);
+      .reduce((sum, invoice) => sum + (invoice.framePrice || 0), 0);
       
     const coatingRevenue = todaySalesData
       .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + invoice.coatingPrice, 0);
+      .reduce((sum, invoice) => sum + (invoice.coatingPrice || 0), 0);
       
     const contactLensRevenue = todaySalesData
       .filter(invoice => !invoice.isRefunded)
@@ -180,9 +180,9 @@ export const DailySalesReport: React.FC = () => {
     
     const deposits = todaySalesData
       .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + invoice.deposit, 0);
+      .reduce((sum, invoice) => sum + (invoice.deposit || 0), 0);
     
-    const refundTotal = todayRefundsData.reduce((sum, refund) => sum + refund.amount, 0);
+    const refundTotal = todayRefundsData.reduce((sum, refund) => sum + (refund.amount || 0), 0);
     
     setTotalRevenue(revenue);
     setTotalLensRevenue(lensRevenue + contactLensRevenue);
@@ -194,13 +194,13 @@ export const DailySalesReport: React.FC = () => {
     
     const paymentMethods: Record<string, { amount: number; count: number }> = {};
     todaySalesData
-      .filter(invoice => !invoice.isRefunded && invoice.deposit > 0)
+      .filter(invoice => !invoice.isRefunded && (invoice.deposit || 0) > 0)
       .forEach(invoice => {
         const method = invoice.paymentMethod || 'غير محدد';
         if (!paymentMethods[method]) {
           paymentMethods[method] = { amount: 0, count: 0 };
         }
-        paymentMethods[method].amount += invoice.deposit;
+        paymentMethods[method].amount += (invoice.deposit || 0);
         paymentMethods[method].count += 1;
       });
     
@@ -218,7 +218,7 @@ export const DailySalesReport: React.FC = () => {
       if (!refundMethods[method]) {
         refundMethods[method] = { amount: 0, count: 0 };
       }
-      refundMethods[method].amount += refund.amount;
+      refundMethods[method].amount += (refund.amount || 0);
       refundMethods[method].count += 1;
     });
     
