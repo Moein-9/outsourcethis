@@ -69,11 +69,7 @@ export const InvoiceStepPayment: React.FC = () => {
 
   const saveOrder = () => {
     if (!paymentMethod) {
-      toast({
-        title: t('error'),
-        description: t('paymentMethodError'),
-        variant: "destructive"
-      });
+      toast.error(t('paymentMethodError'));
       return;
     }
     
@@ -134,10 +130,7 @@ export const InvoiceStepPayment: React.FC = () => {
     
     setOrderSaved(true);
     
-    toast({
-      title: t('success'),
-      description: `${t('orderSavedSuccess')}`,
-    });
+    toast.success(t('orderSavedSuccess'));
 
     if (window && window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('navigateToSummary'));

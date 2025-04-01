@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { usePatientStore } from "@/store/patientStore";
 import { Patient } from "@/store/patientStore";
+import { toast } from "@/components/ui/use-toast";
 
 interface InvoiceFormContextType {
   // Form state
