@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
 import { PrintOptionsDialog } from "@/components/PrintOptionsDialog";
+import { WorkOrder, Invoice } from "@/store/invoiceStore";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -29,12 +30,15 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const directionClass = language === 'ar' ? 'rtl' : 'ltr';
   
+  // Set current timestamp for all created entities
+  const currentTimestamp = new Date().toISOString();
+  
   const invoice = {
     invoiceId: getValues<string>('invoiceId') || "",
     workOrderId: getValues<string>('workOrderId') || "",
     patientName: getValues<string>('patientName') || "",
     patientPhone: getValues<string>('patientPhone') || "",
-    patientId: getValues<string>('patientId'),
+    patientId: getValues<string>('patientId') || "",
     invoiceType: getValues<string>('invoiceType') || "glasses",
     lensType: getValues<string>('lensType') || "",
     lensPrice: getValues<number>('lensPrice') || 0,
@@ -56,22 +60,32 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     serviceId: getValues<string>('serviceId') || "",
     serviceDescription: getValues<string>('serviceDescription') || "",
     servicePrice: getValues<number>('servicePrice') || 0,
-  };
+    createdAt: currentTimestamp, // Add required createdAt field
+  } as Invoice; // Use type assertion to satisfy the Invoice type
   
   const patient = {
+    patientId: getValues<string>('patientId') || "",
     name: getValues<string>('patientName') || "",
-    phone: getValues<string>('patientPhone') || ""
+    phone: getValues<string>('patientPhone') || "",
+    // Add required fields to match Patient type
+    dob: "",
+    notes: "",
+    rx: [],
+    createdAt: currentTimestamp
   };
   
   const hasInvoiceData = !!invoice.invoiceId;
   const isContactLens = invoice.invoiceType === "contacts";
   const isEyeExam = invoice.invoiceType === "exam";
   
-  // Data for work order
-  const workOrder = {
-    id: invoice.workOrderId,
+  // Data for work order - ensure it has all required fields
+  const workOrder: WorkOrder = {
+    id: invoice.workOrderId || "",
+    patientId: patient.patientId || "",  // Add required patientId
+    createdAt: currentTimestamp,         // Add required createdAt
     invoiceId: invoice.invoiceId,
-    date: new Date().toISOString(),
+    workOrderId: invoice.workOrderId || "",
+    date: currentTimestamp,
     patientName: patient.name,
     patientPhone: patient.phone,
     lensType: invoice.lensType,
@@ -80,7 +94,14 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     frameModel: invoice.frameModel,
     frameColor: invoice.frameColor,
     invoiceType: invoice.invoiceType,
-    contactLensItems: invoice.contactLensItems
+    contactLenses: invoice.contactLensItems,
+    // Add required fields for WorkOrder
+    framePrice: invoice.framePrice,
+    lensPrice: invoice.lensPrice,
+    coatingPrice: invoice.coatingPrice,
+    discount: invoice.discount,
+    total: invoice.total,
+    isPaid: invoice.isPaid
   };
   
   const handlePrintWorkOrder = () => {
