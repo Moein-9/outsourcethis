@@ -64,7 +64,7 @@ export const usePrintLabel = (onError?: (message: string) => void) => {
       PrintService.printHtml(htmlDocument, 'label', () => {
         console.log(`[LabelPrinting] Print process completed for frame ${frameId}`);
         setIsPrinting(false);
-        sonnerToast(t('labelPrintedSuccessfully'));
+        sonnerToast.success(t('labelPrintedSuccessfully'));
       });
     } catch (error) {
       console.error('[LabelPrinting] QR code generation error:', error);
