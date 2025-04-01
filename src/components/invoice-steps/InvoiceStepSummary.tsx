@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
 import { Button } from "@/components/ui/button";
@@ -9,10 +10,8 @@ import {
   Contact, ScrollText, Glasses
 } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
-import { WorkOrder } from "@/types/inventory";
-import { Invoice } from "@/store/invoiceStore";
+import { WorkOrder, Invoice } from "@/store/invoiceStore";
 import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
-import { RxLanguageDialog } from "@/components/RxReceiptPrint";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -27,8 +26,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
 }) => {
   const { t, language } = useLanguageStore();
   const { getValues, calculateTotal, calculateRemaining } = useInvoiceForm();
-  
-  const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const directionClass = language === 'ar' ? 'rtl' : 'ltr';
@@ -86,27 +83,20 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     ? { name: lensTypeValue, price: getValues<number>('lensPrice') || 0 }
     : lensTypeValue;
   
-  // Create WorkOrder object that matches the interface in src/types/inventory.ts
+  // Create WorkOrder object that matches the interface in src/store/invoiceStore.ts
   const workOrder: WorkOrder = {
     id: invoice.workOrderId || "",
     patientId: patient.patientId || "",
     createdAt: currentTimestamp,
     lensType: lensTypeObject,
     contactLenses: invoice.contactLensItems,
-    // isPaid is defined in the WorkOrder interface so we can include it directly
+    // Only include properties that exist in the WorkOrder interface
     isPaid: invoice.isPaid,
-    // Add discount only if it exists
     ...(invoice.discount ? { discount: invoice.discount } : {})
   };
   
   const handlePrintInvoice = () => {
     CustomPrintService.printInvoice(invoice);
-  };
-
-  const handleLanguageSelection = (selectedLanguage: 'en' | 'ar') => {
-    setIsLanguageDialogOpen(false);
-    // Here we would print the prescription with the selected language
-    // This component likely needs the RX data as well to print the prescription
   };
   
   if (!hasInvoiceData) {
@@ -295,13 +285,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
           </Button>
         </div>
       </div>
-
-      {/* Language selection dialog */}
-      <RxLanguageDialog
-        isOpen={isLanguageDialogOpen}
-        onClose={() => setIsLanguageDialogOpen(false)}
-        onSelect={handleLanguageSelection}
-      />
     </div>
   );
 };

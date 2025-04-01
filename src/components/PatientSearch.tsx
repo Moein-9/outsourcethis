@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { usePatientStore, Patient, RxData, ContactLensRx } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
-import { printRxReceipt, RxLanguageDialog } from "./RxReceiptPrint";
+import { printRxReceipt } from "./RxReceiptPrint";
 import { PatientNotes } from "./PatientNotes";
 import { PatientSearchForm } from "./PatientSearchForm";
 import { PatientSearchResults } from "./PatientSearchResults";
@@ -283,11 +283,26 @@ export const PatientSearch: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <RxLanguageDialog
-        isOpen={isLanguageDialogOpen}
-        onClose={() => setIsLanguageDialogOpen(false)}
-        onSelect={handleLanguageSelection}
-      />
+      <Dialog open={isLanguageDialogOpen} onOpenChange={setIsLanguageDialogOpen}>
+        <DialogContent className="max-w-md z-[100]">
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? "اختر لغة الطباعة" : "Select Print Language"}</DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? "الرجاء اختيار لغة طباعة الوصفة الطبية" : "Please select the language for printing the prescription"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <Button variant="outline" onClick={() => handleLanguageSelection('en')}>
+              <img src="/placeholdr.svg" alt="" className="w-5 h-5 mr-2" />
+              English
+            </Button>
+            <Button variant="outline" onClick={() => handleLanguageSelection('ar')}>
+              <img src="/placeholdr.svg" alt="" className="w-5 h-5 ml-2" />
+              العربية
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       
       {selectedPatient && (
         <>

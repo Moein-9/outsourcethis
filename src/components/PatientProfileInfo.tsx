@@ -21,7 +21,6 @@ import {
   FileBarChart, 
   Receipt 
 } from "lucide-react";
-import { RxLanguageDialog } from "./RxReceiptPrint";
 
 interface PatientProfileInfoProps {
   patient: Patient;
@@ -35,9 +34,6 @@ export const PatientProfileInfo: React.FC<PatientProfileInfoProps> = ({
   onPrintPrescription
 }) => {
   const { language, t } = useLanguageStore();
-  
-  // Add state for language dialog
-  const [isLanguageDialogOpen, setIsLanguageDialogOpen] = React.useState(false);
   
   const formatDate = (dateString?: string) => {
     if (!dateString) return language === 'ar' ? "تاريخ غير متوفر" : "Date not available";
@@ -53,15 +49,6 @@ export const PatientProfileInfo: React.FC<PatientProfileInfoProps> = ({
     if (!dateOfBirth) return language === 'ar' ? "غير معروف" : "Unknown";
     const age = differenceInYears(new Date(), new Date(dateOfBirth));
     return age;
-  };
-  
-  const handlePrintClick = () => {
-    setIsLanguageDialogOpen(true);
-  };
-
-  const handleLanguageSelection = (selectedLanguage: 'en' | 'ar') => {
-    setIsLanguageDialogOpen(false);
-    onPrintPrescription();
   };
   
   return (
@@ -134,20 +121,13 @@ export const PatientProfileInfo: React.FC<PatientProfileInfoProps> = ({
           <Button 
             variant="outline" 
             className="w-full justify-start" 
-            onClick={handlePrintClick}
+            onClick={onPrintPrescription}
           >
             <Receipt className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'} text-blue-500`} />
             {language === 'ar' ? "طباعة الوصفة الطبية" : "Print Prescription"}
           </Button>
         </div>
       </CardContent>
-
-      {/* Language selection dialog */}
-      <RxLanguageDialog
-        isOpen={isLanguageDialogOpen}
-        onClose={() => setIsLanguageDialogOpen(false)}
-        onSelect={handleLanguageSelection}
-      />
     </Card>
   );
 };

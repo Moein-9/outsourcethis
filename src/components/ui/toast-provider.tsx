@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ToastContext, ToasterToast, TOAST_REMOVE_DELAY } from "@/hooks/use-toast";
 
 const TOAST_LIMIT = 20;
@@ -52,19 +52,6 @@ export function ToastProvider({
   const removeToast = (id: string) => {
     setToasts((prevToasts) => prevToasts.filter((t) => t.id !== id));
   };
-
-  // Listen for toast events from the global 'toast' object
-  useEffect(() => {
-    const handleToastMessage = (event: CustomEvent) => {
-      addToast(event.detail);
-    };
-
-    window.addEventListener('toast-message', handleToastMessage as EventListener);
-    
-    return () => {
-      window.removeEventListener('toast-message', handleToastMessage as EventListener);
-    };
-  }, []);
 
   return (
     <ToastContext.Provider

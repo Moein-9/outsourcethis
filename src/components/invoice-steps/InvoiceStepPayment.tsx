@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -11,7 +10,7 @@ import {
   CreditCard as CardIcon, Save
 } from "lucide-react";
 import { useInvoiceStore } from "@/store/invoiceStore";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -70,31 +69,20 @@ export const InvoiceStepPayment: React.FC = () => {
 
   const saveOrder = () => {
     if (!paymentMethod) {
-      toast.error(t('paymentMethodError'));
+      toast({
+        title: t('error'),
+        description: t('paymentMethodError'),
+        variant: "destructive"
+      });
       return;
     }
     
     const patientId = getValues<string>('patientId') || 'anonymous';
     const invoiceType = getValues<string>('invoiceType') || 'glasses';
     
-    // Get both prescription types
-    const rxData = getValues('rx');
-    const contactLensRxData = getValues('contactLensRx');
-    
-    // Create work order with both prescription types if they exist
     let workOrder: any = {
       patientId
     };
-    
-    // Always include glasses rx data if it exists
-    if (rxData) {
-      workOrder.rx = rxData;
-    }
-    
-    // Always include contact lens rx data if it exists
-    if (contactLensRxData) {
-      workOrder.contactLensRx = contactLensRxData;
-    }
     
     if (invoiceType === 'glasses') {
       workOrder.lensType = {
@@ -103,9 +91,8 @@ export const InvoiceStepPayment: React.FC = () => {
       };
     } else if (invoiceType === 'contacts') {
       workOrder.contactLenses = getValues('contactLensItems') || [];
+      workOrder.contactLensRx = getValues('contactLensRx') || null;
     }
-    
-    console.log('Creating work order with data:', workOrder);
     
     const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
     setValue('workOrderId', workOrderId);
@@ -123,17 +110,8 @@ export const InvoiceStepPayment: React.FC = () => {
       
       paymentMethod: formData.paymentMethod,
       authNumber: formData.authNumber,
-      workOrderId: workOrderId, // Link to the work order
+      workOrderId: workOrderId // Link to the work order
     };
-    
-    // Include both types of prescription data in the invoice if they exist
-    if (rxData) {
-      invoiceData.rx = rxData;
-    }
-    
-    if (contactLensRxData) {
-      invoiceData.contactLensRx = contactLensRxData;
-    }
     
     if (invoiceType === 'glasses') {
       invoiceData.lensType = formData.lensType;
@@ -148,16 +126,18 @@ export const InvoiceStepPayment: React.FC = () => {
       invoiceData.framePrice = formData.framePrice;
     } else if (invoiceType === 'contacts') {
       invoiceData.contactLensItems = formData.contactLensItems || [];
+      invoiceData.contactLensRx = formData.contactLensRx || null;
     }
-    
-    console.log('Creating invoice with data:', invoiceData);
     
     const invoiceId = addInvoice(invoiceData);
     setValue('invoiceId', invoiceId);
     
     setOrderSaved(true);
     
-    toast.success(t('orderSavedSuccess'));
+    toast({
+      title: t('success'),
+      description: `${t('orderSavedSuccess')}`,
+    });
 
     if (window && window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('navigateToSummary'));

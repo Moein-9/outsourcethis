@@ -84,9 +84,6 @@ export interface Invoice {
   isArchived?: boolean;
   archivedAt?: string;
   archiveReason?: string;
-  
-  // Prescription data
-  rx?: any;
 }
 
 // Define WorkOrder interface
@@ -104,9 +101,6 @@ export interface WorkOrder {
   contactLensRx?: any;
   isPickedUp?: boolean;
   pickedUpAt?: string;
-  
-  // Added rx field to store prescription data
-  rx?: any;
   
   // Edit tracking
   lastEditedAt?: string;
