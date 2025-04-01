@@ -71,23 +71,23 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
     setPatientSearchResults([]);
     setRxVisible(true);
     
+    // Set all patient data regardless of invoice type
     setValue('patientId', patient.patientId);
     setValue('patientName', patient.name);
     setValue('patientPhone', patient.phone);
     setValue('rx', patient.rx);
     
-    if (invoiceType === "contacts") {
-      if (patient.contactLensRx) {
-        setValue('contactLensRx', patient.contactLensRx);
-        setShowMissingRxWarning(false);
-      } else {
-        // Initialize with default values if no contact lens RX exists
-        setValue('contactLensRx', {
-          rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
-          leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
-        });
-        setShowMissingRxWarning(true);
-      }
+    // Always set contact lens rx data if available
+    if (patient.contactLensRx) {
+      setValue('contactLensRx', patient.contactLensRx);
+      setShowMissingRxWarning(false);
+    } else {
+      // Initialize with default values if no contact lens RX exists
+      setValue('contactLensRx', {
+        rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
+        leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
+      });
+      setShowMissingRxWarning(invoiceType === "contacts");
     }
   };
   
@@ -129,6 +129,15 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
     });
   };
 
+  // Effect to update the missing RX warning when invoice type changes
+  useEffect(() => {
+    if (currentPatient && invoiceType === "contacts" && !currentPatient.contactLensRx) {
+      setShowMissingRxWarning(true);
+    } else {
+      setShowMissingRxWarning(false);
+    }
+  }, [invoiceType, currentPatient]);
+
   // Get current contact lens RX data
   const currentContactLensRx = getValues<any>('contactLensRx') || {
     rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
@@ -142,6 +151,12 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
         onValueChange={(v) => {
           onInvoiceTypeChange(v as "glasses" | "contacts" | "exam");
           setValue('invoiceType', v);
+          // Update missing RX warning when invoice type changes
+          if (v === "contacts" && currentPatient && !currentPatient.contactLensRx) {
+            setShowMissingRxWarning(true);
+          } else {
+            setShowMissingRxWarning(false);
+          }
         }}
         className="w-auto mb-6"
       >
