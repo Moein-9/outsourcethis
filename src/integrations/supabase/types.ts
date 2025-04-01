@@ -9,7 +9,186 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      contact_lenses: {
+        Row: {
+          bc: string
+          brand: string
+          color: string | null
+          diameter: string
+          id: string
+          lens_id: string
+          power: string
+          price: number
+          qty: number
+          type: string
+        }
+        Insert: {
+          bc: string
+          brand: string
+          color?: string | null
+          diameter: string
+          id?: string
+          lens_id: string
+          power: string
+          price: number
+          qty: number
+          type: string
+        }
+        Update: {
+          bc?: string
+          brand?: string
+          color?: string | null
+          diameter?: string
+          id?: string
+          lens_id?: string
+          power?: string
+          price?: number
+          qty?: number
+          type?: string
+        }
+        Relationships: []
+      }
+      frames: {
+        Row: {
+          brand: string
+          color: string
+          created_at: string | null
+          frame_id: string
+          id: string
+          model: string
+          price: number
+          qty: number
+          size: string
+        }
+        Insert: {
+          brand: string
+          color: string
+          created_at?: string | null
+          frame_id: string
+          id?: string
+          model: string
+          price: number
+          qty: number
+          size: string
+        }
+        Update: {
+          brand?: string
+          color?: string
+          created_at?: string | null
+          frame_id?: string
+          id?: string
+          model?: string
+          price?: number
+          qty?: number
+          size?: string
+        }
+        Relationships: []
+      }
+      lens_coatings: {
+        Row: {
+          category: string
+          coating_id: string
+          description: string | null
+          id: string
+          name: string
+          price: number
+        }
+        Insert: {
+          category: string
+          coating_id: string
+          description?: string | null
+          id?: string
+          name: string
+          price: number
+        }
+        Update: {
+          category?: string
+          coating_id?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
+      lens_thicknesses: {
+        Row: {
+          category: string
+          description: string | null
+          id: string
+          name: string
+          price: number
+          thickness_id: string
+        }
+        Insert: {
+          category: string
+          description?: string | null
+          id?: string
+          name: string
+          price: number
+          thickness_id: string
+        }
+        Update: {
+          category?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+          thickness_id?: string
+        }
+        Relationships: []
+      }
+      lens_types: {
+        Row: {
+          id: string
+          lens_id: string
+          name: string
+          price: number | null
+          type: string
+        }
+        Insert: {
+          id?: string
+          lens_id: string
+          name: string
+          price?: number | null
+          type: string
+        }
+        Update: {
+          id?: string
+          lens_id?: string
+          name?: string
+          price?: number | null
+          type?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          category: string
+          description: string
+          id: string
+          name: string
+          price: number
+          service_id: string
+        }
+        Insert: {
+          category: string
+          description: string
+          id?: string
+          name: string
+          price: number
+          service_id: string
+        }
+        Update: {
+          category?: string
+          description?: string
+          id?: string
+          name?: string
+          price?: number
+          service_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
