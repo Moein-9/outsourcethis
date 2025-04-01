@@ -57,7 +57,39 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const patientName = patient?.name || invoice?.patientName || workOrder?.patientName || t("anonymous");
   const patientPhone = patient?.phone || invoice?.patientPhone || workOrder?.patientPhone;
   
-  const rx = patient?.rx || workOrder?.rx;
+  let rx: any = null;
+  
+  if (workOrder?.rx) {
+    rx = workOrder.rx;
+    console.log("Using RX from workOrder:", rx);
+  } 
+  else if (patient?.rx && Array.isArray(patient.rx) && patient.rx.length > 0) {
+    rx = patient.rx[0];
+    console.log("Using RX from patient.rx array:", rx);
+  } 
+  else if (patient?.rx && typeof patient.rx === 'object' && !Array.isArray(patient.rx)) {
+    rx = patient.rx;
+    console.log("Using RX from patient.rx object:", rx);
+  }
+  if (!rx) {
+    console.log("No RX data found, using empty placeholder");
+    rx = {
+      sphereOD: "—",
+      cylOD: "—",
+      axisOD: "—",
+      sphereOS: "—",
+      cylOS: "—",
+      axisOS: "—",
+      add: "—",
+      pd: "—"
+    };
+  }
+  
+  console.log("Work Order RX data:", { 
+    workOrderRx: workOrder?.rx,
+    patientRx: patient?.rx,
+    finalRx: rx
+  });
   
   const frameData = {
     brand: workOrder?.frameBrand || invoice?.frameBrand || "",
@@ -266,19 +298,19 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           <tbody>
             <tr>
               <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.sphereOD || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.cylOD || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.axisOD || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.addOD || rx.add || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.pdRight || rx.pdOD || rx.pd || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.sphereOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.cylOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.axisOD || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.addOD || rx?.add || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.pdRight || rx?.pdOD || rx?.pd || "—"}</td>
             </tr>
             <tr>
               <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.sphereOS || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.cylOS || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.axisOS || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.addOS || rx.add || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx.pdLeft || rx.pdOS || rx.pd || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.sphereOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.cylOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.axisOS || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.addOS || rx?.add || "—"}</td>
+              <td className="p-1 border border-gray-300 text-center">{rx?.pdLeft || rx?.pdOS || rx?.pd || "—"}</td>
             </tr>
           </tbody>
         </table>
