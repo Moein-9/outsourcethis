@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -76,6 +77,12 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const isContactLens = invoice.invoiceType === "contacts";
   const isEyeExam = invoice.invoiceType === "exam";
   
+  // Convert string lensType to an object if needed
+  const lensTypeValue = getValues<string>('lensType') || "";
+  const lensTypeObject = typeof lensTypeValue === 'string' 
+    ? { name: lensTypeValue, price: getValues<number>('lensPrice') || 0 }
+    : lensTypeValue;
+  
   const workOrder: WorkOrder = {
     id: invoice.workOrderId || "",
     patientId: patient.patientId || "",
@@ -85,19 +92,18 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     date: currentTimestamp,
     patientName: patient.name,
     patientPhone: patient.phone,
-    lensType: invoice.lensType,
+    lensType: lensTypeObject,
     coating: invoice.coating,
     frameBrand: invoice.frameBrand,
     frameModel: invoice.frameModel,
     frameColor: invoice.frameColor,
-    invoiceType: invoice.invoiceType,
-    contactLenses: invoice.contactLensItems,
     framePrice: invoice.framePrice,
     lensPrice: invoice.lensPrice,
     coatingPrice: invoice.coatingPrice,
     discount: invoice.discount,
     total: invoice.total,
-    isPaid: invoice.isPaid
+    isPaid: invoice.isPaid,
+    contactLenses: invoice.contactLensItems,
   };
   
   const handlePrintInvoice = () => {
