@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -10,7 +11,7 @@ import {
   CreditCard as CardIcon, Save
 } from "lucide-react";
 import { useInvoiceStore } from "@/store/invoiceStore";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
@@ -76,8 +77,11 @@ export const InvoiceStepPayment: React.FC = () => {
     const patientId = getValues<string>('patientId') || 'anonymous';
     const invoiceType = getValues<string>('invoiceType') || 'glasses';
     
+    // Create work order with both prescription types
     let workOrder: any = {
-      patientId
+      patientId,
+      // Include rx data in all work orders
+      rx: getValues('rx')
     };
     
     if (invoiceType === 'glasses') {
@@ -85,9 +89,17 @@ export const InvoiceStepPayment: React.FC = () => {
         name: getValues<string>('lensType'),
         price: getValues<number>('lensPrice')
       };
+      // Include contact lens rx data even for glasses orders if it exists
+      if (getValues('contactLensRx')) {
+        workOrder.contactLensRx = getValues('contactLensRx');
+      }
     } else if (invoiceType === 'contacts') {
       workOrder.contactLenses = getValues('contactLensItems') || [];
       workOrder.contactLensRx = getValues('contactLensRx') || null;
+      // Include glasses rx data even for contact lens orders
+      if (getValues('rx')) {
+        workOrder.rx = getValues('rx');
+      }
     }
     
     const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
@@ -106,7 +118,11 @@ export const InvoiceStepPayment: React.FC = () => {
       
       paymentMethod: formData.paymentMethod,
       authNumber: formData.authNumber,
-      workOrderId: workOrderId // Link to the work order
+      workOrderId: workOrderId, // Link to the work order
+      
+      // Include both types of prescription data in the invoice
+      rx: formData.rx,
+      contactLensRx: formData.contactLensRx
     };
     
     if (invoiceType === 'glasses') {
@@ -122,7 +138,6 @@ export const InvoiceStepPayment: React.FC = () => {
       invoiceData.framePrice = formData.framePrice;
     } else if (invoiceType === 'contacts') {
       invoiceData.contactLensItems = formData.contactLensItems || [];
-      invoiceData.contactLensRx = formData.contactLensRx || null;
     }
     
     const invoiceId = addInvoice(invoiceData);

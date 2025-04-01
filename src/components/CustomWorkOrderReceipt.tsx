@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, History } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, History, Contact } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
 import { 
   Card,
@@ -57,7 +57,24 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const patientName = patient?.name || invoice?.patientName || workOrder?.patientName || t("anonymous");
   const patientPhone = patient?.phone || invoice?.patientPhone || workOrder?.patientPhone;
   
-  const rx = patient?.rx || workOrder?.rx;
+  const rx = patient?.rx || workOrder?.rx || invoice?.rx || {
+    sphereOD: '',
+    cylOD: '',
+    axisOD: '',
+    addOD: '',
+    pdOD: '',
+    sphereOS: '',
+    cylOS: '',
+    axisOS: '',
+    addOS: '',
+    pdOS: '',
+    pd: ''
+  };
+  
+  const contactLensRx = workOrder?.contactLensRx || invoice?.contactLensRx;
+  const hasContactLensRx = !!contactLensRx && 
+    ((contactLensRx.rightEye && Object.values(contactLensRx.rightEye).some(v => v)) || 
+     (contactLensRx.leftEye && Object.values(contactLensRx.leftEye).some(v => v)));
   
   const frameData = {
     brand: workOrder?.frameBrand || invoice?.frameBrand || "",
@@ -287,6 +304,49 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
           <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
         </div>
+        
+        {hasContactLensRx && (
+          <div className="mt-3">
+            <div className="font-bold text-sm mb-1 flex items-center justify-center gap-1 text-blue-700">
+              <Contact className="w-4 h-4" /> {isRtl ? "وصفة العدسات اللاصقة" : "Contact Lens Prescription"}
+            </div>
+            <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '16%' }}>Eye</th>
+                  <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '16%' }}>SPH</th>
+                  <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '16%' }}>CYL</th>
+                  <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '16%' }}>AXIS</th>
+                  <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '16%' }}>BC</th>
+                  <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '16%' }}>DIA</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">R</td>
+                  <td className="p-1 border border-gray-300 text-center">{contactLensRx?.rightEye?.sphere || "—"}</td>
+                  <td className="p-1 border border-gray-300 text-center">{contactLensRx?.rightEye?.cylinder || "—"}</td>
+                  <td className="p-1 border border-gray-300 text-center">{contactLensRx?.rightEye?.axis || "—"}</td>
+                  <td className="p-1 border border-gray-300 text-center">{contactLensRx?.rightEye?.bc || "—"}</td>
+                  <td className="p-1 border border-gray-300 text-center">{contactLensRx?.rightEye?.dia || "—"}</td>
+                </tr>
+                <tr>
+                  <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">L</td>
+                  <td className="p-1 border border-gray-300 text-center">{contactLensRx?.leftEye?.sphere || "—"}</td>
+                  <td className="p-1 border border-gray-300 text-center">{contactLensRx?.leftEye?.cylinder || "—"}</td>
+                  <td className="p-1 border border-gray-300 text-center">{contactLensRx?.leftEye?.axis || "—"}</td>
+                  <td className="p-1 border border-gray-300 text-center">{contactLensRx?.leftEye?.bc || "—"}</td>
+                  <td className="p-1 border border-gray-300 text-center">{contactLensRx?.leftEye?.dia || "—"}</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div className="mt-1 text-sm flex justify-between px-1 font-medium">
+              <span>R = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
+              <span>L = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mb-2">
