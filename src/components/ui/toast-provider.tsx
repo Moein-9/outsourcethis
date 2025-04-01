@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { ToastContext, ToasterToast } from "@/hooks/use-toast";
+import { ToastContext, ToasterToast, TOAST_REMOVE_DELAY } from "@/hooks/use-toast";
 
 const TOAST_LIMIT = 20;
 
