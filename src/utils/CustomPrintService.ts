@@ -256,10 +256,10 @@ export class CustomPrintService {
       // Render our component to the temp div
       const root = createRoot(tempDiv);
       root.render(
-        <ReceiptInvoice
-          invoice={invoice}
-          isPrintable={true}
-        />
+        React.createElement(ReceiptInvoice, {
+          invoice: invoice,
+          isPrintable: true
+        })
       );
       
       // Wait for React to render the component
