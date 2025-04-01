@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -7,19 +8,30 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { 
   BadgePercent, Banknote, CreditCard, Check,
-  CreditCard as CardIcon, Save
+  CreditCard as CardIcon, Save, Repeat, Calculator
 } from "lucide-react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
 
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
   const isRtl = language === 'ar';
-  const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
+  const { 
+    getValues, 
+    setValue, 
+    calculateTotal, 
+    calculateRemaining,
+    validateCurrentStep,
+    updateFinalPrice
+  } = useInvoiceForm();
+  
   const addWorkOrder = useInvoiceStore(state => state.addWorkOrder);
   const addInvoice = useInvoiceStore(state => state.addInvoice);
   
   const [discount, setDiscount] = useState(getValues<number>('discount') || 0);
+  const [finalPrice, setFinalPrice] = useState(getValues<number>('finalPrice') || calculateTotal());
+  const [useFinalPrice, setUseFinalPrice] = useState(getValues<boolean>('useFinalPrice') || false);
   const [deposit, setDeposit] = useState(getValues<number>('deposit') || 0);
   const [paymentMethod, setPaymentMethod] = useState(getValues<string>('paymentMethod') || "");
   const [authNumber, setAuthNumber] = useState(getValues<string>('authNumber') || "");
@@ -28,22 +40,81 @@ export const InvoiceStepPayment: React.FC = () => {
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
   
+  // Calculate subtotal (before discount)
+  const calculateSubtotal = (): number => {
+    if (getValues<string>('invoiceType') === 'exam') {
+      return getValues<number>('servicePrice') || 0;
+    } else if (getValues<string>('invoiceType') === 'glasses') {
+      const lensPrice = getValues<number>('lensPrice') || 0;
+      const coatingPrice = getValues<number>('coatingPrice') || 0;
+      const thicknessPrice = getValues<number>('thicknessPrice') || 0;
+      const framePrice = getValues<boolean>('skipFrame') ? 0 : (getValues<number>('framePrice') || 0);
+      return lensPrice + coatingPrice + thicknessPrice + framePrice;
+    } else {
+      const contactLensItems = getValues<any[]>('contactLensItems') || [];
+      return contactLensItems.reduce((sum, lens) => 
+        sum + ((lens.price || 0) * (lens.qty || 1)), 0
+      );
+    }
+  };
+  
+  const subtotal = calculateSubtotal();
+  
   useEffect(() => {
-    const newTotal = calculateTotal();
-    const newRemaining = Math.max(0, newTotal - deposit);
+    if (useFinalPrice) {
+      // In final price mode, discount is calculated from the difference
+      const newTotal = Math.min(finalPrice, subtotal); // Can't exceed subtotal
+      const newDiscount = Math.max(0, subtotal - newTotal);
+      
+      setDiscount(newDiscount);
+      setValue('discount', newDiscount);
+      setValue('total', newTotal);
+      setValue('finalPrice', newTotal);
+      
+      const newRemaining = Math.max(0, newTotal - deposit);
+      setTotal(newTotal);
+      setRemaining(newRemaining);
+      setValue('remaining', newRemaining);
+    } else {
+      // In discount mode, total is calculated by subtracting discount
+      const newTotal = Math.max(0, subtotal - discount);
+      setTotal(newTotal);
+      setValue('total', newTotal);
+      setValue('finalPrice', newTotal);
+      
+      const newRemaining = Math.max(0, newTotal - deposit);
+      setRemaining(newRemaining);
+      setValue('remaining', newRemaining);
+    }
     
-    setTotal(newTotal);
-    setRemaining(newRemaining);
-    
-    setValue('total', newTotal);
-    setValue('remaining', newRemaining);
-    setValue('isPaid', newRemaining <= 0);
-  }, [discount, deposit, calculateTotal]);
+    setValue('isPaid', remaining <= 0);
+  }, [discount, deposit, finalPrice, useFinalPrice, subtotal]);
   
   const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setDiscount(value);
     setValue('discount', value);
+  };
+  
+  const handleFinalPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    // Ensure final price cannot exceed subtotal
+    const validFinalPrice = Math.min(value, subtotal);
+    setFinalPrice(validFinalPrice);
+    updateFinalPrice(validFinalPrice);
+  };
+  
+  const togglePriceMode = (checked: boolean) => {
+    setUseFinalPrice(checked);
+    setValue('useFinalPrice', checked);
+    
+    if (checked) {
+      // Switching to final price mode
+      setFinalPrice(total);
+    } else {
+      // Switching back to discount mode
+      setDiscount(subtotal - total);
+    }
   };
   
   const handleDepositChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,12 +139,8 @@ export const InvoiceStepPayment: React.FC = () => {
   };
 
   const saveOrder = () => {
-    if (!paymentMethod) {
-      toast({
-        title: t('error'),
-        description: t('paymentMethodError'),
-        variant: "destructive"
-      });
+    // Validate payment step before proceeding
+    if (!validateCurrentStep('payment')) {
       return;
     }
     
@@ -139,6 +206,7 @@ export const InvoiceStepPayment: React.FC = () => {
       description: `${t('orderSavedSuccess')}`,
     });
 
+    // Automatically navigate to summary tab
     if (window && window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('navigateToSummary'));
     }
@@ -158,21 +226,77 @@ export const InvoiceStepPayment: React.FC = () => {
         </div>
         
         <div className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <BadgePercent className="w-5 h-5 text-primary" />
-              </div>
-              <Label htmlFor="discount" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>{t('discountColon')}</Label>
-              <Input
-                id="discount"
-                type="number"
-                step="0.01"
-                value={discount || ""}
-                onChange={handleDiscountChange}
-                className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Switch 
+                checked={useFinalPrice} 
+                onCheckedChange={togglePriceMode}
+                id="price-mode-toggle" 
               />
+              <Label htmlFor="price-mode-toggle" className="cursor-pointer">
+                {useFinalPrice 
+                  ? (isRtl ? "إدخال السعر النهائي" : "Enter Final Price") 
+                  : (isRtl ? "إدخال قيمة الخصم" : "Enter Discount Amount")}
+              </Label>
             </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calculator className="w-4 h-4" />
+              <span>{isRtl ? "المجموع الأصلي:" : "Original Subtotal:"} {subtotal.toFixed(2)} {isRtl ? 'د.ك' : t('kwd')}</span>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {useFinalPrice ? (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Calculator className="w-5 h-5 text-green-500" />
+                </div>
+                <Label htmlFor="finalPrice" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>
+                  {isRtl ? "السعر النهائي:" : "Final Price:"}
+                </Label>
+                <Input
+                  id="finalPrice"
+                  type="number"
+                  step="0.01"
+                  value={finalPrice || ""}
+                  onChange={handleFinalPriceChange}
+                  className={`pl-10 border-green-300 focus:border-green-500 ${textAlignClass}`}
+                  max={subtotal}
+                />
+                {finalPrice < subtotal && (
+                  <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                    <BadgePercent className="w-3 h-3" />
+                    {isRtl 
+                      ? `الخصم المحتسب: ${discount.toFixed(2)} د.ك (${((discount/subtotal)*100).toFixed(0)}٪)`
+                      : `Calculated discount: ${discount.toFixed(2)} KWD (${((discount/subtotal)*100).toFixed(0)}%)`}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <BadgePercent className="w-5 h-5 text-primary" />
+                </div>
+                <Label htmlFor="discount" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>{t('discountColon')}</Label>
+                <Input
+                  id="discount"
+                  type="number"
+                  step="0.01"
+                  value={discount || ""}
+                  onChange={handleDiscountChange}
+                  className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
+                  max={subtotal}
+                />
+                {discount > 0 && (
+                  <div className="text-xs text-primary mt-1 flex items-center gap-1">
+                    <Calculator className="w-3 h-3" />
+                    {isRtl 
+                      ? `نسبة الخصم: ${((discount/subtotal)*100).toFixed(0)}٪`
+                      : `Discount percentage: ${((discount/subtotal)*100).toFixed(0)}%`}
+                  </div>
+                )}
+              </div>
+            )}
             
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
