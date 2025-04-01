@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useInvoiceStore, Invoice } from '@/store/invoiceStore';
 import { usePatientStore } from '@/store/patientStore';
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from '@/hooks/use-toast';
 import { useLanguageStore } from '@/store/languageStore';
-import { RefreshCw, Search, AlertTriangle, CheckCircle2, ArrowLeft, Receipt, ShoppingBag, RefreshCcw, Phone, Calendar } from 'lucide-react';
+import { RefreshCw, Search, AlertTriangle, CheckCircle2, ArrowLeft, Receipt, ShoppingBag, RefreshCcw, Phone, Calendar, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { RefundReceiptTemplate } from './RefundReceiptTemplate';
 import { PrintService } from '@/utils/PrintService';
@@ -81,7 +82,8 @@ export const RefundManager: React.FC = () => {
   
   const handleSelectInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
-    setRefundAmount(invoice.total);
+    // Set refund amount to the deposit (amount actually paid) instead of total
+    setRefundAmount(invoice.deposit);
     setSuccess('');
     setErrorMessage('');
   };
@@ -93,11 +95,11 @@ export const RefundManager: React.FC = () => {
     } else {
       setRefundAmount(value);
       
-      if (selectedInvoice && value > selectedInvoice.total) {
+      if (selectedInvoice && value > selectedInvoice.deposit) {
         toast({
           title: language === 'ar' ? 'خطأ في المبلغ' : 'Amount Error',
-          description: language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز إجمالي الفاتورة' : 
-            'Refund amount cannot exceed the invoice total',
+          description: language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز المبلغ المدفوع' : 
+            'Refund amount cannot exceed the amount paid',
           variant: "destructive",
         });
       }
@@ -124,11 +126,12 @@ export const RefundManager: React.FC = () => {
       return false;
     }
     
-    if (refundAmount > selectedInvoice.total) {
+    // Validate against deposit (amount paid) instead of total
+    if (refundAmount > selectedInvoice.deposit) {
       toast({
         title: language === 'ar' ? 'خطأ في المبلغ' : 'Amount Error',
-        description: language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز إجمالي الفاتورة' : 
-          'Refund amount cannot exceed the invoice total',
+        description: language === 'ar' ? 'مبلغ الاسترداد لا يمكن أن يتجاوز المبلغ المدفوع' : 
+          'Refund amount cannot exceed the amount paid',
         variant: "destructive",
       });
       return false;
@@ -364,6 +367,9 @@ export const RefundManager: React.FC = () => {
                         {language === 'ar' ? 'المبلغ الإجمالي' : 'Total Amount'}
                       </TableHead>
                       <TableHead className="text-blue-700 font-semibold">
+                        {language === 'ar' ? 'المبلغ المدفوع' : 'Amount Paid'}
+                      </TableHead>
+                      <TableHead className="text-blue-700 font-semibold">
                         {language === 'ar' ? 'الحالة' : 'Status'}
                       </TableHead>
                       <TableHead className="text-right text-blue-700 font-semibold">
@@ -382,8 +388,11 @@ export const RefundManager: React.FC = () => {
                         <TableCell>{invoice.patientName}</TableCell>
                         <TableCell>{invoice.patientPhone}</TableCell>
                         <TableCell>{formatDate(invoice.createdAt)}</TableCell>
-                        <TableCell className="font-semibold text-blue-700">
+                        <TableCell className="font-medium text-blue-700">
                           {invoice.total.toFixed(3)} KWD
+                        </TableCell>
+                        <TableCell className="font-semibold text-green-700">
+                          {invoice.deposit.toFixed(3)} KWD
                         </TableCell>
                         <TableCell>
                           {invoice.isPaid ? (
@@ -433,7 +442,7 @@ export const RefundManager: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 bg-white/70 p-3 rounded-md">
                     <div className="space-y-1">
                       <div className="text-xs text-blue-600 font-medium">
-                        {language === 'ar' ? 'ال��ميل' : 'Customer'}
+                        {language === 'ar' ? 'العميل' : 'Customer'}
                       </div>
                       <div className="font-medium flex items-center gap-1">
                         <ShoppingBag className="h-4 w-4 text-blue-500 flex-shrink-0" />
@@ -484,10 +493,28 @@ export const RefundManager: React.FC = () => {
                         <div className="text-sm">
                           {language === 'ar' ? 'المبلغ الإجمالي:' : 'Total Amount:'}
                         </div>
-                        <div className="font-bold text-blue-800">
+                        <div className="font-medium text-blue-800">
                           {selectedInvoice.total.toFixed(3)} KWD
                         </div>
                       </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm">
+                          {language === 'ar' ? 'المبلغ المدفوع:' : 'Amount Paid:'}
+                        </div>
+                        <div className="font-bold text-green-700">
+                          {selectedInvoice.deposit.toFixed(3)} KWD
+                        </div>
+                      </div>
+                      {!selectedInvoice.isPaid && (
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm">
+                            {language === 'ar' ? 'المبلغ المتبقي:' : 'Remaining Amount:'}
+                          </div>
+                          <div className="font-medium text-amber-600">
+                            {selectedInvoice.remaining.toFixed(3)} KWD
+                          </div>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
                         <div className="text-sm">
                           {language === 'ar' ? 'طريقة الدفع:' : 'Payment Method:'}
@@ -530,9 +557,19 @@ export const RefundManager: React.FC = () => {
                       />
                       <p className="text-sm text-blue-600 font-medium">
                         {language === 'ar' 
-                          ? `المبلغ الإجمالي للفاتورة: ${selectedInvoice.total.toFixed(3)} KWD`
-                          : `Total invoice amount: ${selectedInvoice.total.toFixed(3)} KWD`}
+                          ? `المبلغ المدفوع للفاتورة: ${selectedInvoice.deposit.toFixed(3)} KWD`
+                          : `Amount paid: ${selectedInvoice.deposit.toFixed(3)} KWD`}
                       </p>
+                      {!selectedInvoice.isPaid && (
+                        <div className="flex items-center mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md text-amber-700">
+                          <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <p className="text-sm">
+                            {language === 'ar' 
+                              ? `هذه الفاتورة غير مدفوعة بالكامل. المبلغ المتبقي: ${selectedInvoice.remaining.toFixed(3)} KWD`
+                              : `This invoice is not fully paid. Remaining amount: ${selectedInvoice.remaining.toFixed(3)} KWD`}
+                          </p>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="space-y-2">
@@ -563,7 +600,7 @@ export const RefundManager: React.FC = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="refundReason" className="text-blue-700 font-medium">
-                      {language === 'ar' ? 'سب�� الاسترداد' : 'Refund Reason'}
+                      {language === 'ar' ? 'سبب الاسترداد' : 'Refund Reason'}
                     </Label>
                     <Select value={refundReason} onValueChange={setRefundReason}>
                       <SelectTrigger id="refundReason" className="border-blue-200 focus:ring-blue-400">
