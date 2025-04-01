@@ -62,7 +62,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const thicknessValue = thickness || (invoice as any).thickness;
   
   // Get prescription data from multiple possible sources with fallbacks
-  const rxData = rx || invoice.rx || (invoice as any).rx || {
+  const rxData = rx || invoice.rx || {
     sphereOD: '',
     cylOD: '',
     axisOD: '',
@@ -77,7 +77,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   };
   
   const contactLensItems = contactLenses || (invoice as any).contactLensItems || [];
-  const contactLensRxData = contactLensRx || (invoice as any).contactLensRx;
+  const contactLensRxData = contactLensRx || invoice.contactLensRx || (invoice as any).contactLensRx;
   
   const frameData = frame || (invoice.frameBrand ? {
     brand: invoice.frameBrand,

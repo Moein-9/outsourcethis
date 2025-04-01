@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -80,8 +79,10 @@ export const InvoiceStepPayment: React.FC = () => {
     // Create work order with both prescription types
     let workOrder: any = {
       patientId,
-      // Include rx data in all work orders
-      rx: getValues('rx')
+      // Always include glasses rx data if it exists
+      rx: getValues('rx'),
+      // Always include contact lens rx data if it exists
+      contactLensRx: getValues('contactLensRx')
     };
     
     if (invoiceType === 'glasses') {
@@ -89,17 +90,8 @@ export const InvoiceStepPayment: React.FC = () => {
         name: getValues<string>('lensType'),
         price: getValues<number>('lensPrice')
       };
-      // Include contact lens rx data even for glasses orders if it exists
-      if (getValues('contactLensRx')) {
-        workOrder.contactLensRx = getValues('contactLensRx');
-      }
     } else if (invoiceType === 'contacts') {
       workOrder.contactLenses = getValues('contactLensItems') || [];
-      workOrder.contactLensRx = getValues('contactLensRx') || null;
-      // Include glasses rx data even for contact lens orders
-      if (getValues('rx')) {
-        workOrder.rx = getValues('rx');
-      }
     }
     
     const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
