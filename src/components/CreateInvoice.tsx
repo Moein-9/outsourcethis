@@ -26,7 +26,7 @@ const CreateInvoiceContent: React.FC = () => {
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("patient");
-  const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
+  const { getValues, setValue, calculateTotal, calculateRemaining, validateCurrentStep } = useInvoiceForm();
   
   useEffect(() => {
     const handleNavigateToSummary = () => {
@@ -39,6 +39,18 @@ const CreateInvoiceContent: React.FC = () => {
       window.removeEventListener('navigateToSummary', handleNavigateToSummary);
     };
   }, []);
+  
+  const handleNextTab = (currentTab: string) => {
+    if (validateCurrentStep(currentTab)) {
+      if (currentTab === "patient") {
+        setActiveTab("products");
+      } else if (currentTab === "products") {
+        setActiveTab("payment");
+      } else if (currentTab === "payment") {
+        setActiveTab("summary");
+      }
+    }
+  };
   
   const handlePrintWorkOrder = () => {
     setWorkOrderPrintOpen(true);
@@ -102,8 +114,6 @@ const CreateInvoiceContent: React.FC = () => {
           <FileText className="w-6 h-6 text-primary" />
           {t('invoiceTitle')}
         </h2>
-        
-        {/* Removed the Print Invoice and Print Work Order buttons */}
       </div>
 
       <div className="grid grid-cols-3 gap-5">
@@ -149,7 +159,7 @@ const CreateInvoiceContent: React.FC = () => {
                     
                     <div className="flex justify-end mt-4">
                       <Button 
-                        onClick={() => setActiveTab("products")} 
+                        onClick={() => handleNextTab("patient")} 
                         className="flex items-center gap-2"
                       >
                         {t('next')}
@@ -175,7 +185,7 @@ const CreateInvoiceContent: React.FC = () => {
                         {t('previous')}
                       </Button>
                       <Button 
-                        onClick={() => setActiveTab("payment")} 
+                        onClick={() => handleNextTab("products")} 
                         className="flex items-center gap-2"
                       >
                         {t('next')}

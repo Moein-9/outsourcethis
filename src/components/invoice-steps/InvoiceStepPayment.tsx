@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Switch } from "@/components/ui/switch";
 import { 
   BadgePercent, Banknote, CreditCard, Check,
-  CreditCard as CardIcon, Save
+  CreditCard as CardIcon, Save, RefreshCw
 } from "lucide-react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/components/ui/use-toast";
@@ -15,11 +16,16 @@ import { toast } from "@/components/ui/use-toast";
 export const InvoiceStepPayment: React.FC = () => {
   const { t, language } = useLanguageStore();
   const isRtl = language === 'ar';
-  const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
+  const { 
+    getValues, setValue, calculateTotal, calculateRemaining,
+    isFinalPriceMode, setIsFinalPriceMode, finalPrice, updateFinalPrice,
+    validateCurrentStep
+  } = useInvoiceForm();
   const addWorkOrder = useInvoiceStore(state => state.addWorkOrder);
   const addInvoice = useInvoiceStore(state => state.addInvoice);
   
   const [discount, setDiscount] = useState(getValues<number>('discount') || 0);
+  const [finalPriceInput, setFinalPriceInput] = useState(0);
   const [deposit, setDeposit] = useState(getValues<number>('deposit') || 0);
   const [paymentMethod, setPaymentMethod] = useState(getValues<string>('paymentMethod') || "");
   const [authNumber, setAuthNumber] = useState(getValues<string>('authNumber') || "");
@@ -27,6 +33,32 @@ export const InvoiceStepPayment: React.FC = () => {
   
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
+  
+  const calculateSubtotal = () => {
+    if (getValues<string>('invoiceType') === 'exam') {
+      return getValues<number>('servicePrice') || 0;
+    } else if (getValues<string>('invoiceType') === 'glasses') {
+      const lensPrice = getValues<number>('lensPrice') || 0;
+      const coatingPrice = getValues<number>('coatingPrice') || 0;
+      const thicknessPrice = getValues<number>('thicknessPrice') || 0;
+      const framePrice = getValues<boolean>('skipFrame') ? 0 : (getValues<number>('framePrice') || 0);
+      return lensPrice + coatingPrice + thicknessPrice + framePrice;
+    } else {
+      const contactLensItems = getValues<any[]>('contactLensItems') || [];
+      return contactLensItems.reduce((sum, lens) => 
+        sum + ((lens.price || 0) * (lens.qty || 1)), 0
+      );
+    }
+  };
+  
+  const subtotal = calculateSubtotal();
+  
+  useEffect(() => {
+    if (isFinalPriceMode) {
+      const currentTotal = calculateTotal();
+      setFinalPriceInput(currentTotal);
+    }
+  }, []);
   
   useEffect(() => {
     const newTotal = calculateTotal();
@@ -44,6 +76,19 @@ export const InvoiceStepPayment: React.FC = () => {
     const value = parseFloat(e.target.value) || 0;
     setDiscount(value);
     setValue('discount', value);
+    
+    if (isFinalPriceMode) {
+      setFinalPriceInput(Math.max(0, subtotal - value));
+    }
+  };
+  
+  const handleFinalPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setFinalPriceInput(value);
+    
+    const newDiscount = Math.max(0, subtotal - value);
+    setDiscount(newDiscount);
+    setValue('discount', newDiscount);
   };
   
   const handleDepositChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,14 +111,18 @@ export const InvoiceStepPayment: React.FC = () => {
     setAuthNumber(e.target.value);
     setValue('authNumber', e.target.value);
   };
+  
+  const toggleDiscountMode = () => {
+    const newMode = !isFinalPriceMode;
+    setIsFinalPriceMode(newMode);
+    
+    if (newMode) {
+      setFinalPriceInput(Math.max(0, subtotal - discount));
+    }
+  };
 
   const saveOrder = () => {
-    if (!paymentMethod) {
-      toast({
-        title: t('error'),
-        description: t('paymentMethodError'),
-        variant: "destructive"
-      });
+    if (!validateCurrentStep('payment')) {
       return;
     }
     
@@ -158,21 +207,61 @@ export const InvoiceStepPayment: React.FC = () => {
         </div>
         
         <div className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <BadgePercent className="w-5 h-5 text-primary" />
-              </div>
-              <Label htmlFor="discount" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>{t('discountColon')}</Label>
-              <Input
-                id="discount"
-                type="number"
-                step="0.01"
-                value={discount || ""}
-                onChange={handleDiscountChange}
-                className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-gray-700">
+              {isRtl ? 'نمط الخصم:' : 'Discount Mode:'}
+            </span>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">
+                {isRtl ? 'مبلغ الخصم' : 'Discount Amount'}
+              </span>
+              <Switch 
+                checked={isFinalPriceMode}
+                onCheckedChange={toggleDiscountMode}
               />
+              <span className="text-sm text-gray-500">
+                {isRtl ? 'المبلغ النهائي' : 'Final Amount'}
+              </span>
             </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {isFinalPriceMode ? (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <BadgePercent className="w-5 h-5 text-primary" />
+                </div>
+                <Label htmlFor="finalPrice" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>
+                  {isRtl ? 'المبلغ النهائي:' : 'Final Amount:'}
+                </Label>
+                <Input
+                  id="finalPrice"
+                  type="number"
+                  step="0.01"
+                  value={finalPriceInput || ""}
+                  onChange={handleFinalPriceChange}
+                  className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
+                />
+                <div className="mt-1 text-xs text-gray-500">
+                  {isRtl ? `الخصم: ${discount.toFixed(3)} د.ك` : `Discount: ${discount.toFixed(3)} KWD`}
+                </div>
+              </div>
+            ) : (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <BadgePercent className="w-5 h-5 text-primary" />
+                </div>
+                <Label htmlFor="discount" className={`text-muted-foreground mb-1.5 block ${textAlignClass}`}>{t('discountColon')}</Label>
+                <Input
+                  id="discount"
+                  type="number"
+                  step="0.01"
+                  value={discount || ""}
+                  onChange={handleDiscountChange}
+                  className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
+                />
+              </div>
+            )}
             
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

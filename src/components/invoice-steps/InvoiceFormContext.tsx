@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { usePatientStore } from "@/store/patientStore";
 import { Patient } from "@/store/patientStore";
+import { toast } from "@/components/ui/use-toast";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface InvoiceFormContextType {
   // Form state
@@ -16,12 +18,19 @@ interface InvoiceFormContextType {
   setCurrentPatient: React.Dispatch<React.SetStateAction<Patient | null>>;
   
   // Navigation helpers
-  validateCurrentStep: () => boolean;
+  validateCurrentStep: (step: string) => boolean;
   
   // Calculation helpers
   calculateTotal: () => number;
   calculateRemaining: () => number;
   updateServicePrice: (price: number) => void;
+  
+  // Final price input handling
+  isFinalPriceMode: boolean;
+  setIsFinalPriceMode: React.Dispatch<React.SetStateAction<boolean>>;
+  finalPrice: number;
+  setFinalPrice: React.Dispatch<React.SetStateAction<number>>;
+  updateFinalPrice: (price: number) => void;
 }
 
 const InvoiceFormContext = createContext<InvoiceFormContextType | undefined>(undefined);
@@ -43,6 +52,7 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
   children,
   value
 }) => {
+  const { t } = useLanguageStore();
   const [formState, setFormState] = useState<Record<string, any>>({
     // Patient details
     patientId: undefined,
@@ -83,6 +93,10 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
   const [patientSearchResults, setPatientSearchResults] = useState<Patient[]>([]);
   const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
   
+  // Final price mode state
+  const [isFinalPriceMode, setIsFinalPriceMode] = useState<boolean>(false);
+  const [finalPrice, setFinalPrice] = useState<number>(0);
+  
   // Form value getters and setters
   const getValues = <T = any>(key?: string): T => {
     if (!key) return formState as T;
@@ -97,8 +111,94 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
   };
   
   // Validation helpers
-  const validateCurrentStep = () => {
-    // We'll implement specific validations when needed
+  const validateCurrentStep = (step: string): boolean => {
+    // Patient step validation
+    if (step === 'patient') {
+      if (!getValues<boolean>('skipPatient') && !getValues<string>('patientName')) {
+        toast({
+          title: t('validationError'),
+          description: t('patientNameRequired'),
+          variant: "destructive"
+        });
+        return false;
+      }
+      return true;
+    }
+    
+    // Products step validation
+    else if (step === 'products') {
+      const invoiceType = getValues<string>('invoiceType');
+      
+      if (invoiceType === 'glasses') {
+        // For glasses, validate lens type or frame info is entered
+        const hasLensType = !!getValues<string>('lensType');
+        const skipFrame = getValues<boolean>('skipFrame');
+        const hasFrameInfo = !skipFrame && !!getValues<string>('frameBrand');
+        
+        if (!hasLensType && !hasFrameInfo) {
+          toast({
+            title: t('validationError'),
+            description: t('productDetailsRequired'),
+            variant: "destructive"
+          });
+          return false;
+        }
+      } 
+      else if (invoiceType === 'contacts') {
+        // For contacts, validate at least one contact lens item
+        const contactLensItems = getValues<any[]>('contactLensItems') || [];
+        if (contactLensItems.length === 0) {
+          toast({
+            title: t('validationError'),
+            description: t('contactLensItemsRequired'),
+            variant: "destructive"
+          });
+          return false;
+        }
+      }
+      else if (invoiceType === 'exam') {
+        // For exam, validate service price
+        const servicePrice = getValues<number>('servicePrice') || 0;
+        if (servicePrice <= 0) {
+          toast({
+            title: t('validationError'),
+            description: t('servicePriceRequired'),
+            variant: "destructive"
+          });
+          return false;
+        }
+      }
+      return true;
+    }
+    
+    // Payment step validation
+    else if (step === 'payment') {
+      const paymentMethod = getValues<string>('paymentMethod');
+      
+      if (!paymentMethod) {
+        toast({
+          title: t('validationError'),
+          description: t('paymentMethodRequired'),
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      // Validate auth number for card payments
+      if ((paymentMethod === "Visa" || paymentMethod === "MasterCard" || 
+           paymentMethod === "كي نت" || paymentMethod === "KNET") && 
+           !getValues<string>('authNumber')) {
+        toast({
+          title: t('validationError'),
+          description: t('authNumberRequired'),
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      return true;
+    }
+    
     return true;
   };
   
@@ -112,6 +212,33 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
       const deposit = getValues<number>('deposit') || 0;
       setValue('remaining', Math.max(0, newTotal - deposit));
     }
+  };
+  
+  // Update from final price
+  const updateFinalPrice = (price: number) => {
+    setFinalPrice(price);
+    
+    // Calculate total without discount first
+    let subtotal = 0;
+    
+    if (getValues<string>('invoiceType') === 'exam') {
+      subtotal = getValues<number>('servicePrice') || 0;
+    } else if (getValues<string>('invoiceType') === 'glasses') {
+      const lensPrice = getValues<number>('lensPrice') || 0;
+      const coatingPrice = getValues<number>('coatingPrice') || 0;
+      const thicknessPrice = getValues<number>('thicknessPrice') || 0;
+      const framePrice = getValues<boolean>('skipFrame') ? 0 : (getValues<number>('framePrice') || 0);
+      subtotal = lensPrice + coatingPrice + thicknessPrice + framePrice;
+    } else {
+      const contactLensItems = getValues<any[]>('contactLensItems') || [];
+      subtotal = contactLensItems.reduce((sum, lens) => 
+        sum + ((lens.price || 0) * (lens.qty || 1)), 0
+      );
+    }
+    
+    // Calculate discount as the difference between subtotal and final price
+    const newDiscount = Math.max(0, subtotal - price);
+    setValue('discount', newDiscount);
   };
   
   // Calculation helpers
@@ -160,7 +287,12 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     validateCurrentStep,
     calculateTotal,
     calculateRemaining,
-    updateServicePrice
+    updateServicePrice,
+    isFinalPriceMode,
+    setIsFinalPriceMode,
+    finalPrice,
+    setFinalPrice,
+    updateFinalPrice
   };
   
   return (
