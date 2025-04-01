@@ -36,6 +36,25 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   const [open, setOpen] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   
+  // Check if this is a contact lens work order
+  const isContactLens = workOrder?.contactLenses?.length > 0 || 
+                        invoice?.contactLensItems?.length > 0 ||
+                        workOrder?.isContactLens === true;
+                          
+  console.log("CustomPrintWorkOrderButton - Is contact lens order:", isContactLens);
+  
+  // Determine which contact lens RX to use
+  const contactLensRx = workOrder?.contactLensRx || invoice?.contactLensRx || patient?.contactLensRx;
+  
+  if (contactLensRx) {
+    console.log("Using contact lens RX:", contactLensRx);
+    
+    // Ensure the workOrder has contactLensRx
+    if (!workOrder.contactLensRx) {
+      workOrder = { ...workOrder, contactLensRx };
+    }
+  }
+  
   const handlePrint = () => {
     if (isPrinting) return; // Prevent multiple calls
     

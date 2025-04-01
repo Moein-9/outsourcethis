@@ -58,6 +58,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const patientPhone = patient?.phone || invoice?.patientPhone || workOrder?.patientPhone;
   
   let rx: any = null;
+  let contactLensRx: any = null;
   
   if (workOrder?.rx) {
     rx = workOrder.rx;
@@ -71,6 +72,20 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
     rx = patient.rx;
     console.log("Using RX from patient.rx object:", rx);
   }
+  
+  if (workOrder?.contactLensRx) {
+    contactLensRx = workOrder.contactLensRx;
+    console.log("Using Contact Lens RX from workOrder:", contactLensRx);
+  }
+  else if (invoice?.contactLensRx) {
+    contactLensRx = invoice.contactLensRx;
+    console.log("Using Contact Lens RX from invoice:", contactLensRx);
+  }
+  else if (patient?.contactLensRx) {
+    contactLensRx = patient.contactLensRx;
+    console.log("Using Contact Lens RX from patient:", contactLensRx);
+  }
+  
   if (!rx) {
     console.log("No RX data found, using empty placeholder");
     rx = {
@@ -91,6 +106,13 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
     finalRx: rx
   });
   
+  console.log("Contact lens RX data sources:", {
+    workOrderRx: workOrder?.contactLensRx,
+    invoiceRx: invoice?.contactLensRx,
+    patientRx: patient?.contactLensRx,
+    finalContactLensRx: contactLensRx
+  });
+  
   const frameData = {
     brand: workOrder?.frameBrand || invoice?.frameBrand || "",
     model: workOrder?.frameModel || invoice?.frameModel || "",
@@ -102,14 +124,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const contactLensItems = invoice?.contactLensItems || workOrder?.contactLenses || [];
   const isContactLens = contactLensItems && contactLensItems.length > 0;
   
-  const contactLensRx = invoice?.contactLensRx || workOrder?.contactLensRx || patient?.contactLensRx || null;
-  console.log("Contact lens RX data sources:", {
-    invoiceRx: invoice?.contactLensRx,
-    workOrderRx: workOrder?.contactLensRx,
-    patientRx: patient?.contactLensRx,
-    finalRx: contactLensRx
-  });
-
   const lensType = workOrder?.lensType || invoice?.lensType || "";
   const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
   

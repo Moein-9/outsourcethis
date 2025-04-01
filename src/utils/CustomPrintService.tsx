@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { toast } from '@/hooks/use-toast';
 import { createRoot } from 'react-dom/client';
@@ -19,6 +20,13 @@ export class CustomPrintService {
         });
         return;
       }
+      
+      // Check if this is a contact lens order
+      const isContactLens = workOrder?.contactLenses?.length > 0 || 
+                          invoice?.contactLensItems?.length > 0 ||
+                          workOrder?.isContactLens === true;
+                          
+      console.log("Is contact lens order:", isContactLens);
       
       // Add basic HTML structure with improved styles for the receipt
       printWindow.document.write(`
@@ -216,6 +224,15 @@ export class CustomPrintService {
       const tempDiv = document.createElement('div');
       document.body.appendChild(tempDiv);
       tempDiv.style.display = 'none';
+      
+      // Prepare the workOrder object with contactLensRx if necessary
+      if (isContactLens && !workOrder.contactLensRx) {
+        if (invoice?.contactLensRx) {
+          workOrder = { ...workOrder, contactLensRx: invoice.contactLensRx };
+        } else if (patient?.contactLensRx) {
+          workOrder = { ...workOrder, contactLensRx: patient.contactLensRx };
+        }
+      }
       
       // Render our component to the temp div
       const root = createRoot(tempDiv);
