@@ -2,8 +2,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { usePatientStore } from "@/store/patientStore";
 import { Patient } from "@/store/patientStore";
-import { toast } from "@/components/ui/use-toast";
-import { useLanguageStore } from "@/store/languageStore";
 
 interface InvoiceFormContextType {
   // Form state
@@ -18,16 +16,12 @@ interface InvoiceFormContextType {
   setCurrentPatient: React.Dispatch<React.SetStateAction<Patient | null>>;
   
   // Navigation helpers
-  validateCurrentStep: (stepName: string) => boolean;
+  validateCurrentStep: () => boolean;
   
   // Calculation helpers
   calculateTotal: () => number;
   calculateRemaining: () => number;
   updateServicePrice: (price: number) => void;
-  
-  // New price/discount calculation
-  updateFinalPrice: (finalPrice: number) => void;
-  useFinalPrice: boolean;
 }
 
 const InvoiceFormContext = createContext<InvoiceFormContextType | undefined>(undefined);
@@ -49,7 +43,6 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
   children,
   value
 }) => {
-  const { t } = useLanguageStore();
   const [formState, setFormState] = useState<Record<string, any>>({
     // Patient details
     patientId: undefined,
@@ -85,10 +78,6 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     workOrderId: '',
     invoiceId: '',
     isPaid: false,
-    
-    // Final price mode
-    useFinalPrice: false, // Toggle between discount amount and final price input
-    finalPrice: 0
   });
   
   const [patientSearchResults, setPatientSearchResults] = useState<Patient[]>([]);
@@ -107,117 +96,9 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     }));
   };
   
-  // Validation helpers for each step
-  const validateCurrentStep = (stepName: string): boolean => {
-    const { t } = useLanguageStore();
-    
-    if (stepName === 'patient') {
-      // Patient step validation
-      if (!getValues('skipPatient') && !getValues('patientName')) {
-        toast({
-          title: t('validationError'),
-          description: t('pleaseSelectOrCreateAPatient'),
-          variant: "destructive"
-        });
-        return false;
-      }
-      return true;
-    }
-    
-    else if (stepName === 'products') {
-      // Products step validation
-      const invoiceType = getValues<string>('invoiceType');
-      
-      if (invoiceType === 'glasses') {
-        // For glasses, either lens or frame (if not skipped) must be selected
-        const hasLens = !!getValues('lensType');
-        const frameRequired = !getValues('skipFrame');
-        const hasFrame = frameRequired ? !!getValues('frameBrand') : true;
-        
-        if (!hasLens && !hasFrame) {
-          toast({
-            title: t('validationError'),
-            description: t('pleaseSelectLensOrFrame'),
-            variant: "destructive"
-          });
-          return false;
-        }
-        
-        if (frameRequired && !hasFrame) {
-          toast({
-            title: t('validationError'),
-            description: t('pleaseSelectFrame'),
-            variant: "destructive"
-          });
-          return false;
-        }
-        
-        if (!hasLens) {
-          toast({
-            title: t('validationError'),
-            description: t('pleaseSelectLens'),
-            variant: "destructive"
-          });
-          return false;
-        }
-      } 
-      else if (invoiceType === 'contacts') {
-        // For contacts, at least one contact lens item must be added
-        const contactItems = getValues<any[]>('contactLensItems') || [];
-        if (contactItems.length === 0) {
-          toast({
-            title: t('validationError'),
-            description: t('pleaseAddContactLenses'),
-            variant: "destructive"
-          });
-          return false;
-        }
-      }
-      else if (invoiceType === 'exam') {
-        // For exam, service price must be set
-        const servicePrice = getValues<number>('servicePrice');
-        if (!servicePrice || servicePrice <= 0) {
-          toast({
-            title: t('validationError'),
-            description: t('pleaseEnterServicePrice'),
-            variant: "destructive"
-          });
-          return false;
-        }
-      }
-      
-      return true;
-    }
-    
-    else if (stepName === 'payment') {
-      // Payment step validation
-      if (!getValues('paymentMethod')) {
-        toast({
-          title: t('validationError'),
-          description: t('pleaseSelectPaymentMethod'),
-          variant: "destructive"
-        });
-        return false;
-      }
-      
-      // For card payments, auth number is required
-      const paymentMethod = getValues<string>('paymentMethod');
-      const isCardPayment = paymentMethod === 'Visa' || paymentMethod === 'MasterCard' || 
-                            paymentMethod === 'كي نت' || paymentMethod === 'KNET';
-      
-      if (isCardPayment && !getValues('authNumber')) {
-        toast({
-          title: t('validationError'),
-          description: t('pleaseEnterAuthNumber'),
-          variant: "destructive"
-        });
-        return false;
-      }
-      
-      return true;
-    }
-    
-    // Default to true for any unhandled step
+  // Validation helpers
+  const validateCurrentStep = () => {
+    // We'll implement specific validations when needed
     return true;
   };
   
@@ -267,38 +148,6 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     return Math.max(0, total - deposit);
   };
   
-  // New function to handle final price input
-  const updateFinalPrice = (finalPrice: number) => {
-    setValue('finalPrice', finalPrice);
-    
-    // Calculate the correct discount amount based on the final price
-    let subtotal = 0;
-    
-    if (getValues<string>('invoiceType') === 'exam') {
-      subtotal = getValues<number>('servicePrice') || 0;
-    } else if (getValues<string>('invoiceType') === 'glasses') {
-      const lensPrice = getValues<number>('lensPrice') || 0;
-      const coatingPrice = getValues<number>('coatingPrice') || 0;
-      const thicknessPrice = getValues<number>('thicknessPrice') || 0;
-      const framePrice = getValues<boolean>('skipFrame') ? 0 : (getValues<number>('framePrice') || 0);
-      subtotal = lensPrice + coatingPrice + thicknessPrice + framePrice;
-    } else {
-      const contactLensItems = getValues<any[]>('contactLensItems') || [];
-      subtotal = contactLensItems.reduce((sum, lens) => 
-        sum + ((lens.price || 0) * (lens.qty || 1)), 0
-      );
-    }
-    
-    // Calculate discount as the difference between subtotal and finalPrice
-    const newDiscount = Math.max(0, subtotal - finalPrice);
-    setValue('discount', newDiscount);
-    
-    // Update total and remaining
-    setValue('total', finalPrice);
-    const deposit = getValues<number>('deposit') || 0;
-    setValue('remaining', Math.max(0, finalPrice - deposit));
-  };
-  
   // Create the context value
   const contextValue = value || {
     getValues,
@@ -311,9 +160,7 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     validateCurrentStep,
     calculateTotal,
     calculateRemaining,
-    updateServicePrice,
-    updateFinalPrice,
-    useFinalPrice: getValues<boolean>('useFinalPrice') || false
+    updateServicePrice
   };
   
   return (

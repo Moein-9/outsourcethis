@@ -26,7 +26,7 @@ const CreateInvoiceContent: React.FC = () => {
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("patient");
-  const { getValues, setValue, calculateTotal, calculateRemaining, validateCurrentStep } = useInvoiceForm();
+  const { getValues, setValue, calculateTotal, calculateRemaining } = useInvoiceForm();
   
   useEffect(() => {
     const handleNavigateToSummary = () => {
@@ -94,92 +94,6 @@ const CreateInvoiceContent: React.FC = () => {
     : invoiceType === "contacts" 
       ? (getValues("contactLensItems")?.length > 0)
       : true; // For exam type, product data is always available
-      
-  const handleTabChange = (value: string) => {
-    if (activeTab === "patient" && value === "products") {
-      if (validateCurrentStep("patient")) {
-        setActiveTab(value);
-      }
-    } 
-    else if (activeTab === "products" && value === "payment") {
-      if (validateCurrentStep("products")) {
-        setActiveTab(value);
-      }
-    }
-    else if (activeTab === "products" && value === "patient") {
-      setActiveTab(value);
-    }
-    else if (activeTab === "payment" && value === "products") {
-      setActiveTab(value);
-    }
-    else if (value === "summary") {
-      if (getValues("workOrderId") && getValues("invoiceId")) {
-        setActiveTab(value);
-      } else {
-        toast({
-          title: t('error'),
-          description: t('pleaseSaveOrderFirst'),
-          variant: "destructive"
-        });
-      }
-    }
-    else {
-      setActiveTab(value);
-    }
-  };
-  
-  const handleNextClick = (currentTab: string) => {
-    if (currentTab === "patient") {
-      if (validateCurrentStep("patient")) {
-        setActiveTab("products");
-      }
-    } else if (currentTab === "products") {
-      if (validateCurrentStep("products")) {
-        setActiveTab("payment");
-      }
-    }
-  };
-  
-  const handleNewInvoice = () => {
-    const confirmed = window.confirm(t('startNewInvoiceConfirmation'));
-    
-    if (confirmed) {
-      setValue('patientId', undefined);
-      setValue('patientName', '');
-      setValue('patientPhone', '');
-      setValue('skipPatient', false);
-      setValue('rx', null);
-      setValue('contactLensRx', null);
-      
-      setValue('invoiceType', 'glasses');
-      setValue('lensType', '');
-      setValue('lensPrice', 0);
-      setValue('coating', '');
-      setValue('coatingPrice', 0);
-      setValue('thickness', '');
-      setValue('thicknessPrice', 0);
-      setValue('skipFrame', false);
-      setValue('frameBrand', '');
-      setValue('frameModel', '');
-      setValue('frameColor', '');
-      setValue('frameSize', '');
-      setValue('framePrice', 0);
-      setValue('contactLensItems', []);
-      
-      setValue('discount', 0);
-      setValue('deposit', 0);
-      setValue('total', 0);
-      setValue('remaining', 0);
-      setValue('paymentMethod', '');
-      setValue('authNumber', '');
-      setValue('workOrderId', '');
-      setValue('invoiceId', '');
-      setValue('isPaid', false);
-      
-      setActiveTab('patient');
-      setInvoiceType('glasses');
-    }
-  };
 
   return (
     <div className="py-6 max-w-7xl mx-auto">
@@ -195,7 +109,7 @@ const CreateInvoiceContent: React.FC = () => {
       <div className="grid grid-cols-3 gap-5">
         <div className="col-span-2">
           <Card className="border border-muted-foreground/10 shadow-md h-full">
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-4 w-full rounded-none">
                 <TabsTrigger value="patient" className="flex items-center gap-2">
                   <User className="w-4 h-4" />
@@ -235,7 +149,7 @@ const CreateInvoiceContent: React.FC = () => {
                     
                     <div className="flex justify-end mt-4">
                       <Button 
-                        onClick={() => handleNextClick("patient")} 
+                        onClick={() => setActiveTab("products")} 
                         className="flex items-center gap-2"
                       >
                         {t('next')}
@@ -261,7 +175,7 @@ const CreateInvoiceContent: React.FC = () => {
                         {t('previous')}
                       </Button>
                       <Button 
-                        onClick={() => handleNextClick("products")} 
+                        onClick={() => setActiveTab("payment")} 
                         className="flex items-center gap-2"
                       >
                         {t('next')}
@@ -312,7 +226,9 @@ const CreateInvoiceContent: React.FC = () => {
                       </Button>
                       <Button 
                         variant="default" 
-                        onClick={handleNewInvoice}
+                        onClick={() => {
+                          setActiveTab("patient");
+                        }} 
                         className="flex items-center gap-2"
                       >
                         {language === 'ar' ? 'فاتورة جديدة' : 'New Invoice'}
