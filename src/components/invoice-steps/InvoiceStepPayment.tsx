@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -76,14 +77,24 @@ export const InvoiceStepPayment: React.FC = () => {
     const patientId = getValues<string>('patientId') || 'anonymous';
     const invoiceType = getValues<string>('invoiceType') || 'glasses';
     
-    // Create work order with both prescription types
+    // Get both prescription types
+    const rxData = getValues('rx');
+    const contactLensRxData = getValues('contactLensRx');
+    
+    // Create work order with both prescription types if they exist
     let workOrder: any = {
-      patientId,
-      // Always include glasses rx data if it exists
-      rx: getValues('rx'),
-      // Always include contact lens rx data if it exists
-      contactLensRx: getValues('contactLensRx')
+      patientId
     };
+    
+    // Always include glasses rx data if it exists
+    if (rxData) {
+      workOrder.rx = rxData;
+    }
+    
+    // Always include contact lens rx data if it exists
+    if (contactLensRxData) {
+      workOrder.contactLensRx = contactLensRxData;
+    }
     
     if (invoiceType === 'glasses') {
       workOrder.lensType = {
@@ -93,6 +104,8 @@ export const InvoiceStepPayment: React.FC = () => {
     } else if (invoiceType === 'contacts') {
       workOrder.contactLenses = getValues('contactLensItems') || [];
     }
+    
+    console.log('Creating work order with data:', workOrder);
     
     const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
     setValue('workOrderId', workOrderId);
@@ -111,11 +124,16 @@ export const InvoiceStepPayment: React.FC = () => {
       paymentMethod: formData.paymentMethod,
       authNumber: formData.authNumber,
       workOrderId: workOrderId, // Link to the work order
-      
-      // Include both types of prescription data in the invoice
-      rx: formData.rx,
-      contactLensRx: formData.contactLensRx
     };
+    
+    // Include both types of prescription data in the invoice if they exist
+    if (rxData) {
+      invoiceData.rx = rxData;
+    }
+    
+    if (contactLensRxData) {
+      invoiceData.contactLensRx = contactLensRxData;
+    }
     
     if (invoiceType === 'glasses') {
       invoiceData.lensType = formData.lensType;
@@ -131,6 +149,8 @@ export const InvoiceStepPayment: React.FC = () => {
     } else if (invoiceType === 'contacts') {
       invoiceData.contactLensItems = formData.contactLensItems || [];
     }
+    
+    console.log('Creating invoice with data:', invoiceData);
     
     const invoiceId = addInvoice(invoiceData);
     setValue('invoiceId', invoiceId);

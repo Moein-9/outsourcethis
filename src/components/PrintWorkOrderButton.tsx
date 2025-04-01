@@ -57,20 +57,41 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
     if (isNewInvoice && !invoice.invoiceId) {
       setLoading(true);
       try {
-        // Create a work order
-        const workOrder = {
+        // Create a work order with necessary prescription data
+        const workOrder: any = {
           patientId: invoice.patientId || 'anonymous',
-          lensType: {
+        };
+        
+        // Add glasses rx if available
+        if (rx || invoice.rx) {
+          workOrder.rx = rx || invoice.rx;
+        }
+        
+        // Add contact lens rx if available
+        if (contactLensRx || invoice.contactLensRx) {
+          workOrder.contactLensRx = contactLensRx || invoice.contactLensRx;
+        }
+        
+        // Add lens type for glasses
+        if (invoice.invoiceType === 'glasses' || invoice.lensType) {
+          workOrder.lensType = {
             name: invoice.lensType,
             price: invoice.lensPrice
-          }
-        };
+          };
+        }
+        
+        // Add contact lenses for contacts
+        if (invoice.invoiceType === 'contacts' && (contactLenses || invoice.contactLensItems)) {
+          workOrder.contactLenses = contactLenses || invoice.contactLensItems;
+        }
+        
+        console.log('Creating work order:', workOrder);
         
         // Generate work order ID
         const workOrderId = addWorkOrder?.(workOrder) || `WO${Date.now()}`;
         
         // Save the invoice to get an ID and link to work order
-        const invoiceId = addInvoice({
+        const invoiceData: any = {
           patientId: invoice.patientId,
           patientName: invoice.patientName,
           patientPhone: invoice.patientPhone,
@@ -89,7 +110,26 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           paymentMethod: invoice.paymentMethod,
           authNumber: invoice.authNumber,
           workOrderId: workOrderId
-        });
+        };
+        
+        // Add rx data if available
+        if (rx || invoice.rx) {
+          invoiceData.rx = rx || invoice.rx;
+        }
+        
+        // Add contact lens rx if available
+        if (contactLensRx || invoice.contactLensRx) {
+          invoiceData.contactLensRx = contactLensRx || invoice.contactLensRx;
+        }
+        
+        // Add contact lens items if available
+        if (contactLenses || invoice.contactLensItems) {
+          invoiceData.contactLensItems = contactLenses || invoice.contactLensItems;
+        }
+        
+        console.log('Creating invoice:', invoiceData);
+        
+        const invoiceId = addInvoice(invoiceData);
         
         // Update the invoice with the new IDs
         const updatedInvoice = { 

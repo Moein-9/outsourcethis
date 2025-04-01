@@ -42,7 +42,9 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     setIsPrinting(true);
     setOpen(false); // Close dialog before printing
     
-    console.log("[CustomPrintWorkOrderButton] Triggering print for workOrder:", workOrder.id);
+    console.log("[CustomPrintWorkOrderButton] Triggering print for workOrder:", workOrder);
+    console.log("[CustomPrintWorkOrderButton] workOrder RX data:", workOrder.rx);
+    console.log("[CustomPrintWorkOrderButton] workOrder contact lens RX data:", workOrder.contactLensRx);
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
