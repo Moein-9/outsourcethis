@@ -123,7 +123,7 @@ export const Dashboard: React.FC = () => {
                 <MoenLogoGreen className="w-16 h-16 bg-white rounded-full p-2" />
                 <div>
                   <h2 className="text-2xl font-bold">{welcomeMessage}</h2>
-                  <p className="text-teal-100">{language === 'ar' ? 'مؤين للبصريات' : 'Moen Optician'}</p>
+                  <p className="text-teal-100">{language === 'ar' ? 'نظارات المعين' : 'Moen Optician'}</p>
                 </div>
               </div>
               <div className="text-right flex flex-col items-end">
