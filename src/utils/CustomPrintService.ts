@@ -277,6 +277,10 @@ export class CustomPrintService {
             const printedReceipt = printWindow.document.querySelector('.print-receipt');
             if (printedReceipt) {
               printedReceipt.setAttribute('id', 'receipt-invoice');
+              // Fix: Cast the element to HTMLElement to access the dir property
+              const direction = (printedReceipt as HTMLElement).getAttribute('dir') === 'rtl' ? 'rtl' : 'ltr';
+              const fontFamily = direction === 'rtl' ? "'Zain', sans-serif" : "'Yrsa', serif";
+              
               printedReceipt.setAttribute('style', `
                 width: 74mm !important;
                 max-width: 74mm !important;
@@ -284,7 +288,7 @@ export class CustomPrintService {
                 padding: 10px !important;
                 background-color: white !important;
                 color: black !important;
-                font-family: ${printedReceipt.dir === 'rtl' ? "'Zain', sans-serif" : "'Yrsa', serif"} !important;
+                font-family: ${fontFamily} !important;
                 page-break-inside: avoid !important;
                 page-break-after: always !important;
                 text-align: center !important;
