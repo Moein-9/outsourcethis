@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensType, LensCoating, LensThickness, useInventoryStore } from "@/store/inventoryStore";
@@ -57,7 +56,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(initialThickness);
   const [activeCategory, setActiveCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
   
-  // Enhanced check for ADD values that handles both object formats
+  // Enhanced check for ADD values that handles both object formats with improved debugging
   const hasAddValues = React.useMemo(() => {
     if (!rx) return false;
     
@@ -68,11 +67,13 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
     
     // Check for flat format (addOD, addOS)
-    return (rx.addOD && rx.addOD !== '0' && rx.addOD !== '0.00') || 
-           (rx.addOS && rx.addOS !== '0' && rx.addOS !== '0.00');
+    const hasAddOD = rx.addOD && rx.addOD !== '0' && rx.addOD !== '0.00' && rx.addOD !== '';
+    const hasAddOS = rx.addOS && rx.addOS !== '0' && rx.addOS !== '0.00' && rx.addOS !== '';
+    
+    return hasAddOD || hasAddOS;
   }, [rx]);
 
-  // Log rx and ADD values for debugging
+  // Debug logging for rx data
   console.log('RX passed to LensSelector:', rx);
   console.log('Has ADD values:', hasAddValues);
   console.log('ADD values check - addOD:', rx?.addOD);
@@ -82,16 +83,18 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const filteredLensTypes = React.useMemo(() => {
     if (hasAddValues) {
       // Show all lens types when ADD values are present
+      console.log('Showing all lens types including Progressive and Bifocal');
       return lensTypes;
     } else {
       // Hide Progressive and Bifocal lens types when ADD values are not present
+      console.log('Filtering out Progressive and Bifocal lens types');
       return lensTypes.filter(lens => 
         lens.type !== 'progressive' && lens.type !== 'bifocal'
       );
     }
   }, [lensTypes, hasAddValues]);
 
-  // Get coatings and thicknesses based on lens type category
+  // Get category from lens type
   const getCategory = (lensType: LensType | null): "distance-reading" | "progressive" | "bifocal" => {
     if (!lensType) return "distance-reading";
     
