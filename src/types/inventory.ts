@@ -70,7 +70,7 @@ export interface WorkOrder {
   total?: number;
   
   // Status tracking
-  isPaid?: boolean;
+  isPaid?: boolean;  // Added this property to fix the type error
   isPickedUp?: boolean;
   pickedUpAt?: string;
   
