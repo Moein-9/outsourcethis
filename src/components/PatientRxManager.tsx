@@ -123,10 +123,8 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
 
   const handleSaveNewRx = () => {
     if (!newRx.sphereOD || !newRx.sphereOS || !newRx.pdRight || !newRx.pdLeft) {
-      toast({
-        title: t("dataError"),
-        description: t("fillAllRequiredFields"),
-        variant: "destructive"
+      toast(t("dataError"), {
+        description: t("fillAllRequiredFields")
       });
       return;
     }
@@ -145,9 +143,8 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     
     setLocalCurrentRx(timestampedNewRx);
 
-    toast({
-      title: t("success"),
-      description: t("successMessage"),
+    toast(t("success"), {
+      description: t("successMessage")
     });
 
     setIsNewRxOpen(false);
@@ -255,17 +252,14 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
 
   const handleAddNote = () => {
     if (!newNote.trim()) {
-      toast({
-        title: t("error"),
-        description: t("noteCannotBeEmpty"),
-        variant: "destructive"
+      toast(t("error"), {
+        description: t("noteCannotBeEmpty")
       });
       return;
     }
 
     addPatientNote(patientId, newNote);
     
-    // Update local state to show the new note immediately
     const newPatientNote = {
       id: `note-${Date.now()}`,
       text: newNote,
@@ -275,8 +269,7 @@ export const PatientRxManager: React.FC<PatientRxManagerProps> = ({
     setLocalPatientNotes(prev => [...prev, newPatientNote]);
     setNewNote("");
     
-    toast({
-      title: t("success"),
+    toast(t("success"), {
       description: t("noteAddedSuccessfully")
     });
   };
