@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { supabase, handleSupabaseError } from '@/integrations/supabase/client';
@@ -70,6 +69,22 @@ interface InventoryState {
   
   // Initialization
   initializeStore: () => Promise<void>;
+  migrateDefaultData: () => Promise<void>;
+  
+  // Helper methods for realtime updates
+  handleRealtimeFramesUpdate: (payload: any) => void;
+  handleRealtimeLensTypesUpdate: (payload: any) => void;
+  handleRealtimeCoatingsUpdate: (payload: any) => void;
+  handleRealtimeThicknessesUpdate: (payload: any) => void;
+  handleRealtimeContactLensesUpdate: (payload: any) => void;
+  handleRealtimeServicesUpdate: (payload: any) => void;
+  
+  // Default data functions
+  getDefaultLensTypes: () => LensType[];
+  getDefaultLensCoatings: () => LensCoating[];
+  getDefaultLensThicknesses: () => LensThickness[];
+  getDefaultContactLenses: () => ContactLensItem[];
+  getDefaultServices: () => ServiceItem[];
   
   // Frame methods
   addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => Promise<string>;
@@ -369,7 +384,6 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
   },
   
   handleRealtimeCoatingsUpdate: (payload: any) => {
-    // Similar implementation for lens coatings
     if (payload.eventType === 'INSERT') {
       const newCoating = {
         id: payload.new.coating_id,
@@ -406,7 +420,6 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
   },
   
   handleRealtimeThicknessesUpdate: (payload: any) => {
-    // Similar implementation for lens thicknesses
     if (payload.eventType === 'INSERT') {
       const newThickness = {
         id: payload.new.thickness_id,
@@ -443,7 +456,6 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
   },
   
   handleRealtimeContactLensesUpdate: (payload: any) => {
-    // Similar implementation for contact lenses
     if (payload.eventType === 'INSERT') {
       const newLens = {
         id: payload.new.lens_id,
@@ -488,7 +500,6 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
   },
   
   handleRealtimeServicesUpdate: (payload: any) => {
-    // Similar implementation for services
     if (payload.eventType === 'INSERT') {
       const newService = {
         id: payload.new.service_id,
