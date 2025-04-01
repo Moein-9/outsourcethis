@@ -16,6 +16,8 @@ import { PrintOptionsDialog } from "@/components/PrintOptionsDialog";
 import { toast } from "sonner";
 import { WorkOrder as InventoryWorkOrder } from "@/types/inventory";
 import { PrintButton } from "@/components/PrintButton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -265,13 +267,16 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
         </div>
       </div>
       
-      <div className="p-6 border-2 border-primary/20 rounded-lg bg-primary/5 shadow-sm">
-        <h3 className={`text-lg font-semibold text-primary pb-3 border-b border-primary/20 flex items-center ${textAlignClass}`}>
-          <FileText className="w-5 h-4" />
-          {t('nextSteps')}
-        </h3>
+      <Card className="border-2 border-primary/20 shadow-sm overflow-hidden">
+        <div className="p-6 bg-primary/5">
+          <h3 className={`text-lg font-semibold text-primary pb-3 flex items-center ${textAlignClass}`}>
+            <FileText className="w-5 h-5 mr-2" />
+            {t('nextSteps')}
+          </h3>
+          <Separator className="my-2 bg-primary/20" />
+        </div>
         
-        <div className="mt-6 space-y-4">
+        <CardContent className="p-4 space-y-4">
           {!isEyeExam && (
             <PrintOptionsDialog
               invoice={invoice}
@@ -280,28 +285,42 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
               onPrintWorkOrder={handlePrintWorkOrder}
               onPrintInvoice={handlePrintInvoice}
             >
-              <PrintButton 
-                variant="outline"
-                icon={ClipboardCheck}
-                iconColor="text-blue-600"
-                label={t('printWorkOrder')}
-                description={t('printWorkOrderDescription')}
-                className="hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"
-              />
+              <div className="group cursor-pointer rounded-lg border hover:border-blue-400 transition-all duration-300 overflow-hidden hover:shadow-md">
+                <div className="flex items-center">
+                  <div className={`${language === 'ar' ? 'order-last' : 'order-first'} w-16 h-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center p-4`}>
+                    <ClipboardCheck className="w-8 h-8 text-white" />
+                  </div>
+                  <div className={`flex-grow p-4 ${textAlignClass}`}>
+                    <h4 className="font-medium text-lg text-blue-700">{t('printWorkOrder')}</h4>
+                    <p className="text-sm text-gray-600">{t('printWorkOrderDescription')}</p>
+                  </div>
+                  <div className={`p-4 ${language === 'ar' ? 'rotate-180' : ''}`}>
+                    <ChevronRight className="w-5 h-5 text-blue-400 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
             </PrintOptionsDialog>
           )}
           
-          <PrintButton 
-            variant="outline"
-            icon={Receipt}
-            iconColor="text-green-600" 
-            label={t('printInvoice')}
-            description={t('printInvoiceDescription')}
+          <div 
+            className="group cursor-pointer rounded-lg border hover:border-green-400 transition-all duration-300 overflow-hidden hover:shadow-md"
             onClick={handlePrintInvoice}
-            className="hover:border-green-500 hover:bg-green-50 hover:text-green-700"
-          />
-        </div>
-      </div>
+          >
+            <div className="flex items-center">
+              <div className={`${language === 'ar' ? 'order-last' : 'order-first'} w-16 h-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center p-4`}>
+                <Receipt className="w-8 h-8 text-white" />
+              </div>
+              <div className={`flex-grow p-4 ${textAlignClass}`}>
+                <h4 className="font-medium text-lg text-green-700">{t('printInvoice')}</h4>
+                <p className="text-sm text-gray-600">{t('printInvoiceDescription')}</p>
+              </div>
+              <div className={`p-4 ${language === 'ar' ? 'rotate-180' : ''}`}>
+                <ChevronRight className="w-5 h-5 text-green-400 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
