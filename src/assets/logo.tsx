@@ -73,55 +73,9 @@ export const MoenLogoBlack: React.FC<{
   );
 };
 
-// Updated store information based on invoice details with both addresses
+// Updated store information based on invoice details
 export const storeInfo = {
   name: "Moen Optician",
-  addresses: [
-    {
-      title: {
-        en: "Al Arbid Gallery Mall",
-        ar: "مجمع العربيد جاليري"
-      },
-      street: {
-        en: "Habeeb Munawer Street, Al Farwaniyah, Kuwait",
-        ar: "شارع حبيب مناور، الفروانية، الكويت"
-      },
-      phone: "24748201"
-    },
-    {
-      title: {
-        en: "Al-Somait Plaza",
-        ar: "مجمع الصميط بلازا"
-      },
-      street: {
-        en: "Habeeb Munawer Street, Al Farwaniyah, Kuwait",
-        ar: "شارع حبيب مناور، الفروانية، الكويت"
-      },
-      phone: "24759016"
-    }
-  ],
-  // Backward compatibility properties
-  get address() {
-    // Format as combined address string
-    return `${this.addresses[0].title.en} | ${this.addresses[0].title.ar}, ${this.addresses[0].street.en}`;
-  },
-  get phone() {
-    return this.addresses[0].phone;
-  }
-};
-
-export const formatStoreAddress = (language: string = 'en', includePhone: boolean = true) => {
-  const isArabic = language === 'ar';
-  
-  return storeInfo.addresses.map((address, index) => {
-    const titleText = `${address.title[isArabic ? 'ar' : 'en']} | ${address.title[isArabic ? 'en' : 'ar']}`;
-    const streetText = `${address.street[isArabic ? 'ar' : 'en']}`;
-    const phoneText = includePhone ? `Tel | هاتف: ${address.phone}` : '';
-    
-    return {
-      title: titleText,
-      street: streetText,
-      phone: phoneText
-    };
-  });
+  address: "al-somait plaza, Habeeb Munawer St, Al Farwaniyah",
+  phone: "2475 9016"
 };

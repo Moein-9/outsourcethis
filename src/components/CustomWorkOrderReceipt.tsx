@@ -1,7 +1,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { MoenLogo, storeInfo, formatStoreAddress } from "@/assets/logo";
+import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
 import { CheckCircle2, AlertTriangle, Calendar, User, Phone, Eye, History } from "lucide-react";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -174,8 +174,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const orderNumber = workOrder?.id || invoice?.workOrderId || `WO${Date.now().toString().slice(-6)}`;
 
-  const formattedAddresses = formatStoreAddress(language);
-  
   if (!workOrder && !invoice) {
     return (
       <div 
@@ -233,17 +231,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           <MoenLogo className="w-auto h-12" /> 
         </div>
         <h2 className="font-bold text-lg mb-0">{storeInfo.name}</h2>
-        
-        {formattedAddresses.map((address, index) => (
-          <React.Fragment key={index}>
-            <p className="text-sm font-medium mb-0 text-gray-800">{address.title}</p>
-            <p className="text-sm mb-0 text-gray-600">{address.street}</p>
-            <p className="text-sm font-medium text-gray-800 mb-1 ltr">{address.phone}</p>
-            {index < formattedAddresses.length - 1 && (
-              <div className="w-1/2 mx-auto border-b border-gray-200 mb-1"></div>
-            )}
-          </React.Fragment>
-        ))}
+        <p className="text-sm font-medium mb-0 text-gray-600">{storeInfo.address}</p>
+        <p className="text-sm font-medium text-gray-600">{t("phone")}: {storeInfo.phone}</p>
       </div>
 
       <div className="text-center mb-2">
@@ -532,7 +521,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                   </div>
                   {coatingPrice > 0 && (
                     <div className="flex justify-between">
-                      <span className="font-semibold">{isRtl ? "السعر | Price" : "Price | السع��"}:</span>
+                      <span className="font-semibold">{isRtl ? "السعر | Price" : "Price | السعر"}:</span>
                       <span className="font-bold">{coatingPrice.toFixed(3)} KWD</span>
                     </div>
                   )}
@@ -799,11 +788,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               font-size: 10px !important;
               margin-top: 4px !important;
               display: inline-block !important;
-            }
-            
-            .ltr {
-              direction: ltr !important;
-              text-align: center !important;
             }
           }
         `}

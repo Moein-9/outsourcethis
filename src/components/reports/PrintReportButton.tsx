@@ -46,18 +46,18 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
       variant={variant}
       disabled={disabled}
       className={`w-full justify-between group hover:shadow-sm p-4 h-auto transition-all duration-300 ${
-        variant === "default" ? "bg-teal-600 hover:bg-teal-700 text-white" : ""
+        variant === "default" ? "bg-green-600 hover:bg-green-700 text-white" : ""
       } ${className}`}
     >
-      <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
+      <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
         <div className={`flex items-center justify-center ${
-          variant === "default" ? "text-white" : "text-teal-600"
+          variant === "default" ? "text-white" : "text-green-600"
         }`}>
           {icon || <Printer className="w-5 h-5" />}
         </div>
         <div className={`text-${isRtl ? 'right' : 'left'}`}>
-          <div className={`font-medium ${language === 'ar' ? 'text-base font-cairo' : 'text-base font-yrsa'}`}>{buttonLabel}</div>
-          <div className={`text-xs text-muted-foreground ${language === 'ar' ? 'font-cairo' : 'font-yrsa'}`}>{buttonDescription}</div>
+          <div className="font-medium">{buttonLabel}</div>
+          <div className="text-xs text-muted-foreground">{buttonDescription}</div>
         </div>
       </div>
       <ChevronRight className={`w-5 h-5 ${variant === "default" ? "text-white/70" : "text-muted-foreground"} group-hover:translate-x-1 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
