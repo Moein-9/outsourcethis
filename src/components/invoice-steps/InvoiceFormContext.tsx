@@ -68,12 +68,6 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     framePrice: 0,
     contactLensItems: [],
     
-    // Service details for eye exams
-    serviceName: '',
-    serviceId: '',
-    serviceDescription: '',
-    servicePrice: 0,
-    
     // Payment details
     discount: 0,
     deposit: 0,
@@ -96,7 +90,6 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
   };
   
   const setValue = <T = any>(key: string, value: T) => {
-    console.log(`Setting ${key} to:`, value);
     setFormState(prev => ({
       ...prev,
       [key]: value

@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -100,8 +101,6 @@ export interface WorkOrder {
   contactLensRx?: any;
   isPickedUp?: boolean;
   pickedUpAt?: string;
-  isPaid?: boolean; // Added to match the WorkOrder interface in inventory.ts
-  discount?: number; // Added to match the WorkOrder interface in inventory.ts
   
   // Edit tracking
   lastEditedAt?: string;
@@ -195,7 +194,6 @@ export const useInvoiceStore = create<InvoiceState>()(
           ]
         }));
         
-        console.log("Invoice created:", invoiceId);
         return invoiceId;
       },
       
@@ -391,30 +389,22 @@ export const useInvoiceStore = create<InvoiceState>()(
       },
       
       addWorkOrder: (workOrder) => {
-        try {
-          const id = `WO${Date.now()}`;
-          const createdAt = new Date().toISOString();
-          
-          // Make sure we're adding discount and isPaid to align with inventory.ts WorkOrder type
-          const enhancedWorkOrder = {
-            ...workOrder,
-            discount: workOrder.discount || 0,
-            isPaid: workOrder.isPaid || false,
-            id,
-            createdAt,
-            isPickedUp: false // Initialize as not picked up
-          };
-          
-          set((state) => ({
-            workOrders: [...state.workOrders, enhancedWorkOrder]
-          }));
-          
-          console.log("Work order created:", id);
-          return id;
-        } catch (error) {
-          console.error("Error creating work order:", error);
-          return `WO${Date.now()}`; // Fallback
-        }
+        const id = `WO${Date.now()}`;
+        const createdAt = new Date().toISOString();
+        
+        set((state) => ({
+          workOrders: [
+            ...state.workOrders,
+            { 
+              ...workOrder, 
+              id, 
+              createdAt,
+              isPickedUp: false // Initialize as not picked up
+            }
+          ]
+        }));
+        
+        return id;
       },
       
       updateInvoice: (updatedInvoice) => {
