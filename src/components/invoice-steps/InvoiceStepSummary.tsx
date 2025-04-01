@@ -56,6 +56,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     frameColor: getValues<string>('frameColor') || "",
     framePrice: getValues<number>('framePrice') || 0,
     contactLensItems: getValues('contactLensItems') || [],
+    contactLensRx: getValues('contactLensRx') || null, // Added contactLensRx
     discount: getValues<number>('discount') || 0,
     deposit: getValues<number>('deposit') || 0,
     total: calculateTotal(),
@@ -95,9 +96,10 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     patientId: getValues<string>('patientId') || "",
     name: getValues<string>('patientName') || "",
     phone: getValues<string>('patientPhone') || "",
+    contactLensRx: getValues('contactLensRx') || null, // Added contactLensRx
     dob: "",
     notes: "",
-    rx: rxData, // Fix: Use rxData directly instead of wrapping in an array
+    rx: rxData,
     createdAt: currentTimestamp
   };
   
@@ -116,8 +118,10 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     createdAt: currentTimestamp,
     lensType: lensTypeObject,
     contactLenses: invoice.contactLensItems,
+    contactLensRx: getValues('contactLensRx') || null, // Added contactLensRx
+    isContactLens: isContactLens, // Added isContactLens flag
     isPaid: invoice.isPaid,
-    rx: rxData, // Add RX data directly to workOrder for consistency
+    rx: rxData,
     ...(invoice.discount ? { discount: invoice.discount } : {})
   } as any;
   

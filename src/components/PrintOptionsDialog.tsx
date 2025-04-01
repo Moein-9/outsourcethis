@@ -30,6 +30,32 @@ export function PrintOptionsDialog({
   const { t, language } = useLanguageStore();
   const [open, setOpen] = React.useState(false);
 
+  // Make sure workOrder has isContactLens and contactLensRx if needed
+  const preparedWorkOrder = React.useMemo(() => {
+    let prepared = { ...workOrder };
+    
+    // Check if this is a contact lens order
+    const isContactLens = workOrder?.contactLenses?.length > 0 || 
+                          invoice?.contactLensItems?.length > 0 ||
+                          workOrder?.isContactLens === true;
+    
+    // Set isContactLens flag if needed
+    if (isContactLens && !prepared.isContactLens) {
+      prepared.isContactLens = true;
+    }
+    
+    // Set contactLensRx if needed
+    if (isContactLens && !prepared.contactLensRx) {
+      if (invoice?.contactLensRx) {
+        prepared.contactLensRx = invoice.contactLensRx;
+      } else if (patient?.contactLensRx) {
+        prepared.contactLensRx = patient.contactLensRx;
+      }
+    }
+    
+    return prepared;
+  }, [workOrder, invoice, patient]);
+
   const handlePrintWorkOrder = () => {
     setOpen(false);
     // Wait for the dialog to close before printing
@@ -71,7 +97,7 @@ export function PrintOptionsDialog({
               <div className="bg-white max-w-[80mm] mx-auto p-1 border rounded shadow-sm">
                 <div id="work-order-receipt">
                   <CustomWorkOrderReceipt 
-                    workOrder={workOrder} 
+                    workOrder={preparedWorkOrder} 
                     invoice={invoice} 
                     patient={patient}
                     isPrintable={true}
