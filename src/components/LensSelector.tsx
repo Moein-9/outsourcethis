@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensType, LensCoating, LensThickness, useInventoryStore } from "@/store/inventoryStore";
@@ -23,7 +22,6 @@ interface LensSelectorProps {
     axis?: { right: string; left: string };
     add?: { right: string; left: string };
     pd?: { right: string; left: string };
-    // Support for direct rx format from store
     sphereOD?: string;
     sphereOS?: string;
     cylOD?: string;
@@ -57,33 +55,23 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(initialThickness);
   const [activeCategory, setActiveCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
   
-  // Improved check for ADD values that handles all edge cases
   const hasAddValues = React.useMemo(() => {
     if (!rx) return false;
     
-    // Helper function to check if a value is a valid ADD value
     const isValidAddValue = (value?: string) => {
-      // If value is undefined or null or empty string, it's not valid
       if (!value) return false;
-      
-      // If value is "0", "0.00", "-", "0-", or similar variations, it's not valid
-      if (value === '0' || value === '0.00' || value === '-' || value === '0-' || value === '.00' || value.trim() === '') return false;
-      
-      // If value is a number and it's greater than 0, it's valid
+      if (value === '0' || value === '0.00' || value === '-' || value === '0-' || value.trim() === '') return false;
       const numValue = parseFloat(value);
       return !isNaN(numValue) && numValue > 0;
     };
     
-    // Check for nested 'add' object format
     if (rx.add) {
       return isValidAddValue(rx.add.right) || isValidAddValue(rx.add.left);
     }
     
-    // Check for flat format (addOD, addOS)
     return isValidAddValue(rx.addOD) || isValidAddValue(rx.addOS);
   }, [rx]);
 
-  // Extended debug logging for rx data
   console.log('RX passed to LensSelector:', rx);
   console.log('Has ADD values:', hasAddValues);
   console.log('ADD values check - addOD:', rx?.addOD);
@@ -91,14 +79,11 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   console.log('ADD values check - add.right:', rx?.add?.right);
   console.log('ADD values check - add.left:', rx?.add?.left);
   
-  // Filter lens types based on ADD values
   const filteredLensTypes = React.useMemo(() => {
     if (hasAddValues) {
-      // Show all lens types when ADD values are present
       console.log('Showing all lens types including Progressive and Bifocal');
       return lensTypes;
     } else {
-      // Hide Progressive and Bifocal lens types when ADD values are not present
       console.log('Filtering out Progressive and Bifocal lens types');
       return lensTypes.filter(lens => 
         lens.type !== 'progressive' && lens.type !== 'bifocal'
@@ -106,7 +91,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   }, [lensTypes, hasAddValues]);
 
-  // Get category from lens type
   const getCategory = (lensType: LensType | null): "distance-reading" | "progressive" | "bifocal" => {
     if (!lensType) return "distance-reading";
     
@@ -123,12 +107,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   };
   
-  // Initialize from props if provided
   useEffect(() => {
     if (initialLensType) {
-      // Check if initialLensType is valid based on hasAddValues
       if (!hasAddValues && (initialLensType.type === 'progressive' || initialLensType.type === 'bifocal')) {
-        // If we have an invalid lens type selected and no ADD values, reset it
         setSelectedLensType(null);
         onSelectLensType(null);
       } else {
@@ -144,14 +125,12 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   }, [initialLensType, initialCoating, initialThickness, hasAddValues, onSelectLensType]);
   
-  // Update selected lens type if it becomes invalid (e.g., prescription changes)
   useEffect(() => {
     if (selectedLensType && !hasAddValues && 
         (selectedLensType.type === 'progressive' || selectedLensType.type === 'bifocal')) {
       setSelectedLensType(null);
       onSelectLensType(null);
       
-      // Reset coating and thickness when lens type is reset
       setSelectedCoating(null);
       setSelectedThickness(null);
       onSelectCoating(null);
@@ -163,11 +142,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     setSelectedLensType(lens);
     onSelectLensType(lens);
     
-    // Update category based on lens type
     const newCategory = getCategory(lens);
     setActiveCategory(newCategory);
     
-    // Reset coating and thickness when lens type changes
     setSelectedCoating(null);
     setSelectedThickness(null);
     onSelectCoating(null);
@@ -199,7 +176,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   };
   
-  // Get filtered coatings and thicknesses based on active category
   const availableCoatings = getLensCoatingsByCategory(activeCategory);
   const availableThicknesses = getLensThicknessesByCategory(activeCategory);
   
@@ -238,7 +214,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               <span className="text-white">2</span> - {t('selectCoatings')}
             </TabsTrigger>
             <TabsTrigger value="thickness" className="flex-1 bg-[#10B981] data-[state=active]:bg-[#10B981] data-[state=active]:text-white">
-              <span className="text-white">3</span> - {t('selectThickness') || "Select Thickness"}
+              <span className="text-white">3</span> - {t('selectThickness')}
             </TabsTrigger>
           </TabsList>
           
@@ -338,7 +314,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               </div>
             ) : (
               <div className="p-4 border border-dashed rounded-lg bg-muted/10 text-center">
-                <p className="text-muted-foreground">{t('selectLensTypeFirst') || "Please select a lens type first"}</p>
+                <p className="text-muted-foreground">{t('selectLensTypeFirst')}</p>
               </div>
             )}
           </TabsContent>
@@ -389,8 +365,8 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                 >
                   <div className="flex justify-between items-start">
                     <div className={`${textAlignClass}`}>
-                      <div className="font-medium">{t('noThickness') || "No Thickness"}</div>
-                      <div className="text-sm text-muted-foreground">{t('noThicknessDesc') || "No additional thickness options"}</div>
+                      <div className="font-medium">{t('noThickness')}</div>
+                      <div className="text-sm text-muted-foreground">{t('noThicknessDesc')}</div>
                     </div>
                     <div className="text-right font-semibold">
                       0.00 {t('kwd')}
@@ -408,7 +384,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               </div>
             ) : (
               <div className="p-4 border border-dashed rounded-lg bg-muted/10 text-center">
-                <p className="text-muted-foreground">{t('selectLensTypeFirst') || "Please select a lens type first"}</p>
+                <p className="text-muted-foreground">{t('selectLensTypeFirst')}</p>
               </div>
             )}
           </TabsContent>
