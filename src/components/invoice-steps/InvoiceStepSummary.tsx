@@ -96,7 +96,8 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     dob: "",
     notes: "",
     rx: rxData,
-    contactLensRx: getValues('contactLensRx') || null
+    contactLensRx: getValues('contactLensRx') || null,
+    createdAt: currentTimestamp
   };
   
   const hasInvoiceData = !!invoice.invoiceId;
