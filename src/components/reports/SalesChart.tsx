@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { 
   PieChart, 
@@ -21,7 +20,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
   frameRevenue = 0, 
   coatingRevenue = 0 
 }) => {
-  // Add debugging logs
+  // Debugging logs - always keep this hook regardless of data
   useEffect(() => {
     console.log("SalesChart props received:", { lensRevenue, frameRevenue, coatingRevenue });
   }, [lensRevenue, frameRevenue, coatingRevenue]);
@@ -78,17 +77,6 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   };
   
-  // Show placeholder if no data or all values are zero
-  if (!hasData || data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-[300px]">
-        <p className="text-center text-muted-foreground">
-          لا توجد بيانات للعرض
-        </p>
-      </div>
-    );
-  }
-  
   // Custom legend rendering with icons
   const renderCustomLegend = (props: any) => {
     const { payload } = props;
@@ -116,7 +104,19 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   };
   
-  // Add a useEffect to log data - for debugging
+  // Show placeholder if no data or all values are zero - moved before the second useEffect
+  if (!hasData || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px]">
+        <p className="text-center text-muted-foreground">
+          لا توجد بيانات للعرض
+        </p>
+      </div>
+    );
+  }
+  
+  // Add a useEffect to log data - BUT only if we actually have data to show
+  // This ensures this hook is always called when the component renders with data
   useEffect(() => {
     console.log("SalesChart data:", data);
     console.log("Has data:", hasData);
