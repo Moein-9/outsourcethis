@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { useLanguageStore } from '@/store/languageStore';
 import { MoenLogo, storeInfo } from '@/assets/logo';
 import { ContactLensItem } from './ContactLensSelector';
-import { Contact, User, Phone, Calendar, Eye, Ruler, Glasses } from 'lucide-react';
+import { Contact, User, Phone, Calendar, Eye, Ruler, Glasses, DollarSign } from 'lucide-react';
 
 interface CustomWorkOrderReceiptProps {
   workOrder: any;
@@ -22,11 +22,11 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const { language, t } = useLanguageStore();
   const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
   
-  const patientName = patient?.name || invoice?.patientName || 'Customer';
-  const patientPhone = patient?.phone || invoice?.patientPhone || '';
+  const patientName = patient?.name || invoice?.patientName || workOrder?.patientName || 'Customer';
+  const patientPhone = patient?.phone || invoice?.patientPhone || workOrder?.patientPhone || '';
   
   // Get prescription data from multiple possible sources with fallbacks
-  const rxData = workOrder?.rx || invoice?.rx || {
+  const rxData = workOrder?.rx || invoice?.rx || patient?.rx || {
     sphereOD: '',
     cylOD: '',
     axisOD: '',
@@ -40,8 +40,10 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
     pd: ''
   };
   
+  console.log('WorkOrder RX data in receipt:', rxData);
+  
   // Get contact lens prescription data
-  const contactLensRxData = workOrder?.contactLensRx || invoice?.contactLensRx;
+  const contactLensRxData = workOrder?.contactLensRx || invoice?.contactLensRx || patient?.contactLensRx;
   
   // Get lens data
   const lensType = workOrder?.lensType?.name || invoice?.lensType;
@@ -57,6 +59,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   // Determine if this is a contact lens order
   const isContactLens = contactLensItems && contactLensItems.length > 0;
+  
+  // Get payment information for remaining balance highlight
+  const total = invoice?.total || 0;
+  const deposit = invoice?.deposit || 0;
+  const remainingBalance = total - deposit;
+  const hasRemainingBalance = remainingBalance > 0;
   
   const orderDate = workOrder?.createdAt ? new Date(workOrder.createdAt) : new Date();
   const formattedDate = format(orderDate, 'dd/MM/yyyy');
@@ -99,6 +107,17 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           </div>
         )}
       </div>
+      
+      {/* Remaining Payment - Red Highlight */}
+      {hasRemainingBalance && invoice && (
+        <div className="bg-red-100 border border-red-500 text-red-700 rounded p-1 mb-2 text-center">
+          <div className="flex items-center justify-center gap-1">
+            <DollarSign className="w-3 h-3" />
+            <span className="font-bold">{t('remainingPayment')}:</span>
+            <span className="font-bold">{remainingBalance.toFixed(2)}</span>
+          </div>
+        </div>
+      )}
       
       {/* Glasses Prescription */}
       {rxData && (
