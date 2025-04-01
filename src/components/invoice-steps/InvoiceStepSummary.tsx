@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -30,7 +29,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const directionClass = language === 'ar' ? 'rtl' : 'ltr';
   
-  // Set current timestamp for all created entities
   const currentTimestamp = new Date().toISOString();
   
   const invoice = {
@@ -77,7 +75,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const isContactLens = invoice.invoiceType === "contacts";
   const isEyeExam = invoice.invoiceType === "exam";
   
-  // Convert string lensType to an object if needed
   const lensTypeValue = getValues<string>('lensType') || "";
   const lensTypeObject = typeof lensTypeValue === 'string' 
     ? { name: lensTypeValue, price: getValues<number>('lensPrice') || 0 }
@@ -87,7 +84,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     id: invoice.workOrderId || "",
     patientId: patient.patientId || "",
     createdAt: currentTimestamp,
-    invoiceId: invoice.invoiceId,
     workOrderId: invoice.workOrderId || "",
     date: currentTimestamp,
     patientName: patient.name,
