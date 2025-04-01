@@ -10,6 +10,7 @@ interface ProductDetailsDisplayProps {
     frameModel?: string;
     frameColor?: string;
     lensType?: string;
+    thickness?: string;
     contactLensItems?: Array<{
       name: string;
       price: number;
@@ -60,6 +61,13 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
             <div className="grid grid-cols-2 gap-2">
               <div className="text-sm text-gray-500">{t('lensType')}:</div>
               <div className="text-sm font-medium">{invoice.lensType}</div>
+            </div>
+          )}
+          
+          {invoice.thickness && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-sm text-gray-500">{t('thickness')}:</div>
+              <div className="text-sm font-medium">{invoice.thickness}</div>
             </div>
           )}
         </div>

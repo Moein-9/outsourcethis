@@ -126,6 +126,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const lensType = workOrder?.lensType || invoice?.lensType || "";
   const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
+  const thickness = workOrder?.thickness || invoice?.thickness || "";
   
   const lastEditedAt = workOrder?.lastEditedAt || invoice?.lastEditedAt;
   const hasBeenEdited = !!lastEditedAt;
@@ -497,6 +498,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                     <span className="font-semibold">{isRtl ? "النوع | Type" : "Type | النوع"}:</span>
                     <span>{lensName}</span>
                   </div>
+                  {thickness && (
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{isRtl ? "السماكة | Thickness" : "Thickness | السماكة"}:</span>
+                      <span>{thickness}</span>
+                    </div>
+                  )}
                   {lensPrice > 0 && (
                     <div className="flex justify-between">
                       <span className="font-semibold">{isRtl ? "السعر | Price" : "Price | السعر"}:</span>
