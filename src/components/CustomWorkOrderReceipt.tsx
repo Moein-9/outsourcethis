@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -267,7 +266,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         )}
       </div>
 
-      {/* Patient Information Section - Bilingual Friendly */}
       <div className="mb-2">
         <div className="text-center bg-black text-white py-1 mb-1 font-bold text-base rounded">
           {isRtl 
@@ -301,7 +299,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Prescription Details Section - Font size increased in table */}
       <div className="mb-2">
         <div className="text-center bg-black text-white py-1 mb-1 font-bold text-base rounded">
           {isRtl 
@@ -393,13 +390,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           </table>
         )}
         
-        <div className="mt-1 text-sm flex justify-between px-1 font-medium">
-          <span>OD = {isRtl ? "العين اليمنى (Right Eye)" : "Right Eye (العين اليمنى)"}</span>
-          <span>OS = {isRtl ? "العين اليسرى (Left Eye)" : "Left Eye (العين اليسرى)"}</span>
+        <div className="mt-1 text-xs flex justify-between px-1">
+          <span className="font-medium">OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
+          <span className="font-medium">OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
         </div>
       </div>
 
-      {/* Product Details Section - Bilingual Friendly */}
       <div className="mb-2">
         <div className="text-center bg-black text-white py-1 mb-1 font-bold text-base rounded">
           {isRtl 
@@ -536,7 +532,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
-      {/* Payment Information Section - Bilingual Friendly */}
       <div className="mb-2">
         <div className="text-center bg-black text-white py-1 mb-1 font-bold text-base rounded">
           {isRtl 
@@ -600,19 +595,25 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Quality Confirmation | تأكيد الجودة"}
         </div>
         
-        <div className="flex gap-1 text-sm mb-0.5">
-          <div className="border border-gray-300 rounded p-0.5 flex-1">
-            <div className="font-bold mb-0.5 text-center border-b border-gray-300 pb-0.5 text-sm">
-              {isRtl ? "توقيع الفني | Technician" : "Technician | توقيع الفني"}
+        <div className="flex gap-2 text-sm mb-0.5">
+          <div className="border-2 border-gray-300 rounded p-1 flex-1 flex flex-col">
+            <div className="font-bold text-center border-b-2 border-gray-300 py-1 mb-1">
+              {isRtl ? "توقيع الفني" : "Technician"}
             </div>
-            <div className="h-14 border-dashed border border-gray-200 rounded-sm bg-yellow-50"></div>
+            <div className="h-14 border border-gray-200 rounded-sm bg-gray-50"></div>
+            <div className="text-xs mt-1 text-center">
+              {t("date")}: ___/___/_____
+            </div>
           </div>
           
-          <div className="border border-gray-300 rounded p-0.5 flex-1">
-            <div className="font-bold mb-0.5 text-center border-b border-gray-300 pb-0.5 text-sm">
-              {isRtl ? "توقيع المدير | Manager" : "Manager | توقيع المدير"}
+          <div className="border-2 border-gray-300 rounded p-1 flex-1 flex flex-col">
+            <div className="font-bold text-center border-b-2 border-gray-300 py-1 mb-1">
+              {isRtl ? "توقيع المدير" : "Manager"}
             </div>
-            <div className="h-14 border-dashed border border-gray-200 rounded-sm bg-yellow-50"></div>
+            <div className="h-14 border border-gray-200 rounded-sm bg-gray-50"></div>
+            <div className="text-xs mt-1 text-center">
+              {t("date")}: ___/___/_____
+            </div>
           </div>
         </div>
       </div>
@@ -734,7 +735,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             }
             
             .text-xs {
-              font-size: 11px !important;
+              font-size: 10px !important;
             }
             
             .text-sm {
@@ -759,8 +760,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             }
             
             .py-1 {
-              padding-top: 0.2rem !important;
-              padding-bottom: 0.2rem !important;
+              padding-top: 0.25rem !important;
+              padding-bottom: 0.25rem !important;
             }
             
             .px-1 {
