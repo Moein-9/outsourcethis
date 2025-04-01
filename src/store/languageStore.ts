@@ -308,7 +308,8 @@ const translations: Record<string, Record<string, string>> = {
     remainingLabel: "Remaining:",
     
     // LensSelector Component
-    frameOnly: "Frame only (without lenses)",
+    frameOnly: "Frame only (no prescription lenses)",
+    skipLens: "Skip Lens",
     
     // Additional translations for images shown
     medicalLenses: "Medical Lenses",
@@ -669,7 +670,8 @@ const translations: Record<string, Record<string, string>> = {
     remainingLabel: "المتبقي:",
     
     // LensSelector Component
-    frameOnly: "إطار فقط (بدون عدسات)",
+    frameOnly: "إطار فقط (بدون عدسات طبية)",
+    skipLens: "تخطي العدسة",
     
     // Additional translations for images shown
     medicalLenses: "العدسات الطبية",

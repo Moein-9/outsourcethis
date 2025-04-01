@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Eye, Check, X } from "lucide-react";
+import { Eye, Check, X, Glasses } from "lucide-react";
 
 interface LensSelectorProps {
   onSelectLensType: (lens: LensType | null) => void;
@@ -206,9 +206,10 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
         />
         <Label 
           htmlFor="skipLensCheck" 
-          className={`font-normal text-sm ${language === 'ar' ? 'mr-2' : 'ml-2'}`}
+          className={`font-normal text-sm flex items-center gap-1 ${language === 'ar' ? 'mr-2' : 'ml-2'}`}
         >
-          {t('skipLens')}
+          <Glasses className="w-4 h-4 text-amber-600" />
+          {t('frameOnly')}
         </Label>
       </div>
       
@@ -401,8 +402,8 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
       
       {skipLens && (
         <div className="p-4 border border-dashed rounded-lg bg-muted/10 text-center">
-          <Eye className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-muted-foreground">{t('lensSkipped')}</p>
+          <Glasses className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+          <p className="text-muted-foreground">{t('frameOnly')}</p>
           <Button 
             variant="outline" 
             size="sm" 

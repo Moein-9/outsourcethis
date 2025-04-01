@@ -344,191 +344,189 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
             />
           </div>
 
-          {!skipFrame && (
-            <div className="border rounded-lg p-5 bg-card shadow-sm">
-              <div className="border-b border-primary/30 pb-3 mb-4">
-                <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
-                  <Glasses className="w-5 h-5" />
-                  {t('frameSection')}
-                </h3>
+          <div className="border rounded-lg p-5 bg-card shadow-sm">
+            <div className="border-b border-primary/30 pb-3 mb-4">
+              <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
+                <Glasses className="w-5 h-5" />
+                {t('frameSection')}
+              </h3>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="frameSearchBox" className={`text-muted-foreground block ${textAlignClass}`}>{t('searchTerm')}</Label>
+                <div className={`flex ${dirClass === 'rtl' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
+                  <Input
+                    id="frameSearchBox"
+                    value={frameSearch}
+                    onChange={(e) => setFrameSearch(e.target.value)}
+                    placeholder={t('searchExample')}
+                    className={`flex-1 ${textAlignClass}`}
+                  />
+                  <Button onClick={handleFrameSearch} className="gap-1">
+                    <Search className="w-4 h-4" />
+                    {t('search')}
+                  </Button>
+                </div>
               </div>
               
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="frameSearchBox" className={`text-muted-foreground block ${textAlignClass}`}>{t('searchTerm')}</Label>
-                  <div className={`flex ${dirClass === 'rtl' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
-                    <Input
-                      id="frameSearchBox"
-                      value={frameSearch}
-                      onChange={(e) => setFrameSearch(e.target.value)}
-                      placeholder={t('searchExample')}
-                      className={`flex-1 ${textAlignClass}`}
-                    />
-                    <Button onClick={handleFrameSearch} className="gap-1">
-                      <Search className="w-4 h-4" />
-                      {t('search')}
-                    </Button>
+              {frameResults.length > 0 && (
+                <div className="overflow-x-auto border rounded-lg">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-muted/50">
+                        <th className="p-2 border">{t('brand')}</th>
+                        <th className="p-2 border">{t('model')}</th>
+                        <th className="p-2 border">{t('color')}</th>
+                        <th className="p-2 border">{t('size')}</th>
+                        <th className="p-2 border">{t('price')} ({t('kwd')})</th>
+                        <th className="p-2 border">{t('quantity')}</th>
+                        <th className="p-2 border"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {frameResults.map((frame, index) => (
+                        <tr 
+                          key={index}
+                          className="hover:bg-muted/30 transition-colors"
+                        >
+                          <td className="p-2 border">{frame.brand}</td>
+                          <td className="p-2 border">{frame.model}</td>
+                          <td className="p-2 border">{frame.color}</td>
+                          <td className="p-2 border">{frame.size}</td>
+                          <td className="p-2 border">{frame.price.toFixed(2)}</td>
+                          <td className="p-2 border">{frame.qty}</td>
+                          <td className="p-2 border">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => selectFrame(frame)}
+                              className="w-full"
+                            >
+                              <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                              {t('choose')}
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              
+              {selectedFrame.brand && (
+                <div className="mt-4 p-3 border rounded-lg bg-primary/5 border-primary/20">
+                  <h4 className={`font-medium text-primary mb-2 flex items-center ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
+                    <PackageCheck className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                    {t('selectedFrame')}
+                  </h4>
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('brand')}</th>
+                        <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('model')}</th>
+                        <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('color')}</th>
+                        <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('size')}</th>
+                        <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('price')} ({t('kwd')})</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className={`p-1 ${textAlignClass}`}>{selectedFrame.brand}</td>
+                        <td className={`p-1 ${textAlignClass}`}>{selectedFrame.model}</td>
+                        <td className={`p-1 ${textAlignClass}`}>{selectedFrame.color}</td>
+                        <td className={`p-1 ${textAlignClass}`}>{selectedFrame.size}</td>
+                        <td className={`p-1 ${textAlignClass}`}>{selectedFrame.price.toFixed(2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              
+              <Button 
+                variant="outline" 
+                onClick={() => setShowManualFrame(!showManualFrame)}
+                className="w-full"
+              >
+                <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                {t('addFrameButton')}
+              </Button>
+              
+              {showManualFrame && (
+                <div className="p-4 border rounded-lg mt-2 bg-muted/10">
+                  <h4 className={`font-semibold mb-3 text-primary ${textAlignClass}`}>{t('newFrameDetails')}</h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="newBrand" className="text-muted-foreground">{t('brand')}:</Label>
+                        <Input
+                          id="newBrand"
+                          value={newBrand}
+                          onChange={(e) => setNewBrand(e.target.value)}
+                          className={textAlignClass}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="newModel" className="text-muted-foreground">{t('model')}:</Label>
+                        <Input
+                          id="newModel"
+                          value={newModel}
+                          onChange={(e) => setNewModel(e.target.value)}
+                          className={textAlignClass}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="newColor" className="text-muted-foreground">{t('color')}:</Label>
+                        <Input
+                          id="newColor"
+                          value={newColor}
+                          onChange={(e) => setNewColor(e.target.value)}
+                          className={textAlignClass}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="newSize" className="text-muted-foreground">{t('size')}:</Label>
+                        <Input
+                          id="newSize"
+                          value={newSize}
+                          onChange={(e) => setNewSize(e.target.value)}
+                          placeholder={t('searchExample')}
+                          className={textAlignClass}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="newPrice" className="text-muted-foreground">{t('price')} ({t('kwd')}):</Label>
+                        <Input
+                          id="newPrice"
+                          type="number"
+                          step="0.01"
+                          value={newPrice}
+                          onChange={(e) => setNewPrice(e.target.value)}
+                          className={textAlignClass}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="newQty" className="text-muted-foreground">{t('quantity')} ({t('pieces')}):</Label>
+                        <Input
+                          id="newQty"
+                          type="number"
+                          step="1"
+                          value={newQty}
+                          onChange={(e) => setNewQty(e.target.value)}
+                          className={textAlignClass}
+                        />
+                      </div>
+                    </div>
+                    <Button onClick={handleAddNewFrame} className="w-full">{t('saveFrame')}</Button>
                   </div>
                 </div>
-                
-                {frameResults.length > 0 && (
-                  <div className="overflow-x-auto border rounded-lg">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="bg-muted/50">
-                          <th className="p-2 border">{t('brand')}</th>
-                          <th className="p-2 border">{t('model')}</th>
-                          <th className="p-2 border">{t('color')}</th>
-                          <th className="p-2 border">{t('size')}</th>
-                          <th className="p-2 border">{t('price')} ({t('kwd')})</th>
-                          <th className="p-2 border">{t('quantity')}</th>
-                          <th className="p-2 border"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {frameResults.map((frame, index) => (
-                          <tr 
-                            key={index}
-                            className="hover:bg-muted/30 transition-colors"
-                          >
-                            <td className="p-2 border">{frame.brand}</td>
-                            <td className="p-2 border">{frame.model}</td>
-                            <td className="p-2 border">{frame.color}</td>
-                            <td className="p-2 border">{frame.size}</td>
-                            <td className="p-2 border">{frame.price.toFixed(2)}</td>
-                            <td className="p-2 border">{frame.qty}</td>
-                            <td className="p-2 border">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => selectFrame(frame)}
-                                className="w-full"
-                              >
-                                <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
-                                {t('choose')}
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-                
-                {selectedFrame.brand && (
-                  <div className="mt-4 p-3 border rounded-lg bg-primary/5 border-primary/20">
-                    <h4 className={`font-medium text-primary mb-2 flex items-center ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
-                      <PackageCheck className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
-                      {t('selectedFrame')}
-                    </h4>
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('brand')}</th>
-                          <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('model')}</th>
-                          <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('color')}</th>
-                          <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('size')}</th>
-                          <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('price')} ({t('kwd')})</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className={`p-1 ${textAlignClass}`}>{selectedFrame.brand}</td>
-                          <td className={`p-1 ${textAlignClass}`}>{selectedFrame.model}</td>
-                          <td className={`p-1 ${textAlignClass}`}>{selectedFrame.color}</td>
-                          <td className={`p-1 ${textAlignClass}`}>{selectedFrame.size}</td>
-                          <td className={`p-1 ${textAlignClass}`}>{selectedFrame.price.toFixed(2)}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-                
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowManualFrame(!showManualFrame)}
-                  className="w-full"
-                >
-                  <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
-                  {t('addFrameButton')}
-                </Button>
-                
-                {showManualFrame && (
-                  <div className="p-4 border rounded-lg mt-2 bg-muted/10">
-                    <h4 className={`font-semibold mb-3 text-primary ${textAlignClass}`}>{t('newFrameDetails')}</h4>
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <Label htmlFor="newBrand" className="text-muted-foreground">{t('brand')}:</Label>
-                          <Input
-                            id="newBrand"
-                            value={newBrand}
-                            onChange={(e) => setNewBrand(e.target.value)}
-                            className={textAlignClass}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="newModel" className="text-muted-foreground">{t('model')}:</Label>
-                          <Input
-                            id="newModel"
-                            value={newModel}
-                            onChange={(e) => setNewModel(e.target.value)}
-                            className={textAlignClass}
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <Label htmlFor="newColor" className="text-muted-foreground">{t('color')}:</Label>
-                          <Input
-                            id="newColor"
-                            value={newColor}
-                            onChange={(e) => setNewColor(e.target.value)}
-                            className={textAlignClass}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="newSize" className="text-muted-foreground">{t('size')}:</Label>
-                          <Input
-                            id="newSize"
-                            value={newSize}
-                            onChange={(e) => setNewSize(e.target.value)}
-                            placeholder={t('searchExample')}
-                            className={textAlignClass}
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <Label htmlFor="newPrice" className="text-muted-foreground">{t('price')} ({t('kwd')}):</Label>
-                          <Input
-                            id="newPrice"
-                            type="number"
-                            step="0.01"
-                            value={newPrice}
-                            onChange={(e) => setNewPrice(e.target.value)}
-                            className={textAlignClass}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="newQty" className="text-muted-foreground">{t('quantity')} ({t('pieces')}):</Label>
-                          <Input
-                            id="newQty"
-                            type="number"
-                            step="1"
-                            value={newQty}
-                            onChange={(e) => setNewQty(e.target.value)}
-                            className={textAlignClass}
-                          />
-                        </div>
-                      </div>
-                      <Button onClick={handleAddNewFrame} className="w-full">{t('saveFrame')}</Button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
-          )}
+          </div>
         </>
       ) : (
         <ContactLensSelector 
