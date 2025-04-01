@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Refund } from '@/store/invoiceStore';
 import { usePatientStore } from '@/store/patientStore';
@@ -57,8 +56,9 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
   const direction = isArabic ? 'rtl' : 'ltr';
   const textAlign = isArabic ? 'right' : 'left';
   
-  // Format the date using date-fns
   const formattedDate = format(new Date(refund.refundDate), 'dd/MM/yyyy hh:mm a');
+  
+  const addressLines = storeInfo.address.split('\n');
   
   return (
     <div 
@@ -78,7 +78,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         direction
       }}
     >
-      {/* Header - Black and white friendly */}
       <div className="receipt-header" style={{
         background: 'white',
         padding: '8px 4px',
@@ -90,11 +89,14 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
           <MoenLogo className="w-auto h-8" />
         </div>
         <h2 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '1px', textAlign: 'center' }}>{storeInfo.name}</h2>
-        <p style={{ fontSize: '9px', marginBottom: '1px', textAlign: 'center' }}>{storeInfo.address}</p>
-        <p style={{ fontSize: '9px', textAlign: 'center' }}>{isArabic ? "هاتف" : "Phone"}: {storeInfo.phone}</p>
+        <div style={{ textAlign: 'center', fontSize: '9px' }}>
+          {addressLines.map((line, index) => (
+            <p key={index} style={{ marginBottom: '1px' }}>{line}</p>
+          ))}
+          <p style={{ direction: 'ltr', textAlign: 'center' }}>{storeInfo.phone}</p>
+        </div>
       </div>
       
-      {/* Receipt Type Badge */}
       <div style={{ 
         margin: '4px auto', 
         width: 'fit-content',
@@ -117,9 +119,7 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         </div>
       </div>
 
-      {/* Main Content - Thermal printer friendly */}
       <div style={{ padding: '0 4px 6px' }}>
-        {/* Customer Information */}
         <div style={{
           borderRadius: '0',
           padding: '6px 4px',
@@ -171,7 +171,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
           )}
         </div>
         
-        {/* Refund Details */}
         <div style={{
           borderRadius: '0',
           padding: '6px 4px',
@@ -241,7 +240,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
           </div>
         </div>
         
-        {/* Products Section */}
         <div style={{ marginBottom: '6px' }}>
           <div style={{ 
             background: 'black', 
@@ -258,9 +256,7 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
             <span>{isArabic ? "المنتجات" : "Products"}</span>
           </div>
 
-          {/* Product Items */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {/* Frame Info */}
             {refund.frameBrand && (
               <div style={{ 
                 backgroundColor: 'white', 
@@ -309,7 +305,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
               </div>
             )}
             
-            {/* Lens Info */}
             {refund.lensType && (
               <div style={{ 
                 backgroundColor: 'white', 
@@ -357,7 +352,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
               </div>
             )}
             
-            {/* Other Items */}
             {refund.invoiceItems && refund.invoiceItems.length > 0 && !refund.frameBrand && !refund.lensType && (
               refund.invoiceItems.map((item, index) => (
                 <div key={index} style={{ 
@@ -408,7 +402,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
           </div>
         </div>
         
-        {/* Refund Details */}
         <div style={{ marginBottom: '6px' }}>
           <div style={{ 
             background: 'black', 
@@ -426,7 +419,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {/* Refund Method */}
             <div style={{ 
               backgroundColor: 'white', 
               padding: '4px',
@@ -454,7 +446,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
               </div>
             </div>
             
-            {/* Refund Reason */}
             <div style={{ 
               backgroundColor: 'white', 
               padding: '4px',
@@ -481,7 +472,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
               </div>
             </div>
             
-            {/* Staff Notes */}
             {refund.staffNotes && (
               <div style={{ 
                 backgroundColor: 'white', 
@@ -512,7 +502,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
           </div>
         </div>
         
-        {/* Amount Information */}
         <div style={{ 
           backgroundColor: 'white', 
           padding: '6px',
@@ -566,7 +555,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
           </div>
         </div>
         
-        {/* Status Badge */}
         <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
           <div style={{ 
             backgroundColor: 'white',
@@ -585,7 +573,6 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
         </div>
       </div>
       
-      {/* Footer */}
       <div style={{ 
         borderTop: '1px solid black',
         padding: '6px',
@@ -686,6 +673,11 @@ export const RefundReceiptTemplate: React.FC<RefundReceiptTemplateProps> = ({ re
           html, body, #refund-receipt {
             width: 80mm !important;
             max-width: 80mm !important;
+          }
+          
+          [dir="ltr"] {
+            direction: ltr !important;
+            text-align: center !important;
           }
         }
         `}

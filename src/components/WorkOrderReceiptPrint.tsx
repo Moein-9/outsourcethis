@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -45,6 +44,10 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
     const { language } = useLanguageStore.getState();
     const isRtl = language === "ar";
     
+    // Split the address into lines for better display
+    const addressLines = storeInfo.address.split('\n');
+    const addressHtml = addressLines.map(line => `<p style="font-size: 9px; margin: 0;">${line}</p>`).join('');
+    
     const content = `
       <div 
         id="work-order-receipt"
@@ -69,8 +72,8 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
           <h1 style="font-size: 14px; font-weight: bold; margin: 2px 0;">
             ${storeInfo.name}
           </h1>
-          <p style="font-size: 9px; margin: 0;">${storeInfo.address}</p>
-          <p style="font-size: 9px; margin: 0;">${storeInfo.phone}</p>
+          ${addressHtml}
+          <p style="font-size: 9px; margin: 0; direction: ltr;">${storeInfo.phone}</p>
         </div>
         
         <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
@@ -509,6 +512,9 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   const isPaid = remaining <= 0;
 
   const orderNumber = invoice.workOrderId || "";
+  
+  // Split the address into lines for better display
+  const addressLines = storeInfo.address.split('\n');
 
   return (
     <div 
@@ -534,8 +540,10 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         <h1 style={{ fontSize: "14px", fontWeight: "bold", margin: "2px 0" }}>
           {storeInfo.name}
         </h1>
-        <p style={{ fontSize: "9px", margin: "0" }}>{storeInfo.address}</p>
-        <p style={{ fontSize: "9px", margin: "0" }}>{storeInfo.phone}</p>
+        {addressLines.map((line, index) => (
+          <p key={index} style={{ fontSize: "9px", margin: 0 }}>{line}</p>
+        ))}
+        <p style={{ fontSize: "9px", margin: 0, direction: "ltr" }}>{storeInfo.phone}</p>
       </div>
       
       <div style={{ borderTop: "1px dashed #000", margin: "4px 0" }}></div>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -78,6 +77,9 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   
   const orderNumber = invoice.workOrderId || "NEW ORDER";
   const date = format(new Date(invoice.createdAt), "dd/MM/yyyy");
+
+  // Split the address into lines for better display
+  const addressLines = storeInfo.address.split('\n');
 
   return (
     <div className="print-wrapper">
@@ -202,6 +204,12 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
         <div className="flex flex-col items-center justify-center border-b border-gray-300 pb-2 mb-3">
           <MoenLogo className="h-10 mb-2" />
           <h1 className="text-xl font-bold">{t("workOrder")}</h1>
+          <div className="text-center text-xs space-y-0.5 mt-1">
+            {addressLines.map((line, index) => (
+              <p key={index} className="m-0 leading-tight">{line}</p>
+            ))}
+            <p className="m-0 leading-tight ltr">{storeInfo.phone}</p>
+          </div>
           <div className="flex justify-between items-center w-full mt-1">
             <div className="flex items-center">
               <Calendar className="w-4 h-4 mr-1" />

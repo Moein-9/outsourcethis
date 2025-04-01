@@ -1,0 +1,9 @@
+
+/* ... keep existing code */
+
+/* Add global class for left-to-right text direction, useful for phone numbers */
+.ltr {
+  direction: ltr !important;
+  text-align: center !important;
+  unicode-bidi: isolate !important;
+}

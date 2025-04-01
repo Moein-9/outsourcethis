@@ -73,9 +73,9 @@ export const MoenLogoBlack: React.FC<{
   );
 };
 
-// Updated store information based on invoice details
+// Updated store information with bilingual format
 export const storeInfo = {
   name: "Moen Optician",
-  address: "al-somait plaza, Habeeb Munawer St, Al Farwaniyah",
-  phone: "2475 9016"
+  address: "Al Arbid Gallery Mall | مجمع العربيد جاليري\nHabeeb Munawer Street, Al Farwaniyah, Kuwait\nشارع حبيب مناور، الفروانية، الكويت",
+  phone: "Tel | هاتف: 24748201"
 };

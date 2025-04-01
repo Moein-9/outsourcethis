@@ -135,6 +135,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const subtotal = invoice.total + (disc || 0);
   const showDiscount = disc > 0;
   
+  const addressLines = storeInfo.address.split('\n');
+  
   return (
     <div 
       className={`${dirClass} print-receipt`} 
@@ -161,8 +163,12 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           <MoenLogo className="w-auto h-14" />
         </div>
         <h2 className="font-bold text-xl mb-0">{storeInfo.name}</h2>
-        <p className="text-sm font-medium mb-0">{storeInfo.address}</p>
-        <p className="text-sm font-medium">{t("phone")}: {storeInfo.phone}</p>
+        <div className="text-sm font-medium space-y-0.5">
+          {addressLines.map((line, index) => (
+            <p key={index} className="m-0 leading-tight">{line}</p>
+          ))}
+          <p className="m-0 leading-tight ltr">{storeInfo.phone}</p>
+        </div>
       </div>
 
       <div className="mb-3">
@@ -404,7 +410,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
 
       <div className="mt-3 pt-2 border-t-2 border-gray-300">
         {isRtl ? (
-          <p className="font-bold text-sm mb-0">شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!</p>
+          <p className="font-bold text-sm mb-0">شكراً لاختياركم نظارات المعين. يس��دنا خدمتكم دائماً!</p>
         ) : (
           <p className="font-bold text-sm mb-0">Thank you for choosing Moein Optical. We're always delighted to serve you!</p>
         )}
@@ -568,6 +574,11 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             svg {
               width: 14px !important;
               height: 14px !important;
+            }
+            
+            .ltr {
+              direction: ltr !important;
+              text-align: center !important;
             }
           }
         `}
