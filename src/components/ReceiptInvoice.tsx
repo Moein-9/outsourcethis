@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -39,11 +38,9 @@ interface ReceiptInvoiceProps {
   servicePrice?: number;
 }
 
-// Helper function to format payment method in both languages
 const getFormattedPaymentMethod = (method: string): string => {
   if (!method) return "";
   
-  // Map of English to Arabic translations
   const paymentMethodMap: Record<string, string> = {
     "Cash": "نقداً",
     "KNET": "كي نت",
@@ -52,7 +49,6 @@ const getFormattedPaymentMethod = (method: string): string => {
     "Bank Transfer": "تحويل بنكي"
   };
   
-  // Map of Arabic to English translations
   const reversePaymentMethodMap: Record<string, string> = {
     "نقداً": "Cash",
     "كي نت": "KNET",
@@ -61,7 +57,6 @@ const getFormattedPaymentMethod = (method: string): string => {
     "تحويل بنكي": "Bank Transfer"
   };
   
-  // Check if the method is already in English or Arabic
   const arabicEquivalent = paymentMethodMap[method];
   const englishEquivalent = reversePaymentMethodMap[method];
   
@@ -71,7 +66,6 @@ const getFormattedPaymentMethod = (method: string): string => {
     return `${englishEquivalent} | ${method}`;
   }
   
-  // If not found in either map, return the original method
   return method;
 };
 
@@ -125,7 +119,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const isContactLens = invoiceType === "contacts" || invoice.invoiceType === "contacts" || contactLensItems.length > 0;
   const isEyeExam = invoiceType === "exam" || invoice.invoiceType === "exam";
   
-  // Get service information for eye exam
   const service = {
     name: serviceName || invoice.serviceName || "",
     id: serviceId || invoice.serviceId || "",
@@ -133,12 +126,14 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
     price: servicePrice !== undefined ? servicePrice : invoice.servicePrice || 0
   };
   
-  // Check if invoice has been refunded
   const isRefunded = invoice.isRefunded;
   const refundAmount = invoice.refundAmount || 0;
   const refundDate = invoice.refundDate;
   const refundMethod = invoice.refundMethod;
   const refundReason = invoice.refundReason;
+  
+  const subtotal = invoice.total + (disc || 0);
+  const showDiscount = disc > 0;
   
   return (
     <div 
@@ -299,8 +294,15 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         <div className="mt-3 border-2 border-gray-300 rounded p-2">
           <div className="flex justify-between px-2 font-bold">
             <span className="text-sm">{isRtl ? "المجموع الفرعي | Subtotal" : "Subtotal | المجموع الفرعي"}:</span>
-            <span className="text-sm">KWD {tot.toFixed(3)}</span>
+            <span className="text-sm">KWD {subtotal.toFixed(3)}</span>
           </div>
+          
+          {showDiscount && (
+            <div className="flex justify-between px-2 font-bold text-red-600 mt-1">
+              <span className="text-sm">{isRtl ? "الخصم | Discount" : "Discount | الخصم"}:</span>
+              <span className="text-sm">- KWD {disc.toFixed(3)}</span>
+            </div>
+          )}
           
           <div className="flex justify-between px-2 font-bold mt-1">
             <span className="text-sm">{isRtl ? "المجموع | Total" : "Total | المجموع"}:</span>

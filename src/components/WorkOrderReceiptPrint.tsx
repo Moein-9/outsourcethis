@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -353,7 +352,7 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
           </div>
           
           ${props.invoice.discount > 0 ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 1px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 1px; color: #B91C1C;">
             <span style="font-weight: bold;">${isRtl ? "الخصم" : "Discount"}:</span>
             <span>-${props.invoice.discount.toFixed(3)} KWD</span>
           </div>
@@ -499,6 +498,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   };
 
   const subtotal = invoice.total + invoice.discount;
+  const showDiscount = invoice.discount > 0;
   
   const amountPaid = invoice.payments 
     ? invoice.payments.reduce((sum, payment) => sum + payment.amount, 0) 
@@ -830,8 +830,8 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           <span style={{ fontWeight: "bold" }}>{isRtl ? "المجموع الفرعي" : "Subtotal"}:</span>
           <span>{subtotal.toFixed(3)} KWD</span>
         </div>
-        {invoice.discount > 0 && (
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px" }}>
+        {showDiscount && (
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1px", color: "#B91C1C" }}>
             <span style={{ fontWeight: "bold" }}>{isRtl ? "الخصم" : "Discount"}:</span>
             <span>-{invoice.discount.toFixed(3)} KWD</span>
           </div>
@@ -913,7 +913,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
       </div>
       
       <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", marginTop: "10px", textAlign: "center" }}>
-        <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "2px" }}>
+        <div style={{ fontSize: "10px", fontWeight: "bold", margin-bottom: "2px" }}>
           {isRtl ? "شكراً لاختياركم نظارات المعين" : "Thank you for choosing Moein Optical"}
         </div>
         <div style={{ fontSize: "7px", color: "#666" }}>

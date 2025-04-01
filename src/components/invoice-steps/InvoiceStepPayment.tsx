@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const InvoiceStepPayment: React.FC = () => {
+  const navigate = useNavigate();
   const { t, language } = useLanguageStore();
   const isRtl = language === 'ar';
   const { 
@@ -188,9 +190,7 @@ export const InvoiceStepPayment: React.FC = () => {
       description: `${t('orderSavedSuccess')}`,
     });
 
-    if (window && window.dispatchEvent) {
-      window.dispatchEvent(new CustomEvent('navigateToSummary'));
-    }
+    navigate('/invoices');
   };
   
   const textAlignClass = isRtl ? 'text-right' : 'text-left';

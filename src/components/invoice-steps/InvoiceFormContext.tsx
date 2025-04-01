@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { usePatientStore } from "@/store/patientStore";
 import { Patient } from "@/store/patientStore";
@@ -239,6 +238,11 @@ export const InvoiceFormProvider: React.FC<InvoiceFormProviderProps> = ({
     // Calculate discount as the difference between subtotal and final price
     const newDiscount = Math.max(0, subtotal - price);
     setValue('discount', newDiscount);
+    setValue('total', price);
+    
+    // Update remaining after setting the total
+    const deposit = getValues<number>('deposit') || 0;
+    setValue('remaining', Math.max(0, price - deposit));
   };
   
   // Calculation helpers
