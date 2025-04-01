@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { 
   PieChart, 
   Pie, 
@@ -21,12 +21,21 @@ export const SalesChart: React.FC<SalesChartProps> = ({
   frameRevenue, 
   coatingRevenue 
 }) => {
+  // Check if we have any data
   const hasData = lensRevenue > 0 || frameRevenue > 0 || coatingRevenue > 0;
   
+  // Ensure all values are at least 0 (not negative)
+  const safeValues = {
+    lensRevenue: Math.max(0, lensRevenue),
+    frameRevenue: Math.max(0, frameRevenue),
+    coatingRevenue: Math.max(0, coatingRevenue)
+  };
+  
+  // Create data array, filtering out zero values
   const data = [
-    { name: "العدسات", value: lensRevenue, icon: <Eye size={16} /> },
-    { name: "الإطارات", value: frameRevenue, icon: <Frame size={16} /> },
-    { name: "الطلاءات", value: coatingRevenue, icon: <Droplets size={16} /> },
+    { name: "العدسات", value: safeValues.lensRevenue, icon: <Eye size={16} /> },
+    { name: "الإطارات", value: safeValues.frameRevenue, icon: <Frame size={16} /> },
+    { name: "الطلاءات", value: safeValues.coatingRevenue, icon: <Droplets size={16} /> },
   ].filter(item => item.value > 0);
   
   const COLORS = ["#8B5CF6", "#F97316", "#0EA5E9"];
@@ -58,7 +67,8 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   };
   
-  if (!hasData) {
+  // Show placeholder if no data or all values are zero
+  if (!hasData || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[300px]">
         <p className="text-center text-muted-foreground">
@@ -68,6 +78,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   }
   
+  // Custom legend rendering with icons
   const renderCustomLegend = (props: any) => {
     const { payload } = props;
     
@@ -85,6 +96,12 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   };
   
+  // Add a useEffect to log data - for debugging
+  useEffect(() => {
+    console.log("SalesChart data:", data);
+    console.log("Has data:", hasData);
+  }, [data, hasData]);
+  
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
@@ -97,6 +114,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
           outerRadius={100}
           fill="#8884d8"
           dataKey="value"
+          minAngle={15} // Ensures small segments are still visible
         >
           {data.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

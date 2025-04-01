@@ -49,9 +49,11 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
         variant === "default" ? "bg-green-600 hover:bg-green-700 text-white" : ""
       } ${className}`}
     >
-      <div className={`flex items-center ${isRtl ? 'flex-row-reverse' : ''}`}>
-        <div className={`w-12 h-12 rounded-full ${variant === "default" ? "bg-green-500" : "bg-green-100"} flex items-center justify-center ${isRtl ? 'ml-4' : 'mr-4'} group-hover:${variant === "default" ? "bg-green-400" : "bg-green-200"} transition-colors`}>
-          {icon || <Printer className={`w-6 h-6 ${variant === "default" ? "text-white" : "text-green-600"}`} />}
+      <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-center justify-center ${
+          variant === "default" ? "text-white" : "text-green-600"
+        }`}>
+          {icon || <Printer className="w-5 h-5" />}
         </div>
         <div className={`text-${isRtl ? 'right' : 'left'}`}>
           <div className="font-medium">{buttonLabel}</div>
