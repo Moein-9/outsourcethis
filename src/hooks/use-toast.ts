@@ -1,5 +1,4 @@
-
-import { useState, useEffect, createContext, useContext } from "react"
+import { useState, createContext, useContext } from "react"
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
 type ToasterToast = ToastProps & {
