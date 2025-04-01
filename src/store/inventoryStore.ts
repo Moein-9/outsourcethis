@@ -236,9 +236,20 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
         category: service.category as "exam" | "repair" | "other"
       }));
       
-      // Initialize with sample data only if tables are empty
-      if (frames.length === 0) {
+      // Check if ALL tables are empty before migrating default data
+      // Only migrate default data if all inventory tables are completely empty
+      const allTablesEmpty = 
+        frames.length === 0 && 
+        lensTypes.length === 0 && 
+        lensCoatings.length === 0 && 
+        lensThicknesses.length === 0 && 
+        contactLenses.length === 0 && 
+        services.length === 0;
+        
+      if (allTablesEmpty) {
         await get().migrateDefaultData();
+        // After migration, fetch data again to get the newly created records
+        return get().initializeStore();
       }
       
       // Setup realtime subscriptions
@@ -291,11 +302,11 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
       // Set the store data
       set({
         frames,
-        lensTypes: lensTypes.length > 0 ? lensTypes : get().getDefaultLensTypes(),
-        lensCoatings: lensCoatings.length > 0 ? lensCoatings : get().getDefaultLensCoatings(),
-        lensThicknesses: lensThicknesses.length > 0 ? lensThicknesses : get().getDefaultLensThicknesses(),
-        contactLenses: contactLenses.length > 0 ? contactLenses : get().getDefaultContactLenses(),
-        services: services.length > 0 ? services : get().getDefaultServices(),
+        lensTypes,
+        lensCoatings,
+        lensThicknesses,
+        contactLenses,
+        services,
         isLoading: false,
         isInitialized: true
       });
