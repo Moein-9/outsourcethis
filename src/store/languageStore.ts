@@ -310,11 +310,18 @@ const translations: Record<string, Record<string, string>> = {
     // LensSelector Component
     frameOnly: "Frame only (no prescription lenses)",
     skipLens: "Skip Lens",
+    selectLensType: "Select Lens Type",
+    selectCoatings: "Select Coatings",
+    selectThickness: "Select Thickness",
+    noThickness: "No Thickness",
+    noThicknessDesc: "No additional thickness options",
+    noCoating: "No Coating",
+    noCoatingDesc: "No additional coating",
+    selectLensTypeFirst: "Please select a lens type first",
+    addLens: "Add Lens",
     
     // Additional translations for images shown
     medicalLenses: "Medical Lenses",
-    selectLensType: "Select Lens Type",
-    selectCoatings: "Select Coatings",
     
     // RX Manager translations with improved spacing
     rxAndCareInstructions: "Rx and Care Instructions",
@@ -672,11 +679,18 @@ const translations: Record<string, Record<string, string>> = {
     // LensSelector Component
     frameOnly: "إطار فقط (بدون عدسات طبية)",
     skipLens: "تخطي العدسة",
+    selectLensType: "اختر نوع العدسة",
+    selectCoatings: "اختر الطلاءات",
+    selectThickness: "اختر السماكة",
+    noThickness: "بدون سماكة",
+    noThicknessDesc: "لا توجد خيارات سماكة إضافية",
+    noCoating: "بدون طلاء",
+    noCoatingDesc: "لا يوجد طلاء إضافي",
+    selectLensTypeFirst: "الرجاء اختيار نوع العدسة أولاً",
+    addLens: "إضافة عدسة",
     
     // Additional translations for images shown
     medicalLenses: "العدسات الطبية",
-    selectLensType: "اختر نوع العدسة",
-    selectCoatings: "اختر الطلاءات",
     
     // RX Manager translations with proper Arabic translations
     rxAndCareInstructions: "تعليمات الوصفة والعناية",
