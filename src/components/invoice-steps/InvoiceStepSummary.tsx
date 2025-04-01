@@ -15,6 +15,7 @@ import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderBut
 import { PrintOptionsDialog } from "@/components/PrintOptionsDialog";
 import { toast } from "sonner";
 import { WorkOrder as InventoryWorkOrder } from "@/types/inventory";
+import { PrintButton } from "@/components/PrintButton";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -94,7 +95,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     phone: getValues<string>('patientPhone') || "",
     dob: "",
     notes: "",
-    rx: [rxData], // Use the RX data from form values
+    rx: rxData, // Fix: Use rxData directly instead of wrapping in an array
     createdAt: currentTimestamp
   };
   
@@ -279,40 +280,26 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
               onPrintWorkOrder={handlePrintWorkOrder}
               onPrintInvoice={handlePrintInvoice}
             >
-              <Button 
+              <PrintButton 
                 variant="outline"
-                className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-              >
-                <div className="flex items-center">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
-                    <ClipboardCheck className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-medium">{t('printWorkOrder')}</div>
-                    <div className="text-xs text-muted-foreground">{t('printWorkOrderDescription')}</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-              </Button>
+                icon={ClipboardCheck}
+                iconColor="text-blue-600"
+                label={t('printWorkOrder')}
+                description={t('printWorkOrderDescription')}
+                className="hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"
+              />
             </PrintOptionsDialog>
           )}
           
-          <Button 
+          <PrintButton 
             variant="outline"
-            className="w-full justify-between group hover:border-green-500 hover:bg-green-50 hover:text-green-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
+            icon={Receipt}
+            iconColor="text-green-600" 
+            label={t('printInvoice')}
+            description={t('printInvoiceDescription')}
             onClick={handlePrintInvoice}
-          >
-            <div className="flex items-center">
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4 group-hover:bg-green-200 transition-colors">
-                <Receipt className="w-6 h-6 text-green-600" />
-              </div>
-              <div className="text-left">
-                <div className="font-medium">{t('printInvoice')}</div>
-                <div className="text-xs text-muted-foreground">{t('printInvoiceDescription')}</div>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-          </Button>
+            className="hover:border-green-500 hover:bg-green-50 hover:text-green-700"
+          />
         </div>
       </div>
     </div>
