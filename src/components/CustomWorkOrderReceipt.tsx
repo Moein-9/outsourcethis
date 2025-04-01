@@ -22,23 +22,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const { language, t } = useLanguageStore();
   const dirClass = language === 'ar' ? 'rtl text-right' : 'ltr text-left';
   
+  // Log all sources to debug RX data
+  console.log('WorkOrder data in receipt:', workOrder);
+  console.log('Invoice data in receipt:', invoice);
+  console.log('Patient data in receipt:', patient);
+  
   const patientName = patient?.name || invoice?.patientName || workOrder?.patientName || 'Customer';
   const patientPhone = patient?.phone || invoice?.patientPhone || workOrder?.patientPhone || '';
   
   // Get prescription data from multiple possible sources with fallbacks
-  const rxData = workOrder?.rx || invoice?.rx || patient?.rx || {
-    sphereOD: '',
-    cylOD: '',
-    axisOD: '',
-    addOD: '',
-    pdOD: '',
-    sphereOS: '',
-    cylOS: '',
-    axisOS: '',
-    addOS: '',
-    pdOS: '',
-    pd: ''
-  };
+  const rxData = workOrder?.rx || invoice?.rx || patient?.rx || {};
   
   console.log('WorkOrder RX data in receipt:', rxData);
   
@@ -68,6 +61,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const orderDate = workOrder?.createdAt ? new Date(workOrder.createdAt) : new Date();
   const formattedDate = format(orderDate, 'dd/MM/yyyy');
+  
+  // Check if RX data exists and is properly structured
+  const hasValidRxData = rxData && (
+    rxData.sphereOD || rxData.sphereOS || 
+    rxData.cylOD || rxData.cylOS || 
+    rxData.axisOD || rxData.axisOS ||
+    rxData.addOD || rxData.addOS ||
+    rxData.pdOD || rxData.pdOS ||
+    rxData.pd
+  );
   
   return (
     <div className={`thermal-receipt text-xs p-2 ${dirClass}`}>
@@ -120,7 +123,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       )}
       
       {/* Glasses Prescription */}
-      {rxData && (
+      {hasValidRxData && (
         <div className="border-t border-dashed pt-1 mb-2">
           <div className="font-bold border-b mb-1 flex items-center gap-1">
             <Eye className="w-3 h-3" /> {t('glassesRx')}
@@ -140,19 +143,19 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             <tbody>
               <tr>
                 <td className="border border-gray-400 px-1 py-0.5 font-semibold">OD</td>
-                <td className="border border-gray-400 px-1 py-0.5">{rxData.sphereOD || "—"}</td>
-                <td className="border border-gray-400 px-1 py-0.5">{rxData.cylOD || "—"}</td>
-                <td className="border border-gray-400 px-1 py-0.5">{rxData.axisOD || "—"}</td>
-                <td className="border border-gray-400 px-1 py-0.5">{rxData.addOD || rxData.add || "—"}</td>
-                <td className="border border-gray-400 px-1 py-0.5">{rxData.pdOD || rxData.pdRight || (rxData.pd ? rxData.pd/2 : "—")}</td>
+                <td className="border border-gray-400 px-1 py-0.5">{rxData.sphereOD || rxData.right?.sphere || "—"}</td>
+                <td className="border border-gray-400 px-1 py-0.5">{rxData.cylOD || rxData.right?.cylinder || "—"}</td>
+                <td className="border border-gray-400 px-1 py-0.5">{rxData.axisOD || rxData.right?.axis || "—"}</td>
+                <td className="border border-gray-400 px-1 py-0.5">{rxData.addOD || rxData.right?.add || rxData.add || "—"}</td>
+                <td className="border border-gray-400 px-1 py-0.5">{rxData.pdOD || rxData.right?.pd || rxData.pdRight || (rxData.pd ? rxData.pd/2 : "—")}</td>
               </tr>
               <tr>
                 <td className="border border-gray-400 px-1 py-0.5 font-semibold">OS</td>
-                <td className="border border-gray-400 px-1 py-0.5">{rxData.sphereOS || "—"}</td>
-                <td className="border border-gray-400 px-1 py-0.5">{rxData.cylOS || "—"}</td>
-                <td className="border border-gray-400 px-1 py-0.5">{rxData.axisOS || "—"}</td>
-                <td className="border border-gray-400 px-1 py-0.5">{rxData.addOS || rxData.add || "—"}</td>
-                <td className="border border-gray-400 px-1 py-0.5">{rxData.pdOS || rxData.pdLeft || (rxData.pd ? rxData.pd/2 : "—")}</td>
+                <td className="border border-gray-400 px-1 py-0.5">{rxData.sphereOS || rxData.left?.sphere || "—"}</td>
+                <td className="border border-gray-400 px-1 py-0.5">{rxData.cylOS || rxData.left?.cylinder || "—"}</td>
+                <td className="border border-gray-400 px-1 py-0.5">{rxData.axisOS || rxData.left?.axis || "—"}</td>
+                <td className="border border-gray-400 px-1 py-0.5">{rxData.addOS || rxData.left?.add || rxData.add || "—"}</td>
+                <td className="border border-gray-400 px-1 py-0.5">{rxData.pdOS || rxData.left?.pd || rxData.pdLeft || (rxData.pd ? rxData.pd/2 : "—")}</td>
               </tr>
             </tbody>
           </table>

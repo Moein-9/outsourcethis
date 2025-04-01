@@ -12,8 +12,8 @@ export class CustomPrintService {
     console.log('For patient:', patient);
     
     // Log available prescription data
-    console.log('Glasses RX data:', workOrder.rx);
-    console.log('Contact lens RX data:', workOrder.contactLensRx);
+    console.log('Glasses RX data:', workOrder.rx || invoice?.rx || patient?.rx || {});
+    console.log('Contact lens RX data:', workOrder.contactLensRx || invoice?.contactLensRx || patient?.contactLensRx || {});
     
     // Create a temporary div to hold the receipt for printing
     const printContainer = document.createElement('div');

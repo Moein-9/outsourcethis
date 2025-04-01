@@ -48,6 +48,10 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     console.log("[CustomPrintWorkOrderButton] Patient data:", patient);
     console.log("[CustomPrintWorkOrderButton] Invoice data:", invoice);
     
+    if (patient?.rx) {
+      console.log("[CustomPrintWorkOrderButton] Patient RX data:", patient.rx);
+    }
+    
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {
       CustomPrintService.printWorkOrder(workOrder, invoice, patient);
