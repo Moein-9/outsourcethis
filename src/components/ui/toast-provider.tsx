@@ -1,14 +1,6 @@
 
 import React, { useState } from "react";
-import { ToastContext } from "@/hooks/use-toast";
-import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
-
-type ToasterToast = ToastProps & {
-  id: string;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  action?: ToastActionElement;
-};
+import { ToastContext, ToasterToast } from "@/hooks/use-toast";
 
 const TOAST_LIMIT = 20;
 
