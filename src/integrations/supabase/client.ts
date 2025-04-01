@@ -35,3 +35,8 @@ export const handleSupabaseError = (error: any): string => {
   // Fallback generic error
   return "An unexpected error occurred. Please try again.";
 };
+
+// Helper to generate unique combination IDs for lens pricing
+export const generateCombinationId = (lensTypeId: string, coatingId: string, thicknessId: string): string => {
+  return `${lensTypeId}_${coatingId}_${thicknessId}`;
+};

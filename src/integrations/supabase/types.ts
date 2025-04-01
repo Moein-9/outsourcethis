@@ -354,6 +354,61 @@ export type Database = {
         }
         Relationships: []
       }
+      lens_pricing_combinations: {
+        Row: {
+          coating_id: string
+          combination_id: string
+          created_at: string
+          id: string
+          lens_type_id: string
+          price: number
+          thickness_id: string
+          updated_at: string
+        }
+        Insert: {
+          coating_id: string
+          combination_id: string
+          created_at?: string
+          id?: string
+          lens_type_id: string
+          price: number
+          thickness_id: string
+          updated_at?: string
+        }
+        Update: {
+          coating_id?: string
+          combination_id?: string
+          created_at?: string
+          id?: string
+          lens_type_id?: string
+          price?: number
+          thickness_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lens_pricing_combinations_coating_id_fkey"
+            columns: ["coating_id"]
+            isOneToOne: false
+            referencedRelation: "lens_coatings"
+            referencedColumns: ["coating_id"]
+          },
+          {
+            foreignKeyName: "lens_pricing_combinations_lens_type_id_fkey"
+            columns: ["lens_type_id"]
+            isOneToOne: false
+            referencedRelation: "lens_types"
+            referencedColumns: ["lens_id"]
+          },
+          {
+            foreignKeyName: "lens_pricing_combinations_thickness_id_fkey"
+            columns: ["thickness_id"]
+            isOneToOne: false
+            referencedRelation: "lens_thicknesses"
+            referencedColumns: ["thickness_id"]
+          },
+        ]
+      }
       lens_thicknesses: {
         Row: {
           category: string

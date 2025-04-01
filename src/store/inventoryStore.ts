@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { supabase, handleSupabaseError } from '@/integrations/supabase/client';
+import { supabase, handleSupabaseError, generateCombinationId } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export interface FrameItem {
@@ -57,6 +57,17 @@ export interface ServiceItem {
   category: "exam" | "repair" | "other";
 }
 
+export interface LensPricingCombination {
+  id: string;
+  combinationId: string;
+  lensTypeId: string;
+  coatingId: string;
+  thicknessId: string;
+  price: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface InventoryState {
   frames: FrameItem[];
   lensTypes: LensType[];
@@ -64,6 +75,7 @@ interface InventoryState {
   lensThicknesses: LensThickness[];
   contactLenses: ContactLensItem[];
   services: ServiceItem[];
+  lensPricingCombinations: LensPricingCombination[];
   isLoading: boolean;
   isInitialized: boolean;
   
@@ -78,6 +90,7 @@ interface InventoryState {
   handleRealtimeThicknessesUpdate: (payload: any) => void;
   handleRealtimeContactLensesUpdate: (payload: any) => void;
   handleRealtimeServicesUpdate: (payload: any) => void;
+  handleRealtimeLensPricingUpdate: (payload: any) => void;
   
   // Default data functions
   getDefaultLensTypes: () => LensType[];
@@ -109,6 +122,12 @@ interface InventoryState {
   deleteLensThickness: (id: string) => Promise<void>;
   getLensThicknessesByCategory: (category: LensThickness['category']) => LensThickness[];
   
+  // Lens pricing combination methods
+  getLensPriceCombination: (lensTypeId: string, coatingId: string, thicknessId: string) => LensPricingCombination | undefined;
+  addLensPriceCombination: (combination: Omit<LensPricingCombination, "id" | "combinationId" | "createdAt" | "updatedAt">) => Promise<string>;
+  updateLensPriceCombination: (combinationId: string, newPrice: number) => Promise<void>;
+  deleteLensPriceCombination: (combinationId: string) => Promise<void>;
+  
   // Contact lens methods
   addContactLens: (lens: Omit<ContactLensItem, "id">) => Promise<string>;
   updateContactLens: (id: string, lens: Partial<Omit<ContactLensItem, "id">>) => Promise<void>;
@@ -130,6 +149,7 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
   lensThicknesses: [],
   contactLenses: [],
   services: [],
+  lensPricingCombinations: [],
   isLoading: false,
   isInitialized: false,
   
@@ -200,6 +220,24 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
         price: Number(thickness.price),
         description: thickness.description,
         category: thickness.category as "distance-reading" | "progressive" | "bifocal"
+      }));
+      
+      // Fetch lens pricing combinations
+      const { data: lensPricingCombinationsData, error: lensPricingCombinationsError } = await supabase
+        .from('lens_pricing_combinations')
+        .select('*');
+      
+      if (lensPricingCombinationsError) throw lensPricingCombinationsError;
+      
+      const lensPricingCombinations = lensPricingCombinationsData.map(combo => ({
+        id: combo.id,
+        combinationId: combo.combination_id,
+        lensTypeId: combo.lens_type_id,
+        coatingId: combo.coating_id,
+        thicknessId: combo.thickness_id,
+        price: Number(combo.price),
+        createdAt: combo.created_at,
+        updatedAt: combo.updated_at
       }));
       
       // Fetch contact lenses
@@ -297,6 +335,13 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
         }, payload => {
           get().handleRealtimeServicesUpdate(payload);
         })
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'lens_pricing_combinations' 
+        }, payload => {
+          get().handleRealtimeLensPricingUpdate(payload);
+        })
         .subscribe();
       
       // Set the store data
@@ -307,6 +352,7 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
         lensThicknesses,
         contactLenses,
         services,
+        lensPricingCombinations,
         isLoading: false,
         isInitialized: true
       });
@@ -546,6 +592,50 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
     }
   },
   
+  handleRealtimeLensPricingUpdate: (payload: any) => {
+    if (payload.eventType === 'INSERT') {
+      const newCombination = {
+        id: payload.new.id,
+        combinationId: payload.new.combination_id,
+        lensTypeId: payload.new.lens_type_id,
+        coatingId: payload.new.coating_id,
+        thicknessId: payload.new.thickness_id,
+        price: Number(payload.new.price),
+        createdAt: payload.new.created_at,
+        updatedAt: payload.new.updated_at
+      };
+      
+      set(state => ({
+        lensPricingCombinations: [...state.lensPricingCombinations, newCombination]
+      }));
+    } 
+    else if (payload.eventType === 'UPDATE') {
+      set(state => ({
+        lensPricingCombinations: state.lensPricingCombinations.map(combo => 
+          combo.id === payload.new.id 
+            ? {
+                id: payload.new.id,
+                combinationId: payload.new.combination_id,
+                lensTypeId: payload.new.lens_type_id,
+                coatingId: payload.new.coating_id,
+                thicknessId: payload.new.thickness_id,
+                price: Number(payload.new.price),
+                createdAt: payload.new.created_at,
+                updatedAt: payload.new.updated_at
+              }
+            : combo
+        )
+      }));
+    }
+    else if (payload.eventType === 'DELETE') {
+      set(state => ({
+        lensPricingCombinations: state.lensPricingCombinations.filter(combo => 
+          combo.id !== payload.old.id
+        )
+      }));
+    }
+  },
+  
   // Default data functions
   getDefaultLensTypes: () => [
     { id: "lens1", name: "نظارات طبية للقراءة", type: "reading" },
@@ -618,7 +708,6 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
     }
   ],
   
-  // Function to migrate default data to Supabase if needed
   migrateDefaultData: async () => {
     try {
       // Migrate lens types
@@ -691,7 +780,6 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
     }
   },
   
-  // Frame methods
   addFrame: async (frame) => {
     const frameId = `FR${Date.now()}`;
     const createdAt = new Date().toISOString();
@@ -763,7 +851,6 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
     return get().frames.find(frame => frame.frameId === id);
   },
   
-  // Lens methods
   addLensType: async (lens) => {
     const id = `lens${Date.now()}`;
     
@@ -833,7 +920,6 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
     }
   },
   
-  // Coating methods
   addLensCoating: async (coating) => {
     const id = `coat${Date.now()}`;
     
@@ -909,7 +995,6 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
     return get().lensCoatings.filter(coating => coating.category === category);
   },
   
-  // Thickness methods
   addLensThickness: async (thickness) => {
     const id = `thick${Date.now()}`;
     
@@ -985,7 +1070,76 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
     return get().lensThicknesses.filter(thickness => thickness.category === category);
   },
   
-  // Contact lens methods
+  getLensPriceCombination: (lensTypeId: string, coatingId: string, thicknessId: string) => {
+    const combinationId = generateCombinationId(lensTypeId, coatingId, thicknessId);
+    return get().lensPricingCombinations.find(combo => combo.combinationId === combinationId);
+  },
+  
+  addLensPriceCombination: async (combination) => {
+    const combinationId = generateCombinationId(
+      combination.lensTypeId, 
+      combination.coatingId, 
+      combination.thicknessId
+    );
+    
+    try {
+      const { error } = await supabase.from('lens_pricing_combinations').insert({
+        combination_id: combinationId,
+        lens_type_id: combination.lensTypeId,
+        coating_id: combination.coatingId,
+        thickness_id: combination.thicknessId,
+        price: combination.price
+      });
+      
+      if (error) throw error;
+      
+      // The actual ID will come back via the realtime subscription
+      // We return the combinationId which can be used as a reference
+      return combinationId;
+    } catch (error) {
+      console.error('Error adding lens price combination:', error);
+      toast.error('Failed to add lens price combination: ' + handleSupabaseError(error));
+      throw error;
+    }
+  },
+  
+  updateLensPriceCombination: async (combinationId: string, newPrice: number) => {
+    try {
+      const { error } = await supabase
+        .from('lens_pricing_combinations')
+        .update({ 
+          price: newPrice,
+          updated_at: new Date().toISOString()
+        })
+        .eq('combination_id', combinationId);
+      
+      if (error) throw error;
+      
+      // The store will be updated via the realtime subscription
+    } catch (error) {
+      console.error('Error updating lens price combination:', error);
+      toast.error('Failed to update lens price combination: ' + handleSupabaseError(error));
+      throw error;
+    }
+  },
+  
+  deleteLensPriceCombination: async (combinationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('lens_pricing_combinations')
+        .delete()
+        .eq('combination_id', combinationId);
+      
+      if (error) throw error;
+      
+      // The store will be updated via the realtime subscription
+    } catch (error) {
+      console.error('Error deleting lens price combination:', error);
+      toast.error('Failed to delete lens price combination: ' + handleSupabaseError(error));
+      throw error;
+    }
+  },
+  
   addContactLens: async (lens) => {
     const id = `cl${Date.now()}`;
     
@@ -1077,7 +1231,6 @@ export const useInventoryStore = create<InventoryState>()((set, get) => ({
     );
   },
   
-  // Service methods
   addService: async (service) => {
     const id = `service${Date.now()}`;
     

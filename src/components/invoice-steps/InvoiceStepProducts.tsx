@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -23,6 +24,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const searchFrames = useInventoryStore((state) => state.searchFrames);
   const addFrame = useInventoryStore((state) => state.addFrame);
   const getServicesByCategory = useInventoryStore((state) => state.getServicesByCategory);
+  const getLensPriceCombination = useInventoryStore((state) => state.getLensPriceCombination);
   const { getValues, setValue, updateServicePrice } = useInvoiceForm();
   
   const [eyeExamService, setEyeExamService] = useState(() => {
@@ -150,26 +152,59 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setValue('framePrice', newFrame.price);
   };
   
-  const getLensPrice = (lens: LensType | null): number => {
-    return lens?.price !== undefined ? lens.price : 0;
+  // Use combination price when available
+  const getLensPrice = (): number => {
+    if (selectedLensType && selectedCoating && selectedThickness) {
+      const priceCombination = getLensPriceCombination(
+        selectedLensType.id, 
+        selectedCoating.id, 
+        selectedThickness.id
+      );
+      
+      if (priceCombination) {
+        return priceCombination.price;
+      }
+    }
+    
+    // Fallback to individual component prices
+    const lensPrice = selectedLensType?.price || 0;
+    const coatingPrice = selectedCoating?.price || 0;
+    const thicknessPrice = selectedThickness?.price || 0;
+    
+    return lensPrice + coatingPrice + thicknessPrice;
   };
   
   const handleLensTypeSelect = (lens: LensType | null) => {
     setSelectedLensType(lens);
     setValue('lensType', lens?.name || '');
-    setValue('lensPrice', getLensPrice(lens));
+    
+    // We'll update the lens price after all selections are made
+    if (!lens) {
+      setValue('lensPrice', 0);
+    }
   };
   
   const handleCoatingSelect = (coating: LensCoating | null) => {
     setSelectedCoating(coating);
     setValue('coating', coating?.name || '');
     setValue('coatingPrice', coating?.price || 0);
+    
+    // Update lens price when all three components are selected
+    if (selectedLensType && coating && selectedThickness) {
+      setValue('lensPrice', getLensPrice());
+    }
   };
   
   const handleThicknessSelect = (thickness: LensThickness | null) => {
     setSelectedThickness(thickness);
     setValue('thickness', thickness?.name || '');
     setValue('thicknessPrice', thickness?.price || 0);
+    
+    // Update lens price when all three components are selected
+    if (selectedLensType && selectedCoating && thickness) {
+      const finalLensPrice = getLensPrice();
+      setValue('lensPrice', finalLensPrice);
+    }
   };
   
   const handleSkipFrameChange = (skip: boolean) => {
