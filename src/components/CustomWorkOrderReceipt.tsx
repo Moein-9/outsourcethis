@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -101,6 +102,10 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const contactLensItems = invoice?.contactLensItems || workOrder?.contactLenses || [];
   const isContactLens = contactLensItems && contactLensItems.length > 0;
+  
+  // Try to get contact lens RX if this is a contact lens work order
+  const contactLensRx = patient?.contactLensRx || workOrder?.contactLensRx || null;
+  console.log("Contact lens RX data:", contactLensRx);
   
   const lensType = workOrder?.lensType || invoice?.lensType || "";
   const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
@@ -284,36 +289,91 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Prescription Details | تفاصيل الوصفة الطبية"}
         </div>
         
-        <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '15%' }}>Eye</th>
-              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>SPH</th>
-              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>CYL</th>
-              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>AXIS</th>
-              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>ADD</th>
-              <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>PD</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
-              <td className="p-1 border border-gray-300 text-center">{rx?.sphereOD || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx?.cylOD || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx?.axisOD || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx?.addOD || rx?.add || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx?.pdRight || rx?.pdOD || rx?.pd || "—"}</td>
-            </tr>
-            <tr>
-              <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
-              <td className="p-1 border border-gray-300 text-center">{rx?.sphereOS || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx?.cylOS || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx?.axisOS || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx?.addOS || rx?.add || "—"}</td>
-              <td className="p-1 border border-gray-300 text-center">{rx?.pdLeft || rx?.pdOS || rx?.pd || "—"}</td>
-            </tr>
-          </tbody>
-        </table>
+        {isContactLens ? (
+          // Contact lens RX table
+          <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '15%' }}>Eye</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>SPH</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>CYL</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>AXIS</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>BC</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>DIA</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
+                <td className="p-1 border border-gray-300 text-center">
+                  {contactLensRx?.rightEye?.sphere || rx?.sphereOD || "—"}
+                </td>
+                <td className="p-1 border border-gray-300 text-center">
+                  {contactLensRx?.rightEye?.cylinder || rx?.cylOD || "—"}
+                </td>
+                <td className="p-1 border border-gray-300 text-center">
+                  {contactLensRx?.rightEye?.axis || rx?.axisOD || "—"}
+                </td>
+                <td className="p-1 border border-gray-300 text-center">
+                  {contactLensRx?.rightEye?.bc || "—"}
+                </td>
+                <td className="p-1 border border-gray-300 text-center">
+                  {contactLensRx?.rightEye?.dia || "—"}
+                </td>
+              </tr>
+              <tr>
+                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
+                <td className="p-1 border border-gray-300 text-center">
+                  {contactLensRx?.leftEye?.sphere || rx?.sphereOS || "—"}
+                </td>
+                <td className="p-1 border border-gray-300 text-center">
+                  {contactLensRx?.leftEye?.cylinder || rx?.cylOS || "—"}
+                </td>
+                <td className="p-1 border border-gray-300 text-center">
+                  {contactLensRx?.leftEye?.axis || rx?.axisOS || "—"}
+                </td>
+                <td className="p-1 border border-gray-300 text-center">
+                  {contactLensRx?.leftEye?.bc || "—"}
+                </td>
+                <td className="p-1 border border-gray-300 text-center">
+                  {contactLensRx?.leftEye?.dia || "—"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        ) : (
+          // Regular glasses RX table
+          <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '15%' }}>Eye</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>SPH</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>CYL</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>AXIS</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>ADD</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>PD</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.sphereOD || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.cylOD || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.axisOD || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.addOD || rx?.add || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.pdRight || rx?.pdOD || rx?.pd || "—"}</td>
+              </tr>
+              <tr>
+                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.sphereOS || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.cylOS || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.axisOS || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.addOS || rx?.add || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.pdLeft || rx?.pdOS || rx?.pd || "—"}</td>
+              </tr>
+            </tbody>
+          </table>
+        )}
         
         <div className="mt-1 text-sm flex justify-between px-1 font-medium">
           <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
