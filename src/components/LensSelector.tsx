@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensType, LensCoating, LensThickness, useInventoryStore } from "@/store/inventoryStore";
@@ -56,28 +57,39 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(initialThickness);
   const [activeCategory, setActiveCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
   
-  // Enhanced check for ADD values that handles both object formats with improved debugging
+  // Improved check for ADD values that handles all edge cases
   const hasAddValues = React.useMemo(() => {
     if (!rx) return false;
     
+    // Helper function to check if a value is a valid ADD value
+    const isValidAddValue = (value?: string) => {
+      // If value is undefined or null or empty string, it's not valid
+      if (!value) return false;
+      
+      // If value is "0", "0.00", "-", "0-", or similar variations, it's not valid
+      if (value === '0' || value === '0.00' || value === '-' || value === '0-' || value === '.00' || value.trim() === '') return false;
+      
+      // If value is a number and it's greater than 0, it's valid
+      const numValue = parseFloat(value);
+      return !isNaN(numValue) && numValue > 0;
+    };
+    
     // Check for nested 'add' object format
     if (rx.add) {
-      return (rx.add.right && rx.add.right !== '0' && rx.add.right !== '0.00') || 
-             (rx.add.left && rx.add.left !== '0' && rx.add.left !== '0.00');
+      return isValidAddValue(rx.add.right) || isValidAddValue(rx.add.left);
     }
     
     // Check for flat format (addOD, addOS)
-    const hasAddOD = rx.addOD && rx.addOD !== '0' && rx.addOD !== '0.00' && rx.addOD !== '';
-    const hasAddOS = rx.addOS && rx.addOS !== '0' && rx.addOS !== '0.00' && rx.addOS !== '';
-    
-    return hasAddOD || hasAddOS;
+    return isValidAddValue(rx.addOD) || isValidAddValue(rx.addOS);
   }, [rx]);
 
-  // Debug logging for rx data
+  // Extended debug logging for rx data
   console.log('RX passed to LensSelector:', rx);
   console.log('Has ADD values:', hasAddValues);
   console.log('ADD values check - addOD:', rx?.addOD);
   console.log('ADD values check - addOS:', rx?.addOS);
+  console.log('ADD values check - add.right:', rx?.add?.right);
+  console.log('ADD values check - add.left:', rx?.add?.left);
   
   // Filter lens types based on ADD values
   const filteredLensTypes = React.useMemo(() => {

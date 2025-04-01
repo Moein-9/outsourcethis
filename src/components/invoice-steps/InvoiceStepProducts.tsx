@@ -25,13 +25,11 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const getServicesByCategory = useInventoryStore((state) => state.getServicesByCategory);
   const { getValues, setValue, updateServicePrice } = useInvoiceForm();
   
-  // Fetch eye exam service from the store
   const [eyeExamService, setEyeExamService] = useState(() => {
     const examServices = getServicesByCategory("exam");
     return examServices.length > 0 ? examServices[0] : null;
   });
   
-  // Refresh the eye exam service when the inventory changes
   useEffect(() => {
     const examServices = getServicesByCategory("exam");
     if (examServices.length > 0) {
@@ -92,6 +90,26 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     size: getValues<string>('frameSize') || "", 
     price: getValues<number>('framePrice') || 0 
   });
+  
+  const [rxFormatted, setRxFormatted] = useState<any>(null);
+  
+  useEffect(() => {
+    const rxData = getValues('rx');
+    if (rxData) {
+      const formattedRx = {
+        ...rxData,
+        addOD: rxData.addOD || '',
+        addOS: rxData.addOS || ''
+      };
+      
+      if (formattedRx.addOD === '-') formattedRx.addOD = '';
+      if (formattedRx.addOS === '-') formattedRx.addOS = '';
+      
+      setRxFormatted(formattedRx);
+      
+      console.log('Formatted RX for lens selection:', formattedRx);
+    }
+  }, [getValues]);
   
   const handleFrameSearch = () => {
     if (!frameSearch.trim()) {
@@ -340,7 +358,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
               initialLensType={selectedLensType}
               initialCoating={selectedCoating}
               initialThickness={selectedThickness}
-              rx={getValues('rx')}
+              rx={rxFormatted || getValues('rx')}
             />
           </div>
 

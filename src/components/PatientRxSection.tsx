@@ -9,11 +9,23 @@ interface PatientRxSectionProps {
 }
 
 export const PatientRxSection: React.FC<PatientRxSectionProps> = ({ patient }) => {
+  // Format the RX data to ensure no dash values in ADD fields
+  const formattedRx = React.useMemo(() => {
+    if (!patient.rx) return undefined;
+    
+    const rx = { ...patient.rx };
+    // Replace dashes with empty strings for ADD values
+    if (rx.addOD === '-') rx.addOD = '';
+    if (rx.addOS === '-') rx.addOS = '';
+    
+    return rx;
+  }, [patient.rx]);
+
   const handlePrintRx = (language?: 'en' | 'ar') => {
     printRxReceipt({
       patientName: patient.name,
       patientPhone: patient.phone,
-      rx: patient.rx,
+      rx: formattedRx || patient.rx,
       forcedLanguage: language
     });
   };
@@ -23,7 +35,7 @@ export const PatientRxSection: React.FC<PatientRxSectionProps> = ({ patient }) =
       patientId={patient.patientId}
       patientName={patient.name}
       patientPhone={patient.phone}
-      currentRx={patient.rx}
+      currentRx={formattedRx || patient.rx}
       rxHistory={patient.rxHistory}
       patientNotes={patient.patientNotes}
       onRxPrintRequest={handlePrintRx}

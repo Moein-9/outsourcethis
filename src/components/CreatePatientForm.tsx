@@ -42,8 +42,8 @@ export const CreatePatientForm: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Create empty RX data with empty strings instead of undefined
-      // This ensures that the ADD fields are always present for checking
+      // Create empty RX data with empty strings instead of undefined or dashes
+      // This ensures that the ADD fields are always present for checking and consistently empty
       const emptyRx = {
         sphereOD: '',
         cylOD: '',
