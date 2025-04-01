@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { usePatientStore, Patient, RxData, ContactLensRx } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
-import { printRxReceipt } from "./RxReceiptPrint";
+import { printRxReceipt, RxLanguageDialog } from "./RxReceiptPrint";
 import { PatientNotes } from "./PatientNotes";
 import { PatientSearchForm } from "./PatientSearchForm";
 import { PatientSearchResults } from "./PatientSearchResults";
@@ -21,7 +21,6 @@ import { toast } from "sonner";
 import { PlusCircle, Eye } from "lucide-react";
 import { AddRxDialog } from "./AddRxDialog";
 import { AddContactLensRxDialog } from "./AddContactLensRxDialog";
-import { RxLanguageDialog } from "./RxLanguageDialog";
 
 interface PatientWithMeta extends Patient {
   dateOfBirth: string;
