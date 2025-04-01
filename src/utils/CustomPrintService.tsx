@@ -3,7 +3,6 @@ import { toast } from '@/hooks/use-toast';
 import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 import { ReceiptInvoice } from '@/components/ReceiptInvoice';
-import { formatDate } from '@/lib/utils';
 
 export class CustomPrintService {
   static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
@@ -127,6 +126,17 @@ export class CustomPrintService {
               
               .card-content {
                 padding: 0.5rem !important;
+              }
+              
+              /* RTL direction */
+              .rtl {
+                direction: rtl !important;
+                font-family: 'Zain', sans-serif !important;
+              }
+              
+              .ltr {
+                direction: ltr !important;
+                font-family: 'Yrsa', serif !important;
               }
               
               /* Print-specific overrides */

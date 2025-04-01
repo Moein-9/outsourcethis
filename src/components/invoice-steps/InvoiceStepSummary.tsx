@@ -10,6 +10,7 @@ import {
   Contact, ScrollText, Glasses
 } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
+import { PrintOptionsDialog } from "@/components/PrintOptionsDialog";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -65,6 +66,30 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const hasInvoiceData = !!invoice.invoiceId;
   const isContactLens = invoice.invoiceType === "contacts";
   const isEyeExam = invoice.invoiceType === "exam";
+  
+  // Data for work order
+  const workOrder = {
+    id: invoice.workOrderId,
+    invoiceId: invoice.invoiceId,
+    date: new Date().toISOString(),
+    patientName: patient.name,
+    patientPhone: patient.phone,
+    lensType: invoice.lensType,
+    coating: invoice.coating,
+    frameBrand: invoice.frameBrand,
+    frameModel: invoice.frameModel,
+    frameColor: invoice.frameColor,
+    invoiceType: invoice.invoiceType,
+    contactLensItems: invoice.contactLensItems
+  };
+  
+  const handlePrintWorkOrder = () => {
+    CustomPrintService.printWorkOrder(workOrder, invoice, patient);
+  };
+  
+  const handlePrintInvoice = () => {
+    CustomPrintService.printInvoice(invoice);
+  };
   
   if (!hasInvoiceData) {
     return (
@@ -212,31 +237,36 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
         
         <div className="mt-6 space-y-4">
           {!isEyeExam && (
-            <Button 
-              variant="outline"
-              className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
-              onClick={() => {
-                setWorkOrderPrintOpen(true);
-              }}
+            <PrintOptionsDialog
+              invoice={invoice}
+              workOrder={workOrder}
+              patient={patient}
+              onPrintWorkOrder={handlePrintWorkOrder}
+              onPrintInvoice={handlePrintInvoice}
             >
-              <div className="flex items-center">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
-                  <ClipboardCheck className="w-6 h-6 text-blue-600" />
+              <Button 
+                variant="outline"
+                className="w-full justify-between group hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
+              >
+                <div className="flex items-center">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
+                    <ClipboardCheck className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium">{t('printWorkOrder')}</div>
+                    <div className="text-xs text-muted-foreground">{t('printWorkOrderDescription')}</div>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <div className="font-medium">{t('printWorkOrder')}</div>
-                  <div className="text-xs text-muted-foreground">{t('printWorkOrderDescription')}</div>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-            </Button>
+                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </PrintOptionsDialog>
           )}
           
           <Button 
             variant="outline"
             className="w-full justify-between group hover:border-green-500 hover:bg-green-50 hover:text-green-700 transition-all duration-300 hover:shadow-sm p-4 h-auto"
             onClick={() => {
-              setInvoicePrintOpen(true);
+              handlePrintInvoice();
             }}
           >
             <div className="flex items-center">
@@ -255,3 +285,4 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     </div>
   );
 };
+
