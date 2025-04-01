@@ -84,7 +84,6 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     id: invoice.workOrderId || "",
     patientId: patient.patientId || "",
     createdAt: currentTimestamp,
-    date: currentTimestamp,
     patientName: patient.name,
     patientPhone: patient.phone,
     lensType: lensTypeObject,
