@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -82,15 +83,14 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     ? { name: lensTypeValue, price: getValues<number>('lensPrice') || 0 }
     : lensTypeValue;
   
+  // Create WorkOrder object that matches the interface in src/store/invoiceStore.ts
   const workOrder: WorkOrder = {
     id: invoice.workOrderId || "",
     patientId: patient.patientId || "",
     createdAt: currentTimestamp,
     lensType: lensTypeObject,
     contactLenses: invoice.contactLensItems,
-    frameBrand: invoice.frameBrand,
-    frameModel: invoice.frameModel,
-    frameColor: invoice.frameColor,
+    // Only include properties that exist in the WorkOrder interface
     isPaid: invoice.isPaid,
     ...(invoice.discount ? { discount: invoice.discount } : {})
   };

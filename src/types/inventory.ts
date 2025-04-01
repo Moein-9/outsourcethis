@@ -40,24 +40,24 @@ export interface LensCoating {
 export interface WorkOrder {
   id: string;
   patientId: string;
-  workOrderId: string;  // Ensure workOrderId is required
+  workOrderId?: string;  // Made optional to match invoiceStore.WorkOrder
   invoiceId?: string;
   createdAt: string;
   
-  // Frame details
-  frameBrand: string;
-  frameModel: string;
-  frameColor: string;
+  // Frame details 
+  frameBrand?: string;
+  frameModel?: string;
+  frameColor?: string;
   frameSize?: string;
-  framePrice: number;
+  framePrice?: number;
   
   // Lens details - match the invoiceStore structure
-  lensType: string | { name: string; price: number };
-  lensPrice: number;
+  lensType?: string | { name: string; price: number };
+  lensPrice?: number;
   
   // Coating
-  coating: string;
-  coatingPrice: number;
+  coating?: string;
+  coatingPrice?: number;
   
   // Service information for eye exams
   serviceName?: string;
@@ -66,8 +66,8 @@ export interface WorkOrder {
   servicePrice?: number;
   
   // Pricing
-  discount: number;
-  total: number;
+  discount?: number;
+  total?: number;
   
   // Status tracking
   isPaid?: boolean;
