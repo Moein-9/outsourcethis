@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -266,6 +267,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         )}
       </div>
 
+      {/* Patient Information Section - Bilingual Friendly */}
       <div className="mb-2">
         <div className="text-center bg-black text-white py-1 mb-1 font-bold text-base rounded">
           {isRtl 
@@ -276,7 +278,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <div className="space-y-1 text-sm px-2"> 
           <div className="flex justify-between items-center">
             <span className="font-bold flex items-center gap-1">
-              <User className="h-4 w-4" /> {t("customer")}:
+              <User className="h-4 w-4" /> {isRtl ? "الاسم | Name" : "Name | الاسم"}:
             </span>
             <span className="font-medium">{patientName}</span>
           </div>
@@ -284,7 +286,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           {patientPhone && (
             <div className="flex justify-between items-center">
               <span className="font-bold flex items-center gap-1">
-                <Phone className="h-4 w-4" /> {t("phone")}:
+                <Phone className="h-4 w-4" /> {isRtl ? "الهاتف | Phone" : "Phone | الهاتف"}:
               </span>
               <span>{patientPhone}</span>
             </div>
@@ -292,13 +294,14 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           
           <div className="flex justify-between items-center">
             <span className="font-bold flex items-center gap-1">
-              <Calendar className="h-4 w-4" /> {t("date")}:
+              <Calendar className="h-4 w-4" /> {isRtl ? "التاريخ | Date" : "Date | التاريخ"}:
             </span>
             <span>{format(new Date(), 'dd/MM/yyyy')}</span>
           </div>
         </div>
       </div>
 
+      {/* Prescription Details Section - Font size increased in table */}
       <div className="mb-2">
         <div className="text-center bg-black text-white py-1 mb-1 font-bold text-base rounded">
           {isRtl 
@@ -307,95 +310,96 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         
         {isContactLens ? (
-          <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
+          <table className="w-full border-collapse" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
             <thead>
               <tr className="bg-gray-100">
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '15%' }}>Eye</th>
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>SPH</th>
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>CYL</th>
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>AXIS</th>
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>BC</th>
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>DIA</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '15%', fontSize: '13px' }}>Eye</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%', fontSize: '13px' }}>SPH</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%', fontSize: '13px' }}>CYL</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%', fontSize: '13px' }}>AXIS</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%', fontSize: '13px' }}>BC</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%', fontSize: '13px' }}>DIA</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
-                <td className="p-1 border border-gray-300 text-center">
+                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100" style={{ fontSize: '13px' }}>OD</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>
                   {contactLensRx?.rightEye?.sphere || "—"}
                 </td>
-                <td className="p-1 border border-gray-300 text-center">
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>
                   {contactLensRx?.rightEye?.cylinder || "—"}
                 </td>
-                <td className="p-1 border border-gray-300 text-center">
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>
                   {contactLensRx?.rightEye?.axis || "—"}
                 </td>
-                <td className="p-1 border border-gray-300 text-center">
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>
                   {contactLensRx?.rightEye?.bc || "—"}
                 </td>
-                <td className="p-1 border border-gray-300 text-center">
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>
                   {contactLensRx?.rightEye?.dia || "—"}
                 </td>
               </tr>
               <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
-                <td className="p-1 border border-gray-300 text-center">
+                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100" style={{ fontSize: '13px' }}>OS</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>
                   {contactLensRx?.leftEye?.sphere || "—"}
                 </td>
-                <td className="p-1 border border-gray-300 text-center">
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>
                   {contactLensRx?.leftEye?.cylinder || "—"}
                 </td>
-                <td className="p-1 border border-gray-300 text-center">
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>
                   {contactLensRx?.leftEye?.axis || "—"}
                 </td>
-                <td className="p-1 border border-gray-300 text-center">
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>
                   {contactLensRx?.leftEye?.bc || "—"}
                 </td>
-                <td className="p-1 border border-gray-300 text-center">
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>
                   {contactLensRx?.leftEye?.dia || "—"}
                 </td>
               </tr>
             </tbody>
           </table>
         ) : (
-          <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
+          <table className="w-full border-collapse" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
             <thead>
               <tr className="bg-gray-100">
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '15%' }}>Eye</th>
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>SPH</th>
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>CYL</th>
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>AXIS</th>
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>ADD</th>
-                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%' }}>PD</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '15%', fontSize: '13px' }}>Eye</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%', fontSize: '13px' }}>SPH</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%', fontSize: '13px' }}>CYL</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%', fontSize: '13px' }}>AXIS</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%', fontSize: '13px' }}>ADD</th>
+                <th className="p-1 border border-gray-300 text-center font-bold" style={{ width: '17%', fontSize: '13px' }}>PD</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.sphereOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.cylOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.axisOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.addOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.pdRight || "—"}</td>
+                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100" style={{ fontSize: '13px' }}>OD</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>{rx?.sphereOD || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>{rx?.cylOD || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>{rx?.axisOD || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>{rx?.addOD || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>{rx?.pdRight || "—"}</td>
               </tr>
               <tr>
-                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.sphereOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.cylOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.axisOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.addOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.pdLeft || "—"}</td>
+                <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100" style={{ fontSize: '13px' }}>OS</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>{rx?.sphereOS || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>{rx?.cylOS || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>{rx?.axisOS || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>{rx?.addOS || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center" style={{ fontSize: '13px' }}>{rx?.pdLeft || "—"}</td>
               </tr>
             </tbody>
           </table>
         )}
         
         <div className="mt-1 text-sm flex justify-between px-1 font-medium">
-          <span>OD = {isRtl ? "العين اليمنى" : "Right Eye"}</span>
-          <span>OS = {isRtl ? "العين اليسرى" : "Left Eye"}</span>
+          <span>OD = {isRtl ? "العين اليمنى (Right Eye)" : "Right Eye (العين اليمنى)"}</span>
+          <span>OS = {isRtl ? "العين اليسرى (Left Eye)" : "Left Eye (العين اليسرى)"}</span>
         </div>
       </div>
 
+      {/* Product Details Section - Bilingual Friendly */}
       <div className="mb-2">
         <div className="text-center bg-black text-white py-1 mb-1 font-bold text-base rounded">
           {isRtl 
@@ -408,34 +412,34 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             <Card className="mb-1 border border-gray-200 rounded-md">
               <CardContent className="p-1">
                 <div className="font-bold border-b border-gray-300 pb-0.5 mb-0.5">
-                  {isRtl ? "الإطار (Frame)" : "Frame (الإطار)"}
+                  {isRtl ? "الإطار | Frame" : "Frame | الإطار"}
                 </div>
                 <div className="px-1 space-y-0.5 text-sm">
                   <div className="flex justify-between">
-                    <span className="font-semibold">{isRtl ? "الماركة" : "Brand"}:</span>
+                    <span className="font-semibold">{isRtl ? "الماركة | Brand" : "Brand | الماركة"}:</span>
                     <span>{frameData.brand}</span>
                   </div>
                   {frameData.model && (
                     <div className="flex justify-between">
-                      <span className="font-semibold">{isRtl ? "الموديل" : "Model"}:</span>
+                      <span className="font-semibold">{isRtl ? "الموديل | Model" : "Model | الموديل"}:</span>
                       <span>{frameData.model}</span>
                     </div>
                   )}
                   {frameData.color && (
                     <div className="flex justify-between">
-                      <span className="font-semibold">{isRtl ? "اللون" : "Color"}:</span>
+                      <span className="font-semibold">{isRtl ? "اللون | Color" : "Color | اللون"}:</span>
                       <span>{frameData.color}</span>
                     </div>
                   )}
                   {frameData.size && (
                     <div className="flex justify-between">
-                      <span className="font-semibold">{isRtl ? "المقاس" : "Size"}:</span>
+                      <span className="font-semibold">{isRtl ? "المقاس | Size" : "Size | المقاس"}:</span>
                       <span>{frameData.size}</span>
                     </div>
                   )}
                   {frameData.price > 0 && (
                     <div className="flex justify-between">
-                      <span className="font-semibold">{isRtl ? "السعر" : "Price"}:</span>
+                      <span className="font-semibold">{isRtl ? "السعر | Price" : "Price | السعر"}:</span>
                       <span className="font-bold">{frameData.price.toFixed(3)} KWD</span>
                     </div>
                   )}
@@ -448,34 +452,34 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             <Card className="mb-1 border border-gray-200 rounded-md">
               <CardContent className="p-1">
                 <div className="font-bold border-b border-gray-300 pb-0.5 mb-0.5">
-                  {isRtl ? "العدسات اللاصقة (Contact Lenses)" : "Contact Lenses (العدسات اللاصقة)"}
+                  {isRtl ? "العدسات اللاصقة | Contact Lenses" : "Contact Lenses | العدسات اللاصقة"}
                 </div>
                 <div className="px-1 space-y-1 text-xs">
                   {contactLensItems.map((lens, idx) => (
                     <div key={idx} className={idx !== 0 ? "border-t border-dashed border-gray-200 pt-0.5 mt-0.5" : ""}>
                       <div className="flex justify-between">
-                        <span className="font-semibold">{isRtl ? "النوع" : "Type"}:</span>
+                        <span className="font-semibold">{isRtl ? "النوع | Type" : "Type | النوع"}:</span>
                         <span>{lens.brand} {lens.type}</span>
                       </div>
                       {lens.color && (
                         <div className="flex justify-between">
-                          <span className="font-semibold">{isRtl ? "اللون" : "Color"}:</span>
+                          <span className="font-semibold">{isRtl ? "اللون | Color" : "Color | اللون"}:</span>
                           <span>{lens.color}</span>
                         </div>
                       )}
                       <div className="flex justify-between">
-                        <span className="font-semibold">{isRtl ? "الكمية" : "Quantity"}:</span>
+                        <span className="font-semibold">{isRtl ? "الكمية | Quantity" : "Quantity | الكمية"}:</span>
                         <span>{lens.qty || 1}</span>
                       </div>
                       {lens.price > 0 && (
                         <div className="flex justify-between">
-                          <span className="font-semibold">{isRtl ? "السعر الإفرادي" : "Unit Price"}:</span>
+                          <span className="font-semibold">{isRtl ? "السعر الإفرادي | Unit Price" : "Unit Price | السعر الإفرادي"}:</span>
                           <span className="font-bold">{lens.price.toFixed(3)} KWD</span>
                         </div>
                       )}
                       {lens.price > 0 && lens.qty > 1 && (
                         <div className="flex justify-between">
-                          <span className="font-semibold">{isRtl ? "المجموع" : "Total"}:</span>
+                          <span className="font-semibold">{isRtl ? "المجموع | Total" : "Total | المجموع"}:</span>
                           <span className="font-bold">{(lens.price * (lens.qty || 1)).toFixed(3)} KWD</span>
                         </div>
                       )}
@@ -490,16 +494,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             <Card className="mb-1 border border-gray-200 rounded-md">
               <CardContent className="p-1">
                 <div className="font-bold border-b border-gray-300 pb-0.5 mb-0.5">
-                  {isRtl ? "العدسات (Lenses)" : "Lenses (العدسات)"}
+                  {isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}
                 </div>
                 <div className="px-1 space-y-0.5 text-sm">
                   <div className="flex justify-between">
-                    <span className="font-semibold">{isRtl ? "النوع" : "Type"}:</span>
+                    <span className="font-semibold">{isRtl ? "النوع | Type" : "Type | النوع"}:</span>
                     <span>{lensName}</span>
                   </div>
                   {lensPrice > 0 && (
                     <div className="flex justify-between">
-                      <span className="font-semibold">{isRtl ? "السعر" : "Price"}:</span>
+                      <span className="font-semibold">{isRtl ? "السعر | Price" : "Price | السعر"}:</span>
                       <span className="font-bold">{lensPrice.toFixed(3)} KWD</span>
                     </div>
                   )}
@@ -512,16 +516,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             <Card className="mb-1 border border-gray-200 rounded-md">
               <CardContent className="p-1">
                 <div className="font-bold border-b border-gray-300 pb-0.5 mb-0.5">
-                  {isRtl ? "الطلاء (Coating)" : "Coating (الطلاء)"}
+                  {isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}
                 </div>
                 <div className="px-1 space-y-0.5 text-sm">
                   <div className="flex justify-between">
-                    <span className="font-semibold">{isRtl ? "النوع" : "Type"}:</span>
+                    <span className="font-semibold">{isRtl ? "النوع | Type" : "Type | النوع"}:</span>
                     <span>{coatingName}</span>
                   </div>
                   {coatingPrice > 0 && (
                     <div className="flex justify-between">
-                      <span className="font-semibold">{isRtl ? "السعر" : "Price"}:</span>
+                      <span className="font-semibold">{isRtl ? "السعر | Price" : "Price | السعر"}:</span>
                       <span className="font-bold">{coatingPrice.toFixed(3)} KWD</span>
                     </div>
                   )}
@@ -532,6 +536,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
       </div>
 
+      {/* Payment Information Section - Bilingual Friendly */}
       <div className="mb-2">
         <div className="text-center bg-black text-white py-1 mb-1 font-bold text-base rounded">
           {isRtl 
@@ -543,24 +548,24 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
           <CardContent className="p-1">
             <div className="space-y-0.5 text-sm">
               <div className="flex justify-between">
-                <span className="font-bold">{t("subtotal")}:</span>
+                <span className="font-bold">{isRtl ? "المجموع الفرعي | Subtotal" : "Subtotal | المجموع الفرعي"}:</span>
                 <span className="font-semibold">{subtotal.toFixed(3)} KWD</span>
               </div>
               
               {discount > 0 && (
                 <div className="flex justify-between">
-                  <span className="font-bold">{t("discount")}:</span>
+                  <span className="font-bold">{isRtl ? "الخصم | Discount" : "Discount | الخصم"}:</span>
                   <span className="font-semibold">-{discount.toFixed(3)} KWD</span>
                 </div>
               )}
               
               <div className="flex justify-between border-b border-gray-200 pb-0.5">
-                <span className="font-bold">{t("total")}:</span>
+                <span className="font-bold">{isRtl ? "الإجمالي | Total" : "Total | الإجمالي"}:</span>
                 <span className="font-semibold">{total.toFixed(3)} KWD</span>
               </div>
               
               <div className="flex justify-between">
-                <span className="font-bold">{t("paid")}:</span>
+                <span className="font-bold">{isRtl ? "المدفوع | Paid" : "Paid | المدفوع"}:</span>
                 <span className="font-semibold">{amountPaid.toFixed(3)} KWD</span>
               </div>
               
@@ -568,22 +573,18 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                 <div className="mt-1 p-1 bg-green-100 rounded border border-green-300 text-center">
                   <div className="flex items-center justify-center gap-1 text-green-800 font-bold">
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>{isRtl ? "تم الدفع بالكامل" : "PAID IN FULL"}</span>
+                    <span>{isRtl ? "تم الدفع بالكامل | PAID IN FULL" : "PAID IN FULL | تم الدفع بالكامل"}</span>
                   </div>
-                  {!isRtl ? <div className="text-green-700 text-sm">تم الدفع بالكامل</div> : 
-                           <div className="text-green-700 text-sm">PAID IN FULL</div>}
                 </div>
               ) : (
                 <div className="mt-1">
                   <div className="p-1 bg-[#FFDEE2] rounded border border-red-300 text-center" style={{ backgroundColor: '#FFDEE2' }}>
                     <div className="font-bold text-red-700 text-sm">
-                      {isRtl ? "المبلغ المتبقي" : "REMAINING AMOUNT"}
+                      {isRtl ? "المبلغ المتبقي | REMAINING AMOUNT" : "REMAINING AMOUNT | المبلغ المتبقي"}
                     </div>
                     <div className="text-base font-bold text-red-800">
                       {remaining.toFixed(3)} KWD
                     </div>
-                    {!isRtl ? <div className="text-red-700 text-sm">المبلغ المتبقي</div> : 
-                             <div className="text-red-700 text-sm">REMAINING AMOUNT</div>}
                   </div>
                 </div>
               )}
@@ -602,14 +603,14 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         <div className="flex gap-1 text-sm mb-0.5">
           <div className="border border-gray-300 rounded p-0.5 flex-1">
             <div className="font-bold mb-0.5 text-center border-b border-gray-300 pb-0.5 text-sm">
-              {isRtl ? "Technician Signature | توقيع الفني" : "Technician Signature | توقيع الفني"}
+              {isRtl ? "توقيع الفني | Technician" : "Technician | توقيع الفني"}
             </div>
             <div className="h-14 border-dashed border border-gray-200 rounded-sm bg-yellow-50"></div>
           </div>
           
           <div className="border border-gray-300 rounded p-0.5 flex-1">
             <div className="font-bold mb-0.5 text-center border-b border-gray-300 pb-0.5 text-sm">
-              {isRtl ? "Manager Signature | توقيع المدير" : "Manager Signature | توقيع المدير"}
+              {isRtl ? "توقيع المدير | Manager" : "Manager | توقيع المدير"}
             </div>
             <div className="h-14 border-dashed border border-gray-200 rounded-sm bg-yellow-50"></div>
           </div>
@@ -719,7 +720,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             table th, table td {
               padding: 3px !important;
               text-align: center !important;
-              font-size: 12px !important;
+              font-size: 13px !important;
               border: 1px solid #d1d5db !important;
             }
             
