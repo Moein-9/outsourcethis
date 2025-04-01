@@ -280,7 +280,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">الكل</SelectItem>
-                        {brands.map((brand) => (
+                        {brands.map(brand => (
                           <SelectItem key={brand} value={brand}>{brand}</SelectItem>
                         ))}
                       </SelectContent>
@@ -295,7 +295,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">الكل</SelectItem>
-                        {types.map((type) => (
+                        {types.map(type => (
                           <SelectItem key={type} value={type}>{type}</SelectItem>
                         ))}
                       </SelectContent>

@@ -297,7 +297,7 @@ export const ContactLensInventory: React.FC = () => {
                         <SelectValue placeholder="اختر الماركة" />
                       </SelectTrigger>
                       <SelectContent>
-                        {COMMON_BRANDS.map((brand) => (
+                        {COMMON_BRANDS.map(brand => (
                           <SelectItem key={brand} value={brand}>{brand}</SelectItem>
                         ))}
                         <SelectItem value="other">أخرى</SelectItem>
@@ -320,7 +320,7 @@ export const ContactLensInventory: React.FC = () => {
                         <SelectValue placeholder="اختر النوع" />
                       </SelectTrigger>
                       <SelectContent>
-                        {COMMON_TYPES.map((type) => (
+                        {COMMON_TYPES.map(type => (
                           <SelectItem key={type} value={type}>{type}</SelectItem>
                         ))}
                         <SelectItem value="other">أخرى</SelectItem>
