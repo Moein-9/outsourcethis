@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
 import { usePatientStore } from "@/store/patientStore";
@@ -80,6 +81,11 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
         setValue('contactLensRx', patient.contactLensRx);
         setShowMissingRxWarning(false);
       } else {
+        // Initialize with default values if no contact lens RX exists
+        setValue('contactLensRx', {
+          rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
+          leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
+        });
         setShowMissingRxWarning(true);
       }
     }
@@ -289,12 +295,13 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                   {rxVisible && invoiceType === "contacts" && (
                     <div className="mt-3">
                       <ContactLensForm 
-                        rxData={getValues<any>('contactLensRx') || {
+                        rxData={getValues('contactLensRx') || {
                           rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
                           leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
                         }}
                         onChange={handleContactLensRxChange}
                         showMissingRxWarning={showMissingRxWarning}
+                        readOnly={false}
                       />
                     </div>
                   )}
@@ -330,6 +337,7 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                   leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
                 }}
                 onChange={handleContactLensRxChange}
+                readOnly={false}
               />
             )}
           </div>

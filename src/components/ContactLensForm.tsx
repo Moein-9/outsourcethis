@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Eye, AlertTriangle } from "lucide-react";
@@ -8,12 +9,14 @@ interface ContactLensFormProps {
   rxData: ContactLensRx;
   onChange: (data: ContactLensRx) => void;
   showMissingRxWarning?: boolean;
+  readOnly?: boolean;
 }
 
 export const ContactLensForm: React.FC<ContactLensFormProps> = ({ 
   rxData, 
   onChange,
-  showMissingRxWarning = false
+  showMissingRxWarning = false,
+  readOnly = false
 }) => {
   const { language, t } = useLanguageStore();
   const [validationErrors, setValidationErrors] = useState({
@@ -22,6 +25,8 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   });
 
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
+    if (readOnly) return;
+    
     const updatedRx = {
       ...rxData,
       rightEye: {
@@ -37,6 +42,8 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   };
 
   const handleLeftEyeChange = (field: keyof ContactLensRx["leftEye"], value: string) => {
+    if (readOnly) return;
+    
     const updatedRx = {
       ...rxData,
       leftEye: {
@@ -127,6 +134,39 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     dia: "w-[16%]"
   };
 
+  // Render form field (select or read-only display)
+  const renderFormField = (
+    eye: 'rightEye' | 'leftEye',
+    field: keyof ContactLensRx['rightEye'],
+    value: string,
+    options: React.ReactNode[],
+    errorCondition = false,
+    handleChange: (field: keyof ContactLensRx['rightEye' | 'leftEye'], value: string) => void,
+    bgClass = 'bg-white',
+    borderClass = ''
+  ) => {
+    if (readOnly) {
+      return (
+        <div className={`p-1 min-h-[30px] flex items-center ${bgClass} rounded-md text-center justify-center text-sm font-medium`}>
+          {value === '-' ? '—' : value}
+        </div>
+      );
+    }
+    
+    return (
+      <select 
+        className={`w-full p-1 rounded-md border ${
+          errorCondition ? 'border-red-500 bg-red-50' : `${borderClass} ${bgClass}`
+        } text-sm`}
+        value={value}
+        onChange={(e) => handleChange(field, e.target.value)}
+        disabled={readOnly}
+      >
+        {options}
+      </select>
+    );
+  };
+
   return (
     <div className={`rounded-lg border p-4 bg-white shadow-sm ${dirClass}`}>
       <div className={`flex items-center justify-between mb-4 pb-2 border-b ${textAlignClass}`}>
@@ -166,58 +206,77 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                 </div>
               </td>
               <td className={`border border-purple-100 p-2 ${columnWidths.sphere}`}>
-                <select 
-                  className="w-full p-1 rounded-md border border-purple-200 bg-white text-sm"
-                  value={rxData.rightEye.sphere}
-                  onChange={(e) => handleRightEyeChange("sphere", e.target.value)}
-                >
-                  {generateSphereOptions()}
-                </select>
+                {renderFormField(
+                  'rightEye',
+                  'sphere',
+                  rxData.rightEye.sphere,
+                  generateSphereOptions(),
+                  false,
+                  handleRightEyeChange,
+                  'bg-white',
+                  'border-purple-200'
+                )}
               </td>
               <td className={`border border-purple-100 p-2 ${columnWidths.cylinder}`}>
-                <select 
-                  className="w-full p-1 rounded-md border border-purple-200 bg-white text-sm"
-                  value={rxData.rightEye.cylinder}
-                  onChange={(e) => handleRightEyeChange("cylinder", e.target.value)}
-                >
-                  {generateCylinderOptions()}
-                </select>
+                {renderFormField(
+                  'rightEye',
+                  'cylinder',
+                  rxData.rightEye.cylinder,
+                  generateCylinderOptions(),
+                  false,
+                  handleRightEyeChange,
+                  'bg-white',
+                  'border-purple-200'
+                )}
               </td>
               <td className={`border border-purple-100 p-2 ${columnWidths.axis}`}>
-                <select 
-                  className={`w-full p-1 rounded-md border ${validationErrors.rightEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-purple-200 bg-white'} text-sm`}
-                  value={rxData.rightEye.axis}
-                  onChange={(e) => handleRightEyeChange("axis", e.target.value)}
-                >
-                  {generateAxisOptions()}
-                </select>
+                {renderFormField(
+                  'rightEye',
+                  'axis',
+                  rxData.rightEye.axis,
+                  generateAxisOptions(),
+                  validationErrors.rightEye.cylinderAxisError,
+                  handleRightEyeChange,
+                  validationErrors.rightEye.cylinderAxisError ? 'bg-red-50' : 'bg-white',
+                  'border-purple-200'
+                )}
               </td>
               <td className={`border border-purple-100 p-2 ${columnWidths.bc}`}>
-                <select 
-                  className="w-full p-1 rounded-md border border-purple-200 bg-white text-sm"
-                  value={rxData.rightEye.bc}
-                  onChange={(e) => handleRightEyeChange("bc", e.target.value)}
-                >
-                  <option value="-">-</option>
-                  <option value="8.4">8.4</option>
-                  <option value="8.5">8.5</option>
-                  <option value="8.6">8.6</option>
-                  <option value="8.7">8.7</option>
-                  <option value="8.8">8.8</option>
-                </select>
+                {renderFormField(
+                  'rightEye',
+                  'bc',
+                  rxData.rightEye.bc,
+                  [
+                    <option key="bc-none" value="-">-</option>,
+                    <option key="bc-8.4" value="8.4">8.4</option>,
+                    <option key="bc-8.5" value="8.5">8.5</option>,
+                    <option key="bc-8.6" value="8.6">8.6</option>,
+                    <option key="bc-8.7" value="8.7">8.7</option>,
+                    <option key="bc-8.8" value="8.8">8.8</option>
+                  ],
+                  false,
+                  handleRightEyeChange,
+                  'bg-white',
+                  'border-purple-200'
+                )}
               </td>
               <td className={`border border-purple-100 p-2 ${columnWidths.dia}`}>
-                <select
-                  className="w-full p-1 rounded-md border border-purple-200 bg-white text-sm"
-                  value={rxData.rightEye.dia}
-                  onChange={(e) => handleRightEyeChange("dia", e.target.value)}
-                >
-                  <option value="-">-</option>
-                  <option value="14.0">14.0</option>
-                  <option value="14.2">14.2</option>
-                  <option value="14.4">14.4</option>
-                  <option value="14.5">14.5</option>
-                </select>
+                {renderFormField(
+                  'rightEye',
+                  'dia',
+                  rxData.rightEye.dia,
+                  [
+                    <option key="dia-none" value="-">-</option>,
+                    <option key="dia-14.0" value="14.0">14.0</option>,
+                    <option key="dia-14.2" value="14.2">14.2</option>,
+                    <option key="dia-14.4" value="14.4">14.4</option>,
+                    <option key="dia-14.5" value="14.5">14.5</option>
+                  ],
+                  false,
+                  handleRightEyeChange,
+                  'bg-white',
+                  'border-purple-200'
+                )}
               </td>
             </tr>
             
@@ -229,64 +288,83 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                 </div>
               </td>
               <td className={`border border-indigo-100 p-2 ${columnWidths.sphere}`}>
-                <select 
-                  className="w-full p-1 rounded-md border border-indigo-200 bg-white text-sm"
-                  value={rxData.leftEye.sphere}
-                  onChange={(e) => handleLeftEyeChange("sphere", e.target.value)}
-                >
-                  {generateSphereOptions()}
-                </select>
+                {renderFormField(
+                  'leftEye',
+                  'sphere',
+                  rxData.leftEye.sphere,
+                  generateSphereOptions(),
+                  false,
+                  handleLeftEyeChange,
+                  'bg-white',
+                  'border-indigo-200'
+                )}
               </td>
               <td className={`border border-indigo-100 p-2 ${columnWidths.cylinder}`}>
-                <select 
-                  className="w-full p-1 rounded-md border border-indigo-200 bg-white text-sm"
-                  value={rxData.leftEye.cylinder}
-                  onChange={(e) => handleLeftEyeChange("cylinder", e.target.value)}
-                >
-                  {generateCylinderOptions()}
-                </select>
+                {renderFormField(
+                  'leftEye',
+                  'cylinder',
+                  rxData.leftEye.cylinder,
+                  generateCylinderOptions(),
+                  false,
+                  handleLeftEyeChange,
+                  'bg-white',
+                  'border-indigo-200'
+                )}
               </td>
               <td className={`border border-indigo-100 p-2 ${columnWidths.axis}`}>
-                <select 
-                  className={`w-full p-1 rounded-md border ${validationErrors.leftEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-indigo-200 bg-white'} text-sm`}
-                  value={rxData.leftEye.axis}
-                  onChange={(e) => handleLeftEyeChange("axis", e.target.value)}
-                >
-                  {generateAxisOptions()}
-                </select>
+                {renderFormField(
+                  'leftEye',
+                  'axis',
+                  rxData.leftEye.axis,
+                  generateAxisOptions(),
+                  validationErrors.leftEye.cylinderAxisError,
+                  handleLeftEyeChange,
+                  validationErrors.leftEye.cylinderAxisError ? 'bg-red-50' : 'bg-white',
+                  'border-indigo-200'
+                )}
               </td>
               <td className={`border border-indigo-100 p-2 ${columnWidths.bc}`}>
-                <select 
-                  className="w-full p-1 rounded-md border border-indigo-200 bg-white text-sm"
-                  value={rxData.leftEye.bc}
-                  onChange={(e) => handleLeftEyeChange("bc", e.target.value)}
-                >
-                  <option value="-">-</option>
-                  <option value="8.4">8.4</option>
-                  <option value="8.5">8.5</option>
-                  <option value="8.6">8.6</option>
-                  <option value="8.7">8.7</option>
-                  <option value="8.8">8.8</option>
-                </select>
+                {renderFormField(
+                  'leftEye',
+                  'bc',
+                  rxData.leftEye.bc,
+                  [
+                    <option key="bc-none" value="-">-</option>,
+                    <option key="bc-8.4" value="8.4">8.4</option>,
+                    <option key="bc-8.5" value="8.5">8.5</option>,
+                    <option key="bc-8.6" value="8.6">8.6</option>,
+                    <option key="bc-8.7" value="8.7">8.7</option>,
+                    <option key="bc-8.8" value="8.8">8.8</option>
+                  ],
+                  false,
+                  handleLeftEyeChange,
+                  'bg-white',
+                  'border-indigo-200'
+                )}
               </td>
               <td className={`border border-indigo-100 p-2 ${columnWidths.dia}`}>
-                <select
-                  className="w-full p-1 rounded-md border border-indigo-200 bg-white text-sm"
-                  value={rxData.leftEye.dia}
-                  onChange={(e) => handleLeftEyeChange("dia", e.target.value)}
-                >
-                  <option value="-">-</option>
-                  <option value="14.0">14.0</option>
-                  <option value="14.2">14.2</option>
-                  <option value="14.4">14.4</option>
-                  <option value="14.5">14.5</option>
-                </select>
+                {renderFormField(
+                  'leftEye',
+                  'dia',
+                  rxData.leftEye.dia,
+                  [
+                    <option key="dia-none" value="-">-</option>,
+                    <option key="dia-14.0" value="14.0">14.0</option>,
+                    <option key="dia-14.2" value="14.2">14.2</option>,
+                    <option key="dia-14.4" value="14.4">14.4</option>,
+                    <option key="dia-14.5" value="14.5">14.5</option>
+                  ],
+                  false,
+                  handleLeftEyeChange,
+                  'bg-white',
+                  'border-indigo-200'
+                )}
               </td>
             </tr>
           </tbody>
         </table>
         
-        {hasValidationErrors && (
+        {hasValidationErrors && !readOnly && (
           <div className="p-3 mt-2 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
             <p className="text-red-700 text-sm">
