@@ -128,6 +128,12 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
       cylinderAxisError: hasError
     });
   };
+
+  // Get current contact lens RX data
+  const currentContactLensRx = getValues<any>('contactLensRx') || {
+    rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
+    leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
+  };
   
   return (
     <div className="space-y-6 animate-fade-in">
@@ -295,13 +301,10 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                   {rxVisible && invoiceType === "contacts" && (
                     <div className="mt-3">
                       <ContactLensForm 
-                        rxData={getValues<any>('contactLensRx') || {
-                          rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
-                          leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
-                        }}
+                        rxData={currentContactLensRx}
                         onChange={handleContactLensRxChange}
                         showMissingRxWarning={showMissingRxWarning}
-                        readOnly={true}  // Show read-only view for patient's rx
+                        readOnly={true}  // Ensure it's in read-only mode when viewing patient data
                       />
                     </div>
                   )}
@@ -332,12 +335,9 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
             
             {invoiceType === "contacts" && (
               <ContactLensForm 
-                rxData={getValues<any>('contactLensRx') || {
-                  rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
-                  leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
-                }}
+                rxData={currentContactLensRx}
                 onChange={handleContactLensRxChange}
-                readOnly={false}  // Allow editing in this case - no existing patient
+                readOnly={false}  // Allow editing when no patient is selected
               />
             )}
           </div>

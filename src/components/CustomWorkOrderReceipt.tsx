@@ -102,10 +102,14 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const contactLensItems = invoice?.contactLensItems || workOrder?.contactLenses || [];
   const isContactLens = contactLensItems && contactLensItems.length > 0;
   
-  // Try to get contact lens RX from multiple possible sources
   const contactLensRx = invoice?.contactLensRx || workOrder?.contactLensRx || patient?.contactLensRx || null;
-  console.log("Contact lens RX data:", contactLensRx);
-  
+  console.log("Contact lens RX data sources:", {
+    invoiceRx: invoice?.contactLensRx,
+    workOrderRx: workOrder?.contactLensRx,
+    patientRx: patient?.contactLensRx,
+    finalRx: contactLensRx
+  });
+
   const lensType = workOrder?.lensType || invoice?.lensType || "";
   const lensPrice = workOrder?.lensPrice || invoice?.lensPrice || 0;
   
@@ -289,7 +293,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
         </div>
         
         {isContactLens ? (
-          // Contact lens RX table
           <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
             <thead>
               <tr className="bg-gray-100">
@@ -341,7 +344,6 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             </tbody>
           </table>
         ) : (
-          // Regular glasses RX table
           <table className="w-full border-collapse text-sm" dir="ltr" style={{ direction: 'ltr', tableLayout: 'fixed' }}>
             <thead>
               <tr className="bg-gray-100">

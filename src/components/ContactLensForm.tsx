@@ -145,9 +145,10 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     bgClass = 'bg-white',
     borderClass = ''
   ) => {
+    // For read-only mode, show a clear display of the value
     if (readOnly) {
       return (
-        <div className={`p-1 min-h-[30px] flex items-center ${bgClass} rounded-md text-center justify-center text-sm font-medium`}>
+        <div className={`p-1 min-h-[30px] flex items-center justify-center ${bgClass} rounded-md text-center text-sm font-medium border ${borderClass || 'border-gray-200'}`}>
           {value === '-' ? '—' : value}
         </div>
       );
