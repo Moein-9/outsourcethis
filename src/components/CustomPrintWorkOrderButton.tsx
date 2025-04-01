@@ -39,8 +39,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
   // Check if this is a contact lens work order
   const isContactLens = workOrder?.contactLenses?.length > 0 || 
                         invoice?.contactLensItems?.length > 0 ||
-                        workOrder?.isContactLens === true ||
-                        invoice?.invoiceType === 'contacts';
+                        workOrder?.isContactLens === true;
                           
   console.log("CustomPrintWorkOrderButton - Is contact lens order:", isContactLens);
   
