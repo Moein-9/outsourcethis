@@ -295,13 +295,13 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                   {rxVisible && invoiceType === "contacts" && (
                     <div className="mt-3">
                       <ContactLensForm 
-                        rxData={getValues('contactLensRx') || {
+                        rxData={getValues<any>('contactLensRx') || {
                           rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
                           leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
                         }}
                         onChange={handleContactLensRxChange}
                         showMissingRxWarning={showMissingRxWarning}
-                        readOnly={false}
+                        readOnly={true}  // Show read-only view for patient's rx
                       />
                     </div>
                   )}
@@ -337,7 +337,7 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                   leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
                 }}
                 onChange={handleContactLensRxChange}
-                readOnly={false}
+                readOnly={false}  // Allow editing in this case - no existing patient
               />
             )}
           </div>

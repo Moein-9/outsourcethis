@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -103,8 +102,8 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   const contactLensItems = invoice?.contactLensItems || workOrder?.contactLenses || [];
   const isContactLens = contactLensItems && contactLensItems.length > 0;
   
-  // Try to get contact lens RX if this is a contact lens work order
-  const contactLensRx = patient?.contactLensRx || workOrder?.contactLensRx || null;
+  // Try to get contact lens RX from multiple possible sources
+  const contactLensRx = invoice?.contactLensRx || workOrder?.contactLensRx || patient?.contactLensRx || null;
   console.log("Contact lens RX data:", contactLensRx);
   
   const lensType = workOrder?.lensType || invoice?.lensType || "";
@@ -306,13 +305,13 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <tr>
                 <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OD</td>
                 <td className="p-1 border border-gray-300 text-center">
-                  {contactLensRx?.rightEye?.sphere || rx?.sphereOD || "—"}
+                  {contactLensRx?.rightEye?.sphere || "—"}
                 </td>
                 <td className="p-1 border border-gray-300 text-center">
-                  {contactLensRx?.rightEye?.cylinder || rx?.cylOD || "—"}
+                  {contactLensRx?.rightEye?.cylinder || "—"}
                 </td>
                 <td className="p-1 border border-gray-300 text-center">
-                  {contactLensRx?.rightEye?.axis || rx?.axisOD || "—"}
+                  {contactLensRx?.rightEye?.axis || "—"}
                 </td>
                 <td className="p-1 border border-gray-300 text-center">
                   {contactLensRx?.rightEye?.bc || "—"}
@@ -324,13 +323,13 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
               <tr>
                 <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
                 <td className="p-1 border border-gray-300 text-center">
-                  {contactLensRx?.leftEye?.sphere || rx?.sphereOS || "—"}
+                  {contactLensRx?.leftEye?.sphere || "—"}
                 </td>
                 <td className="p-1 border border-gray-300 text-center">
-                  {contactLensRx?.leftEye?.cylinder || rx?.cylOS || "—"}
+                  {contactLensRx?.leftEye?.cylinder || "—"}
                 </td>
                 <td className="p-1 border border-gray-300 text-center">
-                  {contactLensRx?.leftEye?.axis || rx?.axisOS || "—"}
+                  {contactLensRx?.leftEye?.axis || "—"}
                 </td>
                 <td className="p-1 border border-gray-300 text-center">
                   {contactLensRx?.leftEye?.bc || "—"}
@@ -360,16 +359,16 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                 <td className="p-1 border border-gray-300 text-center">{rx?.sphereOD || "—"}</td>
                 <td className="p-1 border border-gray-300 text-center">{rx?.cylOD || "—"}</td>
                 <td className="p-1 border border-gray-300 text-center">{rx?.axisOD || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.addOD || rx?.add || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.pdRight || rx?.pdOD || rx?.pd || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.addOD || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.pdRight || "—"}</td>
               </tr>
               <tr>
                 <td className="p-1 border border-gray-300 font-bold text-center bg-gray-100">OS</td>
                 <td className="p-1 border border-gray-300 text-center">{rx?.sphereOS || "—"}</td>
                 <td className="p-1 border border-gray-300 text-center">{rx?.cylOS || "—"}</td>
                 <td className="p-1 border border-gray-300 text-center">{rx?.axisOS || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.addOS || rx?.add || "—"}</td>
-                <td className="p-1 border border-gray-300 text-center">{rx?.pdLeft || rx?.pdOS || rx?.pd || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.addOS || "—"}</td>
+                <td className="p-1 border border-gray-300 text-center">{rx?.pdLeft || "—"}</td>
               </tr>
             </tbody>
           </table>
