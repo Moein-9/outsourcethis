@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore, ContactLensRx } from "@/store/patientStore";
-// Change toast import to sonner
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +63,7 @@ export const CreateClient: React.FC = () => {
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [savedPatient, setSavedPatient] = useState<any>(null);
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
+  const [printPrescriptionType, setPrintPrescriptionType] = useState<"glasses" | "contactLenses">("glasses");
   
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
@@ -205,7 +204,6 @@ export const CreateClient: React.FC = () => {
     e.preventDefault();
     
     if (!name.trim()) {
-      // Use sonner toast instead of shadcn/ui toast
       toast.error(t("requiredField"), {
         description: t("error")
       });
@@ -213,7 +211,6 @@ export const CreateClient: React.FC = () => {
     }
     
     if (activeTab === "glasses" && hasValidationErrors) {
-      // Use sonner toast instead of shadcn/ui toast
       toast.error(t("axisValidationError") || "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.", {
         description: t("error")
       });
@@ -225,65 +222,47 @@ export const CreateClient: React.FC = () => {
       dob = `${dobDay}/${dobMonth}/${dobYear}`;
     }
     
-    let patientData;
+    const glassesRx = {
+      sphereOD: sphOD || "-",
+      cylOD: cylOD || "-",
+      axisOD: axisOD || "-",
+      addOD: addOD || "-",
+      sphereOS: sphOS || "-",
+      cylOS: cylOS || "-",
+      axisOS: axisOS || "-",
+      addOS: addOS || "-",
+      pdRight: pdRight || "-",
+      pdLeft: pdLeft || "-",
+      createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
+    };
+
+    const contactLensRxData = {
+      ...contactLensRx,
+      createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
+    };
     
-    if (activeTab === "glasses") {
-      patientData = {
-        name,
-        phone,
-        dob,
-        notes: notes.trim(),
-        patientNotes: [],
-        rx: {
-          sphereOD: sphOD,
-          cylOD,
-          axisOD,
-          addOD,
-          sphereOS: sphOS,
-          cylOS,
-          axisOS,
-          addOS,
-          pdRight,
-          pdLeft,
-          createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
-        }
-      };
-    } else {
-      patientData = {
-        name,
-        phone,
-        dob,
-        notes: notes.trim(),
-        patientNotes: [],
-        rx: {
-          sphereOD: "-",
-          cylOD: "-",
-          axisOD: "-",
-          addOD: "-",
-          sphereOS: "-",
-          cylOS: "-",
-          axisOS: "-",
-          addOS: "-",
-          pdRight: "-",
-          pdLeft: "-"
-        },
-        contactLensRx: {
-          ...contactLensRx,
-          createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
-        }
-      };
-    }
+    const patientData = {
+      name,
+      phone,
+      dob,
+      notes: notes.trim(),
+      patientNotes: [],
+      rx: glassesRx,
+      contactLensRx: contactLensRxData
+    };
     
-    // Save patient and set state
-    const newPatient = addPatient(patientData);
-    setSavedPatient(patientData);
+    const newPatientId = addPatient(patientData);
+    setSavedPatient({
+      ...patientData,
+      patientId: newPatientId
+    });
     
-    // Use sonner toast instead of shadcn/ui toast
+    setPrintPrescriptionType(activeTab);
+    
     toast.success(t("successMessage"), {
       description: t("success")
     });
     
-    // Show print dialog
     setShowPrintDialog(true);
     
     resetForm();
@@ -320,9 +299,8 @@ export const CreateClient: React.FC = () => {
 
   const handlePrintRx = () => {
     if (savedPatient) {
-      if (activeTab === "glasses") {
+      if (printPrescriptionType === "glasses") {
         setShowPrintDialog(false);
-        // Show language dialog after closing print dialog
         setTimeout(() => {
           setShowLanguageDialog(true);
         }, 100);
