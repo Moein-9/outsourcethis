@@ -84,6 +84,249 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_contact_lens_items: {
+        Row: {
+          bc: string
+          brand: string
+          color: string | null
+          diameter: string
+          id: string
+          invoice_id: string
+          lens_id: string
+          power: string
+          price: number
+          qty: number
+          type: string
+        }
+        Insert: {
+          bc: string
+          brand: string
+          color?: string | null
+          diameter: string
+          id?: string
+          invoice_id: string
+          lens_id: string
+          power: string
+          price: number
+          qty?: number
+          type: string
+        }
+        Update: {
+          bc?: string
+          brand?: string
+          color?: string | null
+          diameter?: string
+          id?: string
+          invoice_id?: string
+          lens_id?: string
+          power?: string
+          price?: number
+          qty?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_contact_lens_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_edit_history: {
+        Row: {
+          id: string
+          invoice_id: string
+          notes: string
+          timestamp: string
+        }
+        Insert: {
+          id?: string
+          invoice_id: string
+          notes: string
+          timestamp?: string
+        }
+        Update: {
+          id?: string
+          invoice_id?: string
+          notes?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_edit_history_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_payments: {
+        Row: {
+          amount: number
+          auth_number: string | null
+          date: string
+          id: string
+          invoice_id: string
+          method: string
+        }
+        Insert: {
+          amount: number
+          auth_number?: string | null
+          date?: string
+          id?: string
+          invoice_id: string
+          method: string
+        }
+        Update: {
+          amount?: number
+          auth_number?: string | null
+          date?: string
+          id?: string
+          invoice_id?: string
+          method?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          archive_reason: string | null
+          archived_at: string | null
+          auth_number: string | null
+          coating: string | null
+          coating_price: number
+          created_at: string
+          deposit: number
+          discount: number
+          frame_brand: string | null
+          frame_color: string | null
+          frame_model: string | null
+          frame_price: number
+          frame_size: string | null
+          id: string
+          invoice_id: string
+          invoice_type: string | null
+          is_archived: boolean | null
+          is_paid: boolean | null
+          is_picked_up: boolean | null
+          is_refunded: boolean | null
+          last_edited_at: string | null
+          lens_price: number
+          lens_type: string | null
+          patient_id: string | null
+          patient_name: string
+          patient_phone: string
+          payment_method: string
+          picked_up_at: string | null
+          refund_amount: number | null
+          refund_date: string | null
+          refund_id: string | null
+          refund_method: string | null
+          refund_reason: string | null
+          remaining: number
+          service_description: string | null
+          service_id: string | null
+          service_name: string | null
+          service_price: number | null
+          total: number
+          work_order_id: string | null
+        }
+        Insert: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          auth_number?: string | null
+          coating?: string | null
+          coating_price?: number
+          created_at?: string
+          deposit?: number
+          discount?: number
+          frame_brand?: string | null
+          frame_color?: string | null
+          frame_model?: string | null
+          frame_price?: number
+          frame_size?: string | null
+          id?: string
+          invoice_id: string
+          invoice_type?: string | null
+          is_archived?: boolean | null
+          is_paid?: boolean | null
+          is_picked_up?: boolean | null
+          is_refunded?: boolean | null
+          last_edited_at?: string | null
+          lens_price?: number
+          lens_type?: string | null
+          patient_id?: string | null
+          patient_name: string
+          patient_phone: string
+          payment_method: string
+          picked_up_at?: string | null
+          refund_amount?: number | null
+          refund_date?: string | null
+          refund_id?: string | null
+          refund_method?: string | null
+          refund_reason?: string | null
+          remaining: number
+          service_description?: string | null
+          service_id?: string | null
+          service_name?: string | null
+          service_price?: number | null
+          total: number
+          work_order_id?: string | null
+        }
+        Update: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          auth_number?: string | null
+          coating?: string | null
+          coating_price?: number
+          created_at?: string
+          deposit?: number
+          discount?: number
+          frame_brand?: string | null
+          frame_color?: string | null
+          frame_model?: string | null
+          frame_price?: number
+          frame_size?: string | null
+          id?: string
+          invoice_id?: string
+          invoice_type?: string | null
+          is_archived?: boolean | null
+          is_paid?: boolean | null
+          is_picked_up?: boolean | null
+          is_refunded?: boolean | null
+          last_edited_at?: string | null
+          lens_price?: number
+          lens_type?: string | null
+          patient_id?: string | null
+          patient_name?: string
+          patient_phone?: string
+          payment_method?: string
+          picked_up_at?: string | null
+          refund_amount?: number | null
+          refund_date?: string | null
+          refund_id?: string | null
+          refund_method?: string | null
+          refund_reason?: string | null
+          remaining?: number
+          service_description?: string | null
+          service_id?: string | null
+          service_name?: string | null
+          service_price?: number | null
+          total?: number
+          work_order_id?: string | null
+        }
+        Relationships: []
+      }
       lens_coatings: {
         Row: {
           category: string
@@ -162,6 +405,213 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_contact_lens_rx: {
+        Row: {
+          created_at: string
+          id: string
+          left_eye_axis: string | null
+          left_eye_bc: string | null
+          left_eye_cylinder: string | null
+          left_eye_dia: string | null
+          left_eye_sphere: string | null
+          patient_id: string
+          right_eye_axis: string | null
+          right_eye_bc: string | null
+          right_eye_cylinder: string | null
+          right_eye_dia: string | null
+          right_eye_sphere: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          left_eye_axis?: string | null
+          left_eye_bc?: string | null
+          left_eye_cylinder?: string | null
+          left_eye_dia?: string | null
+          left_eye_sphere?: string | null
+          patient_id: string
+          right_eye_axis?: string | null
+          right_eye_bc?: string | null
+          right_eye_cylinder?: string | null
+          right_eye_dia?: string | null
+          right_eye_sphere?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          left_eye_axis?: string | null
+          left_eye_bc?: string | null
+          left_eye_cylinder?: string | null
+          left_eye_dia?: string | null
+          left_eye_sphere?: string | null
+          patient_id?: string
+          right_eye_axis?: string | null
+          right_eye_bc?: string | null
+          right_eye_cylinder?: string | null
+          right_eye_dia?: string | null
+          right_eye_sphere?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_contact_lens_rx_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_notes: {
+        Row: {
+          created_at: string
+          id: string
+          note_id: string
+          patient_id: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note_id: string
+          patient_id: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note_id?: string
+          patient_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_notes_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_rx: {
+        Row: {
+          add_od: string | null
+          add_os: string | null
+          axis_od: string | null
+          axis_os: string | null
+          created_at: string
+          cyl_od: string | null
+          cyl_os: string | null
+          id: string
+          patient_id: string
+          pd_left: string | null
+          pd_right: string | null
+          sphere_od: string | null
+          sphere_os: string | null
+        }
+        Insert: {
+          add_od?: string | null
+          add_os?: string | null
+          axis_od?: string | null
+          axis_os?: string | null
+          created_at?: string
+          cyl_od?: string | null
+          cyl_os?: string | null
+          id?: string
+          patient_id: string
+          pd_left?: string | null
+          pd_right?: string | null
+          sphere_od?: string | null
+          sphere_os?: string | null
+        }
+        Update: {
+          add_od?: string | null
+          add_os?: string | null
+          axis_od?: string | null
+          axis_os?: string | null
+          created_at?: string
+          cyl_od?: string | null
+          cyl_os?: string | null
+          id?: string
+          patient_id?: string
+          pd_left?: string | null
+          pd_right?: string | null
+          sphere_od?: string | null
+          sphere_os?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_rx_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          created_at: string
+          dob: string
+          id: string
+          name: string
+          notes: string | null
+          patient_id: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string
+          dob: string
+          id?: string
+          name: string
+          notes?: string | null
+          patient_id: string
+          phone: string
+        }
+        Update: {
+          created_at?: string
+          dob?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          patient_id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      refunds: {
+        Row: {
+          amount: number
+          associated_invoice_id: string
+          date: string
+          id: string
+          method: string
+          reason: string
+          refund_id: string
+          staff_notes: string | null
+        }
+        Insert: {
+          amount: number
+          associated_invoice_id: string
+          date?: string
+          id?: string
+          method: string
+          reason: string
+          refund_id: string
+          staff_notes?: string | null
+        }
+        Update: {
+          amount?: number
+          associated_invoice_id?: string
+          date?: string
+          id?: string
+          method?: string
+          reason?: string
+          refund_id?: string
+          staff_notes?: string | null
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category: string
@@ -186,6 +636,86 @@ export type Database = {
           name?: string
           price?: number
           service_id?: string
+        }
+        Relationships: []
+      }
+      work_order_edit_history: {
+        Row: {
+          id: string
+          notes: string
+          timestamp: string
+          work_order_id: string
+        }
+        Insert: {
+          id?: string
+          notes: string
+          timestamp?: string
+          work_order_id: string
+        }
+        Update: {
+          id?: string
+          notes?: string
+          timestamp?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_edit_history_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_orders: {
+        Row: {
+          archive_reason: string | null
+          archived_at: string | null
+          created_at: string
+          id: string
+          is_archived: boolean | null
+          is_picked_up: boolean | null
+          is_refunded: boolean | null
+          last_edited_at: string | null
+          lens_type_name: string | null
+          lens_type_price: number | null
+          patient_id: string
+          picked_up_at: string | null
+          refund_date: string | null
+          work_order_id: string
+        }
+        Insert: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          created_at?: string
+          id?: string
+          is_archived?: boolean | null
+          is_picked_up?: boolean | null
+          is_refunded?: boolean | null
+          last_edited_at?: string | null
+          lens_type_name?: string | null
+          lens_type_price?: number | null
+          patient_id: string
+          picked_up_at?: string | null
+          refund_date?: string | null
+          work_order_id: string
+        }
+        Update: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          created_at?: string
+          id?: string
+          is_archived?: boolean | null
+          is_picked_up?: boolean | null
+          is_refunded?: boolean | null
+          last_edited_at?: string | null
+          lens_type_name?: string | null
+          lens_type_price?: number | null
+          patient_id?: string
+          picked_up_at?: string | null
+          refund_date?: string | null
+          work_order_id?: string
         }
         Relationships: []
       }

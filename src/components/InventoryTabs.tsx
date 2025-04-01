@@ -7,7 +7,7 @@ import { LensThicknessManager } from "@/components/LensThicknessManager";
 import { FrameInventory } from "@/components/FrameInventory";
 import { ContactLensInventory } from "@/components/ContactLensInventory";
 import { ServiceManager } from "@/components/ServiceManager";
-import { Glasses, Contact, Layers, Paintbrush, Ruler, Wrench } from "lucide-react";
+import { Glasses, Contact, Layers, Paintbrush, Ruler, Wrench, Database } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInventoryStore } from "@/store/inventoryStore";
 
@@ -66,6 +66,13 @@ export const InventoryTabs: React.FC = () => {
         >
           <Wrench className="w-4 h-4" />
           <span>{t('services')}</span>
+        </TabsTrigger>
+        <TabsTrigger 
+          value="database" 
+          className="data-[state=active]:from-blue-700 data-[state=active]:to-blue-800 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
+        >
+          <Database className="w-4 h-4" />
+          <span>{t('database')}</span>
         </TabsTrigger>
       </TabsList>
       
@@ -133,6 +140,46 @@ export const InventoryTabs: React.FC = () => {
                 {t('serviceManagement')}
               </h3>
               <ServiceManager />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="database" className="mt-0">
+            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+              <h3 className={`text-lg font-bold mb-4 text-blue-900 flex items-center gap-2 ${textAlignClass}`}>
+                <Database className="w-5 h-5" />
+                {t('databaseManagement')}
+              </h3>
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 mb-4">
+                <p className="text-sm text-blue-800">
+                  {t('databaseInfo')}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <button onClick={() => window.open("https://supabase.com/dashboard/project/loxnmnlszxxjrpkfybwm/editor", "_blank")} 
+                  className="p-4 bg-white hover:bg-blue-50 border border-blue-200 rounded-lg shadow-sm transition-colors flex flex-col items-center text-center gap-3">
+                  <Database className="w-8 h-8 text-blue-700" />
+                  <div>
+                    <h4 className="font-medium text-blue-900">{t('sqlEditor')}</h4>
+                    <p className="text-sm text-gray-500 mt-1">{t('runCustomQueries')}</p>
+                  </div>
+                </button>
+                <button onClick={() => window.open("https://supabase.com/dashboard/project/loxnmnlszxxjrpkfybwm/editor/table", "_blank")} 
+                  className="p-4 bg-white hover:bg-blue-50 border border-blue-200 rounded-lg shadow-sm transition-colors flex flex-col items-center text-center gap-3">
+                  <Layers className="w-8 h-8 text-blue-700" />
+                  <div>
+                    <h4 className="font-medium text-blue-900">{t('tableEditor')}</h4>
+                    <p className="text-sm text-gray-500 mt-1">{t('viewModifyTables')}</p>
+                  </div>
+                </button>
+                <button onClick={() => window.open("https://supabase.com/dashboard/project/loxnmnlszxxjrpkfybwm", "_blank")} 
+                  className="p-4 bg-white hover:bg-blue-50 border border-blue-200 rounded-lg shadow-sm transition-colors flex flex-col items-center text-center gap-3">
+                  <Wrench className="w-8 h-8 text-blue-700" />
+                  <div>
+                    <h4 className="font-medium text-blue-900">{t('supaDashboard')}</h4>
+                    <p className="text-sm text-gray-500 mt-1">{t('manageDatabaseSettings')}</p>
+                  </div>
+                </button>
+              </div>
             </div>
           </TabsContent>
         </>
