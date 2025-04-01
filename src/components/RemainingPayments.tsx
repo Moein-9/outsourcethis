@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore, Payment, Invoice } from "@/store/invoiceStore";
 import { Button } from "@/components/ui/button";
@@ -254,7 +255,7 @@ export const RemainingPayments: React.FC = () => {
         <Card className="border-dashed border-2 border-muted">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <CheckCircle2 className="h-12 w-12 text-muted mb-4" />
-            <h3 className="text-xl font-medium mb-2">{language === 'ar' ? "جميع ا��فواتير مدفوعة بالكامل" : "All invoices fully paid"}</h3>
+            <h3 className="text-xl font-medium mb-2">{language === 'ar' ? "جميع الفواتير مدفوعة بالكامل" : "All invoices fully paid"}</h3>
             <p className="text-muted-foreground text-center max-w-md">
               {language === 'ar' 
                 ? "لا توجد فواتير تحتاج إلى دفعات متبقية. جميع المعاملات مكتملة."
