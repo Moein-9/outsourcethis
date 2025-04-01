@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { usePatientStore, ContactLensRx } from "@/store/patientStore";
 import { toast } from "@/components/ui/use-toast";
@@ -62,8 +61,8 @@ export const CreateClient: React.FC = () => {
   });
   
   const [showPrintDialog, setShowPrintDialog] = useState(false);
-  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [savedPatient, setSavedPatient] = useState<any>(null);
+  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
@@ -318,15 +317,10 @@ export const CreateClient: React.FC = () => {
   };
 
   const handlePrintRx = () => {
-    console.log("handlePrintRx called, savedPatient:", savedPatient);
     if (savedPatient) {
       if (activeTab === "glasses") {
         setShowPrintDialog(false);
-        // Need to add a delay to ensure the dialog is fully closed
-        // before opening the next one
-        setTimeout(() => {
-          setShowLanguageDialog(true); 
-        }, 100);
+        setShowLanguageDialog(true);
       } else {
         setShowPrintDialog(false);
       }
@@ -334,7 +328,6 @@ export const CreateClient: React.FC = () => {
   };
 
   const printRxWithLanguage = (printLanguage: 'en' | 'ar') => {
-    console.log("Printing RX with language:", printLanguage, "for patient:", savedPatient?.name);
     if (savedPatient) {
       printRxReceipt({
         patientName: savedPatient.name,
@@ -680,7 +673,6 @@ export const CreateClient: React.FC = () => {
         {t("saveAndContinue")}
       </Button>
 
-      {/* The first dialog for asking if user wants to print */}
       <AlertDialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
         <AlertDialogContent className={dirClass}>
           <AlertDialogHeader>
@@ -704,7 +696,6 @@ export const CreateClient: React.FC = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* The second dialog for language selection */}
       <AlertDialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
         <AlertDialogContent className={dirClass}>
           <AlertDialogHeader>

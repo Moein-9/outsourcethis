@@ -10,8 +10,7 @@ import {
   Contact, ScrollText, Glasses
 } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
-import { WorkOrder } from "@/types/inventory";
-import { Invoice } from "@/store/invoiceStore";
+import { WorkOrder, Invoice } from "@/store/invoiceStore";
 import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
 
 interface InvoiceStepSummaryProps {
@@ -84,7 +83,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     ? { name: lensTypeValue, price: getValues<number>('lensPrice') || 0 }
     : lensTypeValue;
   
-  // Create WorkOrder object that matches the interface in src/types/inventory.ts
+  // Create WorkOrder object that matches the interface in src/store/invoiceStore.ts
   const workOrder: WorkOrder = {
     id: invoice.workOrderId || "",
     patientId: patient.patientId || "",
@@ -92,7 +91,8 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     lensType: lensTypeObject,
     contactLenses: invoice.contactLensItems,
     // Only include properties that exist in the WorkOrder interface
-    discount: invoice.discount
+    isPaid: invoice.isPaid,
+    ...(invoice.discount ? { discount: invoice.discount } : {})
   };
   
   const handlePrintInvoice = () => {
