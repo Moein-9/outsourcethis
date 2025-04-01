@@ -9,9 +9,10 @@ import {
   Contact, ScrollText, Glasses
 } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
-import { WorkOrder, Invoice } from "@/store/invoiceStore";
+import { Invoice } from "@/store/invoiceStore";
 import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
 import { toast } from "sonner";
+import { WorkOrder as InventoryWorkOrder } from "@/types/inventory";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -83,7 +84,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     ? { name: lensTypeValue, price: getValues<number>('lensPrice') || 0 }
     : lensTypeValue;
   
-  const workOrder: WorkOrder = {
+  const workOrder = {
     id: invoice.workOrderId || "",
     patientId: patient.patientId || "",
     createdAt: currentTimestamp,
@@ -91,7 +92,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     contactLenses: invoice.contactLensItems,
     isPaid: invoice.isPaid,
     ...(invoice.discount ? { discount: invoice.discount } : {})
-  };
+  } as any;
   
   const handlePrintInvoice = () => {
     CustomPrintService.printInvoice(invoice);
@@ -165,7 +166,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
                 <span className="font-bold text-lg text-primary">{invoice.workOrderId}</span>
               </div>
             )}
-
+            
             <div className={`flex justify-between items-center pb-3 border-b border-dashed border-green-200 ${textAlignClass}`}>
               <div className="flex items-center">
                 {isEyeExam ? (
