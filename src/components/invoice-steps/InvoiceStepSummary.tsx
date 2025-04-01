@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import { CustomPrintService } from "@/utils/CustomPrintService";
 import { WorkOrder } from "@/types/inventory";
 import { Invoice } from "@/store/invoiceStore";
 import { CustomPrintWorkOrderButton } from "@/components/CustomPrintWorkOrderButton";
+import { RxLanguageDialog } from "@/components/RxReceiptPrint";
 
 interface InvoiceStepSummaryProps {
   setInvoicePrintOpen: (open: boolean) => void;
@@ -27,6 +27,8 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
 }) => {
   const { t, language } = useLanguageStore();
   const { getValues, calculateTotal, calculateRemaining } = useInvoiceForm();
+  
+  const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   const directionClass = language === 'ar' ? 'rtl' : 'ltr';
@@ -99,6 +101,12 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   
   const handlePrintInvoice = () => {
     CustomPrintService.printInvoice(invoice);
+  };
+
+  const handleLanguageSelection = (selectedLanguage: 'en' | 'ar') => {
+    setIsLanguageDialogOpen(false);
+    // Here we would print the prescription with the selected language
+    // This component likely needs the RX data as well to print the prescription
   };
   
   if (!hasInvoiceData) {
@@ -287,6 +295,13 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Language selection dialog */}
+      <RxLanguageDialog
+        isOpen={isLanguageDialogOpen}
+        onClose={() => setIsLanguageDialogOpen(false)}
+        onSelect={handleLanguageSelection}
+      />
     </div>
   );
 };
