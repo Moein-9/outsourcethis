@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore, ContactLensRx } from "@/store/patientStore";
 import { toast } from "@/components/ui/use-toast";
@@ -61,8 +62,8 @@ export const CreateClient: React.FC = () => {
   });
   
   const [showPrintDialog, setShowPrintDialog] = useState(false);
-  const [savedPatient, setSavedPatient] = useState<any>(null);
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
+  const [savedPatient, setSavedPatient] = useState<any>(null);
   
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
@@ -317,10 +318,15 @@ export const CreateClient: React.FC = () => {
   };
 
   const handlePrintRx = () => {
+    console.log("handlePrintRx called, savedPatient:", savedPatient);
     if (savedPatient) {
       if (activeTab === "glasses") {
         setShowPrintDialog(false);
-        setShowLanguageDialog(true);
+        // Need to add a delay to ensure the dialog is fully closed
+        // before opening the next one
+        setTimeout(() => {
+          setShowLanguageDialog(true); 
+        }, 100);
       } else {
         setShowPrintDialog(false);
       }
@@ -328,6 +334,7 @@ export const CreateClient: React.FC = () => {
   };
 
   const printRxWithLanguage = (printLanguage: 'en' | 'ar') => {
+    console.log("Printing RX with language:", printLanguage, "for patient:", savedPatient?.name);
     if (savedPatient) {
       printRxReceipt({
         patientName: savedPatient.name,
@@ -337,6 +344,131 @@ export const CreateClient: React.FC = () => {
       });
     }
     setShowLanguageDialog(false);
+  };
+
+  // Generate options functions
+  const validateCylinderAxis = (eye: 'rightEye' | 'leftEye', cylinder: string, axis: string) => {
+    const hasCylinder = cylinder !== "";
+    const hasAxis = axis !== "";
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [eye]: {
+        ...prev[eye],
+        cylinderAxisError: hasCylinder && !hasAxis
+      }
+    }));
+  };
+  
+  const generateSphOptions = () => {
+    const options = [];
+    for (let i = 10; i >= -10; i -= 0.25) {
+      const formatted = i >= 0 ? `+${i.toFixed(2)}` : i.toFixed(2);
+      options.push(
+        <option key={`sph-${i}`} value={formatted}>
+          {formatted}
+        </option>
+      );
+    }
+    return options;
+  };
+  
+  const generateCylOptions = () => {
+    const options = [];
+    for (let i = 0; i >= -6; i -= 0.25) {
+      const formatted = i.toFixed(2);
+      options.push(
+        <option key={`cyl-${i}`} value={formatted}>
+          {formatted}
+        </option>
+      );
+    }
+    return options;
+  };
+  
+  const generateAxisOptions = () => {
+    const options = [];
+    for (let i = 0; i <= 180; i += 1) {
+      options.push(
+        <option key={`axis-${i}`} value={i}>
+          {i}
+        </option>
+      );
+    }
+    return options;
+  };
+  
+  const generateAddOptions = () => {
+    const options = [];
+    for (let i = 0; i <= 3; i += 0.25) {
+      const formatted = i === 0 ? "0.00" : `+${i.toFixed(2)}`;
+      options.push(
+        <option key={`add-${i}`} value={formatted}>
+          {formatted}
+        </option>
+      );
+    }
+    return options;
+  };
+  
+  const generatePdOptions = () => {
+    const options = [];
+    for (let i = 40; i <= 80; i += 1) {
+      options.push(
+        <option key={`pd-${i}`} value={i}>
+          {i}
+        </option>
+      );
+    }
+    return options;
+  };
+  
+  const generateDayOptions = () => {
+    const options = [];
+    for (let i = 1; i <= 31; i++) {
+      options.push(
+        <option key={`day-${i}`} value={i}>
+          {i}
+        </option>
+      );
+    }
+    return options;
+  };
+  
+  const generateMonthOptions = () => {
+    const months = [
+      { value: 1, text: t("january") },
+      { value: 2, text: t("february") },
+      { value: 3, text: t("march") },
+      { value: 4, text: t("april") },
+      { value: 5, text: t("may") },
+      { value: 6, text: t("june") },
+      { value: 7, text: t("july") },
+      { value: 8, text: t("august") },
+      { value: 9, text: t("september") },
+      { value: 10, text: t("october") },
+      { value: 11, text: t("november") },
+      { value: 12, text: t("december") }
+    ];
+    
+    return months.map(month => (
+      <option key={`month-${month.value}`} value={month.value}>
+        {month.text}
+      </option>
+    ));
+  };
+  
+  const generateYearOptions = () => {
+    const options = [];
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear; i >= 1930; i--) {
+      options.push(
+        <option key={`year-${i}`} value={i}>
+          {i}
+        </option>
+      );
+    }
+    return options;
   };
 
   return (
@@ -673,6 +805,7 @@ export const CreateClient: React.FC = () => {
         {t("saveAndContinue")}
       </Button>
 
+      {/* The first dialog for asking if user wants to print */}
       <AlertDialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
         <AlertDialogContent className={dirClass}>
           <AlertDialogHeader>
@@ -696,6 +829,7 @@ export const CreateClient: React.FC = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* The second dialog for language selection */}
       <AlertDialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
         <AlertDialogContent className={dirClass}>
           <AlertDialogHeader>
