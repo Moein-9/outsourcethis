@@ -41,43 +41,58 @@ export function useToast() {
   }
 }
 
-// Create a standalone toast function that doesn't rely on hooks directly
-// This allows it to be imported and used anywhere without violating React hooks rules
-export const toast = {
-  // Regular toast
-  message: (props: Omit<ToasterToast, "id">) => {
-    // When used outside components, this will add the toast via event
-    if (typeof window !== 'undefined') {
-      const event = new CustomEvent('toast-message', { detail: props });
-      window.dispatchEvent(event);
-      return "";
-    }
-    return "";
-  },
-  
-  // Helper methods
-  error: (message: string) => {
-    if (typeof window !== 'undefined') {
-      const props = { 
-        title: "Error", 
-        description: message, 
-        variant: "destructive" as const 
-      };
-      const event = new CustomEvent('toast-message', { detail: props });
-      window.dispatchEvent(event);
-    }
-    return "";
-  },
-  
-  success: (message: string) => {
-    if (typeof window !== 'undefined') {
-      const props = { 
-        title: "Success", 
-        description: message 
-      };
-      const event = new CustomEvent('toast-message', { detail: props });
-      window.dispatchEvent(event);
-    }
-    return "";
+// Create a standalone toast function that doesn't rely on hooks
+// Define the toast function type to include both direct call and methods
+type ToastFunction = {
+  (props: Omit<ToasterToast, "id">): string;
+  message: (props: Omit<ToasterToast, "id">) => string;
+  error: (message: string) => string;
+  success: (message: string) => string;
+}
+
+// Implement the toast function
+export const toast: ToastFunction = function(props: Omit<ToasterToast, "id">): string {
+  // Direct call sends event with the provided props
+  if (typeof window !== 'undefined') {
+    const event = new CustomEvent('toast-message', { detail: props });
+    window.dispatchEvent(event);
   }
+  return "";
+} as ToastFunction;
+
+// Add specific methods
+toast.message = (props: Omit<ToasterToast, "id">): string => {
+  if (typeof window !== 'undefined') {
+    const event = new CustomEvent('toast-message', { detail: props });
+    window.dispatchEvent(event);
+  }
+  return "";
 };
+
+toast.error = (message: string): string => {
+  if (typeof window !== 'undefined') {
+    const props = { 
+      title: "Error", 
+      description: message, 
+      variant: "destructive" as const 
+    };
+    const event = new CustomEvent('toast-message', { detail: props });
+    window.dispatchEvent(event);
+  }
+  return "";
+};
+
+toast.success = (message: string): string => {
+  if (typeof window !== 'undefined') {
+    const props = { 
+      title: "Success", 
+      description: message 
+    };
+    const event = new CustomEvent('toast-message', { detail: props });
+    window.dispatchEvent(event);
+  }
+  return "";
+};
+
+// Export ToastProvider from here too
+export { ToastProvider } from "@/components/ui/toast-provider";

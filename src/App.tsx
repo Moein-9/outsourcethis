@@ -10,7 +10,7 @@ import ReportPage from "./pages/ReportPage";
 import PrintLabelPage from "./pages/PrintLabelPage";
 import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 import { LensDebugger } from "./components/LensDebugger";
-import { ToastProvider } from "@/components/ui/toast-provider";
+import { ToastProvider } from "@/hooks/use-toast";
 
 const queryClient = new QueryClient();
 
