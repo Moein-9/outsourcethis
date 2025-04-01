@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useLanguageStore } from "@/store/languageStore";
 import { RxLanguageDialog } from "./RxReceiptPrint";
 import { Textarea } from "./ui/textarea";

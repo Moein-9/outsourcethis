@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { usePatientStore, ContactLensRx } from "@/store/patientStore";
-import { toast } from "@/components/ui/use-toast";
+// Change toast import to sonner
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -203,19 +205,17 @@ export const CreateClient: React.FC = () => {
     e.preventDefault();
     
     if (!name.trim()) {
-      toast({
-        title: t("error"),
-        description: t("requiredField"),
-        variant: "destructive"
+      // Use sonner toast instead of shadcn/ui toast
+      toast.error(t("requiredField"), {
+        description: t("error")
       });
       return;
     }
     
     if (activeTab === "glasses" && hasValidationErrors) {
-      toast({
-        title: t("error"),
-        description: t("axisValidationError") || "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.",
-        variant: "destructive"
+      // Use sonner toast instead of shadcn/ui toast
+      toast.error(t("axisValidationError") || "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.", {
+        description: t("error")
       });
       return;
     }
@@ -274,14 +274,16 @@ export const CreateClient: React.FC = () => {
       };
     }
     
-    addPatient(patientData);
+    // Save patient and set state
+    const newPatient = addPatient(patientData);
     setSavedPatient(patientData);
     
-    toast({
-      title: t("success"),
-      description: t("successMessage")
+    // Use sonner toast instead of shadcn/ui toast
+    toast.success(t("successMessage"), {
+      description: t("success")
     });
     
+    // Show print dialog
     setShowPrintDialog(true);
     
     resetForm();
@@ -320,7 +322,10 @@ export const CreateClient: React.FC = () => {
     if (savedPatient) {
       if (activeTab === "glasses") {
         setShowPrintDialog(false);
-        setShowLanguageDialog(true);
+        // Show language dialog after closing print dialog
+        setTimeout(() => {
+          setShowLanguageDialog(true);
+        }, 100);
       } else {
         setShowPrintDialog(false);
       }
