@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useCallback } from "react";
 
 // Make sure all fields used in the components are included in this interface

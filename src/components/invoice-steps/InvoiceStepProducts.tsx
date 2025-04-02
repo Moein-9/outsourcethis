@@ -60,13 +60,13 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   
   React.useEffect(() => {
-    if (getValues<string>('frameBrand')) {
+    if (getValues('frameBrand')) {
       setSelectedFrame({
-        brand: getValues<string>('frameBrand'),
-        model: getValues<string>('frameModel'),
-        color: getValues<string>('frameColor'),
-        size: getValues<string>('frameSize'),
-        price: getValues<number>('framePrice')
+        brand: getValues('frameBrand') as string,
+        model: getValues('frameModel') as string,
+        color: getValues('frameColor') as string,
+        size: getValues('frameSize') as string,
+        price: getValues('framePrice') as number
       });
     }
   }, []);
@@ -78,11 +78,11 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     size: string;
     price: number;
   }>({ 
-    brand: getValues<string>('frameBrand') || "", 
-    model: getValues<string>('frameModel') || "", 
-    color: getValues<string>('frameColor') || "", 
-    size: getValues<string>('frameSize') || "", 
-    price: getValues<number>('framePrice') || 0 
+    brand: getValues('frameBrand') as string || "", 
+    model: getValues('frameModel') as string || "", 
+    color: getValues('frameColor') as string || "", 
+    size: getValues('frameSize') as string || "", 
+    price: getValues('framePrice') as number || 0 
   });
   
   const [rxFormatted, setRxFormatted] = useState<any>(null);
@@ -181,10 +181,13 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setCombinedLensPrice(price);
     
     if (price !== null) {
+      setValue('lensCombinationPrice', price);
       toast(
         `${t('combinationPriceFound')}: ${price.toFixed(3)} ${t('kwd')}`,
         { description: t('usingCombinedPrice') }
       );
+    } else {
+      setValue('lensCombinationPrice', null);
     }
   };
   
@@ -598,7 +601,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
       ) : (
         <ContactLensSelector 
           onSelect={handleContactLensSelection} 
-          initialRxData={getValues<any>('contactLensRx')} 
+          initialRxData={getValues('contactLensRx')} 
         />
       )}
     </div>
