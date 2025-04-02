@@ -35,6 +35,14 @@ export interface LensThickness {
   category: "distance-reading" | "progressive" | "bifocal";
 }
 
+export interface LensPricingCombination {
+  id: string;
+  lensTypeId: string;
+  coatingId: string;
+  thicknessId: string;
+  price: number;
+}
+
 export interface ContactLensItem {
   id: string;
   brand: string;
@@ -60,6 +68,7 @@ interface InventoryState {
   lensTypes: LensType[];
   lensCoatings: LensCoating[];
   lensThicknesses: LensThickness[];
+  lensPricingCombinations: LensPricingCombination[];
   contactLenses: ContactLensItem[];
   services: ServiceItem[];
   
@@ -85,6 +94,13 @@ interface InventoryState {
   updateLensThickness: (id: string, thickness: Partial<Omit<LensThickness, "id">>) => void;
   deleteLensThickness: (id: string) => void;
   getLensThicknessesByCategory: (category: LensThickness['category']) => LensThickness[];
+  
+  // Pricing combination methods
+  addLensPricingCombination: (combination: Omit<LensPricingCombination, "id">) => string;
+  updateLensPricingCombination: (id: string, combination: Partial<Omit<LensPricingCombination, "id">>) => void;
+  deleteLensPricingCombination: (id: string) => void;
+  getLensPriceByCombination: (lensTypeId: string, coatingId: string, thicknessId: string) => number | undefined;
+  getPricingCombinationsForLensTypeAndCoating: (lensTypeId: string, coatingId: string) => LensPricingCombination[];
   
   // Contact lens methods
   addContactLens: (lens: Omit<ContactLensItem, "id">) => string;
@@ -167,6 +183,19 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "thick23", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens for Bifocal", category: "bifocal" },
         { id: "thick24", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens for Bifocal", category: "bifocal" },
         { id: "thick25", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens for Bifocal", category: "bifocal" }
+      ],
+      lensPricingCombinations: [
+        // Initial sample pricing combinations
+        { id: "combo1", lensTypeId: "lens2", coatingId: "coat8", thicknessId: "thick8", price: 15 },
+        { id: "combo2", lensTypeId: "lens2", coatingId: "coat8", thicknessId: "thick11", price: 25 },
+        { id: "combo3", lensTypeId: "lens2", coatingId: "coat8", thicknessId: "thick12", price: 35 },
+        { id: "combo4", lensTypeId: "lens2", coatingId: "coat9", thicknessId: "thick8", price: 20 },
+        { id: "combo5", lensTypeId: "lens2", coatingId: "coat9", thicknessId: "thick11", price: 30 },
+        { id: "combo6", lensTypeId: "lens2", coatingId: "coat10", thicknessId: "thick8", price: 25 },
+        { id: "combo7", lensTypeId: "lens3", coatingId: "coat11", thicknessId: "thick14", price: 50 },
+        { id: "combo8", lensTypeId: "lens3", coatingId: "coat12", thicknessId: "thick14", price: 60 },
+        { id: "combo9", lensTypeId: "lens3", coatingId: "coat13", thicknessId: "thick14", price: 70 },
+        { id: "combo10", lensTypeId: "lens4", coatingId: "coat14", thicknessId: "thick20", price: 40 },
       ],
       contactLenses: [
         { id: "cl1", brand: "Acuvue", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 25, qty: 30 },
@@ -305,6 +334,45 @@ export const useInventoryStore = create<InventoryState>()(
       
       getLensThicknessesByCategory: (category) => {
         return get().lensThicknesses.filter(thickness => thickness.category === category);
+      },
+      
+      // Pricing combination methods
+      addLensPricingCombination: (combination) => {
+        const id = `combo${Date.now()}`;
+        
+        set((state) => ({
+          lensPricingCombinations: [...state.lensPricingCombinations, { ...combination, id }]
+        }));
+        
+        return id;
+      },
+      
+      updateLensPricingCombination: (id, combination) => {
+        set((state) => ({
+          lensPricingCombinations: state.lensPricingCombinations.map(combo => 
+            combo.id === id ? { ...combo, ...combination } : combo
+          )
+        }));
+      },
+      
+      deleteLensPricingCombination: (id) => {
+        set((state) => ({
+          lensPricingCombinations: state.lensPricingCombinations.filter(combo => combo.id !== id)
+        }));
+      },
+      
+      getLensPriceByCombination: (lensTypeId, coatingId, thicknessId) => {
+        const combination = get().lensPricingCombinations.find(
+          c => c.lensTypeId === lensTypeId && c.coatingId === coatingId && c.thicknessId === thicknessId
+        );
+        
+        return combination?.price;
+      },
+      
+      getPricingCombinationsForLensTypeAndCoating: (lensTypeId, coatingId) => {
+        return get().lensPricingCombinations.filter(
+          c => c.lensTypeId === lensTypeId && c.coatingId === coatingId
+        );
       },
       
       // Contact lens methods

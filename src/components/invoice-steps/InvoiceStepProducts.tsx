@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -23,6 +24,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const searchFrames = useInventoryStore((state) => state.searchFrames);
   const addFrame = useInventoryStore((state) => state.addFrame);
   const getServicesByCategory = useInventoryStore((state) => state.getServicesByCategory);
+  const getLensPriceByCombination = useInventoryStore((state) => state.getLensPriceByCombination);
   const { getValues, setValue, updateServicePrice } = useInvoiceForm();
   
   const [eyeExamService, setEyeExamService] = useState(() => {
@@ -150,26 +152,67 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setValue('framePrice', newFrame.price);
   };
   
-  const getLensPrice = (lens: LensType | null): number => {
-    return lens?.price !== undefined ? lens.price : 0;
+  const getLensPrice = (lens: LensType | null, coating: LensCoating | null, thickness: LensThickness | null): number => {
+    if (lens && coating && thickness) {
+      const combinedPrice = getLensPriceByCombination(lens.id, coating.id, thickness.id);
+      if (combinedPrice !== undefined) {
+        return combinedPrice;
+      }
+    }
+    // Fallback to individual prices (should be 0 based on UI settings)
+    const lensPrice = lens?.price || 0;
+    const coatingPrice = coating?.price || 0;
+    const thicknessPrice = thickness?.price || 0;
+    return lensPrice + coatingPrice + thicknessPrice;
   };
   
   const handleLensTypeSelect = (lens: LensType | null) => {
     setSelectedLensType(lens);
     setValue('lensType', lens?.name || '');
-    setValue('lensPrice', getLensPrice(lens));
+    
+    // Reset price since it should be calculated from combination
+    setValue('lensPrice', 0);
+    updateLensAndCoatingPrices();
   };
   
   const handleCoatingSelect = (coating: LensCoating | null) => {
     setSelectedCoating(coating);
     setValue('coating', coating?.name || '');
-    setValue('coatingPrice', coating?.price || 0);
+    
+    // Reset price since it should be calculated from combination
+    setValue('coatingPrice', 0);
+    updateLensAndCoatingPrices();
   };
   
   const handleThicknessSelect = (thickness: LensThickness | null) => {
     setSelectedThickness(thickness);
     setValue('thickness', thickness?.name || '');
-    setValue('thicknessPrice', thickness?.price || 0);
+    
+    // Calculate combined price
+    const totalLensPrice = getLensPrice(selectedLensType, selectedCoating, thickness);
+    setValue('thicknessPrice', totalLensPrice);
+    
+    // Update total price
+    updateLensAndCoatingPrices();
+  };
+  
+  // Update all lens-related prices
+  const updateLensAndCoatingPrices = () => {
+    const totalLensPrice = getLensPrice(selectedLensType, selectedCoating, selectedThickness);
+    
+    // Set the lens, coating and thickness prices separately (for display purposes)
+    setValue('lensPrice', 0);
+    setValue('coatingPrice', 0);
+    setValue('thicknessPrice', totalLensPrice);
+    
+    // Calculate new totals
+    const framePrice = getValues<number>('framePrice') || 0;
+    const discount = getValues<number>('discount') || 0;
+    const deposit = getValues<number>('deposit') || 0;
+    const total = framePrice + totalLensPrice;
+    
+    setValue('total', total - discount);
+    setValue('remaining', Math.max(0, total - discount - deposit));
   };
   
   const handleSkipFrameChange = (skip: boolean) => {
