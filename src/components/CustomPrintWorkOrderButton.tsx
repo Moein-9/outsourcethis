@@ -55,6 +55,12 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     }
   }
   
+  // Ensure coating color is set in workOrder if available in invoice
+  if (invoice?.coatingColor && !workOrder.coatingColor) {
+    console.log("Adding coating color from invoice to workOrder:", invoice.coatingColor);
+    workOrder = { ...workOrder, coatingColor: invoice.coatingColor };
+  }
+  
   // If this is a contact lens order, make sure workOrder has the isContactLens flag set
   if (isContactLens && !workOrder.isContactLens) {
     workOrder = { ...workOrder, isContactLens: true };
@@ -66,7 +72,7 @@ export const CustomPrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = (
     setIsPrinting(true);
     setOpen(false); // Close dialog before printing
     
-    console.log("[CustomPrintWorkOrderButton] Triggering print for workOrder:", workOrder.id);
+    console.log("[CustomPrintWorkOrderButton] Triggering print for workOrder:", workOrder.id, "with coating color:", workOrder.coatingColor);
     
     // Slightly longer delay to ensure dialog is fully closed and DOM is updated
     setTimeout(() => {

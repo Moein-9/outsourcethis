@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { toast } from '@/hooks/use-toast';
 import { createRoot } from 'react-dom/client';
@@ -104,6 +105,13 @@ export class CustomPrintService {
                     print-color-adjust: exact !important;
                     color-adjust: exact !important;
                   }
+                  
+                  /* Make sure colors print correctly */
+                  * {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                  }
                 </style>
               </head>
               <body>
@@ -167,7 +175,7 @@ export class CustomPrintService {
             }
             
             // Ensure coating color preview is visible in print
-            const colorPreviews = printWindow.document.querySelectorAll('[style*="backgroundColor"]');
+            const colorPreviews = printWindow.document.querySelectorAll('.color-preview, [style*="backgroundColor"]');
             colorPreviews.forEach(preview => {
               (preview as HTMLElement).style.webkitPrintColorAdjust = 'exact';
               (preview as HTMLElement).style.printColorAdjust = 'exact';

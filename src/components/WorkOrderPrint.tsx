@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -61,11 +62,11 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const phone = patientPhone || invoice.patientPhone;
   const lensTypeValue = lensType || invoice.lensType;
   const coatingValue = coating || invoice.coating;
-  const coatingColorValue = coatingColor || (invoice as any).coatingColor;
-  const thicknessValue = thickness || (invoice as any).thickness;
+  const coatingColorValue = coatingColor || invoice.coatingColor || "";
+  const thicknessValue = thickness || invoice.thickness;
   
-  const contactLensItems = contactLenses || (invoice as any).contactLensItems || [];
-  const contactLensRxData = contactLensRx || (invoice as any).contactLensRx;
+  const contactLensItems = contactLenses || invoice.contactLensItems || [];
+  const contactLensRxData = contactLensRx || invoice.contactLensRx;
   
   const frameData = frame || (invoice.frameBrand ? {
     brand: invoice.frameBrand,
@@ -76,7 +77,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   } : undefined);
   
   const isContactLens = contactLensItems && contactLensItems.length > 0;
-  const invoiceType = (invoice as any).invoiceType || 'glasses';
+  const invoiceType = invoice.invoiceType || 'glasses';
   
   const orderNumber = invoice.workOrderId || "NEW ORDER";
   const date = format(new Date(invoice.createdAt), "dd/MM/yyyy");
@@ -84,6 +85,8 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const addressLines = storeInfo.address.split('\n');
 
   const getColorStyle = (colorName: string) => {
+    if (!colorName) return "transparent";
+    
     const colorMap: Record<string, string> = {
       "Brown": "#8B4513",
       "Gray": "#808080",
@@ -93,6 +96,8 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
     
     return colorMap[colorName] || "transparent";
   };
+  
+  console.log("WorkOrderPrint rendering with coating color:", coatingColorValue);
 
   return (
     <div className="print-wrapper">
@@ -112,6 +117,9 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             /* Reset visibility */
             * {
               visibility: visible !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
 
             html, body {
@@ -207,6 +215,12 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
             .date-line {
               font-size: 9pt !important;
               margin-top: 1mm !important;
+            }
+            
+            .color-preview {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
           }
         `}
@@ -427,8 +441,13 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                     <div className="font-medium text-xs">{language === 'ar' ? "عرض اللون | Preview" : "Preview | عرض اللون"}:</div>
                     <div className="col-span-2 flex items-center">
                       <div 
-                        className="w-4 h-4 rounded-full border border-gray-300 mr-1"
-                        style={{ backgroundColor: getColorStyle(coatingColorValue) }}
+                        className="w-4 h-4 rounded-full border border-gray-300 mr-1 color-preview"
+                        style={{ 
+                          backgroundColor: getColorStyle(coatingColorValue),
+                          WebkitPrintColorAdjust: 'exact',
+                          printColorAdjust: 'exact',
+                          colorAdjust: 'exact'
+                        }}
                       ></div>
                     </div>
                   </div>
