@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { toast } from '@/hooks/use-toast';
 import { createRoot } from 'react-dom/client';
@@ -28,216 +27,33 @@ export class CustomPrintService {
                           
       console.log("Is contact lens order:", isContactLens);
       
-      // Add basic HTML structure with improved styles for the receipt
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Work Order</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap">
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yrsa:wght@400;500;600;700&display=swap">
-            <style>
-              @page {
-                size: 80mm auto !important;
-                margin: 3mm !important; /* Increased margins for safety */
-                padding: 0 !important;
-              }
-              
-              body {
-                width: 74mm !important; /* 80mm - 6mm for margins */
-                margin: 0 auto !important;
-                padding: 0 !important;
-                font-family: Cairo, Arial, sans-serif !important;
-                background: white !important;
-                color: black !important;
-                font-size: 14px !important; /* Increased base font size from 12px */
-              }
-              
-              #work-order-receipt {
-                width: 74mm !important;
-                max-width: 74mm !important;
-                page-break-after: always !important;
-                page-break-inside: avoid !important;
-                position: relative !important; 
-                left: 0 !important;
-                top: 0 !important;
-                border: none !important;
-                box-shadow: none !important;
-                padding: 2mm !important;
-                margin: 0 auto !important;
-                background: white !important;
-                color: black !important;
-              }
-              
-              .print-receipt {
-                height: auto !important;
-                min-height: 0 !important;
-                max-height: none !important;
-              }
-              
-              .print-receipt * {
-                visibility: visible !important;
-                opacity: 1 !important;
-              }
-              
-              .bg-black {
-                background-color: black !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                color: white !important;
-              }
-              
-              .text-white {
-                color: white !important;
-              }
-              
-              /* Tailwind-like classes for printing */
-              .flex { display: flex !important; }
-              .flex-col { flex-direction: column !important; }
-              .items-center { align-items: center !important; }
-              .justify-center { justify-content: center !important; }
-              .justify-between { justify-content: space-between !important; }
-              .text-center { text-align: center !important; }
-              .font-bold { font-weight: bold !important; }
-              .text-xs { font-size: 11px !important; } /* Increased from 9px */
-              .text-sm { font-size: 13px !important; } /* Increased from 11px */
-              .text-base { font-size: 15px !important; } /* Increased from 13px */
-              .text-lg { font-size: 17px !important; } /* Increased from 15px */
-              .mb-0 { margin-bottom: 0 !important; }
-              .mb-1 { margin-bottom: 0.25rem !important; }
-              .mb-2 { margin-bottom: 0.5rem !important; }
-              .mb-3 { margin-bottom: 0.75rem !important; }
-              .py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
-              .px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
-              .p-1 { padding: 0.25rem !important; }
-              .p-2 { padding: 0.5rem !important; }
-              .p-3 { padding: 0.75rem !important; }
-              .rounded { border-radius: 0.25rem !important; }
-              .border { border-width: 1px !important; }
-              .border-2 { border-width: 2px !important; }
-              .border-gray-300 { border-color: #d1d5db !important; }
-              .border-black { border-color: black !important; }
-              .border-b { border-bottom-width: 1px !important; }
-              .bg-gray-100 { background-color: #f3f4f6 !important; }
-              .text-gray-600 { color: #4b5563 !important; }
-              
-              .card { 
-                background-color: white !important; 
-                border-radius: 0.375rem !important;
-                border: 1px solid #e5e7eb !important;
-                overflow: hidden !important;
-                margin-bottom: 0.5rem !important;
-              }
-              
-              .card-content {
-                padding: 0.5rem !important;
-              }
-              
-              /* RTL direction */
-              .rtl {
-                direction: rtl !important;
-                font-family: 'Zain', sans-serif !important;
-              }
-              
-              .ltr {
-                direction: ltr !important;
-                font-family: 'Yrsa', serif !important;
-              }
-              
-              /* Print-specific overrides */
-              @media print {
-                html, body {
-                  width: 74mm !important;
-                  height: auto !important;
-                  min-height: 0 !important;
-                  max-height: none !important;
-                  overflow: visible !important;
-                  background: white !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                  color-adjust: exact !important;
-                }
-                
-                .bg-black {
-                  background-color: black !important;
-                  color: white !important;
-                }
-                
-                .text-white {
-                  color: white !important;
-                }
-                
-                body * {
-                  visibility: visible !important;
-                }
-                
-                /* Improved table styles */
-                table {
-                  width: 100% !important;
-                  border-collapse: collapse !important;
-                  font-size: 12px !important; /* Increased from 10px */
-                  margin: 0 auto !important;
-                }
-                
-                table th, table td {
-                  padding: 3px !important; /* Increased from 2px */
-                  text-align: center !important;
-                  border: 1px solid #d1d5db !important;
-                }
-                
-                /* Notes section */
-                div[class*="min-h-"] {
-                  min-height: 50px !important; /* Increased from 40px */
-                  border: 2px solid #d1d5db !important;
-                  background-color: white !important;
-                }
-                
-                /* Logo sizing */
-                img, svg {
-                  max-height: 12mm !important;
-                  width: auto !important;
-                }
-              }
-            </style>
-          </head>
-          <body>
-            <div id="print-container"></div>
-            <script>
-              window.onload = function() {
-                setTimeout(function() {
-                  window.focus();
-                  window.print();
-                  window.onafterprint = function() {
-                    window.close();
-                  };
-                }, 500);
-              };
-            </script>
-          </body>
-        </html>
-      `);
+      // Determine which contact lens RX to use
+      const contactLensRx = workOrder?.contactLensRx || invoice?.contactLensRx || patient?.contactLensRx;
+      
+      if (contactLensRx) {
+        console.log("Using contact lens RX:", contactLensRx);
+        
+        // Ensure the workOrder has contactLensRx
+        if (!workOrder.contactLensRx) {
+          workOrder = { ...workOrder, contactLensRx };
+        }
+      }
+      
+      // Ensure coating color is set in workOrder if available in invoice
+      if (invoice?.coatingColor && !workOrder.coatingColor) {
+        console.log("Adding coating color from invoice:", invoice.coatingColor);
+        workOrder = { ...workOrder, coatingColor: invoice.coatingColor };
+      }
+      
+      // If this is a contact lens order, make sure workOrder has the isContactLens flag set
+      if (isContactLens && !workOrder.isContactLens) {
+        workOrder = { ...workOrder, isContactLens: true };
+      }
       
       // Create a div element to hold our component temporarily in the current document
       const tempDiv = document.createElement('div');
       document.body.appendChild(tempDiv);
       tempDiv.style.display = 'none';
-      
-      // Prepare the workOrder object with contactLensRx if necessary
-      if (isContactLens && !workOrder.contactLensRx) {
-        if (invoice?.contactLensRx) {
-          workOrder = { ...workOrder, contactLensRx: invoice.contactLensRx };
-        } else if (patient?.contactLensRx) {
-          workOrder = { ...workOrder, contactLensRx: patient.contactLensRx };
-        }
-      }
-      
-      // Make sure workOrder has isContactLens flag set properly
-      if (isContactLens && !workOrder.isContactLens) {
-        workOrder = { ...workOrder, isContactLens: true };
-      }
       
       // Render our component to the temp div
       const root = createRoot(tempDiv);
