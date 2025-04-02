@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -211,6 +210,9 @@ const translations: Record<string, Record<string, string>> = {
     errorUpdatingCombination: 'Error updating combination',
     errorDeletingCombination: 'Error deleting combination',
     unknown: 'Unknown',
+    combinationPriceFound: "Combination Price Found",
+    usingCombinedPrice: "Using combined price",
+    combinedPrice: "Combined Price",
     
     // Remaining Payments
     duePayments: 'Manage incomplete invoices and record remaining payments',
@@ -577,7 +579,6 @@ const translations: Record<string, Record<string, string>> = {
     lensCombinations: 'تركيبات العدسات',
     addNewCombination: 'إضافة تركيبة عدسات جديدة',
     addCombination: 'إضافة تركيبة',
-    // Fixed: Removed duplicate selectLensType key and added it here
     selectLensType: 'اختر نوع العدسة',
     selectThickness: 'اختر سماكة العدسة',
     combinationAdded: 'تمت إضافة تركيبة العدسات بنجاح',
@@ -594,6 +595,9 @@ const translations: Record<string, Record<string, string>> = {
     errorUpdatingCombination: 'خطأ في تحديث التركيبة',
     errorDeletingCombination: 'خطأ في حذف التركيبة',
     unknown: 'غير معروف',
+    combinationPriceFound: "تم العثور على سعر مجمع",
+    usingCombinedPrice: "استخدام السعر المجمع",
+    combinedPrice: "السعر المجمع",
     
     // Remaining Payments
     duePayments: 'إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية',

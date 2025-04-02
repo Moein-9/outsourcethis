@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/button";
 import { LensSelector } from "@/components/LensSelector";
 import { ContactLensSelector, ContactLensSelection } from "@/components/ContactLensSelector";
 import { 
-  Search, Package, Plus, PackageCheck, Eye, Glasses, ScrollText, Check
+  Search, Package, Plus, PackageCheck, Eye, Glasses, ScrollText, Check, AlertCircle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface InvoiceStepProductsProps {
   invoiceType: "glasses" | "contacts" | "exam";
@@ -50,6 +51,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(null);
+  const [combinedLensPrice, setCombinedLensPrice] = useState<number | null>(null);
   
   const [frameSearch, setFrameSearch] = useState("");
   const [frameResults, setFrameResults] = useState<ReturnType<typeof searchFrames>>([]);
@@ -157,19 +159,32 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const handleLensTypeSelect = (lens: LensType | null) => {
     setSelectedLensType(lens);
     setValue('lensType', lens?.name || '');
-    setValue('lensPrice', getLensPrice(lens));
+    
+    if (!lens) {
+      setCombinedLensPrice(null);
+    }
   };
   
   const handleCoatingSelect = (coating: LensCoating | null) => {
     setSelectedCoating(coating);
     setValue('coating', coating?.name || '');
-    setValue('coatingPrice', coating?.price || 0);
   };
   
   const handleThicknessSelect = (thickness: LensThickness | null) => {
     setSelectedThickness(thickness);
     setValue('thickness', thickness?.name || '');
-    setValue('thicknessPrice', thickness?.price || 0);
+  };
+  
+  const handleCombinationPriceChange = (price: number | null) => {
+    setCombinedLensPrice(price);
+    
+    if (price !== null) {
+      toast({
+        title: t('combinationPriceFound'),
+        description: `${t('usingCombinedPrice')}: ${price.toFixed(3)} ${t('kwd')}`,
+        variant: "default"
+      });
+    }
   };
   
   const handleSkipFrameChange = (skip: boolean) => {
@@ -274,6 +289,40 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     }
   };
   
+  useEffect(() => {
+    if (invoiceType === 'glasses' && !skipFrame) {
+      let totalLensPrice = 0;
+      
+      if (combinedLensPrice !== null) {
+        totalLensPrice = combinedLensPrice;
+        console.log('Using combined lens price:', combinedLensPrice);
+        
+        setValue('lensPrice', combinedLensPrice);
+        setValue('coatingPrice', 0);
+        setValue('thicknessPrice', 0);
+      } else {
+        const lensPrice = selectedLensType?.price || 0;
+        const coatingPrice = selectedCoating?.price || 0;
+        const thicknessPrice = selectedThickness?.price || 0;
+        
+        totalLensPrice = lensPrice + coatingPrice + thicknessPrice;
+        console.log('Using component prices - lens:', lensPrice, 'coating:', coatingPrice, 'thickness:', thicknessPrice);
+        
+        setValue('lensPrice', lensPrice);
+        setValue('coatingPrice', coatingPrice);
+        setValue('thicknessPrice', thicknessPrice);
+      }
+      
+      const framePrice = selectedFrame.price || 0;
+      const totalPrice = totalLensPrice + framePrice;
+      
+      setValue('total', totalPrice - (getValues<number>('discount') || 0));
+      setValue('remaining', Math.max(0, totalPrice - (getValues<number>('discount') || 0) - (getValues<number>('deposit') || 0)));
+      
+      console.log('Updated total price:', totalPrice);
+    }
+  }, [selectedLensType, selectedCoating, selectedThickness, combinedLensPrice, skipFrame, selectedFrame.price, setValue, getValues, invoiceType]);
+  
   if (invoiceType === "exam") {
     if (!eyeExamService) {
       return (
@@ -347,6 +396,15 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
                 <Eye className="w-5 h-5" />
                 {t('lensSection')}
               </h3>
+              
+              {combinedLensPrice !== null && (
+                <Badge 
+                  className="bg-green-100 text-green-800 hover:bg-green-200 px-3 py-1 font-medium flex items-center gap-1"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  {t('combinedPrice')}: {combinedLensPrice.toFixed(3)} {t('kwd')}
+                </Badge>
+              )}
             </div>
             
             <LensSelector 
@@ -359,6 +417,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
               initialCoating={selectedCoating}
               initialThickness={selectedThickness}
               rx={rxFormatted || getValues('rx')}
+              onCombinationPriceChange={handleCombinationPriceChange}
             />
           </div>
 

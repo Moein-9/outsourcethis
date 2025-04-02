@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -73,43 +72,36 @@ interface InventoryState {
   services: ServiceItem[];
   lensPricingCombinations: LensPricingCombination[];
   
-  // Frame methods
   addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => string;
   updateFrameQuantity: (frameId: string, newQty: number) => void;
   searchFrames: (query: string) => FrameItem[];
   getFrameById: (id: string) => FrameItem | undefined;
   
-  // Lens methods
   addLensType: (lens: Omit<LensType, "id">) => string;
   updateLensType: (id: string, lens: Partial<Omit<LensType, "id">>) => void;
   deleteLensType: (id: string) => void;
   
-  // Coating methods
   addLensCoating: (coating: Omit<LensCoating, "id">) => string;
   updateLensCoating: (id: string, coating: Partial<Omit<LensCoating, "id">>) => void;
   deleteLensCoating: (id: string) => void;
   getLensCoatingsByCategory: (category: LensCoating['category']) => LensCoating[];
   
-  // Thickness methods
   addLensThickness: (thickness: Omit<LensThickness, "id">) => string;
   updateLensThickness: (id: string, thickness: Partial<Omit<LensThickness, "id">>) => void;
   deleteLensThickness: (id: string) => void;
   getLensThicknessesByCategory: (category: LensThickness['category']) => LensThickness[];
   
-  // Contact lens methods
   addContactLens: (lens: Omit<ContactLensItem, "id">) => string;
   updateContactLens: (id: string, lens: Partial<Omit<ContactLensItem, "id">>) => void;
   deleteContactLens: (id: string) => void;
   searchContactLenses: (query: string) => ContactLensItem[];
   
-  // Service methods
   addService: (service: Omit<ServiceItem, "id">) => string;
   updateService: (id: string, service: Partial<Omit<ServiceItem, "id">>) => void;
   deleteService: (id: string) => void;
   getServiceById: (id: string) => ServiceItem | undefined;
   getServicesByCategory: (category: ServiceItem['category']) => ServiceItem[];
   
-  // Lens pricing combination methods
   addLensPricingCombination: (combination: Omit<LensPricingCombination, "id">) => string;
   updateLensPricingCombination: (id: string, combination: Partial<Omit<LensPricingCombination, "id">>) => void;
   deleteLensPricingCombination: (id: string) => void;
@@ -230,7 +222,6 @@ export const useInventoryStore = create<InventoryState>()(
         }
       ],
       
-      // Frame methods
       addFrame: (frame) => {
         const frameId = `FR${Date.now()}`;
         const createdAt = new Date().toISOString();
@@ -271,7 +262,6 @@ export const useInventoryStore = create<InventoryState>()(
         return get().frames.find(frame => frame.frameId === id);
       },
       
-      // Lens methods
       addLensType: (lens) => {
         const id = `lens${Date.now()}`;
         
@@ -296,7 +286,6 @@ export const useInventoryStore = create<InventoryState>()(
         }));
       },
       
-      // Coating methods
       addLensCoating: (coating) => {
         const id = `coat${Date.now()}`;
         
@@ -325,7 +314,6 @@ export const useInventoryStore = create<InventoryState>()(
         return get().lensCoatings.filter(coating => coating.category === category);
       },
       
-      // Thickness methods
       addLensThickness: (thickness) => {
         const id = `thick${Date.now()}`;
         
@@ -354,7 +342,6 @@ export const useInventoryStore = create<InventoryState>()(
         return get().lensThicknesses.filter(thickness => thickness.category === category);
       },
       
-      // Contact lens methods
       addContactLens: (lens) => {
         const id = `cl${Date.now()}`;
         
@@ -391,7 +378,6 @@ export const useInventoryStore = create<InventoryState>()(
         );
       },
       
-      // Service methods
       addService: (service) => {
         const id = `service${Date.now()}`;
         
@@ -424,7 +410,6 @@ export const useInventoryStore = create<InventoryState>()(
         return get().services.filter(service => service.category === category);
       },
       
-      // Lens pricing combination methods
       addLensPricingCombination: (combination) => {
         const id = `combo${Date.now()}`;
         
@@ -464,13 +449,12 @@ export const useInventoryStore = create<InventoryState>()(
           return combination.price;
         }
         
-        // If no specific combination is found, return null
         return null;
       }
     }),
     {
       name: 'inventory-store',
-      version: 3 // Increment version to ensure store gets updated
+      version: 3
     }
   )
 );

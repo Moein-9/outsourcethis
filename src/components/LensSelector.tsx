@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensType, LensCoating, LensThickness, useInventoryStore } from "@/store/inventoryStore";
@@ -35,6 +34,7 @@ interface LensSelectorProps {
     pdRight?: string;
     pdLeft?: string;
   };
+  onCombinationPriceChange?: (price: number | null) => void;
 }
 
 export const LensSelector: React.FC<LensSelectorProps> = ({
@@ -46,44 +46,35 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   initialLensType = null,
   initialCoating = null,
   initialThickness = null,
-  rx
+  rx,
+  onCombinationPriceChange
 }) => {
   const { t, language } = useLanguageStore();
   const lensTypes = useInventoryStore((state) => state.lensTypes);
-  const { lensCoatings, lensThicknesses, getLensCoatingsByCategory, getLensThicknessesByCategory } = useInventoryStore();
+  const { lensCoatings, lensThicknesses, getLensCoatingsByCategory, getLensThicknessesByCategory, getLensPricingByComponents } = useInventoryStore();
   
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(initialLensType);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(initialCoating);
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(initialThickness);
   const [activeCategory, setActiveCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
   
-  // Improved check for ADD values that handles all edge cases
   const hasAddValues = React.useMemo(() => {
     if (!rx) return false;
     
-    // Helper function to check if a value is a valid ADD value
     const isValidAddValue = (value?: string) => {
-      // If value is undefined or null or empty string, it's not valid
       if (!value) return false;
-      
-      // If value is "0", "0.00", "-", "0-", or similar variations, it's not valid
-      if (value === '0' || value === '0.00' || value === '-' || value === '0-' || value === '.00' || value.trim() === '') return false;
-      
-      // If value is a number and it's greater than 0, it's valid
+      if (value === '0' || value === '0.00' || value === '-' || value === '0-' || value.trim() === '') return false;
       const numValue = parseFloat(value);
       return !isNaN(numValue) && numValue > 0;
     };
     
-    // Check for nested 'add' object format
     if (rx.add) {
       return isValidAddValue(rx.add.right) || isValidAddValue(rx.add.left);
     }
     
-    // Check for flat format (addOD, addOS)
     return isValidAddValue(rx.addOD) || isValidAddValue(rx.addOS);
   }, [rx]);
 
-  // Extended debug logging for rx data
   console.log('RX passed to LensSelector:', rx);
   console.log('Has ADD values:', hasAddValues);
   console.log('ADD values check - addOD:', rx?.addOD);
@@ -91,14 +82,11 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   console.log('ADD values check - add.right:', rx?.add?.right);
   console.log('ADD values check - add.left:', rx?.add?.left);
   
-  // Filter lens types based on ADD values
   const filteredLensTypes = React.useMemo(() => {
     if (hasAddValues) {
-      // Show all lens types when ADD values are present
       console.log('Showing all lens types including Progressive and Bifocal');
       return lensTypes;
     } else {
-      // Hide Progressive and Bifocal lens types when ADD values are not present
       console.log('Filtering out Progressive and Bifocal lens types');
       return lensTypes.filter(lens => 
         lens.type !== 'progressive' && lens.type !== 'bifocal'
@@ -106,7 +94,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   }, [lensTypes, hasAddValues]);
 
-  // Get category from lens type
   const getCategory = (lensType: LensType | null): "distance-reading" | "progressive" | "bifocal" => {
     if (!lensType) return "distance-reading";
     
@@ -123,12 +110,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   };
   
-  // Initialize from props if provided
   useEffect(() => {
     if (initialLensType) {
-      // Check if initialLensType is valid based on hasAddValues
       if (!hasAddValues && (initialLensType.type === 'progressive' || initialLensType.type === 'bifocal')) {
-        // If we have an invalid lens type selected and no ADD values, reset it
         setSelectedLensType(null);
         onSelectLensType(null);
       } else {
@@ -144,14 +128,12 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   }, [initialLensType, initialCoating, initialThickness, hasAddValues, onSelectLensType]);
   
-  // Update selected lens type if it becomes invalid (e.g., prescription changes)
   useEffect(() => {
     if (selectedLensType && !hasAddValues && 
         (selectedLensType.type === 'progressive' || selectedLensType.type === 'bifocal')) {
       setSelectedLensType(null);
       onSelectLensType(null);
       
-      // Reset coating and thickness when lens type is reset
       setSelectedCoating(null);
       setSelectedThickness(null);
       onSelectCoating(null);
@@ -159,19 +141,36 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   }, [hasAddValues, selectedLensType, onSelectLensType, onSelectCoating, onSelectThickness]);
   
+  useEffect(() => {
+    if (selectedLensType && selectedCoating && selectedThickness && onCombinationPriceChange) {
+      const combinedPrice = getLensPricingByComponents(
+        selectedLensType.id,
+        selectedCoating.id,
+        selectedThickness.id
+      );
+
+      console.log('Combined price found:', combinedPrice);
+      onCombinationPriceChange(combinedPrice);
+    } else if (onCombinationPriceChange) {
+      onCombinationPriceChange(null);
+    }
+  }, [selectedLensType, selectedCoating, selectedThickness, getLensPricingByComponents, onCombinationPriceChange]);
+  
   const handleLensTypeSelect = (lens: LensType) => {
     setSelectedLensType(lens);
     onSelectLensType(lens);
     
-    // Update category based on lens type
     const newCategory = getCategory(lens);
     setActiveCategory(newCategory);
     
-    // Reset coating and thickness when lens type changes
     setSelectedCoating(null);
     setSelectedThickness(null);
     onSelectCoating(null);
     onSelectThickness(null);
+    
+    if (onCombinationPriceChange) {
+      onCombinationPriceChange(null);
+    }
   };
   
   const handleCoatingSelect = (coating: LensCoating) => {
@@ -196,10 +195,13 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
       onSelectLensType(null);
       onSelectCoating(null);
       onSelectThickness(null);
+      
+      if (onCombinationPriceChange) {
+        onCombinationPriceChange(null);
+      }
     }
   };
   
-  // Get filtered coatings and thicknesses based on active category
   const availableCoatings = getLensCoatingsByCategory(activeCategory);
   const availableThicknesses = getLensThicknessesByCategory(activeCategory);
   
