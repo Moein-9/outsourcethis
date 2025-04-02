@@ -73,6 +73,51 @@ export class CustomPrintService {
           const contentHtml = tempDiv.innerHTML;
           
           // Insert it into the print window
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>Work Order</title>
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
+                <style>
+                  @page {
+                    size: 80mm auto !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                  }
+                  
+                  body, html {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    width: 80mm !important;
+                    background: white !important;
+                  }
+                  
+                  #print-container {
+                    width: 80mm !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                  }
+                </style>
+              </head>
+              <body>
+                <div id="print-container"></div>
+                <script>
+                  window.onload = function() {
+                    setTimeout(function() {
+                      window.focus();
+                      window.print();
+                      window.onafterprint = function() {
+                        window.close();
+                      };
+                    }, 500);
+                  };
+                </script>
+              </body>
+            </html>
+          `);
+          
+          // Insert it into the print window
           const printContainer = printWindow.document.getElementById('print-container');
           if (printContainer) {
             printContainer.innerHTML = contentHtml;

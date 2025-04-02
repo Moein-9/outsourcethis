@@ -645,3 +645,85 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
       </div>
 
       <style>
+        {`
+          @media print {
+            @page {
+              size: 80mm auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            
+            body, html {
+              margin: 0 !important;
+              padding: 0 !important;
+              width: 80mm !important;
+            }
+            
+            * {
+              box-sizing: border-box !important;
+            }
+            
+            #work-order-receipt {
+              width: 74mm !important;
+              max-width: 74mm !important;
+              margin: 0 auto !important;
+              padding: 2mm !important;
+              position: relative !important;
+              left: 0 !important;
+              top: 0 !important;
+              break-inside: avoid !important;
+              break-after: always !important;
+              color: black !important;
+              page-break-inside: avoid !important;
+              page-break-after: always !important;
+            }
+            
+            /* Text and elements should all be black */
+            #work-order-receipt * {
+              color: black !important;
+            }
+            
+            /* Except for specific color classes */
+            .text-white {
+              color: white !important;
+            }
+            
+            .text-green-800 {
+              color: #166534 !important;
+            }
+            
+            .text-red-700, .text-red-800 {
+              color: #b91c1c !important;
+            }
+            
+            .bg-black {
+              background-color: black !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            
+            .bg-green-100 {
+              background-color: #dcfce7 !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            
+            .border-green-300 {
+              border-color: #86efac !important;
+            }
+            
+            .bg-red-100 {
+              background-color: #fee2e2 !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            
+            .border-red-300 {
+              border-color: #fca5a5 !important;
+            }
+          }
+        `}
+      </style>
+    </div>
+  );
+};
