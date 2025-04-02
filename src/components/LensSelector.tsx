@@ -288,7 +288,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
             <div className="bg-orange-100 p-1.5 rounded-md">
               <PanelTop className="w-4 h-4 text-orange-600" />
             </div>
-            <h3 className="font-semibold text-orange-800 ml-2">2. {t('selectCoatings')}</h3>
+            <h3 className="font-semibold text-orange-800 ml-2">2. {t('selectCoating')}</h3>
           </div>
           
           {selectedLensType ? (
