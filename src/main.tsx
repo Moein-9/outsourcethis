@@ -15,6 +15,7 @@ if (!root) {
   document.body.appendChild(rootDiv);
 }
 
+// Create root and render app
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />
