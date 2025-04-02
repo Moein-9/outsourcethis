@@ -190,26 +190,20 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "thick6", name: "عادي للعدسات الثنائية", price: 3, description: "Standard for Bifocal", category: "bifocal" },
         { id: "thick7", name: "رقيق للعدسات الثنائية", price: 12, description: "Thin for Bifocal", category: "bifocal" },
         
-        // New thickness items for distance-reading
+        // Use only these entries for distance-reading, removing duplicates
         { id: "thick8", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness", category: "distance-reading" },
-        { id: "thick9", name: "Standard Thickness", price: 0, description: "Standard Thickness", category: "distance-reading" },
-        { id: "thick10", name: "Polycarbonate", price: 0, description: "Polycarbonate Material", category: "distance-reading" },
         { id: "thick11", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens", category: "distance-reading" },
         { id: "thick12", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens", category: "distance-reading" },
         { id: "thick13", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens", category: "distance-reading" },
         
-        // New thickness items for progressive
+        // Use only these entries for progressive, removing duplicates
         { id: "thick14", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness for Progressive", category: "progressive" },
-        { id: "thick15", name: "Standard Thickness", price: 0, description: "Standard Thickness for Progressive", category: "progressive" },
-        { id: "thick16", name: "Polycarbonate", price: 0, description: "Polycarbonate Material for Progressive", category: "progressive" },
         { id: "thick17", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens for Progressive", category: "progressive" },
         { id: "thick18", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens for Progressive", category: "progressive" },
         { id: "thick19", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens for Progressive", category: "progressive" },
         
-        // New thickness items for bifocal
+        // Use only these entries for bifocal, removing duplicates
         { id: "thick20", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness for Bifocal", category: "bifocal" },
-        { id: "thick21", name: "Standard Thickness", price: 0, description: "Standard Thickness for Bifocal", category: "bifocal" },
-        { id: "thick22", name: "Polycarbonate", price: 0, description: "Polycarbonate Material for Bifocal", category: "bifocal" },
         { id: "thick23", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens for Bifocal", category: "bifocal" },
         { id: "thick24", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens for Bifocal", category: "bifocal" },
         { id: "thick25", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens for Bifocal", category: "bifocal" }
@@ -256,6 +250,34 @@ export const useInventoryStore = create<InventoryState>()(
           coatingId: "coat11",
           thicknessId: "thick14",
           price: 40
+        },
+        {
+          id: "combo5",
+          lensTypeId: "lens2",
+          coatingId: "coat17",
+          thicknessId: "thick8",
+          price: 35
+        },
+        {
+          id: "combo6",
+          lensTypeId: "lens2",
+          coatingId: "coat17",
+          thicknessId: "thick11",
+          price: 45
+        },
+        {
+          id: "combo7",
+          lensTypeId: "lens3",
+          coatingId: "coat18",
+          thicknessId: "thick14",
+          price: 60
+        },
+        {
+          id: "combo8",
+          lensTypeId: "lens4",
+          coatingId: "coat19",
+          thicknessId: "thick20",
+          price: 50
         }
       ],
       
