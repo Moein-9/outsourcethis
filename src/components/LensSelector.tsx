@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Check, X, Glasses, PanelTop } from "lucide-react";
+import { Eye, Check, X, Glasses, PanelTop, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 interface LensSelectorProps {
@@ -54,7 +54,13 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const { t, language } = useLanguageStore();
   const isRtl = language === 'ar';
   const lensTypes = useInventoryStore((state) => state.lensTypes);
-  const { lensCoatings, lensThicknesses, getLensCoatingsByCategory, getLensThicknessesByCategory, getLensPricingByComponents } = useInventoryStore();
+  const { 
+    getLensCoatingsByCategory, 
+    getLensThicknessesByCategory, 
+    getLensPricingByComponents,
+    getAvailableCoatings,
+    getAvailableThicknesses
+  } = useInventoryStore();
   
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(initialLensType);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(initialCoating);
@@ -170,6 +176,10 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const handleCoatingSelect = (coating: LensCoating) => {
     setSelectedCoating(coating);
     onSelectCoating(coating);
+    
+    // Reset thickness when coating changes as available thicknesses might change
+    setSelectedThickness(null);
+    onSelectThickness(null);
   };
   
   const handleThicknessSelect = (thickness: LensThickness) => {
@@ -196,8 +206,13 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   };
   
-  const availableCoatings = getLensCoatingsByCategory(activeCategory);
-  const availableThicknesses = getLensThicknessesByCategory(activeCategory);
+  const availableCoatings = selectedLensType 
+    ? getAvailableCoatings(selectedLensType.id, activeCategory) 
+    : [];
+  
+  const availableThicknesses = (selectedLensType && selectedCoating)
+    ? getAvailableThicknesses(selectedLensType.id, selectedCoating.id, activeCategory)
+    : [];
   
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
   
@@ -279,38 +294,44 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
           </div>
           
           {selectedLensType ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
-              {availableCoatings.map((coating) => (
-                <Button
-                  key={coating.id}
-                  variant={selectedCoating?.id === coating.id ? "default" : "outline"}
-                  className={`
-                    h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
-                    ${selectedCoating?.id === coating.id ? "bg-orange-600 hover:bg-orange-700 text-white" : "hover:bg-orange-50"}
-                  `}
-                  onClick={() => handleCoatingSelect(coating)}
-                >
-                  <div className="flex flex-col">
-                    <span className="font-medium">{coating.name}</span>
-                    <span className="text-xs opacity-80">{coating.description}</span>
-                  </div>
-                  <div className={`w-full flex ${selectedCoating?.id === coating.id ? "justify-between" : "justify-end"} items-center`}>
-                    {selectedCoating?.id === coating.id && (
-                      <Badge variant="secondary" className="bg-white/20 text-white">
-                        <Check className="w-3 h-3 mr-1" />
-                        {t('selected')}
+            availableCoatings.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+                {availableCoatings.map((coating) => (
+                  <Button
+                    key={coating.id}
+                    variant={selectedCoating?.id === coating.id ? "default" : "outline"}
+                    className={`
+                      h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
+                      ${selectedCoating?.id === coating.id ? "bg-orange-600 hover:bg-orange-700 text-white" : "hover:bg-orange-50"}
+                    `}
+                    onClick={() => handleCoatingSelect(coating)}
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium">{coating.name}</span>
+                      <span className="text-xs opacity-80">{coating.description}</span>
+                    </div>
+                    <div className={`w-full flex ${selectedCoating?.id === coating.id ? "justify-between" : "justify-end"} items-center`}>
+                      {selectedCoating?.id === coating.id && (
+                        <Badge variant="secondary" className="bg-white/20 text-white">
+                          <Check className="w-3 h-3 mr-1" />
+                          {t('selected')}
+                        </Badge>
+                      )}
+                      <Badge variant={selectedCoating?.id === coating.id ? "outline" : "secondary"} 
+                        className={selectedCoating?.id === coating.id ? "border-white/30 text-white" : ""}>
+                        {coating.price.toFixed(2)} {t('kwd')}
                       </Badge>
-                    )}
-                    <Badge variant={selectedCoating?.id === coating.id ? "outline" : "secondary"} 
-                      className={selectedCoating?.id === coating.id ? "border-white/30 text-white" : ""}>
-                      {coating.price.toFixed(2)} {t('kwd')}
-                    </Badge>
-                  </div>
-                </Button>
-              ))}
-              
-              {/* No Coating option has been removed as requested by the user */}
-            </div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 bg-orange-50/50 rounded-lg mb-3">
+                <AlertCircle className="mx-auto h-8 w-8 text-orange-400 mb-2" />
+                <p className="text-orange-800 font-medium">{t('noCoatingsAvailable') || "No coating options available for this lens type."}</p>
+                <p className="text-sm text-orange-600 mt-1">{t('selectDifferentLens') || "Please select a different lens type."}</p>
+              </div>
+            )
           ) : (
             <div className="text-center py-3 text-muted-foreground">
               {t('selectLensTypeFirst')}
@@ -328,69 +349,48 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
             <h3 className="font-semibold text-emerald-800 ml-2">3. {t('selectThickness') || "Select Thickness"}</h3>
           </div>
           
-          {selectedLensType ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
-              {availableThicknesses.map((thickness) => (
-                <Button
-                  key={thickness.id}
-                  variant={selectedThickness?.id === thickness.id ? "default" : "outline"}
-                  className={`
-                    h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
-                    ${selectedThickness?.id === thickness.id ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "hover:bg-emerald-50"}
-                  `}
-                  onClick={() => handleThicknessSelect(thickness)}
-                >
-                  <div className="flex flex-col">
-                    <span className="font-medium">{thickness.name}</span>
-                    <span className="text-xs opacity-80">{thickness.description}</span>
-                  </div>
-                  <div className={`w-full flex ${selectedThickness?.id === thickness.id ? "justify-between" : "justify-end"} items-center`}>
-                    {selectedThickness?.id === thickness.id && (
-                      <Badge variant="secondary" className="bg-white/20 text-white">
-                        <Check className="w-3 h-3 mr-1" />
-                        {t('selected')}
+          {selectedLensType && selectedCoating ? (
+            availableThicknesses.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+                {availableThicknesses.map((thickness) => (
+                  <Button
+                    key={thickness.id}
+                    variant={selectedThickness?.id === thickness.id ? "default" : "outline"}
+                    className={`
+                      h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
+                      ${selectedThickness?.id === thickness.id ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "hover:bg-emerald-50"}
+                    `}
+                    onClick={() => handleThicknessSelect(thickness)}
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium">{thickness.name}</span>
+                      <span className="text-xs opacity-80">{thickness.description}</span>
+                    </div>
+                    <div className={`w-full flex ${selectedThickness?.id === thickness.id ? "justify-between" : "justify-end"} items-center`}>
+                      {selectedThickness?.id === thickness.id && (
+                        <Badge variant="secondary" className="bg-white/20 text-white">
+                          <Check className="w-3 h-3 mr-1" />
+                          {t('selected')}
+                        </Badge>
+                      )}
+                      <Badge variant={selectedThickness?.id === thickness.id ? "outline" : "secondary"}
+                        className={selectedThickness?.id === thickness.id ? "border-white/30 text-white" : ""}>
+                        {thickness.price.toFixed(2)} {t('kwd')}
                       </Badge>
-                    )}
-                    <Badge variant={selectedThickness?.id === thickness.id ? "outline" : "secondary"}
-                      className={selectedThickness?.id === thickness.id ? "border-white/30 text-white" : ""}>
-                      {thickness.price.toFixed(2)} {t('kwd')}
-                    </Badge>
-                  </div>
-                </Button>
-              ))}
-              
-              <Button
-                variant={selectedThickness === null ? "default" : "outline"}
-                className={`
-                  h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
-                  ${selectedThickness === null ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "hover:bg-emerald-50"}
-                `}
-                onClick={() => {
-                  setSelectedThickness(null);
-                  onSelectThickness(null);
-                }}
-              >
-                <div className="flex flex-col">
-                  <span className="font-medium">{t('noThickness') || "No Thickness"}</span>
-                  <span className="text-xs opacity-80">{t('noThicknessDesc') || "Standard thickness"}</span>
-                </div>
-                <div className={`w-full flex ${selectedThickness === null ? "justify-between" : "justify-end"} items-center`}>
-                  {selectedThickness === null && (
-                    <Badge variant="secondary" className="bg-white/20 text-white">
-                      <X className="w-3 h-3 mr-1" />
-                      {t('selected')}
-                    </Badge>
-                  )}
-                  <Badge variant={selectedThickness === null ? "outline" : "secondary"}
-                    className={selectedThickness === null ? "border-white/30 text-white" : ""}>
-                    0.00 {t('kwd')}
-                  </Badge>
-                </div>
-              </Button>
-            </div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 bg-emerald-50/50 rounded-lg mb-3">
+                <AlertCircle className="mx-auto h-8 w-8 text-emerald-400 mb-2" />
+                <p className="text-emerald-800 font-medium">{t('noThicknessAvailable') || "No thickness options available for this combination."}</p>
+                <p className="text-sm text-emerald-600 mt-1">{t('selectDifferentCoating') || "Please select a different coating."}</p>
+              </div>
+            )
           ) : (
             <div className="text-center py-3 text-muted-foreground">
-              {t('selectLensTypeFirst')}
+              {selectedLensType ? t('selectCoatingFirst') || "Select a coating first" : t('selectLensTypeFirst')}
             </div>
           )}
         </CardContent>

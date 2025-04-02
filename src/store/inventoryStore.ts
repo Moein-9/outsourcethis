@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -85,11 +86,13 @@ interface InventoryState {
   updateLensCoating: (id: string, coating: Partial<Omit<LensCoating, "id">>) => void;
   deleteLensCoating: (id: string) => void;
   getLensCoatingsByCategory: (category: LensCoating['category']) => LensCoating[];
+  getAvailableCoatings: (lensTypeId: string, category: LensCoating['category']) => LensCoating[];
   
   addLensThickness: (thickness: Omit<LensThickness, "id">) => string;
   updateLensThickness: (id: string, thickness: Partial<Omit<LensThickness, "id">>) => void;
   deleteLensThickness: (id: string) => void;
   getLensThicknessesByCategory: (category: LensThickness['category']) => LensThickness[];
+  getAvailableThicknesses: (lensTypeId: string, coatingId: string, category: LensThickness['category']) => LensThickness[];
   
   addContactLens: (lens: Omit<ContactLensItem, "id">) => string;
   updateContactLens: (id: string, lens: Partial<Omit<ContactLensItem, "id">>) => void;
@@ -314,6 +317,24 @@ export const useInventoryStore = create<InventoryState>()(
         return get().lensCoatings.filter(coating => coating.category === category);
       },
       
+      getAvailableCoatings: (lensTypeId, category) => {
+        const combinations = get().lensPricingCombinations;
+        
+        // Find all unique coating IDs that have a combination with this lens type
+        const availableCoatingIds = [...new Set(
+          combinations
+            .filter(combo => combo.lensTypeId === lensTypeId)
+            .map(combo => combo.coatingId)
+        )];
+        
+        // Get the actual coating objects for these IDs
+        const availableCoatings = get().lensCoatings.filter(
+          coating => availableCoatingIds.includes(coating.id) && coating.category === category
+        );
+        
+        return availableCoatings;
+      },
+      
       addLensThickness: (thickness) => {
         const id = `thick${Date.now()}`;
         
@@ -340,6 +361,24 @@ export const useInventoryStore = create<InventoryState>()(
       
       getLensThicknessesByCategory: (category) => {
         return get().lensThicknesses.filter(thickness => thickness.category === category);
+      },
+      
+      getAvailableThicknesses: (lensTypeId, coatingId, category) => {
+        const combinations = get().lensPricingCombinations;
+        
+        // Find all unique thickness IDs that have a combination with this lens type and coating
+        const availableThicknessIds = [...new Set(
+          combinations
+            .filter(combo => combo.lensTypeId === lensTypeId && combo.coatingId === coatingId)
+            .map(combo => combo.thicknessId)
+        )];
+        
+        // Get the actual thickness objects for these IDs
+        const availableThicknesses = get().lensThicknesses.filter(
+          thickness => availableThicknessIds.includes(thickness.id) && thickness.category === category
+        );
+        
+        return availableThicknesses;
       },
       
       addContactLens: (lens) => {
