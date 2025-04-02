@@ -5,6 +5,9 @@ import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store
 import { ContactLensSelector, ContactLensSelection } from "@/components/ContactLensSelector";
 import { toast } from "sonner";
 import { SamplePhotochromicCoating } from "@/components/SamplePhotochromicCoating";
+import { LensSection } from "./LensSection";
+import { FrameSection } from "./FrameSection";
+import { EyeExamSection } from "./EyeExamSection";
 
 interface InvoiceStepProductsProps {
   invoiceType: "glasses" | "contacts" | "exam";
