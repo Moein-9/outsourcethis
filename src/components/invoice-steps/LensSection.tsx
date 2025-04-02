@@ -10,14 +10,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LensSelector } from "@/components/LensSelector";
 import { Eye, Check } from "lucide-react";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { PhotochromicColorSelector } from "./PhotochromicColorSelector";
 
 interface LensSectionProps {
   selectedLensType: LensType | null;
@@ -29,8 +22,8 @@ interface LensSectionProps {
   onThicknessSelect: (thickness: LensThickness | null) => void;
   onSkipFrameChange: (skip: boolean) => void;
   onCombinationPriceChange: (price: number | null) => void;
-  onCoatingColorChange?: (color: string) => void; // New prop
-  selectedCoatingColor?: string; // New prop
+  onCoatingColorChange?: (color: string) => void; 
+  selectedCoatingColor?: string;
   combinedLensPrice: number | null;
   rx: any;
 }
@@ -74,8 +67,8 @@ export const LensSection: React.FC<LensSectionProps> = ({
       <CardContent className="p-4">
         <LensSelector 
           onSelectLensType={onLensTypeSelect}
-          onSelectCoating={onCoatingSelect}
-          onSelectThickness={onThicknessSelect}
+          onSelectCoating={onSelectCoating}
+          onSelectThickness={onSelectThickness}
           skipLens={skipFrame}
           onSkipLensChange={onSkipFrameChange}
           initialLensType={selectedLensType}
@@ -85,43 +78,13 @@ export const LensSection: React.FC<LensSectionProps> = ({
           onCombinationPriceChange={onCombinationPriceChange}
         />
         
-        {/* Photochromic color selector */}
-        {selectedCoating?.isPhotochromic && selectedCoating?.availableColors && selectedCoating.availableColors.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-dashed">
-            <Label className="mb-2 block font-medium">{t('selectPhotochromicColor') || "Select Photochromic Color"}</Label>
-            <Select 
-              value={selectedCoatingColor} 
-              onValueChange={onCoatingColorChange ? onCoatingColorChange : () => {}}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={t('selectColor') || "Select Color"} />
-              </SelectTrigger>
-              <SelectContent>
-                {selectedCoating.availableColors.map(color => (
-                  <SelectItem key={color} value={color}>
-                    {color}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {/* Color Preview */}
-            {selectedCoatingColor && (
-              <div className="mt-3 flex items-center gap-3">
-                <div 
-                  className="w-6 h-6 rounded-full border"
-                  style={{ 
-                    backgroundColor: 
-                      selectedCoatingColor === "Brown" ? "#8B4513" :
-                      selectedCoatingColor === "Gray" ? "#808080" : 
-                      selectedCoatingColor === "Green" ? "#006400" :
-                      selectedCoatingColor === "Blue" ? "#0000CD" : "transparent"
-                  }}
-                ></div>
-                <span className="text-sm">{selectedCoatingColor}</span>
-              </div>
-            )}
-          </div>
+        {/* Photochromic color selector moved to its own component */}
+        {selectedCoating?.isPhotochromic && (
+          <PhotochromicColorSelector
+            coating={selectedCoating}
+            selectedColor={selectedCoatingColor}
+            onColorChange={onCoatingColorChange || (() => {})}
+          />
         )}
       </CardContent>
     </Card>
