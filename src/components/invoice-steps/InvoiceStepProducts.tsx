@@ -4,7 +4,6 @@ import { useInvoiceForm } from "./InvoiceFormContext";
 import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store/inventoryStore";
 import { ContactLensSelector, ContactLensSelection } from "@/components/ContactLensSelector";
 import { toast } from "sonner";
-import { SamplePhotochromicCoating } from "@/components/SamplePhotochromicCoating";
 import { LensSection } from "./LensSection";
 import { FrameSection } from "./FrameSection";
 import { EyeExamSection } from "./EyeExamSection";
@@ -223,8 +222,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <SamplePhotochromicCoating />
-      
       {invoiceType === "glasses" ? (
         <>
           <LensSection

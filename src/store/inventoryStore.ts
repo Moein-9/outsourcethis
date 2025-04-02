@@ -111,6 +111,8 @@ interface InventoryState {
   deleteLensPricingCombination: (id: string) => void;
   getLensPricingCombinations: () => LensPricingCombination[];
   getLensPricingByComponents: (lensTypeId: string, coatingId: string, thicknessId: string) => number | null;
+  
+  cleanupSamplePhotochromicCoatings: () => void;
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -564,7 +566,7 @@ export const useInventoryStore = create<InventoryState>()(
         return get().lensPricingCombinations;
       },
       
-      getLensPricingByComponents: (lensTypeId, coatingId, thicknessId) => {
+      getLensPricingByComponents: (lensTypeId: string, coatingId: string, thicknessId: string) => {
         const combination = get().lensPricingCombinations.find(
           c => c.lensTypeId === lensTypeId && 
                c.coatingId === coatingId && 
@@ -576,6 +578,33 @@ export const useInventoryStore = create<InventoryState>()(
         }
         
         return null;
+      },
+      
+      cleanupSamplePhotochromicCoatings: () => {
+        const state = get();
+        
+        // Find sample photochromic coatings
+        const sampleCoatingIds = state.lensCoatings
+          .filter(coating => coating.name === "Sample Photochromic" && coating.isPhotochromic)
+          .map(coating => coating.id);
+        
+        if (sampleCoatingIds.length > 0) {
+          // Remove sample coating price combinations
+          const updatedCombinations = state.lensPricingCombinations.filter(
+            combo => !sampleCoatingIds.includes(combo.coatingId)
+          );
+          
+          // Remove sample coatings
+          const updatedCoatings = state.lensCoatings.filter(
+            coating => !sampleCoatingIds.includes(coating.id)
+          );
+          
+          // Update the state
+          set({
+            lensCoatings: updatedCoatings,
+            lensPricingCombinations: updatedCombinations
+          });
+        }
       }
     }),
     {
