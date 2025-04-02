@@ -4,10 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LensTypeManager } from "@/components/LensTypeManager";
 import { LensCoatingManager } from "@/components/LensCoatingManager";
 import { LensThicknessManager } from "@/components/LensThicknessManager";
+import { LensCombinationManager } from "@/components/LensCombinationManager";
 import { FrameInventory } from "@/components/FrameInventory";
 import { ContactLensInventory } from "@/components/ContactLensInventory";
 import { ServiceManager } from "@/components/ServiceManager";
-import { Glasses, Contact, Layers, Paintbrush, Ruler, Wrench } from "lucide-react";
+import { Glasses, Contact, Layers, Paintbrush, Ruler, Wrench, Calculator } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 
 export const InventoryTabs: React.FC = () => {
@@ -52,6 +53,13 @@ export const InventoryTabs: React.FC = () => {
         >
           <Ruler className="w-4 h-4" />
           <span>{t('lensThicknesses')}</span>
+        </TabsTrigger>
+        <TabsTrigger 
+          value="lensCombination" 
+          className="data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
+        >
+          <Calculator className="w-4 h-4" />
+          <span>{language === 'ar' ? 'تركيبات العدسات' : 'Lens Combinations'}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="services" 
@@ -109,6 +117,16 @@ export const InventoryTabs: React.FC = () => {
             {t('lensThicknesses')}
           </h3>
           <LensThicknessManager />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="lensCombination" className="mt-0">
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className={`text-lg font-bold mb-4 text-amber-800 flex items-center gap-2 ${textAlignClass}`}>
+            <Calculator className="w-5 h-5" />
+            {language === 'ar' ? 'إدارة تركيبات العدسات' : 'Lens Combination Management'}
+          </h3>
+          <LensCombinationManager />
         </div>
       </TabsContent>
       

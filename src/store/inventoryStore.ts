@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -55,6 +56,14 @@ export interface ServiceItem {
   category: "exam" | "repair" | "other";
 }
 
+export interface LensPricingCombination {
+  id: string;
+  lensTypeId: string;
+  coatingId: string;
+  thicknessId: string;
+  price: number;
+}
+
 interface InventoryState {
   frames: FrameItem[];
   lensTypes: LensType[];
@@ -62,6 +71,7 @@ interface InventoryState {
   lensThicknesses: LensThickness[];
   contactLenses: ContactLensItem[];
   services: ServiceItem[];
+  lensPricingCombinations: LensPricingCombination[];
   
   // Frame methods
   addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => string;
@@ -98,6 +108,13 @@ interface InventoryState {
   deleteService: (id: string) => void;
   getServiceById: (id: string) => ServiceItem | undefined;
   getServicesByCategory: (category: ServiceItem['category']) => ServiceItem[];
+  
+  // Lens pricing combination methods
+  addLensPricingCombination: (combination: Omit<LensPricingCombination, "id">) => string;
+  updateLensPricingCombination: (id: string, combination: Partial<Omit<LensPricingCombination, "id">>) => void;
+  deleteLensPricingCombination: (id: string) => void;
+  getLensPricingCombinations: () => LensPricingCombination[];
+  getLensPricingByComponents: (lensTypeId: string, coatingId: string, thicknessId: string) => number | null;
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -180,6 +197,36 @@ export const useInventoryStore = create<InventoryState>()(
           description: "Standard eye examination service to evaluate eye health and vision.", 
           price: 3, 
           category: "exam" 
+        }
+      ],
+      lensPricingCombinations: [
+        {
+          id: "combo1",
+          lensTypeId: "lens2",
+          coatingId: "coat8",
+          thicknessId: "thick8",
+          price: 15
+        },
+        {
+          id: "combo2",
+          lensTypeId: "lens2",
+          coatingId: "coat8",
+          thicknessId: "thick11",
+          price: 25
+        },
+        {
+          id: "combo3",
+          lensTypeId: "lens2",
+          coatingId: "coat9",
+          thicknessId: "thick8",
+          price: 20
+        },
+        {
+          id: "combo4",
+          lensTypeId: "lens3",
+          coatingId: "coat11",
+          thicknessId: "thick14",
+          price: 40
         }
       ],
       
@@ -375,11 +422,55 @@ export const useInventoryStore = create<InventoryState>()(
       
       getServicesByCategory: (category) => {
         return get().services.filter(service => service.category === category);
+      },
+      
+      // Lens pricing combination methods
+      addLensPricingCombination: (combination) => {
+        const id = `combo${Date.now()}`;
+        
+        set((state) => ({
+          lensPricingCombinations: [...state.lensPricingCombinations, { ...combination, id }]
+        }));
+        
+        return id;
+      },
+      
+      updateLensPricingCombination: (id, combination) => {
+        set((state) => ({
+          lensPricingCombinations: state.lensPricingCombinations.map(item => 
+            item.id === id ? { ...item, ...combination } : item
+          )
+        }));
+      },
+      
+      deleteLensPricingCombination: (id) => {
+        set((state) => ({
+          lensPricingCombinations: state.lensPricingCombinations.filter(item => item.id !== id)
+        }));
+      },
+      
+      getLensPricingCombinations: () => {
+        return get().lensPricingCombinations;
+      },
+      
+      getLensPricingByComponents: (lensTypeId, coatingId, thicknessId) => {
+        const combination = get().lensPricingCombinations.find(
+          c => c.lensTypeId === lensTypeId && 
+               c.coatingId === coatingId && 
+               c.thicknessId === thicknessId
+        );
+        
+        if (combination) {
+          return combination.price;
+        }
+        
+        // If no specific combination is found, return null
+        return null;
       }
     }),
     {
       name: 'inventory-store',
-      version: 2
+      version: 3 // Increment version to ensure store gets updated
     }
   )
 );
