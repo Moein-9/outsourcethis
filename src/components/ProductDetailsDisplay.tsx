@@ -16,7 +16,6 @@ interface ProductDetailsDisplayProps {
       price: number;
       quantity?: number;
     }>;
-    thicknessPrice?: number; // Combined price for lens + coating + thickness
   };
 }
 
@@ -68,14 +67,7 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
           {invoice.thickness && (
             <div className="grid grid-cols-2 gap-2">
               <div className="text-sm text-gray-500">{t('thickness')}:</div>
-              <div className="text-sm font-medium">
-                {invoice.thickness}
-                {invoice.thicknessPrice !== undefined && (
-                  <span className="ml-2 text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">
-                    {invoice.thicknessPrice.toFixed(3)} {t('kwd')}
-                  </span>
-                )}
-              </div>
+              <div className="text-sm font-medium">{invoice.thickness}</div>
             </div>
           )}
         </div>
