@@ -123,15 +123,24 @@ export const LensCombinationManager: React.FC = () => {
       price
     };
     
-    const id = addLensPricingCombination(newCombination);
-    
-    if (id) {
-      toast({
-        description: t('combinationAdded'),
-      });
+    try {
+      const id = addLensPricingCombination(newCombination);
       
-      loadPricingCombinations();
-      resetForm();
+      if (id) {
+        toast({
+          description: t('combinationAdded'),
+        });
+        
+        loadPricingCombinations();
+        resetForm();
+      }
+    } catch (error) {
+      console.error("Error adding combination:", error);
+      toast({
+        title: t('error'),
+        description: t('errorAddingCombination'),
+        variant: "destructive"
+      });
     }
   };
   
@@ -155,25 +164,43 @@ export const LensCombinationManager: React.FC = () => {
       return;
     }
     
-    updateLensPricingCombination(id, { price });
-    
-    toast({
-      description: t('combinationUpdated'),
-    });
-    
-    loadPricingCombinations();
-    setEditingId(null);
-    setEditPrice("");
+    try {
+      updateLensPricingCombination(id, { price });
+      
+      toast({
+        description: t('combinationUpdated'),
+      });
+      
+      loadPricingCombinations();
+      setEditingId(null);
+      setEditPrice("");
+    } catch (error) {
+      console.error("Error updating combination:", error);
+      toast({
+        title: t('error'),
+        description: t('errorUpdatingCombination'),
+        variant: "destructive"
+      });
+    }
   };
   
   const handleDeleteCombination = (id: string) => {
-    deleteLensPricingCombination(id);
-    
-    toast({
-      description: t('combinationDeleted'),
-    });
-    
-    loadPricingCombinations();
+    try {
+      deleteLensPricingCombination(id);
+      
+      toast({
+        description: t('combinationDeleted'),
+      });
+      
+      loadPricingCombinations();
+    } catch (error) {
+      console.error("Error deleting combination:", error);
+      toast({
+        title: t('error'),
+        description: t('errorDeletingCombination'),
+        variant: "destructive"
+      });
+    }
   };
   
   const startEditing = (combination: LensPricingCombination) => {
@@ -212,7 +239,10 @@ export const LensCombinationManager: React.FC = () => {
               <Label htmlFor="lensType" className={textAlignClass}>
                 {t('selectLensType')}
               </Label>
-              <Select value={selectedLensType} onValueChange={setSelectedLensType}>
+              <Select 
+                value={selectedLensType} 
+                onValueChange={setSelectedLensType}
+              >
                 <SelectTrigger id="lensType">
                   <SelectValue placeholder={t('selectLensType')} />
                 </SelectTrigger>
@@ -230,7 +260,10 @@ export const LensCombinationManager: React.FC = () => {
               <Label htmlFor="coating" className={textAlignClass}>
                 {t('selectCoating')}
               </Label>
-              <Select value={selectedCoating} onValueChange={setSelectedCoating}>
+              <Select 
+                value={selectedCoating} 
+                onValueChange={setSelectedCoating}
+              >
                 <SelectTrigger id="coating">
                   <SelectValue placeholder={t('selectCoating')} />
                 </SelectTrigger>
@@ -248,7 +281,10 @@ export const LensCombinationManager: React.FC = () => {
               <Label htmlFor="thickness" className={textAlignClass}>
                 {t('selectThickness')}
               </Label>
-              <Select value={selectedThickness} onValueChange={setSelectedThickness}>
+              <Select 
+                value={selectedThickness} 
+                onValueChange={setSelectedThickness}
+              >
                 <SelectTrigger id="thickness">
                   <SelectValue placeholder={t('selectThickness')} />
                 </SelectTrigger>

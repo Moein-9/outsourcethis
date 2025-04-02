@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 
 type LanguageStore = {
@@ -191,6 +192,7 @@ const translations: Record<string, Record<string, string>> = {
     
     // Lens Combinations
     lensPricingCombinations: 'Lens Pricing Combinations',
+    lensCombinations: 'Lens Combinations',
     addNewCombination: 'Add New Lens Combination',
     addCombination: 'Add Combination',
     selectLensType: 'Select Lens Type',
@@ -206,6 +208,10 @@ const translations: Record<string, Record<string, string>> = {
     searchCombinations: 'Search combinations',
     noMatchingCombinations: 'No matching combinations found',
     noCombinations: 'No lens combinations available',
+    errorAddingCombination: 'Error adding combination',
+    errorUpdatingCombination: 'Error updating combination',
+    errorDeletingCombination: 'Error deleting combination',
+    unknown: 'Unknown',
     
     // Remaining Payments
     duePayments: 'Manage incomplete invoices and record remaining payments',
@@ -573,6 +579,7 @@ const translations: Record<string, Record<string, string>> = {
     
     // Lens Combinations
     lensPricingCombinations: 'تركيبات أسعار العدسات',
+    lensCombinations: 'تركيبات العدسات',
     addNewCombination: 'إضافة تركيبة عدسات جديدة',
     addCombination: 'إضافة تركيبة',
     selectLensType: 'اختر نوع العدسة',
@@ -588,6 +595,10 @@ const translations: Record<string, Record<string, string>> = {
     searchCombinations: 'بحث عن تركيبات',
     noMatchingCombinations: 'لم يتم العثور على تركيبات مطابقة',
     noCombinations: 'لا توجد تركيبات عدسات متاحة',
+    errorAddingCombination: 'خطأ في إضافة التركيبة',
+    errorUpdatingCombination: 'خطأ في تحديث التركيبة',
+    errorDeletingCombination: 'خطأ في حذف التركيبة',
+    unknown: 'غير معروف',
     
     // Remaining Payments
     duePayments: 'إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية',
