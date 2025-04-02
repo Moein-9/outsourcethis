@@ -196,7 +196,6 @@ const translations: Record<string, Record<string, string>> = {
     addNewCombination: 'Add New Lens Combination',
     addCombination: 'Add Combination',
     selectLensType: 'Select Lens Type',
-    selectCoating: 'Select Coating',
     selectThickness: 'Select Thickness',
     combinationAdded: 'Lens combination added successfully',
     combinationUpdated: 'Lens combination updated successfully',
@@ -264,7 +263,6 @@ const translations: Record<string, Record<string, string>> = {
     
     // Create Invoice (Additional)
     invoiceTitle: "Create Invoice",
-    // clientSection is now defined above in "Tab sections in Create Invoice"
     noClientFile: "No client file",
     phoneColon: "Phone Number:",
     typeToSearch: "Type to search...",
@@ -284,7 +282,6 @@ const translations: Record<string, Record<string, string>> = {
     discountColon: "Discount (KWD):",
     depositColon: "Deposit (KWD):",
     payInFull: "Pay in Full",
-    // paymentSection is now defined above in "Tab sections in Create Invoice"
     approvalNumber: "Approval Number (Authorization No.):",
     previewInvoice: "Preview Invoice",
     saveAndPrint: "Save and Print",
@@ -337,8 +334,6 @@ const translations: Record<string, Record<string, string>> = {
     
     // Additional translations for images shown
     medicalLenses: "Medical Lenses",
-    selectLensType: "Select Lens Type",
-    selectCoatings: "Select Coatings",
     
     // RX Manager translations with improved spacing
     rxAndCareInstructions: "Rx and Care Instructions",
@@ -651,7 +646,6 @@ const translations: Record<string, Record<string, string>> = {
     
     // Create Invoice (Additional)
     invoiceTitle: "إنشاء فاتورة",
-    // clientSection is now defined above in "Tab sections in Create Invoice"
     noClientFile: "لا يوجد ملف عميل",
     phoneColon: "رقم الهاتف:",
     typeToSearch: "اكتب للبحث...",
@@ -723,7 +717,6 @@ const translations: Record<string, Record<string, string>> = {
     // Additional translations for images shown
     medicalLenses: "العدسات الطبية",
     selectLensType: "اختر نوع العدسة",
-    selectCoatings: "اختر الطلاءات",
     
     // RX Manager translations with proper Arabic translations
     rxAndCareInstructions: "تعليمات الوصفة والعناية",
@@ -790,3 +783,4 @@ export const useLanguageStore = create<LanguageStore>((set) => ({
     return translations[language][key] || key;
   },
 }));
+
