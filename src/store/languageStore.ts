@@ -189,6 +189,24 @@ const translations: Record<string, Record<string, string>> = {
     bifocal: 'Bifocal',
     sunglasses: 'Sunglasses',
     
+    // Lens Combinations
+    lensPricingCombinations: 'Lens Pricing Combinations',
+    addNewCombination: 'Add New Lens Combination',
+    addCombination: 'Add Combination',
+    selectLensType: 'Select Lens Type',
+    selectCoating: 'Select Coating',
+    selectThickness: 'Select Thickness',
+    combinationAdded: 'Lens combination added successfully',
+    combinationUpdated: 'Lens combination updated successfully',
+    combinationDeleted: 'Lens combination deleted successfully',
+    combinationExists: 'This lens combination already exists',
+    allFieldsRequired: 'All fields are required',
+    invalidPrice: 'Please enter a valid price',
+    priceRequired: 'Price is required',
+    searchCombinations: 'Search combinations',
+    noMatchingCombinations: 'No matching combinations found',
+    noCombinations: 'No lens combinations available',
+    
     // Remaining Payments
     duePayments: 'Manage incomplete invoices and record remaining payments',
     clientId: 'Client ID',
@@ -552,6 +570,24 @@ const translations: Record<string, Record<string, string>> = {
     progressive: 'متدرجة (Progressive)',
     bifocal: 'ثنائية البؤرة (Bifocal)',
     sunglasses: 'نظارات شمسية (Sunglasses)',
+    
+    // Lens Combinations
+    lensPricingCombinations: 'تركيبات أسعار العدسات',
+    addNewCombination: 'إضافة تركيبة عدسات جديدة',
+    addCombination: 'إضافة تركيبة',
+    selectLensType: 'اختر نوع العدسة',
+    selectCoating: 'اختر الطلاءات',
+    selectThickness: 'اختر سماكة العدسة',
+    combinationAdded: 'تمت إضافة تركيبة العدسات بنجاح',
+    combinationUpdated: 'تم تحديث تركيبة العدسات بنجاح',
+    combinationDeleted: 'تم حذف تركيبة العدسات بنجاح',
+    combinationExists: 'تركيبة العدسات هذه موجودة بالفعل',
+    allFieldsRequired: 'جميع الحقول مطلوبة',
+    invalidPrice: 'الرجاء إدخال سعر صحيح',
+    priceRequired: 'السعر مطلوب',
+    searchCombinations: 'بحث عن تركيبات',
+    noMatchingCombinations: 'لم يتم العثور على تركيبات مطابقة',
+    noCombinations: 'لا توجد تركيبات عدسات متاحة',
     
     // Remaining Payments
     duePayments: 'إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية',

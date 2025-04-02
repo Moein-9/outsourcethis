@@ -59,7 +59,7 @@ export const InventoryTabs: React.FC = () => {
           className="data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
           <Calculator className="w-4 h-4" />
-          <span>{language === 'ar' ? 'تركيبات العدسات' : 'Lens Combinations'}</span>
+          <span>{t('lensPricingCombinations')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="services" 
@@ -124,7 +124,7 @@ export const InventoryTabs: React.FC = () => {
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <h3 className={`text-lg font-bold mb-4 text-amber-800 flex items-center gap-2 ${textAlignClass}`}>
             <Calculator className="w-5 h-5" />
-            {language === 'ar' ? 'إدارة تركيبات العدسات' : 'Lens Combination Management'}
+            {t('lensPricingCombinations')}
           </h3>
           <LensCombinationManager />
         </div>

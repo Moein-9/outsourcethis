@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { Edit, Save, Plus, XCircle, ChevronUp, ChevronDown, Search } from "lucide-react";
+import { Edit, Save, Plus, XCircle, Search } from "lucide-react";
 
 interface LensPricingCombination {
   id: string;
@@ -116,12 +116,14 @@ export const LensCombinationManager: React.FC = () => {
       return;
     }
     
-    const id = addLensPricingCombination({
+    const newCombination = {
       lensTypeId: selectedLensType,
       coatingId: selectedCoating,
       thicknessId: selectedThickness,
       price
-    });
+    };
+    
+    const id = addLensPricingCombination(newCombination);
     
     if (id) {
       toast({
@@ -187,19 +189,19 @@ export const LensCombinationManager: React.FC = () => {
   };
   
   const getLensTypeName = (id: string) => {
-    return lensTypes.find(lt => lt.id === id)?.name || "Unknown";
+    return lensTypes.find(lt => lt.id === id)?.name || t('unknown');
   };
   
   const getCoatingName = (id: string) => {
-    return lensCoatings.find(c => c.id === id)?.name || "Unknown";
+    return lensCoatings.find(c => c.id === id)?.name || t('unknown');
   };
   
   const getThicknessName = (id: string) => {
-    return lensThicknesses.find(t => t.id === id)?.name || "Unknown";
+    return lensThicknesses.find(t => t.id === id)?.name || t('unknown');
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={dirClass}>
       <Card className="border-blue-100">
         <CardHeader className="bg-blue-50">
           <CardTitle className={textAlignClass}>{t('addNewCombination')}</CardTitle>
@@ -208,11 +210,11 @@ export const LensCombinationManager: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="lensType" className={textAlignClass}>
-                {language === 'ar' ? 'اختر نوع العدسة' : 'Select Lens Type'}
+                {t('selectLensType')}
               </Label>
               <Select value={selectedLensType} onValueChange={setSelectedLensType}>
                 <SelectTrigger id="lensType">
-                  <SelectValue placeholder={language === 'ar' ? 'اختر نوع العدسة' : 'Select Lens Type'} />
+                  <SelectValue placeholder={t('selectLensType')} />
                 </SelectTrigger>
                 <SelectContent>
                   {lensTypes.map((type) => (
@@ -226,11 +228,11 @@ export const LensCombinationManager: React.FC = () => {
             
             <div className="space-y-2">
               <Label htmlFor="coating" className={textAlignClass}>
-                {language === 'ar' ? 'اختر الطلاءات' : 'Select Coating'}
+                {t('selectCoating')}
               </Label>
               <Select value={selectedCoating} onValueChange={setSelectedCoating}>
                 <SelectTrigger id="coating">
-                  <SelectValue placeholder={language === 'ar' ? 'اختر الطلاءات' : 'Select Coating'} />
+                  <SelectValue placeholder={t('selectCoating')} />
                 </SelectTrigger>
                 <SelectContent>
                   {lensCoatings.map((coating) => (
@@ -244,11 +246,11 @@ export const LensCombinationManager: React.FC = () => {
             
             <div className="space-y-2">
               <Label htmlFor="thickness" className={textAlignClass}>
-                {language === 'ar' ? 'اختر سماكة العدسة' : 'Select Thickness'}
+                {t('selectThickness')}
               </Label>
               <Select value={selectedThickness} onValueChange={setSelectedThickness}>
                 <SelectTrigger id="thickness">
-                  <SelectValue placeholder={language === 'ar' ? 'اختر سماكة العدسة' : 'Select Thickness'} />
+                  <SelectValue placeholder={t('selectThickness')} />
                 </SelectTrigger>
                 <SelectContent>
                   {lensThicknesses.map((thickness) => (
@@ -276,7 +278,7 @@ export const LensCombinationManager: React.FC = () => {
           
           <Button 
             onClick={handleAddCombination} 
-            className="w-full mt-4"
+            className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="mr-2 h-4 w-4" /> {t('addCombination')}
           </Button>
@@ -303,10 +305,10 @@ export const LensCombinationManager: React.FC = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-muted/50 border-b">
-                  <th className="p-2 text-left">{language === 'ar' ? 'نوع العدسة' : 'Lens Type'}</th>
-                  <th className="p-2 text-left">{language === 'ar' ? 'الطلاءات' : 'Coating'}</th>
-                  <th className="p-2 text-left">{language === 'ar' ? 'سماكة العدسة' : 'Thickness'}</th>
-                  <th className="p-2 text-left">{t('price')} (KWD)</th>
+                  <th className={`p-2 ${language === 'ar' ? 'text-right' : 'text-left'}`}>{t('lensTypes')}</th>
+                  <th className={`p-2 ${language === 'ar' ? 'text-right' : 'text-left'}`}>{t('lensCoatings')}</th>
+                  <th className={`p-2 ${language === 'ar' ? 'text-right' : 'text-left'}`}>{t('lensThicknesses')}</th>
+                  <th className={`p-2 ${language === 'ar' ? 'text-right' : 'text-left'}`}>{t('price')} (KWD)</th>
                   <th className="p-2 text-center">{t('actions')}</th>
                 </tr>
               </thead>
@@ -345,6 +347,7 @@ export const LensCombinationManager: React.FC = () => {
                                 size="sm" 
                                 variant="outline" 
                                 onClick={() => handleUpdateCombination(combination.id)}
+                                title={t('save')}
                               >
                                 <Save className="h-4 w-4" />
                               </Button>
@@ -352,6 +355,7 @@ export const LensCombinationManager: React.FC = () => {
                                 size="sm" 
                                 variant="outline" 
                                 onClick={() => setEditingId(null)}
+                                title={t('cancel')}
                               >
                                 <XCircle className="h-4 w-4" />
                               </Button>
@@ -362,6 +366,7 @@ export const LensCombinationManager: React.FC = () => {
                                 size="sm" 
                                 variant="outline" 
                                 onClick={() => startEditing(combination)}
+                                title={t('edit')}
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -370,6 +375,7 @@ export const LensCombinationManager: React.FC = () => {
                                 variant="outline" 
                                 className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
                                 onClick={() => handleDeleteCombination(combination.id)}
+                                title={t('delete')}
                               >
                                 <XCircle className="h-4 w-4" />
                               </Button>
