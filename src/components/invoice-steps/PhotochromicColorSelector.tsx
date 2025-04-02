@@ -63,13 +63,13 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
               }}
             >
               {coating.availableColors.map(color => (
-                <SelectItem key={color} value={color} className="py-3">
+                <SelectItem key={color} value={color} className="py-3 h-auto">
                   <div className={`flex items-center gap-3 w-full ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                     <div 
-                      className="w-6 h-6 rounded-full border"
+                      className="min-w-6 h-6 rounded-full border shrink-0"
                       style={{ backgroundColor: getColorStyle(color) }}
                     ></div>
-                    <span className="text-base">{t(color.toLowerCase())}</span>
+                    <span className="text-base whitespace-normal break-words leading-tight">{t(color.toLowerCase())}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -79,12 +79,12 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
         
         {/* Color Preview with larger space */}
         {selectedColor && (
-          <div className={`flex items-center gap-3 p-4 bg-white rounded-md border ${language === 'ar' ? 'flex-row-reverse text-right' : ''}`}>
+          <div className={`flex items-start gap-3 p-4 bg-white rounded-md border ${language === 'ar' ? 'flex-row-reverse text-right' : ''}`}>
             <div 
-              className="w-8 h-8 rounded-full border-2"
+              className="w-8 h-8 rounded-full border-2 shrink-0 mt-0.5"
               style={{ backgroundColor: getColorStyle(selectedColor) }}
             ></div>
-            <span className="text-base font-medium">{t(selectedColor.toLowerCase())}</span>
+            <span className="text-base font-medium break-words whitespace-normal leading-relaxed">{t(selectedColor.toLowerCase())}</span>
           </div>
         )}
       </div>
