@@ -42,7 +42,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
 
   return (
     <div className="w-full">
-      <Label className="mb-2 block font-medium">
+      <Label className="mb-3 block font-medium text-base">
         {t('selectPhotochromicColor')}
       </Label>
       
@@ -51,21 +51,21 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
           value={selectedColor} 
           onValueChange={onColorChange}
         >
-          <SelectTrigger className="w-full bg-white">
+          <SelectTrigger className="w-full bg-white h-12 text-base">
             <SelectValue placeholder={t('selectColor')} />
           </SelectTrigger>
           <SelectContent 
             className="bg-white z-[200]" 
-            style={{ width: "100%", maxHeight: "180px" }}
+            style={{ width: "100%", maxHeight: "220px" }}
           >
             {coating.availableColors.map(color => (
-              <SelectItem key={color} value={color}>
-                <div className="flex items-center gap-2 w-full">
+              <SelectItem key={color} value={color} className="py-2">
+                <div className="flex items-center gap-3 w-full">
                   <div 
-                    className="w-4 h-4 rounded-full border"
+                    className="w-6 h-6 rounded-full border"
                     style={{ backgroundColor: getColorStyle(color) }}
                   ></div>
-                  <span>{t(color.toLowerCase())}</span>
+                  <span className="text-base">{t(color.toLowerCase())}</span>
                 </div>
               </SelectItem>
             ))}
@@ -73,14 +73,14 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
         </Select>
       </div>
       
-      {/* Color Preview */}
+      {/* Color Preview - Make it bigger */}
       {selectedColor && (
-        <div className="mt-3 flex items-center gap-3">
+        <div className="mt-4 flex items-center gap-3 p-3 bg-slate-50 rounded-md">
           <div 
-            className="w-6 h-6 rounded-full border"
+            className="w-8 h-8 rounded-full border-2"
             style={{ backgroundColor: getColorStyle(selectedColor) }}
           ></div>
-          <span className="text-sm">{t(selectedColor.toLowerCase())}</span>
+          <span className="text-base font-medium">{t(selectedColor.toLowerCase())}</span>
         </div>
       )}
     </div>

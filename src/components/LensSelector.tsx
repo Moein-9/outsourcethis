@@ -23,7 +23,6 @@ interface LensSelectorProps {
     axis?: { right: string; left: string };
     add?: { right: string; left: string };
     pd?: { right: string; left: string };
-    // Support for direct rx format from store
     sphereOD?: string;
     sphereOS?: string;
     cylOD?: string;
@@ -322,10 +321,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                           {t('selected')}
                         </Badge>
                       )}
-                      <Badge variant={selectedCoating?.id === coating.id ? "outline" : "secondary"} 
-                        className={selectedCoating?.id === coating.id ? "border-white/30 text-white" : ""}>
-                        {coating.price.toFixed(2)} {t('kwd')}
-                      </Badge>
                     </div>
                   </Button>
                 ))}
