@@ -18,6 +18,7 @@ interface WorkOrderReceiptPrintProps {
   rx?: any;
   lensType?: string;
   coating?: string;
+  coatingColor?: string;
   frame?: {
     brand: string;
     model: string;
@@ -278,6 +279,12 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
                 <span style="font-weight: bold;">${isRtl ? "النوع" : "Type"}:</span>
                 <span>${props.coating}</span>
               </div>
+              ${props.coatingColor ? `
+              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
+                <span style="font-weight: bold;">${isRtl ? "اللون" : "Color"}:</span>
+                <span>${props.coatingColor}</span>
+              </div>
+              ` : ''}
               <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "السعر" : "Price"}:</span>
                 <span>${props.invoice.coatingPrice.toFixed(3)} KWD</span>
@@ -479,6 +486,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   rx,
   lensType,
   coating,
+  coatingColor,
   frame,
   contactLenses,
   contactLensRx,
@@ -970,5 +978,3 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
     </div>
   );
 };
-
-export default WorkOrderReceiptPrint;
