@@ -577,8 +577,7 @@ const translations: Record<string, Record<string, string>> = {
     lensCombinations: 'تركيبات العدسات',
     addNewCombination: 'إضافة تركيبة عدسات جديدة',
     addCombination: 'إضافة تركيبة',
-    selectLensType: 'اختر نوع العدسة',
-    selectCoating: 'اختر الطلاءات',
+    // Removing the duplicate selectLensType key since it's already defined above
     selectThickness: 'اختر سماكة العدسة',
     combinationAdded: 'تمت إضافة تركيبة العدسات بنجاح',
     combinationUpdated: 'تم تحديث تركيبة العدسات بنجاح',
@@ -716,7 +715,7 @@ const translations: Record<string, Record<string, string>> = {
     
     // Additional translations for images shown
     medicalLenses: "العدسات الطبية",
-    selectLensType: "اختر نوع العدسة",
+    // Removing duplicate selectLensType that was causing the TS1117 error
     
     // RX Manager translations with proper Arabic translations
     rxAndCareInstructions: "تعليمات الوصفة والعناية",
@@ -783,4 +782,3 @@ export const useLanguageStore = create<LanguageStore>((set) => ({
     return translations[language][key] || key;
   },
 }));
-
