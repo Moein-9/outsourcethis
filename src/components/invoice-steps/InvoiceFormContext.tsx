@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useCallback } from "react";
 
 interface InvoiceFormData {
@@ -38,6 +39,16 @@ interface InvoiceFormData {
   servicePrice: number;
 
   lensCombinationPrice: number | null;
+  
+  // New fields needed by components
+  invoiceId: string;
+  workOrderId: string;
+  patientId: string;
+  paymentMethod: string;
+  authNumber: string;
+  isPaid: boolean;
+  isFinalPriceMode: boolean;
+  skipPatient: boolean;
 }
 
 interface InvoiceFormContextType {
@@ -45,6 +56,19 @@ interface InvoiceFormContextType {
   setValue: <T extends keyof InvoiceFormData>(field: T, value: InvoiceFormData[T]) => void;
   getValues: <T extends keyof InvoiceFormData>(field?: T) => T extends undefined ? InvoiceFormData : InvoiceFormData[T];
   updateServicePrice: (price: number) => void;
+  
+  // New methods needed by components
+  calculateTotal: () => number;
+  calculateRemaining: () => number;
+  validateCurrentStep: (step: string) => boolean;
+  updateFinalPrice: (price: number) => void;
+  finalPrice: number;
+  
+  // Patient search related
+  patientSearchResults: any[];
+  setPatientSearchResults: (results: any[]) => void;
+  currentPatient: any | null;
+  setCurrentPatient: (patient: any | null) => void;
 }
 
 const InvoiceFormContext = createContext<InvoiceFormContextType | undefined>(undefined);
@@ -83,10 +107,23 @@ const defaultFormState: InvoiceFormData = {
   serviceDescription: "",
   servicePrice: 0,
   lensCombinationPrice: null,
+  
+  // Initialize new fields
+  invoiceId: "",
+  workOrderId: "",
+  patientId: "",
+  paymentMethod: "",
+  authNumber: "",
+  isPaid: false,
+  isFinalPriceMode: false,
+  skipPatient: false,
 };
 
 export const InvoiceFormProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [formData, setFormData] = useState<InvoiceFormData>(defaultFormState);
+  const [finalPrice, setFinalPrice] = useState<number>(0);
+  const [patientSearchResults, setPatientSearchResults] = useState<any[]>([]);
+  const [currentPatient, setCurrentPatient] = useState<any | null>(null);
   
   const setValue = useCallback(<T extends keyof InvoiceFormData>(field: T, value: InvoiceFormData[T]) => {
     setFormData(prev => ({
@@ -108,11 +145,111 @@ export const InvoiceFormProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }));
   }, []);
   
+  const calculateTotal = useCallback(() => {
+    if (formData.invoiceType === 'exam') {
+      return formData.servicePrice - formData.discount;
+    } else if (formData.invoiceType === 'glasses') {
+      let lensPrice = formData.lensCombinationPrice !== null 
+        ? formData.lensCombinationPrice 
+        : formData.lensPrice + formData.coatingPrice + formData.thicknessPrice;
+      
+      const framePrice = formData.skipFrame ? 0 : formData.framePrice;
+      return lensPrice + framePrice - formData.discount;
+    } else {
+      // Contact lenses
+      const contactLensTotal = formData.contactLensItems.reduce((sum, lens) => 
+        sum + ((lens.price || 0) * (lens.qty || 1)), 0
+      );
+      return contactLensTotal - formData.discount;
+    }
+  }, [formData]);
+  
+  const calculateRemaining = useCallback(() => {
+    const total = calculateTotal();
+    return Math.max(0, total - formData.deposit);
+  }, [formData, calculateTotal]);
+  
+  const validateCurrentStep = useCallback((step: string): boolean => {
+    if (step === 'patient') {
+      if (!formData.patientName && !formData.skipPatient) {
+        return false;
+      }
+      return true;
+    } else if (step === 'products') {
+      if (formData.invoiceType === 'glasses') {
+        // For glasses, either lens or frame is required
+        if (!formData.skipFrame && !formData.frameBrand) {
+          return false;
+        }
+        if (!formData.lensType && !formData.skipFrame) {
+          return false;
+        }
+      } else if (formData.invoiceType === 'contacts' && (!formData.contactLensItems || formData.contactLensItems.length === 0)) {
+        // For contacts, at least one item is required
+        return false;
+      }
+      // For exam, we don't need to validate anything specific
+      return true;
+    } else if (step === 'payment') {
+      // Validate payment method
+      if (!formData.paymentMethod) {
+        return false;
+      }
+      // Card payments require auth number
+      if ((formData.paymentMethod === 'Visa' || formData.paymentMethod === 'MasterCard') && !formData.authNumber) {
+        return false;
+      }
+      return true;
+    }
+    return true;
+  }, [formData]);
+  
+  const updateFinalPrice = useCallback((price: number) => {
+    setFinalPrice(price);
+    
+    const newDiscount = Math.max(0, calculateSubtotal() - price);
+    
+    setFormData(prev => ({
+      ...prev,
+      discount: newDiscount,
+      total: price,
+      remaining: Math.max(0, price - prev.deposit)
+    }));
+  }, []);
+  
+  const calculateSubtotal = useCallback(() => {
+    if (formData.invoiceType === 'exam') {
+      return formData.servicePrice || 0;
+    } else if (formData.invoiceType === 'glasses') {
+      let lensPrice = formData.lensCombinationPrice !== null 
+        ? formData.lensCombinationPrice 
+        : formData.lensPrice + formData.coatingPrice + formData.thicknessPrice;
+      
+      const framePrice = formData.skipFrame ? 0 : (formData.framePrice || 0);
+      return lensPrice + framePrice;
+    } else {
+      // Contact lenses
+      const contactLensItems = formData.contactLensItems || [];
+      return contactLensItems.reduce((sum, lens) => 
+        sum + ((lens.price || 0) * (lens.qty || 1)), 0
+      );
+    }
+  }, [formData]);
+  
   const contextValue: InvoiceFormContextType = {
     formData,
     setValue,
     getValues,
-    updateServicePrice
+    updateServicePrice,
+    calculateTotal,
+    calculateRemaining,
+    validateCurrentStep,
+    finalPrice,
+    updateFinalPrice,
+    patientSearchResults,
+    setPatientSearchResults,
+    currentPatient,
+    setCurrentPatient
   };
   
   return (
