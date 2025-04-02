@@ -390,7 +390,15 @@ const translations: Record<string, Record<string, string>> = {
     nameRequired: 'Name is required',
     selectCategory: 'Select Category',
     noServices: 'No services available',
-    noExamServiceFound: 'No eye exam service found. Please add one in the Services tab.'
+    noExamServiceFound: 'No eye exam service found. Please add one in the Services tab.',
+    
+    // Add new photochromic related translations
+    selectPhotochromicColor: "Select Photochromic Color",
+    selectColor: "Select Color",
+    brown: "Brown",
+    gray: "Gray",
+    green: "Green",
+    blue: "Blue",
   },
   ar: {
     // General UI
@@ -774,7 +782,15 @@ const translations: Record<string, Record<string, string>> = {
     nameRequired: 'الاسم مطلوب',
     selectCategory: 'اختر الفئة',
     noServices: 'لا توجد خدمات متاحة',
-    noExamServiceFound: 'لم يتم العثور على خدمة فحص العين. يرجى إضافة واحدة في علامة التبويب الخدمات.'
+    noExamServiceFound: 'لم يتم العثور على خدمة فحص العين. يرجى إضافة واحدة في علامة التبويب الخدمات.',
+    
+    // Add new photochromic related translations
+    selectPhotochromicColor: "اختر لون الفوتوكروميك",
+    selectColor: "اختر اللون",
+    brown: "بني",
+    gray: "رمادي",
+    green: "أخضر",
+    blue: "أزرق",
   }
 };
 

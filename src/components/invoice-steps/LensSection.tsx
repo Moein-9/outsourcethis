@@ -46,7 +46,7 @@ export const LensSection: React.FC<LensSectionProps> = ({
   const { t } = useLanguageStore();
 
   return (
-    <Card className="border shadow-sm">
+    <Card className="border shadow-sm relative">
       <CardHeader className="bg-gradient-to-r from-violet-50 to-violet-100/50 border-b">
         <CardTitle className={`text-base flex justify-between items-center`}>
           <span className="flex items-center gap-2 text-violet-800">
@@ -64,7 +64,7 @@ export const LensSection: React.FC<LensSectionProps> = ({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-4 overflow-visible">
         <LensSelector 
           onSelectLensType={onLensTypeSelect}
           onSelectCoating={onCoatingSelect}
@@ -78,13 +78,15 @@ export const LensSection: React.FC<LensSectionProps> = ({
           onCombinationPriceChange={onCombinationPriceChange}
         />
         
-        {/* Photochromic color selector moved to its own component */}
+        {/* Photochromic color selector when applicable */}
         {selectedCoating?.isPhotochromic && (
-          <PhotochromicColorSelector
-            coating={selectedCoating}
-            selectedColor={selectedCoatingColor}
-            onColorChange={onCoatingColorChange || (() => {})}
-          />
+          <div className="mt-4 pb-2">
+            <PhotochromicColorSelector
+              coating={selectedCoating}
+              selectedColor={selectedCoatingColor || ""}
+              onColorChange={onCoatingColorChange || (() => {})}
+            />
+          </div>
         )}
       </CardContent>
     </Card>
