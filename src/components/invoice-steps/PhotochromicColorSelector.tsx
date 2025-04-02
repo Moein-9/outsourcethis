@@ -57,13 +57,19 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
             </SelectTrigger>
             <SelectContent 
               className="bg-white z-[200]" 
+              position="popper"
               style={{ 
                 width: "var(--radix-select-trigger-width)", 
-                maxHeight: "220px"
+                maxHeight: "220px",
+                overflow: "auto"
               }}
             >
               {coating.availableColors.map(color => (
-                <SelectItem key={color} value={color} className="py-3 h-auto">
+                <SelectItem 
+                  key={color} 
+                  value={color} 
+                  className="py-3 h-auto hover:bg-slate-100"
+                >
                   <div className={`flex items-center gap-3 w-full ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                     <div 
                       className="min-w-6 h-6 rounded-full border shrink-0"

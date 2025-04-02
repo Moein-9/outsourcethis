@@ -70,6 +70,18 @@
   direction: ltr;
 }
 
+.text-right[dir="rtl"] {
+  text-align: right;
+}
+
+.whitespace-normal {
+  white-space: normal !important;
+}
+
+.break-words {
+  word-wrap: break-word !important;
+}
+
 @media print {
   @page {
     margin: 0 !important;
