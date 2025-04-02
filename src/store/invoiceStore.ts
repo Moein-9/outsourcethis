@@ -38,7 +38,10 @@ export interface Invoice {
   
   coating: string;
   coatingPrice: number;
-  coatingColor?: string; // Added coatingColor property
+  coatingColor?: string;
+  
+  thickness: string; // Added the missing thickness property
+  thicknessPrice: number;
   
   frameBrand: string;
   frameModel: string;

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -288,7 +287,9 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    {isRtl ? colorDisplayName.ar : colorDisplayName.en}
+                    {typeof colorDisplayName === 'string' 
+                      ? colorDisplayName 
+                      : (isRtl ? colorDisplayName.ar : colorDisplayName.en)}
                   </span>
                   <div 
                     className="w-4 h-4 rounded-full border border-gray-300 color-preview" 
