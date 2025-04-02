@@ -41,7 +41,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
   }
 
   return (
-    <div className="mt-4 pt-4 border-t border-dashed">
+    <div className="w-full">
       <Label className="mb-2 block font-medium">
         {t('selectPhotochromicColor')}
       </Label>
@@ -54,9 +54,12 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
           <SelectTrigger className="w-full bg-white">
             <SelectValue placeholder={t('selectColor')} />
           </SelectTrigger>
-          <SelectContent className="bg-white z-[200] w-full max-h-[180px] overflow-auto">
+          <SelectContent 
+            className="bg-white z-[200]" 
+            style={{ width: "100%", maxHeight: "180px" }}
+          >
             {coating.availableColors.map(color => (
-              <SelectItem key={color} value={color} className="flex items-center">
+              <SelectItem key={color} value={color}>
                 <div className="flex items-center gap-2 w-full">
                   <div 
                     className="w-4 h-4 rounded-full border"
