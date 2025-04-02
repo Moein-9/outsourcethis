@@ -41,8 +41,37 @@ export function useToast() {
   }
 }
 
-// Additional export for compatibility
-export const toast = (props: Omit<ToasterToast, "id">) => {
-  const { toast } = useToast()
-  return toast(props)
-}
+// We can't directly export a function that uses hooks outside of components
+// Create a properly memoized function for direct import usage
+const toastFn = {
+  success: (props: Omit<ToasterToast, "id">) => {
+    // We're accessing window object to get the __TOAST_CONTEXT__ added by ToastProvider
+    const toastContext = (window as any).__TOAST_CONTEXT__;
+    if (toastContext) {
+      return toastContext.addToast({ ...props, variant: "default" });
+    }
+    console.error("Toast context not available. Make sure ToastProvider is mounted.");
+    return "";
+  },
+  error: (props: Omit<ToasterToast, "id">) => {
+    const toastContext = (window as any).__TOAST_CONTEXT__;
+    if (toastContext) {
+      return toastContext.addToast({ ...props, variant: "destructive" });
+    }
+    console.error("Toast context not available. Make sure ToastProvider is mounted.");
+    return "";
+  },
+  // Default toast function
+  toast: (props: Omit<ToasterToast, "id">) => {
+    const toastContext = (window as any).__TOAST_CONTEXT__;
+    if (toastContext) {
+      return toastContext.addToast(props);
+    }
+    console.error("Toast context not available. Make sure ToastProvider is mounted.");
+    return "";
+  }
+};
+
+export const toast = toastFn.toast;
+export const successToast = toastFn.success;
+export const errorToast = toastFn.error;

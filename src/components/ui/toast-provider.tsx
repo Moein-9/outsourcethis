@@ -1,8 +1,20 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ToastContext, ToasterToast, TOAST_REMOVE_DELAY } from "@/hooks/use-toast";
 
 const TOAST_LIMIT = 20;
+
+// Declare this on the window object
+declare global {
+  interface Window {
+    __TOAST_CONTEXT__: {
+      addToast: (toast: Omit<ToasterToast, "id">) => string;
+      updateToast: (id: string, toast: Partial<ToasterToast>) => void;
+      dismissToast: (id: string) => void;
+      removeToast: (id: string) => void;
+    };
+  }
+}
 
 export function ToastProvider({
   children,
@@ -52,6 +64,20 @@ export function ToastProvider({
   const removeToast = (id: string) => {
     setToasts((prevToasts) => prevToasts.filter((t) => t.id !== id));
   };
+  
+  // Expose the context to window object for non-component usage
+  useEffect(() => {
+    window.__TOAST_CONTEXT__ = {
+      addToast,
+      updateToast,
+      dismissToast,
+      removeToast
+    };
+    
+    return () => {
+      delete window.__TOAST_CONTEXT__;
+    };
+  }, []);
 
   return (
     <ToastContext.Provider

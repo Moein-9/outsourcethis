@@ -124,14 +124,17 @@ export const LensCombinationManager: React.FC = () => {
     };
     
     try {
+      console.log("Adding new combination:", newCombination);
       const id = addLensPricingCombination(newCombination);
       
       if (id) {
+        console.log("Combination added with ID:", id);
         toast({
           description: t('combinationAdded'),
         });
         
-        loadPricingCombinations();
+        // Force a refresh of pricing combinations
+        setTimeout(loadPricingCombinations, 50);
         resetForm();
       }
     } catch (error) {
