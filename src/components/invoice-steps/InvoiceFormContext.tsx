@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useCallback } from "react";
 
+// Make sure all fields used in the components are included in this interface
 interface InvoiceFormData {
   invoiceType: "glasses" | "contacts" | "exam";
   patientName: string;
@@ -40,7 +41,7 @@ interface InvoiceFormData {
 
   lensCombinationPrice: number | null;
   
-  // New fields needed by components
+  // Invoice specific fields
   invoiceId: string;
   workOrderId: string;
   patientId: string;
@@ -53,11 +54,11 @@ interface InvoiceFormData {
 
 interface InvoiceFormContextType {
   formData: InvoiceFormData;
-  setValue: <T extends keyof InvoiceFormData>(field: T, value: InvoiceFormData[T]) => void;
-  getValues: <T extends keyof InvoiceFormData>(field?: T) => T extends undefined ? InvoiceFormData : InvoiceFormData[T];
+  setValue: <K extends keyof InvoiceFormData>(field: K, value: InvoiceFormData[K]) => void;
+  getValues: <K extends keyof InvoiceFormData>(field?: K) => K extends undefined ? InvoiceFormData : InvoiceFormData[K];
   updateServicePrice: (price: number) => void;
   
-  // New methods needed by components
+  // Required methods for the components
   calculateTotal: () => number;
   calculateRemaining: () => number;
   validateCurrentStep: (step: string) => boolean;
@@ -125,14 +126,14 @@ export const InvoiceFormProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [patientSearchResults, setPatientSearchResults] = useState<any[]>([]);
   const [currentPatient, setCurrentPatient] = useState<any | null>(null);
   
-  const setValue = useCallback(<T extends keyof InvoiceFormData>(field: T, value: InvoiceFormData[T]) => {
+  const setValue = useCallback(<K extends keyof InvoiceFormData>(field: K, value: InvoiceFormData[K]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   }, []);
   
-  const getValues = useCallback(<T extends keyof InvoiceFormData>(field?: T): T extends undefined ? InvoiceFormData : InvoiceFormData[T] => {
+  const getValues = useCallback(<K extends keyof InvoiceFormData>(field?: K): K extends undefined ? InvoiceFormData : InvoiceFormData[K] => {
     return field ? formData[field] : formData as any;
   }, [formData]);
   
@@ -144,6 +145,25 @@ export const InvoiceFormProvider: React.FC<{ children: React.ReactNode }> = ({ c
       servicePrice: price
     }));
   }, []);
+  
+  const calculateSubtotal = useCallback(() => {
+    if (formData.invoiceType === 'exam') {
+      return formData.servicePrice || 0;
+    } else if (formData.invoiceType === 'glasses') {
+      let lensPrice = formData.lensCombinationPrice !== null 
+        ? formData.lensCombinationPrice 
+        : formData.lensPrice + formData.coatingPrice + formData.thicknessPrice;
+      
+      const framePrice = formData.skipFrame ? 0 : formData.framePrice;
+      return lensPrice + framePrice;
+    } else {
+      // Contact lenses
+      const contactLensTotal = formData.contactLensItems.reduce((sum, lens) => 
+        sum + ((lens.price || 0) * (lens.qty || 1)), 0
+      );
+      return contactLensTotal;
+    }
+  }, [formData]);
   
   const calculateTotal = useCallback(() => {
     if (formData.invoiceType === 'exam') {
@@ -215,26 +235,7 @@ export const InvoiceFormProvider: React.FC<{ children: React.ReactNode }> = ({ c
       total: price,
       remaining: Math.max(0, price - prev.deposit)
     }));
-  }, []);
-  
-  const calculateSubtotal = useCallback(() => {
-    if (formData.invoiceType === 'exam') {
-      return formData.servicePrice || 0;
-    } else if (formData.invoiceType === 'glasses') {
-      let lensPrice = formData.lensCombinationPrice !== null 
-        ? formData.lensCombinationPrice 
-        : formData.lensPrice + formData.coatingPrice + formData.thicknessPrice;
-      
-      const framePrice = formData.skipFrame ? 0 : (formData.framePrice || 0);
-      return lensPrice + framePrice;
-    } else {
-      // Contact lenses
-      const contactLensItems = formData.contactLensItems || [];
-      return contactLensItems.reduce((sum, lens) => 
-        sum + ((lens.price || 0) * (lens.qty || 1)), 0
-      );
-    }
-  }, [formData]);
+  }, [calculateSubtotal]);
   
   const contextValue: InvoiceFormContextType = {
     formData,

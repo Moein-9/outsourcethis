@@ -38,16 +38,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     }
   }, [getServicesByCategory]);
   
-  useEffect(() => {
-    if (invoiceType === "exam" && eyeExamService) {
-      updateServicePrice(eyeExamService.price);
-      setValue('serviceName', eyeExamService.name);
-      setValue('serviceId', eyeExamService.id);
-      setValue('serviceDescription', eyeExamService.description);
-    }
-  }, [invoiceType, setValue, eyeExamService, updateServicePrice]);
-  
-  const [skipFrame, setSkipFrame] = useState(getValues<boolean>('skipFrame'));
+  const [skipFrame, setSkipFrame] = useState(getValues('skipFrame'));
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(null);
@@ -160,6 +151,12 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setSelectedLensType(lens);
     setValue('lensType', lens?.name || '');
     
+    if (lens?.price !== undefined) {
+      setValue('lensPrice', lens.price);
+    } else {
+      setValue('lensPrice', 0);
+    }
+    
     if (!lens) {
       setCombinedLensPrice(null);
     }
@@ -168,11 +165,23 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const handleCoatingSelect = (coating: LensCoating | null) => {
     setSelectedCoating(coating);
     setValue('coating', coating?.name || '');
+    
+    if (coating?.price !== undefined) {
+      setValue('coatingPrice', coating.price);
+    } else {
+      setValue('coatingPrice', 0);
+    }
   };
   
   const handleThicknessSelect = (thickness: LensThickness | null) => {
     setSelectedThickness(thickness);
     setValue('thickness', thickness?.name || '');
+    
+    if (thickness?.price !== undefined) {
+      setValue('thicknessPrice', thickness.price);
+    } else {
+      setValue('thicknessPrice', 0);
+    }
   };
   
   const handleCombinationPriceChange = (price: number | null) => {

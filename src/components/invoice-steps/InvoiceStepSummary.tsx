@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -39,39 +38,38 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   const currentTimestamp = new Date().toISOString();
   
   const invoice = {
-    invoiceId: getValues<string>('invoiceId') || "",
-    workOrderId: getValues<string>('workOrderId') || "",
-    patientName: getValues<string>('patientName') || "",
-    patientPhone: getValues<string>('patientPhone') || "",
-    patientId: getValues<string>('patientId') || "",
-    invoiceType: getValues<string>('invoiceType') || "glasses",
-    lensType: getValues<string>('lensType') || "",
-    lensPrice: getValues<number>('lensPrice') || 0,
-    coating: getValues<string>('coating') || "",
-    coatingPrice: getValues<number>('coatingPrice') || 0,
-    thickness: getValues<string>('thickness') || "",
-    thicknessPrice: getValues<number>('thicknessPrice') || 0,
-    frameBrand: getValues<string>('frameBrand') || "",
-    frameModel: getValues<string>('frameModel') || "",
-    frameColor: getValues<string>('frameColor') || "",
-    framePrice: getValues<number>('framePrice') || 0,
+    invoiceId: getValues('invoiceId') || "",
+    workOrderId: getValues('workOrderId') || "",
+    patientName: getValues('patientName') || "",
+    patientPhone: getValues('patientPhone') || "",
+    patientId: getValues('patientId') || "",
+    invoiceType: getValues('invoiceType') || "glasses",
+    lensType: getValues('lensType') || "",
+    lensPrice: getValues('lensPrice') || 0,
+    coating: getValues('coating') || "",
+    coatingPrice: getValues('coatingPrice') || 0,
+    thickness: getValues('thickness') || "",
+    thicknessPrice: getValues('thicknessPrice') || 0,
+    frameBrand: getValues('frameBrand') || "",
+    frameModel: getValues('frameModel') || "",
+    frameColor: getValues('frameColor') || "",
+    framePrice: getValues('framePrice') || 0,
     contactLensItems: getValues('contactLensItems') || [],
-    contactLensRx: getValues('contactLensRx') || null, // Added contactLensRx
-    discount: getValues<number>('discount') || 0,
-    deposit: getValues<number>('deposit') || 0,
+    contactLensRx: getValues('contactLensRx') || null,
+    discount: getValues('discount') || 0,
+    deposit: getValues('deposit') || 0,
     total: calculateTotal(),
     remaining: calculateRemaining(),
-    paymentMethod: getValues<string>('paymentMethod') || "",
+    paymentMethod: getValues('paymentMethod') || "",
     isPaid: calculateRemaining() <= 0,
-    authNumber: getValues<string>('authNumber') || "",
-    serviceName: getValues<string>('serviceName') || "",
-    serviceId: getValues<string>('serviceId') || "",
-    serviceDescription: getValues<string>('serviceDescription') || "",
-    servicePrice: getValues<number>('servicePrice') || 0,
+    authNumber: getValues('authNumber') || "",
+    serviceName: getValues('serviceName') || "",
+    serviceId: getValues('serviceId') || "",
+    serviceDescription: getValues('serviceDescription') || "",
+    servicePrice: getValues('servicePrice') || 0,
     createdAt: currentTimestamp,
   } as Invoice;
   
-  // Get the RX data from form values
   const rxData = getValues('rx') || {
     sphereOD: "",
     cylOD: "",
@@ -93,23 +91,23 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
   };
   
   const patient = {
-    patientId: getValues<string>('patientId') || "",
-    name: getValues<string>('patientName') || "",
-    phone: getValues<string>('patientPhone') || "",
-    contactLensRx: getValues('contactLensRx') || null, // Added contactLensRx
+    patientId: getValues('patientId') || "",
+    name: getValues('patientName') || "",
+    phone: getValues('patientPhone') || "",
+    contactLensRx: getValues('contactLensRx') || null,
     dob: "",
     notes: "",
     rx: rxData,
     createdAt: currentTimestamp
-  };
+  } as any;
   
   const hasInvoiceData = !!invoice.invoiceId;
   const isContactLens = invoice.invoiceType === "contacts";
   const isEyeExam = invoice.invoiceType === "exam";
   
-  const lensTypeValue = getValues<string>('lensType') || "";
+  const lensTypeValue = getValues('lensType') || "";
   const lensTypeObject = typeof lensTypeValue === 'string' 
-    ? { name: lensTypeValue, price: getValues<number>('lensPrice') || 0 }
+    ? { name: lensTypeValue, price: getValues('lensPrice') || 0 }
     : lensTypeValue;
   
   const workOrder = {
@@ -118,8 +116,8 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     createdAt: currentTimestamp,
     lensType: lensTypeObject,
     contactLenses: invoice.contactLensItems,
-    contactLensRx: getValues('contactLensRx') || null, // Added contactLensRx
-    isContactLens: isContactLens, // Added isContactLens flag
+    contactLensRx: getValues('contactLensRx') || null,
+    isContactLens: isContactLens,
     isPaid: invoice.isPaid,
     rx: rxData,
     ...(invoice.discount ? { discount: invoice.discount } : {})

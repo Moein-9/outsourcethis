@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -23,31 +22,32 @@ export const InvoiceStepPayment: React.FC = () => {
     finalPrice, updateFinalPrice,
     validateCurrentStep
   } = useInvoiceForm();
+  
   const addWorkOrder = useInvoiceStore(state => state.addWorkOrder);
   const addInvoice = useInvoiceStore(state => state.addInvoice);
   
-  const [discount, setDiscount] = useState(getValues<number>('discount') || 0);
+  const [discount, setDiscount] = useState(getValues('discount') || 0);
   const [finalPriceInput, setFinalPriceInput] = useState(0);
-  const [deposit, setDeposit] = useState(getValues<number>('deposit') || 0);
-  const [paymentMethod, setPaymentMethod] = useState(getValues<string>('paymentMethod') || "");
-  const [authNumber, setAuthNumber] = useState(getValues<string>('authNumber') || "");
-  const [orderSaved, setOrderSaved] = useState(!!getValues<string>('workOrderId') && !!getValues<string>('invoiceId'));
+  const [deposit, setDeposit] = useState(getValues('deposit') || 0);
+  const [paymentMethod, setPaymentMethod] = useState(getValues('paymentMethod') || "");
+  const [authNumber, setAuthNumber] = useState(getValues('authNumber') || "");
+  const [orderSaved, setOrderSaved] = useState(!!getValues('workOrderId') && !!getValues('invoiceId'));
   const [showPaymentError, setShowPaymentError] = useState(false);
   
   const [total, setTotal] = useState(calculateTotal());
   const [remaining, setRemaining] = useState(calculateRemaining());
   
   const calculateSubtotal = () => {
-    if (getValues<string>('invoiceType') === 'exam') {
-      return getValues<number>('servicePrice') || 0;
-    } else if (getValues<string>('invoiceType') === 'glasses') {
-      const lensPrice = getValues<number>('lensPrice') || 0;
-      const coatingPrice = getValues<number>('coatingPrice') || 0;
-      const thicknessPrice = getValues<number>('thicknessPrice') || 0;
-      const framePrice = getValues<boolean>('skipFrame') ? 0 : (getValues<number>('framePrice') || 0);
+    if (getValues('invoiceType') === 'exam') {
+      return getValues('servicePrice') || 0;
+    } else if (getValues('invoiceType') === 'glasses') {
+      const lensPrice = getValues('lensPrice') || 0;
+      const coatingPrice = getValues('coatingPrice') || 0;
+      const thicknessPrice = getValues('thicknessPrice') || 0;
+      const framePrice = getValues('skipFrame') ? 0 : (getValues('framePrice') || 0);
       return lensPrice + coatingPrice + thicknessPrice + framePrice;
     } else {
-      const contactLensItems = getValues<any[]>('contactLensItems') || [];
+      const contactLensItems = getValues('contactLensItems') || [];
       return contactLensItems.reduce((sum, lens) => 
         sum + ((lens.price || 0) * (lens.qty || 1)), 0
       );
@@ -57,11 +57,9 @@ export const InvoiceStepPayment: React.FC = () => {
   const subtotal = calculateSubtotal();
   
   useEffect(() => {
-    // Initialize the final price input with the calculated total
     const currentTotal = calculateTotal();
     setFinalPriceInput(currentTotal);
     
-    // Make sure we're always in "final price" mode
     setValue('isFinalPriceMode', true);
   }, []);
   
@@ -81,7 +79,6 @@ export const InvoiceStepPayment: React.FC = () => {
     const value = parseFloat(e.target.value) || 0;
     setFinalPriceInput(value);
     
-    // Calculate discount as the difference between subtotal and final price
     const newDiscount = Math.max(0, subtotal - value);
     setDiscount(newDiscount);
     setValue('discount', newDiscount);
@@ -111,7 +108,6 @@ export const InvoiceStepPayment: React.FC = () => {
   };
 
   const saveOrder = () => {
-    // First check if payment method is selected
     if (!paymentMethod) {
       setShowPaymentError(true);
       toast({
@@ -126,8 +122,8 @@ export const InvoiceStepPayment: React.FC = () => {
       return;
     }
     
-    const patientId = getValues<string>('patientId') || 'anonymous';
-    const invoiceType = getValues<string>('invoiceType') || 'glasses';
+    const patientId = getValues('patientId') || 'anonymous';
+    const invoiceType = getValues('invoiceType') || 'glasses';
     
     let workOrder: any = {
       patientId
@@ -135,8 +131,8 @@ export const InvoiceStepPayment: React.FC = () => {
     
     if (invoiceType === 'glasses') {
       workOrder.lensType = {
-        name: getValues<string>('lensType'),
-        price: getValues<number>('lensPrice')
+        name: getValues('lensType'),
+        price: getValues('lensPrice')
       };
     } else if (invoiceType === 'contacts') {
       workOrder.contactLenses = getValues('contactLensItems') || [];
@@ -159,7 +155,7 @@ export const InvoiceStepPayment: React.FC = () => {
       
       paymentMethod: formData.paymentMethod,
       authNumber: formData.authNumber,
-      workOrderId: workOrderId // Link to the work order
+      workOrderId: workOrderId
     };
     
     if (invoiceType === 'glasses') {
@@ -188,7 +184,6 @@ export const InvoiceStepPayment: React.FC = () => {
       description: `${t('orderSavedSuccess')}`,
     });
 
-    // Use custom event to navigate to summary tab instead of redirecting to invoices page
     const event = new CustomEvent('navigateToSummary');
     window.dispatchEvent(event);
   };
@@ -240,8 +235,8 @@ export const InvoiceStepPayment: React.FC = () => {
                 id="deposit"
                 type="number"
                 step="0.01"
-                value={deposit || ""}
-                onChange={handleDepositChange}
+                value={deposit}
+                onChange={(e) => handleDepositChange(e)}
                 className={`pl-10 border-primary/20 focus:border-primary ${textAlignClass}`}
               />
             </div>

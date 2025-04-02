@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -36,9 +35,9 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
   
   const [patientSearch, setPatientSearch] = useState("");
   const [rxVisible, setRxVisible] = useState(false);
-  const [skipPatient, setSkipPatient] = useState(getValues<boolean>('skipPatient'));
-  const [manualName, setManualName] = useState(getValues<string>('patientName'));
-  const [manualPhone, setManualPhone] = useState(getValues<string>('patientPhone'));
+  const [skipPatient, setSkipPatient] = useState(getValues('skipPatient'));
+  const [manualName, setManualName] = useState(getValues('patientName'));
+  const [manualPhone, setManualPhone] = useState(getValues('patientPhone'));
   const [showMissingRxWarning, setShowMissingRxWarning] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     cylinderAxisError: false
@@ -71,18 +70,15 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
     setPatientSearchResults([]);
     setRxVisible(true);
     
-    // Set all patient data regardless of invoice type
     setValue('patientId', patient.patientId);
     setValue('patientName', patient.name);
     setValue('patientPhone', patient.phone);
     setValue('rx', patient.rx);
     
-    // Always set contact lens rx data if available
     if (patient.contactLensRx) {
       setValue('contactLensRx', patient.contactLensRx);
       setShowMissingRxWarning(false);
     } else {
-      // Initialize with default values if no contact lens RX exists
       setValue('contactLensRx', {
         rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
         leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
@@ -97,7 +93,7 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
     
     if (checked) {
       setCurrentPatient(null);
-      setValue('patientId', undefined);
+      setValue('patientId', "");
     }
   };
   
@@ -129,7 +125,6 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
     });
   };
 
-  // Effect to update the missing RX warning when invoice type changes
   useEffect(() => {
     if (currentPatient && invoiceType === "contacts" && !currentPatient.contactLensRx) {
       setShowMissingRxWarning(true);
@@ -138,7 +133,6 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
     }
   }, [invoiceType, currentPatient]);
 
-  // Get current contact lens RX data
   const currentContactLensRx = getValues<any>('contactLensRx') || {
     rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
     leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
@@ -150,8 +144,7 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
         value={invoiceType} 
         onValueChange={(v) => {
           onInvoiceTypeChange(v as "glasses" | "contacts" | "exam");
-          setValue('invoiceType', v);
-          // Update missing RX warning when invoice type changes
+          setValue('invoiceType', v as "glasses" | "contacts" | "exam");
           if (v === "contacts" && currentPatient && !currentPatient.contactLensRx) {
             setShowMissingRxWarning(true);
           } else {
@@ -195,7 +188,7 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
             <Checkbox 
               id="skipPatientCheck" 
               checked={skipPatient} 
-              onCheckedChange={(checked) => handleSkipPatientChange(checked === true)} 
+              onCheckedChange={(checked) => handleSkipPatientChange(checked as boolean)} 
             />
             <Label 
               htmlFor="skipPatientCheck" 
@@ -319,7 +312,7 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                         rxData={currentContactLensRx}
                         onChange={handleContactLensRxChange}
                         showMissingRxWarning={showMissingRxWarning}
-                        readOnly={true}  // Ensure it's in read-only mode when viewing patient data
+                        readOnly={true}
                       />
                     </div>
                   )}
@@ -333,7 +326,7 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
               <Label htmlFor="manualName" className={`text-muted-foreground block ${textAlignClass}`}>{t('clientName')} ({t('optional')}):</Label>
               <Input
                 id="manualName"
-                value={manualName}
+                value={manualName as string}
                 onChange={handleManualNameChange}
                 className={textAlignClass}
               />
@@ -342,7 +335,7 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
               <Label htmlFor="manualPhone" className={`text-muted-foreground block ${textAlignClass}`}>{t('clientPhone')} ({t('optional')}):</Label>
               <Input
                 id="manualPhone"
-                value={manualPhone}
+                value={manualPhone as string}
                 onChange={handleManualPhoneChange}
                 className={textAlignClass}
               />
@@ -352,7 +345,7 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
               <ContactLensForm 
                 rxData={currentContactLensRx}
                 onChange={handleContactLensRxChange}
-                readOnly={false}  // Allow editing when no patient is selected
+                readOnly={false}
               />
             )}
           </div>
