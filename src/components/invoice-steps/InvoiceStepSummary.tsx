@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -6,7 +7,7 @@ import {
   ClipboardCheck, Printer, Receipt, 
   Check, ChevronRight, FileText, PartyPopper,
   CreditCard, User, Phone, Calendar, AlertTriangle,
-  Contact, ScrollText, Glasses
+  Contact, ScrollText, Glasses, Paintbrush
 } from "lucide-react";
 import { CustomPrintService } from "@/utils/CustomPrintService";
 import { Invoice } from "@/store/invoiceStore";
@@ -48,6 +49,7 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     lensPrice: getValues('lensPrice') || 0,
     coating: getValues('coating') || "",
     coatingPrice: getValues('coatingPrice') || 0,
+    coatingColor: getValues('coatingColor') || "",
     thickness: getValues('thickness') || "",
     thicknessPrice: getValues('thicknessPrice') || 0,
     frameBrand: getValues('frameBrand') || "",
@@ -120,14 +122,46 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
     isContactLens: isContactLens,
     isPaid: invoice.isPaid,
     rx: rxData,
+    coatingColor: getValues('coatingColor') || "",
     ...(invoice.discount ? { discount: invoice.discount } : {})
   } as any;
+  
+  const getColorStyle = (colorName: string) => {
+    if (!colorName) return "transparent";
+    
+    const colorMap: Record<string, string> = {
+      "Brown": "#8B4513",
+      "Gray": "#808080",
+      "Green": "#006400",
+      "Blue": "#0000CD"
+    };
+    
+    return colorMap[colorName] || "transparent";
+  };
+  
+  const getColorDisplayName = (colorName: string) => {
+    if (!colorName) return "";
+    
+    const colorMap: Record<string, { en: string, ar: string }> = {
+      "Brown": { en: "Brown", ar: "بني" },
+      "Gray": { en: "Gray", ar: "رمادي" },
+      "Green": { en: "Green", ar: "أخضر" },
+      "Blue": { en: "Blue", ar: "أزرق" }
+    };
+    
+    return colorMap[colorName] || { en: colorName, ar: colorName };
+  };
+  
+  const coatingColor = getValues('coatingColor') || "";
+  const colorDisplayName = getColorDisplayName(coatingColor);
+  const isRtl = language === 'ar';
   
   const handlePrintInvoice = () => {
     CustomPrintService.printInvoice(invoice);
   };
   
   const handlePrintWorkOrder = () => {
+    console.log("Sending work order with coating color:", workOrder.coatingColor);
     CustomPrintService.printWorkOrder(workOrder, invoice, patient);
   };
   
@@ -245,6 +279,28 @@ export const InvoiceStepSummary: React.FC<InvoiceStepSummaryProps> = ({
               </div>
               <span>{new Date().toLocaleDateString('en-US')}</span>
             </div>
+            
+            {invoice.coating && coatingColor && (
+              <div className={`flex justify-between items-center pb-3 border-t border-dashed border-green-200 pt-3 ${textAlignClass}`}>
+                <div className="flex items-center">
+                  <Paintbrush className="w-5 h-5 text-purple-500 mr-2" />
+                  <span className="text-gray-600 font-medium">{t('coatingColor')}:</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">
+                    {isRtl ? colorDisplayName.ar : colorDisplayName.en}
+                  </span>
+                  <div 
+                    className="w-4 h-4 rounded-full border border-gray-300 color-preview" 
+                    style={{ 
+                      backgroundColor: getColorStyle(coatingColor),
+                      printColorAdjust: 'exact',
+                      WebkitPrintColorAdjust: 'exact'
+                    }}
+                  />
+                </div>
+              </div>
+            )}
             
             <div className="my-3 border-t border-dashed border-green-200"></div>
             
