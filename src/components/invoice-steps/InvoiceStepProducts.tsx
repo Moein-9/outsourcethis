@@ -1,15 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
 import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store/inventoryStore";
 import { ContactLensSelector, ContactLensSelection } from "@/components/ContactLensSelector";
 import { toast } from "sonner";
-
-// Import our newly created components
-import { EyeExamSection } from "./EyeExamSection";
-import { LensSection } from "./LensSection";
-import { FrameSection } from "./FrameSection";
+import { SamplePhotochromicCoating } from "@/components/SamplePhotochromicCoating";
 
 interface InvoiceStepProductsProps {
   invoiceType: "glasses" | "contacts" | "exam";
@@ -68,7 +63,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
       });
     }
     
-    // Load saved coating color if any
     if (getValues('coatingColor')) {
       setCoatingColor(getValues('coatingColor'));
     }
@@ -119,7 +113,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setSelectedCoating(coating);
     setValue('coating', coating?.name || '');
     
-    // Reset coating color if changing coatings or if not photochromic
     if (!coating?.isPhotochromic) {
       setCoatingColor("");
       setValue('coatingColor', "");
@@ -227,6 +220,8 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <SamplePhotochromicCoating />
+      
       {invoiceType === "glasses" ? (
         <>
           <LensSection

@@ -26,7 +26,7 @@ export const LensCoatingManager: React.FC = () => {
   const [newCoatingDescription, setNewCoatingDescription] = useState("");
   const [newCoatingCategory, setNewCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
   const [newIsPhotochromic, setNewIsPhotochromic] = useState(false);
-  const [newAvailableColors, setNewAvailableColors] = useState<string[]>(["Brown", "Gray", "Green"]);
+  const [newAvailableColors, setNewAvailableColors] = useState<string[]>(["Brown", "Gray", "Green", "Blue"]);
   
   // Edit coating form state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -206,7 +206,7 @@ export const LensCoatingManager: React.FC = () => {
                     ))}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {t("defaultColorsNote") || "Default colors: Brown, Gray, Green"}
+                    {t("defaultColorsNote") || "Default colors: Brown, Gray, Green, Blue"}
                   </p>
                 </div>
               )}

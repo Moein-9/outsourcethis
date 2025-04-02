@@ -88,13 +88,13 @@ export const LensSection: React.FC<LensSectionProps> = ({
         {/* Photochromic color selector */}
         {selectedCoating?.isPhotochromic && selectedCoating?.availableColors && selectedCoating.availableColors.length > 0 && (
           <div className="mt-4 pt-4 border-t border-dashed">
-            <Label className="mb-2 block font-medium">{t('selectPhotochromicColor')}</Label>
+            <Label className="mb-2 block font-medium">{t('selectPhotochromicColor') || "Select Photochromic Color"}</Label>
             <Select 
               value={selectedCoatingColor} 
               onValueChange={onCoatingColorChange ? onCoatingColorChange : () => {}}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder={t('selectColor')} />
+                <SelectValue placeholder={t('selectColor') || "Select Color"} />
               </SelectTrigger>
               <SelectContent>
                 {selectedCoating.availableColors.map(color => (
@@ -104,6 +104,23 @@ export const LensSection: React.FC<LensSectionProps> = ({
                 ))}
               </SelectContent>
             </Select>
+            
+            {/* Color Preview */}
+            {selectedCoatingColor && (
+              <div className="mt-3 flex items-center gap-3">
+                <div 
+                  className="w-6 h-6 rounded-full border"
+                  style={{ 
+                    backgroundColor: 
+                      selectedCoatingColor === "Brown" ? "#8B4513" :
+                      selectedCoatingColor === "Gray" ? "#808080" : 
+                      selectedCoatingColor === "Green" ? "#006400" :
+                      selectedCoatingColor === "Blue" ? "#0000CD" : "transparent"
+                  }}
+                ></div>
+                <span className="text-sm">{selectedCoatingColor}</span>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
