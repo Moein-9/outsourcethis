@@ -105,7 +105,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const lensP = lensPrice !== undefined ? lensPrice : invoice.lensPrice;
   const coat = coating || invoice.coating;
   const coatP = coatingPrice !== undefined ? coatingPrice : invoice.coatingPrice;
-  const coatColor = coatingColor || invoice.coatingColor;
+  const coatColor = coatingColor || invoice.coatingColor || "";
   const frameBrand = frame?.brand || invoice.frameBrand;
   const frameModel = frame?.model || invoice.frameModel;
   const frameP = framePrice !== undefined ? framePrice : invoice.framePrice;

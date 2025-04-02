@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useCallback } from "react";
 
 // Make sure all fields used in the components are included in this interface
@@ -25,7 +24,7 @@ interface InvoiceFormData {
   lensPrice: number;
   coating: string;
   coatingPrice: number;
-  coatingColor: string; // Added for photochromic color selection
+  coatingColor: string; // Ensure this is defined clearly
   thickness: string;
   thicknessPrice: number;
   rx: any; // prescription
