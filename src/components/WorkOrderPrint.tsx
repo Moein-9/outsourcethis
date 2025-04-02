@@ -83,6 +83,17 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
 
   const addressLines = storeInfo.address.split('\n');
 
+  const getColorStyle = (colorName: string) => {
+    const colorMap: Record<string, string> = {
+      "Brown": "#8B4513",
+      "Gray": "#808080",
+      "Green": "#006400",
+      "Blue": "#0000CD"
+    };
+    
+    return colorMap[colorName] || "transparent";
+  };
+
   return (
     <div className="print-wrapper">
       <style>
@@ -202,7 +213,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
       </style>
 
       <div id="work-order-print" className={`${dirClass} bg-white`} style={{ width: "80mm", padding: "2mm" }}>
-        {/* Header with logo and title */}
         <div className="flex flex-col items-center justify-center border-b border-gray-300 pb-2 mb-3">
           <MoenLogo className="h-10 mb-2" />
           <h1 className="text-xl font-bold">{t("workOrder")}</h1>
@@ -221,7 +231,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         </div>
 
-        {/* Patient Information */}
         <div className="mb-3 border-b border-gray-300 pb-2">
           <div className="font-semibold flex items-center mb-2 text-primary">
             <User className="w-4 h-4 mr-1" />
@@ -255,7 +264,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         </div>
 
-        {/* Frame Details */}
         {invoiceType === 'glasses' && frameData && (
           <div className="mb-3 border-b border-gray-300 pb-2">
             <div className="font-semibold flex items-center mb-2 text-primary">
@@ -285,7 +293,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         )}
         
-        {/* Contact Lens Details */}
         {isContactLens && (
           <div className="mb-3 border-b border-gray-300 pb-2">
             <div className="font-semibold flex items-center mb-2 text-primary">
@@ -311,7 +318,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         )}
 
-        {/* Prescription Details */}
         {invoiceType === 'glasses' && rx && (
           <div className="mb-3 border-b border-gray-300 pb-2">
             <div className="font-semibold flex items-center mb-2 text-primary">
@@ -353,7 +359,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         )}
         
-        {/* Contact Lens Prescription */}
         {isContactLens && contactLensRxData && (
           <div className="mb-3 border-b border-gray-300 pb-2">
             <div className="font-semibold flex items-center mb-2 text-primary">
@@ -395,7 +400,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         )}
 
-        {/* Lens Details */}
         {invoiceType === 'glasses' && lensTypeValue && (
           <div className="mb-3 border-b border-gray-300 pb-2">
             <div className="font-semibold flex items-center mb-2 text-primary">
@@ -410,13 +414,25 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               {coatingValue && (
                 <div className="grid grid-cols-3 gap-1">
                   <div className="font-medium">{t("coating")}:</div>
-                  <div className="col-span-2">
-                    {coatingValue}
-                    {coatingColorValue && (
-                      <span className="ml-1 text-xs">({coatingColorValue})</span>
-                    )}
-                  </div>
+                  <div className="col-span-2">{coatingValue}</div>
                 </div>
+              )}
+              {coatingColorValue && (
+                <>
+                  <div className="grid grid-cols-3 gap-1">
+                    <div className="font-medium">{language === 'ar' ? "اللون | Color" : "Color | اللون"}:</div>
+                    <div className="col-span-2">{coatingColorValue}</div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1 mt-1">
+                    <div className="font-medium text-xs">{language === 'ar' ? "عرض اللون | Preview" : "Preview | عرض اللون"}:</div>
+                    <div className="col-span-2 flex items-center">
+                      <div 
+                        className="w-4 h-4 rounded-full border border-gray-300 mr-1"
+                        style={{ backgroundColor: getColorStyle(coatingColorValue) }}
+                      ></div>
+                    </div>
+                  </div>
+                </>
               )}
               {thicknessValue && (
                 <div className="grid grid-cols-3 gap-1">
@@ -428,7 +444,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         )}
 
-        {/* Payment Information */}
         <div className="mb-3 border-b border-gray-300 pb-2">
           <div className="font-semibold flex items-center mb-2 text-primary">
             <Home className="w-4 h-4 mr-1" />
@@ -450,7 +465,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         </div>
 
-        {/* Notes Section */}
         <div className="mb-3 border-b border-gray-300 pb-2">
           <div className="font-semibold flex items-center mb-2 text-primary">
             <CircleDot className="w-4 h-4 mr-1" />
@@ -461,7 +475,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         </div>
 
-        {/* Signatures */}
         <div className="mt-4 pt-2">
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -477,7 +490,6 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
           </div>
         </div>
 
-        {/* Store Information Footer */}
         <div className="mt-4 pt-3 border-t border-gray-300 text-center text-xs text-gray-500">
           <p>{storeInfo.name}</p>
           <p>{storeInfo.address}</p>

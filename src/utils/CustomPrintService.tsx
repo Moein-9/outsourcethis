@@ -159,6 +159,13 @@ export class CustomPrintService {
               (notesSection as HTMLElement).style.border = '2px solid #d1d5db';
               (notesSection as HTMLElement).style.backgroundColor = 'white';
             }
+            
+            // Ensure coating color preview is visible in print
+            const colorPreviews = printWindow.document.querySelectorAll('[style*="backgroundColor"]');
+            colorPreviews.forEach(preview => {
+              (preview as HTMLElement).style.webkitPrintColorAdjust = 'exact';
+              (preview as HTMLElement).style.printColorAdjust = 'exact';
+            });
           }
           
           // Close the document to finish loading

@@ -164,6 +164,32 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const coatingName = matchingCoating?.name || getCoatingArabic(coatingString);
   
+  const getColorDisplayName = (colorName: string) => {
+    if (!colorName) return "";
+    
+    const colorMap: Record<string, { en: string, ar: string }> = {
+      "Brown": { en: "Brown", ar: "بني" },
+      "Gray": { en: "Gray", ar: "رمادي" },
+      "Green": { en: "Green", ar: "أخضر" },
+      "Blue": { en: "Blue", ar: "أزرق" }
+    };
+    
+    return colorMap[colorName] || { en: colorName, ar: colorName };
+  };
+  
+  const colorDisplayName = getColorDisplayName(coatingColor);
+  
+  const getColorStyle = (colorName: string) => {
+    const colorMap: Record<string, string> = {
+      "Brown": "#8B4513",
+      "Gray": "#808080",
+      "Green": "#006400",
+      "Blue": "#0000CD"
+    };
+    
+    return colorMap[colorName] || "transparent";
+  };
+  
   const total = invoice?.total || workOrder?.total || 0;
   const deposit = invoice?.deposit || workOrder?.deposit || 0;
   const discount = invoice?.discount || workOrder?.discount || 0;
@@ -527,12 +553,24 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                     <span className="font-semibold">{isRtl ? "النوع | Type" : "Type | النوع"}:</span>
                     <span>{coatingName}</span>
                   </div>
+                  
                   {coatingColor && (
-                    <div className="flex justify-between">
-                      <span className="font-semibold">{isRtl ? "اللون | Color" : "Color | اللون"}:</span>
-                      <span>{coatingColor}</span>
-                    </div>
+                    <>
+                      <div className="flex justify-between">
+                        <span className="font-semibold">{isRtl ? "اللون | Color" : "Color | اللون"}:</span>
+                        <span>{isRtl ? colorDisplayName.ar : colorDisplayName.en}</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-1 p-1 bg-gray-50 rounded border border-gray-200">
+                        <span className="font-semibold text-xs">{isRtl ? "عرض اللون | Color Preview" : "Color Preview | عرض اللون"}</span>
+                        <div 
+                          className="w-6 h-6 rounded-full border border-gray-300"
+                          style={{ backgroundColor: getColorStyle(coatingColor) }}
+                        ></div>
+                      </div>
+                    </>
                   )}
+                  
                   {coatingPrice > 0 && (
                     <div className="flex justify-between">
                       <span className="font-semibold">{isRtl ? "السعر | Price" : "Price | السعر"}:</span>
