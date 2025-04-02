@@ -9,11 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Edit, Plus, Trash, Droplet } from "lucide-react";
+import { Edit, Plus, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguageStore } from "@/store/languageStore";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 
 export const LensCoatingManager: React.FC = () => {
   const { lensCoatings, addLensCoating, updateLensCoating, deleteLensCoating } = useInventoryStore();
@@ -26,9 +24,6 @@ export const LensCoatingManager: React.FC = () => {
   const [newCoatingPrice, setNewCoatingPrice] = useState<number | "">("");
   const [newCoatingDescription, setNewCoatingDescription] = useState("");
   const [newCoatingCategory, setNewCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
-  const [newCoatingHasColors, setNewCoatingHasColors] = useState(false);
-  const [newCoatingColorOptions, setNewCoatingColorOptions] = useState<string[]>([]);
-  const [newColorOption, setNewColorOption] = useState("");
   
   // Edit coating form state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -37,31 +32,6 @@ export const LensCoatingManager: React.FC = () => {
   const [editCoatingPrice, setEditCoatingPrice] = useState<number | "">("");
   const [editCoatingDescription, setEditCoatingDescription] = useState("");
   const [editCoatingCategory, setEditCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
-  const [editCoatingHasColors, setEditCoatingHasColors] = useState(false);
-  const [editCoatingColorOptions, setEditCoatingColorOptions] = useState<string[]>([]);
-  const [editColorOption, setEditColorOption] = useState("");
-  
-  const addColorOption = () => {
-    if (newColorOption && !newCoatingColorOptions.includes(newColorOption)) {
-      setNewCoatingColorOptions([...newCoatingColorOptions, newColorOption]);
-      setNewColorOption("");
-    }
-  };
-  
-  const removeColorOption = (color: string) => {
-    setNewCoatingColorOptions(newCoatingColorOptions.filter(c => c !== color));
-  };
-  
-  const addEditColorOption = () => {
-    if (editColorOption && !editCoatingColorOptions.includes(editColorOption)) {
-      setEditCoatingColorOptions([...editCoatingColorOptions, editColorOption]);
-      setEditColorOption("");
-    }
-  };
-  
-  const removeEditColorOption = (color: string) => {
-    setEditCoatingColorOptions(editCoatingColorOptions.filter(c => c !== color));
-  };
   
   const handleAddCoating = () => {
     if (!newCoatingName || newCoatingPrice === "") {
@@ -69,19 +39,12 @@ export const LensCoatingManager: React.FC = () => {
       return;
     }
     
-    const newCoating: Omit<LensCoating, "id"> = {
+    addLensCoating({
       name: newCoatingName,
       price: Number(newCoatingPrice),
       description: newCoatingDescription,
       category: newCoatingCategory
-    };
-    
-    if (newCoatingHasColors && newCoatingColorOptions.length > 0) {
-      newCoating.hasColorOptions = true;
-      newCoating.colorOptions = [...newCoatingColorOptions];
-    }
-    
-    addLensCoating(newCoating);
+    });
     
     toast.success(t("coatingAddedSuccess"));
     
@@ -89,8 +52,6 @@ export const LensCoatingManager: React.FC = () => {
     setNewCoatingName("");
     setNewCoatingPrice("");
     setNewCoatingDescription("");
-    setNewCoatingHasColors(false);
-    setNewCoatingColorOptions([]);
     setIsAddDialogOpen(false);
   };
   
@@ -100,22 +61,12 @@ export const LensCoatingManager: React.FC = () => {
       return;
     }
     
-    const updatedCoating: Partial<Omit<LensCoating, "id">> = {
+    updateLensCoating(editCoatingId, {
       name: editCoatingName,
       price: Number(editCoatingPrice),
       description: editCoatingDescription,
       category: editCoatingCategory
-    };
-    
-    if (editCoatingHasColors) {
-      updatedCoating.hasColorOptions = true;
-      updatedCoating.colorOptions = [...editCoatingColorOptions];
-    } else {
-      updatedCoating.hasColorOptions = false;
-      updatedCoating.colorOptions = [];
-    }
-    
-    updateLensCoating(editCoatingId, updatedCoating);
+    });
     
     toast.success(t("coatingUpdatedSuccess"));
     
@@ -134,8 +85,6 @@ export const LensCoatingManager: React.FC = () => {
     setEditCoatingPrice(coating.price);
     setEditCoatingDescription(coating.description || "");
     setEditCoatingCategory(coating.category);
-    setEditCoatingHasColors(!!coating.hasColorOptions);
-    setEditCoatingColorOptions(coating.colorOptions || []);
     setIsEditDialogOpen(true);
   };
   
@@ -210,60 +159,6 @@ export const LensCoatingManager: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
-              {/* Color options section */}
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="hasColors" 
-                    checked={newCoatingHasColors}
-                    onCheckedChange={(checked) => setNewCoatingHasColors(!!checked)}
-                  />
-                  <Label htmlFor="hasColors" className="flex items-center gap-1">
-                    <Droplet size={16} className="text-blue-500" />
-                    {t("hasColorOptions") || "Has color options"}
-                  </Label>
-                </div>
-                
-                {newCoatingHasColors && (
-                  <div className="mt-2 space-y-3 p-3 bg-muted/30 rounded-md">
-                    <Label>{t("colorOptions") || "Color Options"}</Label>
-                    
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {newCoatingColorOptions.map((color) => (
-                        <Badge 
-                          key={color} 
-                          variant="secondary" 
-                          className="flex items-center gap-1"
-                        >
-                          {color}
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
-                            onClick={() => removeColorOption(color)}
-                          >
-                            <Trash size={10} />
-                          </Button>
-                        </Badge>
-                      ))}
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Input
-                        value={newColorOption}
-                        onChange={(e) => setNewColorOption(e.target.value)}
-                        placeholder={t("enterColorName") || "Enter color name"}
-                        className="flex-grow"
-                      />
-                      <Button type="button" size="sm" onClick={addColorOption}>
-                        <Plus size={16} />
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t("cancel")}</Button>
@@ -292,22 +187,6 @@ export const LensCoatingManager: React.FC = () => {
                     <p className="text-lg font-bold">{coating.price.toFixed(2)} {language === 'ar' ? 'د.ك' : 'KD'}</p>
                     {coating.description && (
                       <p className="text-sm text-muted-foreground mt-1">{coating.description}</p>
-                    )}
-                    
-                    {coating.hasColorOptions && coating.colorOptions && coating.colorOptions.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("colorOptions") || "Color Options"}:
-                        </p>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {coating.colorOptions.map((color) => (
-                            <Badge key={color} variant="outline" className="text-xs">
-                              <span className="w-2 h-2 rounded-full bg-primary mr-1"></span>
-                              {color}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
                     )}
                   </CardContent>
                   <CardFooter className="p-2 flex justify-end gap-2 bg-muted/50">
@@ -382,60 +261,6 @@ export const LensCoatingManager: React.FC = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            
-            {/* Edit color options */}
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="edit-hasColors" 
-                  checked={editCoatingHasColors}
-                  onCheckedChange={(checked) => setEditCoatingHasColors(!!checked)}
-                />
-                <Label htmlFor="edit-hasColors" className="flex items-center gap-1">
-                  <Droplet size={16} className="text-blue-500" />
-                  {t("hasColorOptions") || "Has color options"}
-                </Label>
-              </div>
-              
-              {editCoatingHasColors && (
-                <div className="mt-2 space-y-3 p-3 bg-muted/30 rounded-md">
-                  <Label>{t("colorOptions") || "Color Options"}</Label>
-                  
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {editCoatingColorOptions.map((color) => (
-                      <Badge 
-                        key={color} 
-                        variant="secondary" 
-                        className="flex items-center gap-1"
-                      >
-                        {color}
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
-                          onClick={() => removeEditColorOption(color)}
-                        >
-                          <Trash size={10} />
-                        </Button>
-                      </Badge>
-                    ))}
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Input
-                      value={editColorOption}
-                      onChange={(e) => setEditColorOption(e.target.value)}
-                      placeholder={t("enterColorName") || "Enter color name"}
-                      className="flex-grow"
-                    />
-                    <Button type="button" size="sm" onClick={addEditColorOption}>
-                      <Plus size={16} />
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
           <DialogFooter>

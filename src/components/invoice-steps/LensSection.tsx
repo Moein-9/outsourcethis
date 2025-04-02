@@ -17,7 +17,7 @@ interface LensSectionProps {
   selectedThickness: LensThickness | null;
   skipFrame: boolean;
   onLensTypeSelect: (lens: LensType | null) => void;
-  onCoatingSelect: (coating: LensCoating | null, selectedColor?: string) => void;
+  onCoatingSelect: (coating: LensCoating | null) => void;
   onThicknessSelect: (thickness: LensThickness | null) => void;
   onSkipFrameChange: (skip: boolean) => void;
   onCombinationPriceChange: (price: number | null) => void;

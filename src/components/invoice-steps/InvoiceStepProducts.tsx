@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -6,7 +5,7 @@ import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store
 import { ContactLensSelector, ContactLensSelection } from "@/components/ContactLensSelector";
 import { toast } from "sonner";
 
-// Import our created components
+// Import our newly created components
 import { EyeExamSection } from "./EyeExamSection";
 import { LensSection } from "./LensSection";
 import { FrameSection } from "./FrameSection";
@@ -37,7 +36,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const [skipFrame, setSkipFrame] = useState(getValues('skipFrame'));
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
-  const [selectedCoatingColor, setSelectedCoatingColor] = useState<string | undefined>(undefined);
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(null);
   const [combinedLensPrice, setCombinedLensPrice] = useState<number | null>(null);
   
@@ -110,18 +108,9 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     }
   };
   
-  const handleCoatingSelect = (coating: LensCoating | null, colorOption?: string) => {
+  const handleCoatingSelect = (coating: LensCoating | null) => {
     setSelectedCoating(coating);
     setValue('coating', coating?.name || '');
-    
-    // Store the selected color if provided
-    if (coating && colorOption) {
-      setSelectedCoatingColor(colorOption);
-      setValue('coatingColor', colorOption);
-    } else {
-      setSelectedCoatingColor(undefined);
-      setValue('coatingColor', '');
-    }
     
     if (coating?.price !== undefined) {
       setValue('coatingPrice', coating.price);

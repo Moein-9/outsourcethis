@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensType, LensCoating, LensThickness, useInventoryStore } from "@/store/inventoryStore";
@@ -5,13 +6,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Check, X, Glasses, PanelTop, AlertCircle, Droplet } from "lucide-react";
+import { Eye, Check, X, Glasses, PanelTop, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface LensSelectorProps {
   onSelectLensType: (lens: LensType | null) => void;
-  onSelectCoating: (coating: LensCoating | null, selectedColor?: string) => void;
+  onSelectCoating: (coating: LensCoating | null) => void;
   onSelectThickness: (thickness: LensThickness | null) => void;
   skipLens?: boolean;
   onSkipLensChange?: (skip: boolean) => void;
@@ -24,6 +24,7 @@ interface LensSelectorProps {
     axis?: { right: string; left: string };
     add?: { right: string; left: string };
     pd?: { right: string; left: string };
+    // Support for direct rx format from store
     sphereOD?: string;
     sphereOS?: string;
     cylOD?: string;
@@ -63,7 +64,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(initialLensType);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(initialCoating);
-  const [selectedCoatingColor, setSelectedCoatingColor] = useState<string | undefined>(undefined);
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(initialThickness);
   const [activeCategory, setActiveCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
   
@@ -165,7 +165,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     
     setSelectedCoating(null);
     setSelectedThickness(null);
-    setSelectedCoatingColor(undefined);
     onSelectCoating(null);
     onSelectThickness(null);
     
@@ -176,27 +175,11 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   
   const handleCoatingSelect = (coating: LensCoating) => {
     setSelectedCoating(coating);
-    
-    // If this coating has color options and no color is selected, default to the first color
-    if (coating.hasColorOptions && coating.colorOptions && coating.colorOptions.length > 0) {
-      const defaultColor = coating.colorOptions[0];
-      setSelectedCoatingColor(defaultColor);
-      onSelectCoating(coating, defaultColor);
-    } else {
-      setSelectedCoatingColor(undefined);
-      onSelectCoating(coating);
-    }
+    onSelectCoating(coating);
     
     // Reset thickness when coating changes as available thicknesses might change
     setSelectedThickness(null);
     onSelectThickness(null);
-  };
-  
-  const handleCoatingColorSelect = (color: string) => {
-    setSelectedCoatingColor(color);
-    if (selectedCoating) {
-      onSelectCoating(selectedCoating, color);
-    }
   };
   
   const handleThicknessSelect = (thickness: LensThickness) => {
@@ -323,18 +306,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                     `}
                     onClick={() => handleCoatingSelect(coating)}
                   >
-                    <div className="flex flex-col w-full">
+                    <div className="flex flex-col">
                       <span className="font-medium">{coating.name}</span>
                       <span className="text-xs opacity-80">{coating.description}</span>
-                      
-                      {coating.hasColorOptions && coating.colorOptions && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <Droplet size={12} className={selectedCoating?.id === coating.id ? "text-white" : "text-orange-500"} />
-                          <span className="text-xs">
-                            {t('colorOptions')}
-                          </span>
-                        </div>
-                      )}
                     </div>
                     <div className={`w-full flex ${selectedCoating?.id === coating.id ? "justify-between" : "justify-end"} items-center`}>
                       {selectedCoating?.id === coating.id && (
@@ -361,39 +335,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
           ) : (
             <div className="text-center py-3 text-muted-foreground">
               {t('selectLensTypeFirst')}
-            </div>
-          )}
-          
-          {selectedCoating?.hasColorOptions && selectedCoating?.colorOptions && selectedCoating.colorOptions.length > 0 && (
-            <div className="mt-3 mb-3 p-3 border border-dashed border-orange-300 bg-orange-50/50 rounded-md">
-              <Label className="text-sm font-medium mb-2 block text-orange-800">
-                <Droplet size={14} className="inline-block mr-1" /> 
-                {t('selectPhotochromicColor') || "Select Photochromic Color"}
-              </Label>
-              
-              <Select 
-                value={selectedCoatingColor} 
-                onValueChange={handleCoatingColorSelect}
-              >
-                <SelectTrigger className="w-full bg-white">
-                  <SelectValue placeholder={t('selectColor') || "Select color"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {selectedCoating.colorOptions.map((color) => (
-                    <SelectItem key={color} value={color}>
-                      {color}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {selectedCoatingColor && (
-                <div className="mt-2">
-                  <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-200">
-                    {t('selectedColor')}: {selectedCoatingColor}
-                  </Badge>
-                </div>
-              )}
             </div>
           )}
         </CardContent>
