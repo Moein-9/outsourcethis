@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LensTypeManager } from "@/components/LensTypeManager";
 import { LensCoatingManager } from "@/components/LensCoatingManager";
@@ -7,20 +7,13 @@ import { LensThicknessManager } from "@/components/LensThicknessManager";
 import { FrameInventory } from "@/components/FrameInventory";
 import { ContactLensInventory } from "@/components/ContactLensInventory";
 import { ServiceManager } from "@/components/ServiceManager";
-import { Glasses, Contact, Layers, Paintbrush, Ruler, Wrench, Database } from "lucide-react";
+import { Glasses, Contact, Layers, Paintbrush, Ruler, Wrench } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
-import { useInventoryStore } from "@/store/inventoryStore";
 
 export const InventoryTabs: React.FC = () => {
   const { t, language } = useLanguageStore();
-  const { initializeStore, isLoading } = useInventoryStore();
   const directionClass = language === 'ar' ? 'rtl' : 'ltr';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
-
-  // Initialize store on component mount
-  useEffect(() => {
-    initializeStore();
-  }, [initializeStore]);
 
   return (
     <Tabs defaultValue="frames" className="w-full" dir={directionClass}>
@@ -67,123 +60,67 @@ export const InventoryTabs: React.FC = () => {
           <Wrench className="w-4 h-4" />
           <span>{t('services')}</span>
         </TabsTrigger>
-        <TabsTrigger 
-          value="database" 
-          className="data-[state=active]:from-blue-700 data-[state=active]:to-blue-800 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
-        >
-          <Database className="w-4 h-4" />
-          <span>{t('database')}</span>
-        </TabsTrigger>
       </TabsList>
       
-      {isLoading ? (
-        <div className="flex items-center justify-center p-12">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="ml-2 text-blue-500 font-medium">{t('loadingInventory')}</p>
+      <TabsContent value="frames" className="mt-0">
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className={`text-lg font-bold mb-4 text-blue-800 flex items-center gap-2 ${textAlignClass}`}>
+            <Glasses className="w-5 h-5" />
+            {t('frameManagement')}
+          </h3>
+          <FrameInventory />
         </div>
-      ) : (
-        <>
-          <TabsContent value="frames" className="mt-0">
-            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className={`text-lg font-bold mb-4 text-blue-800 flex items-center gap-2 ${textAlignClass}`}>
-                <Glasses className="w-5 h-5" />
-                {t('frameManagement')}
-              </h3>
-              <FrameInventory />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="contactLenses" className="mt-0">
-            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className={`text-lg font-bold mb-4 text-amber-800 flex items-center gap-2 ${textAlignClass}`}>
-                <Contact className="w-5 h-5" />
-                {t('contactLensManagement')}
-              </h3>
-              <ContactLensInventory />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="lensTypes" className="mt-0">
-            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className={`text-lg font-bold mb-4 text-purple-800 flex items-center gap-2 ${textAlignClass}`}>
-                <Layers className="w-5 h-5" />
-                {t('lensTypes')}
-              </h3>
-              <LensTypeManager />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="lensCoatings" className="mt-0">
-            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className={`text-lg font-bold mb-4 text-teal-800 flex items-center gap-2 ${textAlignClass}`}>
-                <Paintbrush className="w-5 h-5" />
-                {t('lensCoatings')}
-              </h3>
-              <LensCoatingManager />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="lensThicknesses" className="mt-0">
-            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className={`text-lg font-bold mb-4 text-green-800 flex items-center gap-2 ${textAlignClass}`}>
-                <Ruler className="w-5 h-5" />
-                {t('lensThicknesses')}
-              </h3>
-              <LensThicknessManager />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="services" className="mt-0">
-            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className={`text-lg font-bold mb-4 text-indigo-800 flex items-center gap-2 ${textAlignClass}`}>
-                <Wrench className="w-5 h-5" />
-                {t('serviceManagement')}
-              </h3>
-              <ServiceManager />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="database" className="mt-0">
-            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className={`text-lg font-bold mb-4 text-blue-900 flex items-center gap-2 ${textAlignClass}`}>
-                <Database className="w-5 h-5" />
-                {t('databaseManagement')}
-              </h3>
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 mb-4">
-                <p className="text-sm text-blue-800">
-                  {t('databaseInfo')}
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <button onClick={() => window.open("https://supabase.com/dashboard/project/loxnmnlszxxjrpkfybwm/editor", "_blank")} 
-                  className="p-4 bg-white hover:bg-blue-50 border border-blue-200 rounded-lg shadow-sm transition-colors flex flex-col items-center text-center gap-3">
-                  <Database className="w-8 h-8 text-blue-700" />
-                  <div>
-                    <h4 className="font-medium text-blue-900">{t('sqlEditor')}</h4>
-                    <p className="text-sm text-gray-500 mt-1">{t('runCustomQueries')}</p>
-                  </div>
-                </button>
-                <button onClick={() => window.open("https://supabase.com/dashboard/project/loxnmnlszxxjrpkfybwm/editor/table", "_blank")} 
-                  className="p-4 bg-white hover:bg-blue-50 border border-blue-200 rounded-lg shadow-sm transition-colors flex flex-col items-center text-center gap-3">
-                  <Layers className="w-8 h-8 text-blue-700" />
-                  <div>
-                    <h4 className="font-medium text-blue-900">{t('tableEditor')}</h4>
-                    <p className="text-sm text-gray-500 mt-1">{t('viewModifyTables')}</p>
-                  </div>
-                </button>
-                <button onClick={() => window.open("https://supabase.com/dashboard/project/loxnmnlszxxjrpkfybwm", "_blank")} 
-                  className="p-4 bg-white hover:bg-blue-50 border border-blue-200 rounded-lg shadow-sm transition-colors flex flex-col items-center text-center gap-3">
-                  <Wrench className="w-8 h-8 text-blue-700" />
-                  <div>
-                    <h4 className="font-medium text-blue-900">{t('supaDashboard')}</h4>
-                    <p className="text-sm text-gray-500 mt-1">{t('manageDatabaseSettings')}</p>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </TabsContent>
-        </>
-      )}
+      </TabsContent>
+      
+      <TabsContent value="contactLenses" className="mt-0">
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className={`text-lg font-bold mb-4 text-amber-800 flex items-center gap-2 ${textAlignClass}`}>
+            <Contact className="w-5 h-5" />
+            {t('contactLensManagement')}
+          </h3>
+          <ContactLensInventory />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="lensTypes" className="mt-0">
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className={`text-lg font-bold mb-4 text-purple-800 flex items-center gap-2 ${textAlignClass}`}>
+            <Layers className="w-5 h-5" />
+            {t('lensTypes')}
+          </h3>
+          <LensTypeManager />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="lensCoatings" className="mt-0">
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className={`text-lg font-bold mb-4 text-teal-800 flex items-center gap-2 ${textAlignClass}`}>
+            <Paintbrush className="w-5 h-5" />
+            {t('lensCoatings')}
+          </h3>
+          <LensCoatingManager />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="lensThicknesses" className="mt-0">
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className={`text-lg font-bold mb-4 text-green-800 flex items-center gap-2 ${textAlignClass}`}>
+            <Ruler className="w-5 h-5" />
+            {t('lensThicknesses')}
+          </h3>
+          <LensThicknessManager />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="services" className="mt-0">
+        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className={`text-lg font-bold mb-4 text-indigo-800 flex items-center gap-2 ${textAlignClass}`}>
+            <Wrench className="w-5 h-5" />
+            {t('serviceManagement')}
+          </h3>
+          <ServiceManager />
+        </div>
+      </TabsContent>
     </Tabs>
   );
 };

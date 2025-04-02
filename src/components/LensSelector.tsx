@@ -50,65 +50,40 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
 }) => {
   const { t, language } = useLanguageStore();
   const lensTypes = useInventoryStore((state) => state.lensTypes);
-  const { 
-    lensCoatings, 
-    lensThicknesses, 
-    getLensCoatingsByCategory, 
-    getLensThicknessesByCategory,
-    getLensPriceCombination 
-  } = useInventoryStore();
+  const { lensCoatings, lensThicknesses, getLensCoatingsByCategory, getLensThicknessesByCategory } = useInventoryStore();
   
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(initialLensType);
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(initialCoating);
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(initialThickness);
   const [activeCategory, setActiveCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
-  const [currentTab, setCurrentTab] = useState<"lensType" | "coating" | "thickness">("lensType");
   
-  // Track combined price
-  const [combinedPrice, setCombinedPrice] = useState<number | undefined>(undefined);
-  
-  // Calculate combination price when selections change
-  useEffect(() => {
-    if (selectedLensType && selectedCoating && selectedThickness) {
-      const priceCombination = getLensPriceCombination(
-        selectedLensType.id, 
-        selectedCoating.id, 
-        selectedThickness.id
-      );
-      
-      if (priceCombination) {
-        setCombinedPrice(priceCombination.price);
-      } else {
-        // Fallback to individual component prices if no combination price is found
-        const lensPrice = selectedLensType.price || 0;
-        const coatingPrice = selectedCoating.price || 0;
-        const thicknessPrice = selectedThickness.price || 0;
-        setCombinedPrice(lensPrice + coatingPrice + thicknessPrice);
-      }
-    } else {
-      setCombinedPrice(undefined);
-    }
-  }, [selectedLensType, selectedCoating, selectedThickness, getLensPriceCombination]);
-  
+  // Improved check for ADD values that handles all edge cases
   const hasAddValues = React.useMemo(() => {
     if (!rx) return false;
     
+    // Helper function to check if a value is a valid ADD value
     const isValidAddValue = (value?: string) => {
+      // If value is undefined or null or empty string, it's not valid
       if (!value) return false;
       
-      if (value === '0' || value === '0.00' || value === '-' || value === '0-' || value.trim() === '') return false;
+      // If value is "0", "0.00", "-", "0-", or similar variations, it's not valid
+      if (value === '0' || value === '0.00' || value === '-' || value === '0-' || value === '.00' || value.trim() === '') return false;
       
+      // If value is a number and it's greater than 0, it's valid
       const numValue = parseFloat(value);
       return !isNaN(numValue) && numValue > 0;
     };
     
+    // Check for nested 'add' object format
     if (rx.add) {
       return isValidAddValue(rx.add.right) || isValidAddValue(rx.add.left);
     }
     
+    // Check for flat format (addOD, addOS)
     return isValidAddValue(rx.addOD) || isValidAddValue(rx.addOS);
   }, [rx]);
 
+  // Extended debug logging for rx data
   console.log('RX passed to LensSelector:', rx);
   console.log('Has ADD values:', hasAddValues);
   console.log('ADD values check - addOD:', rx?.addOD);
@@ -116,11 +91,14 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   console.log('ADD values check - add.right:', rx?.add?.right);
   console.log('ADD values check - add.left:', rx?.add?.left);
   
+  // Filter lens types based on ADD values
   const filteredLensTypes = React.useMemo(() => {
     if (hasAddValues) {
+      // Show all lens types when ADD values are present
       console.log('Showing all lens types including Progressive and Bifocal');
       return lensTypes;
     } else {
+      // Hide Progressive and Bifocal lens types when ADD values are not present
       console.log('Filtering out Progressive and Bifocal lens types');
       return lensTypes.filter(lens => 
         lens.type !== 'progressive' && lens.type !== 'bifocal'
@@ -128,6 +106,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   }, [lensTypes, hasAddValues]);
 
+  // Get category from lens type
   const getCategory = (lensType: LensType | null): "distance-reading" | "progressive" | "bifocal" => {
     if (!lensType) return "distance-reading";
     
@@ -144,9 +123,12 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   };
   
+  // Initialize from props if provided
   useEffect(() => {
     if (initialLensType) {
+      // Check if initialLensType is valid based on hasAddValues
       if (!hasAddValues && (initialLensType.type === 'progressive' || initialLensType.type === 'bifocal')) {
+        // If we have an invalid lens type selected and no ADD values, reset it
         setSelectedLensType(null);
         onSelectLensType(null);
       } else {
@@ -162,12 +144,14 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   }, [initialLensType, initialCoating, initialThickness, hasAddValues, onSelectLensType]);
   
+  // Update selected lens type if it becomes invalid (e.g., prescription changes)
   useEffect(() => {
     if (selectedLensType && !hasAddValues && 
         (selectedLensType.type === 'progressive' || selectedLensType.type === 'bifocal')) {
       setSelectedLensType(null);
       onSelectLensType(null);
       
+      // Reset coating and thickness when lens type is reset
       setSelectedCoating(null);
       setSelectedThickness(null);
       onSelectCoating(null);
@@ -179,42 +163,25 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     setSelectedLensType(lens);
     onSelectLensType(lens);
     
+    // Update category based on lens type
     const newCategory = getCategory(lens);
     setActiveCategory(newCategory);
     
+    // Reset coating and thickness when lens type changes
     setSelectedCoating(null);
     setSelectedThickness(null);
     onSelectCoating(null);
     onSelectThickness(null);
-    
-    // Automatically advance to coating tab
-    setCurrentTab("coating");
   };
   
   const handleCoatingSelect = (coating: LensCoating) => {
     setSelectedCoating(coating);
     onSelectCoating(coating);
-    
-    // Automatically advance to thickness tab
-    setCurrentTab("thickness");
   };
   
   const handleThicknessSelect = (thickness: LensThickness) => {
     setSelectedThickness(thickness);
     onSelectThickness(thickness);
-    
-    // Update lens price based on combination in the parent component
-    if (selectedLensType && selectedCoating) {
-      const priceCombination = getLensPriceCombination(
-        selectedLensType.id, 
-        selectedCoating.id, 
-        thickness.id
-      );
-      
-      if (priceCombination) {
-        setCombinedPrice(priceCombination.price);
-      }
-    }
   };
   
   const handleSkipLensChange = (checked: boolean) => {
@@ -232,6 +199,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   };
   
+  // Get filtered coatings and thicknesses based on active category
   const availableCoatings = getLensCoatingsByCategory(activeCategory);
   const availableThicknesses = getLensThicknessesByCategory(activeCategory);
   
@@ -261,7 +229,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
       </div>
       
       {!skipLens && (
-        <Tabs value={currentTab} onValueChange={(val) => setCurrentTab(val as any)} className="w-full">
+        <Tabs defaultValue="lensType" className="w-full">
           <TabsList className="w-full mb-4 grid grid-cols-3">
             <TabsTrigger value="lensType" className="flex-1 bg-[#8B5CF6] data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
               <span className="text-white">1</span> - {t('selectLensType')}
@@ -270,7 +238,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               <span className="text-white">2</span> - {t('selectCoatings')}
             </TabsTrigger>
             <TabsTrigger value="thickness" className="flex-1 bg-[#10B981] data-[state=active]:bg-[#10B981] data-[state=active]:text-white">
-              <span className="text-white">3</span> - {language === 'ar' ? 'اختر السماكة والسعر' : 'Select Thickness & Price'}
+              <span className="text-white">3</span> - {t('selectThickness') || "Select Thickness"}
             </TabsTrigger>
           </TabsList>
           
@@ -323,6 +291,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                         <div className="font-medium">{coating.name}</div>
                         <div className="text-sm text-muted-foreground">{coating.description || ''}</div>
                       </div>
+                      <div className="text-right font-semibold">
+                        {coating.price.toFixed(2)} {t('kwd')}
+                      </div>
                     </div>
                     
                     {selectedCoating?.id === coating.id && (
@@ -344,13 +315,15 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                   onClick={() => {
                     setSelectedCoating(null);
                     onSelectCoating(null);
-                    setCurrentTab("thickness");
                   }}
                 >
                   <div className="flex justify-between items-start">
                     <div className={`${textAlignClass}`}>
                       <div className="font-medium">{t('noCoating')}</div>
                       <div className="text-sm text-muted-foreground">{t('noCoatingDesc')}</div>
+                    </div>
+                    <div className="text-right font-semibold">
+                      0.00 {t('kwd')}
                     </div>
                   </div>
                   
@@ -365,72 +338,43 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               </div>
             ) : (
               <div className="p-4 border border-dashed rounded-lg bg-muted/10 text-center">
-                <p className="text-muted-foreground">{t('selectLensTypeFirst')}</p>
+                <p className="text-muted-foreground">{t('selectLensTypeFirst') || "Please select a lens type first"}</p>
               </div>
             )}
           </TabsContent>
           
           <TabsContent value="thickness" className="space-y-4">
-            {selectedLensType && selectedCoating ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {availableThicknesses.map((thickness) => {
-                    // Check if there's a combination price
-                    const priceCombination = getLensPriceCombination(
-                      selectedLensType.id, 
-                      selectedCoating.id, 
-                      thickness.id
-                    );
+            {selectedLensType ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {availableThicknesses.map((thickness) => (
+                  <div
+                    key={thickness.id}
+                    className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                      selectedThickness?.id === thickness.id
+                        ? "border-[#10B981] bg-[#10B981]/10 shadow-sm" 
+                        : "hover:border-[#10B981]/30 hover:bg-muted/10"
+                    }`}
+                    onClick={() => handleThicknessSelect(thickness)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className={`${textAlignClass}`}>
+                        <div className="font-medium">{thickness.name}</div>
+                        <div className="text-sm text-muted-foreground">{thickness.description || ''}</div>
+                      </div>
+                      <div className="text-right font-semibold">
+                        {thickness.price.toFixed(2)} {t('kwd')}
+                      </div>
+                    </div>
                     
-                    const displayPrice = priceCombination ? priceCombination.price : thickness.price;
-                    
-                    return (
-                      <div
-                        key={thickness.id}
-                        className={`border rounded-lg p-3 cursor-pointer transition-all ${
-                          selectedThickness?.id === thickness.id
-                            ? "border-[#10B981] bg-[#10B981]/10 shadow-sm" 
-                            : "hover:border-[#10B981]/30 hover:bg-muted/10"
-                        }`}
-                        onClick={() => handleThicknessSelect(thickness)}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div className={`${textAlignClass}`}>
-                            <div className="font-medium">{thickness.name}</div>
-                            <div className="text-sm text-muted-foreground">{thickness.description || ''}</div>
-                          </div>
-                          <div className="text-right font-semibold">
-                            {displayPrice.toFixed(2)} {t('kwd')}
-                          </div>
+                    {selectedThickness?.id === thickness.id && (
+                      <div className="mt-2 flex justify-end">
+                        <div className="bg-[#10B981] text-white rounded-full p-1">
+                          <Check className="w-4 h-4" />
                         </div>
-                        
-                        {selectedThickness?.id === thickness.id && (
-                          <div className="mt-2 flex justify-end">
-                            <div className="bg-[#10B981] text-white rounded-full p-1">
-                              <Check className="w-4 h-4" />
-                            </div>
-                          </div>
-                        )}
                       </div>
-                    );
-                  })}
-                </div>
-                
-                {selectedThickness && combinedPrice !== undefined && (
-                  <div className="p-4 border-2 border-primary/40 rounded-lg bg-primary/5 mt-5">
-                    <div className="flex justify-between items-center">
-                      <div className={`text-lg font-semibold text-primary ${textAlignClass}`}>
-                        {language === 'ar' ? 'السعر النهائي للعدسة:' : 'Final Lens Price:'}
-                      </div>
-                      <div className="text-xl font-bold text-primary">
-                        {combinedPrice.toFixed(3)} {t('kwd')}
-                      </div>
-                    </div>
-                    <div className={`text-sm text-muted-foreground mt-2 ${textAlignClass}`}>
-                      {language === 'ar' ? 'يتضمن نوع العدسة والطلاء والسماكة' : 'Includes lens type, coating and thickness'}
-                    </div>
+                    )}
                   </div>
-                )}
+                ))}
                 
                 <div
                   className={`border rounded-lg p-3 cursor-pointer transition-all ${
@@ -445,8 +389,11 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                 >
                   <div className="flex justify-between items-start">
                     <div className={`${textAlignClass}`}>
-                      <div className="font-medium">{t('noThickness')}</div>
-                      <div className="text-sm text-muted-foreground">{t('noThicknessDesc')}</div>
+                      <div className="font-medium">{t('noThickness') || "No Thickness"}</div>
+                      <div className="text-sm text-muted-foreground">{t('noThicknessDesc') || "No additional thickness options"}</div>
+                    </div>
+                    <div className="text-right font-semibold">
+                      0.00 {t('kwd')}
                     </div>
                   </div>
                   
@@ -461,12 +408,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
               </div>
             ) : (
               <div className="p-4 border border-dashed rounded-lg bg-muted/10 text-center">
-                <p className="text-muted-foreground">
-                  {selectedLensType 
-                    ? t('selectCoatingFirst')
-                    : t('selectLensTypeFirst')
-                  }
-                </p>
+                <p className="text-muted-foreground">{t('selectLensTypeFirst') || "Please select a lens type first"}</p>
               </div>
             )}
           </TabsContent>
