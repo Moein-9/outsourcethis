@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -412,7 +413,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                   <div className="font-medium">{t("coating")}:</div>
                   <div className="col-span-2">
                     {coatingValue}
-                    {coatingColorValue && coatingValue.includes("Photochromic") && (
+                    {coatingColorValue && (
                       <span className="ml-1 text-xs">({coatingColorValue})</span>
                     )}
                   </div>
