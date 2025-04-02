@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { 
   LensType, 
@@ -10,6 +10,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LensSelector } from "@/components/LensSelector";
 import { Eye, Check } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface LensSectionProps {
   selectedLensType: LensType | null;
@@ -21,6 +29,8 @@ interface LensSectionProps {
   onThicknessSelect: (thickness: LensThickness | null) => void;
   onSkipFrameChange: (skip: boolean) => void;
   onCombinationPriceChange: (price: number | null) => void;
+  onCoatingColorChange?: (color: string) => void; // New prop
+  selectedCoatingColor?: string; // New prop
   combinedLensPrice: number | null;
   rx: any;
 }
@@ -35,6 +45,8 @@ export const LensSection: React.FC<LensSectionProps> = ({
   onThicknessSelect,
   onSkipFrameChange,
   onCombinationPriceChange,
+  onCoatingColorChange,
+  selectedCoatingColor = "",
   combinedLensPrice,
   rx
 }) => {
@@ -72,6 +84,28 @@ export const LensSection: React.FC<LensSectionProps> = ({
           rx={rx}
           onCombinationPriceChange={onCombinationPriceChange}
         />
+        
+        {/* Photochromic color selector */}
+        {selectedCoating?.isPhotochromic && selectedCoating?.availableColors && selectedCoating.availableColors.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-dashed">
+            <Label className="mb-2 block font-medium">{t('selectPhotochromicColor')}</Label>
+            <Select 
+              value={selectedCoatingColor} 
+              onValueChange={onCoatingColorChange ? onCoatingColorChange : () => {}}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t('selectColor')} />
+              </SelectTrigger>
+              <SelectContent>
+                {selectedCoating.availableColors.map(color => (
+                  <SelectItem key={color} value={color}>
+                    {color}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

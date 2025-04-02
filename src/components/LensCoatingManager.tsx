@@ -24,6 +24,8 @@ export const LensCoatingManager: React.FC = () => {
   const [newCoatingPrice, setNewCoatingPrice] = useState<number | "">("");
   const [newCoatingDescription, setNewCoatingDescription] = useState("");
   const [newCoatingCategory, setNewCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
+  const [newIsPhotochromic, setNewIsPhotochromic] = useState(false);
+  const [newAvailableColors, setNewAvailableColors] = useState<string[]>(["Brown", "Gray", "Green"]);
   
   // Edit coating form state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -32,6 +34,8 @@ export const LensCoatingManager: React.FC = () => {
   const [editCoatingPrice, setEditCoatingPrice] = useState<number | "">("");
   const [editCoatingDescription, setEditCoatingDescription] = useState("");
   const [editCoatingCategory, setEditCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
+  const [editIsPhotochromic, setEditIsPhotochromic] = useState(false);
+  const [editAvailableColors, setEditAvailableColors] = useState<string[]>([]);
   
   const handleAddCoating = () => {
     if (!newCoatingName || newCoatingPrice === "") {
@@ -39,12 +43,20 @@ export const LensCoatingManager: React.FC = () => {
       return;
     }
     
-    addLensCoating({
+    const coatingData: Omit<LensCoating, "id"> = {
       name: newCoatingName,
       price: Number(newCoatingPrice),
       description: newCoatingDescription,
       category: newCoatingCategory
-    });
+    };
+    
+    // Add photochromic properties if it's a photochromic coating
+    if (newIsPhotochromic) {
+      coatingData.isPhotochromic = true;
+      coatingData.availableColors = [...newAvailableColors];
+    }
+    
+    addLensCoating(coatingData);
     
     toast.success(t("coatingAddedSuccess"));
     
@@ -52,6 +64,7 @@ export const LensCoatingManager: React.FC = () => {
     setNewCoatingName("");
     setNewCoatingPrice("");
     setNewCoatingDescription("");
+    setNewIsPhotochromic(false);
     setIsAddDialogOpen(false);
   };
   
@@ -61,12 +74,23 @@ export const LensCoatingManager: React.FC = () => {
       return;
     }
     
-    updateLensCoating(editCoatingId, {
+    const coatingData: Partial<Omit<LensCoating, "id">> = {
       name: editCoatingName,
       price: Number(editCoatingPrice),
       description: editCoatingDescription,
       category: editCoatingCategory
-    });
+    };
+    
+    // Add photochromic properties if it's a photochromic coating
+    if (editIsPhotochromic) {
+      coatingData.isPhotochromic = true;
+      coatingData.availableColors = [...editAvailableColors];
+    } else {
+      coatingData.isPhotochromic = false;
+      coatingData.availableColors = undefined;
+    }
+    
+    updateLensCoating(editCoatingId, coatingData);
     
     toast.success(t("coatingUpdatedSuccess"));
     
@@ -85,6 +109,8 @@ export const LensCoatingManager: React.FC = () => {
     setEditCoatingPrice(coating.price);
     setEditCoatingDescription(coating.description || "");
     setEditCoatingCategory(coating.category);
+    setEditIsPhotochromic(!!coating.isPhotochromic);
+    setEditAvailableColors(coating.availableColors || ["Brown", "Gray", "Green"]);
     setIsEditDialogOpen(true);
   };
   
@@ -159,6 +185,30 @@ export const LensCoatingManager: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="isPhotochromic"
+                  checked={newIsPhotochromic}
+                  onChange={(e) => setNewIsPhotochromic(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="isPhotochromic">{t("isPhotochromic") || "Photochromic Coating"}</Label>
+              </div>
+              
+              {newIsPhotochromic && (
+                <div className="grid gap-2">
+                  <Label>{t("availableColors") || "Available Colors"}</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {newAvailableColors.map((color, index) => (
+                      <Badge key={index}>{color}</Badge>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {t("defaultColorsNote") || "Default colors: Brown, Gray, Green"}
+                  </p>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t("cancel")}</Button>
@@ -179,14 +229,29 @@ export const LensCoatingManager: React.FC = () => {
           {filteredCoatings.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredCoatings.map((coating) => (
-                <Card key={coating.id} className="overflow-hidden">
+                <Card key={coating.id} className={`overflow-hidden ${coating.isPhotochromic ? 'border-blue-300' : ''}`}>
                   <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-base">{coating.name}</CardTitle>
+                    <CardTitle className="text-base">
+                      {coating.name}
+                      {coating.isPhotochromic && (
+                        <Badge className="ml-2 bg-blue-100 text-blue-800">{t("photochromic")}</Badge>
+                      )}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 pb-2">
                     <p className="text-lg font-bold">{coating.price.toFixed(2)} {language === 'ar' ? 'د.ك' : 'KD'}</p>
                     {coating.description && (
                       <p className="text-sm text-muted-foreground mt-1">{coating.description}</p>
+                    )}
+                    {coating.isPhotochromic && coating.availableColors && coating.availableColors.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs font-medium text-gray-500">{t("availableColors") || "Available Colors"}:</p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {coating.availableColors.map((color, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">{color}</Badge>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </CardContent>
                   <CardFooter className="p-2 flex justify-end gap-2 bg-muted/50">
@@ -262,6 +327,30 @@ export const LensCoatingManager: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="edit-isPhotochromic"
+                checked={editIsPhotochromic}
+                onChange={(e) => setEditIsPhotochromic(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="edit-isPhotochromic">{t("isPhotochromic") || "Photochromic Coating"}</Label>
+            </div>
+            
+            {editIsPhotochromic && (
+              <div className="grid gap-2">
+                <Label>{t("availableColors") || "Available Colors"}</Label>
+                <div className="flex flex-wrap gap-2">
+                  {editAvailableColors.map((color, index) => (
+                    <Badge key={index}>{color}</Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t("defaultColorsNote") || "Default colors: Brown, Gray, Green"}
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>{t("cancel")}</Button>

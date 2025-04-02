@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensType, LensCoating, LensThickness, useInventoryStore } from "@/store/inventoryStore";
@@ -303,12 +302,18 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                     className={`
                       h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
                       ${selectedCoating?.id === coating.id ? "bg-orange-600 hover:bg-orange-700 text-white" : "hover:bg-orange-50"}
+                      ${coating.isPhotochromic ? "border-blue-300 border-2" : ""}
                     `}
                     onClick={() => handleCoatingSelect(coating)}
                   >
                     <div className="flex flex-col">
                       <span className="font-medium">{coating.name}</span>
                       <span className="text-xs opacity-80">{coating.description}</span>
+                      {coating.isPhotochromic && (
+                        <span className="text-xs mt-1 font-medium text-blue-600 dark:text-blue-400">
+                          {t('photochromic')}
+                        </span>
+                      )}
                     </div>
                     <div className={`w-full flex ${selectedCoating?.id === coating.id ? "justify-between" : "justify-end"} items-center`}>
                       {selectedCoating?.id === coating.id && (

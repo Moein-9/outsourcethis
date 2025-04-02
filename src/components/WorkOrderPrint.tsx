@@ -13,6 +13,7 @@ interface WorkOrderPrintProps {
   rx?: any;
   lensType?: string;
   coating?: string;
+  coatingColor?: string;
   thickness?: string;
   frame?: {
     brand: string;
@@ -47,6 +48,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   rx,
   lensType,
   coating,
+  coatingColor,
   thickness,
   frame,
   contactLenses,
@@ -59,6 +61,7 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
   const phone = patientPhone || invoice.patientPhone;
   const lensTypeValue = lensType || invoice.lensType;
   const coatingValue = coating || invoice.coating;
+  const coatingColorValue = coatingColor || (invoice as any).coatingColor;
   const thicknessValue = thickness || (invoice as any).thickness;
   
   const contactLensItems = contactLenses || (invoice as any).contactLensItems || [];
@@ -407,7 +410,12 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
               {coatingValue && (
                 <div className="grid grid-cols-3 gap-1">
                   <div className="font-medium">{t("coating")}:</div>
-                  <div className="col-span-2">{coatingValue}</div>
+                  <div className="col-span-2">
+                    {coatingValue}
+                    {coatingColorValue && coatingValue.includes("Photochromic") && (
+                      <span className="ml-1 text-xs">({coatingColorValue})</span>
+                    )}
+                  </div>
                 </div>
               )}
               {thicknessValue && (

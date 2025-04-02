@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -26,6 +25,8 @@ export interface LensCoating {
   price: number;
   description?: string;
   category: "distance-reading" | "progressive" | "bifocal";
+  isPhotochromic?: boolean;
+  availableColors?: string[];
 }
 
 export interface LensThickness {
@@ -132,20 +133,45 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "coat6", name: "مضاد للانعكاس للعدسات الثنائية", price: 8, description: "Anti-Reflective for Bifocal", category: "bifocal" },
         { id: "coat7", name: "حماية شاشة للعدسات الثنائية", price: 9, description: "Blue Light Protection for Bifocal", category: "bifocal" },
         
-        // New coating items for distance-reading
+        // Standard coating items
         { id: "coat8", name: "Basic (عادي)", price: 0, description: "Basic Coating", category: "distance-reading" },
         { id: "coat9", name: "Filter (فلتر)", price: 0, description: "Filter Coating", category: "distance-reading" },
         { id: "coat10", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating", category: "distance-reading" },
-        
-        // New coating items for progressive
         { id: "coat11", name: "Basic (عادي)", price: 0, description: "Basic Coating for Progressive", category: "progressive" },
         { id: "coat12", name: "Filter (فلتر)", price: 0, description: "Filter Coating for Progressive", category: "progressive" },
         { id: "coat13", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Progressive", category: "progressive" },
-        
-        // New coating items for bifocal
         { id: "coat14", name: "Basic (عادي)", price: 0, description: "Basic Coating for Bifocal", category: "bifocal" },
         { id: "coat15", name: "Filter (فلتر)", price: 0, description: "Filter Coating for Bifocal", category: "bifocal" },
-        { id: "coat16", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Bifocal", category: "bifocal" }
+        { id: "coat16", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Bifocal", category: "bifocal" },
+        
+        // Photochromic coating items with color options
+        { 
+          id: "coat17", 
+          name: "Photochromic (فوتوكروميك)", 
+          price: 15, 
+          description: "Photochromic lenses that darken in sunlight", 
+          category: "distance-reading", 
+          isPhotochromic: true,
+          availableColors: ["Brown", "Gray", "Green"]
+        },
+        { 
+          id: "coat18", 
+          name: "Photochromic (فوتوكروميك)", 
+          price: 20, 
+          description: "Photochromic lenses for progressive that darken in sunlight", 
+          category: "progressive", 
+          isPhotochromic: true,
+          availableColors: ["Brown", "Gray", "Green"]
+        },
+        { 
+          id: "coat19", 
+          name: "Photochromic (فوتوكروميك)", 
+          price: 18, 
+          description: "Photochromic lenses for bifocal that darken in sunlight", 
+          category: "bifocal", 
+          isPhotochromic: true,
+          availableColors: ["Brown", "Gray", "Green"]
+        }
       ],
       lensThicknesses: [
         { id: "thick1", name: "عادي", price: 0, description: "Standard Thickness", category: "distance-reading" },
@@ -222,6 +248,67 @@ export const useInventoryStore = create<InventoryState>()(
           coatingId: "coat11",
           thicknessId: "thick14",
           price: 40
+        },
+        
+        // Add pricing combinations for photochromic coatings
+        // Distance-reading combinations
+        {
+          id: "combo5",
+          lensTypeId: "lens2",
+          coatingId: "coat17",
+          thicknessId: "thick8",
+          price: 30
+        },
+        {
+          id: "combo6",
+          lensTypeId: "lens2",
+          coatingId: "coat17",
+          thicknessId: "thick11",
+          price: 40
+        },
+        {
+          id: "combo7",
+          lensTypeId: "lens1",
+          coatingId: "coat17",
+          thicknessId: "thick8",
+          price: 30
+        },
+        {
+          id: "combo8",
+          lensTypeId: "lens1",
+          coatingId: "coat17",
+          thicknessId: "thick11",
+          price: 40
+        },
+        // Progressive combinations
+        {
+          id: "combo9",
+          lensTypeId: "lens3",
+          coatingId: "coat18",
+          thicknessId: "thick14",
+          price: 55
+        },
+        {
+          id: "combo10",
+          lensTypeId: "lens3",
+          coatingId: "coat18",
+          thicknessId: "thick17",
+          price: 65
+        },
+        // Bifocal combinations
+        {
+          id: "combo11",
+          lensTypeId: "lens4",
+          coatingId: "coat19",
+          thicknessId: "thick20",
+          price: 45
+        },
+        {
+          id: "combo12",
+          lensTypeId: "lens4",
+          coatingId: "coat19",
+          thicknessId: "thick23",
+          price: 55
         }
       ],
       

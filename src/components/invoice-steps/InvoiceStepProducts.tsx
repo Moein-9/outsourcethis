@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -38,6 +39,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   const [selectedCoating, setSelectedCoating] = useState<LensCoating | null>(null);
   const [selectedThickness, setSelectedThickness] = useState<LensThickness | null>(null);
   const [combinedLensPrice, setCombinedLensPrice] = useState<number | null>(null);
+  const [coatingColor, setCoatingColor] = useState(getValues('coatingColor') || "");
   
   const [selectedFrame, setSelectedFrame] = useState<{
     brand: string;
@@ -64,6 +66,11 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
         size: getValues('frameSize') as string,
         price: getValues('framePrice') as number
       });
+    }
+    
+    // Load saved coating color if any
+    if (getValues('coatingColor')) {
+      setCoatingColor(getValues('coatingColor'));
     }
   }, [getValues]);
   
@@ -112,6 +119,12 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setSelectedCoating(coating);
     setValue('coating', coating?.name || '');
     
+    // Reset coating color if changing coatings or if not photochromic
+    if (!coating?.isPhotochromic) {
+      setCoatingColor("");
+      setValue('coatingColor', "");
+    }
+    
     if (coating?.price !== undefined) {
       setValue('coatingPrice', coating.price);
     } else {
@@ -128,6 +141,11 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     } else {
       setValue('thicknessPrice', 0);
     }
+  };
+  
+  const handleCoatingColorChange = (color: string) => {
+    setCoatingColor(color);
+    setValue('coatingColor', color);
   };
   
   const handleCombinationPriceChange = (price: number | null) => {
@@ -221,6 +239,8 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
             onThicknessSelect={handleThicknessSelect}
             onSkipFrameChange={handleSkipFrameChange}
             onCombinationPriceChange={handleCombinationPriceChange}
+            onCoatingColorChange={handleCoatingColorChange}
+            selectedCoatingColor={coatingColor}
             combinedLensPrice={combinedLensPrice}
             rx={rxFormatted || getValues('rx')}
           />
