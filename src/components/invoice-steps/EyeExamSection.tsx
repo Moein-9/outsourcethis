@@ -1,9 +1,10 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInventoryStore, ServiceItem } from "@/store/inventoryStore";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollText, Check } from "lucide-react";
+import { useInvoiceForm } from "./InvoiceFormContext";
 
 interface EyeExamSectionProps {
   examService: ServiceItem | null;
@@ -13,6 +14,14 @@ export const EyeExamSection: React.FC<EyeExamSectionProps> = ({ examService }) =
   const { language } = useLanguageStore();
   const isRtl = language === 'ar';
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const { updateServicePrice } = useInvoiceForm();
+
+  // This effect will update the service price whenever the exam service changes
+  useEffect(() => {
+    if (examService) {
+      updateServicePrice(examService.price);
+    }
+  }, [examService, updateServicePrice]);
 
   if (!examService) {
     return (

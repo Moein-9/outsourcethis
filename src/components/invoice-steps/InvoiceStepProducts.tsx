@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -17,7 +16,7 @@ interface InvoiceStepProductsProps {
 
 export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoiceType }) => {
   const { t } = useLanguageStore();
-  const { getValues, setValue } = useInvoiceForm();
+  const { getValues, setValue, updateServicePrice } = useInvoiceForm();
   const getServicesByCategory = useInventoryStore((state) => state.getServicesByCategory);
   
   const [eyeExamService, setEyeExamService] = useState(() => {
@@ -26,11 +25,13 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   });
   
   useEffect(() => {
-    const examServices = getServicesByCategory("exam");
-    if (examServices.length > 0) {
-      setEyeExamService(examServices[0]);
+    if (invoiceType === 'exam' && eyeExamService) {
+      setValue('serviceName', eyeExamService.name);
+      setValue('serviceId', eyeExamService.id);
+      setValue('serviceDescription', eyeExamService.description || '');
+      updateServicePrice(eyeExamService.price);
     }
-  }, [getServicesByCategory]);
+  }, [invoiceType, eyeExamService, setValue, updateServicePrice]);
   
   const [skipFrame, setSkipFrame] = useState(getValues('skipFrame'));
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
