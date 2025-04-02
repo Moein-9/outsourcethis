@@ -98,6 +98,12 @@ export class CustomPrintService {
                     margin: 0 !important;
                     padding: 0 !important;
                   }
+                  
+                  .color-preview {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                  }
                 </style>
               </head>
               <body>
@@ -165,6 +171,7 @@ export class CustomPrintService {
             colorPreviews.forEach(preview => {
               (preview as HTMLElement).style.webkitPrintColorAdjust = 'exact';
               (preview as HTMLElement).style.printColorAdjust = 'exact';
+              (preview as HTMLElement).classList.add('color-preview');
             });
           }
           
@@ -266,86 +273,12 @@ export class CustomPrintService {
                 text-align: center !important;
               }
               
-              .print-receipt {
-                height: auto !important;
-                min-height: 0 !important;
-                max-height: none !important;
-              }
-              
-              .print-receipt * {
-                visibility: visible !important;
-                opacity: 1 !important;
-              }
-              
-              .bg-black {
-                background-color: black !important;
+              .color-preview {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 color-adjust: exact !important;
-                color: white !important;
               }
               
-              .text-white {
-                color: white !important;
-              }
-              
-              /* Tailwind-like classes for printing */
-              .flex { display: flex !important; }
-              .flex-col { flex-direction: column !important; }
-              .items-center { align-items: center !important; }
-              .justify-center { justify-content: center !important; }
-              .justify-between { justify-content: space-between !important; }
-              .text-center { text-align: center !important; }
-              .font-bold { font-weight: bold !important; }
-              .text-xs { font-size: 11px !important; } /* Increased from 0.75rem */
-              .text-sm { font-size: 13px !important; } /* Increased from 0.875rem */
-              .text-base { font-size: 15px !important; } /* Increased from 1rem */
-              .text-lg { font-size: 17px !important; } /* Increased from 1.125rem */
-              .mb-0 { margin-bottom: 0 !important; }
-              .mb-1 { margin-bottom: 0.25rem !important; }
-              .mb-2 { margin-bottom: 0.5rem !important; }
-              .mb-3 { margin-bottom: 0.75rem !important; }
-              .py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
-              .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-              .px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
-              .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-              .p-1 { padding: 0.25rem !important; }
-              .p-2 { padding: 0.5rem !important; }
-              .p-3 { padding: 0.75rem !important; }
-              .rounded { border-radius: 0.25rem !important; }
-              .border { border-width: 1px !important; }
-              .border-2 { border-width: 2px !important; }
-              .border-black { border-color: black !important; }
-              .border-gray-300 { border-color: #d1d5db !important; }
-              .border-gray-400 { border-color: #9ca3af !important; }
-              .border-b { border-bottom-width: 1px !important; }
-              .bg-gray-100 { background-color: #f3f4f6 !important; }
-              .text-gray-600 { color: #4b5563 !important; }
-              
-              .card { 
-                background-color: white !important; 
-                border-radius: 0.375rem !important;
-                border: 1px solid #e5e7eb !important;
-                overflow: hidden !important;
-                margin-bottom: 0.5rem !important;
-              }
-              
-              .card-content {
-                padding: 0.5rem !important;
-              }
-              
-              /* RTL direction */
-              .rtl {
-                direction: rtl !important;
-                font-family: 'Zain', sans-serif !important;
-              }
-              
-              .ltr {
-                direction: ltr !important;
-                font-family: 'Yrsa', serif !important;
-              }
-              
-              /* Print-specific overrides */
               @media print {
                 html, body {
                   width: 74mm !important;
@@ -466,6 +399,14 @@ export class CustomPrintService {
                 (el as HTMLElement).style.fontSize = '14px';
                 (el as HTMLElement).style.fontWeight = 'bold';
               }
+            });
+            
+            // Ensure coating color preview is visible in print
+            const colorPreviews = printWindow.document.querySelectorAll('[style*="backgroundColor"]');
+            colorPreviews.forEach(preview => {
+              (preview as HTMLElement).style.webkitPrintColorAdjust = 'exact';
+              (preview as HTMLElement).style.printColorAdjust = 'exact';
+              (preview as HTMLElement).classList.add('color-preview');
             });
           }
           

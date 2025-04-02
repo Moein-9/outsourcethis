@@ -17,6 +17,7 @@ interface ReceiptInvoiceProps {
   lensPrice?: number;
   coating?: string;
   coatingPrice?: number;
+  coatingColor?: string;
   frame?: {
     brand: string;
     model: string;
@@ -79,6 +80,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   lensPrice,
   coating,
   coatingPrice,
+  coatingColor,
   frame,
   framePrice,
   discount,
@@ -103,6 +105,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const lensP = lensPrice !== undefined ? lensPrice : invoice.lensPrice;
   const coat = coating || invoice.coating;
   const coatP = coatingPrice !== undefined ? coatingPrice : invoice.coatingPrice;
+  const coatColor = coatingColor || invoice.coatingColor;
   const frameBrand = frame?.brand || invoice.frameBrand;
   const frameModel = frame?.model || invoice.frameModel;
   const frameP = framePrice !== undefined ? framePrice : invoice.framePrice;
@@ -136,6 +139,34 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   const showDiscount = disc > 0;
   
   const addressLines = storeInfo.address.split('\n');
+  
+  const getColorStyle = (colorName: string) => {
+    if (!colorName) return "transparent";
+    
+    const colorMap: Record<string, string> = {
+      "Brown": "#8B4513",
+      "Gray": "#808080",
+      "Green": "#006400",
+      "Blue": "#0000CD"
+    };
+    
+    return colorMap[colorName] || "transparent";
+  };
+  
+  const getColorDisplayName = (colorName: string) => {
+    if (!colorName) return "";
+    
+    const colorMap: Record<string, { en: string, ar: string }> = {
+      "Brown": { en: "Brown", ar: "بني" },
+      "Gray": { en: "Gray", ar: "رمادي" },
+      "Green": { en: "Green", ar: "أخضر" },
+      "Blue": { en: "Blue", ar: "أزرق" }
+    };
+    
+    return colorMap[colorName] || { en: colorName, ar: colorName };
+  };
+  
+  const colorDisplayName = getColorDisplayName(coatColor);
   
   return (
     <div 
@@ -291,6 +322,31 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                     <span className="font-bold text-sm">KWD {coatP.toFixed(3)}</span>
                   </div>
                   <div className="text-xs font-medium text-center">{coat}</div>
+                  
+                  {coatColor && (
+                    <div className="mt-1 flex flex-col">
+                      <div className="flex justify-between px-2 text-xs">
+                        <span>{isRtl ? "اللون | Color" : "Color | اللون"}:</span>
+                        <span>
+                          {typeof colorDisplayName === 'object'
+                            ? (isRtl ? colorDisplayName.ar : colorDisplayName.en)
+                            : coatColor}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-1 p-1 bg-gray-50 rounded border border-gray-200">
+                        <span className="text-xs">{isRtl ? "عينة | Sample" : "Sample | عينة"}</span>
+                        <div 
+                          className="w-4 h-4 rounded-full border border-gray-300" 
+                          style={{ 
+                            backgroundColor: getColorStyle(coatColor),
+                            printColorAdjust: 'exact',
+                            WebkitPrintColorAdjust: 'exact' 
+                          }} 
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
