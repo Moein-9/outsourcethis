@@ -63,7 +63,7 @@ export const LensSection: React.FC<LensSectionProps> = ({
         <LensSelector 
           onSelectLensType={onLensTypeSelect}
           onSelectCoating={onCoatingSelect}
-          onSelectThickness={onSelectThickness}
+          onSelectThickness={onThicknessSelect}
           skipLens={skipFrame}
           onSkipLensChange={onSkipFrameChange}
           initialLensType={selectedLensType}
