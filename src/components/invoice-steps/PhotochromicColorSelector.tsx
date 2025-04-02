@@ -46,27 +46,29 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
         {t('selectPhotochromicColor')}
       </Label>
       
-      <Select 
-        value={selectedColor} 
-        onValueChange={onColorChange}
-      >
-        <SelectTrigger className="w-full bg-white">
-          <SelectValue placeholder={t('selectColor')} />
-        </SelectTrigger>
-        <SelectContent className="bg-white z-[200] w-full">
-          {coating.availableColors.map(color => (
-            <SelectItem key={color} value={color} className="flex items-center">
-              <div className="flex items-center gap-2 w-full">
-                <div 
-                  className="w-4 h-4 rounded-full border"
-                  style={{ backgroundColor: getColorStyle(color) }}
-                ></div>
-                <span>{color}</span>
-              </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="relative w-full">
+        <Select 
+          value={selectedColor} 
+          onValueChange={onColorChange}
+        >
+          <SelectTrigger className="w-full bg-white">
+            <SelectValue placeholder={t('selectColor')} />
+          </SelectTrigger>
+          <SelectContent className="bg-white z-[200] w-full max-h-[180px] overflow-auto">
+            {coating.availableColors.map(color => (
+              <SelectItem key={color} value={color} className="flex items-center">
+                <div className="flex items-center gap-2 w-full">
+                  <div 
+                    className="w-4 h-4 rounded-full border"
+                    style={{ backgroundColor: getColorStyle(color) }}
+                  ></div>
+                  <span>{t(color.toLowerCase())}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       
       {/* Color Preview */}
       {selectedColor && (
@@ -75,7 +77,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
             className="w-6 h-6 rounded-full border"
             style={{ backgroundColor: getColorStyle(selectedColor) }}
           ></div>
-          <span className="text-sm">{selectedColor}</span>
+          <span className="text-sm">{t(selectedColor.toLowerCase())}</span>
         </div>
       )}
     </div>

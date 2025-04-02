@@ -81,6 +81,11 @@ const SelectContent = React.forwardRef<
       )}
       position={position}
       {...props}
+      style={{
+        width: "var(--radix-select-trigger-width)",
+        maxHeight: "var(--radix-select-content-available-height)",
+        ...props.style
+      }}
     >
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
