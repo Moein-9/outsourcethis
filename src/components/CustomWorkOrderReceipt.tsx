@@ -558,7 +558,11 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                     <>
                       <div className="flex justify-between">
                         <span className="font-semibold">{isRtl ? "اللون | Color" : "Color | اللون"}:</span>
-                        <span>{isRtl ? colorDisplayName.ar : colorDisplayName.en}</span>
+                        <span>
+                          {typeof colorDisplayName === 'object' 
+                            ? (isRtl ? colorDisplayName.ar : colorDisplayName.en)
+                            : colorDisplayName}
+                        </span>
                       </div>
                       
                       <div className="flex items-center justify-between mt-1 p-1 bg-gray-50 rounded border border-gray-200">
