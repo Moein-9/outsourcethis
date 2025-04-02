@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
 import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store/inventoryStore";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -99,18 +100,12 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
       if (formattedRx.addOS === '-') formattedRx.addOS = '';
       
       setRxFormatted(formattedRx);
-      
-      console.log('Formatted RX for lens selection:', formattedRx);
     }
   }, [getValues]);
   
   const handleFrameSearch = () => {
     if (!frameSearch.trim()) {
-      toast({
-        title: t('error'),
-        description: t('searchTermError'),
-        variant: "destructive"
-      });
+      toast(t('searchTermError'));
       return;
     }
     
@@ -118,9 +113,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setFrameResults(results);
     
     if (results.length === 0) {
-      toast({
-        description: t('noFramesFound'),
-      });
+      toast(t('noFramesFound'));
     }
   };
   
@@ -188,11 +181,10 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setCombinedLensPrice(price);
     
     if (price !== null) {
-      toast({
-        title: t('combinationPriceFound'),
-        description: `${t('usingCombinedPrice')}: ${price.toFixed(3)} ${t('kwd')}`,
-        variant: "default"
-      });
+      toast(
+        `${t('combinationPriceFound')}: ${price.toFixed(3)} ${t('kwd')}`,
+        { description: t('usingCombinedPrice') }
+      );
     }
   };
   
@@ -203,11 +195,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
   
   const handleAddNewFrame = () => {
     if (!newBrand || !newModel || !newColor || !newPrice) {
-      toast({
-        title: t('error'),
-        description: t('frameDetailsError'),
-        variant: "destructive"
-      });
+      toast(t('frameDetailsError'));
       return;
     }
     
@@ -215,20 +203,12 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     const qty = parseInt(newQty);
     
     if (isNaN(price) || price <= 0) {
-      toast({
-        title: t('error'),
-        description: t('priceError'),
-        variant: "destructive"
-      });
+      toast(t('priceError'));
       return;
     }
     
     if (isNaN(qty) || qty <= 0) {
-      toast({
-        title: t('error'),
-        description: t('quantityError'),
-        variant: "destructive"
-      });
+      toast(t('quantityError'));
       return;
     }
     
@@ -265,9 +245,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setNewPrice("");
     setNewQty("1");
     
-    toast({
-      description: t('frameAddedSuccess'),
-    });
+    toast(t('frameAddedSuccess'));
   };
   
   const handleContactLensSelection = (selection: ContactLensSelection) => {
@@ -292,9 +270,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
       
       const totalLensCount = itemsWithQuantities.reduce((count, lens) => count + (lens.qty || 1), 0);
       
-      toast({
-        description: `${t('contactLensesTotal')} (${totalLensCount} ${t('lensCount')})`,
-      });
+      toast(`${t('contactLensesTotal')} (${totalLensCount} ${t('lensCount')})`);
     }
   };
   
@@ -304,7 +280,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
       
       if (combinedLensPrice !== null) {
         totalLensPrice = combinedLensPrice;
-        console.log('Using combined lens price:', combinedLensPrice);
         
         setValue('lensPrice', combinedLensPrice);
         setValue('coatingPrice', 0);
@@ -315,7 +290,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
         const thicknessPrice = selectedThickness?.price || 0;
         
         totalLensPrice = lensPrice + coatingPrice + thicknessPrice;
-        console.log('Using component prices - lens:', lensPrice, 'coating:', coatingPrice, 'thickness:', thicknessPrice);
         
         setValue('lensPrice', lensPrice);
         setValue('coatingPrice', coatingPrice);
@@ -327,8 +301,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
       
       setValue('total', totalPrice - (getValues<number>('discount') || 0));
       setValue('remaining', Math.max(0, totalPrice - (getValues<number>('discount') || 0) - (getValues<number>('deposit') || 0)));
-      
-      console.log('Updated total price:', totalPrice);
     }
   }, [selectedLensType, selectedCoating, selectedThickness, combinedLensPrice, skipFrame, selectedFrame.price, setValue, getValues, invoiceType]);
   
@@ -399,220 +371,229 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     <div className="space-y-6 animate-fade-in">
       {invoiceType === "glasses" ? (
         <>
-          <div className="border rounded-lg p-5 bg-card shadow-sm">
-            <div className="flex justify-between items-center border-b border-primary/30 pb-3 mb-4">
-              <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
-                <Eye className="w-5 h-5" />
-                {t('lensSection')}
-              </h3>
-              
-              {combinedLensPrice !== null && (
-                <Badge 
-                  className="bg-green-100 text-green-800 hover:bg-green-200 px-3 py-1 font-medium flex items-center gap-1"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  {t('combinedPrice')}: {combinedLensPrice.toFixed(3)} {t('kwd')}
-                </Badge>
-              )}
-            </div>
-            
-            <LensSelector 
-              onSelectLensType={handleLensTypeSelect}
-              onSelectCoating={handleCoatingSelect}
-              onSelectThickness={handleThicknessSelect}
-              skipLens={skipFrame}
-              onSkipLensChange={handleSkipFrameChange}
-              initialLensType={selectedLensType}
-              initialCoating={selectedCoating}
-              initialThickness={selectedThickness}
-              rx={rxFormatted || getValues('rx')}
-              onCombinationPriceChange={handleCombinationPriceChange}
-            />
-          </div>
+          <Card className="border shadow-sm">
+            <CardHeader className="bg-gradient-to-r from-violet-50 to-violet-100/50 border-b">
+              <CardTitle className={`text-base flex justify-between items-center`}>
+                <span className="flex items-center gap-2 text-violet-800">
+                  <Eye className="w-4 h-4 text-violet-600" />
+                  {t('lensSection')}
+                </span>
+                
+                {combinedLensPrice !== null && (
+                  <Badge 
+                    className="bg-green-100 text-green-800 hover:bg-green-200 px-3 py-1 font-medium flex items-center gap-1"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    {t('combinedPrice')}: {combinedLensPrice.toFixed(3)} {t('kwd')}
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <LensSelector 
+                onSelectLensType={handleLensTypeSelect}
+                onSelectCoating={handleCoatingSelect}
+                onSelectThickness={handleThicknessSelect}
+                skipLens={skipFrame}
+                onSkipLensChange={handleSkipFrameChange}
+                initialLensType={selectedLensType}
+                initialCoating={selectedCoating}
+                initialThickness={selectedThickness}
+                rx={rxFormatted || getValues('rx')}
+                onCombinationPriceChange={handleCombinationPriceChange}
+              />
+            </CardContent>
+          </Card>
 
-          <div className="border rounded-lg p-5 bg-card shadow-sm">
-            <div className="border-b border-primary/30 pb-3 mb-4">
-              <h3 className={`text-lg font-semibold text-primary flex items-center gap-2 ${textAlignClass}`}>
-                <Glasses className="w-5 h-5" />
+          <Card className="border shadow-sm">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-amber-100/50 border-b">
+              <CardTitle className={`text-base flex items-center gap-2 text-amber-800`}>
+                <Glasses className="w-4 h-4 text-amber-600" />
                 {t('frameSection')}
-              </h3>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="frameSearchBox" className={`text-muted-foreground block ${textAlignClass}`}>{t('searchTerm')}</Label>
-                <div className={`flex ${dirClass === 'rtl' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
-                  <Input
-                    id="frameSearchBox"
-                    value={frameSearch}
-                    onChange={(e) => setFrameSearch(e.target.value)}
-                    placeholder={t('searchExample')}
-                    className={`flex-1 ${textAlignClass}`}
-                  />
-                  <Button onClick={handleFrameSearch} className="gap-1">
-                    <Search className="w-4 h-4" />
-                    {t('search')}
-                  </Button>
-                </div>
-              </div>
-              
-              {frameResults.length > 0 && (
-                <div className="overflow-x-auto border rounded-lg">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-muted/50">
-                        <th className="p-2 border">{t('brand')}</th>
-                        <th className="p-2 border">{t('model')}</th>
-                        <th className="p-2 border">{t('color')}</th>
-                        <th className="p-2 border">{t('size')}</th>
-                        <th className="p-2 border">{t('price')} ({t('kwd')})</th>
-                        <th className="p-2 border">{t('quantity')}</th>
-                        <th className="p-2 border"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {frameResults.map((frame, index) => (
-                        <tr 
-                          key={index}
-                          className="hover:bg-muted/30 transition-colors"
-                        >
-                          <td className="p-2 border">{frame.brand}</td>
-                          <td className="p-2 border">{frame.model}</td>
-                          <td className="p-2 border">{frame.color}</td>
-                          <td className="p-2 border">{frame.size}</td>
-                          <td className="p-2 border">{frame.price.toFixed(2)}</td>
-                          <td className="p-2 border">{frame.qty}</td>
-                          <td className="p-2 border">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => selectFrame(frame)}
-                              className="w-full"
-                            >
-                              <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
-                              {t('choose')}
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-              
-              {selectedFrame.brand && (
-                <div className="mt-4 p-3 border rounded-lg bg-primary/5 border-primary/20">
-                  <h4 className={`font-medium text-primary mb-2 flex items-center ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
-                    <PackageCheck className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
-                    {t('selectedFrame')}
-                  </h4>
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('brand')}</th>
-                        <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('model')}</th>
-                        <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('color')}</th>
-                        <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('size')}</th>
-                        <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('price')} ({t('kwd')})</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className={`p-1 ${textAlignClass}`}>{selectedFrame.brand}</td>
-                        <td className={`p-1 ${textAlignClass}`}>{selectedFrame.model}</td>
-                        <td className={`p-1 ${textAlignClass}`}>{selectedFrame.color}</td>
-                        <td className={`p-1 ${textAlignClass}`}>{selectedFrame.size}</td>
-                        <td className={`p-1 ${textAlignClass}`}>{selectedFrame.price.toFixed(2)}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              )}
-              
-              <Button 
-                variant="outline" 
-                onClick={() => setShowManualFrame(!showManualFrame)}
-                className="w-full"
-              >
-                <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
-                {t('addFrameButton')}
-              </Button>
-              
-              {showManualFrame && (
-                <div className="p-4 border rounded-lg mt-2 bg-muted/10">
-                  <h4 className={`font-semibold mb-3 text-primary ${textAlignClass}`}>{t('newFrameDetails')}</h4>
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label htmlFor="newBrand" className="text-muted-foreground">{t('brand')}:</Label>
-                        <Input
-                          id="newBrand"
-                          value={newBrand}
-                          onChange={(e) => setNewBrand(e.target.value)}
-                          className={textAlignClass}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="newModel" className="text-muted-foreground">{t('model')}:</Label>
-                        <Input
-                          id="newModel"
-                          value={newModel}
-                          onChange={(e) => setNewModel(e.target.value)}
-                          className={textAlignClass}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label htmlFor="newColor" className="text-muted-foreground">{t('color')}:</Label>
-                        <Input
-                          id="newColor"
-                          value={newColor}
-                          onChange={(e) => setNewColor(e.target.value)}
-                          className={textAlignClass}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="newSize" className="text-muted-foreground">{t('size')}:</Label>
-                        <Input
-                          id="newSize"
-                          value={newSize}
-                          onChange={(e) => setNewSize(e.target.value)}
-                          placeholder={t('searchExample')}
-                          className={textAlignClass}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label htmlFor="newPrice" className="text-muted-foreground">{t('price')} ({t('kwd')}):</Label>
-                        <Input
-                          id="newPrice"
-                          type="number"
-                          step="0.01"
-                          value={newPrice}
-                          onChange={(e) => setNewPrice(e.target.value)}
-                          className={textAlignClass}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="newQty" className="text-muted-foreground">{t('quantity')} ({t('pieces')}):</Label>
-                        <Input
-                          id="newQty"
-                          type="number"
-                          step="1"
-                          value={newQty}
-                          onChange={(e) => setNewQty(e.target.value)}
-                          className={textAlignClass}
-                        />
-                      </div>
-                    </div>
-                    <Button onClick={handleAddNewFrame} className="w-full">{t('saveFrame')}</Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="frameSearchBox" className={`text-muted-foreground block ${textAlignClass}`}>{t('searchTerm')}</Label>
+                  <div className={`flex ${dirClass === 'rtl' ? 'space-x-2 space-x-reverse' : 'space-x-2'}`}>
+                    <Input
+                      id="frameSearchBox"
+                      value={frameSearch}
+                      onChange={(e) => setFrameSearch(e.target.value)}
+                      placeholder={t('searchExample')}
+                      className={`flex-1 ${textAlignClass}`}
+                    />
+                    <Button onClick={handleFrameSearch} className="gap-1">
+                      <Search className="w-4 h-4" />
+                      {t('search')}
+                    </Button>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
+                
+                {frameResults.length > 0 && (
+                  <div className="overflow-x-auto border rounded-lg">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-muted/50">
+                          <th className="p-2 border">{t('brand')}</th>
+                          <th className="p-2 border">{t('model')}</th>
+                          <th className="p-2 border">{t('color')}</th>
+                          <th className="p-2 border">{t('size')}</th>
+                          <th className="p-2 border">{t('price')} ({t('kwd')})</th>
+                          <th className="p-2 border">{t('quantity')}</th>
+                          <th className="p-2 border"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {frameResults.map((frame, index) => (
+                          <tr 
+                            key={index}
+                            className="hover:bg-muted/30 transition-colors"
+                          >
+                            <td className="p-2 border">{frame.brand}</td>
+                            <td className="p-2 border">{frame.model}</td>
+                            <td className="p-2 border">{frame.color}</td>
+                            <td className="p-2 border">{frame.size}</td>
+                            <td className="p-2 border">{frame.price.toFixed(2)}</td>
+                            <td className="p-2 border">{frame.qty}</td>
+                            <td className="p-2 border">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => selectFrame(frame)}
+                                className="w-full"
+                              >
+                                <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                                {t('choose')}
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                
+                {selectedFrame.brand && (
+                  <div className="mt-4 p-3 border rounded-lg bg-amber-50/50 border-amber-200/70">
+                    <h4 className={`font-medium text-amber-800 mb-2 flex items-center ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
+                      <PackageCheck className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
+                      {t('selectedFrame')}
+                    </h4>
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-amber-200/50">
+                          <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('brand')}</th>
+                          <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('model')}</th>
+                          <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('color')}</th>
+                          <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('size')}</th>
+                          <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('price')} ({t('kwd')})</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className={`p-1 ${textAlignClass}`}>{selectedFrame.brand}</td>
+                          <td className={`p-1 ${textAlignClass}`}>{selectedFrame.model}</td>
+                          <td className={`p-1 ${textAlignClass}`}>{selectedFrame.color}</td>
+                          <td className={`p-1 ${textAlignClass}`}>{selectedFrame.size}</td>
+                          <td className={`p-1 ${textAlignClass} font-medium`}>{selectedFrame.price.toFixed(2)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowManualFrame(!showManualFrame)}
+                  className="w-full border-amber-200 text-amber-700 hover:bg-amber-50"
+                >
+                  <Plus className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'}`} />
+                  {t('addFrameButton')}
+                </Button>
+                
+                {showManualFrame && (
+                  <div className="p-4 border rounded-lg mt-2 bg-amber-50/30 border-amber-200/50">
+                    <h4 className={`font-semibold mb-3 text-amber-800 ${textAlignClass}`}>{t('newFrameDetails')}</h4>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label htmlFor="newBrand" className="text-muted-foreground">{t('brand')}:</Label>
+                          <Input
+                            id="newBrand"
+                            value={newBrand}
+                            onChange={(e) => setNewBrand(e.target.value)}
+                            className={textAlignClass}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="newModel" className="text-muted-foreground">{t('model')}:</Label>
+                          <Input
+                            id="newModel"
+                            value={newModel}
+                            onChange={(e) => setNewModel(e.target.value)}
+                            className={textAlignClass}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label htmlFor="newColor" className="text-muted-foreground">{t('color')}:</Label>
+                          <Input
+                            id="newColor"
+                            value={newColor}
+                            onChange={(e) => setNewColor(e.target.value)}
+                            className={textAlignClass}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="newSize" className="text-muted-foreground">{t('size')}:</Label>
+                          <Input
+                            id="newSize"
+                            value={newSize}
+                            onChange={(e) => setNewSize(e.target.value)}
+                            placeholder={t('searchExample')}
+                            className={textAlignClass}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label htmlFor="newPrice" className="text-muted-foreground">{t('price')} ({t('kwd')}):</Label>
+                          <Input
+                            id="newPrice"
+                            type="number"
+                            step="0.01"
+                            value={newPrice}
+                            onChange={(e) => setNewPrice(e.target.value)}
+                            className={textAlignClass}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="newQty" className="text-muted-foreground">{t('quantity')} ({t('pieces')}):</Label>
+                          <Input
+                            id="newQty"
+                            type="number"
+                            step="1"
+                            value={newQty}
+                            onChange={(e) => setNewQty(e.target.value)}
+                            className={textAlignClass}
+                          />
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={handleAddNewFrame} 
+                        className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                      >
+                        {t('saveFrame')}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </>
       ) : (
         <ContactLensSelector 
