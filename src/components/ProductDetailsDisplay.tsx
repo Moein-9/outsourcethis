@@ -11,6 +11,7 @@ interface ProductDetailsDisplayProps {
     frameColor?: string;
     lensType?: string;
     coating?: string;
+    coatingColor?: string;
     thickness?: string;
     contactLensItems?: Array<{
       name: string;
@@ -68,7 +69,12 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
           {invoice.coating && (
             <div className="grid grid-cols-2 gap-2">
               <div className="text-sm text-gray-500">{t('coating')}:</div>
-              <div className="text-sm font-medium">{invoice.coating}</div>
+              <div className="text-sm font-medium">
+                {invoice.coating}
+                {invoice.coatingColor && (
+                  <span className="ml-1 text-xs text-gray-600">({invoice.coatingColor})</span>
+                )}
+              </div>
             </div>
           )}
           

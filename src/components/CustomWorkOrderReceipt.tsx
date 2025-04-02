@@ -152,6 +152,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
   
   const coating = workOrder?.coating || invoice?.coating || "";
   const coatingPrice = workOrder?.coatingPrice || invoice?.coatingPrice || 0;
+  const coatingColor = workOrder?.coatingColor || invoice?.coatingColor || "";
   
   const coatingString = typeof coating === 'object' ? coating?.name || '' : String(coating);
   const matchingCoating = lensCoatings.find(c => {
@@ -526,6 +527,12 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                     <span className="font-semibold">{isRtl ? "النوع | Type" : "Type | النوع"}:</span>
                     <span>{coatingName}</span>
                   </div>
+                  {coatingColor && (
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{isRtl ? "اللون | Color" : "Color | اللون"}:</span>
+                      <span>{coatingColor}</span>
+                    </div>
+                  )}
                   {coatingPrice > 0 && (
                     <div className="flex justify-between">
                       <span className="font-semibold">{isRtl ? "السعر | Price" : "Price | السعر"}:</span>
