@@ -78,9 +78,9 @@ export const LensSection: React.FC<LensSectionProps> = ({
           onCombinationPriceChange={onCombinationPriceChange}
         />
         
-        {/* Photochromic color selector when applicable */}
+        {/* Photochromic color selector when applicable - with better spacing */}
         {selectedCoating?.isPhotochromic && (
-          <div className="mt-5 px-5 py-4 bg-white rounded-md border shadow-sm">
+          <div className="mt-6">
             <PhotochromicColorSelector
               coating={selectedCoating}
               selectedColor={selectedCoatingColor || ""}

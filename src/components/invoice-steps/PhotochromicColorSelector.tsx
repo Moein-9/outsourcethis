@@ -22,7 +22,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
   selectedColor,
   onColorChange
 }) => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
 
   // Color mapping for visualization
   const getColorStyle = (colorName: string) => {
@@ -46,43 +46,48 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
         {t('selectPhotochromicColor')}
       </Label>
       
-      <div className="relative w-full">
-        <Select 
-          value={selectedColor} 
-          onValueChange={onColorChange}
-        >
-          <SelectTrigger className="w-full bg-white h-12 text-base">
-            <SelectValue placeholder={t('selectColor')} />
-          </SelectTrigger>
-          <SelectContent 
-            className="bg-white z-[200]" 
-            style={{ width: "100%", maxHeight: "220px" }}
+      <div className="w-full bg-slate-50 rounded-lg p-4 border shadow-sm">
+        <div className="relative w-full mb-4">
+          <Select 
+            value={selectedColor} 
+            onValueChange={onColorChange}
           >
-            {coating.availableColors.map(color => (
-              <SelectItem key={color} value={color} className="py-2">
-                <div className="flex items-center gap-3 w-full">
-                  <div 
-                    className="w-6 h-6 rounded-full border"
-                    style={{ backgroundColor: getColorStyle(color) }}
-                  ></div>
-                  <span className="text-base">{t(color.toLowerCase())}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      {/* Color Preview - Make it bigger */}
-      {selectedColor && (
-        <div className="mt-4 flex items-center gap-3 p-3 bg-slate-50 rounded-md">
-          <div 
-            className="w-8 h-8 rounded-full border-2"
-            style={{ backgroundColor: getColorStyle(selectedColor) }}
-          ></div>
-          <span className="text-base font-medium">{t(selectedColor.toLowerCase())}</span>
+            <SelectTrigger className={`w-full bg-white h-12 text-base ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+              <SelectValue placeholder={t('selectColor')} />
+            </SelectTrigger>
+            <SelectContent 
+              className="bg-white z-[200]" 
+              style={{ 
+                width: "var(--radix-select-trigger-width)", 
+                maxHeight: "220px"
+              }}
+            >
+              {coating.availableColors.map(color => (
+                <SelectItem key={color} value={color} className="py-3">
+                  <div className={`flex items-center gap-3 w-full ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                    <div 
+                      className="w-6 h-6 rounded-full border"
+                      style={{ backgroundColor: getColorStyle(color) }}
+                    ></div>
+                    <span className="text-base">{t(color.toLowerCase())}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      )}
+        
+        {/* Color Preview with larger space */}
+        {selectedColor && (
+          <div className={`flex items-center gap-3 p-4 bg-white rounded-md border ${language === 'ar' ? 'flex-row-reverse text-right' : ''}`}>
+            <div 
+              className="w-8 h-8 rounded-full border-2"
+              style={{ backgroundColor: getColorStyle(selectedColor) }}
+            ></div>
+            <span className="text-base font-medium">{t(selectedColor.toLowerCase())}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
