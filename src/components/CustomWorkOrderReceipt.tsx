@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -568,7 +569,7 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
                       <div className="flex items-center justify-between mt-1 p-1 bg-gray-50 rounded border border-gray-200">
                         <span className="font-semibold text-xs">{isRtl ? "عرض اللون | Color Preview" : "Color Preview | عرض اللون"}</span>
                         <div 
-                          className="w-6 h-6 rounded-full border border-gray-300"
+                          className="w-6 h-6 rounded-full border border-gray-300 color-preview"
                           style={{ backgroundColor: getColorStyle(coatingColor) }}
                         ></div>
                       </div>
@@ -651,4 +652,29 @@ export const CustomWorkOrderReceipt: React.FC<CustomWorkOrderReceiptProps> = ({
             : "Quality Confirmation | تأكيد الجودة"}
         </div>
         
-        <div className="flex gap-2
+        <div className="flex gap-2 mb-2">
+          <div className="flex-1 border border-gray-300 rounded p-1">
+            <div className="text-center text-xs font-bold mb-1">{isRtl ? "توقيع القائم بالعمل" : "Technician Signature"}</div>
+            <div className="h-7 border border-dashed border-gray-400 rounded-sm"></div>
+          </div>
+          <div className="flex-1 border border-gray-300 rounded p-1">
+            <div className="text-center text-xs font-bold mb-1">{isRtl ? "توقيع المشرف" : "Supervisor Signature"}</div>
+            <div className="h-7 border border-dashed border-gray-400 rounded-sm"></div>
+          </div>
+        </div>
+        
+        <div className="border border-gray-300 rounded p-1 mb-2">
+          <div className="text-center text-xs font-bold mb-1">{isRtl ? "ملاحظات | Notes" : "Notes | ملاحظات"}</div>
+          <div className="min-h-[40px] p-1 border border-gray-300 rounded-sm text-xs">
+            {workOrder?.notes || ""}
+          </div>
+        </div>
+        
+        <div className="text-center text-xs">
+          <p className="mb-0">{storeInfo.footer1}</p>
+          <p className="mb-0">{storeInfo.footer2}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
