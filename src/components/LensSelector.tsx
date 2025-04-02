@@ -143,6 +143,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
         selectedThickness.id
       );
 
+      // Silently update the combination price without toast notification
       onCombinationPriceChange(combinedPrice);
     } else if (onCombinationPriceChange) {
       onCombinationPriceChange(null);
@@ -308,34 +309,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                 </Button>
               ))}
               
-              <Button
-                variant={selectedCoating === null ? "default" : "outline"}
-                className={`
-                  h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
-                  ${selectedCoating === null ? "bg-orange-600 hover:bg-orange-700 text-white" : "hover:bg-orange-50"}
-                `}
-                onClick={() => {
-                  setSelectedCoating(null);
-                  onSelectCoating(null);
-                }}
-              >
-                <div className="flex flex-col">
-                  <span className="font-medium">{t('noCoating')}</span>
-                  <span className="text-xs opacity-80">{t('noCoatingDesc')}</span>
-                </div>
-                <div className={`w-full flex ${selectedCoating === null ? "justify-between" : "justify-end"} items-center`}>
-                  {selectedCoating === null && (
-                    <Badge variant="secondary" className="bg-white/20 text-white">
-                      <X className="w-3 h-3 mr-1" />
-                      {t('selected')}
-                    </Badge>
-                  )}
-                  <Badge variant={selectedCoating === null ? "outline" : "secondary"}
-                    className={selectedCoating === null ? "border-white/30 text-white" : ""}>
-                    0.00 {t('kwd')}
-                  </Badge>
-                </div>
-              </Button>
+              {/* No Coating option has been removed as requested by the user */}
             </div>
           ) : (
             <div className="text-center py-3 text-muted-foreground">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -182,10 +181,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     
     if (price !== null) {
       setValue('lensCombinationPrice', price);
-      toast(
-        `${t('combinationPriceFound')}: ${price.toFixed(3)} ${t('kwd')}`,
-        { description: t('usingCombinedPrice') }
-      );
     } else {
       setValue('lensCombinationPrice', null);
     }
