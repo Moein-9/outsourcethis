@@ -268,8 +268,9 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
         sum + (lens.price * (lens.qty || 1)), 0
       );
       
-      setValue('total', lensesTotal - (getValues<number>('discount') || 0));
-      setValue('remaining', Math.max(0, lensesTotal - (getValues<number>('discount') || 0) - (getValues<number>('deposit') || 0)));
+      const discount = getValues('discount') as number || 0;
+      setValue('total', lensesTotal - discount);
+      setValue('remaining', Math.max(0, lensesTotal - discount - (getValues('deposit') as number || 0)));
       
       const totalLensCount = itemsWithQuantities.reduce((count, lens) => count + (lens.qty || 1), 0);
       
@@ -301,9 +302,10 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
       
       const framePrice = selectedFrame.price || 0;
       const totalPrice = totalLensPrice + framePrice;
+      const discount = getValues('discount') as number || 0;
       
-      setValue('total', totalPrice - (getValues<number>('discount') || 0));
-      setValue('remaining', Math.max(0, totalPrice - (getValues<number>('discount') || 0) - (getValues<number>('deposit') || 0)));
+      setValue('total', totalPrice - discount);
+      setValue('remaining', Math.max(0, totalPrice - discount - (getValues('deposit') as number || 0)));
     }
   }, [selectedLensType, selectedCoating, selectedThickness, combinedLensPrice, skipFrame, selectedFrame.price, setValue, getValues, invoiceType]);
   
