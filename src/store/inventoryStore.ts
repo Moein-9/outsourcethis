@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -26,6 +25,8 @@ export interface LensCoating {
   price: number;
   description?: string;
   category: "distance-reading" | "progressive" | "bifocal";
+  hasColorOptions?: boolean;
+  colorOptions?: string[];
 }
 
 export interface LensThickness {
@@ -137,15 +138,48 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "coat9", name: "Filter (فلتر)", price: 0, description: "Filter Coating", category: "distance-reading" },
         { id: "coat10", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating", category: "distance-reading" },
         
+        // Add Photochromic coating options for each category
+        { 
+          id: "coat17", 
+          name: "Photochromic (فوتوكروميك)", 
+          price: 15, 
+          description: "Light-adaptive lenses that darken in sunlight", 
+          category: "distance-reading",
+          hasColorOptions: true,
+          colorOptions: ["Brown", "Gray", "Green"]
+        },
+        
         // New coating items for progressive
         { id: "coat11", name: "Basic (عادي)", price: 0, description: "Basic Coating for Progressive", category: "progressive" },
         { id: "coat12", name: "Filter (فلتر)", price: 0, description: "Filter Coating for Progressive", category: "progressive" },
         { id: "coat13", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Progressive", category: "progressive" },
         
+        // Add Photochromic coating for progressive
+        { 
+          id: "coat18", 
+          name: "Photochromic (فوتوكروميك)", 
+          price: 18, 
+          description: "Light-adaptive lenses for progressive glasses", 
+          category: "progressive",
+          hasColorOptions: true,
+          colorOptions: ["Brown", "Gray", "Green"]
+        },
+        
         // New coating items for bifocal
         { id: "coat14", name: "Basic (عادي)", price: 0, description: "Basic Coating for Bifocal", category: "bifocal" },
         { id: "coat15", name: "Filter (فلتر)", price: 0, description: "Filter Coating for Bifocal", category: "bifocal" },
-        { id: "coat16", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Bifocal", category: "bifocal" }
+        { id: "coat16", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Bifocal", category: "bifocal" },
+        
+        // Add Photochromic coating for bifocal
+        { 
+          id: "coat19", 
+          name: "Photochromic (فوتوكروميك)", 
+          price: 16, 
+          description: "Light-adaptive lenses for bifocal glasses", 
+          category: "bifocal",
+          hasColorOptions: true,
+          colorOptions: ["Brown", "Gray", "Green"]
+        }
       ],
       lensThicknesses: [
         { id: "thick1", name: "عادي", price: 0, description: "Standard Thickness", category: "distance-reading" },

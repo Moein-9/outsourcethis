@@ -17,7 +17,7 @@ interface LensSectionProps {
   selectedThickness: LensThickness | null;
   skipFrame: boolean;
   onLensTypeSelect: (lens: LensType | null) => void;
-  onCoatingSelect: (coating: LensCoating | null) => void;
+  onCoatingSelect: (coating: LensCoating | null, selectedColor?: string) => void;
   onThicknessSelect: (thickness: LensThickness | null) => void;
   onSkipFrameChange: (skip: boolean) => void;
   onCombinationPriceChange: (price: number | null) => void;
@@ -63,7 +63,7 @@ export const LensSection: React.FC<LensSectionProps> = ({
         <LensSelector 
           onSelectLensType={onLensTypeSelect}
           onSelectCoating={onCoatingSelect}
-          onSelectThickness={onThicknessSelect}
+          onSelectThickness={onSelectThickness}
           skipLens={skipFrame}
           onSkipLensChange={onSkipFrameChange}
           initialLensType={selectedLensType}
