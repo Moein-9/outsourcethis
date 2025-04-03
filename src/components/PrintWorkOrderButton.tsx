@@ -79,6 +79,9 @@ export const PrintWorkOrderButton: React.FC<PrintWorkOrderButtonProps> = ({
           lensPrice: invoice.lensPrice,
           coating: invoice.coating,
           coatingPrice: invoice.coatingPrice,
+          coatingColor: invoice.coatingColor,
+          thickness: invoice.thickness || "",   // Add the thickness property
+          thicknessPrice: invoice.thicknessPrice || 0,  // Add the thicknessPrice property
           frameBrand: invoice.frameBrand,
           frameModel: invoice.frameModel,
           frameColor: invoice.frameColor,
