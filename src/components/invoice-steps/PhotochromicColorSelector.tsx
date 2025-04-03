@@ -24,69 +24,19 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
 }) => {
   const { t, language } = useLanguageStore();
 
-  // Function to extract appropriate language part from bilingual string
-  const extractLocalizedText = (text: string): string => {
-    // Check if the text contains a separator indicating it's bilingual
-    if (text.includes(' | ')) {
-      const [english, arabic] = text.split(' | ');
-      return language === 'ar' ? arabic : english;
-    }
-    
-    return text;
-  };
-
   // Color mapping for visualization
-  const getColorStyle = (colorName: string): string => {
-    const baseColorName = extractLocalizedText(colorName).toLowerCase();
-    
+  const getColorStyle = (colorName: string) => {
     const colorMap: Record<string, string> = {
-      // Basic colors
-      "brown": "#8B4513",
-      "gray": "#808080",
-      "green": "#006400",
-      "blue": "#0000CD",
-      "silver": "#C0C0C0",
-      "gold": "#FFD700",
-      "red": "#FF0000",
-      "black": "#000000",
-      
-      // Specialty colors
-      "amber gray": "#A99D97",
-      "cinnamon brown": "#7E4D3A",
-      "cloudy gray": "#B6B6B4",
-      "crystal": "#A7D8DE",
-      "emerald green": "#2AAD73",
-      "lavender gray": "#9C9CB0",
-      "midnight blue": "#003366",
-      "mint gray": "#B5BCB6",
-      "sandy brown": "#C4A484",
-      "sandy gray": "#B9B8B5",
-      "silky gold": "#D4AF37",
-      "silky gray": "#C0C0C0",
-      "hazel": "#AF753A",
-      "caramel": "#C68E17",
-      "radiant brown": "#8B4513",
-      "radiant gray": "#808080",
-      "vivid blue": "#0000FF",
-      "oak": "#806517",
-      "pine": "#01796F",
+      "Brown": "#8B4513",
+      "Gray": "#808080",
+      "Green": "#006400",
+      "Blue": "#0000CD",
+      "Silver": "#C0C0C0",
+      "Gold": "#FFD700",
+      "Red": "#FF0000"
     };
     
-    // Try to match specific multi-word colors first
-    for (const [key, value] of Object.entries(colorMap)) {
-      if (baseColorName.includes(key)) {
-        return value;
-      }
-    }
-    
-    // Fallback to basic color matching
-    for (const basicColor of ["brown", "gray", "green", "blue", "silver", "gold", "red", "black"]) {
-      if (baseColorName.includes(basicColor)) {
-        return colorMap[basicColor];
-      }
-    }
-    
-    return "transparent";
+    return colorMap[colorName] || "transparent";
   };
 
   // Determine if the component should display
@@ -138,9 +88,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
                       className="min-w-6 h-6 rounded-full border shrink-0"
                       style={{ backgroundColor: getColorStyle(color) }}
                     ></div>
-                    <span className="text-base whitespace-normal break-words leading-tight">
-                      {extractLocalizedText(color)}
-                    </span>
+                    <span className="text-base whitespace-normal break-words leading-tight">{t(color.toLowerCase()) || color}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -156,7 +104,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
               style={{ backgroundColor: getColorStyle(selectedColor) }}
             ></div>
             <span className="text-base font-medium break-words whitespace-normal leading-relaxed">
-              {extractLocalizedText(selectedColor)}
+              {t(selectedColor.toLowerCase()) || selectedColor}
             </span>
           </div>
         )}
