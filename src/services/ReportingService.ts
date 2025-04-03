@@ -1,25 +1,76 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Invoice, Refund } from "@/store/invoiceStore";
-import { 
-  DailySalesSummary, 
-  PaymentMethodSummary, 
-  InvoiceTypeSummary, 
-  MonthlySalesSummary, 
-  InvoiceRecord, 
-  RefundRecord,
-  Database
-} from "@/types/reportingTypes";
+import { format, parse, getMonth, getYear } from "date-fns";
+import { Database } from "@/types/reportingTypes";
 
 // Export types using 'export type' syntax
-export type { 
-  DailySalesSummary, 
-  PaymentMethodSummary, 
-  InvoiceTypeSummary, 
-  MonthlySalesSummary, 
-  InvoiceRecord, 
-  RefundRecord,
-  Database
+export type DailySalesSummary = {
+  id?: string;
+  date: string;
+  total_sales: number;
+  total_refunds: number;
+  net_sales: number;
+  glasses_sales_count: number;
+  contacts_sales_count: number;
+  exam_sales_count: number;
+  location_id: string;
+  created_at?: string;
+  updated_at: string;
+};
+
+export type PaymentMethodSummary = {
+  id?: string;
+  daily_summary_id: string;
+  payment_method: string;
+  amount: number;
+  transaction_count: number;
+  created_at?: string;
+};
+
+export type InvoiceTypeSummary = {
+  id?: string;
+  daily_summary_id: string;
+  invoice_type: string;
+  amount: number;
+  count: number;
+  created_at?: string;
+};
+
+export type MonthlySalesSummary = {
+  id?: string;
+  year: number;
+  month: number;
+  total_sales: number;
+  total_refunds: number;
+  net_sales: number;
+  glasses_sales_count: number;
+  contacts_sales_count: number;
+  exam_sales_count: number;
+  location_id: string;
+  created_at?: string;
+  updated_at: string;
+};
+
+export type InvoiceRecord = {
+  id?: string;
+  invoice_id: string;
+  invoice_date: string;
+  client_id: string | null;
+  total_amount: number;
+  payment_method: string;
+  payment_status: string;
+  invoice_type: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type RefundRecord = {
+  id?: string;
+  refund_id: string;
+  invoice_id: string;
+  refund_date: string;
+  amount: number;
+  reason: string;
+  created_at?: string;
 };
 
 export class ReportingService {
@@ -488,4 +539,3 @@ export class ReportingService {
     }
   }
 }
-

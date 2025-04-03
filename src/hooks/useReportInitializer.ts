@@ -64,4 +64,3 @@ export const useReportInitializer = () => {
   
   return { isInitialized, isInitializing: isInitializing };
 };
-

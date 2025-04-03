@@ -22,6 +22,7 @@ interface RevenueSalesChartProps {
   lensRevenue: number;
   frameRevenue: number;
   coatingRevenue: number;
+  language?: string; // Make language optional in this interface
   data?: never;
   type?: never;
 }
@@ -53,7 +54,7 @@ export const SalesChart: React.FC<SalesChartProps> = (props) => {
     return <ComparativeChart {...props} />;
   }
   
-  return <RevenueBreakdownChart {...props as RevenueSalesChartProps} language={language} />;
+  return <RevenueBreakdownChart {...props} language={language} />;
 };
 
 const RevenueBreakdownChart: React.FC<RevenueSalesChartProps & { language: string }> = ({ 
