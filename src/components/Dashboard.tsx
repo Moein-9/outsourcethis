@@ -82,90 +82,174 @@ export const Dashboard: React.FC = () => {
       title: language === 'ar' ? 'إنشاء فاتورة' : 'New Invoice',
       description: language === 'ar' ? 'إنشاء فاتورة جديدة' : 'Create a new invoice',
       icon: FileText,
-      color: 'bg-teal-500',
+      color: 'bg-blue-500',
       onClick: () => navigateToSection('createInvoice')
     },
     {
-      title: language === 'ar' ? 'فحص العين' : 'Eye Exam',
-      description: language === 'ar' ? 'إنشاء فاتورة فحص عين' : 'Create an eye exam invoice',
+      title: language === 'ar' ? 'فحص نظر' : 'Eye Exam',
+      description: language === 'ar' ? 'إجراء فحص نظر جديد' : 'Perform a new eye exam',
       icon: Eye,
-      color: 'bg-teal-500',
+      color: 'bg-purple-500',
       onClick: navigateToEyeExam
     },
     {
-      title: language === 'ar' ? 'المدفوعات المتبقية' : 'Remaining Payments',
-      description: language === 'ar' ? 'عرض المدفوعات المتبقية' : 'View remaining payments',
-      icon: CreditCard,
-      color: 'bg-teal-500',
-      onClick: () => navigateToSection('remainingPayments')
+      title: language === 'ar' ? 'البحث عن عميل' : 'Search Patient',
+      description: language === 'ar' ? 'البحث عن عميل' : 'Search for a patient',
+      icon: Search,
+      color: 'bg-green-500',
+      onClick: () => navigateToSection('patientSearch')
     },
     {
-      title: language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges',
-      description: language === 'ar' ? 'معالجة استرداد الأموال واستبدال المنتجات' : 'Process refunds and exchanges',
-      icon: RefreshCcw,
-      color: 'bg-teal-500',
-      onClick: () => navigateToSection('refundManager')
+      title: language === 'ar' ? 'إدارة المخزون' : 'Inventory',
+      description: language === 'ar' ? 'إدارة مخزون النظارات والعدسات' : 'Manage glasses and lenses inventory',
+      icon: Package,
+      color: 'bg-amber-500',
+      onClick: () => navigateToSection('inventory')
     },
+    {
+      title: language === 'ar' ? 'المواعيد' : 'Appointments',
+      description: language === 'ar' ? 'عرض وإدارة مواعيد اليوم' : 'View and manage today\'s appointments',
+      icon: Calendar,
+      color: 'bg-red-500',
+      onClick: () => navigateToSection('appointments')
+    }
   ];
 
-  const rtlClass = language === 'ar' ? 'rtl' : 'ltr';
-  const welcomeMessage = language === 'ar' ? 'مرحباً بكم في متجرنا' : 'Welcome to Our Store';
-  const dateFormatted = format(currentTime, 'EEEE, MMMM do, yyyy');
-  const timeFormatted = format(currentTime, 'h:mm:ss a');
+  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
+  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
 
   return (
-    <div className={`py-4 space-y-6 ${rtlClass}`}>
-      <Card className="mb-6 overflow-hidden">
-        <CardContent className="p-0">
-          <div className="bg-gradient-to-r from-teal-500 to-teal-700 p-6 text-white">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <MoenLogoGreen className="w-16 h-16 bg-white rounded-full p-2" />
-                <div>
-                  <h2 className="text-2xl font-bold">{welcomeMessage}</h2>
-                  <p className="text-teal-100">
-                    {language === 'ar' ? 'نظارات المعين - فرع العربيد' : 'Moen Optician - Al Arbid location'}
+    <div className={`${dirClass} py-4 max-w-6xl mx-auto`}>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-2">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-md border mt-1">
+            <MoenLogoGreen className="h-12 w-12" />
+          </div>
+          <div>
+            <h1 className={`text-2xl font-semibold ${textAlignClass}`}>
+              {language === 'ar' ? 'مرحباً بك في مركز النظارات!' : 'Welcome to Moen Optics!'}
+            </h1>
+            <p className={`text-sm text-muted-foreground mt-1 ${textAlignClass}`}>
+              {format(currentTime, language === 'ar' ? 'EEEE, dd MMMM yyyy' : 'EEEE, MMMM dd, yyyy')} | {currentTime.toLocaleTimeString()}
+            </p>
+          </div>
+        </div>
+        <LanguageToggle />
+      </div>
+      
+      <div className="space-y-8">
+        <Card>
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg p-5">
+            <div className="flex justify-between items-center mb-1">
+              <CardTitle className={`text-lg font-semibold ${textAlignClass}`}>
+                {language === 'ar' ? 'إجراءات سريعة' : 'Quick Actions'}
+              </CardTitle>
+              <RefreshCcw className="h-4 w-4 text-gray-500" />
+            </div>
+            <p className={`text-sm text-muted-foreground ${textAlignClass}`}>
+              {language === 'ar' ? 'إدارة عملياتك الأكثر استخدامًا' : 'Manage your most common operations'}
+            </p>
+          </CardHeader>
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {quickActions.map((action, index) => (
+                <div 
+                  key={index}
+                  onClick={action.onClick}
+                  className="relative overflow-hidden border group cursor-pointer rounded-lg p-4 hover:shadow-md transition-all hover:border-primary/50"
+                >
+                  <div className="flex justify-between mb-2">
+                    <div className={`${action.color} p-2 rounded-lg text-white`}>
+                      <action.icon className="h-5 w-5" />
+                    </div>
+                    <div className="absolute -right-3 -top-3 bg-gray-100 rounded-full p-8 opacity-10 group-hover:scale-110 transition-transform"></div>
+                  </div>
+                  <h3 className={`font-medium mt-1.5 ${textAlignClass}`}>{action.title}</h3>
+                  <p className={`text-sm text-muted-foreground mt-1 ${textAlignClass}`}>
+                    {action.description}
                   </p>
+                  <div className={`mt-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity flex ${language === 'ar' ? 'justify-start' : 'justify-end'} items-center`}>
+                    <span className="text-sm font-medium mr-1">{language === 'ar' ? 'بدء' : 'Start'}</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CollapsibleCard
+            title={language === 'ar' ? 'إحصائيات' : 'Statistics'}
+            description={language === 'ar' ? 'نظرة عامة على النشاط' : 'Activity overview'}
+            className="col-span-2"
+            defaultOpen
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-6">
+              <div className="bg-green-50 rounded-lg p-4 border border-green-100">
+                <h4 className={`text-sm font-medium text-green-800 mb-2 ${textAlignClass}`}>
+                  {language === 'ar' ? 'العملاء' : 'Patients'}
+                </h4>
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-bold text-green-700">{patients.length || 0}</span>
+                  <span className="text-sm text-green-600 ml-2">
+                    {language === 'ar' ? 'عميل' : 'patients'}
+                  </span>
                 </div>
               </div>
-              <div className="text-right flex flex-col items-end">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  <span className="text-xl font-mono force-ltr-numbers">{timeFormatted}</span>
+              
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                <h4 className={`text-sm font-medium text-blue-800 mb-2 ${textAlignClass}`}>
+                  {language === 'ar' ? 'المخزون' : 'Inventory'}
+                </h4>
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-bold text-blue-700">{frames.length || 0}</span>
+                  <span className="text-sm text-blue-600 ml-2">
+                    {language === 'ar' ? 'إطار' : 'frames'}
+                  </span>
                 </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <Calendar className="h-5 w-5" />
-                  <span className="text-sm">{dateFormatted}</span>
+              </div>
+              
+              <div className="bg-amber-50 rounded-lg p-4 border border-amber-100">
+                <h4 className={`text-sm font-medium text-amber-800 mb-2 ${textAlignClass}`}>
+                  {language === 'ar' ? 'المبيعات' : 'Sales'}
+                </h4>
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-bold text-amber-700">-</span>
+                  <span className="text-sm text-amber-600 ml-2">
+                    {language === 'ar' ? 'د.ك' : 'KWD'}
+                  </span>
                 </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <CollapsibleCard 
-        title={language === 'ar' ? 'الإجراءات السريعة' : 'Quick Actions'} 
-        defaultOpen={true}
-        className="mb-6"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 p-4">
-          {quickActions.map((action, index) => (
-            <Card 
-              key={index} 
-              className="hover:shadow-md transition-shadow duration-300 cursor-pointer border-2 border-transparent hover:border-teal-100"
-              onClick={action.onClick}
-            >
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <div className={`${action.color} p-3 rounded-full mb-4 text-white`}>
-                  <action.icon className="h-6 w-6" />
+          </CollapsibleCard>
+          
+          <CollapsibleCard
+            title={language === 'ar' ? 'إشعارات' : 'Notifications'}
+            description={language === 'ar' ? 'أحدث التحديثات' : 'Latest updates'}
+            defaultOpen
+          >
+            <div className="p-4">
+              <div className="space-y-4">
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-blue-800">
+                  <p className={`text-sm ${textAlignClass}`}>
+                    {language === 'ar' 
+                      ? 'مرحبًا بك في نسخة المعاينة من نظام مون للبصريات' 
+                      : 'Welcome to the preview version of Moen Optics system'}
+                  </p>
                 </div>
-                <h3 className="font-semibold mb-1">{action.title}</h3>
-                <p className="text-sm text-muted-foreground">{action.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 text-gray-600">
+                  <p className={`text-sm ${textAlignClass}`}>
+                    {language === 'ar' 
+                      ? 'يمكنك إنشاء واختبار العديد من الميزات' 
+                      : 'You can create and test various features'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CollapsibleCard>
         </div>
-      </CollapsibleCard>
+      </div>
     </div>
   );
 };
