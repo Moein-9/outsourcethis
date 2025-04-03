@@ -97,8 +97,8 @@ export const LensSection: React.FC<LensSectionProps> = ({
       <CardContent className="p-4 overflow-visible">
         <LensSelector 
           onSelectLensType={onLensTypeSelect}
-          onSelectCoating={onSelectCoating}
-          onSelectThickness={onSelectThickness}
+          onSelectCoating={onCoatingSelect}
+          onSelectThickness={onThicknessSelect}
           skipLens={skipFrame}
           onSkipLensChange={onSkipFrameChange}
           initialLensType={selectedLensType}
