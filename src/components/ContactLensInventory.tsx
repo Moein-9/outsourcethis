@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, ContactLensItem } from "@/store/inventoryStore";
+import { useLanguageStore } from "@/store/languageStore";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,8 @@ const ContactLensItemCard = ({ lens, onEdit }: {
   lens: ContactLensItem; 
   onEdit: (lens: ContactLensItem) => void;
 }) => {
+  const { language } = useLanguageStore();
+  
   return (
     <Card className="overflow-hidden hover:shadow-md transition-all duration-200 border-blue-200">
       <CardHeader className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 border-b">
@@ -59,7 +62,7 @@ const ContactLensItemCard = ({ lens, onEdit }: {
             </CardDescription>
           </div>
           <Badge variant={lens.qty > 5 ? "outline" : "destructive"} className="text-xs">
-            {lens.qty} في المخزون
+            {lens.qty} {language === 'ar' ? 'في المخزون' : 'in stock'}
           </Badge>
         </div>
       </CardHeader>
@@ -69,13 +72,13 @@ const ContactLensItemCard = ({ lens, onEdit }: {
           <span className="font-medium">{lens.bc}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">القطر:</span>
+          <span className="text-muted-foreground">{language === 'ar' ? 'القطر' : 'Diameter'}:</span>
           <span className="font-medium">{lens.diameter}</span>
         </div>
       </CardContent>
       <CardFooter className="p-0 border-t">
         <Button variant="ghost" className="rounded-none h-10 text-blue-600 w-full" onClick={() => onEdit(lens)}>
-          <Edit className="h-4 w-4 mr-1" /> تعديل
+          <Edit className="h-4 w-4 mr-1" /> {language === 'ar' ? 'تعديل' : 'Edit'}
         </Button>
       </CardFooter>
     </Card>
@@ -84,6 +87,7 @@ const ContactLensItemCard = ({ lens, onEdit }: {
 
 export const ContactLensInventory: React.FC = () => {
   const { contactLenses, addContactLens, updateContactLens, searchContactLenses } = useInventoryStore();
+  const { language } = useLanguageStore();
   
   // State variables
   const [contactLensSearchTerm, setContactLensSearchTerm] = useState("");
@@ -128,7 +132,9 @@ export const ContactLensInventory: React.FC = () => {
     setContactLensResults(results);
     
     if (results.length === 0 && (contactLensSearchTerm || filterBrand !== "all" || filterType !== "all")) {
-      toast.info("لم يتم العثور على عدسات لاصقة مطابقة للبحث.");
+      toast.info(language === 'ar' 
+        ? "لم يتم العثور على عدسات لاصقة مطابقة للبحث."
+        : "No matching contact lenses were found.");
     }
   };
   
@@ -143,7 +149,9 @@ export const ContactLensInventory: React.FC = () => {
   // Handle adding a new contact lens
   const handleAddContactLens = () => {
     if (!contactLensBrand || !contactLensType || !contactLensBC || !contactLensDiameter || !contactLensPrice) {
-      toast.error("الرجاء إدخال تفاصيل العدسة اللاصقة كاملة");
+      toast.error(language === 'ar'
+        ? "الرجاء إدخال تفاصيل العدسة اللاصقة كاملة"
+        : "Please enter all contact lens details");
       return;
     }
     
@@ -151,12 +159,16 @@ export const ContactLensInventory: React.FC = () => {
     const qty = parseInt(contactLensQty);
     
     if (isNaN(price) || price <= 0) {
-      toast.error("الرجاء إدخال سعر صحيح");
+      toast.error(language === 'ar'
+        ? "الرجاء إدخال سعر صحيح"
+        : "Please enter a valid price");
       return;
     }
     
     if (isNaN(qty) || qty <= 0) {
-      toast.error("الرجاء إدخال كمية صحيحة");
+      toast.error(language === 'ar'
+        ? "الرجاء إدخال كمية صحيحة"
+        : "Please enter a valid quantity");
       return;
     }
     
@@ -174,10 +186,14 @@ export const ContactLensInventory: React.FC = () => {
     
     if (editingLens) {
       updateContactLens(editingLens.id, newContactLens);
-      toast.success(`تم تحديث العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`);
+      toast.success(language === 'ar'
+        ? `تم تحديث العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`
+        : `Successfully updated contact lens: ${contactLensBrand} ${contactLensType}`);
     } else {
       const id = addContactLens(newContactLens);
-      toast.success(`تم إضافة العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`);
+      toast.success(language === 'ar'
+        ? `تم إضافة العدسة اللاصقة بنجاح: ${contactLensBrand} ${contactLensType}`
+        : `Successfully added contact lens: ${contactLensBrand} ${contactLensType}`);
     }
     
     resetContactLensForm();
@@ -223,8 +239,11 @@ export const ContactLensInventory: React.FC = () => {
     handleContactLensSearch();
   }, [filterBrand, filterType]);
   
+  // Text direction based on language
+  const textDirection = language === 'ar' ? 'rtl' : 'ltr';
+  
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={textDirection}>
       <div className="flex flex-col md:flex-row justify-between items-stretch gap-4">
         <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <div className="relative flex-1">
@@ -232,13 +251,15 @@ export const ContactLensInventory: React.FC = () => {
             <Input
               value={contactLensSearchTerm}
               onChange={(e) => setContactLensSearchTerm(e.target.value)}
-              placeholder="البحث عن عدسة لاصقة (ماركة، نوع، قطر...)"
+              placeholder={language === 'ar' 
+                ? "البحث عن عدسة لاصقة (ماركة، نوع، قطر...)"
+                : "Search contact lenses (brand, type, diameter...)"}
               className="pl-9 w-full"
               onKeyDown={(e) => e.key === 'Enter' && handleContactLensSearch()}
             />
           </div>
           <Button onClick={handleContactLensSearch} variant="secondary" className="shrink-0">
-            <Search className="h-4 w-4 mr-1" /> بحث
+            <Search className="h-4 w-4 mr-1" /> {language === 'ar' ? 'بحث' : 'Search'}
           </Button>
         </div>
         
@@ -247,10 +268,10 @@ export const ContactLensInventory: React.FC = () => {
             setFilterBrand(value);
           }}>
             <SelectTrigger className="w-40 bg-white">
-              <SelectValue placeholder="اختر البراند" />
+              <SelectValue placeholder={language === 'ar' ? 'اختر البراند' : 'Select Brand'} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل البراندات</SelectItem>
+              <SelectItem value="all">{language === 'ar' ? 'كل البراندات' : 'All Brands'}</SelectItem>
               {brands.map(brand => (
                 <SelectItem key={brand} value={brand}>{brand}</SelectItem>
               ))}
@@ -261,10 +282,10 @@ export const ContactLensInventory: React.FC = () => {
             setFilterType(value);
           }}>
             <SelectTrigger className="w-40 bg-white">
-              <SelectValue placeholder="اختر النوع" />
+              <SelectValue placeholder={language === 'ar' ? 'اختر النوع' : 'Select Type'} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الأنواع</SelectItem>
+              <SelectItem value="all">{language === 'ar' ? 'كل الأنواع' : 'All Types'}</SelectItem>
               {types.map(type => (
                 <SelectItem key={type} value={type}>{type}</SelectItem>
               ))}
@@ -274,16 +295,21 @@ export const ContactLensInventory: React.FC = () => {
           <Dialog open={isAddContactLensDialogOpen} onOpenChange={setIsAddContactLensDialogOpen}>
             <DialogTrigger asChild>
               <Button className="shrink-0 bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-1" /> إضافة عدسة لاصقة
+                <Plus className="h-4 w-4 mr-1" /> {language === 'ar' ? 'إضافة عدسة لاصقة' : 'Add Contact Lens'}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>{editingLens ? "تعديل عدسة لاصقة" : "إضافة عدسة لاصقة جديدة"}</DialogTitle>
+                <DialogTitle>
+                  {editingLens 
+                    ? (language === 'ar' ? 'تعديل عدسة لاصقة' : 'Edit Contact Lens')
+                    : (language === 'ar' ? 'إضافة عدسة لاصقة جديدة' : 'Add New Contact Lens')
+                  }
+                </DialogTitle>
                 <DialogDescription>
                   {editingLens 
-                    ? "قم بتعديل بيانات العدسة اللاصقة"
-                    : "أدخل تفاصيل العدسة اللاصقة الجديدة لإضافتها إلى المخزون"
+                    ? (language === 'ar' ? 'قم بتعديل بيانات العدسة اللاصقة' : 'Update the contact lens details')
+                    : (language === 'ar' ? 'أدخل تفاصيل العدسة اللاصقة الجديدة لإضافتها إلى المخزون' : 'Enter new contact lens details to add to inventory')
                   }
                 </DialogDescription>
               </DialogHeader>
@@ -291,22 +317,22 @@ export const ContactLensInventory: React.FC = () => {
               <div className="space-y-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="contactLensBrand">الماركة</Label>
+                    <Label htmlFor="contactLensBrand">{language === 'ar' ? 'الماركة' : 'Brand'}</Label>
                     <Select value={contactLensBrand} onValueChange={setContactLensBrand}>
                       <SelectTrigger id="contactLensBrand" className="w-full">
-                        <SelectValue placeholder="اختر الماركة" />
+                        <SelectValue placeholder={language === 'ar' ? 'اختر الماركة' : 'Select brand'} />
                       </SelectTrigger>
                       <SelectContent>
                         {COMMON_BRANDS.map(brand => (
                           <SelectItem key={brand} value={brand}>{brand}</SelectItem>
                         ))}
-                        <SelectItem value="other">أخرى</SelectItem>
+                        <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
                     {contactLensBrand === "other" && (
                       <Input
                         className="mt-2"
-                        placeholder="أدخل اسم الماركة"
+                        placeholder={language === 'ar' ? 'أدخل اسم الماركة' : 'Enter brand name'}
                         onChange={(e) => setContactLensBrand(e.target.value)}
                         value=""
                       />
@@ -314,22 +340,22 @@ export const ContactLensInventory: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="contactLensType">النوع</Label>
+                    <Label htmlFor="contactLensType">{language === 'ar' ? 'النوع' : 'Type'}</Label>
                     <Select value={contactLensType} onValueChange={setContactLensType}>
                       <SelectTrigger id="contactLensType" className="w-full">
-                        <SelectValue placeholder="اختر النوع" />
+                        <SelectValue placeholder={language === 'ar' ? 'اختر النوع' : 'Select type'} />
                       </SelectTrigger>
                       <SelectContent>
                         {COMMON_TYPES.map(type => (
                           <SelectItem key={type} value={type}>{type}</SelectItem>
                         ))}
-                        <SelectItem value="other">أخرى</SelectItem>
+                        <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
                     {contactLensType === "other" && (
                       <Input
                         className="mt-2"
-                        placeholder="أدخل النوع"
+                        placeholder={language === 'ar' ? 'أدخل النوع' : 'Enter type'}
                         onChange={(e) => setContactLensType(e.target.value)}
                         value=""
                       />
@@ -342,19 +368,19 @@ export const ContactLensInventory: React.FC = () => {
                     <Label htmlFor="contactLensBC">BC</Label>
                     <Select value={contactLensBC} onValueChange={setContactLensBC}>
                       <SelectTrigger id="contactLensBC" className="w-full">
-                        <SelectValue placeholder="اختر BC" />
+                        <SelectValue placeholder={language === 'ar' ? 'اختر BC' : 'Select BC'} />
                       </SelectTrigger>
                       <SelectContent>
                         {COMMON_BC_VALUES.map(bc => (
                           <SelectItem key={bc} value={bc}>{bc}</SelectItem>
                         ))}
-                        <SelectItem value="other">أخرى</SelectItem>
+                        <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
                     {contactLensBC === "other" && (
                       <Input
                         className="mt-2"
-                        placeholder="أدخل BC"
+                        placeholder={language === 'ar' ? 'أدخل BC' : 'Enter BC'}
                         onChange={(e) => setContactLensBC(e.target.value)}
                         value=""
                       />
@@ -362,22 +388,22 @@ export const ContactLensInventory: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="contactLensDiameter">القطر</Label>
+                    <Label htmlFor="contactLensDiameter">{language === 'ar' ? 'القطر' : 'Diameter'}</Label>
                     <Select value={contactLensDiameter} onValueChange={setContactLensDiameter}>
                       <SelectTrigger id="contactLensDiameter" className="w-full">
-                        <SelectValue placeholder="اختر القطر" />
+                        <SelectValue placeholder={language === 'ar' ? 'اختر القطر' : 'Select diameter'} />
                       </SelectTrigger>
                       <SelectContent>
                         {COMMON_DIAMETER_VALUES.map(dia => (
                           <SelectItem key={dia} value={dia}>{dia}</SelectItem>
                         ))}
-                        <SelectItem value="other">أخرى</SelectItem>
+                        <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
                     {contactLensDiameter === "other" && (
                       <Input
                         className="mt-2"
-                        placeholder="أدخل القطر"
+                        placeholder={language === 'ar' ? 'أدخل القطر' : 'Enter diameter'}
                         onChange={(e) => setContactLensDiameter(e.target.value)}
                         value=""
                       />
@@ -386,23 +412,23 @@ export const ContactLensInventory: React.FC = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="contactLensColor">اللون (اختياري)</Label>
+                  <Label htmlFor="contactLensColor">{language === 'ar' ? 'اللون (اختياري)' : 'Color (Optional)'}</Label>
                   <Select value={contactLensColor} onValueChange={setContactLensColor}>
                     <SelectTrigger id="contactLensColor" className="w-full">
-                      <SelectValue placeholder="اختر اللون" />
+                      <SelectValue placeholder={language === 'ar' ? 'اختر اللون' : 'Select color'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">بدون لون</SelectItem>
+                      <SelectItem value="none">{language === 'ar' ? 'بدون لون' : 'No color'}</SelectItem>
                       {COMMON_COLORS.filter(color => color !== "none").map(color => (
                         <SelectItem key={color} value={color}>{color}</SelectItem>
                       ))}
-                      <SelectItem value="other">أخرى</SelectItem>
+                      <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                     </SelectContent>
                   </Select>
                   {contactLensColor === "other" && (
                     <Input
                       className="mt-2"
-                      placeholder="أدخل اللون"
+                      placeholder={language === 'ar' ? 'أدخل اللون' : 'Enter color'}
                       onChange={(e) => setContactLensColor(e.target.value)}
                       value=""
                     />
@@ -411,7 +437,7 @@ export const ContactLensInventory: React.FC = () => {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="contactLensPrice">السعر (KWD)</Label>
+                    <Label htmlFor="contactLensPrice">{language === 'ar' ? 'السعر (KWD)' : 'Price (KWD)'}</Label>
                     <Input
                       id="contactLensPrice"
                       type="number"
@@ -424,7 +450,7 @@ export const ContactLensInventory: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="contactLensQty">الكمية</Label>
+                    <Label htmlFor="contactLensQty">{language === 'ar' ? 'الكمية' : 'Quantity'}</Label>
                     <Input
                       id="contactLensQty"
                       type="number"
@@ -442,10 +468,12 @@ export const ContactLensInventory: React.FC = () => {
                   resetContactLensForm();
                   setIsAddContactLensDialogOpen(false);
                 }}>
-                  إلغاء
+                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
                 </Button>
                 <Button onClick={handleAddContactLens} className="bg-blue-600 hover:bg-blue-700">
-                  <Save className="h-4 w-4 mr-1" /> {editingLens ? "تحديث" : "حفظ العدسة"}
+                  <Save className="h-4 w-4 mr-1" /> {editingLens 
+                    ? (language === 'ar' ? 'تحديث' : 'Update') 
+                    : (language === 'ar' ? 'حفظ العدسة' : 'Save Lens')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -466,12 +494,14 @@ export const ContactLensInventory: React.FC = () => {
       ) : (
         <div className="bg-muted/30 rounded-lg p-12 text-center">
           <Contact className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-          <h3 className="text-lg font-medium mb-1">لا توجد عدسات لاصقة</h3>
+          <h3 className="text-lg font-medium mb-1">{language === 'ar' ? 'لا توجد عدسات لاصقة' : 'No Contact Lenses'}</h3>
           <p className="text-muted-foreground mb-4">
-            لم يتم العثور على عدسات لاصقة مطابقة للبحث.
+            {language === 'ar' 
+              ? 'لم يتم العثور على عدسات لاصقة مطابقة للبحث.'
+              : 'No matching contact lenses were found.'}
           </p>
           <Button variant="outline" onClick={resetFilters}>
-            عرض جميع العدسات اللاصقة
+            {language === 'ar' ? 'عرض جميع العدسات اللاصقة' : 'Show All Contact Lenses'}
           </Button>
         </div>
       )}
