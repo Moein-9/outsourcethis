@@ -1,81 +1,42 @@
 
 import React, { useEffect } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
+import { 
+  PieChart, 
+  Pie, 
+  Cell, 
+  ResponsiveContainer, 
+  Legend, 
   Tooltip,
-  Sector,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  BarChart,
-  Bar
+  Sector
 } from "recharts";
 import { Eye, Frame, Droplets } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 
-interface RevenueSalesChartProps {
+interface SalesChartProps {
   lensRevenue: number;
   frameRevenue: number;
   coatingRevenue: number;
-  language?: string;
-  data?: undefined;
-  type?: undefined;
 }
 
-interface ComparativeSalesChartProps {
-  data: Array<{
-    date: string;
-    totalSales: number;
-    refunds: number;
-    netSales: number;
-    glasses: number;
-    contacts: number;
-    exam: number;
-  }>;
-  type: "line" | "bar" | "pie";
-  language: string;
-  lensRevenue?: undefined;
-  frameRevenue?: undefined;
-  coatingRevenue?: undefined;
-}
-
-export type SalesChartProps = RevenueSalesChartProps | ComparativeSalesChartProps;
-
-export const SalesChart: React.FC<SalesChartProps> = (props) => {
+export const SalesChart: React.FC<SalesChartProps> = ({ 
+  lensRevenue, 
+  frameRevenue, 
+  coatingRevenue 
+}) => {
   const { language } = useLanguageStore();
   const isRtl = language === 'ar';
   
-  if ('data' in props && props.data) {
-    // Type assertion to ensure TypeScript knows what properties to expect
-    return <ComparativeChart {...props as ComparativeSalesChartProps} />;
-  }
-  
-  // Type assertion to ensure TypeScript knows what properties to expect
-  return <RevenueBreakdownChart {...props as RevenueSalesChartProps} language={language} />;
-};
-
-const RevenueBreakdownChart: React.FC<RevenueSalesChartProps & { language: string }> = ({ 
-  lensRevenue, 
-  frameRevenue, 
-  coatingRevenue,
-  language
-}) => {
-  const isRtl = language === 'ar';
-  
+  // Check if we have any data
   const hasData = lensRevenue > 0 || frameRevenue > 0 || coatingRevenue > 0;
   
+  // Ensure all values are at least 0 (not negative)
   const safeValues = {
     lensRevenue: Math.max(0, lensRevenue),
     frameRevenue: Math.max(0, frameRevenue),
     coatingRevenue: Math.max(0, coatingRevenue)
   };
   
+  // Create data array, filtering out zero values
   const data = [
     { name: language === 'ar' ? "العدسات" : "Lenses", value: safeValues.lensRevenue, icon: <Eye size={16} /> },
     { name: language === 'ar' ? "الإطارات" : "Frames", value: safeValues.frameRevenue, icon: <Frame size={16} /> },
@@ -110,6 +71,7 @@ const RevenueBreakdownChart: React.FC<RevenueSalesChartProps & { language: strin
     );
   };
 
+  // Active shape for hover effect
   const renderActiveShape = (props: any) => {
     const { 
       cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, value 
@@ -159,11 +121,19 @@ const RevenueBreakdownChart: React.FC<RevenueSalesChartProps & { language: strin
     );
   };
 
+  // State for tracking active index on hover
   const [activeIndex, setActiveIndex] = React.useState(0);
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
   };
   
+  // Debug logs - using a single useEffect to avoid hook count issues
+  useEffect(() => {
+    console.log("SalesChart data:", data);
+    console.log("Has data:", hasData);
+  }, [data, hasData]);
+  
+  // Custom legend rendering with icons
   const renderCustomLegend = (props: any) => {
     const { payload } = props;
     
@@ -181,6 +151,7 @@ const RevenueBreakdownChart: React.FC<RevenueSalesChartProps & { language: strin
     );
   };
   
+  // If no data, show a placeholder instead of attempting to render the chart
   if (!hasData || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[300px]">
@@ -206,7 +177,7 @@ const RevenueBreakdownChart: React.FC<RevenueSalesChartProps & { language: strin
           innerRadius={55}
           fill="#8884d8"
           dataKey="value"
-          minAngle={15}
+          minAngle={15} // Ensures small segments are still visible
           onMouseEnter={onPieEnter}
         >
           {data.map((entry, index) => (
@@ -228,94 +199,6 @@ const RevenueBreakdownChart: React.FC<RevenueSalesChartProps & { language: strin
           verticalAlign="bottom"
           layout="horizontal"
         />
-      </PieChart>
-    </ResponsiveContainer>
-  );
-};
-
-const ComparativeChart: React.FC<ComparativeSalesChartProps> = ({ data, type, language }) => {
-  const isRtl = language === 'ar';
-  const COLORS = ["#10B981", "#F59E0B", "#3B82F6", "#8B5CF6", "#EC4899"];
-  
-  const translations = {
-    sales: language === 'ar' ? "المبيعات" : "Sales",
-    netSales: language === 'ar' ? "صافي المبيعات" : "Net Sales",
-    refunds: language === 'ar' ? "المبالغ المستردة" : "Refunds",
-    glasses: language === 'ar' ? "نظارات" : "Glasses",
-    contacts: language === 'ar' ? "عدسات لاصقة" : "Contacts",
-    exam: language === 'ar' ? "فحص" : "Exam",
-    date: language === 'ar' ? "التاريخ" : "Date",
-    amount: language === 'ar' ? "المبلغ" : "Amount",
-    noData: language === 'ar' ? "لا توجد بيانات للعرض" : "No data to display"
-  };
-  
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-[300px]">
-        <p className="text-center text-muted-foreground">{translations.noData}</p>
-      </div>
-    );
-  }
-  
-  const pieData = [
-    { name: translations.glasses, value: data.reduce((sum, d) => sum + d.glasses, 0) },
-    { name: translations.contacts, value: data.reduce((sum, d) => sum + d.contacts, 0) },
-    { name: translations.exam, value: data.reduce((sum, d) => sum + d.exam, 0) }
-  ].filter(item => item.value > 0);
-  
-  if (type === "line") {
-    return (
-      <ResponsiveContainer width="100%" height={350}>
-        <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip formatter={(value) => (typeof value === 'number' ? `${value.toFixed(2)} KWD` : value)} />
-          <Legend />
-          <Line type="monotone" dataKey="totalSales" name={translations.sales} stroke="#10B981" activeDot={{ r: 8 }} />
-          <Line type="monotone" dataKey="netSales" name={translations.netSales} stroke="#3B82F6" />
-          <Line type="monotone" dataKey="refunds" name={translations.refunds} stroke="#EF4444" />
-        </LineChart>
-      </ResponsiveContainer>
-    );
-  } 
-  
-  if (type === "bar") {
-    return (
-      <ResponsiveContainer width="100%" height={350}>
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip formatter={(value) => (typeof value === 'number' ? `${value.toFixed(2)} KWD` : value)} />
-          <Legend />
-          <Bar dataKey="glasses" name={translations.glasses} fill="#8B5CF6" />
-          <Bar dataKey="contacts" name={translations.contacts} fill="#F59E0B" />
-          <Bar dataKey="exam" name={translations.exam} fill="#EC4899" />
-        </BarChart>
-      </ResponsiveContainer>
-    );
-  }
-  
-  return (
-    <ResponsiveContainer width="100%" height={350}>
-      <PieChart>
-        <Pie
-          data={pieData}
-          cx="50%"
-          cy="50%"
-          labelLine={true}
-          outerRadius={130}
-          fill="#8884d8"
-          dataKey="value"
-          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-        >
-          {pieData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-        <Tooltip formatter={(value) => (typeof value === 'number' ? `${value.toFixed(2)} KWD` : value)} />
-        <Legend />
       </PieChart>
     </ResponsiveContainer>
   );

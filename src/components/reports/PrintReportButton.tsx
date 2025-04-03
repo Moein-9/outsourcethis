@@ -5,17 +5,13 @@ import { Printer, ChevronRight } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 
 interface PrintReportButtonProps {
-  onPrint?: () => void;
+  onPrint: () => void;
   className?: string;
   label?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   icon?: React.ReactNode;
   disabled?: boolean;
   description?: string;
-  // Add support for date or dateRange
-  date?: string;
-  dateRange?: { from: Date; to: Date };
-  isComparative?: boolean;
 }
 
 export const PrintReportButton: React.FC<PrintReportButtonProps> = ({ 
@@ -25,17 +21,14 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
   variant = "default",
   icon,
   disabled = false,
-  description,
-  date,
-  dateRange,
-  isComparative = false
+  description
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === 'ar';
   
-  const defaultLabel = language === 'ar' ? 'طباعة التقرير' : 'Print Report';
+  const defaultLabel = language === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice';
   const buttonLabel = label || defaultLabel;
-  const buttonDescription = description || (language === 'ar' ? 'طباعة نسخة من التقرير' : 'Print a copy of the report');
+  const buttonDescription = description || (language === 'ar' ? 'طباعة نسخة من الفاتورة' : 'Print a copy of the invoice');
   
   const handlePrint = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,15 +36,7 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
     
     // Add a slight delay to ensure any state updates have completed
     setTimeout(() => {
-      if (onPrint) {
-        onPrint();
-      } else {
-        // Default print implementation if no custom handler provided
-        console.log("Print requested for:", isComparative ? "Comparative Report" : "Daily Report");
-        console.log("Date info:", date || (dateRange ? `${dateRange.from} to ${dateRange.to}` : "Not specified"));
-        // Implement default printing logic here
-        window.print();
-      }
+      onPrint();
     }, 100);
   };
   
@@ -79,4 +64,3 @@ export const PrintReportButton: React.FC<PrintReportButtonProps> = ({
     </Button>
   );
 };
-

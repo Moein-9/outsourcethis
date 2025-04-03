@@ -1,15 +1,11 @@
 
 import { useEffect } from 'react';
 import { useInventoryStore } from "@/store/inventoryStore";
-import { useReportInitializer } from '@/hooks/useReportInitializer';
 
 export const InventoryInitializer = () => {
   const cleanupSamplePhotochromicCoatings = useInventoryStore(
     (state) => state.cleanupSamplePhotochromicCoatings
   );
-  
-  // Initialize reporting system
-  useReportInitializer();
 
   useEffect(() => {
     // Clean up any existing sample photochromic coatings on component mount
