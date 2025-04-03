@@ -4,11 +4,11 @@ import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store
 import { useLanguageStore } from "@/store/languageStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { Edit, Save, Plus, XCircle, Search } from "lucide-react";
+import { Edit, Save, Plus, XCircle, Search, Database } from "lucide-react";
 
 interface LensPricingCombination {
   id: string;
@@ -229,12 +229,35 @@ export const LensCombinationManager: React.FC = () => {
   const getThicknessName = (id: string) => {
     return lensThicknesses.find(t => t.id === id)?.name || t('unknown');
   };
+
+  // Group coatings by category
+  const groupedCoatings = lensCoatings.reduce((acc, coating) => {
+    if (!acc[coating.category]) {
+      acc[coating.category] = [];
+    }
+    acc[coating.category].push(coating);
+    return acc;
+  }, {} as Record<string, LensCoating[]>);
+
+  // Group thicknesses by category
+  const groupedThicknesses = lensThicknesses.reduce((acc, thickness) => {
+    if (!acc[thickness.category]) {
+      acc[thickness.category] = [];
+    }
+    acc[thickness.category].push(thickness);
+    return acc;
+  }, {} as Record<string, LensThickness[]>);
   
   return (
     <div className="space-y-6" dir={dirClass}>
       <Card className="border-blue-100">
         <CardHeader className="bg-blue-50">
-          <CardTitle className={textAlignClass}>{t('addNewCombination')}</CardTitle>
+          <CardTitle className={textAlignClass}>
+            <div className="flex items-center gap-2">
+              <Database className="w-5 h-5 text-blue-600" />
+              {t('addNewCombination')}
+            </div>
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -246,15 +269,27 @@ export const LensCombinationManager: React.FC = () => {
                 value={selectedLensType} 
                 onValueChange={setSelectedLensType}
               >
-                <SelectTrigger id="lensType">
+                <SelectTrigger id="lensType" className="bg-white">
                   <SelectValue placeholder={t('selectLensType')} />
                 </SelectTrigger>
-                <SelectContent>
-                  {lensTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.id}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
+                <SelectContent className="bg-white z-[200]">
+                  <SelectGroup>
+                    <SelectLabel>{t('singleVision')}</SelectLabel>
+                    {lensTypes.filter(type => type.type === 'distance' || type.type === 'reading' || type.type === 'sunglasses').map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectSeparator />
+                  <SelectGroup>
+                    <SelectLabel>{t('multifocal')}</SelectLabel>
+                    {lensTypes.filter(type => type.type === 'progressive' || type.type === 'bifocal').map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
@@ -267,14 +302,33 @@ export const LensCombinationManager: React.FC = () => {
                 value={selectedCoating} 
                 onValueChange={setSelectedCoating}
               >
-                <SelectTrigger id="coating">
+                <SelectTrigger id="coating" className="bg-white">
                   <SelectValue placeholder={t('selectCoating')} />
                 </SelectTrigger>
-                <SelectContent>
-                  {lensCoatings.map((coating) => (
-                    <SelectItem key={coating.id} value={coating.id}>
-                      {coating.name}
-                    </SelectItem>
+                <SelectContent className="bg-white z-[200]">
+                  {Object.entries(groupedCoatings).map(([category, coatings]) => (
+                    <React.Fragment key={category}>
+                      <SelectGroup>
+                        <SelectLabel>
+                          {category === 'distance-reading' ? t('singleVisionCoatings') : 
+                           category === 'progressive' ? t('progressiveCoatings') : 
+                           category === 'bifocal' ? t('bifocalCoatings') : category}
+                        </SelectLabel>
+                        {coatings.map(coating => (
+                          <SelectItem key={coating.id} value={coating.id} className="py-2">
+                            <div className="flex flex-col">
+                              <span>{coating.name}</span>
+                              {coating.description && (
+                                <span className="text-xs text-gray-500">{coating.description}</span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                      {Object.keys(groupedCoatings).indexOf(category) < Object.keys(groupedCoatings).length - 1 && (
+                        <SelectSeparator />
+                      )}
+                    </React.Fragment>
                   ))}
                 </SelectContent>
               </Select>
@@ -288,14 +342,33 @@ export const LensCombinationManager: React.FC = () => {
                 value={selectedThickness} 
                 onValueChange={setSelectedThickness}
               >
-                <SelectTrigger id="thickness">
+                <SelectTrigger id="thickness" className="bg-white">
                   <SelectValue placeholder={t('selectThickness')} />
                 </SelectTrigger>
-                <SelectContent>
-                  {lensThicknesses.map((thickness) => (
-                    <SelectItem key={thickness.id} value={thickness.id}>
-                      {thickness.name}
-                    </SelectItem>
+                <SelectContent className="bg-white z-[200]">
+                  {Object.entries(groupedThicknesses).map(([category, thicknesses]) => (
+                    <React.Fragment key={category}>
+                      <SelectGroup>
+                        <SelectLabel>
+                          {category === 'distance-reading' ? t('singleVisionThicknesses') : 
+                           category === 'progressive' ? t('progressiveThicknesses') : 
+                           category === 'bifocal' ? t('bifocalThicknesses') : category}
+                        </SelectLabel>
+                        {thicknesses.map(thickness => (
+                          <SelectItem key={thickness.id} value={thickness.id} className="py-2">
+                            <div className="flex flex-col">
+                              <span>{thickness.name}</span>
+                              {thickness.description && (
+                                <span className="text-xs text-gray-500">{thickness.description}</span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                      {Object.keys(groupedThicknesses).indexOf(category) < Object.keys(groupedThicknesses).length - 1 && (
+                        <SelectSeparator />
+                      )}
+                    </React.Fragment>
                   ))}
                 </SelectContent>
               </Select>
@@ -310,7 +383,7 @@ export const LensCombinationManager: React.FC = () => {
                 min="0"
                 value={combinationPrice}
                 onChange={(e) => setCombinationPrice(e.target.value)}
-                className={textAlignClass}
+                className={`${textAlignClass} bg-white`}
               />
             </div>
           </div>
@@ -334,7 +407,7 @@ export const LensCombinationManager: React.FC = () => {
                 placeholder={t('searchCombinations')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
+                className="pl-8 bg-white"
               />
             </div>
           </div>
@@ -372,7 +445,7 @@ export const LensCombinationManager: React.FC = () => {
                             min="0"
                             value={editPrice}
                             onChange={(e) => setEditPrice(e.target.value)}
-                            className="w-24"
+                            className="w-24 bg-white"
                           />
                         ) : (
                           <>{combination.price.toFixed(3)}</>

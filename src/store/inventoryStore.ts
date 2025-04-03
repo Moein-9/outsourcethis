@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -113,6 +114,7 @@ interface InventoryState {
   getLensPricingByComponents: (lensTypeId: string, coatingId: string, thicknessId: string) => number | null;
   
   cleanupSamplePhotochromicCoatings: () => void;
+  resetLensPricing: () => void;
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -127,86 +129,102 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "lens5", name: "عدسات شمسية", type: "sunglasses" }
       ],
       lensCoatings: [
-        { id: "coat1", name: "مضاد للانعكاس", price: 5, description: "Anti-Reflective Coating", category: "distance-reading" },
-        { id: "coat2", name: "حماية شاشة", price: 7, description: "Blue Light Protection", category: "distance-reading" },
-        { id: "coat3", name: "ضد الخدش", price: 8, description: "Scratch Resistant", category: "distance-reading" },
-        { id: "coat4", name: "مضاد للانعكاس للعدسات التقدمية", price: 10, description: "Anti-Reflective for Progressive", category: "progressive" },
-        { id: "coat5", name: "حماية شاشة للعدسات التقدمية", price: 12, description: "Blue Light Protection for Progressive", category: "progressive" },
-        { id: "coat6", name: "مضاد للانعكاس للعدسات الثنائية", price: 8, description: "Anti-Reflective for Bifocal", category: "bifocal" },
-        { id: "coat7", name: "حماية شاشة للعدسات الثنائية", price: 9, description: "Blue Light Protection for Bifocal", category: "bifocal" },
-        
-        // Standard coating items
-        { id: "coat8", name: "Basic (عادي)", price: 0, description: "Basic Coating", category: "distance-reading" },
-        { id: "coat9", name: "Filter (فلتر)", price: 0, description: "Filter Coating", category: "distance-reading" },
-        { id: "coat10", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating", category: "distance-reading" },
-        { id: "coat11", name: "Basic (عادي)", price: 0, description: "Basic Coating for Progressive", category: "progressive" },
-        { id: "coat12", name: "Filter (فلتر)", price: 0, description: "Filter Coating for Progressive", category: "progressive" },
-        { id: "coat13", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Progressive", category: "progressive" },
-        { id: "coat14", name: "Basic (عادي)", price: 0, description: "Basic Coating for Bifocal", category: "bifocal" },
-        { id: "coat15", name: "Filter (فلتر)", price: 0, description: "Filter Coating for Bifocal", category: "bifocal" },
-        { id: "coat16", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Bifocal", category: "bifocal" },
-        
-        // Photochromic coating items with color options
+        // Basic lens coatings for Single Vision
         { 
-          id: "coat17", 
+          id: "basic-sv", 
+          name: "Basic (عادي)", 
+          price: 0, 
+          description: "Basic coating for single vision lenses", 
+          category: "distance-reading" 
+        },
+        // Filter lens coatings for Single Vision
+        { 
+          id: "filter-sv", 
+          name: "Filter (فلتر)", 
+          price: 0, 
+          description: "Filter coating for single vision lenses", 
+          category: "distance-reading" 
+        },
+        // Super Filter lens coatings for Single Vision
+        { 
+          id: "super-filter-sv", 
+          name: "Super Filter (سوبر فلتر)", 
+          price: 0, 
+          description: "Super filter coating for single vision lenses", 
+          category: "distance-reading" 
+        },
+        
+        // Basic lens coatings for Progressive
+        { 
+          id: "basic-prog", 
+          name: "Basic (عادي)", 
+          price: 0, 
+          description: "Basic coating for progressive lenses", 
+          category: "progressive" 
+        },
+        // Filter lens coatings for Progressive
+        { 
+          id: "filter-prog", 
+          name: "Filter (فلتر)", 
+          price: 0, 
+          description: "Filter coating for progressive lenses", 
+          category: "progressive" 
+        },
+        
+        // Basic lens coatings for Bifocal
+        { 
+          id: "basic-bif", 
+          name: "Basic (عادي)", 
+          price: 0, 
+          description: "Basic coating for bifocal lenses", 
+          category: "bifocal" 
+        },
+        // Filter lens coatings for Bifocal
+        { 
+          id: "filter-bif", 
+          name: "Filter (فلتر)", 
+          price: 0, 
+          description: "Filter coating for bifocal lenses", 
+          category: "bifocal" 
+        },
+        
+        // Photochromic lens coatings
+        { 
+          id: "photochromic-sv", 
           name: "Photochromic (فوتوكروميك)", 
-          price: 15, 
-          description: "Photochromic lenses that darken in sunlight", 
-          category: "distance-reading", 
+          price: 0, 
+          description: "Photochromic coating for single vision lenses", 
+          category: "distance-reading",
           isPhotochromic: true,
           availableColors: ["Brown", "Gray", "Green"]
         },
         { 
-          id: "coat18", 
+          id: "photochromic-prog", 
           name: "Photochromic (فوتوكروميك)", 
-          price: 20, 
-          description: "Photochromic lenses for progressive that darken in sunlight", 
-          category: "progressive", 
-          isPhotochromic: true,
-          availableColors: ["Brown", "Gray", "Green"]
-        },
-        { 
-          id: "coat19", 
-          name: "Photochromic (فوتوكروميك)", 
-          price: 18, 
-          description: "Photochromic lenses for bifocal that darken in sunlight", 
-          category: "bifocal", 
+          price: 0, 
+          description: "Photochromic coating for progressive lenses", 
+          category: "progressive",
           isPhotochromic: true,
           availableColors: ["Brown", "Gray", "Green"]
         }
       ],
       lensThicknesses: [
-        { id: "thick1", name: "عادي", price: 0, description: "Standard Thickness", category: "distance-reading" },
-        { id: "thick2", name: "رقيق", price: 10, description: "Thin", category: "distance-reading" },
-        { id: "thick3", name: "رقيق جداً", price: 20, description: "Ultra Thin", category: "distance-reading" },
-        { id: "thick4", name: "عادي للعدسات التقدمية", price: 5, description: "Standard for Progressive", category: "progressive" },
-        { id: "thick5", name: "رقيق للعدسات التقدمية", price: 15, description: "Thin for Progressive", category: "progressive" },
-        { id: "thick6", name: "عادي للعدسات الثنائية", price: 3, description: "Standard for Bifocal", category: "bifocal" },
-        { id: "thick7", name: "رقيق للعدسات الثنائية", price: 12, description: "Thin for Bifocal", category: "bifocal" },
+        // Single Vision thicknesses
+        { id: "sv-156", name: "1.56", price: 0, description: "Standard thickness (1.56)", category: "distance-reading" },
+        { id: "sv-160", name: "1.60", price: 0, description: "Thin lens (1.60)", category: "distance-reading" },
+        { id: "sv-167", name: "1.67", price: 0, description: "Super thin lens (1.67)", category: "distance-reading" },
+        { id: "sv-174", name: "1.74", price: 0, description: "Ultra thin lens (1.74)", category: "distance-reading" },
+        { id: "sv-poly", name: "Polycarbonate", price: 0, description: "Polycarbonate material", category: "distance-reading" },
         
-        // New thickness items for distance-reading
-        { id: "thick8", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness", category: "distance-reading" },
-        { id: "thick9", name: "Standard Thickness", price: 0, description: "Standard Thickness", category: "distance-reading" },
-        { id: "thick10", name: "Polycarbonate", price: 0, description: "Polycarbonate Material", category: "distance-reading" },
-        { id: "thick11", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens", category: "distance-reading" },
-        { id: "thick12", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens", category: "distance-reading" },
-        { id: "thick13", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens", category: "distance-reading" },
+        // Progressive thicknesses
+        { id: "prog-156", name: "1.56", price: 0, description: "Standard thickness for progressive (1.56)", category: "progressive" },
+        { id: "prog-160", name: "1.60", price: 0, description: "Thin lens for progressive (1.60)", category: "progressive" },
+        { id: "prog-167", name: "1.67", price: 0, description: "Super thin lens for progressive (1.67)", category: "progressive" },
+        { id: "prog-174", name: "1.74", price: 0, description: "Ultra thin lens for progressive (1.74)", category: "progressive" },
+        { id: "prog-poly", name: "Polycarbonate", price: 0, description: "Polycarbonate material for progressive", category: "progressive" },
         
-        // New thickness items for progressive
-        { id: "thick14", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness for Progressive", category: "progressive" },
-        { id: "thick15", name: "Standard Thickness", price: 0, description: "Standard Thickness for Progressive", category: "progressive" },
-        { id: "thick16", name: "Polycarbonate", price: 0, description: "Polycarbonate Material for Progressive", category: "progressive" },
-        { id: "thick17", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens for Progressive", category: "progressive" },
-        { id: "thick18", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens for Progressive", category: "progressive" },
-        { id: "thick19", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens for Progressive", category: "progressive" },
-        
-        // New thickness items for bifocal
-        { id: "thick20", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness for Bifocal", category: "bifocal" },
-        { id: "thick21", name: "Standard Thickness", price: 0, description: "Standard Thickness for Bifocal", category: "bifocal" },
-        { id: "thick22", name: "Polycarbonate", price: 0, description: "Polycarbonate Material for Bifocal", category: "bifocal" },
-        { id: "thick23", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens for Bifocal", category: "bifocal" },
-        { id: "thick24", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens for Bifocal", category: "bifocal" },
-        { id: "thick25", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens for Bifocal", category: "bifocal" }
+        // Bifocal thicknesses
+        { id: "bif-basic", name: "Basic", price: 0, description: "Standard thickness for bifocal", category: "bifocal" },
       ],
       contactLenses: [
         { id: "cl1", brand: "Acuvue", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 25, qty: 30 },
@@ -223,95 +241,7 @@ export const useInventoryStore = create<InventoryState>()(
         }
       ],
       lensPricingCombinations: [
-        {
-          id: "combo1",
-          lensTypeId: "lens2",
-          coatingId: "coat8",
-          thicknessId: "thick8",
-          price: 15
-        },
-        {
-          id: "combo2",
-          lensTypeId: "lens2",
-          coatingId: "coat8",
-          thicknessId: "thick11",
-          price: 25
-        },
-        {
-          id: "combo3",
-          lensTypeId: "lens2",
-          coatingId: "coat9",
-          thicknessId: "thick8",
-          price: 20
-        },
-        {
-          id: "combo4",
-          lensTypeId: "lens3",
-          coatingId: "coat11",
-          thicknessId: "thick14",
-          price: 40
-        },
-        
-        // Add pricing combinations for photochromic coatings
-        // Distance-reading combinations
-        {
-          id: "combo5",
-          lensTypeId: "lens2",
-          coatingId: "coat17",
-          thicknessId: "thick8",
-          price: 30
-        },
-        {
-          id: "combo6",
-          lensTypeId: "lens2",
-          coatingId: "coat17",
-          thicknessId: "thick11",
-          price: 40
-        },
-        {
-          id: "combo7",
-          lensTypeId: "lens1",
-          coatingId: "coat17",
-          thicknessId: "thick8",
-          price: 30
-        },
-        {
-          id: "combo8",
-          lensTypeId: "lens1",
-          coatingId: "coat17",
-          thicknessId: "thick11",
-          price: 40
-        },
-        // Progressive combinations
-        {
-          id: "combo9",
-          lensTypeId: "lens3",
-          coatingId: "coat18",
-          thicknessId: "thick14",
-          price: 55
-        },
-        {
-          id: "combo10",
-          lensTypeId: "lens3",
-          coatingId: "coat18",
-          thicknessId: "thick17",
-          price: 65
-        },
-        // Bifocal combinations
-        {
-          id: "combo11",
-          lensTypeId: "lens4",
-          coatingId: "coat19",
-          thicknessId: "thick20",
-          price: 45
-        },
-        {
-          id: "combo12",
-          lensTypeId: "lens4",
-          coatingId: "coat19",
-          thicknessId: "thick23",
-          price: 55
-        }
+        // Initial empty array - will be populated with updated pricing
       ],
       
       addFrame: (frame) => {
@@ -605,6 +535,87 @@ export const useInventoryStore = create<InventoryState>()(
             lensPricingCombinations: updatedCombinations
           });
         }
+      },
+      
+      // New function to reset lens pricing
+      resetLensPricing: () => {
+        // Create the new pricing combinations based on the provided pricing table
+        const newPricingCombinations: LensPricingCombination[] = [
+          // Single Vision - Basic Lenses
+          { id: "sv-basic-156", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-156", price: 8 },
+          { id: "sv-basic-160", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-160", price: 18 },
+          { id: "sv-basic-167", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-167", price: 30 },
+          { id: "sv-basic-174", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-174", price: 40 },
+          
+          // Single Vision - Filter Lenses
+          { id: "sv-filter-156", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-156", price: 13 },
+          { id: "sv-filter-poly", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-poly", price: 18 },
+          { id: "sv-filter-160", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-160", price: 20 },
+          { id: "sv-filter-167", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-167", price: 38 },
+          { id: "sv-filter-174", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-174", price: 40 },
+          
+          // Single Vision - Super Filter Lenses
+          { id: "sv-superfilter-156", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-156", price: 18 },
+          { id: "sv-superfilter-poly", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-poly", price: 25 },
+          { id: "sv-superfilter-160", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-160", price: 28 },
+          { id: "sv-superfilter-167", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-167", price: 35 },
+          { id: "sv-superfilter-174", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-174", price: 40 },
+          
+          // Reading lenses - same as distance
+          // Reading - Basic Lenses
+          { id: "read-basic-156", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-156", price: 8 },
+          { id: "read-basic-160", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-160", price: 18 },
+          { id: "read-basic-167", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-167", price: 30 },
+          { id: "read-basic-174", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-174", price: 40 },
+          
+          // Reading - Filter Lenses
+          { id: "read-filter-156", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-156", price: 13 },
+          { id: "read-filter-poly", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-poly", price: 18 },
+          { id: "read-filter-160", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-160", price: 20 },
+          { id: "read-filter-167", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-167", price: 38 },
+          { id: "read-filter-174", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-174", price: 40 },
+          
+          // Reading - Super Filter Lenses
+          { id: "read-superfilter-156", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-156", price: 18 },
+          { id: "read-superfilter-poly", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-poly", price: 25 },
+          { id: "read-superfilter-160", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-160", price: 28 },
+          { id: "read-superfilter-167", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-167", price: 35 },
+          { id: "read-superfilter-174", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-174", price: 40 },
+          
+          // Progressive - Basic Lenses
+          { id: "prog-basic-156", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-156", price: 35 },
+          { id: "prog-basic-160", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-160", price: 50 },
+          { id: "prog-basic-167", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-167", price: 80 },
+          { id: "prog-basic-174", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-174", price: 100 },
+          
+          // Progressive - Filter Lenses
+          { id: "prog-filter-156", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-156", price: 50 },
+          { id: "prog-filter-poly", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-poly", price: 70 },
+          { id: "prog-filter-160", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-160", price: 85 },
+          { id: "prog-filter-167", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-167", price: 114 },
+          { id: "prog-filter-174", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-174", price: 200 },
+          
+          // Bifocal - Basic and Filter
+          { id: "bif-basic", lensTypeId: "lens4", coatingId: "basic-bif", thicknessId: "bif-basic", price: 18 },
+          { id: "bif-filter", lensTypeId: "lens4", coatingId: "filter-bif", thicknessId: "bif-basic", price: 28 },
+          
+          // Sunglasses - using same pricing as single vision
+          { id: "sun-basic-156", lensTypeId: "lens5", coatingId: "basic-sv", thicknessId: "sv-156", price: 8 },
+          { id: "sun-basic-160", lensTypeId: "lens5", coatingId: "basic-sv", thicknessId: "sv-160", price: 18 },
+          
+          // Photochromic options
+          { id: "sv-photo-156", lensTypeId: "lens2", coatingId: "photochromic-sv", thicknessId: "sv-156", price: 30 },
+          { id: "sv-photo-160", lensTypeId: "lens2", coatingId: "photochromic-sv", thicknessId: "sv-160", price: 40 },
+          { id: "read-photo-156", lensTypeId: "lens1", coatingId: "photochromic-sv", thicknessId: "sv-156", price: 30 },
+          { id: "read-photo-160", lensTypeId: "lens1", coatingId: "photochromic-sv", thicknessId: "sv-160", price: 40 },
+          { id: "prog-photo-156", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-156", price: 60 },
+          { id: "prog-photo-160", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-160", price: 90 },
+        ];
+        
+        // Update the store with the new pricing combinations
+        set({
+          lensPricingCombinations: newPricingCombinations
+        });
       }
     }),
     {

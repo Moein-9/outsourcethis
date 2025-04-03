@@ -93,3 +93,31 @@ h3, .h3 {
 .card-content-enhanced {
   padding: 1.5rem !important;
 }
+
+/* Dropdown menu improvements */
+.select-content {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  z-index: 200 !important;
+}
+
+.select-item {
+  transition: background-color 0.2s ease !important;
+}
+
+.select-item:hover {
+  background-color: #f1f5f9 !important;
+}
+
+.select-label {
+  font-weight: 600 !important;
+  color: #6366f1 !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.875rem !important;
+}
+
+.select-separator {
+  margin: 0.25rem 0 !important;
+  background-color: #e2e8f0 !important;
+}
