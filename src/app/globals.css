@@ -121,3 +121,31 @@ h3, .h3 {
   margin: 0.25rem 0 !important;
   background-color: #e2e8f0 !important;
 }
+
+/* Enhanced dropdown category styling */
+.select-category-label {
+  display: block !important;
+  margin-bottom: 0.5rem !important;
+  font-weight: 600 !important;
+  border-radius: 0.375rem !important;
+  padding: 0.25rem 0.75rem !important;
+}
+
+/* Category badges for dropdowns */
+.category-badge {
+  display: inline-block !important;
+  padding: 0.125rem 0.5rem !important;
+  border-radius: 0.25rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Make selects display properly in RTL mode */
+[dir="rtl"] .select-trigger .select-value {
+  text-align: right !important;
+}
+
+[dir="rtl"] .select-item {
+  text-align: right !important;
+}

@@ -247,6 +247,76 @@ export const LensCombinationManager: React.FC = () => {
     acc[thickness.category].push(thickness);
     return acc;
   }, {} as Record<string, LensThickness[]>);
+
+  // Category color mapping
+  const getCategoryColor = (category: string) => {
+    switch(category) {
+      case 'distance-reading':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'progressive':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'bifocal':
+        return 'bg-amber-100 text-amber-800 border-amber-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  // Category translations
+  const getCategoryName = (category: string) => {
+    switch(category) {
+      case 'distance-reading':
+        return language === 'ar' ? 'النظارات أحادية الرؤية (Single Vision)' : 'Single Vision';
+      case 'progressive':
+        return language === 'ar' ? 'النظارات متعددة البؤر (Progressive)' : 'Progressive';
+      case 'bifocal':
+        return language === 'ar' ? 'النظارات ثنائية البؤرة (Bifocal)' : 'Bifocal';
+      default:
+        return category;
+    }
+  };
+
+  // Subcategory translations and colors
+  const getSubcategoryInfo = (subcategory: string, category: string) => {
+    let name = '';
+    let color = '';
+
+    switch(subcategory) {
+      case 'basic':
+        name = language === 'ar' ? 'أساسي (Basic)' : 'Basic';
+        color = 'bg-green-50 text-green-700 border-green-100';
+        break;
+      case 'filter':
+        name = language === 'ar' ? 'فلتر (Filter)' : 'Filter';
+        color = 'bg-indigo-50 text-indigo-700 border-indigo-100';
+        break;
+      case 'super-filter':
+        name = language === 'ar' ? 'سوبر فلتر (Super Filter)' : 'Super Filter';
+        color = 'bg-violet-50 text-violet-700 border-violet-100';
+        break;
+      case 'photochromic':
+        name = language === 'ar' ? 'فوتوكروميك (Photochromic)' : 'Photochromic';
+        color = 'bg-rose-50 text-rose-700 border-rose-100';
+        break;
+      case 'standard':
+        name = language === 'ar' ? 'قياسي (Standard)' : 'Standard';
+        color = 'bg-teal-50 text-teal-700 border-teal-100';
+        break;
+      case 'thin':
+        name = language === 'ar' ? 'رفيع (Thin)' : 'Thin';
+        color = 'bg-sky-50 text-sky-700 border-sky-100';
+        break;
+      case 'ultra-thin':
+        name = language === 'ar' ? 'رفيع جداً (Ultra Thin)' : 'Ultra Thin';
+        color = 'bg-cyan-50 text-cyan-700 border-cyan-100';
+        break;
+      default:
+        name = subcategory;
+        color = 'bg-gray-50 text-gray-700 border-gray-100';
+    }
+
+    return { name, color };
+  };
   
   return (
     <div className="space-y-6" dir={dirClass}>
@@ -274,17 +344,32 @@ export const LensCombinationManager: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-white z-[200]">
                   <SelectGroup>
-                    <SelectLabel>{t('singleVision')}</SelectLabel>
+                    <SelectLabel className={`${getCategoryColor('distance-reading')} px-3 py-1 rounded-md font-medium mb-1`}>
+                      {getCategoryName('distance-reading')}
+                    </SelectLabel>
                     {lensTypes.filter(type => type.type === 'distance' || type.type === 'reading' || type.type === 'sunglasses').map((type) => (
                       <SelectItem key={type.id} value={type.id}>
                         {type.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
-                  <SelectSeparator />
+                  <SelectSeparator className="my-2" />
                   <SelectGroup>
-                    <SelectLabel>{t('multifocal')}</SelectLabel>
-                    {lensTypes.filter(type => type.type === 'progressive' || type.type === 'bifocal').map((type) => (
+                    <SelectLabel className={`${getCategoryColor('progressive')} px-3 py-1 rounded-md font-medium mb-1`}>
+                      {getCategoryName('progressive')}
+                    </SelectLabel>
+                    {lensTypes.filter(type => type.type === 'progressive').map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectSeparator className="my-2" />
+                  <SelectGroup>
+                    <SelectLabel className={`${getCategoryColor('bifocal')} px-3 py-1 rounded-md font-medium mb-1`}>
+                      {getCategoryName('bifocal')}
+                    </SelectLabel>
+                    {lensTypes.filter(type => type.type === 'bifocal').map((type) => (
                       <SelectItem key={type.id} value={type.id}>
                         {type.name}
                       </SelectItem>
@@ -309,24 +394,28 @@ export const LensCombinationManager: React.FC = () => {
                   {Object.entries(groupedCoatings).map(([category, coatings]) => (
                     <React.Fragment key={category}>
                       <SelectGroup>
-                        <SelectLabel>
-                          {category === 'distance-reading' ? t('singleVisionCoatings') : 
-                           category === 'progressive' ? t('progressiveCoatings') : 
-                           category === 'bifocal' ? t('bifocalCoatings') : category}
+                        <SelectLabel className={`${getCategoryColor(category)} px-3 py-1 rounded-md font-medium mb-1`}>
+                          {getCategoryName(category)}
                         </SelectLabel>
-                        {coatings.map(coating => (
-                          <SelectItem key={coating.id} value={coating.id} className="py-2">
-                            <div className="flex flex-col">
-                              <span>{coating.name}</span>
-                              {coating.description && (
-                                <span className="text-xs text-gray-500">{coating.description}</span>
-                              )}
-                            </div>
-                          </SelectItem>
-                        ))}
+                        {coatings.map(coating => {
+                          const subInfo = getSubcategoryInfo(coating.type || 'basic', category);
+                          return (
+                            <SelectItem key={coating.id} value={coating.id} className="py-2">
+                              <div className="flex flex-col">
+                                <span className={`${subInfo.color} px-2 py-0.5 rounded text-sm font-medium mb-0.5 inline-block w-fit`}>
+                                  {subInfo.name}
+                                </span>
+                                <span>{coating.name}</span>
+                                {coating.description && (
+                                  <span className="text-xs text-gray-500">{coating.description}</span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
                       </SelectGroup>
                       {Object.keys(groupedCoatings).indexOf(category) < Object.keys(groupedCoatings).length - 1 && (
-                        <SelectSeparator />
+                        <SelectSeparator className="my-2" />
                       )}
                     </React.Fragment>
                   ))}
@@ -349,24 +438,28 @@ export const LensCombinationManager: React.FC = () => {
                   {Object.entries(groupedThicknesses).map(([category, thicknesses]) => (
                     <React.Fragment key={category}>
                       <SelectGroup>
-                        <SelectLabel>
-                          {category === 'distance-reading' ? t('singleVisionThicknesses') : 
-                           category === 'progressive' ? t('progressiveThicknesses') : 
-                           category === 'bifocal' ? t('bifocalThicknesses') : category}
+                        <SelectLabel className={`${getCategoryColor(category)} px-3 py-1 rounded-md font-medium mb-1`}>
+                          {getCategoryName(category)}
                         </SelectLabel>
-                        {thicknesses.map(thickness => (
-                          <SelectItem key={thickness.id} value={thickness.id} className="py-2">
-                            <div className="flex flex-col">
-                              <span>{thickness.name}</span>
-                              {thickness.description && (
-                                <span className="text-xs text-gray-500">{thickness.description}</span>
-                              )}
-                            </div>
-                          </SelectItem>
-                        ))}
+                        {thicknesses.map(thickness => {
+                          const subInfo = getSubcategoryInfo(thickness.type || 'standard', category);
+                          return (
+                            <SelectItem key={thickness.id} value={thickness.id} className="py-2">
+                              <div className="flex flex-col">
+                                <span className={`${subInfo.color} px-2 py-0.5 rounded text-sm font-medium mb-0.5 inline-block w-fit`}>
+                                  {subInfo.name}
+                                </span>
+                                <span>{thickness.name}</span>
+                                {thickness.description && (
+                                  <span className="text-xs text-gray-500">{thickness.description}</span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
                       </SelectGroup>
                       {Object.keys(groupedThicknesses).indexOf(category) < Object.keys(groupedThicknesses).length - 1 && (
-                        <SelectSeparator />
+                        <SelectSeparator className="my-2" />
                       )}
                     </React.Fragment>
                   ))}
@@ -402,12 +495,12 @@ export const LensCombinationManager: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <CardTitle>{t('lensPricingCombinations')}</CardTitle>
             <div className="relative w-full md:w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
               <Input
                 placeholder={t('searchCombinations')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 bg-white"
+                className="pl-9 bg-white"
               />
             </div>
           </div>
