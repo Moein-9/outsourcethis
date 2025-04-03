@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LensTypeManager } from "@/components/LensTypeManager";
@@ -5,10 +6,9 @@ import { LensCoatingManager } from "@/components/LensCoatingManager";
 import { LensThicknessManager } from "@/components/LensThicknessManager";
 import { LensCombinationManager } from "@/components/LensCombinationManager";
 import { FrameInventory } from "@/components/FrameInventory";
-import { SunglassesInventory } from "@/components/SunglassesInventory";
 import { ContactLensInventory } from "@/components/ContactLensInventory";
 import { ServiceManager } from "@/components/ServiceManager";
-import { Glasses, Contact, Layers, Paintbrush, Ruler, Calculator, Wrench, Sun } from "lucide-react";
+import { Glasses, Contact, Layers, Paintbrush, Ruler, Calculator, Wrench } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 
 export const InventoryTabs: React.FC = () => {
@@ -25,13 +25,6 @@ export const InventoryTabs: React.FC = () => {
         >
           <Glasses className="w-4 h-4" />
           <span>{t('frames')}</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="sunglasses" 
-          className="data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
-        >
-          <Sun className="w-4 h-4" />
-          <span>{t('sunglasses')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="contactLenses" 
@@ -84,16 +77,6 @@ export const InventoryTabs: React.FC = () => {
             {t('frameManagement')}
           </h3>
           <FrameInventory />
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="sunglasses" className="mt-0">
-        <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className={`text-lg font-bold mb-4 text-orange-800 flex items-center gap-2 ${textAlignClass}`}>
-            <Sun className="w-5 h-5" />
-            {t('sunglassesManagement')}
-          </h3>
-          <SunglassesInventory />
         </div>
       </TabsContent>
       
