@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store/inventoryStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -21,25 +20,33 @@ interface LensPricingCombination {
 export const LensCombinationManager: React.FC = () => {
   const { t, language } = useLanguageStore();
   const lensTypes = useInventoryStore((state) => state.lensTypes);
-  const lensCoatings = useInventoryStore((state) => state.lensCoatings);
-  const lensThicknesses = useInventoryStore((state) => state.lensThicknesses);
+  const allLensCoatings = useInventoryStore((state) => state.lensCoatings);
+  const allLensThicknesses = useInventoryStore((state) => state.lensThicknesses);
   const getLensPricingCombinations = useInventoryStore((state) => state.getLensPricingCombinations);
   const addLensPricingCombination = useInventoryStore((state) => state.addLensPricingCombination);
   const updateLensPricingCombination = useInventoryStore((state) => state.updateLensPricingCombination);
   const deleteLensPricingCombination = useInventoryStore((state) => state.deleteLensPricingCombination);
+  
+  const lensCoatings = allLensCoatings.filter(coating => 
+    coating.category === "all" || 
+    (coating.categories && coating.categories.length > 0)
+  );
+  
+  const lensThicknesses = allLensThicknesses.filter(thickness => 
+    thickness.category === "all" || 
+    (thickness.categories && thickness.categories.length > 0)
+  );
   
   const [pricingCombinations, setPricingCombinations] = useState<LensPricingCombination[]>([]);
   const [filteredCombinations, setFilteredCombinations] = useState<LensPricingCombination[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   
-  // New combination form
   const [selectedLensType, setSelectedLensType] = useState<string>("");
   const [selectedCoating, setSelectedCoating] = useState<string>("");
   const [selectedThickness, setSelectedThickness] = useState<string>("");
   const [combinationPrice, setCombinationPrice] = useState<string>("");
   
-  // Edit form
   const [editPrice, setEditPrice] = useState<string>("");
   
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
@@ -67,8 +74,8 @@ export const LensCombinationManager: React.FC = () => {
     const lowerSearchTerm = searchTerm.toLowerCase();
     const filtered = pricingCombinations.filter((combo) => {
       const lensType = lensTypes.find(lt => lt.id === combo.lensTypeId);
-      const coating = lensCoatings.find(c => c.id === combo.coatingId);
-      const thickness = lensThicknesses.find(t => t.id === combo.thicknessId);
+      const coating = allLensCoatings.find(c => c.id === combo.coatingId);
+      const thickness = allLensThicknesses.find(t => t.id === combo.thicknessId);
       
       return (
         (lensType?.name.toLowerCase().includes(lowerSearchTerm) || false) ||
@@ -100,7 +107,6 @@ export const LensCombinationManager: React.FC = () => {
       return;
     }
     
-    // Check for existing combination
     const exists = pricingCombinations.some(
       c => c.lensTypeId === selectedLensType && 
            c.coatingId === selectedCoating && 
@@ -133,7 +139,6 @@ export const LensCombinationManager: React.FC = () => {
           description: t('combinationAdded'),
         });
         
-        // Force a refresh of pricing combinations
         setTimeout(loadPricingCombinations, 50);
         resetForm();
       }
@@ -223,11 +228,11 @@ export const LensCombinationManager: React.FC = () => {
   };
   
   const getCoatingName = (id: string) => {
-    return lensCoatings.find(c => c.id === id)?.name || t('unknown');
+    return allLensCoatings.find(c => c.id === id)?.name || t('unknown');
   };
   
   const getThicknessName = (id: string) => {
-    return lensThicknesses.find(t => t.id === id)?.name || t('unknown');
+    return allLensThicknesses.find(t => t.id === id)?.name || t('unknown');
   };
   
   return (

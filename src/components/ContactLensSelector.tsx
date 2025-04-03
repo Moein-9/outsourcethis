@@ -60,6 +60,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filterType, setFilterType] = useState<string>("all");
 
+  // Get unique brands and types from contact lenses
   const brands = [...new Set(contactLenses.map(lens => lens.brand))];
   const types = [...new Set(contactLenses.map(lens => lens.type))];
 
