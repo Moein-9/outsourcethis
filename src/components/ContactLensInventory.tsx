@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, ContactLensItem } from "@/store/inventoryStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -400,7 +399,6 @@ export const ContactLensInventory: React.FC = () => {
                       onValueChange={(value) => {
                         if (value === "other") {
                           setContactLensBrand("");
-                          setCustomBrand("");
                         } else {
                           setContactLensBrand(value);
                           setCustomBrand("");
@@ -434,7 +432,6 @@ export const ContactLensInventory: React.FC = () => {
                       onValueChange={(value) => {
                         if (value === "other") {
                           setContactLensType("");
-                          setCustomType("");
                         } else {
                           setContactLensType(value);
                           setCustomType("");
@@ -470,7 +467,6 @@ export const ContactLensInventory: React.FC = () => {
                       onValueChange={(value) => {
                         if (value === "other") {
                           setContactLensBC("");
-                          setCustomBC("");
                         } else {
                           setContactLensBC(value);
                           setCustomBC("");
@@ -504,7 +500,6 @@ export const ContactLensInventory: React.FC = () => {
                       onValueChange={(value) => {
                         if (value === "other") {
                           setContactLensDiameter("");
-                          setCustomDiameter("");
                         } else {
                           setContactLensDiameter(value);
                           setCustomDiameter("");
@@ -539,7 +534,6 @@ export const ContactLensInventory: React.FC = () => {
                     onValueChange={(value) => {
                       if (value === "other") {
                         setContactLensColor("");
-                        setCustomColor("");
                       } else {
                         setContactLensColor(value);
                         setCustomColor("");
