@@ -36,12 +36,11 @@ export const useReportInitializer = () => {
   useEffect(() => {
     // Add a listener to the invoice store to sync new invoices and refunds
     const unsubscribe = useInvoiceStore.subscribe(
+      // Only pass one argument here - this fixes the TS2554 error
       state => [state.invoices, state.refunds],
-      async (newState) => {
+      async ([newInvoices, newRefunds]) => {
         // Skip initial load
         if (!isInitialized) return;
-        
-        const [newInvoices, newRefunds] = newState;
         
         // Check if there are new invoices
         const lastInvoice = newInvoices[newInvoices.length - 1];
