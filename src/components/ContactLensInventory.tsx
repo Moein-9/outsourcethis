@@ -398,11 +398,12 @@ export const ContactLensInventory: React.FC = () => {
                     <Select 
                       value={contactLensBrand} 
                       onValueChange={(value) => {
-                        if (value !== "other") {
-                          setContactLensBrand(value);
+                        if (value === "other") {
+                          setContactLensBrand("");
                           setCustomBrand("");
                         } else {
-                          setContactLensBrand("");
+                          setContactLensBrand(value);
+                          setCustomBrand("");
                         }
                       }}
                     >
@@ -416,7 +417,7 @@ export const ContactLensInventory: React.FC = () => {
                         <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
-                    {(contactLensBrand === "other" || (!allBrands.includes(contactLensBrand) && contactLensBrand !== "")) && (
+                    {contactLensBrand === "" && (
                       <Input
                         className="mt-2"
                         placeholder={language === 'ar' ? 'أدخل اسم الماركة' : 'Enter brand name'}
@@ -431,11 +432,12 @@ export const ContactLensInventory: React.FC = () => {
                     <Select 
                       value={contactLensType} 
                       onValueChange={(value) => {
-                        if (value !== "other") {
-                          setContactLensType(value);
+                        if (value === "other") {
+                          setContactLensType("");
                           setCustomType("");
                         } else {
-                          setContactLensType("");
+                          setContactLensType(value);
+                          setCustomType("");
                         }
                       }}
                     >
@@ -449,7 +451,7 @@ export const ContactLensInventory: React.FC = () => {
                         <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
-                    {(contactLensType === "other" || (!allTypes.includes(contactLensType) && contactLensType !== "")) && (
+                    {contactLensType === "" && (
                       <Input
                         className="mt-2"
                         placeholder={language === 'ar' ? 'أدخل النوع' : 'Enter type'}
@@ -466,11 +468,12 @@ export const ContactLensInventory: React.FC = () => {
                     <Select 
                       value={contactLensBC} 
                       onValueChange={(value) => {
-                        if (value !== "other") {
-                          setContactLensBC(value);
+                        if (value === "other") {
+                          setContactLensBC("");
                           setCustomBC("");
                         } else {
-                          setContactLensBC("");
+                          setContactLensBC(value);
+                          setCustomBC("");
                         }
                       }}
                     >
@@ -484,7 +487,7 @@ export const ContactLensInventory: React.FC = () => {
                         <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
-                    {(contactLensBC === "other" || (!COMMON_BC_VALUES.includes(contactLensBC) && contactLensBC !== "")) && (
+                    {contactLensBC === "" && (
                       <Input
                         className="mt-2"
                         placeholder={language === 'ar' ? 'أدخل BC' : 'Enter BC'}
@@ -499,11 +502,12 @@ export const ContactLensInventory: React.FC = () => {
                     <Select 
                       value={contactLensDiameter} 
                       onValueChange={(value) => {
-                        if (value !== "other") {
-                          setContactLensDiameter(value);
+                        if (value === "other") {
+                          setContactLensDiameter("");
                           setCustomDiameter("");
                         } else {
-                          setContactLensDiameter("");
+                          setContactLensDiameter(value);
+                          setCustomDiameter("");
                         }
                       }}
                     >
@@ -517,7 +521,7 @@ export const ContactLensInventory: React.FC = () => {
                         <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
-                    {(contactLensDiameter === "other" || (!COMMON_DIAMETER_VALUES.includes(contactLensDiameter) && contactLensDiameter !== "")) && (
+                    {contactLensDiameter === "" && (
                       <Input
                         className="mt-2"
                         placeholder={language === 'ar' ? 'أدخل القطر' : 'Enter diameter'}
@@ -533,11 +537,12 @@ export const ContactLensInventory: React.FC = () => {
                   <Select 
                     value={contactLensColor} 
                     onValueChange={(value) => {
-                      if (value !== "other") {
-                        setContactLensColor(value);
+                      if (value === "other") {
+                        setContactLensColor("");
                         setCustomColor("");
                       } else {
-                        setContactLensColor("");
+                        setContactLensColor(value);
+                        setCustomColor("");
                       }
                     }}
                   >
@@ -552,7 +557,7 @@ export const ContactLensInventory: React.FC = () => {
                       <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                     </SelectContent>
                   </Select>
-                  {(contactLensColor === "other" || (!COMMON_COLORS.includes(contactLensColor) && contactLensColor !== "" && contactLensColor !== "none")) && (
+                  {contactLensColor === "" && (
                     <Input
                       className="mt-2"
                       placeholder={language === 'ar' ? 'أدخل اللون' : 'Enter color'}
