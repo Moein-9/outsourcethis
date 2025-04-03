@@ -12,7 +12,6 @@ import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 import { LensDebugger } from "./components/LensDebugger";
 import { useInventoryStore } from "./store/inventoryStore";
 import { useEffect } from "react";
-import { toast } from "sonner";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient({
@@ -39,12 +38,7 @@ const App = () => {
     // Log current coatings for debugging
     console.log("Current lens coatings:", lensCoatings);
     
-    // Add a toast to help with debugging
-    if (process.env.NODE_ENV === 'development') {
-      setTimeout(() => {
-        toast.info("Debug: App initialized with " + lensCoatings.length + " lens coatings");
-      }, 1000);
-    }
+    // Remove the debug toast that was showing the message
   }, []);
   
   return (
