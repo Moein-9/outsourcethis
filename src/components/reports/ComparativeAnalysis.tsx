@@ -1,6 +1,5 @@
-
-import React, { useState, useEffect } from "react";
-import { format, subDays, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
+import React, { useState, useEffect, useMemo } from "react";
+import { format, subDays, startOfMonth, endOfMonth, parseISO, isWithinInterval, differenceInDays } from "date-fns";
 import { useInvoiceStore, Invoice, Refund } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { Button } from "@/components/ui/button";
@@ -20,18 +19,30 @@ import {
   XAxis, 
   YAxis, 
   CartesianGrid, 
-  Tooltip, 
+  Tooltip as RechartsTooltip, 
   Legend, 
   ResponsiveContainer,
   BarChart,
-  Bar
+  Bar,
+  Cell
 } from "recharts";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BarChart3, LineChart as LineChartIcon, MapPin, Store, Phone, RefreshCcw, CreditCard, Receipt } from "lucide-react";
+import { 
+  BarChart3, 
+  LineChart as LineChartIcon, 
+  MapPin, 
+  Store, 
+  Phone, 
+  RefreshCcw, 
+  CreditCard, 
+  Receipt, 
+  Calendar,
+  Info
+} from "lucide-react";
 import { PrintService } from "@/utils/PrintService";
 import { PrintReportButton } from "./PrintReportButton";
-import { MoenLogo } from "@/assets/logo";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const STORE_INFO = {
   name: {
@@ -46,6 +57,14 @@ const STORE_INFO = {
   phone: "+965 1234 5678"
 };
 
+const CHART_COLORS = {
+  sales: "#22c55e",
+  refunds: "#ef4444",
+  lens: "#8B5CF6",
+  frame: "#F97316",
+  coating: "#0EA5E9"
+};
+
 interface ComparativeAnalysisProps {
   className?: string;
 }
@@ -53,9 +72,15 @@ interface ComparativeAnalysisProps {
 const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) => {
   const invoiceStore = useInvoiceStore();
   const { language } = useLanguageStore();
-  const invoices: Invoice[] = invoiceStore?.invoices || [];
-  const refunds: Refund[] = invoiceStore?.refunds || [];
   const isRtl = language === 'ar';
+  
+  const invoices: Invoice[] = useMemo(() => {
+    return invoiceStore?.invoices || [];
+  }, [invoiceStore?.invoices]);
+  
+  const refunds: Refund[] = useMemo(() => {
+    return invoiceStore?.refunds || [];
+  }, [invoiceStore?.refunds]);
   
   const [date, setDate] = useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -70,6 +95,7 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
   const [averageDailySales, setAverageDailySales] = useState(0);
   const [transactionCount, setTransactionCount] = useState(0);
   const [refundCount, setRefundCount] = useState(0);
+  const [selectedBarIndex, setSelectedBarIndex] = useState(-1);
   
   const translations = {
     comparativeAnalysis: language === 'ar' ? "التحليل المقارن | Comparative Analysis" : "Comparative Analysis | التحليل المقارن",
@@ -81,7 +107,7 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
     totalSales: language === 'ar' ? "إجمالي المبيعات | Total Sales" : "Total Sales | إجمالي المبيعات",
     averageDailySales: language === 'ar' ? "متوسط المبيعات اليومية | Average Daily Sales" : "Average Daily Sales | متوسط المبيعات اليومية",
     transactionCount: language === 'ar' ? "عدد المعاملات | Transaction Count" : "Transaction Count | عدد المعاملات",
-    salesTrend: language === 'ar' ? "اتجاه المبيعات | Sales Trend" : "Sales Trend | اتجاه المبيعات",
+    salesTrend: language === 'ar' ? "اتجاه المبيعات | Sales Trend" : "Sales Trend | اتجاه المبي��ات",
     productSales: language === 'ar' ? "مبيعات المنتجات | Product Sales" : "Product Sales | مبيعات المنتجات",
     lensSales: language === 'ar' ? "مبيعات العدسات | Lens Sales" : "Lens Sales | مبيعات العدسات",
     frameSales: language === 'ar' ? "مبيعات الإطارات | Frame Sales" : "Frame Sales | مبيعات الإطارات",
@@ -95,23 +121,23 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
   };
   
   useEffect(() => {
-    let startDate: Date;
-    let endDate: Date;
-    
     if (selectedTimeRange === "week") {
-      endDate = new Date();
-      startDate = subDays(endDate, 7);
+      const endDate = new Date();
+      const startDate = subDays(endDate, 7);
       setDate({ from: startDate, to: endDate });
     } else if (selectedTimeRange === "month") {
-      startDate = startOfMonth(new Date());
-      endDate = endOfMonth(new Date());
+      const currentDate = new Date();
+      const startDate = startOfMonth(currentDate);
+      const endDate = endOfMonth(currentDate);
       setDate({ from: startDate, to: endDate });
-    } else if (date?.from && date?.to) {
-      startDate = date.from;
-      endDate = date.to;
-    } else {
-      return;
     }
+  }, [selectedTimeRange]);
+  
+  useEffect(() => {
+    if (!date?.from || !date?.to) return;
+    
+    const startDate = date.from;
+    const endDate = date.to;
     
     const filteredInvoices = invoices.filter(invoice => {
       const invoiceDate = parseISO(invoice.createdAt);
@@ -123,27 +149,39 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
       return isWithinInterval(refundDate, { start: startDate, end: endDate });
     });
     
-    const dailySales: { [key: string]: number } = {};
+    const dailySales: { [key: string]: { sales: number, refunds: number } } = {};
     let total = 0;
     let refundTotal = 0;
     
+    const dateRange = Math.abs(differenceInDays(startDate, endDate)) + 1;
+    for (let i = 0; i < dateRange; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      const dateKey = format(currentDate, 'yyyy-MM-dd');
+      dailySales[dateKey] = { sales: 0, refunds: 0 };
+    }
+    
     filteredInvoices.forEach(invoice => {
       const dateKey = format(parseISO(invoice.createdAt), 'yyyy-MM-dd');
-      dailySales[dateKey] = (dailySales[dateKey] || 0) + invoice.total;
+      dailySales[dateKey].sales = (dailySales[dateKey]?.sales || 0) + invoice.total;
       total += invoice.total;
     });
     
-    // Calculate refund totals
     filteredRefunds.forEach(refund => {
       const dateKey = format(parseISO(refund.date), 'yyyy-MM-dd');
-      dailySales[dateKey] = (dailySales[dateKey] || 0) - refund.amount; // Subtract refunds from daily sales
+      dailySales[dateKey].refunds = (dailySales[dateKey]?.refunds || 0) + refund.amount;
       refundTotal += refund.amount;
     });
     
-    const chartData = Object.entries(dailySales).map(([date, sales]) => ({
-      date,
-      sales,
-    }));
+    const chartData = Object.entries(dailySales)
+      .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+      .map(([date, data]) => ({
+        date,
+        displayDate: format(new Date(date), 'MMM dd'),
+        sales: data.sales,
+        refunds: data.refunds,
+        net: data.sales - data.refunds
+      }));
     
     setSalesData(chartData);
     
@@ -152,9 +190,9 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
     const coatingSales = filteredInvoices.reduce((sum, invoice) => sum + invoice.coatingPrice, 0);
     
     setProductSalesData([
-      { name: translations.lensSales, sales: lensSales },
-      { name: translations.frameSales, sales: frameSales },
-      { name: translations.coatingSales, sales: coatingSales },
+      { name: language === 'ar' ? 'العدسات' : 'Lenses', sales: lensSales, color: CHART_COLORS.lens },
+      { name: language === 'ar' ? 'الإطارات' : 'Frames', sales: frameSales, color: CHART_COLORS.frame },
+      { name: language === 'ar' ? 'الطلاءات' : 'Coatings', sales: coatingSales, color: CHART_COLORS.coating },
     ]);
     
     setTotalSales(total);
@@ -163,14 +201,21 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
     setTransactionCount(filteredInvoices.length);
     setRefundCount(filteredRefunds.length);
     
-    const numberOfDays = Math.ceil(
+    const numberOfDays = Math.max(1, Math.ceil(
       (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
-    );
+    ));
     setAverageDailySales((total - refundTotal) / numberOfDays);
-  }, [date, invoices, refunds, selectedTimeRange, translations]);
+  }, [date, invoices, refunds, language]);
   
   const handleTimeRangeChange = (value: "week" | "month" | "custom") => {
     setSelectedTimeRange(value);
+  };
+  
+  const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
+    if (newDateRange) {
+      setDate(newDateRange);
+      setSelectedTimeRange("custom");
+    }
   };
   
   const handlePrintReport = () => {
@@ -215,7 +260,6 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
       </div>
     `;
     
-    // Add refund section
     const refundAnalysis = `
       <div class="section-title">${language === 'ar' ? 'معلومات المستردات | Refund Information' : 'Refund Information | معلومات المستردات'}</div>
       <div class="summary-item">
@@ -445,115 +489,91 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
     });
   };
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat(language === 'ar' ? 'ar-KW' : 'en-KW', { 
+      style: 'currency', 
+      currency: 'KWD',
+      maximumFractionDigits: 2 
+    }).format(value);
+  };
+  
+  const handleBarClick = (data: any, index: number) => {
+    setSelectedBarIndex(index === selectedBarIndex ? -1 : index);
+  };
+  
+  const hasData = salesData.length > 0;
+  
   return (
-    <div className={`space-y-4 ${className} ${isRtl ? 'rtl' : 'ltr'}`} style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+    <div 
+      className={`space-y-4 ${className}`} 
+      style={{ direction: isRtl ? 'rtl' : 'ltr' }}
+    >
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>{translations.comparativeAnalysis}</span>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <span className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              {translations.comparativeAnalysis}
+            </span>
             <div className="hidden sm:flex items-center text-sm text-muted-foreground gap-1">
               <Store className="h-4 w-4" />
               <span>{STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}</span>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="pl-2 pb-2">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <Select value={selectedTimeRange} onValueChange={handleTimeRangeChange}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder={translations.timeRange} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="week">{translations.lastWeek}</SelectItem>
-                <SelectItem value="month">{translations.lastMonth}</SelectItem>
-                <SelectItem value="custom">{translations.customRange}</SelectItem>
-              </SelectContent>
-            </Select>
-            {selectedTimeRange === "custom" && (
+        <CardContent className="pb-3">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <div className="w-full sm:w-auto">
+              <Select value={selectedTimeRange} onValueChange={handleTimeRangeChange}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder={translations.timeRange} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="week">{translations.lastWeek}</SelectItem>
+                  <SelectItem value="month">{translations.lastMonth}</SelectItem>
+                  <SelectItem value="custom">{translations.customRange}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="w-full sm:w-auto">
               <DatePicker
                 date={date}
-                onSelect={setDate}
+                onSelect={handleDateRangeChange}
                 defaultMonth={date?.from}
                 className="w-full sm:w-auto"
               />
-            )}
-            <PrintReportButton onPrint={handlePrintReport} className="mt-2 sm:mt-0 w-full sm:w-auto" />
+            </div>
+            
+            <div className="w-full sm:w-auto sm:ml-auto">
+              <PrintReportButton 
+                onPrint={handlePrintReport} 
+                className="w-full sm:w-auto"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <LineChartIcon className="h-4 w-4" />
-              {translations.salesTrend}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-1 sm:px-4">
-            {salesData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={salesData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" angle={-45} textAnchor="end" height={50} />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="sales" stroke="#8884d8" activeDot={{ r: 8 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center py-4">
-                {translations.noDataAvailable}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              {translations.productSales}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-1 sm:px-4">
-            {productSalesData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={productSalesData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="sales" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center py-4">
-                {translations.noDataAvailable}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-      
       <Card>
-        <CardHeader>
-          <CardTitle>{translations.totalSales}</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2">
+            <Receipt className="h-5 w-5" />
+            {translations.totalSales}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="p-4 border rounded-lg bg-white shadow-sm">
               <p className="text-sm font-semibold mb-1">{translations.totalSales}</p>
               <p className="text-3xl font-bold">
-                {totalSales.toFixed(2)} {translations.currency}
+                {formatCurrency(totalSales)}
               </p>
             </div>
             <div className="p-4 border rounded-lg bg-white shadow-sm">
               <p className="text-sm font-semibold mb-1">{translations.averageDailySales}</p>
               <p className="text-3xl font-bold">
-                {averageDailySales.toFixed(2)} {translations.currency}
+                {formatCurrency(averageDailySales)}
               </p>
             </div>
             <div className="p-4 border rounded-lg bg-white shadow-sm">
@@ -562,7 +582,6 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
             </div>
           </div>
           
-          {/* Added Refund and Net Revenue Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 border rounded-lg bg-white shadow-sm border-red-200">
               <div className="flex items-center gap-1 text-sm font-semibold mb-1 text-red-600">
@@ -570,7 +589,7 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
                 <p>{translations.totalRefunds}</p>
               </div>
               <p className="text-3xl font-bold text-red-600">
-                -{totalRefunds.toFixed(2)} {translations.currency}
+                -{formatCurrency(totalRefunds)}
               </p>
               <p className="text-xs text-gray-500 mt-1">{translations.refundCount}: {refundCount}</p>
             </div>
@@ -580,12 +599,185 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
                 <p>{translations.netRevenue}</p>
               </div>
               <p className="text-3xl font-bold text-green-600">
-                {netRevenue.toFixed(2)} {translations.currency}
+                {formatCurrency(netRevenue)}
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <LineChartIcon className="h-5 w-5" />
+                {translations.salesTrend}
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Info className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{language === 'ar' 
+                      ? 'انقر على النقاط لعرض التفاصيل' 
+                      : 'Click on dots to see details'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {hasData ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart 
+                  data={salesData}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 30 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="displayDate" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={60}
+                    tickMargin={15}
+                    interval={0}
+                    reversed={isRtl}
+                  />
+                  <YAxis />
+                  <RechartsTooltip 
+                    formatter={(value: number) => formatCurrency(value)}
+                    labelFormatter={(label) => format(new Date(salesData.find(item => item.displayDate === label)?.date || new Date()), 'PPP')}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="sales" 
+                    name={language === 'ar' ? 'المبيعات' : 'Sales'}
+                    stroke={CHART_COLORS.sales}
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                    activeDot={{ r: 8, onClick: (e: any) => console.log('clicked', e) }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="refunds" 
+                    name={language === 'ar' ? 'المستردات' : 'Refunds'}
+                    stroke={CHART_COLORS.refunds} 
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="net" 
+                    name={language === 'ar' ? 'صافي' : 'Net'}
+                    stroke="#6366f1" 
+                    strokeWidth={3}
+                    dot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[300px]">
+                <p className="text-center text-muted-foreground">
+                  {translations.noDataAvailable}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                {translations.productSales}
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Info className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{language === 'ar' 
+                      ? 'انقر على الأعمدة لعرض التفاصيل' 
+                      : 'Click on bars to see details'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {productSalesData.length > 0 && productSalesData.some(item => item.sales > 0) ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart 
+                  data={productSalesData} 
+                  margin={{ top: 20, right: 30, left: 0, bottom: 30 }}
+                  layout={isRtl ? "vertical" : "horizontal"}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  {isRtl ? (
+                    <>
+                      <YAxis 
+                        dataKey="name" 
+                        type="category" 
+                        axisLine={false}
+                        tickLine={false}
+                        width={80}
+                      />
+                      <XAxis 
+                        type="number"
+                        domain={[0, 'dataMax']}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false}
+                        tickLine={false}
+                        interval={0}
+                      />
+                      <YAxis />
+                    </>
+                  )}
+                  <RechartsTooltip 
+                    formatter={(value: number) => formatCurrency(value)}
+                  />
+                  <Bar 
+                    dataKey="sales" 
+                    name={language === 'ar' ? 'المبيعات' : 'Sales'}
+                    radius={[4, 4, 0, 0]}
+                    onClick={handleBarClick}
+                  >
+                    {productSalesData.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={entry.color}
+                        stroke={entry.color}
+                        opacity={selectedBarIndex === -1 || selectedBarIndex === index ? 1 : 0.5}
+                        strokeWidth={selectedBarIndex === index ? 2 : 0}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[300px]">
+                <p className="text-center text-muted-foreground">
+                  {translations.noDataAvailable}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
