@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store/inventoryStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -10,7 +9,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { PhotochromicColorSelector } from "./PhotochromicColorSelector";
-import { Check, Eye } from "lucide-react";
 
 interface LensSectionProps {
   selectedLensType: LensType | null;
