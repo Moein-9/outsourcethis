@@ -59,6 +59,21 @@ export const ContactLensCard: React.FC<ContactLensCardProps> = ({ lens, onEdit, 
                         brandColorClass.includes('cyan') ? 'text-cyan-600' :
                         'text-orange-600';
   
+  // Function to extract appropriate language part from bilingual string
+  const extractLocalizedText = (text: string | undefined): string => {
+    if (!text) return "";
+    
+    // Check if the text contains a separator indicating it's bilingual
+    if (text.includes(' | ')) {
+      const [english, arabic] = text.split(' | ');
+      return language === 'ar' ? arabic : english;
+    }
+    
+    return text;
+  };
+
+  const displayColor = lens.color ? extractLocalizedText(lens.color) : "";
+  
   return (
     <Card className={`overflow-hidden hover:shadow-md transition-all duration-200 border bg-gradient-to-r ${brandColorClass}`}>
       <CardHeader className="p-4 border-b">
@@ -70,7 +85,7 @@ export const ContactLensCard: React.FC<ContactLensCardProps> = ({ lens, onEdit, 
             </CardTitle>
             <CardDescription className="mt-1 flex items-center gap-1">
               {lens.price.toFixed(2)} KWD
-              {lens.color && <span className={`text-xs ${textColorClass}`}>| {lens.color}</span>}
+              {displayColor && <span className={`text-xs ${textColorClass}`}>| {displayColor}</span>}
             </CardDescription>
           </div>
           <Badge variant={lens.qty > 5 ? "outline" : "destructive"} className={`text-xs ${lens.qty > 5 ? textColorClass : ''}`}>
