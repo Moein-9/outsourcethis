@@ -334,6 +334,17 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                         </span>
                       </div>
                       
+                      <div className="flex items-center justify-between mt-1 p-1 bg-gray-50 rounded border border-gray-200">
+                        <span className="text-xs">{isRtl ? "عينة | Sample" : "Sample | عينة"}</span>
+                        <div 
+                          className="w-4 h-4 rounded-full border border-gray-300" 
+                          style={{ 
+                            backgroundColor: getColorStyle(coatColor),
+                            printColorAdjust: 'exact',
+                            WebkitPrintColorAdjust: 'exact' 
+                          }} 
+                        />
+                      </div>
                     </div>
                   )}
                 </div>

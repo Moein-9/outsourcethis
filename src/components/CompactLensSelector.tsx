@@ -78,17 +78,10 @@ export const CompactLensSelector: React.FC<CompactLensSelectorProps> = ({
     return "distance-reading"; // Default fallback
   };
 
-  // Get available coatings based on active tab - update to use categories field
+  // Get available coatings based on active tab
   const getAvailableCoatings = (): LensCoating[] => {
     const category = getLensCategoryForCoatings(activeTab);
-    
-    // Filter coatings that have either:
-    // 1. category === "all", or
-    // 2. categories array that includes the current category
-    return lensCoatings.filter(coating => 
-      coating.category === "all" || 
-      (coating.categories && coating.categories.includes(category))
-    );
+    return lensCoatings.filter(coating => coating.category === category);
   };
 
   // Category colors
