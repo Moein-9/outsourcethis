@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -6,7 +7,7 @@ export interface Payment {
   amount: number;
   method: string;
   date: string;
-  authNumber?: string;
+  authNumber?: string; // Added for card payment authorization numbers
 }
 
 export interface Refund {
@@ -39,7 +40,7 @@ export interface Invoice {
   coatingPrice: number;
   coatingColor?: string;
   
-  thickness: string;
+  thickness: string; // Added the missing thickness property
   thicknessPrice: number;
   
   frameBrand: string;
@@ -168,13 +169,14 @@ export const useInvoiceStore = create<InvoiceState>()(
         const remaining = Math.max(0, invoice.total - invoice.deposit);
         const isPaid = remaining === 0;
         
+        // Extract auth number if it exists
         const { authNumber, workOrderId, ...restInvoice } = invoice as (typeof invoice & { authNumber?: string, workOrderId?: string });
         
         const initialPayment: Payment = {
           amount: invoice.deposit,
           method: invoice.paymentMethod,
           date: createdAt,
-          authNumber: authNumber
+          authNumber: authNumber // Add auth number to payment
         };
         
         const payments = invoice.deposit > 0 ? [initialPayment] : [];
@@ -189,9 +191,9 @@ export const useInvoiceStore = create<InvoiceState>()(
               remaining,
               isPaid,
               payments,
-              authNumber,
-              workOrderId,
-              isPickedUp: false
+              authNumber, // Store auth number at invoice level too
+              workOrderId, // Store the work order ID if provided
+              isPickedUp: false // Initialize as not picked up
             }
           ]
         }));
@@ -206,13 +208,15 @@ export const useInvoiceStore = create<InvoiceState>()(
               const remainingAmount = invoice.remaining;
               const method = paymentMethod || invoice.paymentMethod;
               
+              // Create a new payment record for the remaining amount
               const newPayment: Payment = {
                 amount: remainingAmount,
                 method: method,
                 date: new Date().toISOString(),
-                authNumber: authNumber
+                authNumber: authNumber // Add auth number to payment
               };
               
+              // Get existing payments or create empty array if none exist
               const existingPayments = invoice.payments || [];
               
               return { 
@@ -222,7 +226,7 @@ export const useInvoiceStore = create<InvoiceState>()(
                 deposit: invoice.total,
                 paymentMethod: method,
                 payments: [...existingPayments, newPayment],
-                authNumber: authNumber || invoice.authNumber
+                authNumber: authNumber || invoice.authNumber // Update or retain auth number
               };
             }
             return invoice;
@@ -234,6 +238,7 @@ export const useInvoiceStore = create<InvoiceState>()(
         const pickedUpAt = new Date().toISOString();
         
         if (isInvoice) {
+          // Mark invoice as picked up
           set((state) => ({
             invoices: state.invoices.map(invoice => {
               if (invoice.invoiceId === id) {
@@ -247,6 +252,7 @@ export const useInvoiceStore = create<InvoiceState>()(
             })
           }));
           
+          // Also mark associated work order as picked up if it exists
           const invoice = get().invoices.find(inv => inv.invoiceId === id);
           if (invoice?.workOrderId) {
             set((state) => ({
@@ -263,6 +269,7 @@ export const useInvoiceStore = create<InvoiceState>()(
             }));
           }
         } else {
+          // Mark work order as picked up
           set((state) => ({
             workOrders: state.workOrders.map(wo => {
               if (wo.id === id) {
@@ -276,6 +283,7 @@ export const useInvoiceStore = create<InvoiceState>()(
             })
           }));
           
+          // Also mark associated invoice as picked up if it exists
           const relatedInvoice = get().invoices.find(inv => inv.workOrderId === id);
           if (relatedInvoice) {
             set((state) => ({
@@ -298,13 +306,16 @@ export const useInvoiceStore = create<InvoiceState>()(
         set((state) => ({
           invoices: state.invoices.map(invoice => {
             if (invoice.invoiceId === invoiceId) {
+              // Get existing payments or create empty array if none exist
               const existingPayments = invoice.payments || [];
               
+              // Create a new payment record
               const newPayment: Payment = {
                 ...payment,
                 date: new Date().toISOString()
               };
               
+              // Calculate new remaining amount
               const newDeposit = existingPayments.reduce((sum, p) => sum + p.amount, 0) + payment.amount;
               const newRemaining = Math.max(0, invoice.total - newDeposit);
               const isPaid = newRemaining === 0;
@@ -315,7 +326,7 @@ export const useInvoiceStore = create<InvoiceState>()(
                 remaining: newRemaining,
                 deposit: newDeposit,
                 payments: [...existingPayments, newPayment],
-                authNumber: payment.authNumber || invoice.authNumber
+                authNumber: payment.authNumber || invoice.authNumber // Update auth number if provided
               };
             }
             return invoice;
@@ -367,7 +378,7 @@ export const useInvoiceStore = create<InvoiceState>()(
             amount: invoice.deposit,
             method: invoice.paymentMethod,
             date: invoice.createdAt,
-            authNumber: (invoice as any).authNumber
+            authNumber: (invoice as any).authNumber // Add auth number if exists
           };
           
           invoiceToAdd = {
@@ -392,7 +403,7 @@ export const useInvoiceStore = create<InvoiceState>()(
               ...workOrder, 
               id, 
               createdAt,
-              isPickedUp: false
+              isPickedUp: false // Initialize as not picked up
             }
           ]
         }));
@@ -404,12 +415,15 @@ export const useInvoiceStore = create<InvoiceState>()(
         set((state) => ({
           invoices: state.invoices.map((invoice) => {
             if (invoice.invoiceId === updatedInvoice.invoiceId) {
+              // Ensure the edit history is preserved
               const editHistory = updatedInvoice.editHistory || invoice.editHistory || [];
               
+              // If lastEditedAt is new, add to edit history if not already tracked
               if (updatedInvoice.lastEditedAt && 
                   (!invoice.lastEditedAt || 
                    new Date(updatedInvoice.lastEditedAt).getTime() !== new Date(invoice.lastEditedAt || '').getTime())) {
                 
+                // Only add new history entry if it doesn't exist already
                 const historyExists = editHistory.some(
                   h => new Date(h.timestamp).getTime() === new Date(updatedInvoice.lastEditedAt || '').getTime()
                 );
@@ -436,12 +450,15 @@ export const useInvoiceStore = create<InvoiceState>()(
         set((state) => ({
           workOrders: state.workOrders.map((workOrder) => {
             if (workOrder.id === updatedWorkOrder.id) {
+              // Ensure the edit history is preserved
               const editHistory = updatedWorkOrder.editHistory || workOrder.editHistory || [];
               
+              // If lastEditedAt is new, add to edit history if not already tracked
               if (updatedWorkOrder.lastEditedAt && 
                   (!workOrder.lastEditedAt || 
                    new Date(updatedWorkOrder.lastEditedAt).getTime() !== new Date(workOrder.lastEditedAt || '').getTime())) {
                 
+                // Only add new history entry if it doesn't exist already
                 const historyExists = editHistory.some(
                   h => new Date(h.timestamp).getTime() === new Date(updatedWorkOrder.lastEditedAt || '').getTime()
                 );
@@ -473,9 +490,12 @@ export const useInvoiceStore = create<InvoiceState>()(
           return undefined;
         }
         
+        // Find any associated invoice
         const relatedInvoice = get().invoices.find(inv => inv.workOrderId === workOrderId);
         
+        // Check if there are payments to refund
         if (relatedInvoice && relatedInvoice.deposit > 0) {
+          // Process a refund if there was a deposit
           const refundId = get().processRefund(
             relatedInvoice.invoiceId,
             relatedInvoice.deposit,
@@ -484,6 +504,7 @@ export const useInvoiceStore = create<InvoiceState>()(
             'Automatic refund due to order deletion'
           );
           
+          // Mark workOrder as archived
           set((state) => ({
             workOrders: state.workOrders.map(wo => {
               if (wo.id === workOrderId) {
@@ -498,6 +519,7 @@ export const useInvoiceStore = create<InvoiceState>()(
             })
           }));
           
+          // If there's a related invoice, mark it as archived too
           if (relatedInvoice) {
             set((state) => ({
               invoices: state.invoices.map(inv => {
@@ -507,6 +529,7 @@ export const useInvoiceStore = create<InvoiceState>()(
                     isArchived: true,
                     archivedAt: now,
                     archiveReason: reason || 'Order deleted',
+                    // Clear remaining payments
                     remaining: 0
                   };
                 }
@@ -517,6 +540,7 @@ export const useInvoiceStore = create<InvoiceState>()(
           
           return refundId;
         } else {
+          // No deposit to refund, just mark as archived
           set((state) => ({
             workOrders: state.workOrders.map(wo => {
               if (wo.id === workOrderId) {
@@ -531,6 +555,7 @@ export const useInvoiceStore = create<InvoiceState>()(
             })
           }));
           
+          // If there's a related invoice, mark it as archived too
           if (relatedInvoice) {
             set((state) => ({
               invoices: state.invoices.map(inv => {
@@ -540,6 +565,7 @@ export const useInvoiceStore = create<InvoiceState>()(
                     isArchived: true,
                     archivedAt: now,
                     archiveReason: reason || 'Order deleted',
+                    // Clear remaining payments
                     remaining: 0
                   };
                 }
@@ -548,7 +574,7 @@ export const useInvoiceStore = create<InvoiceState>()(
             }));
           }
           
-          return undefined;
+          return undefined; // No refund was processed
         }
       },
       
@@ -561,6 +587,7 @@ export const useInvoiceStore = create<InvoiceState>()(
         const refundId = `RF${Date.now()}`;
         const refundDate = new Date().toISOString();
         
+        // Create a new refund record
         const newRefund: Refund = {
           refundId,
           amount: refundAmount,
@@ -571,6 +598,7 @@ export const useInvoiceStore = create<InvoiceState>()(
           associatedInvoiceId: invoiceId
         };
         
+        // Update the invoice with refund information
         const updatedInvoice: Invoice = {
           ...invoice,
           isRefunded: true,
@@ -581,6 +609,7 @@ export const useInvoiceStore = create<InvoiceState>()(
           refundId
         };
         
+        // If there's a related work order, update it as well
         const workOrder = invoice.workOrderId ? 
           get().workOrders.find(wo => wo.id === invoice.workOrderId) : undefined;
         
@@ -592,6 +621,7 @@ export const useInvoiceStore = create<InvoiceState>()(
           );
         }
         
+        // Update the store
         set(state => ({
           refunds: [...state.refunds, newRefund],
           invoices: state.invoices.map(inv => 

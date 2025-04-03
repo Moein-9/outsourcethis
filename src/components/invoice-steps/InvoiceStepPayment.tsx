@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -8,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { 
   BadgePercent, Banknote, CreditCard, Check,
-  CreditCard as CardIcon, Save
+  CreditCard as CardIcon, Save, RefreshCw
 } from "lucide-react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const InvoiceStepPayment: React.FC = () => {
+  const navigate = useNavigate();
   const { t, language } = useLanguageStore();
   const isRtl = language === 'ar';
   const { 
@@ -281,7 +282,7 @@ export const InvoiceStepPayment: React.FC = () => {
           <div 
             className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${
               paymentMethod === (isRtl ? "كي نت" : "KNET")
-                ? "border-primary bg-primary/5 shadow-sm"
+                ? "border-primary bg-primary/5 shadow-sm" 
                 : "hover:border-primary/30 hover:bg-muted/10"
             }`}
             onClick={() => selectPaymentMethod(isRtl ? "كي نت" : "KNET")}

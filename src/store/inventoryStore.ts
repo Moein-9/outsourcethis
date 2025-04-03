@@ -170,22 +170,6 @@ export const useInventoryStore = create<InventoryState>()(
           description: "Filter coating for progressive lenses", 
           category: "progressive" 
         },
-        // NEW: Basic Pro coating for Progressive
-        { 
-          id: "basic-pro-prog", 
-          name: "Basic Pro (عادي برو)", 
-          price: 0, 
-          description: "Premium basic coating for progressive lenses", 
-          category: "progressive" 
-        },
-        // NEW: Filter Pro coating for Progressive
-        { 
-          id: "filter-pro-prog", 
-          name: "Filter Pro (فلتر برو)", 
-          price: 0, 
-          description: "Premium filter coating for progressive lenses", 
-          category: "progressive" 
-        },
         
         // Basic lens coatings for Bifocal
         { 
@@ -262,14 +246,6 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "prog-167", name: "1.67", price: 0, description: "Super thin lens for progressive (1.67)", category: "progressive" },
         { id: "prog-174", name: "1.74", price: 0, description: "Ultra thin lens for progressive (1.74)", category: "progressive" },
         { id: "prog-poly", name: "Polycarbonate", price: 0, description: "Polycarbonate material for progressive", category: "progressive" },
-        
-        // NEW: Progressive Pro thicknesses
-        { id: "prog-156-pro", name: "1.56 Pro", price: 0, description: "Professional standard thickness (1.56)", category: "progressive" },
-        { id: "prog-159-pro", name: "1.59 Pro", price: 0, description: "Professional medium thickness (1.59)", category: "progressive" },
-        { id: "prog-160-pro", name: "1.60 Pro", price: 0, description: "Professional thin lens (1.60)", category: "progressive" },
-        { id: "prog-167-pro", name: "1.67 Pro", price: 0, description: "Professional super thin lens (1.67)", category: "progressive" },
-        { id: "prog-174-pro", name: "1.74 Pro", price: 0, description: "Professional ultra thin lens (1.74)", category: "progressive" },
-        { id: "prog-poly-pro", name: "Poly Pro", price: 0, description: "Professional polycarbonate material", category: "progressive" },
         
         // Bifocal thicknesses
         { id: "bif-basic", name: "Basic", price: 0, description: "Standard thickness for bifocal", category: "bifocal" },
@@ -667,20 +643,6 @@ export const useInventoryStore = create<InventoryState>()(
           { id: "prog-filter-167", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-167", price: 114 },
           { id: "prog-filter-174", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-174", price: 200 },
           
-          // NEW: Progressive - Basic Pro
-          { id: "prog-basic-pro-156", lensTypeId: "lens3", coatingId: "basic-pro-prog", thicknessId: "prog-156-pro", price: 55 },
-          { id: "prog-basic-pro-poly", lensTypeId: "lens3", coatingId: "basic-pro-prog", thicknessId: "prog-poly-pro", price: 85 },
-          { id: "prog-basic-pro-160", lensTypeId: "lens3", coatingId: "basic-pro-prog", thicknessId: "prog-160-pro", price: 100 },
-          { id: "prog-basic-pro-167", lensTypeId: "lens3", coatingId: "basic-pro-prog", thicknessId: "prog-167-pro", price: 140 },
-          { id: "prog-basic-pro-174", lensTypeId: "lens3", coatingId: "basic-pro-prog", thicknessId: "prog-174-pro", price: 180 },
-          
-          // NEW: Progressive - Filter Pro
-          { id: "prog-filter-pro-156", lensTypeId: "lens3", coatingId: "filter-pro-prog", thicknessId: "prog-156-pro", price: 55 },
-          { id: "prog-filter-pro-poly", lensTypeId: "lens3", coatingId: "filter-pro-prog", thicknessId: "prog-poly-pro", price: 85 },
-          { id: "prog-filter-pro-160", lensTypeId: "lens3", coatingId: "filter-pro-prog", thicknessId: "prog-160-pro", price: 100 },
-          { id: "prog-filter-pro-167", lensTypeId: "lens3", coatingId: "filter-pro-prog", thicknessId: "prog-167-pro", price: 140 },
-          { id: "prog-filter-pro-174", lensTypeId: "lens3", coatingId: "filter-pro-prog", thicknessId: "prog-174-pro", price: 180 },
-          
           // Bifocal
           { id: "bif-basic", lensTypeId: "lens4", coatingId: "basic-bif", thicknessId: "bif-basic", price: 18 },
           { id: "bif-filter", lensTypeId: "lens4", coatingId: "filter-bif", thicknessId: "bif-basic", price: 28 },
@@ -712,10 +674,6 @@ export const useInventoryStore = create<InventoryState>()(
           { id: "prog-photo-160", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-160", price: 90 },
           { id: "prog-photo-167", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-167", price: 130 },
           { id: "prog-photo-174", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-174", price: 180 },
-          
-          // NEW: Progressive Photochromic Pro
-          { id: "prog-photo-pro-156", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-156-pro", price: 130 },
-          { id: "prog-photo-pro-poly", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-poly-pro", price: 180 },
         ];
         
         set({
