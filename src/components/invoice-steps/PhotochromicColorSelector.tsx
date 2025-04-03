@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensCoating } from "@/store/inventoryStore";
@@ -36,6 +35,17 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
       "Red": "#FF0000"
     };
     
+    // Extract the English color name when it's a bilingual format (e.g., "Color | اللون")
+    const englishColorName = colorName.split(" | ")[0];
+    
+    // Try to find the color by the English name first (for bilingual colors)
+    for (const [key, value] of Object.entries(colorMap)) {
+      if (englishColorName.includes(key)) {
+        return value;
+      }
+    }
+    
+    // Fallback to original mapping
     return colorMap[colorName] || "transparent";
   };
 
@@ -52,6 +62,18 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
   const titleKey = coating.isPhotochromic 
     ? 'selectPhotochromicColor' 
     : 'selectSunglassColor';
+    
+  // Function to get the appropriate display name based on language
+  const getDisplayName = (colorName: string): string => {
+    // If the color name contains a separator for bilingual display
+    if (colorName.includes(" | ")) {
+      const [english, arabic] = colorName.split(" | ");
+      return language === 'ar' ? arabic : english;
+    }
+    
+    // Otherwise, try to translate it or return as is
+    return t(colorName.toLowerCase()) || colorName;
+  };
 
   return (
     <div className="w-full">
@@ -88,7 +110,9 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
                       className="min-w-6 h-6 rounded-full border shrink-0"
                       style={{ backgroundColor: getColorStyle(color) }}
                     ></div>
-                    <span className="text-base whitespace-normal break-words leading-tight">{t(color.toLowerCase()) || color}</span>
+                    <span className="text-base whitespace-normal break-words leading-tight">
+                      {getDisplayName(color)}
+                    </span>
                   </div>
                 </SelectItem>
               ))}
@@ -104,7 +128,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
               style={{ backgroundColor: getColorStyle(selectedColor) }}
             ></div>
             <span className="text-base font-medium break-words whitespace-normal leading-relaxed">
-              {t(selectedColor.toLowerCase()) || selectedColor}
+              {getDisplayName(selectedColor)}
             </span>
           </div>
         )}
