@@ -127,16 +127,11 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     setActiveIndex(index);
   };
   
-  // Show placeholder if no data or all values are zero
-  if (!hasData || data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-[300px]">
-        <p className="text-center text-muted-foreground">
-          {language === 'ar' ? "لا توجد بيانات للعرض" : "No data to display"}
-        </p>
-      </div>
-    );
-  }
+  // Debug logs - using a single useEffect to avoid hook count issues
+  useEffect(() => {
+    console.log("SalesChart data:", data);
+    console.log("Has data:", hasData);
+  }, [data, hasData]);
   
   // Custom legend rendering with icons
   const renderCustomLegend = (props: any) => {
@@ -147,7 +142,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
         {payload.map((entry: any, index: number) => (
           <li key={`item-${index}`} className="flex items-center gap-1">
             <div style={{ color: entry.color }} className="mr-1">
-              {data[index].icon}
+              {data[index]?.icon}
             </div>
             <span className="text-sm">{entry.value}</span>
           </li>
@@ -156,11 +151,16 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   };
   
-  // Log data for debugging
-  useEffect(() => {
-    console.log("SalesChart data:", data);
-    console.log("Has data:", hasData);
-  }, [data, hasData]);
+  // If no data, show a placeholder instead of attempting to render the chart
+  if (!hasData || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px]">
+        <p className="text-center text-muted-foreground">
+          {language === 'ar' ? "لا توجد بيانات للعرض" : "No data to display"}
+        </p>
+      </div>
+    );
+  }
   
   return (
     <ResponsiveContainer width="100%" height={300}>
