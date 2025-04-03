@@ -26,6 +26,11 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
 
   // Color mapping for visualization
   const getColorStyle = (colorName: string) => {
+    // Extract English part if it's a bilingual string
+    const simplifiedColorName = colorName.includes('|') 
+      ? colorName.split('|')[0].trim().split(' - ').pop() || '' 
+      : colorName;
+      
     const colorMap: Record<string, string> = {
       "Brown": "#8B4513",
       "Gray": "#808080",
@@ -33,10 +38,44 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
       "Blue": "#0000CD",
       "Silver": "#C0C0C0",
       "Gold": "#FFD700",
-      "Red": "#FF0000"
+      "Red": "#FF0000",
+      // Add simple color mappings for common colors in Bella lenses
+      "Contour Gray": "#707070",
+      "Contour Green": "#2E5C2E",
+      "Contour Hazel": "#A67D3D",
+      "Platinum Gray": "#A9A9A9",
+      "Agate Brown": "#614126",
+      "Bluish Gray": "#6699CC",
+      "Jade Green": "#00A86B",
+      "Ocean Blue": "#4F42B5",
+      "Navy Gray": "#3B444B"
     };
     
-    return colorMap[colorName] || "transparent";
+    // Try to match based on the end of the color name
+    for (const [key, value] of Object.entries(colorMap)) {
+      if (simplifiedColorName.endsWith(key)) {
+        return value;
+      }
+    }
+    
+    // Default basic colors based on general color mentions
+    if (simplifiedColorName.toLowerCase().includes("brown")) return "#8B4513";
+    if (simplifiedColorName.toLowerCase().includes("gray")) return "#808080";
+    if (simplifiedColorName.toLowerCase().includes("green")) return "#006400";
+    if (simplifiedColorName.toLowerCase().includes("blue")) return "#0000CD";
+    if (simplifiedColorName.toLowerCase().includes("hazel")) return "#A67D3D";
+    if (simplifiedColorName.toLowerCase().includes("gold")) return "#FFD700";
+    
+    return "transparent";
+  };
+  
+  // Format the display text based on language
+  const formatColorText = (colorName: string): string => {
+    if (colorName.includes('|')) {
+      const [english, arabic] = colorName.split('|').map(part => part.trim());
+      return language === 'ar' ? arabic : english;
+    }
+    return colorName;
   };
 
   // Determine if the component should display
@@ -88,7 +127,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
                       className="min-w-6 h-6 rounded-full border shrink-0"
                       style={{ backgroundColor: getColorStyle(color) }}
                     ></div>
-                    <span className="text-base whitespace-normal break-words leading-tight">{t(color.toLowerCase()) || color}</span>
+                    <span className="text-base whitespace-normal break-words leading-tight">{formatColorText(color)}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -104,7 +143,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
               style={{ backgroundColor: getColorStyle(selectedColor) }}
             ></div>
             <span className="text-base font-medium break-words whitespace-normal leading-relaxed">
-              {t(selectedColor.toLowerCase()) || selectedColor}
+              {formatColorText(selectedColor)}
             </span>
           </div>
         )}

@@ -59,6 +59,19 @@ export const ContactLensCard: React.FC<ContactLensCardProps> = ({ lens, onEdit, 
                         brandColorClass.includes('cyan') ? 'text-cyan-600' :
                         'text-orange-600';
   
+  // Format color text - if it contains '|', display appropriate language portion
+  const formatColorText = (colorText: string | undefined): string => {
+    if (!colorText) return '';
+    
+    // If color contains a delimiter '|' for bilingual text
+    if (colorText.includes('|')) {
+      const [english, arabic] = colorText.split('|').map(part => part.trim());
+      return language === 'ar' ? arabic : english;
+    }
+    
+    return colorText;
+  };
+  
   return (
     <Card className={`overflow-hidden hover:shadow-md transition-all duration-200 border bg-gradient-to-r ${brandColorClass}`}>
       <CardHeader className="p-4 border-b">
@@ -70,7 +83,7 @@ export const ContactLensCard: React.FC<ContactLensCardProps> = ({ lens, onEdit, 
             </CardTitle>
             <CardDescription className="mt-1 flex items-center gap-1">
               {lens.price.toFixed(2)} KWD
-              {lens.color && <span className={`text-xs ${textColorClass}`}>| {lens.color}</span>}
+              {lens.color && <span className={`text-xs ${textColorClass}`}>| {formatColorText(lens.color)}</span>}
             </CardDescription>
           </div>
           <Badge variant={lens.qty > 5 ? "outline" : "destructive"} className={`text-xs ${lens.qty > 5 ? textColorClass : ''}`}>
