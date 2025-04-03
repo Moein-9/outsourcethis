@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
@@ -46,33 +47,56 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
 }) => {
   const { t, language } = useLanguageStore();
   
+  // Generate consistent background color based on brand name
+  const getBrandColor = (brand: string): string => {
+    const colors = [
+      'bg-blue-50 border-blue-200 text-blue-800',
+      'bg-purple-50 border-purple-200 text-purple-800',
+      'bg-teal-50 border-teal-200 text-teal-800',
+      'bg-amber-50 border-amber-200 text-amber-800',
+      'bg-pink-50 border-pink-200 text-pink-800',
+      'bg-indigo-50 border-indigo-200 text-indigo-800',
+      'bg-emerald-50 border-emerald-200 text-emerald-800'
+    ];
+    
+    let hash = 0;
+    for (let i = 0; i < brand.length; i++) {
+      hash = brand.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    return colors[Math.abs(hash) % colors.length];
+  };
+  
+  const colorClass = getBrandColor(frame.brand);
+  const [bgClass, borderClass, textClass] = colorClass.split(' ');
+  
   return (
-    <Card key={index} className="overflow-hidden hover:shadow-md transition-all duration-200 border-gray-200">
-      <CardHeader className="p-3 bg-gray-50 border-b flex flex-row justify-between items-start">
+    <Card key={index} className={`overflow-hidden hover:shadow-md transition-all duration-200 border-gray-200 border ${bgClass.replace('bg-', 'bg-opacity-30 bg-')}`}>
+      <CardHeader className={`p-3 ${bgClass} ${borderClass} border-b flex flex-row justify-between items-start`}>
         <div className="flex items-start gap-2">
-          <Glasses className="h-5 w-5 text-indigo-600 mt-0.5" />
+          <Glasses className={`h-5 w-5 ${textClass.replace('text-', 'text-')} mt-0.5`} />
           <div>
             <div className="font-bold text-base">{frame.brand} - {frame.model}</div>
             <div className="text-sm font-medium mt-0.5">{frame.price.toFixed(2)} KWD</div>
           </div>
         </div>
-        <Badge variant="destructive" className="text-xs rounded-full">
+        <Badge variant={frame.qty > 5 ? "outline" : "destructive"} className={`text-xs rounded-full ${frame.qty > 5 ? textClass : ''}`}>
           {language === 'ar' ? `في المخزون: ${frame.qty}` : `In Stock: ${frame.qty}`}
         </Badge>
       </CardHeader>
       <CardContent className="p-3 pt-2 text-sm">
         <div className="flex justify-between py-1 border-b border-gray-100">
-          <span className="text-blue-500">{t('color')}:</span>
+          <span className={textClass}>{t('color')}:</span>
           <span>{frame.color || "-"}</span>
         </div>
         <div className="flex justify-between py-1">
-          <span className="text-blue-500">{t('size')}:</span>
+          <span className={textClass}>{t('size')}:</span>
           <span>{frame.size || "-"}</span>
         </div>
       </CardContent>
       <CardFooter className="p-0 border-t">
         <div className="grid grid-cols-3 w-full divide-x divide-x-reverse">
-          <Button variant="ghost" className="rounded-none h-10 text-blue-600">
+          <Button variant="ghost" className={`rounded-none h-10 ${textClass}`}>
             <Edit className="h-4 w-4 mr-1" /> {t('edit')}
           </Button>
           <Button variant="ghost" className="rounded-none h-10 text-amber-600">
@@ -110,6 +134,23 @@ export const FrameInventory: React.FC = () => {
   const [frameSize, setFrameSize] = useState("");
   const [framePrice, setFramePrice] = useState("");
   const [frameQty, setFrameQty] = useState("1");
+  
+  // Group frames by brand
+  const groupedByBrand = React.useMemo(() => {
+    const grouped: Record<string, FrameItem[]> = {};
+    
+    searchResults.forEach(frame => {
+      if (!grouped[frame.brand]) {
+        grouped[frame.brand] = [];
+      }
+      grouped[frame.brand].push(frame);
+    });
+    
+    // Sort brands by name
+    return Object.fromEntries(
+      Object.entries(grouped).sort(([brandA], [brandB]) => brandA.localeCompare(brandB))
+    );
+  }, [searchResults]);
   
   const handleFrameSearch = () => {
     if (!frameSearchTerm.trim()) {
@@ -310,15 +351,28 @@ export const FrameInventory: React.FC = () => {
         </div>
       </div>
       
-      {searchResults.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {searchResults.map((frame, index) => (
-            <FrameItemCard 
-              key={frame.frameId} 
-              frame={frame} 
-              index={index} 
-              onPrintLabel={printSingleLabel}
-            />
+      {Object.keys(groupedByBrand).length > 0 ? (
+        <div className="space-y-4">
+          {Object.entries(groupedByBrand).map(([brand, brandFrames]) => (
+            <CollapsibleCard
+              key={brand}
+              title={`${brand} (${brandFrames.length})`} 
+              defaultOpen={true}
+              headerClassName="bg-gradient-to-r from-amber-50 to-amber-100"
+              titleClassName="text-amber-800 font-medium flex items-center gap-2"
+              contentClassName="p-4 bg-white"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {brandFrames.map((frame, index) => (
+                  <FrameItemCard
+                    key={frame.frameId}
+                    frame={frame}
+                    index={index}
+                    onPrintLabel={printSingleLabel}
+                  />
+                ))}
+              </div>
+            </CollapsibleCard>
           ))}
         </div>
       ) : (

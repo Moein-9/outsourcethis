@@ -4,7 +4,7 @@ import { useLanguageStore } from "@/store/languageStore";
 import { ContactLensItem } from "@/store/inventoryStore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Contact, Edit } from "lucide-react";
+import { Contact, Edit, Trash2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -17,9 +17,10 @@ import {
 interface ContactLensCardProps {
   lens: ContactLensItem;
   onEdit: (lens: ContactLensItem) => void;
+  onDelete: (id: string) => void;
 }
 
-export const ContactLensCard: React.FC<ContactLensCardProps> = ({ lens, onEdit }) => {
+export const ContactLensCard: React.FC<ContactLensCardProps> = ({ lens, onEdit, onDelete }) => {
   const { language } = useLanguageStore();
   
   // Generate consistent background color based on brand name
@@ -82,13 +83,22 @@ export const ContactLensCard: React.FC<ContactLensCardProps> = ({ lens, onEdit }
         </div>
       </CardContent>
       <CardFooter className="p-0 border-t">
-        <Button 
-          variant="ghost" 
-          className={`rounded-none h-10 w-full ${textColorClass} hover:bg-white/50`} 
-          onClick={() => onEdit(lens)}
-        >
-          <Edit className="h-4 w-4 mr-1" /> {language === 'ar' ? 'تعديل' : 'Edit'}
-        </Button>
+        <div className="grid grid-cols-2 w-full">
+          <Button 
+            variant="ghost" 
+            className={`rounded-none h-10 ${textColorClass} hover:bg-white/50 border-r`} 
+            onClick={() => onEdit(lens)}
+          >
+            <Edit className="h-4 w-4 mr-1" /> {language === 'ar' ? 'تعديل' : 'Edit'}
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="rounded-none h-10 text-destructive hover:bg-white/50 hover:text-destructive/80" 
+            onClick={() => onDelete(lens.id)}
+          >
+            <Trash2 className="h-4 w-4 mr-1" /> {language === 'ar' ? 'حذف' : 'Delete'}
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

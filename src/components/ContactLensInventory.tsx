@@ -19,12 +19,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { ContactLensCard } from "./contact-lens/ContactLensCard";
 import { ContactLensForm } from "./contact-lens/ContactLensForm";
 import { Search, Plus, Contact } from "lucide-react";
 
 export const ContactLensInventory: React.FC = () => {
-  const { contactLenses, addContactLens, updateContactLens, searchContactLenses } = useInventoryStore();
+  const { contactLenses, addContactLens, updateContactLens, deleteContactLens, searchContactLenses } = useInventoryStore();
   const { language } = useLanguageStore();
   
   // State variables
@@ -32,6 +43,7 @@ export const ContactLensInventory: React.FC = () => {
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchContactLenses>>(contactLenses);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingLens, setEditingLens] = useState<ContactLensItem | null>(null);
+  const [deletingLensId, setDeletingLensId] = useState<string | null>(null);
   
   // User-saved custom values
   const [savedCustomBrands, setSavedCustomBrands] = useState<string[]>(() => {
@@ -132,6 +144,25 @@ export const ContactLensInventory: React.FC = () => {
     setIsAddDialogOpen(true);
   };
   
+  // Handle delete lens
+  const handleDeleteLens = (id: string) => {
+    setDeletingLensId(id);
+  };
+  
+  // Confirm delete lens
+  const confirmDeleteLens = () => {
+    if (deletingLensId) {
+      const lensToDelete = contactLenses.find(lens => lens.id === deletingLensId);
+      deleteContactLens(deletingLensId);
+      setDeletingLensId(null);
+      setSearchResults(prev => prev.filter(lens => lens.id !== deletingLensId));
+      
+      toast.success(language === 'ar'
+        ? `تم حذف العدسة اللاصقة بنجاح: ${lensToDelete?.brand} ${lensToDelete?.type}`
+        : `Successfully deleted contact lens: ${lensToDelete?.brand} ${lensToDelete?.type}`);
+    }
+  };
+  
   // Close dialog and reset form
   const closeDialog = () => {
     setIsAddDialogOpen(false);
@@ -147,6 +178,20 @@ export const ContactLensInventory: React.FC = () => {
   useEffect(() => {
     handleSearch();
   }, [filterBrand, filterType]);
+  
+  // Group contact lenses by brand
+  const groupedByBrand = React.useMemo(() => {
+    const grouped: Record<string, ContactLensItem[]> = {};
+    
+    searchResults.forEach(lens => {
+      if (!grouped[lens.brand]) {
+        grouped[lens.brand] = [];
+      }
+      grouped[lens.brand].push(lens);
+    });
+    
+    return grouped;
+  }, [searchResults]);
   
   // Text direction based on language
   const textDirection = language === 'ar' ? 'rtl' : 'ltr';
@@ -210,14 +255,28 @@ export const ContactLensInventory: React.FC = () => {
         </div>
       </div>
       
-      {searchResults.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {searchResults.map((lens) => (
-            <ContactLensCard 
-              key={lens.id} 
-              lens={lens} 
-              onEdit={handleEditLens}
-            />
+      {Object.keys(groupedByBrand).length > 0 ? (
+        <div className="space-y-6">
+          {Object.entries(groupedByBrand).map(([brand, lenses]) => (
+            <CollapsibleCard 
+              key={brand}
+              title={`${brand} (${lenses.length})`}
+              defaultOpen={true}
+              headerClassName="bg-gradient-to-r from-blue-50 to-blue-100"
+              titleClassName="text-blue-800 font-medium flex items-center gap-2"
+              contentClassName="p-4 bg-white"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {lenses.map(lens => (
+                  <ContactLensCard
+                    key={lens.id}
+                    lens={lens}
+                    onEdit={handleEditLens}
+                    onDelete={handleDeleteLens}
+                  />
+                ))}
+              </div>
+            </CollapsibleCard>
           ))}
         </div>
       ) : (
@@ -265,6 +324,31 @@ export const ContactLensInventory: React.FC = () => {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingLensId} onOpenChange={(open) => !open && setDeletingLensId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {language === 'ar' ? 'تأكيد الحذف' : 'Confirm Deletion'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {language === 'ar' 
+                ? 'هل أنت متأكد أنك تريد حذف هذه العدسة اللاصقة؟ لا يمكن التراجع عن هذا الإجراء.'
+                : 'Are you sure you want to delete this contact lens? This action cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{language === 'ar' ? 'إلغاء' : 'Cancel'}</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteLens}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {language === 'ar' ? 'حذف' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
