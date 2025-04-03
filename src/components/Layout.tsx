@@ -13,9 +13,12 @@ export const Layout = ({ children, activeSection = "dashboard", onNavigate = () 
   return (
     <div className="min-h-screen flex flex-col">
       <InventoryInitializer />
-      <DashboardSidebar activeSection={activeSection} onNavigate={onNavigate}>
-        {children}
-      </DashboardSidebar>
+      <div className="flex flex-1">
+        <DashboardSidebar />
+        <div className="flex-1 p-4 md:p-6">
+          {children}
+        </div>
+      </div>
     </div>
   );
 };

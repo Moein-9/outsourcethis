@@ -8,24 +8,41 @@ import NotFound from './pages/NotFound.tsx';
 import ReportPage from './pages/ReportPage.tsx';
 import PrintLabelPage from './pages/PrintLabelPage.tsx';
 import SystemPage from './pages/SystemPage.tsx';
+import Index from './pages/Index.tsx';
+import { CustomWorkOrderReceipt } from './components/CustomWorkOrderReceipt.tsx';
+import { LensDebugger } from './components/LensDebugger.tsx';
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    errorElement: <NotFound />
-  },
-  {
-    path: "/reports",
-    element: <ReportPage />
-  },
-  {
-    path: "/print-label/:frameId",
-    element: <PrintLabelPage />
-  },
-  {
-    path: "/system",
-    element: <SystemPage />
+    errorElement: <NotFound />,
+    children: [
+      {
+        index: true,
+        element: <Index />
+      },
+      {
+        path: "reports",
+        element: <ReportPage />
+      },
+      {
+        path: "print-label/:frameId",
+        element: <PrintLabelPage />
+      },
+      {
+        path: "system",
+        element: <SystemPage />
+      },
+      {
+        path: "custom-work-order",
+        element: <CustomWorkOrderReceipt workOrder={{}} />
+      },
+      {
+        path: "lens-debug",
+        element: <LensDebugger />
+      }
+    ]
   }
 ]);
 
