@@ -1,23 +1,36 @@
 
-import { createRoot } from 'react-dom/client'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App.tsx'
 import './index.css'
-import * as React from 'react'
+import NotFound from './pages/NotFound.tsx';
+import ReportPage from './pages/ReportPage.tsx';
+import PrintLabelPage from './pages/PrintLabelPage.tsx';
+import SystemPage from './pages/SystemPage.tsx';
 
-// Ensure React is properly imported and available globally
-window.React = React;
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    errorElement: <NotFound />
+  },
+  {
+    path: "/reports",
+    element: <ReportPage />
+  },
+  {
+    path: "/print-label/:frameId",
+    element: <PrintLabelPage />
+  },
+  {
+    path: "/system",
+    element: <SystemPage />
+  }
+]);
 
-// Ensure the app is properly mounted
-const root = document.getElementById("root");
-if (!root) {
-  const rootDiv = document.createElement("div");
-  rootDiv.id = "root";
-  document.body.appendChild(rootDiv);
-}
-
-// Create root and render app
-createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+    <RouterProvider router={router} />
+  </React.StrictMode>,
+)
