@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 
 interface LanguageStore {
@@ -315,6 +316,108 @@ export const useLanguageStore = create<LanguageStore>((set, get) => ({
       print: {
         en: "Print",
         ar: "طباعة"
+      },
+      // New translations for sunglasses
+      sunglasses: {
+        en: "Sunglasses",
+        ar: "نظارات شمسية"
+      },
+      isSunglasses: {
+        en: "Is Sunglasses",
+        ar: "نظارات شمسية"
+      },
+      eyeglasses: {
+        en: "Eyeglasses",
+        ar: "نظارات طبية"
+      },
+      sunglassesManagement: {
+        en: "Sunglasses Management",
+        ar: "إدارة النظارات الشمسية"
+      },
+      selectedSunglasses: {
+        en: "Selected Sunglasses",
+        ar: "النظارات الشمسية المختارة"
+      },
+      addSunglasses: {
+        en: "Add Sunglasses",
+        ar: "إضافة نظارات شمسية"
+      },
+      searchSunglasses: {
+        en: "Search Sunglasses",
+        ar: "البحث عن نظارات شمسية"
+      },
+      searchSunglassesPlaceholder: {
+        en: "Enter brand, model or color...",
+        ar: "أدخل العلامة التجارية أو الطراز أو اللون..."
+      },
+      noSunglassesFound: {
+        en: "No sunglasses found with that search term",
+        ar: "لم يتم العثور على نظارات شمسية بهذا المصطلح"
+      },
+      noSunglassesInInventory: {
+        en: "No sunglasses in inventory",
+        ar: "لا توجد نظارات شمسية في المخزون"
+      },
+      sunglassesAddedSuccess: {
+        en: "Sunglasses added successfully!",
+        ar: "تمت إضافة النظارات الشمسية بنجاح!"
+      },
+      addNewSunglasses: {
+        en: "Add New Sunglasses",
+        ar: "إضافة نظارات شمسية جديدة"
+      },
+      pleaseCompleteAllFieldsError: {
+        en: "Please complete all required fields",
+        ar: "يرجى استكمال جميع الحقول المطلوبة"
+      },
+      invalidPriceError: {
+        en: "Please enter a valid price",
+        ar: "يرجى إدخال سعر صالح"
+      },
+      invalidQuantityError: {
+        en: "Please enter a valid quantity",
+        ar: "يرجى إدخال كمية صالحة"
+      },
+      enterBrand: {
+        en: "Enter brand",
+        ar: "أدخل العلامة التجارية"
+      },
+      enterModel: {
+        en: "Enter model",
+        ar: "أدخل الطراز"
+      },
+      enterColor: {
+        en: "Enter color",
+        ar: "أدخل اللون"
+      },
+      enterSize: {
+        en: "Enter size",
+        ar: "أدخل الحجم"
+      },
+      clearSearch: {
+        en: "Clear Search",
+        ar: "مسح البحث"
+      },
+      type: {
+        en: "Type",
+        ar: "النوع"
+      },
+      frameSection: {
+        en: "Frame",
+        ar: "إطار"
+      },
+      sunglassesSection: {
+        en: "Sunglasses",
+        ar: "نظارات شمسية"
+      },
+      addNew: {
+        en: "Add New",
+        ar: "إضافة جديد"
+      },
+      // Fix Reports page title
+      reportsPage: {
+        en: "Reports",
+        ar: "التقارير"
       }
     };
     
