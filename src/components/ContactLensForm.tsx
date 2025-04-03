@@ -23,6 +23,24 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     rightEye: { cylinderAxisError: false },
     leftEye: { cylinderAxisError: false }
   });
+  
+  // Custom field states
+  const [customValues, setCustomValues] = useState({
+    rightEye: {
+      sphere: "",
+      cylinder: "",
+      axis: "",
+      bc: "",
+      dia: ""
+    },
+    leftEye: {
+      sphere: "",
+      cylinder: "",
+      axis: "",
+      bc: "",
+      dia: ""
+    }
+  });
 
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
     if (readOnly) return;
@@ -56,6 +74,28 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     if (field === 'cylinder' || field === 'axis') {
       validateCylinderAxis('leftEye', updatedRx.leftEye.cylinder, updatedRx.leftEye.axis);
     }
+  };
+  
+  // Custom field handlers
+  const handleCustomValueChange = (
+    eye: 'rightEye' | 'leftEye', 
+    field: keyof ContactLensRx["rightEye"], 
+    value: string
+  ) => {
+    if (readOnly) return;
+    
+    // Update custom value state
+    setCustomValues(prev => ({
+      ...prev,
+      [eye]: {
+        ...prev[eye],
+        [field]: value
+      }
+    }));
+    
+    // Update the actual rx data
+    const handleChange = eye === 'rightEye' ? handleRightEyeChange : handleLeftEyeChange;
+    handleChange(field, value);
   };
   
   const validateCylinderAxis = (eye: 'rightEye' | 'leftEye', cylinder: string, axis: string) => {
@@ -96,14 +136,22 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       );
     }
     
+    // Add Other option
+    options.push(<option key="sph-other" value="other">Other</option>);
+    
     return options;
   };
 
   const generateCylinderOptions = () => {
     const cylValues = ["-", "-0.75", "-1.25", "-1.75", "-2.25"];
-    return cylValues.map(value => (
+    const options = cylValues.map(value => (
       <option key={`cyl-${value}`} value={value}>{value}</option>
     ));
+    
+    // Add Other option
+    options.push(<option key="cyl-other" value="other">Other</option>);
+    
+    return options;
   };
 
   const generateAxisOptions = () => {
@@ -115,6 +163,33 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
         <option key={`axis-${i}`} value={i.toString()}>{i}°</option>
       );
     }
+    
+    // Add Other option
+    options.push(<option key="axis-other" value="other">Other</option>);
+    
+    return options;
+  };
+
+  const generateBCOptions = () => {
+    const bcValues = ["-", "8.4", "8.5", "8.6", "8.7", "8.8"];
+    const options = bcValues.map(value => (
+      <option key={`bc-${value}`} value={value}>{value}</option>
+    ));
+    
+    // Add Other option
+    options.push(<option key="bc-other" value="other">Other</option>);
+    
+    return options;
+  };
+
+  const generateDiaOptions = () => {
+    const diaValues = ["-", "14.0", "14.2", "14.4", "14.5"];
+    const options = diaValues.map(value => (
+      <option key={`dia-${value}`} value={value}>{value}</option>
+    ));
+    
+    // Add Other option
+    options.push(<option key="dia-other" value="other">Other</option>);
     
     return options;
   };
@@ -154,17 +229,52 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       );
     }
     
+    // Check if the value is "other" to show input field
+    const isOther = value === "other";
+    const customValue = customValues[eye][field];
+    
     return (
-      <select 
-        className={`w-full p-1 rounded-md border ${
-          errorCondition ? 'border-red-500 bg-red-50' : `${borderClass} ${bgClass}`
-        } text-sm`}
-        value={value}
-        onChange={(e) => handleChange(field, e.target.value)}
-        disabled={readOnly}
-      >
-        {options}
-      </select>
+      <div className="w-full">
+        <select 
+          className={`w-full p-1 rounded-md border ${
+            errorCondition ? 'border-red-500 bg-red-50' : `${borderClass} ${bgClass}`
+          } text-sm ${isOther ? 'mb-1' : ''}`}
+          value={isOther ? "other" : value}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            if (newValue === "other") {
+              // Just set to "other", don't clear the custom value
+              handleChange(field, "other");
+            } else {
+              handleChange(field, newValue);
+              // Clear custom value when selecting a regular option
+              setCustomValues(prev => ({
+                ...prev,
+                [eye]: {
+                  ...prev[eye],
+                  [field]: ""
+                }
+              }));
+            }
+          }}
+          disabled={readOnly}
+        >
+          {options}
+        </select>
+        
+        {isOther && (
+          <input
+            type="text"
+            className={`w-full mt-1 p-1 border ${
+              errorCondition ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            } rounded text-sm`}
+            placeholder={`Enter custom ${field}`}
+            value={customValue}
+            onChange={(e) => handleCustomValueChange(eye, field, e.target.value)}
+            autoFocus
+          />
+        )}
+      </div>
     );
   };
 
@@ -247,14 +357,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   'rightEye',
                   'bc',
                   rxData.rightEye.bc,
-                  [
-                    <option key="bc-none" value="-">-</option>,
-                    <option key="bc-8.4" value="8.4">8.4</option>,
-                    <option key="bc-8.5" value="8.5">8.5</option>,
-                    <option key="bc-8.6" value="8.6">8.6</option>,
-                    <option key="bc-8.7" value="8.7">8.7</option>,
-                    <option key="bc-8.8" value="8.8">8.8</option>
-                  ],
+                  generateBCOptions(),
                   false,
                   handleRightEyeChange,
                   'bg-white',
@@ -266,13 +369,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   'rightEye',
                   'dia',
                   rxData.rightEye.dia,
-                  [
-                    <option key="dia-none" value="-">-</option>,
-                    <option key="dia-14.0" value="14.0">14.0</option>,
-                    <option key="dia-14.2" value="14.2">14.2</option>,
-                    <option key="dia-14.4" value="14.4">14.4</option>,
-                    <option key="dia-14.5" value="14.5">14.5</option>
-                  ],
+                  generateDiaOptions(),
                   false,
                   handleRightEyeChange,
                   'bg-white',
@@ -329,14 +426,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   'leftEye',
                   'bc',
                   rxData.leftEye.bc,
-                  [
-                    <option key="bc-none" value="-">-</option>,
-                    <option key="bc-8.4" value="8.4">8.4</option>,
-                    <option key="bc-8.5" value="8.5">8.5</option>,
-                    <option key="bc-8.6" value="8.6">8.6</option>,
-                    <option key="bc-8.7" value="8.7">8.7</option>,
-                    <option key="bc-8.8" value="8.8">8.8</option>
-                  ],
+                  generateBCOptions(),
                   false,
                   handleLeftEyeChange,
                   'bg-white',
@@ -348,13 +438,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
                   'leftEye',
                   'dia',
                   rxData.leftEye.dia,
-                  [
-                    <option key="dia-none" value="-">-</option>,
-                    <option key="dia-14.0" value="14.0">14.0</option>,
-                    <option key="dia-14.2" value="14.2">14.2</option>,
-                    <option key="dia-14.4" value="14.4">14.4</option>,
-                    <option key="dia-14.5" value="14.5">14.5</option>
-                  ],
+                  generateDiaOptions(),
                   false,
                   handleLeftEyeChange,
                   'bg-white',
