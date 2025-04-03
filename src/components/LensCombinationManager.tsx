@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store/inventoryStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -7,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGr
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { Edit, Save, Plus, XCircle, Search, Database } from "lucide-react";
+import { Edit, Save, Plus, XCircle, Search, Database, RefreshCw } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -35,6 +36,7 @@ export const LensCombinationManager: React.FC = () => {
   const addLensPricingCombination = useInventoryStore((state) => state.addLensPricingCombination);
   const updateLensPricingCombination = useInventoryStore((state) => state.updateLensPricingCombination);
   const deleteLensPricingCombination = useInventoryStore((state) => state.deleteLensPricingCombination);
+  const resetLensPricing = useInventoryStore((state) => state.resetLensPricing);
   
   const [pricingCombinations, setPricingCombinations] = useState<LensPricingCombination[]>([]);
   const [filteredCombinations, setFilteredCombinations] = useState<LensPricingCombination[]>([]);
@@ -84,6 +86,23 @@ export const LensCombinationManager: React.FC = () => {
     });
     
     setFilteredCombinations(filtered);
+  };
+  
+  const handleResetPricing = () => {
+    try {
+      resetLensPricing();
+      toast({
+        description: t('pricingReset') || "Pricing has been reset to default values",
+      });
+      setTimeout(loadPricingCombinations, 50);
+    } catch (error) {
+      console.error("Error resetting pricing:", error);
+      toast({
+        title: t('error'),
+        description: t('errorResettingPricing') || "Error resetting pricing",
+        variant: "destructive"
+      });
+    }
   };
   
   const handleAddCombination = () => {
@@ -334,6 +353,15 @@ export const LensCombinationManager: React.FC = () => {
 
   return (
     <div className="space-y-6" dir={dirClass}>
+      <div className="flex justify-end mb-4">
+        <Button
+          onClick={handleResetPricing}
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" /> {t('resetDefaultPricing') || "Reset Default Pricing"}
+        </Button>
+      </div>
+      
       <Card className="border-blue-100">
         <CardHeader className="bg-blue-50">
           <CardTitle className={textAlignClass}>
