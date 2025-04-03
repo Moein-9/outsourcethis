@@ -10,7 +10,6 @@ import ReportPage from "./pages/ReportPage";
 import PrintLabelPage from "./pages/PrintLabelPage";
 import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 import { LensDebugger } from "./components/LensDebugger";
-import SupplierInvoiceManager from "./components/supplier/SupplierInvoiceManager";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient({
@@ -38,7 +37,7 @@ const App = () => {
             <Route path="/print-labels" element={<PrintLabelPage />} />
             <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
             <Route path="/lens-debug" element={<LensDebugger />} />
-            <Route path="/supplier-invoices" element={<SupplierInvoiceManager />} />
+            <Route path="/supplier-invoices" element={<Index />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
