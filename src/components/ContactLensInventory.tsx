@@ -37,97 +37,104 @@ import { CustomTypesManager } from "./contact-lens/CustomTypesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Contact, Settings, Tag, Database, UploadCloud, Filter, RefreshCw } from "lucide-react";
 
-const bilingualContactLenses = [
+const bellaContactLenses = [
   // Contour collection
-  { brand: "Contour", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Contour Gray | كونتور جراي" },
-  { brand: "Contour", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Contour Green | كونتور جرين" },
-  { brand: "Contour", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Contour Hazel | كونتور هيزل" },
-  { brand: "Contour", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Platinum Gray | بلاتينيوم جراي" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Contour Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Contour Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Contour Hazel" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Platinum Gray" },
   
   // Diamond collection
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Agate Brown | أجات براون" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Allure Blonde | ألور بلوند" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Almond Gray | ألموند جراي" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Bluish Gray | بلوش جراي" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Brown Shadow | براون شادو" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Citrine Crystal | سترين كريستال" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Glitter Gray | جليتر جراي" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Green | جراي جرين" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Shadow | جراي شادو" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Hazel Beige | هيزل بيج" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Hazel Honey | هيزل هني" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Husky Gray Green | هسكي جراي جرين" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Jade Green | جيد جرين" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lime Green | لايم جرين" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Moon Stone | مون ستون" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mysterious | مستيريوس" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Navy Gray | نيفي جراي" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Nay | ناي" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Oak | أوك" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Ocean Blue | أوشن بلو" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Pine | باين" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Rosewood | روزوود" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Saturn | ساترن" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silky Green | سيلكي جرين" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silver Mist | سيلفر ميست" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Viola Gray | فيولا جراي" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Wild Honey | وايلد هني" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Wood Leaf | وود ليف" },
-  { brand: "Diamond", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Wood Stone | وود ستون" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Agate Brown" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Allure Blonde" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Almond Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Bluish Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Brown Shadow" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Citrine Crystal" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Glitter Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Shadow" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Hazel Beige" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Hazel Honey" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Husky Gray Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Jade Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lime Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Moon Stone" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mysterious" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Navy Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Nay" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Oak" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Ocean Blue" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Pine" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Rosewood" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Saturn" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silky Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silver Mist" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Viola Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Wild Honey" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Wood Leaf" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Wood Stone" },
   
   // Elite collection
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Amber Gray | أمبر جراي" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cinnamon Brown | سينامون براون" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cloudy Gray | كلاودي جراي" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Crystal N | كريستال إن" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Emerald Green | إميرالد جرين" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Beige | جراي بيج" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Olive | جراي أوليف" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Green Olive | جرين أوليف" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lavender Gray | لافندر جراي" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Matt Olive | مات أوليف" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Midnight Blue | ميدنايت بلو" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mint Gray | مينت جراي" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sandy Brown | ساندي براون" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sandy Gray | ساندي جراي" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silky Gold | سيلكي جولد" },
-  { brand: "Elite", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silky Gray | سيلكي جراي" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Amber Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cinnamon Brown" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cloudy Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Crystal N" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Emerald Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Beige" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Olive" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Green Olive" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lavender Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Matt Olive" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Midnight Blue" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mint Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sandy Brown" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sandy Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silky Gold" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silky Gray" },
   
   // Glow collection
-  { brand: "Glow", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Glow Radiant Hazelnut | جلو رادينت هيزلنَت" },
-  { brand: "Glow", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Caramel | جراي كراميل" },
-  { brand: "Glow", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Radiant Brown | رادينت براون" },
-  { brand: "Glow", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Radiant Gray | رادينت جراي" },
-  { brand: "Glow", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Radiant Hazelnut | رادينت هيزلنَت" },
-  { brand: "Glow", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Vivid Blue | فيفيد بلو" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Glow Radiant Hazelnut" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Caramel" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Radiant Brown" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Radiant Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Radiant Hazelnut" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Vivid Blue" },
   
   // Highlight collection
-  { brand: "Highlight", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Circle Brown | سيركل براون" },
-  { brand: "Highlight", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Circle Gray | سيركل جراي" },
-  { brand: "Highlight", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Highlight Cool Gray | هايلايت كوول جراي" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Circle Brown" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Circle Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Highlight Cool Gray" },
   
   // Natural collection
-  { brand: "Natural", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Marengo | مارينجو" },
-  { brand: "Natural", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Cool Gray | ناتشورال كوول جراي" },
-  { brand: "Natural", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Gray | ناتشورال جراي" },
-  { brand: "Natural", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Gray Blue | ناتشورال جراي بلو" },
-  { brand: "Natural", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Green Yellow | ناتشورال جرين ييلو" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Marengo" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Cool Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Gray Blue" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Green Yellow" },
   
   // One Day collection (daily)
-  { brand: "One Day", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Almond Brown (Daily Disposable) | ألموند براون (يومي)" },
-  { brand: "One Day", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Ash Brown (Daily Disposable) | آش براون (يومي)" },
-  { brand: "One Day", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cedar (Daily Disposable) | سيدار (يومي)" },
-  { brand: "One Day", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cove (Daily Disposable) | كوف (يومي)" },
-  { brand: "One Day", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Earth (Daily Disposable) | إيرث (يومي)" },
-  { brand: "One Day", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mars (Daily Disposable) | مارس (يومي)" },
-  { brand: "One Day", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Moon (Daily Disposable) | مون (يومي)" },
-  { brand: "One Day", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Star (Daily Disposable) | ستار (يومي)" },
-  { brand: "One Day", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Venus (Daily Disposable) | فينوس (يومي)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Almond Brown (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Ash Brown (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cedar (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cove (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Earth (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mars (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Moon (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Star (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Venus (Daily Disposable)" },
   
   // Snow White collection
-  { brand: "Snow White", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Snow White Black | سنو وايت بلاك" },
-  { brand: "Snow White", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Snow White Satin Gray | سنو وايت ساتِن جراي" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Snow White Black" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Snow White Satin Gray" },
 ];
+
+const mBellaContactLenses = bellaContactLenses.map(lens => ({
+  ...lens,
+  brand: "M-Bella"
+}));
+
+const allContactLenses = [...bellaContactLenses, ...mBellaContactLenses];
 
 export const ContactLensInventory: React.FC = () => {
   const { contactLenses, addContactLens, updateContactLens, deleteContactLens, searchContactLenses } = useInventoryStore();
@@ -311,7 +318,7 @@ export const ContactLensInventory: React.FC = () => {
   const handleBulkImport = () => {
     let importedCount = 0;
     
-    bilingualContactLenses.forEach(lens => {
+    allContactLenses.forEach(lens => {
       const existingLens = contactLenses.find(
         cl => cl.brand === lens.brand && 
              cl.type === lens.type && 
