@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { 
   PieChart, 
   Pie, 
@@ -25,9 +25,6 @@ export const SalesChart: React.FC<SalesChartProps> = ({
 }) => {
   const { language } = useLanguageStore();
   const isRtl = language === 'ar';
-  
-  // State for tracking active index on hover - moved hook before any conditionals
-  const [activeIndex, setActiveIndex] = React.useState(0);
   
   // Check if we have any data
   const hasData = lensRevenue > 0 || frameRevenue > 0 || coatingRevenue > 0;
@@ -124,13 +121,22 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   };
 
+  // State for tracking active index on hover
+  const [activeIndex, setActiveIndex] = React.useState(0);
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
   };
   
-  // Log data for debugging - moved outside of the conditional rendering
-  console.log("SalesChart data:", data);
-  console.log("Has data:", hasData);
+  // Show placeholder if no data or all values are zero
+  if (!hasData || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px]">
+        <p className="text-center text-muted-foreground">
+          {language === 'ar' ? "لا توجد بيانات للعرض" : "No data to display"}
+        </p>
+      </div>
+    );
+  }
   
   // Custom legend rendering with icons
   const renderCustomLegend = (props: any) => {
@@ -150,16 +156,11 @@ export const SalesChart: React.FC<SalesChartProps> = ({
     );
   };
   
-  // Show placeholder if no data or all values are zero
-  if (!hasData || data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-[300px]">
-        <p className="text-center text-muted-foreground">
-          {language === 'ar' ? "لا توجد بيانات للعرض" : "No data to display"}
-        </p>
-      </div>
-    );
-  }
+  // Log data for debugging
+  useEffect(() => {
+    console.log("SalesChart data:", data);
+    console.log("Has data:", hasData);
+  }, [data, hasData]);
   
   return (
     <ResponsiveContainer width="100%" height={300}>

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, PackageCheck, Sunglasses, Glasses } from "lucide-react";
+import { Search, Plus, PackageCheck } from "lucide-react";
 
 interface FrameSearchProps {
   onFrameSelected: (frame: {
@@ -15,7 +15,6 @@ interface FrameSearchProps {
     color: string;
     size: string;
     price: number;
-    isSunglasses?: boolean;
   }) => void;
   selectedFrame: {
     brand: string;
@@ -23,7 +22,6 @@ interface FrameSearchProps {
     color: string;
     size: string;
     price: number;
-    isSunglasses?: boolean;
   };
 }
 
@@ -58,8 +56,7 @@ export const FrameSearch: React.FC<FrameSearchProps> = ({ onFrameSelected, selec
       model: frame.model,
       color: frame.color,
       size: frame.size,
-      price: frame.price,
-      isSunglasses: frame.isSunglasses
+      price: frame.price
     };
     
     onFrameSelected(newFrame);
@@ -98,7 +95,6 @@ export const FrameSearch: React.FC<FrameSearchProps> = ({ onFrameSelected, selec
                 <th className="p-2 border">{t('size')}</th>
                 <th className="p-2 border">{t('price')} ({t('kwd')})</th>
                 <th className="p-2 border">{t('quantity')}</th>
-                <th className="p-2 border">{t('type')}</th>
                 <th className="p-2 border"></th>
               </tr>
             </thead>
@@ -114,21 +110,6 @@ export const FrameSearch: React.FC<FrameSearchProps> = ({ onFrameSelected, selec
                   <td className="p-2 border">{frame.size}</td>
                   <td className="p-2 border">{frame.price.toFixed(2)}</td>
                   <td className="p-2 border">{frame.qty}</td>
-                  <td className="p-2 border">
-                    <div className="flex items-center">
-                      {frame.isSunglasses ? (
-                        <>
-                          <Sunglasses className="w-4 h-4 mr-1" />
-                          {t('sunglasses')}
-                        </>
-                      ) : (
-                        <>
-                          <Glasses className="w-4 h-4 mr-1" />
-                          {t('eyeglasses')}
-                        </>
-                      )}
-                    </div>
-                  </td>
                   <td className="p-2 border">
                     <Button 
                       size="sm" 
@@ -150,12 +131,8 @@ export const FrameSearch: React.FC<FrameSearchProps> = ({ onFrameSelected, selec
       {selectedFrame.brand && (
         <div className="mt-4 p-3 border rounded-lg bg-amber-50/50 border-amber-200/70">
           <h4 className={`font-medium text-amber-800 mb-2 flex items-center ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
-            {selectedFrame.isSunglasses ? (
-              <Sunglasses className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
-            ) : (
-              <PackageCheck className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
-            )}
-            {selectedFrame.isSunglasses ? t('selectedSunglasses') : t('selectedFrame')}
+            <PackageCheck className={`w-4 h-4 ${language === 'ar' ? 'ml-1' : 'mr-1'} text-amber-600`} />
+            {t('selectedFrame')}
           </h4>
           <table className="w-full">
             <thead>
@@ -165,7 +142,6 @@ export const FrameSearch: React.FC<FrameSearchProps> = ({ onFrameSelected, selec
                 <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('color')}</th>
                 <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('size')}</th>
                 <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('price')} ({t('kwd')})</th>
-                <th className={`p-1 ${textAlignClass} text-muted-foreground text-sm`}>{t('type')}</th>
               </tr>
             </thead>
             <tbody>
@@ -175,9 +151,6 @@ export const FrameSearch: React.FC<FrameSearchProps> = ({ onFrameSelected, selec
                 <td className={`p-1 ${textAlignClass}`}>{selectedFrame.color}</td>
                 <td className={`p-1 ${textAlignClass}`}>{selectedFrame.size}</td>
                 <td className={`p-1 ${textAlignClass} font-medium`}>{selectedFrame.price.toFixed(2)}</td>
-                <td className={`p-1 ${textAlignClass}`}>
-                  {selectedFrame.isSunglasses ? t('sunglasses') : t('eyeglasses')}
-                </td>
               </tr>
             </tbody>
           </table>

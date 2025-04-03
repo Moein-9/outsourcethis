@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Plus } from "lucide-react";
 
 interface AddFrameFormProps {
@@ -16,7 +15,6 @@ interface AddFrameFormProps {
     color: string;
     size: string;
     price: number;
-    isSunglasses?: boolean;
   }) => void;
 }
 
@@ -30,7 +28,6 @@ export const AddFrameForm: React.FC<AddFrameFormProps> = ({ onFrameAdded }) => {
   const [newSize, setNewSize] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [newQty, setNewQty] = useState("1");
-  const [isSunglasses, setIsSunglasses] = useState(false);
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
@@ -59,8 +56,7 @@ export const AddFrameForm: React.FC<AddFrameFormProps> = ({ onFrameAdded }) => {
       color: newColor,
       size: newSize,
       price,
-      qty,
-      isSunglasses
+      qty
     });
     
     const newFrameData = {
@@ -68,8 +64,7 @@ export const AddFrameForm: React.FC<AddFrameFormProps> = ({ onFrameAdded }) => {
       model: newModel,
       color: newColor,
       size: newSize,
-      price,
-      isSunglasses
+      price
     };
     
     onFrameAdded(newFrameData);
@@ -80,7 +75,6 @@ export const AddFrameForm: React.FC<AddFrameFormProps> = ({ onFrameAdded }) => {
     setNewSize("");
     setNewPrice("");
     setNewQty("1");
-    setIsSunglasses(false);
     
     toast(t('frameAddedSuccess'));
   };
@@ -153,16 +147,6 @@ export const AddFrameForm: React.FC<AddFrameFormProps> = ({ onFrameAdded }) => {
               className={textAlignClass}
             />
           </div>
-        </div>
-        <div className="flex items-center space-x-2 pt-2">
-          <Checkbox 
-            id="isSunglasses" 
-            checked={isSunglasses} 
-            onCheckedChange={(checked) => setIsSunglasses(checked === true)}
-          />
-          <Label htmlFor="isSunglasses" className="cursor-pointer">
-            {t('isSunglasses')}
-          </Label>
         </div>
         <Button 
           onClick={handleAddNewFrame} 

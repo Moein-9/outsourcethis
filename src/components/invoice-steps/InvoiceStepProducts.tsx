@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -45,14 +44,12 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     color: string;
     size: string;
     price: number;
-    isSunglasses?: boolean;
   }>({ 
     brand: getValues('frameBrand') as string || "", 
     model: getValues('frameModel') as string || "", 
     color: getValues('frameColor') as string || "", 
     size: getValues('frameSize') as string || "", 
-    price: getValues('framePrice') as number || 0,
-    isSunglasses: getValues('isSunglasses') as boolean || false
+    price: getValues('framePrice') as number || 0 
   });
   
   const [rxFormatted, setRxFormatted] = useState<any>(null);
@@ -64,8 +61,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
         model: getValues('frameModel') as string,
         color: getValues('frameColor') as string,
         size: getValues('frameSize') as string,
-        price: getValues('framePrice') as number,
-        isSunglasses: getValues('isSunglasses') as boolean || false
+        price: getValues('framePrice') as number
       });
     }
     
@@ -98,7 +94,6 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setValue('frameColor', frame.color);
     setValue('frameSize', frame.size);
     setValue('framePrice', frame.price);
-    setValue('isSunglasses', frame.isSunglasses || false);
   };
   
   const handleLensTypeSelect = (lens: LensType | null) => {

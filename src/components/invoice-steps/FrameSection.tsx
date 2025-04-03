@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FrameSearch } from "./FrameSearch";
 import { AddFrameForm } from "./AddFrameForm";
-import { Glasses, Plus, Sunglasses } from "lucide-react";
+import { Glasses, Plus } from "lucide-react";
 
 interface FrameSectionProps {
   selectedFrame: {
@@ -14,7 +14,6 @@ interface FrameSectionProps {
     color: string;
     size: string;
     price: number;
-    isSunglasses?: boolean;
   };
   onFrameSelected: (frame: {
     brand: string;
@@ -22,7 +21,6 @@ interface FrameSectionProps {
     color: string;
     size: string;
     price: number;
-    isSunglasses?: boolean;
   }) => void;
 }
 
@@ -34,12 +32,8 @@ export const FrameSection: React.FC<FrameSectionProps> = ({ selectedFrame, onFra
     <Card className="border shadow-sm">
       <CardHeader className="bg-gradient-to-r from-amber-50 to-amber-100/50 border-b">
         <CardTitle className={`text-base flex items-center gap-2 text-amber-800`}>
-          {selectedFrame.isSunglasses ? (
-            <Sunglasses className="w-4 h-4 text-amber-600" />
-          ) : (
-            <Glasses className="w-4 h-4 text-amber-600" />
-          )}
-          {selectedFrame.isSunglasses ? t('sunglassesSection') : t('frameSection')}
+          <Glasses className="w-4 h-4 text-amber-600" />
+          {t('frameSection')}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">

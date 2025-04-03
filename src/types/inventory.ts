@@ -8,7 +8,6 @@ export interface Frame {
   size?: string;
   price: number;
   stock: number;
-  isSunglasses?: boolean;
 }
 
 export interface FrameItem {
@@ -20,7 +19,6 @@ export interface FrameItem {
   price: number;
   qty: number;
   createdAt: string;
-  isSunglasses?: boolean;
 }
 
 export interface LensType {
@@ -52,7 +50,6 @@ export interface WorkOrder {
   frameColor?: string;
   frameSize?: string;
   framePrice?: number;
-  isSunglasses?: boolean;
   
   // Lens details - match the invoiceStore structure
   lensType?: string | { name: string; price: number };
@@ -105,7 +102,6 @@ export interface WorkOrderEdit {
   frameColor: string;
   frameSize?: string;
   framePrice: number;
-  isSunglasses?: boolean;
   
   // Lens details
   lensType: string | { name: string; price: number };

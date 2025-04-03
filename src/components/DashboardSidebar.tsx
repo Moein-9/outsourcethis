@@ -172,7 +172,8 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
                   activeSection === "patientSearch" ? t('patientSearch') :
                   activeSection === "refundManager" ? 
                     (language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges') :
-                  activeSection === "reports" ? t('reportsPage') :
+                  activeSection === "reports" ? 
+                    (language === 'ar' ? 'التقارير' : 'Reports') :
                   t('dashboard')
                 }</h1>
               </div>
