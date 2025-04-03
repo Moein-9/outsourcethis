@@ -7,7 +7,7 @@ import {
   FileText, Printer, Receipt, User, PackageCheck, CreditCard,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
   MessageCircleDashed, Loader, Check, Ruler, Paintbrush, ScrollText,
-  Eye, layers, Glasses
+  Eye, Layers, Glasses
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -447,7 +447,7 @@ const CreateInvoiceContent: React.FC = () => {
                       {(getValues("coatingPrice") > 0 || getValues("thicknessPrice") > 0) && (
                         <div className="flex justify-between items-center py-1">
                           <span className="text-sm text-gray-600 flex items-center gap-1">
-                            <layers className="w-3 h-3" /> {t('lensFeatures')}
+                            <Layers className="w-3 h-3" /> {t('lensFeatures')}
                           </span>
                           <span className="font-medium text-purple-600">
                             {(

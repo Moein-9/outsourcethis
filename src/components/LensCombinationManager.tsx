@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, LensType, LensCoating, LensThickness } from "@/store/inventoryStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -42,13 +41,11 @@ export const LensCombinationManager: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   
-  // New combination form
   const [selectedLensType, setSelectedLensType] = useState<string>("");
   const [selectedCoating, setSelectedCoating] = useState<string>("");
   const [selectedThickness, setSelectedThickness] = useState<string>("");
   const [combinationPrice, setCombinationPrice] = useState<string>("");
   
-  // Edit form
   const [editPrice, setEditPrice] = useState<string>("");
   
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
@@ -109,7 +106,6 @@ export const LensCombinationManager: React.FC = () => {
       return;
     }
     
-    // Check for existing combination
     const exists = pricingCombinations.some(
       c => c.lensTypeId === selectedLensType && 
            c.coatingId === selectedCoating && 
@@ -142,7 +138,6 @@ export const LensCombinationManager: React.FC = () => {
           description: t('combinationAdded'),
         });
         
-        // Force a refresh of pricing combinations
         setTimeout(loadPricingCombinations, 50);
         resetForm();
       }
@@ -231,8 +226,8 @@ export const LensCombinationManager: React.FC = () => {
     const lensType = lensTypes.find(lt => lt.id === id);
     if (!lensType) return t('unknown');
     
-    return language === 'ar' && lensType.arabicName 
-      ? lensType.arabicName 
+    return language === 'ar' && lensType.name 
+      ? lensType.name 
       : lensType.name;
   };
   
@@ -240,9 +235,6 @@ export const LensCombinationManager: React.FC = () => {
     const coating = lensCoatings.find(c => c.id === id);
     if (!coating) return t('unknown');
     
-    if (language === 'ar' && coating.arabicName) {
-      return coating.arabicName;
-    }
     return coating.name;
   };
   
@@ -250,13 +242,9 @@ export const LensCombinationManager: React.FC = () => {
     const thickness = lensThicknesses.find(t => t.id === id);
     if (!thickness) return t('unknown');
     
-    if (language === 'ar' && thickness.arabicName) {
-      return thickness.arabicName;
-    }
     return thickness.name;
   };
 
-  // Group coatings by category
   const groupedCoatings = lensCoatings.reduce((acc, coating) => {
     if (!acc[coating.category]) {
       acc[coating.category] = [];
@@ -265,7 +253,6 @@ export const LensCombinationManager: React.FC = () => {
     return acc;
   }, {} as Record<string, LensCoating[]>);
 
-  // Group thicknesses by category
   const groupedThicknesses = lensThicknesses.reduce((acc, thickness) => {
     if (!acc[thickness.category]) {
       acc[thickness.category] = [];
@@ -274,7 +261,6 @@ export const LensCombinationManager: React.FC = () => {
     return acc;
   }, {} as Record<string, LensThickness[]>);
 
-  // Category color mapping
   const getCategoryColor = (category: string) => {
     switch(category) {
       case 'distance-reading':
@@ -288,7 +274,6 @@ export const LensCombinationManager: React.FC = () => {
     }
   };
 
-  // Category translations
   const getCategoryName = (category: string) => {
     switch(category) {
       case 'distance-reading':
@@ -302,7 +287,6 @@ export const LensCombinationManager: React.FC = () => {
     }
   };
 
-  // Subcategory translations and colors
   const getSubcategoryInfo = (subcategory: string, category: string) => {
     let name = '';
     let color = '';
@@ -347,7 +331,7 @@ export const LensCombinationManager: React.FC = () => {
 
     return { name, color };
   };
-  
+
   return (
     <div className="space-y-6" dir={dirClass}>
       <Card className="border-blue-100">
@@ -379,7 +363,7 @@ export const LensCombinationManager: React.FC = () => {
                     </SelectLabel>
                     {lensTypes.filter(type => type.type === 'distance' || type.type === 'reading' || type.type === 'sunglasses').map((type) => (
                       <SelectItem key={type.id} value={type.id}>
-                        {language === 'ar' && type.arabicName ? type.arabicName : type.name}
+                        {type.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -390,7 +374,7 @@ export const LensCombinationManager: React.FC = () => {
                     </SelectLabel>
                     {lensTypes.filter(type => type.type === 'progressive').map((type) => (
                       <SelectItem key={type.id} value={type.id}>
-                        {language === 'ar' && type.arabicName ? type.arabicName : type.name}
+                        {type.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -401,7 +385,7 @@ export const LensCombinationManager: React.FC = () => {
                     </SelectLabel>
                     {lensTypes.filter(type => type.type === 'bifocal').map((type) => (
                       <SelectItem key={type.id} value={type.id}>
-                        {language === 'ar' && type.arabicName ? type.arabicName : type.name}
+                        {type.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -428,7 +412,7 @@ export const LensCombinationManager: React.FC = () => {
                           {getCategoryName(category)}
                         </SelectLabel>
                         {coatings.map(coating => {
-                          const subInfo = getSubcategoryInfo(coating.type || 'basic', category);
+                          const subInfo = getSubcategoryInfo(coating.category || 'basic', category);
                           return (
                             <SelectItem key={coating.id} value={coating.id} className="py-2">
                               <div className="flex flex-col">
@@ -436,13 +420,11 @@ export const LensCombinationManager: React.FC = () => {
                                   {subInfo.name}
                                 </span>
                                 <span>
-                                  {language === 'ar' && coating.arabicName ? coating.arabicName : coating.name}
+                                  {coating.name}
                                 </span>
                                 {coating.description && (
                                   <span className="text-xs text-gray-500">
-                                    {language === 'ar' && coating.arabicDescription 
-                                      ? coating.arabicDescription 
-                                      : coating.description}
+                                    {coating.description}
                                   </span>
                                 )}
                               </div>
@@ -478,7 +460,7 @@ export const LensCombinationManager: React.FC = () => {
                           {getCategoryName(category)}
                         </SelectLabel>
                         {thicknesses.map(thickness => {
-                          const subInfo = getSubcategoryInfo(thickness.type || 'standard', category);
+                          const subInfo = getSubcategoryInfo(thickness.category || 'standard', category);
                           return (
                             <SelectItem key={thickness.id} value={thickness.id} className="py-2">
                               <div className="flex flex-col">
@@ -486,13 +468,11 @@ export const LensCombinationManager: React.FC = () => {
                                   {subInfo.name}
                                 </span>
                                 <span>
-                                  {language === 'ar' && thickness.arabicName ? thickness.arabicName : thickness.name}
+                                  {thickness.name}
                                 </span>
                                 {thickness.description && (
                                   <span className="text-xs text-gray-500">
-                                    {language === 'ar' && thickness.arabicDescription 
-                                      ? thickness.arabicDescription 
-                                      : thickness.description}
+                                    {thickness.description}
                                   </span>
                                 )}
                               </div>
