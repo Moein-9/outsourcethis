@@ -9,6 +9,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { Edit, Save, Plus, XCircle, Search, Database } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface LensPricingCombination {
   id: string;
@@ -219,15 +228,32 @@ export const LensCombinationManager: React.FC = () => {
   };
   
   const getLensTypeName = (id: string) => {
-    return lensTypes.find(lt => lt.id === id)?.name || t('unknown');
+    const lensType = lensTypes.find(lt => lt.id === id);
+    if (!lensType) return t('unknown');
+    
+    return language === 'ar' && lensType.arabicName 
+      ? lensType.arabicName 
+      : lensType.name;
   };
   
   const getCoatingName = (id: string) => {
-    return lensCoatings.find(c => c.id === id)?.name || t('unknown');
+    const coating = lensCoatings.find(c => c.id === id);
+    if (!coating) return t('unknown');
+    
+    if (language === 'ar' && coating.arabicName) {
+      return coating.arabicName;
+    }
+    return coating.name;
   };
   
   const getThicknessName = (id: string) => {
-    return lensThicknesses.find(t => t.id === id)?.name || t('unknown');
+    const thickness = lensThicknesses.find(t => t.id === id);
+    if (!thickness) return t('unknown');
+    
+    if (language === 'ar' && thickness.arabicName) {
+      return thickness.arabicName;
+    }
+    return thickness.name;
   };
 
   // Group coatings by category
@@ -310,6 +336,10 @@ export const LensCombinationManager: React.FC = () => {
         name = language === 'ar' ? 'رفيع جداً (Ultra Thin)' : 'Ultra Thin';
         color = 'bg-cyan-50 text-cyan-700 border-cyan-100';
         break;
+      case 'poly':
+        name = language === 'ar' ? 'بولي (Poly)' : 'Polycarbonate';
+        color = 'bg-blue-50 text-blue-700 border-blue-100';
+        break;
       default:
         name = subcategory;
         color = 'bg-gray-50 text-gray-700 border-gray-100';
@@ -349,7 +379,7 @@ export const LensCombinationManager: React.FC = () => {
                     </SelectLabel>
                     {lensTypes.filter(type => type.type === 'distance' || type.type === 'reading' || type.type === 'sunglasses').map((type) => (
                       <SelectItem key={type.id} value={type.id}>
-                        {type.name}
+                        {language === 'ar' && type.arabicName ? type.arabicName : type.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -360,7 +390,7 @@ export const LensCombinationManager: React.FC = () => {
                     </SelectLabel>
                     {lensTypes.filter(type => type.type === 'progressive').map((type) => (
                       <SelectItem key={type.id} value={type.id}>
-                        {type.name}
+                        {language === 'ar' && type.arabicName ? type.arabicName : type.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -371,7 +401,7 @@ export const LensCombinationManager: React.FC = () => {
                     </SelectLabel>
                     {lensTypes.filter(type => type.type === 'bifocal').map((type) => (
                       <SelectItem key={type.id} value={type.id}>
-                        {type.name}
+                        {language === 'ar' && type.arabicName ? type.arabicName : type.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -405,9 +435,15 @@ export const LensCombinationManager: React.FC = () => {
                                 <span className={`${subInfo.color} px-2 py-0.5 rounded text-sm font-medium mb-0.5 inline-block w-fit`}>
                                   {subInfo.name}
                                 </span>
-                                <span>{coating.name}</span>
+                                <span>
+                                  {language === 'ar' && coating.arabicName ? coating.arabicName : coating.name}
+                                </span>
                                 {coating.description && (
-                                  <span className="text-xs text-gray-500">{coating.description}</span>
+                                  <span className="text-xs text-gray-500">
+                                    {language === 'ar' && coating.arabicDescription 
+                                      ? coating.arabicDescription 
+                                      : coating.description}
+                                  </span>
                                 )}
                               </div>
                             </SelectItem>
@@ -449,9 +485,15 @@ export const LensCombinationManager: React.FC = () => {
                                 <span className={`${subInfo.color} px-2 py-0.5 rounded text-sm font-medium mb-0.5 inline-block w-fit`}>
                                   {subInfo.name}
                                 </span>
-                                <span>{thickness.name}</span>
+                                <span>
+                                  {language === 'ar' && thickness.arabicName ? thickness.arabicName : thickness.name}
+                                </span>
                                 {thickness.description && (
-                                  <span className="text-xs text-gray-500">{thickness.description}</span>
+                                  <span className="text-xs text-gray-500">
+                                    {language === 'ar' && thickness.arabicDescription 
+                                      ? thickness.arabicDescription 
+                                      : thickness.description}
+                                  </span>
                                 )}
                               </div>
                             </SelectItem>
@@ -507,30 +549,30 @@ export const LensCombinationManager: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-muted/50 border-b">
-                  <th className={`p-2 ${language === 'ar' ? 'text-right' : 'text-left'}`}>{t('lensTypes')}</th>
-                  <th className={`p-2 ${language === 'ar' ? 'text-right' : 'text-left'}`}>{t('lensCoatings')}</th>
-                  <th className={`p-2 ${language === 'ar' ? 'text-right' : 'text-left'}`}>{t('lensThicknesses')}</th>
-                  <th className={`p-2 ${language === 'ar' ? 'text-right' : 'text-left'}`}>{t('price')} (KWD)</th>
-                  <th className="p-2 text-center">{t('actions')}</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('lensTypes')}</TableHead>
+                  <TableHead>{t('lensCoatings')}</TableHead>
+                  <TableHead>{t('lensThicknesses')}</TableHead>
+                  <TableHead>{t('price')} (KWD)</TableHead>
+                  <TableHead className="text-center">{t('actions')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filteredCombinations.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-4 text-center text-muted-foreground">
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
                       {searchTerm ? t('noMatchingCombinations') : t('noCombinations')}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   filteredCombinations.map((combination) => (
-                    <tr key={combination.id} className="border-b hover:bg-muted/20">
-                      <td className="p-2">{getLensTypeName(combination.lensTypeId)}</td>
-                      <td className="p-2">{getCoatingName(combination.coatingId)}</td>
-                      <td className="p-2">{getThicknessName(combination.thicknessId)}</td>
-                      <td className="p-2">
+                    <TableRow key={combination.id}>
+                      <TableCell>{getLensTypeName(combination.lensTypeId)}</TableCell>
+                      <TableCell>{getCoatingName(combination.coatingId)}</TableCell>
+                      <TableCell>{getThicknessName(combination.thicknessId)}</TableCell>
+                      <TableCell>
                         {editingId === combination.id ? (
                           <Input
                             type="number"
@@ -543,8 +585,8 @@ export const LensCombinationManager: React.FC = () => {
                         ) : (
                           <>{combination.price.toFixed(3)}</>
                         )}
-                      </td>
-                      <td className="p-2">
+                      </TableCell>
+                      <TableCell>
                         <div className="flex justify-center gap-2">
                           {editingId === combination.id ? (
                             <>
@@ -587,12 +629,12 @@ export const LensCombinationManager: React.FC = () => {
                             </>
                           )}
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>

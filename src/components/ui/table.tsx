@@ -15,7 +15,7 @@ const Table = React.forwardRef<
       <table
         ref={ref}
         className={cn(`w-full caption-bottom text-sm ${dirClass}`, className)}
-        style={dirClass === 'ltr' ? { direction: 'ltr' } : { direction: 'rtl' }}
+        dir={dirClass}
         {...props}
       />
     </div>
@@ -78,53 +78,12 @@ const TableHead = React.forwardRef<
   React.ThHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => {
   const { language } = useLanguageStore();
-  // Instead of trying to access ref from props, use a state variable
-  const [textAlignClass, setTextAlignClass] = React.useState(language === 'ar' ? 'text-right' : 'text-left');
-  
-  // Try to find parent table element and determine direction
-  const cellRef = React.useRef<HTMLTableCellElement | null>(null);
-  
-  React.useEffect(() => {
-    // Search for parent table when component mounts
-    const findParentTableDirection = () => {
-      if (!cellRef.current) return;
-      
-      let element: HTMLElement | null = cellRef.current;
-      while (element && element.tagName !== 'TABLE') {
-        element = element.parentElement;
-      }
-      
-      if (element) {
-        if (element.classList.contains('rtl')) {
-          setTextAlignClass('text-right');
-        } else if (element.classList.contains('ltr')) {
-          setTextAlignClass('text-left');
-        } else {
-          setTextAlignClass(language === 'ar' ? 'text-right' : 'text-left');
-        }
-      }
-    };
-    
-    findParentTableDirection();
-  }, [language]);
-  
-  // Use function that assigns to both refs
-  const assignRefs = (el: HTMLTableCellElement | null) => {
-    // assign to local ref
-    cellRef.current = el;
-    // forward the ref
-    if (typeof ref === 'function') {
-      ref(el);
-    } else if (ref) {
-      ref.current = el;
-    }
-  };
   
   return (
     <th
-      ref={assignRefs}
+      ref={ref}
       className={cn(
-        `h-12 px-4 ${textAlignClass} align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0`,
+        `h-12 px-4 align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 ${language === 'ar' ? 'text-right' : 'text-left'}`,
         className
       )}
       {...props}
@@ -138,52 +97,11 @@ const TableCell = React.forwardRef<
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => {
   const { language } = useLanguageStore();
-  // Instead of trying to access ref from props, use a state variable
-  const [textAlignClass, setTextAlignClass] = React.useState(language === 'ar' ? 'text-right' : 'text-left');
-  
-  // Try to find parent table element and determine direction
-  const cellRef = React.useRef<HTMLTableCellElement | null>(null);
-  
-  React.useEffect(() => {
-    // Search for parent table when component mounts
-    const findParentTableDirection = () => {
-      if (!cellRef.current) return;
-      
-      let element: HTMLElement | null = cellRef.current;
-      while (element && element.tagName !== 'TABLE') {
-        element = element.parentElement;
-      }
-      
-      if (element) {
-        if (element.classList.contains('rtl')) {
-          setTextAlignClass('text-right');
-        } else if (element.classList.contains('ltr')) {
-          setTextAlignClass('text-left');
-        } else {
-          setTextAlignClass(language === 'ar' ? 'text-right' : 'text-left');
-        }
-      }
-    };
-    
-    findParentTableDirection();
-  }, [language]);
-  
-  // Use function that assigns to both refs
-  const assignRefs = (el: HTMLTableCellElement | null) => {
-    // assign to local ref
-    cellRef.current = el;
-    // forward the ref
-    if (typeof ref === 'function') {
-      ref(el);
-    } else if (ref) {
-      ref.current = el;
-    }
-  };
   
   return (
     <td
-      ref={assignRefs}
-      className={cn(`p-4 ${textAlignClass} align-middle [&:has([role=checkbox])]:pr-0`, className)}
+      ref={ref}
+      className={cn(`p-4 align-middle [&:has([role=checkbox])]:pr-0 ${language === 'ar' ? 'text-right' : 'text-left'}`, className)}
       {...props}
     />
   )
