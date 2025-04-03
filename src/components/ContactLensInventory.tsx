@@ -36,7 +36,7 @@ import { Search, Plus, Contact, Edit, Save } from "lucide-react";
 // Common values for dropdowns
 const COMMON_BC_VALUES = ["8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "9.0"];
 const COMMON_DIAMETER_VALUES = ["13.8", "14.0", "14.2", "14.5", "14.8"];
-const COMMON_BRANDS = ["Acuvue", "Air Optix", "Biofinty", "FreshLook", "PureVision", "SofLens"];
+const COMMON_BRANDS = ["Acuvue", "Air Optix", "Biofinty", "Bella", "FreshLook", "PureVision", "SofLens"];
 const COMMON_TYPES = ["Daily", "Monthly", "Biweekly", "Yearly", "Color"];
 const COMMON_COLORS = ["none", "Clear", "Blue", "Green", "Brown", "Hazel", "Gray", "Honey"];
 
@@ -105,6 +105,32 @@ export const ContactLensInventory: React.FC = () => {
   const [contactLensPrice, setContactLensPrice] = useState("");
   const [contactLensQty, setContactLensQty] = useState("1");
   
+  // Custom entries for select fields
+  const [customBrand, setCustomBrand] = useState("");
+  const [customType, setCustomType] = useState("");
+  const [customBC, setCustomBC] = useState("");
+  const [customDiameter, setCustomDiameter] = useState("");
+  const [customColor, setCustomColor] = useState("");
+  
+  // User-saved custom values
+  const [savedCustomBrands, setSavedCustomBrands] = useState<string[]>(() => {
+    const saved = localStorage.getItem("customBrands");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [savedCustomTypes, setSavedCustomTypes] = useState<string[]>(() => {
+    const saved = localStorage.getItem("customTypes");
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  // Save custom values to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem("customBrands", JSON.stringify(savedCustomBrands));
+  }, [savedCustomBrands]);
+  
+  useEffect(() => {
+    localStorage.setItem("customTypes", JSON.stringify(savedCustomTypes));
+  }, [savedCustomTypes]);
+  
   // Filters
   const [filterBrand, setFilterBrand] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
@@ -172,6 +198,16 @@ export const ContactLensInventory: React.FC = () => {
       return;
     }
     
+    // Save custom brand if it's a new one
+    if (contactLensBrand && !COMMON_BRANDS.includes(contactLensBrand) && !savedCustomBrands.includes(contactLensBrand)) {
+      setSavedCustomBrands(prev => [...prev, contactLensBrand]);
+    }
+    
+    // Save custom type if it's a new one
+    if (contactLensType && !COMMON_TYPES.includes(contactLensType) && !savedCustomTypes.includes(contactLensType)) {
+      setSavedCustomTypes(prev => [...prev, contactLensType]);
+    }
+    
     // Create the base object with required properties
     const newContactLens: Omit<ContactLensItem, "id"> = {
       brand: contactLensBrand,
@@ -212,6 +248,11 @@ export const ContactLensInventory: React.FC = () => {
     setContactLensColor("none");
     setContactLensPrice("");
     setContactLensQty("1");
+    setCustomBrand("");
+    setCustomType("");
+    setCustomBC("");
+    setCustomDiameter("");
+    setCustomColor("");
     setEditingLens(null);
   };
   
@@ -229,6 +270,36 @@ export const ContactLensInventory: React.FC = () => {
     setIsAddContactLensDialogOpen(true);
   };
   
+  // Handle custom brand change
+  const handleCustomBrandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomBrand(e.target.value);
+    setContactLensBrand(e.target.value);
+  };
+  
+  // Handle custom type change
+  const handleCustomTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomType(e.target.value);
+    setContactLensType(e.target.value);
+  };
+  
+  // Handle custom BC change
+  const handleCustomBCChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomBC(e.target.value);
+    setContactLensBC(e.target.value);
+  };
+  
+  // Handle custom diameter change
+  const handleCustomDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomDiameter(e.target.value);
+    setContactLensDiameter(e.target.value);
+  };
+  
+  // Handle custom color change
+  const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomColor(e.target.value);
+    setContactLensColor(e.target.value);
+  };
+  
   // Initialize search results
   useEffect(() => {
     setContactLensResults(contactLenses);
@@ -241,6 +312,12 @@ export const ContactLensInventory: React.FC = () => {
   
   // Text direction based on language
   const textDirection = language === 'ar' ? 'rtl' : 'ltr';
+  
+  // Combine standard brands with custom saved brands for the dropdown
+  const allBrands = [...COMMON_BRANDS, ...savedCustomBrands.filter(brand => !COMMON_BRANDS.includes(brand))];
+  
+  // Combine standard types with custom saved types for the dropdown
+  const allTypes = [...COMMON_TYPES, ...savedCustomTypes.filter(type => !COMMON_TYPES.includes(type))];
   
   return (
     <div className="space-y-6" dir={textDirection}>
@@ -318,46 +395,66 @@ export const ContactLensInventory: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="contactLensBrand">{language === 'ar' ? 'الماركة' : 'Brand'}</Label>
-                    <Select value={contactLensBrand} onValueChange={setContactLensBrand}>
+                    <Select 
+                      value={contactLensBrand} 
+                      onValueChange={(value) => {
+                        if (value !== "other") {
+                          setContactLensBrand(value);
+                          setCustomBrand("");
+                        } else {
+                          setContactLensBrand("");
+                        }
+                      }}
+                    >
                       <SelectTrigger id="contactLensBrand" className="w-full">
                         <SelectValue placeholder={language === 'ar' ? 'اختر الماركة' : 'Select brand'} />
                       </SelectTrigger>
                       <SelectContent>
-                        {COMMON_BRANDS.map(brand => (
+                        {allBrands.map(brand => (
                           <SelectItem key={brand} value={brand}>{brand}</SelectItem>
                         ))}
                         <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
-                    {contactLensBrand === "other" && (
+                    {(contactLensBrand === "other" || (!allBrands.includes(contactLensBrand) && contactLensBrand !== "")) && (
                       <Input
                         className="mt-2"
                         placeholder={language === 'ar' ? 'أدخل اسم الماركة' : 'Enter brand name'}
-                        onChange={(e) => setContactLensBrand(e.target.value)}
-                        value=""
+                        onChange={handleCustomBrandChange}
+                        value={customBrand}
                       />
                     )}
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="contactLensType">{language === 'ar' ? 'النوع' : 'Type'}</Label>
-                    <Select value={contactLensType} onValueChange={setContactLensType}>
+                    <Select 
+                      value={contactLensType} 
+                      onValueChange={(value) => {
+                        if (value !== "other") {
+                          setContactLensType(value);
+                          setCustomType("");
+                        } else {
+                          setContactLensType("");
+                        }
+                      }}
+                    >
                       <SelectTrigger id="contactLensType" className="w-full">
                         <SelectValue placeholder={language === 'ar' ? 'اختر النوع' : 'Select type'} />
                       </SelectTrigger>
                       <SelectContent>
-                        {COMMON_TYPES.map(type => (
+                        {allTypes.map(type => (
                           <SelectItem key={type} value={type}>{type}</SelectItem>
                         ))}
                         <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
-                    {contactLensType === "other" && (
+                    {(contactLensType === "other" || (!allTypes.includes(contactLensType) && contactLensType !== "")) && (
                       <Input
                         className="mt-2"
                         placeholder={language === 'ar' ? 'أدخل النوع' : 'Enter type'}
-                        onChange={(e) => setContactLensType(e.target.value)}
-                        value=""
+                        onChange={handleCustomTypeChange}
+                        value={customType}
                       />
                     )}
                   </div>
@@ -366,7 +463,17 @@ export const ContactLensInventory: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="contactLensBC">BC</Label>
-                    <Select value={contactLensBC} onValueChange={setContactLensBC}>
+                    <Select 
+                      value={contactLensBC} 
+                      onValueChange={(value) => {
+                        if (value !== "other") {
+                          setContactLensBC(value);
+                          setCustomBC("");
+                        } else {
+                          setContactLensBC("");
+                        }
+                      }}
+                    >
                       <SelectTrigger id="contactLensBC" className="w-full">
                         <SelectValue placeholder={language === 'ar' ? 'اختر BC' : 'Select BC'} />
                       </SelectTrigger>
@@ -377,19 +484,29 @@ export const ContactLensInventory: React.FC = () => {
                         <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
-                    {contactLensBC === "other" && (
+                    {(contactLensBC === "other" || (!COMMON_BC_VALUES.includes(contactLensBC) && contactLensBC !== "")) && (
                       <Input
                         className="mt-2"
                         placeholder={language === 'ar' ? 'أدخل BC' : 'Enter BC'}
-                        onChange={(e) => setContactLensBC(e.target.value)}
-                        value=""
+                        onChange={handleCustomBCChange}
+                        value={customBC}
                       />
                     )}
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="contactLensDiameter">{language === 'ar' ? 'القطر' : 'Diameter'}</Label>
-                    <Select value={contactLensDiameter} onValueChange={setContactLensDiameter}>
+                    <Select 
+                      value={contactLensDiameter} 
+                      onValueChange={(value) => {
+                        if (value !== "other") {
+                          setContactLensDiameter(value);
+                          setCustomDiameter("");
+                        } else {
+                          setContactLensDiameter("");
+                        }
+                      }}
+                    >
                       <SelectTrigger id="contactLensDiameter" className="w-full">
                         <SelectValue placeholder={language === 'ar' ? 'اختر القطر' : 'Select diameter'} />
                       </SelectTrigger>
@@ -400,12 +517,12 @@ export const ContactLensInventory: React.FC = () => {
                         <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                       </SelectContent>
                     </Select>
-                    {contactLensDiameter === "other" && (
+                    {(contactLensDiameter === "other" || (!COMMON_DIAMETER_VALUES.includes(contactLensDiameter) && contactLensDiameter !== "")) && (
                       <Input
                         className="mt-2"
                         placeholder={language === 'ar' ? 'أدخل القطر' : 'Enter diameter'}
-                        onChange={(e) => setContactLensDiameter(e.target.value)}
-                        value=""
+                        onChange={handleCustomDiameterChange}
+                        value={customDiameter}
                       />
                     )}
                   </div>
@@ -413,7 +530,17 @@ export const ContactLensInventory: React.FC = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="contactLensColor">{language === 'ar' ? 'اللون (اختياري)' : 'Color (Optional)'}</Label>
-                  <Select value={contactLensColor} onValueChange={setContactLensColor}>
+                  <Select 
+                    value={contactLensColor} 
+                    onValueChange={(value) => {
+                      if (value !== "other") {
+                        setContactLensColor(value);
+                        setCustomColor("");
+                      } else {
+                        setContactLensColor("");
+                      }
+                    }}
+                  >
                     <SelectTrigger id="contactLensColor" className="w-full">
                       <SelectValue placeholder={language === 'ar' ? 'اختر اللون' : 'Select color'} />
                     </SelectTrigger>
@@ -425,12 +552,12 @@ export const ContactLensInventory: React.FC = () => {
                       <SelectItem value="other">{language === 'ar' ? 'أخرى' : 'Other'}</SelectItem>
                     </SelectContent>
                   </Select>
-                  {contactLensColor === "other" && (
+                  {(contactLensColor === "other" || (!COMMON_COLORS.includes(contactLensColor) && contactLensColor !== "" && contactLensColor !== "none")) && (
                     <Input
                       className="mt-2"
                       placeholder={language === 'ar' ? 'أدخل اللون' : 'Enter color'}
-                      onChange={(e) => setContactLensColor(e.target.value)}
-                      value=""
+                      onChange={handleCustomColorChange}
+                      value={customColor}
                     />
                   )}
                 </div>
