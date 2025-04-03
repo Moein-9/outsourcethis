@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import {
   PieChart,
@@ -22,9 +23,9 @@ interface RevenueSalesChartProps {
   lensRevenue: number;
   frameRevenue: number;
   coatingRevenue: number;
-  language?: string; // Make language optional in this interface
-  data?: never;
-  type?: never;
+  language?: string;
+  data?: undefined;
+  type?: undefined;
 }
 
 interface ComparativeSalesChartProps {
@@ -39,9 +40,9 @@ interface ComparativeSalesChartProps {
   }>;
   type: "line" | "bar" | "pie";
   language: string;
-  lensRevenue?: never;
-  frameRevenue?: never;
-  coatingRevenue?: never;
+  lensRevenue?: undefined;
+  frameRevenue?: undefined;
+  coatingRevenue?: undefined;
 }
 
 export type SalesChartProps = RevenueSalesChartProps | ComparativeSalesChartProps;
@@ -51,10 +52,12 @@ export const SalesChart: React.FC<SalesChartProps> = (props) => {
   const isRtl = language === 'ar';
   
   if ('data' in props && props.data) {
-    return <ComparativeChart {...props} />;
+    // Type assertion to ensure TypeScript knows what properties to expect
+    return <ComparativeChart {...props as ComparativeSalesChartProps} />;
   }
   
-  return <RevenueBreakdownChart {...props} language={language} />;
+  // Type assertion to ensure TypeScript knows what properties to expect
+  return <RevenueBreakdownChart {...props as RevenueSalesChartProps} language={language} />;
 };
 
 const RevenueBreakdownChart: React.FC<RevenueSalesChartProps & { language: string }> = ({ 

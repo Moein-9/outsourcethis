@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { format, parse, getMonth, getYear } from "date-fns";
 import { Database } from "@/types/reportingTypes";
+import { useInvoiceStore } from "@/store/invoiceStore";
+import type { Invoice, Refund } from "@/store/invoiceStore";
 
 // Export types using 'export type' syntax
 export type DailySalesSummary = {
@@ -53,12 +55,18 @@ export type MonthlySalesSummary = {
 export type InvoiceRecord = {
   id?: string;
   invoice_id: string;
-  invoice_date: string;
-  client_id: string | null;
-  total_amount: number;
-  payment_method: string;
-  payment_status: string;
+  patient_id?: string | null;
+  patient_name: string;
+  date: string;
   invoice_type: string;
+  total_amount: number;
+  deposit_amount: number;
+  remaining_amount: number;
+  payment_method: string;
+  is_paid: boolean;
+  is_refunded: boolean;
+  refund_id?: string | null;
+  location_id: string;
   created_at?: string;
   updated_at?: string;
 };
@@ -67,9 +75,10 @@ export type RefundRecord = {
   id?: string;
   refund_id: string;
   invoice_id: string;
-  refund_date: string;
+  date: string;
   amount: number;
-  reason: string;
+  reason: string | null;
+  location_id: string;
   created_at?: string;
 };
 
@@ -105,7 +114,6 @@ export class ReportingService {
     };
 
     if (existingInvoice) {
-      // Update existing record
       const { error: updateError } = await supabase
         .from('invoice_records')
         .update(invoiceRecord)
@@ -115,7 +123,6 @@ export class ReportingService {
         console.error('Error updating invoice record:', updateError);
       }
     } else {
-      // Insert new record
       const { error: insertError } = await supabase
         .from('invoice_records')
         .insert(invoiceRecord);
@@ -125,7 +132,6 @@ export class ReportingService {
       }
     }
 
-    // Update or create the daily summary
     await this.updateDailySummary(invoiceDate);
   }
 
@@ -153,7 +159,6 @@ export class ReportingService {
     };
 
     if (existingRefund) {
-      // Update existing record
       const { error: updateError } = await supabase
         .from('refund_records')
         .update(refundRecord)
@@ -163,7 +168,6 @@ export class ReportingService {
         console.error('Error updating refund record:', updateError);
       }
     } else {
-      // Insert new record
       const { error: insertError } = await supabase
         .from('refund_records')
         .insert(refundRecord);
@@ -173,12 +177,10 @@ export class ReportingService {
       }
     }
 
-    // Update or create the daily summary
     await this.updateDailySummary(refundDate);
   }
 
   static async updateDailySummary(date: string): Promise<void> {
-    // Get all invoices for this date
     const { data: invoices, error: invoiceError } = await supabase
       .from('invoice_records')
       .select('*')
@@ -189,7 +191,6 @@ export class ReportingService {
       return;
     }
 
-    // Get all refunds for this date
     const { data: refunds, error: refundError } = await supabase
       .from('refund_records')
       .select('*')
@@ -200,7 +201,6 @@ export class ReportingService {
       return;
     }
 
-    // Calculate summary data
     const total_sales = invoices ? invoices.reduce((sum, inv) => sum + inv.total_amount, 0) : 0;
     const total_refunds = refunds ? refunds.reduce((sum, ref) => sum + ref.amount, 0) : 0;
     const net_sales = total_sales - total_refunds;
@@ -209,7 +209,6 @@ export class ReportingService {
     const contacts_sales_count = invoices ? invoices.filter(inv => inv.invoice_type === 'contacts').length : 0;
     const exam_sales_count = invoices ? invoices.filter(inv => inv.invoice_type === 'exam').length : 0;
 
-    // Check if summary already exists for this date
     const { data: existingSummary, error: checkError } = await supabase
       .from('daily_sales_summary')
       .select('id')
@@ -237,7 +236,6 @@ export class ReportingService {
     let daily_summary_id: string;
 
     if (existingSummary) {
-      // Update existing summary
       const { data: updatedSummary, error: updateError } = await supabase
         .from('daily_sales_summary')
         .update(summaryData)
@@ -256,20 +254,16 @@ export class ReportingService {
         return;
       }
 
-      // Delete existing payment method summaries
       await supabase
         .from('payment_methods_summary')
         .delete()
         .eq('daily_summary_id', daily_summary_id);
 
-      // Delete existing invoice type summaries
       await supabase
         .from('invoice_types_summary')
         .delete()
         .eq('daily_summary_id', daily_summary_id);
-      
     } else {
-      // Insert new summary
       const { data: newSummary, error: insertError } = await supabase
         .from('daily_sales_summary')
         .insert(summaryData)
@@ -288,7 +282,6 @@ export class ReportingService {
       }
     }
 
-    // Create payment method summaries
     if (invoices && invoices.length > 0) {
       const paymentMethods = [...new Set(invoices.map(inv => inv.payment_method))];
       for (const method of paymentMethods) {
@@ -310,7 +303,6 @@ export class ReportingService {
       }
     }
 
-    // Create invoice type summaries
     if (invoices && invoices.length > 0) {
       const invoiceTypes = [...new Set(invoices.map(inv => inv.invoice_type))];
       for (const type of invoiceTypes) {
@@ -332,16 +324,14 @@ export class ReportingService {
       }
     }
 
-    // Update monthly summary
     await this.updateMonthlySummary(date);
   }
 
   static async updateMonthlySummary(date: string): Promise<void> {
     const dateObj = new Date(date);
     const year = dateObj.getFullYear();
-    const month = dateObj.getMonth() + 1; // JavaScript months are 0-indexed
+    const month = dateObj.getMonth() + 1;
     
-    // Get all daily summaries for this month
     const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
     const lastDay = new Date(year, month, 0).getDate();
     const endDate = `${year}-${month.toString().padStart(2, '0')}-${lastDay}`;
@@ -363,7 +353,6 @@ export class ReportingService {
       return;
     }
 
-    // Calculate monthly totals
     const total_sales = dailySummaries.reduce((sum, day) => sum + day.total_sales, 0);
     const total_refunds = dailySummaries.reduce((sum, day) => sum + day.total_refunds, 0);
     const net_sales = total_sales - total_refunds;
@@ -385,7 +374,6 @@ export class ReportingService {
       updated_at: new Date().toISOString()
     };
 
-    // Upsert monthly summary (insert if not exists, update if exists)
     const { error: upsertError } = await supabase
       .from('monthly_sales_summary')
       .upsert(monthlySummaryData, { onConflict: 'year,month,location_id' });
@@ -432,7 +420,6 @@ export class ReportingService {
       return { summary: null, paymentMethods: [], invoiceTypes: [] };
     }
 
-    // Get payment methods summary
     const { data: paymentMethods, error: paymentError } = await supabase
       .from('payment_methods_summary')
       .select('*')
@@ -443,7 +430,6 @@ export class ReportingService {
       return { summary, paymentMethods: [], invoiceTypes: [] };
     }
 
-    // Get invoice types summary
     const { data: invoiceTypes, error: typeError } = await supabase
       .from('invoice_types_summary')
       .select('*')
@@ -509,7 +495,6 @@ export class ReportingService {
   }
 
   static async syncAllInvoicesAndRefunds(invoices: Invoice[], refunds: Refund[]): Promise<void> {
-    // Use the edge function to perform bulk sync
     try {
       const response = await fetch(`${window.location.origin}/api/sync-reports`, {
         method: 'POST',
