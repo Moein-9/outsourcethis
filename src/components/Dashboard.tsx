@@ -124,7 +124,7 @@ export const Dashboard: React.FC = () => {
                 <div>
                   <h2 className="text-2xl font-bold">{welcomeMessage}</h2>
                   <p className="text-teal-100">
-                    {language === 'ar' ? 'نظارات المعين - فرع العربيد' : 'Moen Optician - Al Arbid location'}
+                    {language === 'ar' ? 'نظارات المعين - فرع الصميط' : 'Moen Optician - Al Somait location'}
                   </p>
                 </div>
               </div>
