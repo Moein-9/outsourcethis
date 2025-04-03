@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { ContactLensRx } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
+import { useLanguageStore } from "@/store/languageStore";
 
 export interface ContactLensItem {
   id: string;
@@ -49,6 +50,7 @@ interface ContactLensSelectorProps {
 
 export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSelect, initialRxData }) => {
   const { contactLenses, searchContactLenses } = useInventoryStore();
+  const { language, t } = useLanguageStore();
   
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ContactLensItem[]>(contactLenses);
@@ -87,7 +89,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     setResults(filtered);
     
     if (filtered.length === 0 && (search || filterBrand !== "all" || filterType !== "all")) {
-      toast("لم يتم العثور على عدسات مطابقة للبحث");
+      toast(language === 'ar' ? "لم يتم العثور على عدسات مطابقة للبحث" : "No matching lenses found");
     }
   };
 
@@ -128,7 +130,9 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
         }
       });
       
-      toast(`تمت زيادة كمية ${lens.brand} ${lens.type} بنجاح`);
+      toast(language === 'ar' 
+        ? `تمت زيادة كمية ${lens.brand} ${lens.type} بنجاح` 
+        : `Increased quantity of ${lens.brand} ${lens.type} successfully`);
       return;
     }
     
@@ -151,7 +155,9 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
       }
     });
     
-    toast(`تمت إضافة ${lens.brand} ${lens.type} بنجاح`);
+    toast(language === 'ar'
+      ? `تمت إضافة ${lens.brand} ${lens.type} بنجاح`
+      : `Added ${lens.brand} ${lens.type} successfully`);
   };
 
   const handleRemoveLens = (lensId: string) => {
@@ -210,30 +216,36 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
       quantities: itemQuantities
     });
     
-    toast(`تمت إضافة ${selectedLenses.length} عدسة للفاتورة`);
+    toast(language === 'ar' 
+      ? `تمت إضافة ${selectedLenses.length} عدسة للفاتورة`
+      : `Added ${selectedLenses.length} lenses to the invoice`);
   };
   
+  const textDirection = language === 'ar' ? 'rtl' : 'ltr';
+  
   return (
-    <div className="space-y-5">
+    <div className="space-y-5" dir={textDirection}>
       <div className="flex justify-between items-center bg-white p-4 rounded-lg border shadow-sm">
         <div className="flex items-center gap-2">
           <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-2 rounded-full">
             <Contact className="w-5 h-5 text-blue-600" />
           </div>
-          <h3 className="text-xl font-bold text-blue-800">العدسات اللاصقة</h3>
+          <h3 className="text-xl font-bold text-blue-800">
+            {language === 'ar' ? 'العدسات اللاصقة' : 'Contact Lenses'}
+          </h3>
         </div>
         
         <div className="flex items-center gap-3">
           {selectedLenses.length > 0 && (
             <Badge variant="outline" className="px-3 py-1.5 bg-blue-50 text-blue-700 border-blue-200">
-              {selectedLenses.length} عدسة مختارة
+              {selectedLenses.length} {language === 'ar' ? 'عدسة مختارة' : 'lenses selected'}
             </Badge>
           )}
           
           {selectedLenses.length > 0 && (
             <Badge className="bg-primary text-white px-3 py-1.5 flex items-center gap-1">
               <ShoppingCart className="h-3.5 w-3.5" />
-              {totalPrice.toFixed(2)} KWD
+              {totalPrice.toFixed(2)} {t('kwd')}
             </Badge>
           )}
         </div>
@@ -246,7 +258,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               <CardTitle className="text-blue-800 flex items-center justify-between text-base">
                 <span className="flex items-center gap-2">
                   <Search className="h-4 w-4 text-blue-600" />
-                  بحث في المخزون
+                  {language === 'ar' ? 'بحث في المخزون' : 'Search Inventory'}
                 </span>
                 <Button 
                   variant="ghost" 
@@ -255,7 +267,9 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                   className="h-8 text-blue-700 hover:bg-blue-100"
                 >
                   <Filter className="h-4 w-4 mr-1" />
-                  {filtersVisible ? 'إخفاء الفلاتر' : 'إظهار الفلاتر'}
+                  {filtersVisible 
+                    ? (language === 'ar' ? 'إخفاء الفلاتر' : 'Hide Filters')
+                    : (language === 'ar' ? 'إظهار الفلاتر' : 'Show Filters')}
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -263,7 +277,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="ابحث عن عدسة لاصقة..."
+                  placeholder={language === 'ar' ? 'ابحث عن عدسة لاصقة...' : 'Search for contact lenses...'}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 pr-3 border-blue-200"
@@ -273,13 +287,15 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               {filtersVisible && (
                 <div className="space-y-3 border-t pt-3 mt-2 border-blue-100">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-blue-700">البراند:</Label>
+                    <Label className="text-sm font-medium text-blue-700">
+                      {language === 'ar' ? 'البراند:' : 'Brand:'}
+                    </Label>
                     <Select value={filterBrand} onValueChange={setFilterBrand}>
                       <SelectTrigger className="w-full bg-white border-blue-200">
-                        <SelectValue placeholder="اختر البراند" />
+                        <SelectValue placeholder={language === 'ar' ? 'اختر البراند' : 'Select brand'} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">الكل</SelectItem>
+                        <SelectItem value="all">{language === 'ar' ? 'الكل' : 'All'}</SelectItem>
                         {brands.map(brand => (
                           <SelectItem key={brand} value={brand}>{brand}</SelectItem>
                         ))}
@@ -288,13 +304,15 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-blue-700">النوع:</Label>
+                    <Label className="text-sm font-medium text-blue-700">
+                      {language === 'ar' ? 'النوع:' : 'Type:'}
+                    </Label>
                     <Select value={filterType} onValueChange={setFilterType}>
                       <SelectTrigger className="w-full bg-white border-blue-200">
-                        <SelectValue placeholder="اختر النوع" />
+                        <SelectValue placeholder={language === 'ar' ? 'اختر النوع' : 'Select type'} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">الكل</SelectItem>
+                        <SelectItem value="all">{language === 'ar' ? 'الكل' : 'All'}</SelectItem>
                         {types.map(type => (
                           <SelectItem key={type} value={type}>{type}</SelectItem>
                         ))}
@@ -313,7 +331,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                     }}
                     className="w-full mt-2 text-blue-700 border-blue-200 hover:bg-blue-50"
                   >
-                    إعادة ضبط البحث
+                    {language === 'ar' ? 'إعادة ضبط البحث' : 'Reset Search'}
                   </Button>
                 </div>
               )}
@@ -326,7 +344,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                 <CardTitle className="text-blue-800 flex items-center justify-between text-base">
                   <span className="flex items-center gap-2">
                     <ShoppingCart className="h-4 w-4 text-blue-600" />
-                    العدسات المختارة
+                    {language === 'ar' ? 'العدسات المختارة' : 'Selected Lenses'}
                   </span>
                   <Badge className="bg-blue-100 text-blue-700 px-2">
                     {selectedLenses.length}
@@ -344,7 +362,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                         {lens.brand} {lens.type}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {lens.color ? lens.color : "Clear"} | {lens.price.toFixed(2)} KWD
+                        {lens.color ? lens.color : "Clear"} | {lens.price.toFixed(2)} {t('kwd')}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -383,9 +401,11 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               </CardContent>
               <CardFooter className="border-t border-blue-100 p-3 bg-blue-50/50">
                 <div className="w-full flex justify-between items-center">
-                  <span className="font-semibold">المجموع:</span>
+                  <span className="font-semibold">
+                    {language === 'ar' ? 'المجموع:' : 'Total:'}
+                  </span>
                   <Badge className="bg-primary text-white px-2.5 py-1 text-sm">
-                    {totalPrice.toFixed(2)} KWD
+                    {totalPrice.toFixed(2)} {t('kwd')}
                   </Badge>
                 </div>
               </CardFooter>
@@ -399,10 +419,10 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               <CardTitle className="text-blue-800 flex items-center justify-between text-base">
                 <span className="flex items-center gap-2">
                   <Eye className="h-4 w-4 text-blue-600" />
-                  نتائج البحث
+                  {language === 'ar' ? 'نتائج البحث' : 'Search Results'}
                 </span>
                 <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700">
-                  {results.length} عدسة
+                  {results.length} {language === 'ar' ? 'عدسة' : 'lenses'}
                 </Badge>
               </CardTitle>
             </CardHeader>
@@ -412,11 +432,21 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                   <table className="w-full">
                     <thead className="bg-gradient-to-r from-blue-50 to-blue-100/50">
                       <tr className="border-b border-blue-100">
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">البراند</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">النوع</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">اللون</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">BC</th>
-                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">السعر</th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">
+                          {language === 'ar' ? 'البراند' : 'Brand'}
+                        </th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">
+                          {language === 'ar' ? 'النوع' : 'Type'}
+                        </th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">
+                          {language === 'ar' ? 'اللون' : 'Color'}
+                        </th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">
+                          BC
+                        </th>
+                        <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800">
+                          {language === 'ar' ? 'السعر' : 'Price'}
+                        </th>
                         <th className="py-2.5 px-3 text-right text-xs font-medium text-blue-800"></th>
                       </tr>
                     </thead>
@@ -427,7 +457,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                           <td className="py-2.5 px-3 text-sm">{lens.type}</td>
                           <td className="py-2.5 px-3 text-sm">{lens.color || "-"}</td>
                           <td className="py-2.5 px-3 text-sm">{lens.bc}</td>
-                          <td className="py-2.5 px-3 text-sm font-medium">{lens.price.toFixed(2)} KWD</td>
+                          <td className="py-2.5 px-3 text-sm font-medium">{lens.price.toFixed(2)} {t('kwd')}</td>
                           <td className="py-2 px-3">
                             <Button 
                               variant="ghost" 
@@ -436,7 +466,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                               className="h-7 gap-1 text-xs hover:bg-blue-100 text-blue-700"
                             >
                               <Plus className="w-3.5 h-3.5" />
-                              اختر
+                              {language === 'ar' ? 'اختر' : 'Select'}
                             </Button>
                           </td>
                         </tr>
@@ -447,9 +477,13 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               ) : (
                 <div className="flex flex-col items-center justify-center text-center p-8">
                   <Contact className="h-12 w-12 text-blue-200 mb-2" />
-                  <h4 className="text-base font-medium text-blue-800 mb-1">لا توجد نتائج</h4>
+                  <h4 className="text-base font-medium text-blue-800 mb-1">
+                    {language === 'ar' ? 'لا توجد نتائج' : 'No Results'}
+                  </h4>
                   <p className="text-sm text-blue-600/80 mb-4">
-                    لم يتم العثور على عدسات لاصقة مطابقة للبحث
+                    {language === 'ar' 
+                      ? 'لم يتم العثور على عدسات لاصقة مطابقة للبحث' 
+                      : 'No matching contact lenses were found'}
                   </p>
                   <Button 
                     variant="outline" 
@@ -462,7 +496,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                     }}
                     className="border-blue-200 hover:bg-blue-50 text-blue-700"
                   >
-                    عرض جميع العدسات
+                    {language === 'ar' ? 'عرض جميع العدسات' : 'Show All Lenses'}
                   </Button>
                 </div>
               )}
@@ -475,7 +509,9 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
               onClick={handleConfirmSelection}
             >
               <Check className="w-5 h-5" />
-              إضافة للفاتورة ({totalPrice.toFixed(2)} KWD)
+              {language === 'ar' 
+                ? `إضافة للفاتورة (${totalPrice.toFixed(2)} ${t('kwd')})` 
+                : `Add to Invoice (${totalPrice.toFixed(2)} ${t('kwd')})`}
             </Button>
           )}
         </div>
