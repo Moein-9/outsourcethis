@@ -93,3 +93,28 @@ h3, .h3 {
 .card-content-enhanced {
   padding: 1.5rem !important;
 }
+
+/* Photochromic selector RTL fixes */
+.photochromic-select-item {
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+}
+
+[dir="rtl"] .photochromic-select-item {
+  text-align: right !important;
+}
+
+/* Fix RTL select items with proper text alignment and indicator position */
+[dir="rtl"] [role="listbox"] [role="option"] {
+  text-align: right !important;
+  padding-right: 8px !important;
+  padding-left: 2rem !important;
+}
+
+[dir="rtl"] [role="listbox"] [role="option"] span:first-child {
+  left: auto !important;
+  right: 8px !important;
+}

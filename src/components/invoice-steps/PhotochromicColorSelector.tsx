@@ -23,6 +23,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
   onColorChange
 }) => {
   const { t, language } = useLanguageStore();
+  const isRtl = language === 'ar';
 
   // Color mapping for visualization
   const getColorStyle = (colorName: string) => {
@@ -41,7 +42,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full" dir={isRtl ? "rtl" : "ltr"}>
       <Label className="mb-3 block font-medium text-base">
         {t('selectPhotochromicColor')}
       </Label>
@@ -52,7 +53,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
             value={selectedColor} 
             onValueChange={onColorChange}
           >
-            <SelectTrigger className={`w-full bg-white h-12 text-base ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+            <SelectTrigger className={`w-full bg-white h-12 text-base`}>
               <SelectValue placeholder={t('selectColor')} />
             </SelectTrigger>
             <SelectContent 
@@ -68,9 +69,9 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
                 <SelectItem 
                   key={color} 
                   value={color} 
-                  className="py-3 h-auto hover:bg-slate-100"
+                  className="py-3 h-auto hover:bg-slate-100 photochromic-select-item"
                 >
-                  <div className={`flex items-center gap-3 w-full ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                  <div className={`flex items-center gap-3 w-full ${isRtl ? 'flex-row-reverse' : ''}`}>
                     <div 
                       className="min-w-6 h-6 rounded-full border shrink-0"
                       style={{ backgroundColor: getColorStyle(color) }}
@@ -85,7 +86,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
         
         {/* Color Preview with larger space */}
         {selectedColor && (
-          <div className={`flex items-start gap-3 p-4 bg-white rounded-md border ${language === 'ar' ? 'flex-row-reverse text-right' : ''}`}>
+          <div className={`flex items-start gap-3 p-4 bg-white rounded-md border ${isRtl ? 'flex-row-reverse' : ''}`}>
             <div 
               className="w-8 h-8 rounded-full border-2 shrink-0 mt-0.5"
               style={{ backgroundColor: getColorStyle(selectedColor) }}
