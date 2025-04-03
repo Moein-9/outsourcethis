@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -17,7 +18,6 @@ export interface LensType {
   name: string;
   type: "distance" | "reading" | "progressive" | "bifocal" | "sunglasses";
   price?: number;
-  arabicName?: string;
 }
 
 export interface LensCoating {
@@ -28,9 +28,6 @@ export interface LensCoating {
   category: "distance-reading" | "progressive" | "bifocal";
   isPhotochromic?: boolean;
   availableColors?: string[];
-  arabicName?: string;
-  arabicDescription?: string;
-  type?: string;
 }
 
 export interface LensThickness {
@@ -39,9 +36,6 @@ export interface LensThickness {
   price: number;
   description?: string;
   category: "distance-reading" | "progressive" | "bifocal";
-  arabicName?: string;
-  arabicDescription?: string;
-  type?: string;
 }
 
 export interface ContactLensItem {

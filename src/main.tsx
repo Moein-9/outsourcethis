@@ -1,53 +1,23 @@
 
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import NotFound from './pages/NotFound.tsx';
-import ReportPage from './pages/ReportPage.tsx';
-import PrintLabelPage from './pages/PrintLabelPage.tsx';
-import SystemPage from './pages/SystemPage.tsx';
-import Index from './pages/Index.tsx';
-import { CustomWorkOrderReceipt } from './components/CustomWorkOrderReceipt.tsx';
-import { LensDebugger } from './components/LensDebugger.tsx';
+import * as React from 'react'
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    errorElement: <NotFound />,
-    children: [
-      {
-        index: true,
-        element: <Index />
-      },
-      {
-        path: "reports",
-        element: <ReportPage />
-      },
-      {
-        path: "print-label/:frameId",
-        element: <PrintLabelPage />
-      },
-      {
-        path: "system",
-        element: <SystemPage />
-      },
-      {
-        path: "custom-work-order",
-        element: <CustomWorkOrderReceipt workOrder={{}} />
-      },
-      {
-        path: "lens-debug",
-        element: <LensDebugger />
-      }
-    ]
-  }
-]);
+// Ensure React is properly imported and available globally
+window.React = React;
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+// Ensure the app is properly mounted
+const root = document.getElementById("root");
+if (!root) {
+  const rootDiv = document.createElement("div");
+  rootDiv.id = "root";
+  document.body.appendChild(rootDiv);
+}
+
+// Create root and render app
+createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
-)
+    <App />
+  </React.StrictMode>
+);
