@@ -487,7 +487,8 @@ export const useInventoryStore = create<InventoryState>()(
           lens.brand.toLowerCase().includes(q) || 
           lens.type.toLowerCase().includes(q) || 
           lens.power.includes(q) || 
-          lens.bc.includes(q)
+          lens.bc.includes(q) ||
+          (lens.color && lens.color.toLowerCase().includes(q))
         );
       },
       

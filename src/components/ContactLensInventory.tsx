@@ -35,7 +35,7 @@ import { ContactLensForm } from "./contact-lens/ContactLensForm";
 import { CustomBrandsManager } from "./contact-lens/CustomBrandsManager";
 import { CustomTypesManager } from "./contact-lens/CustomTypesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Contact, Settings, Tag, Database, UploadCloud } from "lucide-react";
+import { Search, Plus, Contact, Settings, Tag, Database, UploadCloud, Filter, RefreshCw } from "lucide-react";
 
 const bellaContactLenses = [
   // Contour collection
@@ -168,16 +168,18 @@ export const ContactLensInventory: React.FC = () => {
   
   const [filterBrand, setFilterBrand] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
+  const [filterColor, setFilterColor] = useState<string>("all");
   
-  const brands = [...new Set(contactLenses.map(lens => lens.brand))];
-  const types = [...new Set(contactLenses.map(lens => lens.type))];
+  const brands = [...new Set(contactLenses.map(lens => lens.brand))].sort();
+  const types = [...new Set(contactLenses.map(lens => lens.type))].sort();
+  const colors = [...new Set(contactLenses.map(lens => lens.color).filter(Boolean))].sort();
+  
+  useEffect(() => {
+    handleSearch();
+  }, [searchTerm, filterBrand, filterType, filterColor, contactLenses]);
   
   const handleSearch = () => {
-    let results = contactLenses;
-    
-    if (searchTerm) {
-      results = searchContactLenses(searchTerm);
-    }
+    let results = searchTerm ? searchContactLenses(searchTerm) : [...contactLenses];
     
     if (filterBrand && filterBrand !== "all") {
       results = results.filter(lens => lens.brand === filterBrand);
@@ -187,9 +189,13 @@ export const ContactLensInventory: React.FC = () => {
       results = results.filter(lens => lens.type === filterType);
     }
     
+    if (filterColor && filterColor !== "all") {
+      results = results.filter(lens => lens.color === filterColor);
+    }
+    
     setSearchResults(results);
     
-    if (results.length === 0 && (searchTerm || filterBrand !== "all" || filterType !== "all")) {
+    if (results.length === 0 && (searchTerm || filterBrand !== "all" || filterType !== "all" || filterColor !== "all")) {
       toast.info(language === 'ar' 
         ? "لم يتم العثور على عدسات لاصقة مطابقة للبحث."
         : "No matching contact lenses were found.");
@@ -200,6 +206,7 @@ export const ContactLensInventory: React.FC = () => {
     setSearchTerm("");
     setFilterBrand("all");
     setFilterType("all");
+    setFilterColor("all");
     setSearchResults(contactLenses);
   };
   
@@ -293,14 +300,6 @@ export const ContactLensInventory: React.FC = () => {
     setEditingLens(null);
   };
   
-  useEffect(() => {
-    setSearchResults(contactLenses);
-  }, [contactLenses]);
-  
-  useEffect(() => {
-    handleSearch();
-  }, [filterBrand, filterType]);
-  
   const groupedByBrand = React.useMemo(() => {
     const grouped: Record<string, ContactLensItem[]> = {};
     
@@ -359,14 +358,13 @@ export const ContactLensInventory: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder={language === 'ar' 
-                ? "البحث عن عدسة لاصقة (ماركة، نوع، قطر...)"
-                : "Search contact lenses (brand, type, diameter...)"}
+                ? "البحث عن عدسة لاصقة (ماركة، نوع، لون، قطر...)"
+                : "Search contact lenses (brand, type, color, diameter...)"}
               className="pl-9 w-full"
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
-          <Button onClick={handleSearch} variant="secondary" className="shrink-0">
-            <Search className="h-4 w-4 mr-1" /> {language === 'ar' ? 'بحث' : 'Search'}
+          <Button variant="outline" onClick={resetFilters} className="shrink-0">
+            <RefreshCw className="h-4 w-4 mr-1" /> {language === 'ar' ? 'إعادة ضبط' : 'Reset'}
           </Button>
         </div>
         
@@ -391,6 +389,18 @@ export const ContactLensInventory: React.FC = () => {
               <SelectItem value="all">{language === 'ar' ? 'كل الأنواع' : 'All Types'}</SelectItem>
               {types.map(type => (
                 <SelectItem key={type} value={type}>{type}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={filterColor} onValueChange={setFilterColor}>
+            <SelectTrigger className="w-52 bg-white">
+              <SelectValue placeholder={language === 'ar' ? 'اختر اللون' : 'Select Color'} />
+            </SelectTrigger>
+            <SelectContent className="max-h-[300px]">
+              <SelectItem value="all">{language === 'ar' ? 'كل الألوان' : 'All Colors'}</SelectItem>
+              {colors.map(color => (
+                <SelectItem key={color} value={color}>{color}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -420,7 +430,7 @@ export const ContactLensInventory: React.FC = () => {
         </div>
       </div>
       
-      {Object.keys(groupedByBrand).length > 0 ? (
+      {searchResults.length > 0 ? (
         <div className="space-y-6">
           {Object.entries(groupedByBrand).map(([brand, lenses]) => (
             <CollapsibleCard 
