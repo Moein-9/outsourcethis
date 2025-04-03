@@ -9,7 +9,253 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      daily_sales_summary: {
+        Row: {
+          contacts_sales_count: number
+          created_at: string | null
+          date: string
+          exam_sales_count: number
+          glasses_sales_count: number
+          id: string
+          location_id: string | null
+          net_sales: number
+          total_refunds: number
+          total_sales: number
+          updated_at: string | null
+        }
+        Insert: {
+          contacts_sales_count?: number
+          created_at?: string | null
+          date: string
+          exam_sales_count?: number
+          glasses_sales_count?: number
+          id?: string
+          location_id?: string | null
+          net_sales?: number
+          total_refunds?: number
+          total_sales?: number
+          updated_at?: string | null
+        }
+        Update: {
+          contacts_sales_count?: number
+          created_at?: string | null
+          date?: string
+          exam_sales_count?: number
+          glasses_sales_count?: number
+          id?: string
+          location_id?: string | null
+          net_sales?: number
+          total_refunds?: number
+          total_sales?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      invoice_records: {
+        Row: {
+          created_at: string | null
+          date: string
+          deposit_amount: number
+          id: string
+          invoice_id: string
+          invoice_type: string
+          is_paid: boolean
+          is_refunded: boolean
+          location_id: string | null
+          patient_id: string | null
+          patient_name: string
+          payment_method: string
+          refund_id: string | null
+          remaining_amount: number
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          deposit_amount: number
+          id?: string
+          invoice_id: string
+          invoice_type: string
+          is_paid?: boolean
+          is_refunded?: boolean
+          location_id?: string | null
+          patient_id?: string | null
+          patient_name: string
+          payment_method: string
+          refund_id?: string | null
+          remaining_amount: number
+          total_amount: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          deposit_amount?: number
+          id?: string
+          invoice_id?: string
+          invoice_type?: string
+          is_paid?: boolean
+          is_refunded?: boolean
+          location_id?: string | null
+          patient_id?: string | null
+          patient_name?: string
+          payment_method?: string
+          refund_id?: string | null
+          remaining_amount?: number
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      invoice_types_summary: {
+        Row: {
+          amount: number
+          count: number
+          created_at: string | null
+          daily_summary_id: string | null
+          id: string
+          invoice_type: string
+        }
+        Insert: {
+          amount?: number
+          count?: number
+          created_at?: string | null
+          daily_summary_id?: string | null
+          id?: string
+          invoice_type: string
+        }
+        Update: {
+          amount?: number
+          count?: number
+          created_at?: string | null
+          daily_summary_id?: string | null
+          id?: string
+          invoice_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_types_summary_daily_summary_id_fkey"
+            columns: ["daily_summary_id"]
+            isOneToOne: false
+            referencedRelation: "daily_sales_summary"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monthly_sales_summary: {
+        Row: {
+          contacts_sales_count: number
+          created_at: string | null
+          exam_sales_count: number
+          glasses_sales_count: number
+          id: string
+          location_id: string | null
+          month: number
+          net_sales: number
+          total_refunds: number
+          total_sales: number
+          updated_at: string | null
+          year: number
+        }
+        Insert: {
+          contacts_sales_count?: number
+          created_at?: string | null
+          exam_sales_count?: number
+          glasses_sales_count?: number
+          id?: string
+          location_id?: string | null
+          month: number
+          net_sales?: number
+          total_refunds?: number
+          total_sales?: number
+          updated_at?: string | null
+          year: number
+        }
+        Update: {
+          contacts_sales_count?: number
+          created_at?: string | null
+          exam_sales_count?: number
+          glasses_sales_count?: number
+          id?: string
+          location_id?: string | null
+          month?: number
+          net_sales?: number
+          total_refunds?: number
+          total_sales?: number
+          updated_at?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
+      payment_methods_summary: {
+        Row: {
+          amount: number
+          created_at: string | null
+          daily_summary_id: string | null
+          id: string
+          payment_method: string
+          transaction_count: number
+        }
+        Insert: {
+          amount?: number
+          created_at?: string | null
+          daily_summary_id?: string | null
+          id?: string
+          payment_method: string
+          transaction_count?: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          daily_summary_id?: string | null
+          id?: string
+          payment_method?: string
+          transaction_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_methods_summary_daily_summary_id_fkey"
+            columns: ["daily_summary_id"]
+            isOneToOne: false
+            referencedRelation: "daily_sales_summary"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refund_records: {
+        Row: {
+          amount: number
+          created_at: string | null
+          date: string
+          id: string
+          invoice_id: string
+          location_id: string | null
+          reason: string | null
+          refund_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          date: string
+          id?: string
+          invoice_id: string
+          location_id?: string | null
+          reason?: string | null
+          refund_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          date?: string
+          id?: string
+          invoice_id?: string
+          location_id?: string | null
+          reason?: string | null
+          refund_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

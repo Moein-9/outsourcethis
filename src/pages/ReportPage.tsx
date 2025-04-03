@@ -30,7 +30,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LockKeyhole, Unlock, Eye, EyeOff } from "lucide-react";
+import { LockKeyhole, Unlock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useReportStore } from "@/store/reportStore";
+import { useReportInitializer } from "@/hooks/useReportInitializer";
 
 const ReportPage: React.FC = () => {
   const invoiceStore = useInvoiceStore();
@@ -44,6 +46,11 @@ const ReportPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [resetCode, setResetCode] = useState("");
   const [securityAnswer, setSecurityAnswer] = useState("");
+  
+  // Use the reporting state from our store
+  const { isInitialized, isInitializing } = useReportInitializer();
+  const loadDailyData = useReportStore(state => state.loadDailyData);
+  const loadComparativeData = useReportStore(state => state.loadComparativeData);
   
   const correctPassword = "admin123";
   const securityQuestion = language === 'ar' 
@@ -85,6 +92,8 @@ const ReportPage: React.FC = () => {
     wrongAnswer: language === 'ar' ? "الإجابة غير صحيحة" : "Incorrect answer",
     passwordRevealed: language === 'ar' ? `كلمة المرور هي: ${correctPassword}` : `The password is: ${correctPassword}`,
     backToDashboard: language === 'ar' ? "العودة إلى لوحة التحكم" : "Back to Dashboard",
+    loading: language === 'ar' ? "جاري التحميل..." : "Loading...",
+    initializingSystem: language === 'ar' ? "جاري تهيئة نظام التقارير..." : "Initializing reporting system...",
   };
   
   const handleNavigate = (section: string) => {
@@ -103,7 +112,13 @@ const ReportPage: React.FC = () => {
     if (authStatus === "true") {
       setIsAuthenticated(true);
     }
-  }, []);
+    
+    // Load reports data on component mount
+    if (isInitialized) {
+      loadDailyData();
+      loadComparativeData();
+    }
+  }, [isInitialized, loadDailyData, loadComparativeData]);
   
   const handlePasswordSubmit = () => {
     if (password === correctPassword) {
@@ -146,6 +161,38 @@ const ReportPage: React.FC = () => {
     setActiveTab("daily");
     toast.success(translations.logoutSuccess);
   };
+  
+  // Show loading state while the reporting system initializes
+  if (isInitializing || !isInitialized) {
+    return (
+      <Layout activeSection="reports" onNavigate={handleNavigate}>
+        <div className="container px-4 py-6 md:px-6">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl md:text-3xl font-bold">{translations.reportsTitle}</h1>
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-600 border-teal-200"
+              onClick={() => handleNavigate("dashboard")}
+            >
+              {language === 'ar' ? "←" : "←"} {translations.backToDashboard}
+            </Button>
+          </div>
+          
+          <Card className="w-full p-10 flex flex-col items-center justify-center">
+            <Loader2 className="h-12 w-12 animate-spin text-teal-500 mb-4" />
+            <h3 className="text-lg font-medium text-gray-700">
+              {translations.initializingSystem}
+            </h3>
+            <p className="text-gray-500 mt-2 text-center">
+              {language === 'ar' 
+                ? "يرجى الانتظار بينما نقوم بإعداد البيانات للتقارير..."
+                : "Please wait while we prepare your reporting data..."}
+            </p>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
   
   return (
     <Layout activeSection="reports" onNavigate={handleNavigate}>

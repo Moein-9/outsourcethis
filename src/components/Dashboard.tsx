@@ -13,7 +13,8 @@ import {
   Calendar,
   Store,
   ScrollText,
-  Eye
+  Eye,
+  LineChart
 } from "lucide-react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -100,6 +101,13 @@ export const Dashboard: React.FC = () => {
       onClick: () => navigateToSection('remainingPayments')
     },
     {
+      title: language === 'ar' ? 'التقارير' : 'Reports',
+      description: language === 'ar' ? 'عرض تقارير المبيعات' : 'View sales reports',
+      icon: LineChart,
+      color: 'bg-teal-500',
+      onClick: () => navigate('/reports')
+    },
+    {
       title: language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges',
       description: language === 'ar' ? 'معالجة استرداد الأموال واستبدال المنتجات' : 'Process refunds and exchanges',
       icon: RefreshCcw,
@@ -148,7 +156,7 @@ export const Dashboard: React.FC = () => {
         defaultOpen={true}
         className="mb-6"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-4">
           {quickActions.map((action, index) => (
             <Card 
               key={index} 

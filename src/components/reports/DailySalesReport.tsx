@@ -1,1365 +1,443 @@
 
 import React, { useState, useEffect } from "react";
-import { format } from "date-fns";
-import { enUS } from "date-fns/locale";
-import { useInvoiceStore, Invoice, Refund } from "@/store/invoiceStore";
-import { useLanguageStore } from "@/store/languageStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  ChartLine, 
-  CreditCard, 
-  Wallet, 
-  Receipt, 
-  ArrowRight,
-  ChevronDown,
-  ChevronUp,
-  Eye,
-  Tag,
-  MapPin,
-  Store,
-  Phone,
-  RefreshCcw,
-  Calendar as CalendarIcon
-} from "lucide-react";
-import { 
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { SalesChart } from "./SalesChart";
-import { CollapsibleCard } from "@/components/ui/collapsible-card";
-import { PrintService } from "@/utils/PrintService";
-import { PrintReportButton } from "./PrintReportButton";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { MoenLogo, storeInfo } from "@/assets/logo";
-import { toast } from "sonner";
-import { formatDate } from "@/lib/utils";
+import { format, isToday, isSameDay } from "date-fns";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Printer, Download, RefreshCw, CreditCard, Ban, Wallet, ShoppingBag, Contact, Glasses, Eye } from "lucide-react";
+import { useInvoiceStore } from "@/store/invoiceStore";
+import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/languageStore";
+import { PrintReportButton } from "./PrintReportButton";
+import { useReportStore } from "@/store/reportStore";
 
-export const DailySalesReport: React.FC = () => {
-  const invoiceStore = useInvoiceStore();
+export const DailySalesReport = () => {
   const { language } = useLanguageStore();
-  const invoices: Invoice[] = invoiceStore?.invoices || [];
-  const refunds: Refund[] = invoiceStore?.refunds || [];
   
-  const [todaySales, setTodaySales] = useState<Invoice[]>([]);
-  const [todayRefunds, setTodayRefunds] = useState<Refund[]>([]);
-  const [paymentBreakdown, setPaymentBreakdown] = useState<{
-    method: string;
-    amount: number;
-    count: number;
-  }[]>([]);
-  const [refundBreakdown, setRefundBreakdown] = useState<{
-    method: string;
-    amount: number;
-    count: number;
-  }[]>([]);
+  // Use the report store instead of local state
+  const {
+    selectedDate,
+    setSelectedDate,
+    previousDay,
+    nextDay,
+    loadDailyData,
+    dailySummary,
+    paymentMethods,
+    invoiceTypes,
+    dailyInvoices,
+    dailyRefunds,
+    loading
+  } = useReportStore();
   
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [totalLensRevenue, setTotalLensRevenue] = useState(0);
-  const [totalFrameRevenue, setTotalFrameRevenue] = useState(0);
-  const [totalCoatingRevenue, setTotalCoatingRevenue] = useState(0);
-  const [totalDeposit, setTotalDeposit] = useState(0);
-  const [totalRefunds, setTotalRefunds] = useState(0);
-  const [netRevenue, setNetRevenue] = useState(0);
-  
-  const [expandedInvoices, setExpandedInvoices] = useState<Record<string, boolean>>({});
-  
-  const t = {
-    dailySalesReport: language === 'ar' ? "تقرير المبيعات اليومي" : "Daily Sales Report",
-    printReport: language === 'ar' ? "طباعة التقرير" : "Print Report",
-    totalSales: language === 'ar' ? "إجمالي المبيعات" : "Total Sales",
-    forDay: language === 'ar' ? "لليوم" : "For day",
-    invoiceCount: language === 'ar' ? "عدد الفواتير" : "Invoice Count",
-    inTodaysTransactions: language === 'ar' ? "في معاملات اليوم" : "In today's transactions",
-    totalPayments: language === 'ar' ? "إجمالي المدفوعات" : "Total Payments",
-    actuallyReceived: language === 'ar' ? "المستلم فعلياً" : "Actually received",
-    remainingAmounts: language === 'ar' ? "المبالغ المتبقية" : "Remaining Amounts",
-    deferredAmounts: language === 'ar' ? "المبالغ المؤجلة" : "Deferred amounts",
-    salesDistribution: language === 'ar' ? "توزيع المبيعات" : "Sales Distribution",
-    paymentMethods: language === 'ar' ? "طرق الدفع" : "Payment Methods",
-    transactions: language === 'ar' ? "معاملات" : "transactions",
-    todaysInvoiceList: language === 'ar' ? "قائمة الفواتير اليوم" : "Today's Invoice List",
-    noInvoices: language === 'ar' ? "لا توجد فواتير" : "No Invoices",
-    noInvoicesToday: language === 'ar' ? "لم يتم إنشاء أي فواتير لليوم الحالي" : "No invoices have been created for today",
-    lensRevenue: language === 'ar' ? "مبيعات العدسات" : "Lens Revenue",
-    frameRevenue: language === 'ar' ? "مبيعات الإطارات" : "Frame Revenue",
-    coatingRevenue: language === 'ar' ? "مبيعات الطلاءات" : "Coating Revenue",
-    customerInfo: language === 'ar' ? "معلومات العميل" : "Customer Information",
-    fileNumber: language === 'ar' ? "رقم الملف" : "File Number",
-    paymentInfo: language === 'ar' ? "معلومات الدفع" : "Payment Information",
-    total: language === 'ar' ? "المجموع" : "Total",
-    paid: language === 'ar' ? "المدفوع" : "Paid",
-    remaining: language === 'ar' ? "المتبقي" : "Remaining",
-    discount: language === 'ar' ? "الخصم" : "Discount",
-    paymentMethod: language === 'ar' ? "طريقة الدفع" : "Payment Method",
-    invoiceStatus: language === 'ar' ? "حالة الفاتورة" : "Invoice Status",
-    fullyPaid: language === 'ar' ? "مدفوعة بالكامل" : "Fully Paid",
-    partiallyPaid: language === 'ar' ? "مدفوعة جزئياً" : "Partially Paid",
-    creationDate: language === 'ar' ? "تاريخ الإنشاء" : "Creation Date",
-    lenses: language === 'ar' ? "العدسات" : "Lenses",
-    price: language === 'ar' ? "السعر" : "Price",
-    frame: language === 'ar' ? "الإطار" : "Frame",
-    color: language === 'ar' ? "اللون" : "Color",
-    coating: language === 'ar' ? "الطلاء" : "Coating",
-    currency: language === 'ar' ? "د.ك" : "KWD",
-    totalRefunds: language === 'ar' ? "إجمالي المبالغ المستردة" : "Total Refunds",
-    todaysRefunds: language === 'ar' ? "المبالغ المستردة اليوم" : "Today's refunds",
-    refundMethods: language === 'ar' ? "طرق الاسترداد" : "Refund Methods",
-    netRevenue: language === 'ar' ? "صافي الإيرادات" : "Net Revenue",
-    afterRefunds: language === 'ar' ? "بعد الاستردادات" : "After refunds",
-    refundedItems: language === 'ar' ? "العناصر المستردة" : "Refunded Items",
-    refundedInvoices: language === 'ar' ? "الفواتير المستردة" : "Refunded Invoices",
-    noRefunds: language === 'ar' ? "لا توجد استردادات" : "No Refunds",
-    noRefundsToday: language === 'ar' ? "لم يتم إجراء أي استردادات لليوم الحالي" : "No refunds have been processed for today",
-    reason: language === 'ar' ? "السبب" : "Reason",
-  };
-  
-  const toggleInvoiceExpansion = (invoiceId: string) => {
-    setExpandedInvoices(prev => ({
-      ...prev,
-      [invoiceId]: !prev[invoiceId]
-    }));
-  };
-  
+  // Reload data when component mounts
   useEffect(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // Get today's sales
-    const todaySalesData = invoices.filter(invoice => {
-      const invoiceDate = new Date(invoice.createdAt);
-      invoiceDate.setHours(0, 0, 0, 0);
-      return invoiceDate.getTime() === today.getTime();
-    });
-    
-    // Get today's refunds
-    const todayRefundsData = refunds.filter(refund => {
-      const refundDate = new Date(refund.date);
-      refundDate.setHours(0, 0, 0, 0);
-      return refundDate.getTime() === today.getTime();
-    });
-    
-    setTodaySales(todaySalesData);
-    setTodayRefunds(todayRefundsData);
-    
-    // Calculate total revenue (excluding refunded invoices)
-    const revenue = todaySalesData
-      .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => {
-        if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
-          const contactLensTotal = invoice.contactLensItems.reduce(
-            (lensSum, lens) => lensSum + (lens.price || 0) * (lens.qty || 1), 0
-          );
-          return sum + Math.max(0, contactLensTotal - (invoice.discount || 0));
-        }
-        return sum + invoice.total;
-      }, 0);
-    
-    // Calculate product type revenues
-    const lensRevenue = todaySalesData
-      .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + invoice.lensPrice, 0);
-      
-    const frameRevenue = todaySalesData
-      .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + invoice.framePrice, 0);
-      
-    const coatingRevenue = todaySalesData
-      .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + invoice.coatingPrice, 0);
-      
-    const contactLensRevenue = todaySalesData
-      .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => {
-        if (invoice.invoiceType === 'contacts' && invoice.contactLensItems?.length) {
-          return sum + invoice.contactLensItems.reduce(
-            (lensSum, lens) => lensSum + (lens.price || 0) * (lens.qty || 1), 0
-          );
-        }
-        return sum;
-      }, 0);
-    
-    // Calculate deposits
-    const deposits = todaySalesData
-      .filter(invoice => !invoice.isRefunded)
-      .reduce((sum, invoice) => sum + invoice.deposit, 0);
-    
-    // Calculate total refunds
-    const refundTotal = todayRefundsData.reduce((sum, refund) => sum + refund.amount, 0);
-    
-    // Set state values
-    setTotalRevenue(revenue);
-    setTotalLensRevenue(lensRevenue + contactLensRevenue);
-    setTotalFrameRevenue(frameRevenue);
-    setTotalCoatingRevenue(coatingRevenue);
-    setTotalDeposit(deposits);
-    setTotalRefunds(refundTotal);
-    setNetRevenue(revenue - refundTotal);
-    
-    // Calculate payment method breakdown
-    const paymentMethods: Record<string, { amount: number; count: number }> = {};
-    todaySalesData
-      .filter(invoice => !invoice.isRefunded && invoice.deposit > 0)
-      .forEach(invoice => {
-        const method = invoice.paymentMethod || 'غير محدد';
-        if (!paymentMethods[method]) {
-          paymentMethods[method] = { amount: 0, count: 0 };
-        }
-        paymentMethods[method].amount += invoice.deposit;
-        paymentMethods[method].count += 1;
-      });
-    
-    const breakdownData = Object.entries(paymentMethods).map(([method, data]) => ({
-      method,
-      amount: data.amount,
-      count: data.count
-    }));
-    
-    setPaymentBreakdown(breakdownData);
-    
-    // Calculate refund method breakdown
-    const refundMethods: Record<string, { amount: number; count: number }> = {};
-    todayRefundsData.forEach(refund => {
-      const method = refund.method || 'غير محدد';
-      if (!refundMethods[method]) {
-        refundMethods[method] = { amount: 0, count: 0 };
-      }
-      refundMethods[method].amount += refund.amount;
-      refundMethods[method].count += 1;
-    });
-    
-    const refundBreakdownData = Object.entries(refundMethods).map(([method, data]) => ({
-      method,
-      amount: data.amount,
-      count: data.count
-    }));
-    
-    setRefundBreakdown(refundBreakdownData);
-    
-  }, [invoices, refunds]);
+    loadDailyData();
+  }, [loadDailyData]);
   
-  const handlePrintReport = () => {
-    const today = format(new Date(), 'MM/dd/yyyy', { locale: enUS });
-    const pageTitle = language === 'ar' 
-      ? `تقرير المبيعات اليومي - ${today}` 
-      : `Daily Sales Report - ${today}`;
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      const formattedDate = format(date, "yyyy-MM-dd");
+      setSelectedDate(formattedDate);
+    }
+  };
+  
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'KWD',
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3
+    }).format(amount);
+  };
+  
+  const selectedDateObj = new Date(selectedDate);
+  const isSelectedToday = isToday(selectedDateObj);
+  
+  // Prepare payment method data
+  const paymentMethodIcons: Record<string, React.ReactNode> = {
+    "Cash": <Wallet className="w-4 h-4 text-green-500" />,
+    "Visa": <CreditCard className="w-4 h-4 text-blue-500" />,
+    "MasterCard": <CreditCard className="w-4 h-4 text-red-500" />,
+    "KNET": <CreditCard className="w-4 h-4 text-purple-500" />,
+    "Other": <CreditCard className="w-4 h-4 text-gray-500" />,
+  };
+  
+  // Prepare invoice type data
+  const invoiceTypeIcons: Record<string, React.ReactNode> = {
+    "glasses": <Glasses className="w-4 h-4 text-blue-500" />,
+    "contacts": <Contact className="w-4 h-4 text-green-500" />,
+    "exam": <Eye className="w-4 h-4 text-amber-500" />,
+  };
+  
+  const translations = {
+    dailySalesReport: language === 'ar' ? "تقرير المبيعات اليومي" : "Daily Sales Report",
+    date: language === 'ar' ? "التاريخ" : "Date",
+    today: language === 'ar' ? "اليوم" : "Today",
+    totalSales: language === 'ar' ? "إجمالي المبيعات" : "Total Sales",
+    refunds: language === 'ar' ? "المبالغ المستردة" : "Refunds",
+    netSales: language === 'ar' ? "صافي المبيعات" : "Net Sales",
+    paymentMethods: language === 'ar' ? "طرق الدفع" : "Payment Methods",
+    invoiceTypes: language === 'ar' ? "أنواع الفواتير" : "Invoice Types",
+    glasses: language === 'ar' ? "نظارات" : "Glasses",
+    contacts: language === 'ar' ? "عدسات لاصقة" : "Contact Lenses",
+    exam: language === 'ar' ? "فحص العين" : "Eye Exam",
+    cash: language === 'ar' ? "نقدي" : "Cash",
+    visa: language === 'ar' ? "فيزا" : "Visa",
+    mastercard: language === 'ar' ? "ماستركارد" : "MasterCard",
+    knet: language === 'ar' ? "كي نت" : "KNET",
+    other: language === 'ar' ? "أخرى" : "Other",
+    transactions: language === 'ar' ? "المعاملات" : "Transactions",
+    noTransactions: language === 'ar' ? "لا توجد معاملات في هذا اليوم" : "No transactions for this day",
+    amount: language === 'ar' ? "المبلغ" : "Amount",
+    invoices: language === 'ar' ? "الفواتير" : "Invoices",
+    refund: language === 'ar' ? "استرداد" : "Refund",
+    refreshData: language === 'ar' ? "تحديث البيانات" : "Refresh Data",
+    printReport: language === 'ar' ? "طباعة التقرير" : "Print Report",
+    downloadCSV: language === 'ar' ? "تنزيل CSV" : "Download CSV",
+    loading: language === 'ar' ? "جاري التحميل..." : "Loading...",
+    noData: language === 'ar' ? "لا توجد بيانات متاحة لهذا اليوم" : "No data available for this day",
+  };
+  
+  const rtlClass = language === 'ar' ? 'rtl' : 'ltr';
+  
+  // Helper function to create a CSV file for download
+  const generateCSV = () => {
+    // Header row
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Daily Sales Report - " + format(selectedDateObj, "yyyy-MM-dd") + "\r\n\r\n";
     
-    let paymentBreakdownHTML = '';
-    paymentBreakdown.forEach(payment => {
-      paymentBreakdownHTML += `
-        <tr>
-          <td class="payment-method">${payment.method}</td>
-          <td class="payment-count">${payment.count}</td>
-          <td class="payment-amount">${payment.amount.toFixed(2)} ${t.currency}</td>
-        </tr>
-      `;
+    // Summary data
+    csvContent += "Total Sales,Refunds,Net Sales\r\n";
+    csvContent += `${dailySummary?.total_sales || 0},${dailySummary?.total_refunds || 0},${dailySummary?.net_sales || 0}\r\n\r\n`;
+    
+    // Payment methods
+    csvContent += "Payment Methods\r\n";
+    csvContent += "Method,Amount,Transactions\r\n";
+    paymentMethods.forEach(method => {
+      csvContent += `${method.payment_method},${method.amount},${method.transaction_count}\r\n`;
     });
+    csvContent += "\r\n";
     
-    let refundBreakdownHTML = '';
-    refundBreakdown.forEach(refund => {
-      refundBreakdownHTML += `
-        <tr>
-          <td class="refund-method">${refund.method}</td>
-          <td class="refund-count">${refund.count}</td>
-          <td class="refund-amount">${refund.amount.toFixed(2)} ${t.currency}</td>
-        </tr>
-      `;
+    // Invoice types
+    csvContent += "Invoice Types\r\n";
+    csvContent += "Type,Amount,Count\r\n";
+    invoiceTypes.forEach(type => {
+      csvContent += `${type.invoice_type},${type.amount},${type.count}\r\n`;
     });
+    csvContent += "\r\n";
     
-    let refundsHTML = '';
-    todayRefunds.forEach(refund => {
-      // Find the associated invoice
-      const relatedInvoice = invoices.find(inv => inv.invoiceId === refund.associatedInvoiceId);
-      
-      refundsHTML += `
-        <tr>
-          <td class="refund-id" style="width: 20%; max-width: 20%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${refund.refundId}</td>
-          <td class="refund-customer" style="width: 30%; max-width: 30%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${relatedInvoice?.patientName || '-'}</td>
-          <td class="refund-amount" style="width: 25%; max-width: 25%;">${refund.amount.toFixed(2)} ${t.currency}</td>
-          <td class="refund-method" style="width: 25%; max-width: 25%;">${refund.method || '-'}</td>
-        </tr>
-      `;
+    // Invoice data
+    csvContent += "Invoices\r\n";
+    csvContent += "Invoice ID,Patient Name,Type,Amount,Payment Method,Status\r\n";
+    dailyInvoices.forEach(invoice => {
+      csvContent += `${invoice.invoice_id},${invoice.patient_name},${invoice.invoice_type},${invoice.total_amount},${invoice.payment_method},${invoice.is_paid ? "Paid" : "Partial"}\r\n`;
     });
+    csvContent += "\r\n";
     
-    let invoicesHTML = '';
-    todaySales.forEach(invoice => {
-      invoicesHTML += `
-        <tr>
-          <td class="invoice-customer">${invoice.patientName}</td>
-          <td class="invoice-total">${invoice.total.toFixed(2)} ${t.currency}</td>
-          <td class="invoice-paid">${invoice.deposit.toFixed(2)} ${t.currency}</td>
-          <td class="invoice-method">${invoice.paymentMethod || '-'}</td>
-        </tr>
-      `;
-    });
+    // Refund data
+    if (dailyRefunds.length > 0) {
+      csvContent += "Refunds\r\n";
+      csvContent += "Refund ID,Invoice ID,Amount,Reason\r\n";
+      dailyRefunds.forEach(refund => {
+        csvContent += `${refund.refund_id},${refund.invoice_id},${refund.amount},${refund.reason || "N/A"}\r\n`;
+      });
+    }
     
-    const reportDate = format(new Date(), 'dd/MM/yyyy', { locale: enUS });
-    
-    // Create the report content with improved styling for thermal printer and bilingual support with vertical stacking
-    const reportContent = `
-      <div class="report-container">
-        <div class="report-header">
-          <div class="store-logo">
-            <img src="/lovable-uploads/d0902afc-d6a5-486b-9107-68104dfd2a68.png" alt="${storeInfo.name}" />
-          </div>
-          <div class="store-info">
-            <h2 class="store-name">${storeInfo.name}</h2>
-            <p class="store-address">${storeInfo.address}</p>
-            <p class="store-phone">${language === 'ar' ? 'هاتف:' : 'Phone:'} ${storeInfo.phone}</p>
-          </div>
-        </div>
-
-        <div class="report-title-box">
-          <div class="report-title">
-            <div class="bilingual-text">
-              <div class="ar-text">${t.dailySalesReport}</div>
-              <div class="en-text">Daily Sales Report</div>
-            </div>
-          </div>
-          <div class="report-date">
-            <div class="bilingual-text">
-              <div class="ar-text">التاريخ: ${reportDate}</div>
-              <div class="en-text">Date: ${reportDate}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="summary-section">
-          <div class="section-header">
-            <div class="bilingual-text">
-              <div class="ar-text">ملخص المبيعات</div>
-              <div class="en-text">Sales Summary</div>
-            </div>
-          </div>
-          <table class="summary-table">
-            <tr>
-              <td class="summary-label">
-                <div class="bilingual-text">
-                  <div class="ar-text">${t.totalSales}:</div>
-                  <div class="en-text">Total Sales:</div>
-                </div>
-              </td>
-              <td class="summary-value">${totalRevenue.toFixed(2)} ${t.currency}</td>
-            </tr>
-            <tr>
-              <td class="summary-label">
-                <div class="bilingual-text">
-                  <div class="ar-text">${t.totalRefunds}:</div>
-                  <div class="en-text">Total Refunds:</div>
-                </div>
-              </td>
-              <td class="summary-value">${totalRefunds.toFixed(2)} ${t.currency}</td>
-            </tr>
-            <tr>
-              <td class="summary-label">
-                <div class="bilingual-text">
-                  <div class="ar-text">${t.netRevenue}:</div>
-                  <div class="en-text">Net Revenue:</div>
-                </div>
-              </td>
-              <td class="summary-value">${netRevenue.toFixed(2)} ${t.currency}</td>
-            </tr>
-            <tr>
-              <td class="summary-label">
-                <div class="bilingual-text">
-                  <div class="ar-text">${t.totalPayments}:</div>
-                  <div class="en-text">Total Payments:</div>
-                </div>
-              </td>
-              <td class="summary-value">${totalDeposit.toFixed(2)} ${t.currency}</td>
-            </tr>
-            <tr>
-              <td class="summary-label">
-                <div class="bilingual-text">
-                  <div class="ar-text">عدد الفواتير:</div>
-                  <div class="en-text">Invoice Count:</div>
-                </div>
-              </td>
-              <td class="summary-value">${todaySales.length}</td>
-            </tr>
-          </table>
-        </div>
-
-        <div class="summary-section">
-          <div class="section-header">
-            <div class="bilingual-text">
-              <div class="ar-text">تفاصيل المبيعات</div>
-              <div class="en-text">Sales Details</div>
-            </div>
-          </div>
-          <table class="summary-table">
-            <tr>
-              <td class="summary-label">
-                <div class="bilingual-text">
-                  <div class="ar-text">${t.lensRevenue}:</div>
-                  <div class="en-text">Lens Revenue:</div>
-                </div>
-              </td>
-              <td class="summary-value">${totalLensRevenue.toFixed(2)} ${t.currency}</td>
-            </tr>
-            <tr>
-              <td class="summary-label">
-                <div class="bilingual-text">
-                  <div class="ar-text">${t.frameRevenue}:</div>
-                  <div class="en-text">Frame Revenue:</div>
-                </div>
-              </td>
-              <td class="summary-value">${totalFrameRevenue.toFixed(2)} ${t.currency}</td>
-            </tr>
-            <tr>
-              <td class="summary-label">
-                <div class="bilingual-text">
-                  <div class="ar-text">${t.coatingRevenue}:</div>
-                  <div class="en-text">Coating Revenue:</div>
-                </div>
-              </td>
-              <td class="summary-value">${totalCoatingRevenue.toFixed(2)} ${t.currency}</td>
-            </tr>
-          </table>
-        </div>
-
-        <div class="summary-section">
-          <div class="section-header">
-            <div class="bilingual-text">
-              <div class="ar-text">طرق الدفع</div>
-              <div class="en-text">Payment Methods</div>
-            </div>
-          </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>
-                  <div class="bilingual-text">
-                    <div class="ar-text">الطريقة</div>
-                    <div class="en-text">Method</div>
-                  </div>
-                </th>
-                <th>
-                  <div class="bilingual-text">
-                    <div class="ar-text">العدد</div>
-                    <div class="en-text">Count</div>
-                  </div>
-                </th>
-                <th>
-                  <div class="bilingual-text">
-                    <div class="ar-text">المبلغ</div>
-                    <div class="en-text">Amount</div>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              ${paymentBreakdownHTML || `
-                <tr>
-                  <td colspan="3" class="no-data">
-                    <div class="bilingual-text">
-                      <div class="ar-text">لا توجد بيانات</div>
-                      <div class="en-text">No data</div>
-                    </div>
-                  </td>
-                </tr>
-              `}
-            </tbody>
-          </table>
-        </div>
-
-        ${todaySales.length > 0 ? `
-          <div class="summary-section">
-            <div class="section-header">
-              <div class="bilingual-text">
-                <div class="ar-text">قائمة الفواتير</div>
-                <div class="en-text">Invoice List</div>
-              </div>
-            </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>
-                    <div class="bilingual-text">
-                      <div class="ar-text">العميل</div>
-                      <div class="en-text">Customer</div>
-                    </div>
-                  </th>
-                  <th>
-                    <div class="bilingual-text">
-                      <div class="ar-text">المجموع</div>
-                      <div class="en-text">Total</div>
-                    </div>
-                  </th>
-                  <th>
-                    <div class="bilingual-text">
-                      <div class="ar-text">المدفوع</div>
-                      <div class="en-text">Paid</div>
-                    </div>
-                  </th>
-                  <th>
-                    <div class="bilingual-text">
-                      <div class="ar-text">الطريقة</div>
-                      <div class="en-text">Method</div>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                ${invoicesHTML}
-              </tbody>
-            </table>
-          </div>
-        ` : ''}
-
-        ${todayRefunds.length > 0 ? `
-          <div class="summary-section">
-            <div class="section-header">
-              <div class="bilingual-text">
-                <div class="ar-text">طرق الاسترداد</div>
-                <div class="en-text">Refund Methods</div>
-              </div>
-            </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>
-                    <div class="bilingual-text">
-                      <div class="ar-text">الطريقة</div>
-                      <div class="en-text">Method</div>
-                    </div>
-                  </th>
-                  <th>
-                    <div class="bilingual-text">
-                      <div class="ar-text">العدد</div>
-                      <div class="en-text">Count</div>
-                    </div>
-                  </th>
-                  <th>
-                    <div class="bilingual-text">
-                      <div class="ar-text">المبلغ</div>
-                      <div class="en-text">Amount</div>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                ${refundBreakdownHTML || `
-                  <tr>
-                    <td colspan="3" class="no-data">
-                      <div class="bilingual-text">
-                        <div class="ar-text">لا توجد بيانات</div>
-                        <div class="en-text">No data</div>
-                      </div>
-                    </td>
-                  </tr>
-                `}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="summary-section">
-            <div class="section-header">
-              <div class="bilingual-text">
-                <div class="ar-text">الفواتير المستردة</div>
-                <div class="en-text">Refunded Invoices</div>
-              </div>
-            </div>
-            <table class="data-table small-table">
-              <thead>
-                <tr>
-                  <th style="width: 20%;">
-                    <div class="bilingual-text">
-                      <div class="ar-text">رقم</div>
-                      <div class="en-text">ID</div>
-                    </div>
-                  </th>
-                  <th style="width: 30%;">
-                    <div class="bilingual-text">
-                      <div class="ar-text">العميل</div>
-                      <div class="en-text">Customer</div>
-                    </div>
-                  </th>
-                  <th style="width: 25%;">
-                    <div class="bilingual-text">
-                      <div class="ar-text">المبلغ</div>
-                      <div class="en-text">Amount</div>
-                    </div>
-                  </th>
-                  <th style="width: 25%;">
-                    <div class="bilingual-text">
-                      <div class="ar-text">الطريقة</div>
-                      <div class="en-text">Method</div>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                ${refundsHTML || `
-                  <tr>
-                    <td colspan="4" class="no-data">
-                      <div class="bilingual-text">
-                        <div class="ar-text">لا توجد استردادات</div>
-                        <div class="en-text">No refunds</div>
-                      </div>
-                    </td>
-                  </tr>
-                `}
-              </tbody>
-            </table>
-          </div>
-        ` : ''}
-
-        <div class="report-footer">
-          <p>${language === 'ar' 
-            ? `© ${new Date().getFullYear()} ${storeInfo.name} - جميع الحقوق محفوظة`
-            : `© ${new Date().getFullYear()} ${storeInfo.name} - All rights reserved`}</p>
-        </div>
-      </div>
-      
-      <style>
-        @media print {
-          @page {
-            size: 80mm auto !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          
-          body {
-            width: 80mm !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-            font-family: 'Arial', sans-serif !important;
-          }
-          
-          .report-container {
-            width: 72mm !important;
-            margin: 4mm auto !important;
-            padding: 0 !important;
-            page-break-after: always !important;
-            page-break-inside: avoid !important;
-            background: white !important;
-            font-family: 'Arial', sans-serif !important;
-          }
-          
-          /* Ensure all content is visible */
-          * {
-            visibility: visible !important;
-            opacity: 1 !important;
-          }
-        }
-        
-        .report-container {
-          text-align: center;
-          font-family: 'Arial', sans-serif;
-          width: 72mm;
-          margin: 0 auto;
-        }
-        
-        .report-header {
-          margin-bottom: 10px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid #000;
-          text-align: center;
-        }
-        
-        .store-logo {
-          text-align: center;
-          margin-bottom: 5px;
-        }
-        
-        .store-logo img {
-          max-height: 40px;
-          max-width: 100%;
-        }
-        
-        .store-info {
-          text-align: center;
-        }
-        
-        .store-name {
-          font-size: 16px;
-          font-weight: bold;
-          margin: 0;
-        }
-        
-        .store-address, .store-phone {
-          font-size: 12px;
-          margin: 2px 0;
-        }
-        
-        .report-title-box {
-          border: 2px solid #000;
-          padding: 5px;
-          margin-bottom: 10px;
-        }
-        
-        .report-title {
-          font-size: 14px;
-          font-weight: bold;
-        }
-        
-        .report-date {
-          font-size: 12px;
-        }
-        
-        /* Bilingual text styling for vertical stacking */
-        .bilingual-text {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        .ar-text {
-          font-weight: bold;
-          margin-bottom: 1px;
-          direction: rtl;
-        }
-        
-        .en-text {
-          font-size: 90%;
-          direction: ltr;
-        }
-        
-        .section-header {
-          background-color: #000;
-          color: #fff;
-          padding: 5px;
-          font-size: 14px;
-          font-weight: bold;
-          margin-bottom: 5px;
-          text-align: center;
-        }
-        
-        .summary-section {
-          margin-bottom: 10px;
-          border: 1px solid #000;
-        }
-        
-        .summary-table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 13px;
-        }
-        
-        .summary-table td {
-          padding: 4px;
-        }
-        
-        .summary-label {
-          text-align: left;
-          font-weight: bold;
-        }
-        
-        .summary-value {
-          text-align: right;
-          font-weight: bold;
-        }
-        
-        .data-table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 11px;
-          table-layout: fixed;
-        }
-        
-        .data-table th, .data-table td {
-          border: 1px solid #000;
-          padding: 3px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: normal;
-          max-width: 100%;
-          word-break: break-word;
-        }
-        
-        .data-table th {
-          background-color: #f2f2f2;
-          font-weight: bold;
-          padding: 5px 2px;
-        }
-        
-        .small-table {
-          font-size: 10px;
-        }
-        
-        .small-table th, .small-table td {
-          padding: 2px;
-        }
-        
-        .payment-method, .invoice-customer, .refund-method, .refund-id, .refund-customer {
-          text-align: left;
-        }
-        
-        .payment-count, .payment-amount, .invoice-total, .invoice-paid, .invoice-method, .refund-count, .refund-amount {
-          text-align: right;
-        }
-        
-        .no-data {
-          text-align: center;
-          padding: 10px;
-        }
-        
-        .report-footer {
-          margin-top: 10px;
-          padding-top: 5px;
-          border-top: 1px solid #000;
-          font-size: 10px;
-          text-align: center;
-        }
-      </style>
-    `;
-    
-    PrintService.printReport(reportContent, pageTitle, () => {
-      toast(
-        language === 'ar' ? 'تم إرسال التقرير للطباعة' : 'Report sent to printer'
-      );
-    });
+    // Create download link
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `sales_report_${format(selectedDateObj, "yyyy-MM-dd")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
   
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <h2 className="text-xl md:text-2xl font-bold">{t.dailySalesReport}</h2>
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center text-sm text-muted-foreground gap-1">
-            <Store className="h-4 w-4" />
-            <span>{storeInfo.name}</span>
-          </div>
-          <PrintReportButton onPrint={handlePrintReport} className="w-full sm:w-auto" />
+    <div className={`space-y-6 ${rtlClass}`}>
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={previousDay}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "justify-start text-left font-normal w-[240px]",
+                  !selectedDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {selectedDate ? (
+                  isSelectedToday ? translations.today : format(selectedDateObj, "PPP")
+                ) : (
+                  translations.date
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={selectedDateObj}
+                onSelect={handleDateSelect}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={nextDay}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={loadDailyData}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            {translations.refreshData}
+          </Button>
+          
+          <PrintReportButton date={selectedDate} />
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={generateCSV}
+            disabled={loading || !dailySummary}
+          >
+            <Download className="h-4 w-4" />
+            {translations.downloadCSV}
+          </Button>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardHeader className="pb-2 px-3 md:px-4">
-            <CardTitle className="text-xs md:text-sm font-medium text-blue-700">
-              {t.totalSales}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 md:px-4">
-            <div className="text-xl md:text-2xl font-bold text-blue-900">{totalRevenue.toFixed(2)} {t.currency}</div>
-            <p className="text-xs text-blue-600 mt-1">
-              {t.forDay}: {format(new Date(), 'MM/dd/yyyy', { locale: enUS })}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardHeader className="pb-2 px-3 md:px-4">
-            <CardTitle className="text-xs md:text-sm font-medium text-green-700">
-              {t.netRevenue}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 md:px-4">
-            <div className="text-xl md:text-2xl font-bold text-green-900">{netRevenue.toFixed(2)} {t.currency}</div>
-            <p className="text-xs text-green-600 mt-1">
-              {t.afterRefunds}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardHeader className="pb-2 px-3 md:px-4">
-            <CardTitle className="text-xs md:text-sm font-medium text-purple-700">
-              {t.invoiceCount}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 md:px-4">
-            <div className="text-xl md:text-2xl font-bold text-purple-900">{todaySales.length}</div>
-            <p className="text-xs text-purple-600 mt-1">
-              {t.inTodaysTransactions}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-          <CardHeader className="pb-2 px-3 md:px-4">
-            <CardTitle className="text-xs md:text-sm font-medium text-red-700">
-              {t.totalRefunds}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 md:px-4">
-            <div className="text-xl md:text-2xl font-bold text-red-900">{totalRefunds.toFixed(2)} {t.currency}</div>
-            <p className="text-xs text-red-600 mt-1">
-              {t.todaysRefunds}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6">
-        <Card className="border-indigo-200">
-          <CardHeader className="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-t-lg py-3 px-3 md:p-4">
-            <CardTitle className="text-indigo-700 text-sm md:text-base">{t.salesDistribution}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 md:p-4">
-            <SalesChart 
-              lensRevenue={totalLensRevenue}
-              frameRevenue={totalFrameRevenue}
-              coatingRevenue={totalCoatingRevenue}
-            />
-          </CardContent>
-        </Card>
-        
-        <Card className="border-teal-200">
-          <CardHeader className="bg-gradient-to-r from-teal-50 to-teal-100 rounded-t-lg py-3 px-3 md:p-4">
-            <CardTitle className="text-teal-700 text-sm md:text-base">{t.paymentMethods}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col space-y-3 md:space-y-4 p-3 md:p-4">
-            {paymentBreakdown.map((payment, index) => (
-              <div key={index} className="flex items-center justify-between p-2 md:p-3 rounded-md bg-white shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-2">
-                  {payment.method === 'نقداً' || payment.method === 'Cash' ? (
-                    <Wallet className="h-4 w-4 md:h-5 md:w-5 text-green-500" />
-                  ) : payment.method === 'كي نت' || payment.method === 'KNET' ? (
-                    <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-blue-500" />
-                  ) : payment.method === 'Visa' ? (
-                    <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-indigo-500" />
-                  ) : payment.method === 'MasterCard' ? (
-                    <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-orange-500" />
-                  ) : (
-                    <Receipt className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
-                  )}
-                  <span className="font-medium text-sm md:text-base">{payment.method}</span>
-                </div>
-                <div className="flex items-center gap-2 md:gap-4">
-                  <span className="text-xs md:text-sm text-gray-600 bg-gray-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded-full">
-                    {payment.count} {t.transactions}
-                  </span>
-                  <span className="font-medium text-sm md:text-base text-gray-900">{payment.amount.toFixed(2)} {t.currency}</span>
-                </div>
-              </div>
-            ))}
-            
-            {paymentBreakdown.length === 0 && (
-              <p className="text-center text-muted-foreground py-4">
-                {t.noInvoices}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg py-3 px-3 md:p-4">
-          <CardTitle className="text-gray-700 text-sm md:text-base">{t.todaysInvoiceList}</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 md:p-4">
-          {todaySales.length > 0 ? (
-            <div className="space-y-3 md:space-y-4">
-              {todaySales
-                .filter(invoice => !invoice.isRefunded)
-                .map((invoice) => (
-                <div key={invoice.invoiceId} 
-                  className="border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200 border-gray-200"
-                >
-                  <div 
-                    className={`flex flex-wrap md:flex-nowrap justify-between items-start md:items-center p-3 md:p-4 cursor-pointer gap-2 ${
-                      expandedInvoices[invoice.invoiceId] ? 'bg-gray-50 border-b' : ''
-                    }`}
-                    onClick={() => toggleInvoiceExpansion(invoice.invoiceId)}
-                  >
-                    <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
-                      <div className={`p-1.5 md:p-2 rounded-full ${
-                        invoice.isPaid ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
-                      }`}>
-                        <Receipt size={16} className="md:w-[18px] md:h-[18px]" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-sm md:text-base">{invoice.patientName}</h3>
-                        <p className="text-xs md:text-sm text-gray-500">{invoice.invoiceId}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between w-full md:w-auto gap-2 md:gap-6">
-                      <div className="text-right">
-                        <p className="font-medium text-sm md:text-base">
-                          {invoice.total.toFixed(2)} {t.currency}
-                        </p>
-                        <p className="text-xs md:text-sm text-gray-500">{invoice.paymentMethod}</p>
-                      </div>
-                      <Button 
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 md:h-8 md:w-8 rounded-full"
-                      >
-                        {expandedInvoices[invoice.invoiceId] ? 
-                          <ChevronUp size={16} className="md:w-[18px] md:h-[18px]" /> : 
-                          <ChevronDown size={16} className="md:w-[18px] md:h-[18px]" />
-                        }
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {expandedInvoices[invoice.invoiceId] && (
-                    <div className="p-3 md:p-4 bg-gray-50 space-y-3 md:space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                        <div className="bg-white p-2 md:p-3 rounded-md border">
-                          <h4 className="text-xs md:text-sm font-medium text-gray-500 mb-1">
-                            {t.customerInfo}
-                          </h4>
-                          <p className="font-medium text-sm md:text-base">{invoice.patientName}</p>
-                          <p className="text-xs md:text-sm">{invoice.patientPhone}</p>
-                          {invoice.patientId && <p className="text-xs text-gray-500">{t.fileNumber}: {invoice.patientId}</p>}
-                        </div>
-                        
-                        <div className="bg-white p-2 md:p-3 rounded-md border">
-                          <h4 className="text-xs md:text-sm font-medium text-gray-500 mb-1">
-                            {t.paymentInfo}
-                          </h4>
-                          <div className="flex justify-between items-center mt-1">
-                            <span className="font-medium text-sm md:text-base">{t.total}:</span>
-                            <span className="font-bold text-base md:text-lg">{invoice.total.toFixed(2)} {t.currency}</span>
-                          </div>
-                          <div className="flex justify-between items-center mt-1 md:mt-2">
-                            <span className="text-blue-600 font-medium text-sm">{t.paid}:</span>
-                            <span className="font-medium text-blue-600 text-sm">{invoice.deposit.toFixed(2)} {t.currency}</span>
-                          </div>
-                          {invoice.remaining > 0 && (
-                            <div className="flex justify-between items-center mt-1 bg-amber-50 p-1 md:p-1.5 rounded">
-                              <span className="text-amber-700 font-medium text-sm">{t.remaining}:</span>
-                              <span className="font-medium text-amber-700 text-sm">{invoice.remaining.toFixed(2)} {t.currency}</span>
-                            </div>
-                          )}
-                          {invoice.discount > 0 && (
-                            <div className="flex justify-between text-green-600 mt-1 md:mt-2 bg-green-50 p-1 md:p-1.5 rounded">
-                              <span className="flex items-center gap-1 font-medium text-sm">
-                                <Tag size={12} className="md:w-[14px] md:h-[14px]" />
-                                {t.discount}:
-                              </span>
-                              <span className="font-medium text-sm">{invoice.discount.toFixed(2)} {t.currency}</span>
-                            </div>
-                          )}
-                          <div className="mt-2 md:mt-3 pt-1 md:pt-2 border-t">
-                            <span className="text-xs md:text-sm font-medium text-gray-600">{t.paymentMethod}:</span>
-                            <div className="flex items-center gap-1 mt-0.5 md:mt-1">
-                              {invoice.paymentMethod === 'نقداً' || invoice.paymentMethod === 'Cash' ? (
-                                <Wallet className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
-                              ) : invoice.paymentMethod === 'كي نت' || invoice.paymentMethod === 'KNET' ? (
-                                <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-blue-500" />
-                              ) : invoice.paymentMethod === 'Visa' ? (
-                                <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-indigo-500" />
-                              ) : invoice.paymentMethod === 'MasterCard' ? (
-                                <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
-                              ) : (
-                                <Receipt className="h-3 w-3 md:h-4 md:w-4 text-gray-500" />
-                              )}
-                              <span className="text-xs md:text-sm">{invoice.paymentMethod}</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-white p-2 md:p-3 rounded-md border">
-                          <h4 className="text-xs md:text-sm font-medium text-gray-500 mb-1">{t.invoiceStatus}</h4>
-                          <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            invoice.isPaid ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
-                          }`}>
-                            {invoice.isPaid ? t.fullyPaid : t.partiallyPaid}
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {t.creationDate}: {new Date(invoice.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                        <div className="bg-blue-50 p-2 md:p-3 rounded-md border border-blue-100">
-                          <h4 className="text-xs md:text-sm font-medium text-blue-700 mb-1">{t.lenses}</h4>
-                          <p className="font-medium text-sm md:text-base">{invoice.lensType}</p>
-                          <div className="flex justify-between mt-1">
-                            <span className="text-xs md:text-sm text-blue-600">{t.price}:</span>
-                            <span className="font-medium text-sm md:text-base">{invoice.lensPrice.toFixed(2)} {t.currency}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-purple-50 p-2 md:p-3 rounded-md border border-purple-100">
-                          <h4 className="text-xs md:text-sm font-medium text-purple-700 mb-1">{t.frame}</h4>
-                          <p className="font-medium text-sm md:text-base">{invoice.frameBrand} {invoice.frameModel}</p>
-                          <p className="text-xs md:text-sm text-purple-600">{t.color}: {invoice.frameColor}</p>
-                          <div className="flex justify-between mt-1">
-                            <span className="text-xs md:text-sm text-purple-600">{t.price}:</span>
-                            <span className="font-medium text-sm md:text-base">{invoice.framePrice.toFixed(2)} {t.currency}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-green-50 p-2 md:p-3 rounded-md border border-green-100">
-                          <h4 className="text-xs md:text-sm font-medium text-green-700 mb-1">{t.coating}</h4>
-                          <p className="font-medium text-sm md:text-base">{invoice.coating}</p>
-                          <div className="flex justify-between mt-1">
-                            <span className="text-xs md:text-sm text-green-600">{t.price}:</span>
-                            <span className="font-medium text-sm md:text-base">{invoice.coatingPrice.toFixed(2)} {t.currency}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 md:py-12 bg-gray-50 rounded-lg">
-              <Receipt className="h-8 w-8 md:h-12 md:w-12 mx-auto text-gray-400 mb-3" />
-              <h3 className="text-base md:text-lg font-medium text-gray-700 mb-1">{t.noInvoices}</h3>
-              <p className="text-xs md:text-sm text-gray-500">{t.noInvoicesToday}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      {/* Refund sections - moved to bottom and collapsed by default */}
-      {todayRefunds.length > 0 && (
+      {loading ? (
+        <div className="flex items-center justify-center p-10">
+          <RefreshCw className="h-6 w-6 animate-spin text-gray-400 mr-2" />
+          <span>{translations.loading}</span>
+        </div>
+      ) : !dailySummary ? (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-6 text-center text-yellow-800">
+          <Ban className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
+          <h3 className="text-lg font-medium">{translations.noData}</h3>
+        </div>
+      ) : (
         <>
-          <CollapsibleCard 
-            title={t.refundMethods}
-            className="border-red-200"
-            headerClassName="bg-gradient-to-r from-red-50 to-red-100"
-            titleClassName="text-red-700"
-            defaultOpen={false}
-          >
-            <div className="flex flex-col space-y-3 md:space-y-4 p-3 md:p-4">
-              {refundBreakdown.map((refund, index) => (
-                <div key={index} className="flex items-center justify-between p-2 md:p-3 rounded-md bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-2">
-                    {refund.method === 'نقداً' || refund.method === 'Cash' ? (
-                      <Wallet className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-                    ) : refund.method === 'كي نت' || refund.method === 'KNET' ? (
-                      <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-                    ) : refund.method === 'Visa' ? (
-                      <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-                    ) : refund.method === 'MasterCard' ? (
-                      <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-                    ) : (
-                      <RefreshCcw className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-                    )}
-                    <span className="font-medium text-sm md:text-base">{refund.method}</span>
-                  </div>
-                  <div className="flex items-center gap-2 md:gap-4">
-                    <span className="text-xs md:text-sm text-gray-600 bg-gray-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded-full">
-                      {refund.count} {t.transactions}
-                    </span>
-                    <span className="font-medium text-sm md:text-base text-red-600">{refund.amount.toFixed(2)} {t.currency}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CollapsibleCard>
-          
-          <CollapsibleCard 
-            title={t.refundedItems}
-            className="border-red-200"
-            headerClassName="bg-gradient-to-r from-red-50 to-red-100"
-            titleClassName="text-red-700"
-            defaultOpen={false}
-          >
-            <div className="divide-y border border-red-200 rounded-lg overflow-hidden bg-gradient-to-r from-red-50/30 to-pink-50/30 m-4">
-              {todayRefunds.map((refund) => {
-                // Find the associated invoice
-                const relatedInvoice = invoices.find(inv => inv.invoiceId === refund.associatedInvoiceId);
-                
-                return (
-                  <div key={refund.refundId} className="p-4 hover:bg-red-50/40 transition-all">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-3 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <RefreshCcw className="h-5 w-5 text-red-600" />
-                          <span className="font-semibold text-red-800 text-lg">{refund.refundId}</span>
-                          <span className="text-sm text-gray-500">({t.invoiceStatus}: {relatedInvoice?.invoiceId || 'N/A'})</span>
-                        </div>
-                        
-                        <div className="text-xs text-red-600 flex items-center gap-1 mt-0.5">
-                          <CalendarIcon className="h-3 w-3" />
-                          {language === 'ar' ? "تاريخ الاسترداد:" : "Refund date:"} {formatDate(refund.date)}
-                        </div>
-                        
-                        <div className="text-xs mt-1.5 text-red-600 bg-red-50 rounded-md inline-block px-2 py-0.5">
-                          {t.reason}: {refund.reason}
-                        </div>
-                        
-                        {relatedInvoice && (
-                          <div className="text-sm mt-1 font-medium text-gray-700">
-                            {language === 'ar' ? "اسم العميل:" : "Customer name:"} {relatedInvoice.patientName}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="text-right">
-                        <div className="font-semibold text-red-800 text-xl">
-                          {refund.amount.toFixed(3)} KWD
-                        </div>
-                        <div className="text-sm text-gray-600 mt-1">
-                          {t.paymentMethod}: {refund.method}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CollapsibleCard>
-        </>
-      )}
-
-      {/* Show refunded invoices in a separate section */}
-      {todaySales.filter(invoice => invoice.isRefunded).length > 0 && (
-        <CollapsibleCard 
-          title={t.refundedInvoices}
-          className="border-red-200"
-          headerClassName="bg-gradient-to-r from-red-50 to-red-100"
-          titleClassName="text-red-700"
-          defaultOpen={false}
-        >
-          <div className="space-y-3 md:space-y-4 p-3 md:p-4">
-            {todaySales
-              .filter(invoice => invoice.isRefunded)
-              .map((invoice) => (
-              <div key={invoice.invoiceId} 
-                className="border border-red-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200"
-              >
-                <div 
-                  className={`flex flex-wrap md:flex-nowrap justify-between items-start md:items-center p-3 md:p-4 cursor-pointer gap-2 ${
-                    expandedInvoices[invoice.invoiceId] ? 'bg-red-50/20 border-b' : 'bg-red-50/20'
-                  }`}
-                  onClick={() => toggleInvoiceExpansion(invoice.invoiceId)}
-                >
-                  <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
-                    <div className="p-1.5 md:p-2 rounded-full bg-red-100 text-red-600">
-                      <RefreshCcw size={16} className="md:w-[18px] md:h-[18px]" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-sm md:text-base">{invoice.patientName}</h3>
-                      <p className="text-xs md:text-sm text-gray-500">{invoice.invoiceId}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between w-full md:w-auto gap-2 md:gap-6">
-                    <div className="text-right">
-                      <p className="font-medium text-sm md:text-base">
-                        {invoice.total.toFixed(2)} {t.currency}
-                        {invoice.isRefunded && invoice.refundAmount && (
-                          <span className="text-red-600 block">
-                            ({language === 'ar' ? "مسترد:" : "Refunded:"} {invoice.refundAmount.toFixed(2)} {t.currency})
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-xs md:text-sm text-gray-500">{invoice.paymentMethod}</p>
-                    </div>
-                    <Button 
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 md:h-8 md:w-8 rounded-full"
-                    >
-                      {expandedInvoices[invoice.invoiceId] ? 
-                        <ChevronUp size={16} className="md:w-[18px] md:h-[18px]" /> : 
-                        <ChevronDown size={16} className="md:w-[18px] md:h-[18px]" />
-                      }
-                    </Button>
-                  </div>
-                </div>
-                
-                {expandedInvoices[invoice.invoiceId] && (
-                  <div className="p-3 md:p-4 bg-gray-50 space-y-3 md:space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                      <div className="bg-white p-2 md:p-3 rounded-md border">
-                        <h4 className="text-xs md:text-sm font-medium text-gray-500 mb-1">
-                          {t.customerInfo}
-                        </h4>
-                        <p className="font-medium text-sm md:text-base">{invoice.patientName}</p>
-                        <p className="text-xs md:text-sm">{invoice.patientPhone}</p>
-                        {invoice.patientId && <p className="text-xs text-gray-500">{t.fileNumber}: {invoice.patientId}</p>}
-                      </div>
-                      
-                      <div className="bg-white p-2 md:p-3 rounded-md border">
-                        <h4 className="text-xs md:text-sm font-medium text-gray-500 mb-1">
-                          {t.paymentInfo}
-                        </h4>
-                        <div className="flex justify-between items-center mt-1">
-                          <span className="font-medium text-sm md:text-base">{t.total}:</span>
-                          <span className="font-bold text-base md:text-lg">{invoice.total.toFixed(2)} {t.currency}</span>
-                        </div>
-                        <div className="flex justify-between items-center mt-1 md:mt-2">
-                          <span className="text-blue-600 font-medium text-sm">{t.paid}:</span>
-                          <span className="font-medium text-blue-600 text-sm">{invoice.deposit.toFixed(2)} {t.currency}</span>
-                        </div>
-                        {invoice.remaining > 0 && (
-                          <div className="flex justify-between items-center mt-1 bg-amber-50 p-1 md:p-1.5 rounded">
-                            <span className="text-amber-700 font-medium text-sm">{t.remaining}:</span>
-                            <span className="font-medium text-amber-700 text-sm">{invoice.remaining.toFixed(2)} {t.currency}</span>
-                          </div>
-                        )}
-                        {invoice.discount > 0 && (
-                          <div className="flex justify-between text-green-600 mt-1 md:mt-2 bg-green-50 p-1 md:p-1.5 rounded">
-                            <span className="flex items-center gap-1 font-medium text-sm">
-                              <Tag size={12} className="md:w-[14px] md:h-[14px]" />
-                              {t.discount}:
-                            </span>
-                            <span className="font-medium text-sm">{invoice.discount.toFixed(2)} {t.currency}</span>
-                          </div>
-                        )}
-                        <div className="mt-2 md:mt-3 pt-1 md:pt-2 border-t">
-                          <span className="text-xs md:text-sm font-medium text-gray-600">{t.paymentMethod}:</span>
-                          <div className="flex items-center gap-1 mt-0.5 md:mt-1">
-                            {invoice.paymentMethod === 'نقداً' || invoice.paymentMethod === 'Cash' ? (
-                              <Wallet className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
-                            ) : invoice.paymentMethod === 'كي نت' || invoice.paymentMethod === 'KNET' ? (
-                              <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-blue-500" />
-                            ) : invoice.paymentMethod === 'Visa' ? (
-                              <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-indigo-500" />
-                            ) : invoice.paymentMethod === 'MasterCard' ? (
-                              <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
-                            ) : (
-                              <Receipt className="h-3 w-3 md:h-4 md:w-4 text-gray-500" />
-                            )}
-                            <span className="text-xs md:text-sm">{invoice.paymentMethod}</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-white p-2 md:p-3 rounded-md border">
-                        <h4 className="text-xs md:text-sm font-medium text-gray-500 mb-1">{t.invoiceStatus}</h4>
-                        <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800`}>
-                          {language === 'ar' ? "مسترد" : "Refunded"}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {t.creationDate}: {new Date(invoice.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                      <div className="bg-blue-50 p-2 md:p-3 rounded-md border border-blue-100">
-                        <h4 className="text-xs md:text-sm font-medium text-blue-700 mb-1">{t.lenses}</h4>
-                        <p className="font-medium text-sm md:text-base">{invoice.lensType}</p>
-                        <div className="flex justify-between mt-1">
-                          <span className="text-xs md:text-sm text-blue-600">{t.price}:</span>
-                          <span className="font-medium text-sm md:text-base">{invoice.lensPrice.toFixed(2)} {t.currency}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-purple-50 p-2 md:p-3 rounded-md border border-purple-100">
-                        <h4 className="text-xs md:text-sm font-medium text-purple-700 mb-1">{t.frame}</h4>
-                        <p className="font-medium text-sm md:text-base">{invoice.frameBrand} {invoice.frameModel}</p>
-                        <p className="text-xs md:text-sm text-purple-600">{t.color}: {invoice.frameColor}</p>
-                        <div className="flex justify-between mt-1">
-                          <span className="text-xs md:text-sm text-purple-600">{t.price}:</span>
-                          <span className="font-medium text-sm md:text-base">{invoice.framePrice.toFixed(2)} {t.currency}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-green-50 p-2 md:p-3 rounded-md border border-green-100">
-                        <h4 className="text-xs md:text-sm font-medium text-green-700 mb-1">{t.coating}</h4>
-                        <p className="font-medium text-sm md:text-base">{invoice.coating}</p>
-                        <div className="flex justify-between mt-1">
-                          <span className="text-xs md:text-sm text-green-600">{t.price}:</span>
-                          <span className="font-medium text-sm md:text-base">{invoice.coatingPrice.toFixed(2)} {t.currency}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-teal-700">{translations.totalSales}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-teal-900">{formatCurrency(dailySummary.total_sales)}</div>
+                <p className="text-xs text-teal-600 mt-1">{dailySummary.glasses_sales_count + dailySummary.contacts_sales_count + dailySummary.exam_sales_count} {translations.transactions}</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-red-700">{translations.refunds}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-900">{formatCurrency(dailySummary.total_refunds)}</div>
+                <p className="text-xs text-red-600 mt-1">{dailyRefunds.length} {translations.transactions}</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-blue-700">{translations.netSales}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-900">{formatCurrency(dailySummary.net_sales)}</div>
+              </CardContent>
+            </Card>
           </div>
-        </CollapsibleCard>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">{translations.paymentMethods}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {paymentMethods.map(method => (
+                    <div key={method.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {paymentMethodIcons[method.payment_method] || <CreditCard className="w-4 h-4 text-gray-500" />}
+                        <span className="font-medium">
+                          {method.payment_method}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          ({method.transaction_count} {translations.transactions})
+                        </span>
+                      </div>
+                      <span className="font-bold">{formatCurrency(method.amount)}</span>
+                    </div>
+                  ))}
+                  
+                  {paymentMethods.length === 0 && (
+                    <div className="text-center py-4 text-gray-500">
+                      {translations.noTransactions}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">{translations.invoiceTypes}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {invoiceTypes.map(type => (
+                    <div key={type.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {invoiceTypeIcons[type.invoice_type] || <ShoppingBag className="w-4 h-4 text-gray-500" />}
+                        <span className="font-medium">
+                          {type.invoice_type === "glasses" ? translations.glasses :
+                           type.invoice_type === "contacts" ? translations.contacts :
+                           type.invoice_type === "exam" ? translations.exam : type.invoice_type}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          ({type.count} {translations.transactions})
+                        </span>
+                      </div>
+                      <span className="font-bold">{formatCurrency(type.amount)}</span>
+                    </div>
+                  ))}
+                  
+                  {invoiceTypes.length === 0 && (
+                    <div className="text-center py-4 text-gray-500">
+                      {translations.noTransactions}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">{translations.invoices}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="relative overflow-x-auto">
+                <table className="w-full text-sm text-left text-gray-700">
+                  <thead className="text-xs uppercase bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2">ID</th>
+                      <th className="px-4 py-2">{translations === 'ar' ? 'العميل' : 'Patient'}</th>
+                      <th className="px-4 py-2">{translations === 'ar' ? 'النوع' : 'Type'}</th>
+                      <th className="px-4 py-2">{translations.amount}</th>
+                      <th className="px-4 py-2">{translations === 'ar' ? 'طريقة الدفع' : 'Payment'}</th>
+                      <th className="px-4 py-2">{translations === 'ar' ? 'الحالة' : 'Status'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dailyInvoices.map(invoice => (
+                      <tr key={invoice.id} className="border-b hover:bg-gray-50">
+                        <td className="px-4 py-2">{invoice.invoice_id}</td>
+                        <td className="px-4 py-2">{invoice.patient_name}</td>
+                        <td className="px-4 py-2">
+                          <div className="flex items-center gap-1">
+                            {invoiceTypeIcons[invoice.invoice_type]}
+                            <span>
+                              {invoice.invoice_type === "glasses" ? translations.glasses :
+                               invoice.invoice_type === "contacts" ? translations.contacts :
+                               invoice.invoice_type === "exam" ? translations.exam : invoice.invoice_type}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2 font-medium">{formatCurrency(invoice.total_amount)}</td>
+                        <td className="px-4 py-2">
+                          <div className="flex items-center gap-1">
+                            {paymentMethodIcons[invoice.payment_method] || <CreditCard className="w-4 h-4" />}
+                            <span>{invoice.payment_method}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            invoice.is_paid 
+                              ? "bg-green-100 text-green-800" 
+                              : "bg-amber-100 text-amber-800"
+                          }`}>
+                            {invoice.is_paid 
+                              ? (language === 'ar' ? "مدفوع بالكامل" : "Paid") 
+                              : (language === 'ar' ? "مدفوع جزئياً" : "Partial")}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    
+                    {dailyInvoices.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-4 text-center text-gray-500">
+                          {translations.noTransactions}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {dailyRefunds.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">{translations.refund}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative overflow-x-auto">
+                  <table className="w-full text-sm text-left text-gray-700">
+                    <thead className="text-xs uppercase bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2">ID</th>
+                        <th className="px-4 py-2">{translations === 'ar' ? 'الفاتورة' : 'Invoice'}</th>
+                        <th className="px-4 py-2">{translations.amount}</th>
+                        <th className="px-4 py-2">{translations === 'ar' ? 'السبب' : 'Reason'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dailyRefunds.map(refund => (
+                        <tr key={refund.id} className="border-b hover:bg-gray-50">
+                          <td className="px-4 py-2">{refund.refund_id}</td>
+                          <td className="px-4 py-2">{refund.invoice_id}</td>
+                          <td className="px-4 py-2 font-medium text-red-600">{formatCurrency(refund.amount)}</td>
+                          <td className="px-4 py-2">{refund.reason || "-"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
     </div>
   );

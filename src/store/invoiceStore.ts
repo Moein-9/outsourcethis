@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
+import { ReportingService } from '@/services/ReportingService';
 
 export interface Payment {
   amount: number;
@@ -154,6 +155,10 @@ interface InvoiceState {
   getRefundById: (refundId: string) => Refund | undefined;
   getRefundsByPatientId: (patientId: string) => Refund[];
   getRefundsByInvoiceId: (invoiceId: string) => Refund | undefined;
+  
+  // Database sync status
+  lastSyncedAt?: string;
+  syncWithDatabase: () => Promise<void>;
 }
 
 export const useInvoiceStore = create<InvoiceState>()(
@@ -162,6 +167,24 @@ export const useInvoiceStore = create<InvoiceState>()(
       invoices: [],
       workOrders: [], 
       refunds: [],
+      lastSyncedAt: undefined,
+      
+      syncWithDatabase: async () => {
+        try {
+          // Only sync if ReportingService is available (it's dynamically loaded)
+          if (ReportingService) {
+            const { invoices, refunds } = get();
+            console.log(`Syncing ${invoices.length} invoices and ${refunds.length} refunds with database...`);
+            
+            await ReportingService.syncAllInvoicesAndRefunds(invoices, refunds);
+            
+            set({ lastSyncedAt: new Date().toISOString() });
+            console.log('Database sync completed successfully');
+          }
+        } catch (error) {
+          console.error('Error syncing with database:', error);
+        }
+      },
       
       addInvoice: (invoice) => {
         const invoiceId = `IN${Date.now()}`;
@@ -181,29 +204,36 @@ export const useInvoiceStore = create<InvoiceState>()(
         
         const payments = invoice.deposit > 0 ? [initialPayment] : [];
         
+        const newInvoice = { 
+          ...restInvoice, 
+          invoiceId, 
+          createdAt, 
+          remaining,
+          isPaid,
+          payments,
+          authNumber, // Store auth number at invoice level too
+          workOrderId, // Store the work order ID if provided
+          isPickedUp: false // Initialize as not picked up
+        };
+        
         set((state) => ({
-          invoices: [
-            ...state.invoices,
-            { 
-              ...restInvoice, 
-              invoiceId, 
-              createdAt, 
-              remaining,
-              isPaid,
-              payments,
-              authNumber, // Store auth number at invoice level too
-              workOrderId, // Store the work order ID if provided
-              isPickedUp: false // Initialize as not picked up
-            }
-          ]
+          invoices: [...state.invoices, newInvoice]
         }));
+        
+        // Sync with database
+        if (ReportingService) {
+          ReportingService.syncInvoiceToDatabase(newInvoice)
+            .catch(err => console.error('Error syncing new invoice to database:', err));
+        }
         
         return invoiceId;
       },
       
       markAsPaid: (invoiceId, paymentMethod, authNumber) => {
-        set((state) => ({
-          invoices: state.invoices.map(invoice => {
+        let updatedInvoice: Invoice | undefined;
+        
+        set((state) => {
+          const updatedInvoices = state.invoices.map(invoice => {
             if (invoice.invoiceId === invoiceId) {
               const remainingAmount = invoice.remaining;
               const method = paymentMethod || invoice.paymentMethod;
@@ -219,7 +249,7 @@ export const useInvoiceStore = create<InvoiceState>()(
               // Get existing payments or create empty array if none exist
               const existingPayments = invoice.payments || [];
               
-              return { 
+              updatedInvoice = { 
                 ...invoice, 
                 isPaid: true, 
                 remaining: 0, 
@@ -228,29 +258,43 @@ export const useInvoiceStore = create<InvoiceState>()(
                 payments: [...existingPayments, newPayment],
                 authNumber: authNumber || invoice.authNumber // Update or retain auth number
               };
+              
+              return updatedInvoice;
             }
             return invoice;
-          })
-        }));
+          });
+          
+          return { invoices: updatedInvoices };
+        });
+        
+        // Sync updated invoice with database
+        if (updatedInvoice && ReportingService) {
+          ReportingService.syncInvoiceToDatabase(updatedInvoice)
+            .catch(err => console.error('Error syncing paid invoice to database:', err));
+        }
       },
       
       markAsPickedUp: (id, isInvoice = true) => {
         const pickedUpAt = new Date().toISOString();
+        let updatedInvoice: Invoice | undefined;
         
         if (isInvoice) {
           // Mark invoice as picked up
-          set((state) => ({
-            invoices: state.invoices.map(invoice => {
+          set((state) => {
+            const updatedInvoices = state.invoices.map(invoice => {
               if (invoice.invoiceId === id) {
-                return { 
+                updatedInvoice = { 
                   ...invoice, 
                   isPickedUp: true,
                   pickedUpAt
                 };
+                return updatedInvoice;
               }
               return invoice;
-            })
-          }));
+            });
+            
+            return { invoices: updatedInvoices };
+          });
           
           // Also mark associated work order as picked up if it exists
           const invoice = get().invoices.find(inv => inv.invoiceId === id);
@@ -286,25 +330,36 @@ export const useInvoiceStore = create<InvoiceState>()(
           // Also mark associated invoice as picked up if it exists
           const relatedInvoice = get().invoices.find(inv => inv.workOrderId === id);
           if (relatedInvoice) {
-            set((state) => ({
-              invoices: state.invoices.map(invoice => {
+            set((state) => {
+              const updatedInvoices = state.invoices.map(invoice => {
                 if (invoice.invoiceId === relatedInvoice.invoiceId) {
-                  return {
+                  updatedInvoice = {
                     ...invoice,
                     isPickedUp: true,
                     pickedUpAt
                   };
+                  return updatedInvoice;
                 }
                 return invoice;
-              })
-            }));
+              });
+              
+              return { invoices: updatedInvoices };
+            });
           }
+        }
+        
+        // Sync updated invoice with database if it was modified
+        if (updatedInvoice && ReportingService) {
+          ReportingService.syncInvoiceToDatabase(updatedInvoice)
+            .catch(err => console.error('Error syncing picked up invoice to database:', err));
         }
       },
       
       addPartialPayment: (invoiceId, payment) => {
-        set((state) => ({
-          invoices: state.invoices.map(invoice => {
+        let updatedInvoice: Invoice | undefined;
+        
+        set((state) => {
+          const updatedInvoices = state.invoices.map(invoice => {
             if (invoice.invoiceId === invoiceId) {
               // Get existing payments or create empty array if none exist
               const existingPayments = invoice.payments || [];
@@ -320,7 +375,7 @@ export const useInvoiceStore = create<InvoiceState>()(
               const newRemaining = Math.max(0, invoice.total - newDeposit);
               const isPaid = newRemaining === 0;
               
-              return { 
+              updatedInvoice = { 
                 ...invoice, 
                 isPaid,
                 remaining: newRemaining,
@@ -328,10 +383,20 @@ export const useInvoiceStore = create<InvoiceState>()(
                 payments: [...existingPayments, newPayment],
                 authNumber: payment.authNumber || invoice.authNumber // Update auth number if provided
               };
+              
+              return updatedInvoice;
             }
             return invoice;
-          })
-        }));
+          });
+          
+          return { invoices: updatedInvoices };
+        });
+        
+        // Sync updated invoice with database
+        if (updatedInvoice && ReportingService) {
+          ReportingService.syncInvoiceToDatabase(updatedInvoice)
+            .catch(err => console.error('Error syncing partial payment to database:', err));
+        }
       },
       
       getInvoiceById: (id) => {
@@ -390,6 +455,12 @@ export const useInvoiceStore = create<InvoiceState>()(
         set((state) => ({
           invoices: [...state.invoices, invoiceToAdd]
         }));
+        
+        // Sync with database
+        if (ReportingService) {
+          ReportingService.syncInvoiceToDatabase(invoiceToAdd)
+            .catch(err => console.error('Error syncing existing invoice to database:', err));
+        }
       },
       
       addWorkOrder: (workOrder) => {
@@ -412,8 +483,8 @@ export const useInvoiceStore = create<InvoiceState>()(
       },
       
       updateInvoice: (updatedInvoice) => {
-        set((state) => ({
-          invoices: state.invoices.map((invoice) => {
+        set((state) => {
+          const updatedInvoices = state.invoices.map((invoice) => {
             if (invoice.invoiceId === updatedInvoice.invoiceId) {
               // Ensure the edit history is preserved
               const editHistory = updatedInvoice.editHistory || invoice.editHistory || [];
@@ -436,14 +507,24 @@ export const useInvoiceStore = create<InvoiceState>()(
                 }
               }
               
-              return {
+              const finalUpdatedInvoice = {
                 ...updatedInvoice,
                 editHistory
               };
+              
+              // Sync with database
+              if (ReportingService) {
+                ReportingService.syncInvoiceToDatabase(finalUpdatedInvoice)
+                  .catch(err => console.error('Error syncing updated invoice to database:', err));
+              }
+              
+              return finalUpdatedInvoice;
             }
             return invoice;
-          })
-        }));
+          });
+          
+          return { invoices: updatedInvoices };
+        });
       },
       
       updateWorkOrder: (updatedWorkOrder) => {
@@ -520,11 +601,13 @@ export const useInvoiceStore = create<InvoiceState>()(
           }));
           
           // If there's a related invoice, mark it as archived too
+          let updatedInvoice: Invoice | undefined;
+          
           if (relatedInvoice) {
-            set((state) => ({
-              invoices: state.invoices.map(inv => {
+            set((state) => {
+              const updatedInvoices = state.invoices.map(inv => {
                 if (inv.invoiceId === relatedInvoice.invoiceId) {
-                  return {
+                  updatedInvoice = {
                     ...inv,
                     isArchived: true,
                     archivedAt: now,
@@ -532,10 +615,19 @@ export const useInvoiceStore = create<InvoiceState>()(
                     // Clear remaining payments
                     remaining: 0
                   };
+                  return updatedInvoice;
                 }
                 return inv;
-              })
-            }));
+              });
+              
+              return { invoices: updatedInvoices };
+            });
+            
+            // Sync updated invoice with database
+            if (updatedInvoice && ReportingService) {
+              ReportingService.syncInvoiceToDatabase(updatedInvoice)
+                .catch(err => console.error('Error syncing archived invoice to database:', err));
+            }
           }
           
           return refundId;
@@ -556,11 +648,13 @@ export const useInvoiceStore = create<InvoiceState>()(
           }));
           
           // If there's a related invoice, mark it as archived too
+          let updatedInvoice: Invoice | undefined;
+          
           if (relatedInvoice) {
-            set((state) => ({
-              invoices: state.invoices.map(inv => {
+            set((state) => {
+              const updatedInvoices = state.invoices.map(inv => {
                 if (inv.invoiceId === relatedInvoice.invoiceId) {
-                  return {
+                  updatedInvoice = {
                     ...inv,
                     isArchived: true,
                     archivedAt: now,
@@ -568,10 +662,19 @@ export const useInvoiceStore = create<InvoiceState>()(
                     // Clear remaining payments
                     remaining: 0
                   };
+                  return updatedInvoice;
                 }
                 return inv;
-              })
-            }));
+              });
+              
+              return { invoices: updatedInvoices };
+            });
+            
+            // Sync updated invoice with database
+            if (updatedInvoice && ReportingService) {
+              ReportingService.syncInvoiceToDatabase(updatedInvoice)
+                .catch(err => console.error('Error syncing archived invoice to database:', err));
+            }
           }
           
           return undefined; // No refund was processed
@@ -629,6 +732,15 @@ export const useInvoiceStore = create<InvoiceState>()(
           ),
           workOrders: updatedWorkOrders
         }));
+        
+        // Sync refund with database
+        if (ReportingService) {
+          ReportingService.syncRefundToDatabase(newRefund)
+            .catch(err => console.error('Error syncing refund to database:', err));
+          
+          ReportingService.syncInvoiceToDatabase(updatedInvoice)
+            .catch(err => console.error('Error syncing refunded invoice to database:', err));
+        }
         
         return refundId;
       },
