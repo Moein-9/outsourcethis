@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensCoating } from "@/store/inventoryStore";
@@ -69,12 +68,8 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
     return "transparent";
   };
   
-  // Format the display text based on language
+  // Format the display text - always display full text regardless of language
   const formatColorText = (colorName: string): string => {
-    if (colorName.includes('|')) {
-      const [english, arabic] = colorName.split('|').map(part => part.trim());
-      return language === 'ar' ? arabic : english;
-    }
     return colorName;
   };
 

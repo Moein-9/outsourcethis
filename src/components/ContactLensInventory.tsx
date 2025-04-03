@@ -134,7 +134,97 @@ const mBellaContactLenses = bellaContactLenses.map(lens => ({
   brand: "M-Bella"
 }));
 
-const allContactLenses = [...bellaContactLenses, ...mBellaContactLenses];
+const dahabMonthlyAndDailies = [
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lumirere Blue - لوميرير بلو" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lumirere Hazel - لوميرير هيزل" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lumirere Gray - لوميرير جراي" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Solitaire - سوليتير" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sabrin Gray Green - سابرين جراي جرين" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sabrin Gray - سابرين جراي" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Swarovski - سواروفسكي" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sun Kiss - صن كيس" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Diamond - دايموند" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Topaz - توباز" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sky - سكاي" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cat Eye - كات آي" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Creamy - كريمي" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lumirere Green - لوميرير جرين" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lumirere Brown - لوميرير براون" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Ice - آيس" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Aqua - أكوا" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Caramel - كراميل" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Tiffany Blue - تيفاني بلو" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Hind - هند" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Blue - ناتشورال بلو" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Perle - بيرل" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mentha - منثا" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Rain - رين" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Alaska - ألاسكا" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sabrin Soul - سابرين سول" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Medusa - ميدوسا" },
+  
+  // Daily versions of the same colors
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lumirere Blue - لوميرير بلو" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lumirere Hazel - لوميرير هيزل" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lumirere Gray - لوميرير جراي" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Solitaire - سوليتير" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sabrin Gray Green - سابرين جراي جرين" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sabrin Gray - سابرين جراي" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Swarovski - سواروفسكي" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sun Kiss - صن كيس" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Diamond - دايموند" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Topaz - توباز" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sky - سكاي" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cat Eye - كات آي" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Creamy - كريمي" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lumirere Green - لوميرير جرين" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lumirere Brown - لوميرير براون" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Ice - آيس" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Aqua - أكوا" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Caramel - كراميل" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Tiffany Blue - تيفاني بلو" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Hind - هند" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Blue - ناتشورال بلو" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Perle - بيرل" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mentha - منثا" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Rain - رين" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Alaska - ألاسكا" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sabrin Soul - سابرين سول" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Medusa - ميدوسا" },
+];
+
+const dahabMonthlyOnly = [
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Kaf - كاف" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Smokey - سموكي" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Marbel - ماربل" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Hazel - ناتشورال هيزل" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Gray - ناتشورال جراي" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Green - ناتشورال جرين" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cappuccino - كابتشينو" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Honey - هوني" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Argan - أرغان" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Hawaii - هاواي" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Olive - أوليف" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Khaki - خاكي" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Grayish - جريش" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Brownish - براونش" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Brown - براون" },
+  { brand: "Dahab", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Black - بلاك" },
+];
+
+const dahabDailiesOnly = [
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Daily Mix - ديلي ميكس" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Marron - مارون" },
+  { brand: "Dahab", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Daily Mix 2 - ديلي ميكس 2" },
+];
+
+const dahabContactLenses = [
+  ...dahabMonthlyAndDailies,
+  ...dahabMonthlyOnly,
+  ...dahabDailiesOnly
+];
+
+const allContactLenses = [...bellaContactLenses, ...mBellaContactLenses, ...dahabContactLenses];
 
 export const ContactLensInventory: React.FC = () => {
   const { contactLenses, addContactLens, updateContactLens, deleteContactLens, searchContactLenses } = useInventoryStore();
@@ -318,13 +408,13 @@ export const ContactLensInventory: React.FC = () => {
   const handleBulkImport = () => {
     const { contactLenses, deleteContactLens, addContactLens } = useInventoryStore.getState();
     
-    // First, remove all existing Bella and M-Bella lenses to avoid duplicates
-    const existingBellaLenses = contactLenses.filter(lens => 
-      lens.brand === "Bella" || lens.brand === "M-Bella"
+    // First, remove all existing Bella, M-Bella, and Dahab lenses to avoid duplicates
+    const existingLenses = contactLenses.filter(lens => 
+      lens.brand === "Bella" || lens.brand === "M-Bella" || lens.brand === "Dahab"
     );
     
-    // Delete all existing Bella and M-Bella lenses
-    existingBellaLenses.forEach(lens => {
+    // Delete all existing lenses of these brands
+    existingLenses.forEach(lens => {
       deleteContactLens(lens.id);
     });
     

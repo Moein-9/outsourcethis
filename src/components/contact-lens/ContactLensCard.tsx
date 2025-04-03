@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { ContactLensItem } from "@/store/inventoryStore";
@@ -59,16 +58,9 @@ export const ContactLensCard: React.FC<ContactLensCardProps> = ({ lens, onEdit, 
                         brandColorClass.includes('cyan') ? 'text-cyan-600' :
                         'text-orange-600';
   
-  // Format color text - if it contains '|', display appropriate language portion
+  // Format color text - always display full text regardless of language
   const formatColorText = (colorText: string | undefined): string => {
     if (!colorText) return '';
-    
-    // If color contains a delimiter '|' for bilingual text
-    if (colorText.includes('|')) {
-      const [english, arabic] = colorText.split('|').map(part => part.trim());
-      return language === 'ar' ? arabic : english;
-    }
-    
     return colorText;
   };
   
