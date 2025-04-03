@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,7 +12,6 @@ import PrintLabelPage from "./pages/PrintLabelPage";
 import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 import { LensDebugger } from "./components/LensDebugger";
 import { useInventoryStore } from "./store/inventoryStore";
-import { toast } from "sonner";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient({
@@ -25,14 +24,9 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  const resetLensPricing = useInventoryStore((state) => state.resetLensPricing);
+  // We're removing the automatic call to resetLensPricing
+  // This ensures that your pricing data persists between refreshes
   
-  useEffect(() => {
-    // Initialize the lens pricing based on the new pricing structure
-    resetLensPricing();
-    toast.success("Lens pricing data has been initialized");
-  }, [resetLensPricing]);
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
