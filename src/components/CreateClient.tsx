@@ -142,7 +142,7 @@ export const CreateClient: React.FC = () => {
   
   const generatePdOptions = () => {
     const options = [];
-    for (let i = 40; i <= 80; i += 1) {
+    for (let i = 20; i <= 50; i += 1) {
       options.push(
         <option key={`pd-${i}`} value={i}>
           {i}

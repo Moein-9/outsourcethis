@@ -132,7 +132,8 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
 
   const generatePdValues = () => {
     const values = [""];
-    for (let i = 15; i <= 60; i += 1) {
+    // Updated PD range to start from 20 to 50 as requested
+    for (let i = 20; i <= 50; i += 1) {
       values.push(i.toString());
     }
     return values;
