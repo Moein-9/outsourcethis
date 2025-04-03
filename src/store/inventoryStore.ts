@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -126,7 +125,8 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "lens2", name: "نظارات للنظر البعيد", type: "distance" },
         { id: "lens3", name: "عدسات تقدمية", type: "progressive" },
         { id: "lens4", name: "عدسات ثنائية", type: "bifocal" },
-        { id: "lens5", name: "عدسات شمسية", type: "sunglasses" }
+        { id: "lens5", name: "عدسات شمسية", type: "sunglasses" },
+        { id: "lens6", name: "عدسات تقدمية PRO", type: "progressive" }
       ],
       lensCoatings: [
         // Basic lens coatings for Single Vision
@@ -643,6 +643,20 @@ export const useInventoryStore = create<InventoryState>()(
           { id: "prog-filter-167", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-167", price: 114 },
           { id: "prog-filter-174", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-174", price: 200 },
           
+          // PRO Progressive - Basic
+          { id: "prog-pro-basic-156", lensTypeId: "lens6", coatingId: "basic-prog", thicknessId: "prog-156", price: 55 },
+          { id: "prog-pro-basic-poly", lensTypeId: "lens6", coatingId: "basic-prog", thicknessId: "prog-poly", price: 85 },
+          { id: "prog-pro-basic-160", lensTypeId: "lens6", coatingId: "basic-prog", thicknessId: "prog-160", price: 100 },
+          { id: "prog-pro-basic-167", lensTypeId: "lens6", coatingId: "basic-prog", thicknessId: "prog-167", price: 140 },
+          { id: "prog-pro-basic-174", lensTypeId: "lens6", coatingId: "basic-prog", thicknessId: "prog-174", price: 180 },
+          
+          // PRO Progressive - Filter
+          { id: "prog-pro-filter-156", lensTypeId: "lens6", coatingId: "filter-prog", thicknessId: "prog-156", price: 55 },
+          { id: "prog-pro-filter-poly", lensTypeId: "lens6", coatingId: "filter-prog", thicknessId: "prog-poly", price: 85 },
+          { id: "prog-pro-filter-160", lensTypeId: "lens6", coatingId: "filter-prog", thicknessId: "prog-160", price: 100 },
+          { id: "prog-pro-filter-167", lensTypeId: "lens6", coatingId: "filter-prog", thicknessId: "prog-167", price: 140 },
+          { id: "prog-pro-filter-174", lensTypeId: "lens6", coatingId: "filter-prog", thicknessId: "prog-174", price: 180 },
+          
           // Bifocal
           { id: "bif-basic", lensTypeId: "lens4", coatingId: "basic-bif", thicknessId: "bif-basic", price: 18 },
           { id: "bif-filter", lensTypeId: "lens4", coatingId: "filter-bif", thicknessId: "bif-basic", price: 28 },
@@ -674,6 +688,13 @@ export const useInventoryStore = create<InventoryState>()(
           { id: "prog-photo-160", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-160", price: 90 },
           { id: "prog-photo-167", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-167", price: 130 },
           { id: "prog-photo-174", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-174", price: 180 },
+          
+          // PRO Progressive Photochromic
+          { id: "prog-pro-photo-156", lensTypeId: "lens6", coatingId: "photochromic-prog", thicknessId: "prog-156", price: 130 },
+          { id: "prog-pro-photo-poly", lensTypeId: "lens6", coatingId: "photochromic-prog", thicknessId: "prog-poly", price: 180 },
+          { id: "prog-pro-photo-160", lensTypeId: "lens6", coatingId: "photochromic-prog", thicknessId: "prog-160", price: 180 },
+          { id: "prog-pro-photo-167", lensTypeId: "lens6", coatingId: "photochromic-prog", thicknessId: "prog-167", price: 220 },
+          { id: "prog-pro-photo-174", lensTypeId: "lens6", coatingId: "photochromic-prog", thicknessId: "prog-174", price: 270 },
         ];
         
         set({
