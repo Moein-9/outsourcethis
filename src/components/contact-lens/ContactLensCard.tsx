@@ -32,7 +32,10 @@ export const ContactLensCard: React.FC<ContactLensCardProps> = ({ lens, onEdit, 
       'from-amber-50 to-amber-100 border-amber-200',
       'from-pink-50 to-pink-100 border-pink-200',
       'from-indigo-50 to-indigo-100 border-indigo-200',
-      'from-emerald-50 to-emerald-100 border-emerald-200'
+      'from-emerald-50 to-emerald-100 border-emerald-200',
+      'from-rose-50 to-rose-100 border-rose-200',
+      'from-cyan-50 to-cyan-100 border-cyan-200',
+      'from-orange-50 to-orange-100 border-orange-200'
     ];
     
     // Simple hash function for brand name to get consistent color
@@ -51,7 +54,10 @@ export const ContactLensCard: React.FC<ContactLensCardProps> = ({ lens, onEdit, 
                         brandColorClass.includes('amber') ? 'text-amber-600' :
                         brandColorClass.includes('pink') ? 'text-pink-600' :
                         brandColorClass.includes('indigo') ? 'text-indigo-600' :
-                        'text-emerald-600';
+                        brandColorClass.includes('emerald') ? 'text-emerald-600' :
+                        brandColorClass.includes('rose') ? 'text-rose-600' :
+                        brandColorClass.includes('cyan') ? 'text-cyan-600' :
+                        'text-orange-600';
   
   return (
     <Card className={`overflow-hidden hover:shadow-md transition-all duration-200 border bg-gradient-to-r ${brandColorClass}`}>

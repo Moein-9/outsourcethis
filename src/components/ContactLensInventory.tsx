@@ -11,6 +11,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -32,7 +33,10 @@ import {
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { ContactLensCard } from "./contact-lens/ContactLensCard";
 import { ContactLensForm } from "./contact-lens/ContactLensForm";
-import { Search, Plus, Contact } from "lucide-react";
+import { CustomBrandsManager } from "./contact-lens/CustomBrandsManager";
+import { CustomTypesManager } from "./contact-lens/CustomTypesManager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Plus, Contact, Settings, Tag } from "lucide-react";
 
 export const ContactLensInventory: React.FC = () => {
   const { contactLenses, addContactLens, updateContactLens, deleteContactLens, searchContactLenses } = useInventoryStore();
@@ -42,8 +46,10 @@ export const ContactLensInventory: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchContactLenses>>(contactLenses);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
   const [editingLens, setEditingLens] = useState<ContactLensItem | null>(null);
   const [deletingLensId, setDeletingLensId] = useState<string | null>(null);
+  const [activeManageTab, setActiveManageTab] = useState<"brands" | "types">("brands");
   
   // User-saved custom values
   const [savedCustomBrands, setSavedCustomBrands] = useState<string[]>(() => {
@@ -163,6 +169,46 @@ export const ContactLensInventory: React.FC = () => {
     }
   };
   
+  // Handle add/edit custom brand
+  const handleAddCustomBrand = (brand: string) => {
+    setSavedCustomBrands(prev => [...prev, brand]);
+  };
+  
+  // Handle delete custom brand
+  const handleDeleteCustomBrand = (brand: string) => {
+    // Check if the brand is in use
+    const brandInUse = contactLenses.some(lens => lens.brand === brand);
+    if (brandInUse) {
+      toast.error(
+        language === 'ar'
+          ? `لا يمكن حذف البراند "${brand}" لأنه مستخدم في عدسات لاصقة موجودة`
+          : `Cannot delete brand "${brand}" as it is used in existing contact lenses`
+      );
+      return;
+    }
+    setSavedCustomBrands(prev => prev.filter(b => b !== brand));
+  };
+  
+  // Handle add/edit custom type
+  const handleAddCustomType = (type: string) => {
+    setSavedCustomTypes(prev => [...prev, type]);
+  };
+  
+  // Handle delete custom type
+  const handleDeleteCustomType = (type: string) => {
+    // Check if the type is in use
+    const typeInUse = contactLenses.some(lens => lens.type === type);
+    if (typeInUse) {
+      toast.error(
+        language === 'ar'
+          ? `لا يمكن حذف النوع "${type}" لأنه مستخدم في عدسات لاصقة موجودة`
+          : `Cannot delete type "${type}" as it is used in existing contact lenses`
+      );
+      return;
+    }
+    setSavedCustomTypes(prev => prev.filter(t => t !== type));
+  };
+  
   // Close dialog and reset form
   const closeDialog = () => {
     setIsAddDialogOpen(false);
@@ -218,9 +264,7 @@ export const ContactLensInventory: React.FC = () => {
         </div>
         
         <div className="flex flex-wrap gap-2">
-          <Select value={filterBrand} onValueChange={(value) => {
-            setFilterBrand(value);
-          }}>
+          <Select value={filterBrand} onValueChange={setFilterBrand}>
             <SelectTrigger className="w-40 bg-white">
               <SelectValue placeholder={language === 'ar' ? 'اختر البراند' : 'Select Brand'} />
             </SelectTrigger>
@@ -232,9 +276,7 @@ export const ContactLensInventory: React.FC = () => {
             </SelectContent>
           </Select>
           
-          <Select value={filterType} onValueChange={(value) => {
-            setFilterType(value);
-          }}>
+          <Select value={filterType} onValueChange={setFilterType}>
             <SelectTrigger className="w-40 bg-white">
               <SelectValue placeholder={language === 'ar' ? 'اختر النوع' : 'Select Type'} />
             </SelectTrigger>
@@ -251,6 +293,14 @@ export const ContactLensInventory: React.FC = () => {
             onClick={() => setIsAddDialogOpen(true)}
           >
             <Plus className="h-4 w-4 mr-1" /> {language === 'ar' ? 'إضافة عدسة لاصقة' : 'Add Contact Lens'}
+          </Button>
+          
+          <Button
+            variant="outline"
+            className="shrink-0 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
+            onClick={() => setIsManageDialogOpen(true)}
+          >
+            <Settings className="h-4 w-4 mr-1" /> {language === 'ar' ? 'إدارة الخيارات' : 'Manage Options'}
           </Button>
         </div>
       </div>
@@ -322,6 +372,60 @@ export const ContactLensInventory: React.FC = () => {
             savedCustomTypes={savedCustomTypes}
             isEditing={!!editingLens}
           />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Manage Brands and Types Dialog */}
+      <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'ar' ? 'إدارة البراندات والأنواع' : 'Manage Brands & Types'}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'ar' 
+                ? 'أضف أو احذف البراندات والأنواع المخصصة من هذه القائمة'
+                : 'Add or remove custom brands and types from this list'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Tabs value={activeManageTab} onValueChange={(value) => setActiveManageTab(value as "brands" | "types")}>
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="brands" className="flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                {language === 'ar' ? 'البراندات' : 'Brands'}
+              </TabsTrigger>
+              <TabsTrigger value="types" className="flex items-center gap-2">
+                <Contact className="h-4 w-4" />
+                {language === 'ar' ? 'الأنواع' : 'Types'}
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="brands" className="mt-0">
+              <CustomBrandsManager
+                savedBrands={savedCustomBrands}
+                onSaveBrand={handleAddCustomBrand}
+                onDeleteBrand={handleDeleteCustomBrand}
+              />
+            </TabsContent>
+            
+            <TabsContent value="types" className="mt-0">
+              <CustomTypesManager
+                savedTypes={savedCustomTypes}
+                onSaveType={handleAddCustomType}
+                onDeleteType={handleDeleteCustomType}
+              />
+            </TabsContent>
+          </Tabs>
+          
+          <div className="flex justify-end mt-4">
+            <Button 
+              onClick={() => setIsManageDialogOpen(false)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {language === 'ar' ? 'تم' : 'Done'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
