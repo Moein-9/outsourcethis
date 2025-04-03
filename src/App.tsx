@@ -25,20 +25,14 @@ const queryClient = new QueryClient({
 
 const App = () => {
   // Make sure the sunglasses coating category is properly initialized
-  const { lensCoatings, cleanupSamplePhotochromicCoatings, resetLensPricing } = useInventoryStore();
+  const { cleanupSamplePhotochromicCoatings, resetLensPricing } = useInventoryStore();
   
   useEffect(() => {
     // Clean up any sample photochromic coatings
     cleanupSamplePhotochromicCoatings();
     
     // Reset lens pricing combinations if needed
-    const sunglassesCoatings = lensCoatings.filter(c => c.category === "sunglasses");
-    console.log("Sunglasses coatings on startup:", sunglassesCoatings);
-    
-    // Log current coatings for debugging
-    console.log("Current lens coatings:", lensCoatings);
-    
-    // Remove the debug toast that was showing the message
+    // Note: Removed debug logs that were showing initialization messages
   }, []);
   
   return (

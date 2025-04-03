@@ -84,14 +84,7 @@ export const LensSection: React.FC<LensSectionProps> = ({
             {t('lensSection')}
           </span>
           
-          {combinedLensPrice !== null && (
-            <Badge 
-              className="bg-green-100 text-green-800 hover:bg-green-200 px-3 py-1 font-medium flex items-center gap-1"
-            >
-              <Check className="w-3.5 h-3.5" />
-              {t('combinedPrice')}: {combinedLensPrice.toFixed(3)} {t('kwd')}
-            </Badge>
-          )}
+          {/* Removed combined price badge */}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 overflow-visible">

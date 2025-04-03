@@ -314,9 +314,6 @@ const CreateInvoiceContent: React.FC = () => {
                                 {language === 'ar' ? 'خدمة فحص العين' : 'Eye examination service'}
                               </p>
                             </div>
-                            <p className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-sm">
-                              {getValues("servicePrice")?.toFixed(3)} KWD
-                            </p>
                           </div>
                         </div>
                       ) : invoiceType === "glasses" ? (
@@ -333,9 +330,6 @@ const CreateInvoiceContent: React.FC = () => {
                                     {getValues("frameBrand")} {getValues("frameModel")}
                                   </p>
                                 </div>
-                                <p className="font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-md text-sm">
-                                  {getValues("framePrice")?.toFixed(3)} KWD
-                                </p>
                               </div>
                             </div>
                           )}
@@ -368,9 +362,6 @@ const CreateInvoiceContent: React.FC = () => {
                                     {getValues("coating")}
                                   </p>
                                 </div>
-                                <p className="font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-md text-sm">
-                                  {getValues("coatingPrice")?.toFixed(3)} KWD
-                                </p>
                               </div>
                             </div>
                           )}
@@ -387,9 +378,6 @@ const CreateInvoiceContent: React.FC = () => {
                                     {getValues("thickness")}
                                   </p>
                                 </div>
-                                <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md text-sm">
-                                  {getValues("thicknessPrice")?.toFixed(3)} KWD
-                                </p>
                               </div>
                             </div>
                           )}
@@ -410,9 +398,6 @@ const CreateInvoiceContent: React.FC = () => {
                                     </p>
                                   )}
                                 </div>
-                                <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md text-sm">
-                                  {(lens.price * (lens.qty || 1)).toFixed(3)} KWD
-                                </p>
                               </div>
                             </div>
                           ))}
