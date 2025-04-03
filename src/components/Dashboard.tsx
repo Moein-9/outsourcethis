@@ -13,12 +13,10 @@ import {
   Calendar,
   Store,
   ScrollText,
-  Eye,
-  Trash2
+  Eye
 } from "lucide-react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
-import { useInvoiceStore } from "@/store/invoiceStore";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MoenLogoGreen } from "@/assets/logo";
@@ -27,14 +25,12 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { format } from "date-fns";
-import { toast } from "@/components/ui/use-toast";
 
 export const Dashboard: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const { patients } = usePatientStore();
   const { frames } = useInventoryStore();
   const { t, language } = useLanguageStore();
-  const { clearInvoices } = useInvoiceStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -71,19 +67,6 @@ export const Dashboard: React.FC = () => {
           examRadioButton.click();
         }
       }, 100);
-    }
-  };
-
-  const resetAllData = () => {
-    if (clearInvoices) {
-      clearInvoices();
-      toast({
-        title: language === 'ar' ? "تم المسح بنجاح" : "Data Cleared",
-        description: language === 'ar' 
-          ? "تم مسح جميع الفواتير وطلبات العمل والمبالغ المستردة" 
-          : "All invoices, work orders, and refunds have been cleared",
-        variant: "success"
-      });
     }
   };
 
@@ -183,33 +166,6 @@ export const Dashboard: React.FC = () => {
           ))}
         </div>
       </CollapsibleCard>
-
-      {/* Debug Section - For Testing Purposes */}
-      <Card className="mb-6 border-dashed border-red-300">
-        <CardHeader>
-          <CardTitle className="text-red-500 flex items-center gap-2">
-            <Trash2 className="h-5 w-5" />
-            {language === 'ar' ? 'أدوات الفحص' : 'Testing Tools'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              {language === 'ar' 
-                ? 'استخدم هذه الأدوات فقط لأغراض الاختبار. ستؤدي إلى حذف البيانات بشكل دائم.'
-                : 'Use these tools for testing purposes only. This will permanently delete data.'}
-            </p>
-            <Button 
-              variant="destructive" 
-              onClick={resetAllData} 
-              className="mt-2 w-full sm:w-auto"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              {language === 'ar' ? 'مسح جميع البيانات' : 'Reset All Data'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
