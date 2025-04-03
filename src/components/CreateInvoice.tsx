@@ -6,7 +6,8 @@ import { motion } from "framer-motion";
 import { 
   FileText, Printer, Receipt, User, PackageCheck, CreditCard,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
-  MessageCircleDashed, Loader, Check, Ruler, Paintbrush, ScrollText
+  MessageCircleDashed, Loader, Check, Ruler, Paintbrush, ScrollText,
+  Eye, layers, Glasses
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -339,7 +340,7 @@ const CreateInvoiceContent: React.FC = () => {
                             </div>
                           )}
                           
-                          {getValues("lensType") && (
+                          {getValues("lensType") && getValues("lensPrice") > 0 && (
                             <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full opacity-20"></div>
                               <div className="flex justify-between items-start">
@@ -439,6 +440,42 @@ const CreateInvoiceContent: React.FC = () => {
                         <span className="font-medium">{(total + (getValues("discount") || 0)).toFixed(3)} KWD</span>
                       </div>
                       
+                      {/* Lens Type Cost */}
+                      {getValues("lensType") && getValues("lensPrice") > 0 && (
+                        <div className="flex justify-between items-center py-1">
+                          <span className="text-sm text-gray-600 flex items-center gap-1">
+                            <Eye className="w-3 h-3" /> {t('lensType')}
+                          </span>
+                          <span className="font-medium text-blue-600">{getValues("lensPrice")?.toFixed(3)} KWD</span>
+                        </div>
+                      )}
+                      
+                      {/* Lens Features Cost (Coating + Thickness) */}
+                      {(getValues("coatingPrice") > 0 || getValues("thicknessPrice") > 0) && (
+                        <div className="flex justify-between items-center py-1">
+                          <span className="text-sm text-gray-600 flex items-center gap-1">
+                            <layers className="w-3 h-3" /> {t('lensFeatures')}
+                          </span>
+                          <span className="font-medium text-purple-600">
+                            {(
+                              (getValues("coatingPrice") || 0) + 
+                              (getValues("thicknessPrice") || 0)
+                            ).toFixed(3)} KWD
+                          </span>
+                        </div>
+                      )}
+                      
+                      {/* Frame Cost */}
+                      {!getValues("skipFrame") && getValues("framePrice") > 0 && (
+                        <div className="flex justify-between items-center py-1">
+                          <span className="text-sm text-gray-600 flex items-center gap-1">
+                            <Glasses className="w-3 h-3" /> {t('frame')}
+                          </span>
+                          <span className="font-medium text-amber-600">{getValues("framePrice")?.toFixed(3)} KWD</span>
+                        </div>
+                      )}
+                      
+                      {/* Discount section */}
                       {(getValues("discount") || 0) > 0 && (
                         <div className="flex justify-between items-center py-1 text-rose-600">
                           <span className="text-sm flex items-center gap-1">
@@ -448,6 +485,7 @@ const CreateInvoiceContent: React.FC = () => {
                         </div>
                       )}
                       
+                      {/* Total and remaining sections */}
                       <div className="flex justify-between items-center py-2 border-t border-dashed border-amber-200">
                         <span className="font-medium text-gray-800">{t('total')}</span>
                         <span className="text-lg font-bold text-amber-600">{total.toFixed(3)} KWD</span>
