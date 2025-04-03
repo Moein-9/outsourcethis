@@ -74,15 +74,13 @@ export const LensSection: React.FC<LensSectionProps> = ({
             <Eye className="w-4 h-4 text-violet-600" />
             {t('lensSection')}
           </span>
-          
-          {/* Removed combined price badge */}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 overflow-visible">
         <LensSelector 
           onSelectLensType={onLensTypeSelect}
-          onSelectCoating={onSelectCoating}
-          onSelectThickness={onSelectThickness}
+          onSelectCoating={onCoatingSelect}
+          onSelectThickness={onThicknessSelect}
           skipLens={skipFrame}
           onSkipLensChange={onSkipFrameChange}
           initialLensType={selectedLensType}
