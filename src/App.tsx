@@ -10,6 +10,8 @@ import ReportPage from "./pages/ReportPage";
 import PrintLabelPage from "./pages/PrintLabelPage";
 import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 import { LensDebugger } from "./components/LensDebugger";
+import { useInventoryStore } from "./store/inventoryStore";
+import { useEffect } from "react";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient({
@@ -22,8 +24,16 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // We're removing the automatic call to resetLensPricing
-  // This ensures that your pricing data persists between refreshes
+  // Make sure the sunglasses coating category is properly initialized
+  const { lensCoatings, cleanupSamplePhotochromicCoatings } = useInventoryStore();
+  
+  useEffect(() => {
+    // Clean up any sample photochromic coatings
+    cleanupSamplePhotochromicCoatings();
+    
+    // Log current coatings for debugging
+    console.log("Current lens coatings:", lensCoatings);
+  }, []);
   
   return (
     <QueryClientProvider client={queryClient}>

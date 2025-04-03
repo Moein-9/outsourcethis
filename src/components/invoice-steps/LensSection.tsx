@@ -45,6 +45,13 @@ export const LensSection: React.FC<LensSectionProps> = ({
 }) => {
   const { t } = useLanguageStore();
 
+  // Debug log to check selected coating
+  React.useEffect(() => {
+    if (selectedCoating) {
+      console.log("Selected coating:", selectedCoating);
+    }
+  }, [selectedCoating]);
+
   return (
     <Card className="border shadow-sm relative overflow-visible">
       <CardHeader className="bg-gradient-to-r from-violet-50 to-violet-100/50 border-b">
@@ -68,7 +75,7 @@ export const LensSection: React.FC<LensSectionProps> = ({
         <LensSelector 
           onSelectLensType={onLensTypeSelect}
           onSelectCoating={onCoatingSelect}
-          onSelectThickness={onThicknessSelect}
+          onSelectThickness={onSelectThickness}
           skipLens={skipFrame}
           onSkipLensChange={onSkipFrameChange}
           initialLensType={selectedLensType}
@@ -80,6 +87,17 @@ export const LensSection: React.FC<LensSectionProps> = ({
         
         {/* Photochromic color selector when applicable */}
         {selectedCoating?.isPhotochromic && (
+          <div className="mt-6">
+            <PhotochromicColorSelector
+              coating={selectedCoating}
+              selectedColor={selectedCoatingColor || ""}
+              onColorChange={onCoatingColorChange || (() => {})}
+            />
+          </div>
+        )}
+        
+        {/* Sunglasses color selector when applicable */}
+        {selectedCoating?.category === "sunglasses" && selectedCoating.availableColors && (
           <div className="mt-6">
             <PhotochromicColorSelector
               coating={selectedCoating}

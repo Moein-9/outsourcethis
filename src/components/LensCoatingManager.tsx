@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useInventoryStore, LensCoating } from "@/store/inventoryStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,9 @@ export const LensCoatingManager: React.FC = () => {
   const [editIsPhotochromic, setEditIsPhotochromic] = useState(false);
   const [editAvailableColors, setEditAvailableColors] = useState<string[]>([]);
   
+  // Force update when active tab changes
+  const [, forceUpdate] = useState({});
+  
   const handleAddCoating = () => {
     if (!newCoatingName || newCoatingPrice === "") {
       toast.error(t("fillRequiredFields"));
@@ -53,15 +57,24 @@ export const LensCoatingManager: React.FC = () => {
       coatingData.availableColors = [...newAvailableColors];
     }
     
-    addLensCoating(coatingData);
+    const id = addLensCoating(coatingData);
     
-    toast.success(t("coatingAddedSuccess"));
-    
-    setNewCoatingName("");
-    setNewCoatingPrice("");
-    setNewCoatingDescription("");
-    setNewIsPhotochromic(false);
-    setIsAddDialogOpen(false);
+    if (id) {
+      toast.success(t("coatingAddedSuccess"));
+      
+      // Force re-render to show the new coating
+      setTimeout(() => {
+        forceUpdate({});
+      }, 100);
+      
+      setNewCoatingName("");
+      setNewCoatingPrice("");
+      setNewCoatingDescription("");
+      setNewIsPhotochromic(false);
+      setIsAddDialogOpen(false);
+    } else {
+      toast.error("Failed to add coating");
+    }
   };
   
   const handleEditCoating = () => {
@@ -89,12 +102,22 @@ export const LensCoatingManager: React.FC = () => {
     
     toast.success(t("coatingUpdatedSuccess"));
     
+    // Force re-render to show the updated coating
+    setTimeout(() => {
+      forceUpdate({});
+    }, 100);
+    
     setIsEditDialogOpen(false);
   };
   
   const handleDeleteCoating = (id: string) => {
     deleteLensCoating(id);
     toast.success(t("coatingDeletedSuccess"));
+    
+    // Force re-render
+    setTimeout(() => {
+      forceUpdate({});
+    }, 100);
   };
   
   const startEditCoating = (coating: LensCoating) => {
@@ -115,7 +138,16 @@ export const LensCoatingManager: React.FC = () => {
     { value: "sunglasses", label: t("sunglasses") }
   ];
   
-  const filteredCoatings = lensCoatings.filter(coating => coating.category === activeTab);
+  // Use memo to prevent unnecessary re-filtering
+  const filteredCoatings = React.useMemo(() => {
+    return lensCoatings.filter(coating => coating.category === activeTab);
+  }, [lensCoatings, activeTab]);
+  
+  // Debug logging to see what's happening with the coatings
+  useEffect(() => {
+    console.log("All lens coatings:", lensCoatings);
+    console.log("Filtered coatings for tab", activeTab, ":", filteredCoatings);
+  }, [lensCoatings, filteredCoatings, activeTab]);
   
   return (
     <div className="space-y-4">
