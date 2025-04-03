@@ -13,8 +13,7 @@ import {
   Calendar,
   Store,
   ScrollText,
-  Eye,
-  FileInvoice
+  Eye
 } from "lucide-react";
 import { usePatientStore } from "@/store/patientStore";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -49,10 +48,6 @@ export const Dashboard: React.FC = () => {
       const event = new CustomEvent('navigate', { detail: { section } });
       rootElement.dispatchEvent(event);
     }
-  };
-
-  const navigateToRoute = (route: string) => {
-    navigate(route);
   };
 
   const navigateToEyeExam = () => {
@@ -96,13 +91,6 @@ export const Dashboard: React.FC = () => {
       icon: Eye,
       color: 'bg-teal-500',
       onClick: navigateToEyeExam
-    },
-    {
-      title: language === 'ar' ? 'فواتير الموردين' : 'Supplier Invoices',
-      description: language === 'ar' ? 'إدارة وتتبع فواتير الموردين' : 'Manage and track supplier invoices',
-      icon: FileInvoice,
-      color: 'bg-teal-500',
-      onClick: () => navigateToRoute('/supplier-invoices')
     },
     {
       title: language === 'ar' ? 'المدفوعات المتبقية' : 'Remaining Payments',
