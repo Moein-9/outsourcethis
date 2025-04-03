@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
@@ -26,7 +25,6 @@ const ComparativeAnalysis: React.FC = () => {
   const { language } = useLanguageStore();
   const [activeChart, setActiveChart] = useState("line");
   
-  // Use the report store for comparative data
   const {
     startDate,
     endDate,
@@ -36,15 +34,12 @@ const ComparativeAnalysis: React.FC = () => {
     comparativeLoading
   } = useReportStore();
   
-  // Handle date range selection
   const [date, setDate] = useState<DateRange>({
     from: new Date(startDate),
     to: new Date(endDate)
   });
   
-  // Set initial date range when component mounts
   useEffect(() => {
-    // Only set date range if startDate and endDate are valid
     if (startDate && endDate) {
       setDate({
         from: new Date(startDate),
@@ -53,7 +48,6 @@ const ComparativeAnalysis: React.FC = () => {
     }
   }, [startDate, endDate]);
   
-  // Update date range in store when date changes
   useEffect(() => {
     if (date.from && date.to) {
       setComparativeDateRange(
@@ -63,7 +57,6 @@ const ComparativeAnalysis: React.FC = () => {
     }
   }, [date, setComparativeDateRange]);
   
-  // Load comparative data when component mounts
   useEffect(() => {
     loadComparativeData();
   }, [loadComparativeData]);
@@ -109,23 +102,18 @@ const ComparativeAnalysis: React.FC = () => {
     }).format(amount);
   };
   
-  // Helper function to create a CSV file for download
   const generateCSV = () => {
     if (!comparativeSummaries.length) return;
     
-    // Header row
     let csvContent = "data:text/csv;charset=utf-8,";
     csvContent += "Comparative Sales Analysis - " + format(date.from, "yyyy-MM-dd") + " to " + format(date.to, "yyyy-MM-dd") + "\r\n\r\n";
     
-    // Column headers
     csvContent += "Date,Total Sales,Refunds,Net Sales,Glasses Count,Contacts Count,Exam Count\r\n";
     
-    // Data rows
     comparativeSummaries.forEach(day => {
       csvContent += `${day.date},${day.total_sales},${day.total_refunds},${day.net_sales},${day.glasses_sales_count},${day.contacts_sales_count},${day.exam_sales_count}\r\n`;
     });
     
-    // Create download link
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -135,7 +123,6 @@ const ComparativeAnalysis: React.FC = () => {
     document.body.removeChild(link);
   };
   
-  // Prepare data for charts
   const prepareChartData = () => {
     return comparativeSummaries.map(day => ({
       date: day.date,
@@ -148,7 +135,6 @@ const ComparativeAnalysis: React.FC = () => {
     }));
   };
   
-  // Calculate statistics
   const calculateStats = () => {
     if (!comparativeSummaries.length) return {
       totalSales: 0,
@@ -169,7 +155,6 @@ const ComparativeAnalysis: React.FC = () => {
     const contacts = comparativeSummaries.reduce((sum, day) => sum + day.contacts_sales_count, 0);
     const exam = comparativeSummaries.reduce((sum, day) => sum + day.exam_sales_count, 0);
     
-    // Find highest and lowest sales days
     let highestSalesDay = { date: "", amount: 0 };
     let lowestSalesDay = { date: "", amount: Number.MAX_VALUE };
     
@@ -182,12 +167,10 @@ const ComparativeAnalysis: React.FC = () => {
       }
     });
     
-    // If no sales, set lowest to 0
     if (lowestSalesDay.amount === Number.MAX_VALUE) {
       lowestSalesDay = { date: "", amount: 0 };
     }
     
-    // Calculate average daily sales
     const averageDailySales = comparativeSummaries.length 
       ? totalSales / comparativeSummaries.length 
       : 0;
@@ -208,7 +191,6 @@ const ComparativeAnalysis: React.FC = () => {
   const stats = calculateStats();
   const chartData = prepareChartData();
   
-  // Translations
   const translations = {
     comparativeAnalysis: language === 'ar' ? "التحليل المقارن" : "Comparative Analysis",
     dateRange: language === 'ar' ? "نطاق التاريخ" : "Date Range",
@@ -296,7 +278,6 @@ const ComparativeAnalysis: React.FC = () => {
                 }}
                 numberOfMonths={2}
                 disabled={(date) => {
-                  // Disable dates more than a year ago
                   const yearAgo = subMonths(new Date(), 12);
                   return isBefore(date, yearAgo) || isAfter(date, new Date());
                 }}
@@ -327,8 +308,10 @@ const ComparativeAnalysis: React.FC = () => {
           </Button>
           
           <PrintReportButton 
-            dateRange={{ from: date.from, to: date.to }} 
-            isComparative 
+            dateRange={{ from: date.from, to: date.to }}
+            isComparative={true}
+            label={translations.printReport}
+            description={language === 'ar' ? 'طباعة تقرير المقارنة' : 'Print comparative report'}
           />
           
           <Button 

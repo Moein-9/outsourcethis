@@ -101,6 +101,14 @@ export const DailySalesReport = () => {
     downloadCSV: language === 'ar' ? "تنزيل CSV" : "Download CSV",
     loading: language === 'ar' ? "جاري التحميل..." : "Loading...",
     noData: language === 'ar' ? "لا توجد بيانات متاحة لهذا اليوم" : "No data available for this day",
+    patient: language === 'ar' ? 'العميل' : 'Patient',
+    type: language === 'ar' ? 'النوع' : 'Type',
+    payment: language === 'ar' ? 'طريقة الدفع' : 'Payment',
+    status: language === 'ar' ? 'الحالة' : 'Status',
+    paid: language === 'ar' ? "مدفوع بالكامل" : "Paid",
+    partial: language === 'ar' ? "مدفوع جزئياً" : "Partial",
+    reason: language === 'ar' ? 'السبب' : 'Reason',
+    invoice: language === 'ar' ? 'الفاتورة' : 'Invoice',
   };
   
   const rtlClass = language === 'ar' ? 'rtl' : 'ltr';
@@ -218,7 +226,11 @@ export const DailySalesReport = () => {
             {translations.refreshData}
           </Button>
           
-          <PrintReportButton date={selectedDate} />
+          <PrintReportButton 
+            date={selectedDate}
+            label={translations.printReport}
+            description={language === 'ar' ? 'طباعة تقرير المبيعات اليومي' : 'Print daily sales report'}
+          />
           
           <Button 
             variant="outline" 
@@ -350,11 +362,11 @@ export const DailySalesReport = () => {
                   <thead className="text-xs uppercase bg-gray-50">
                     <tr>
                       <th className="px-4 py-2">ID</th>
-                      <th className="px-4 py-2">{translations === 'ar' ? 'العميل' : 'Patient'}</th>
-                      <th className="px-4 py-2">{translations === 'ar' ? 'النوع' : 'Type'}</th>
+                      <th className="px-4 py-2">{translations.patient}</th>
+                      <th className="px-4 py-2">{translations.type}</th>
                       <th className="px-4 py-2">{translations.amount}</th>
-                      <th className="px-4 py-2">{translations === 'ar' ? 'طريقة الدفع' : 'Payment'}</th>
-                      <th className="px-4 py-2">{translations === 'ar' ? 'الحالة' : 'Status'}</th>
+                      <th className="px-4 py-2">{translations.payment}</th>
+                      <th className="px-4 py-2">{translations.status}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -385,9 +397,7 @@ export const DailySalesReport = () => {
                               ? "bg-green-100 text-green-800" 
                               : "bg-amber-100 text-amber-800"
                           }`}>
-                            {invoice.is_paid 
-                              ? (language === 'ar' ? "مدفوع بالكامل" : "Paid") 
-                              : (language === 'ar' ? "مدفوع جزئياً" : "Partial")}
+                            {invoice.is_paid ? translations.paid : translations.partial}
                           </span>
                         </td>
                       </tr>
@@ -417,9 +427,9 @@ export const DailySalesReport = () => {
                     <thead className="text-xs uppercase bg-gray-50">
                       <tr>
                         <th className="px-4 py-2">ID</th>
-                        <th className="px-4 py-2">{translations === 'ar' ? 'الفاتورة' : 'Invoice'}</th>
+                        <th className="px-4 py-2">{translations.invoice}</th>
                         <th className="px-4 py-2">{translations.amount}</th>
-                        <th className="px-4 py-2">{translations === 'ar' ? 'السبب' : 'Reason'}</th>
+                        <th className="px-4 py-2">{translations.reason}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -442,3 +452,4 @@ export const DailySalesReport = () => {
     </div>
   );
 };
+

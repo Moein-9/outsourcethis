@@ -7,16 +7,19 @@ import {
   InvoiceTypeSummary, 
   MonthlySalesSummary, 
   InvoiceRecord, 
-  RefundRecord 
+  RefundRecord,
+  Database
 } from "@/types/reportingTypes";
 
-export { 
+// Export types using 'export type' syntax
+export type { 
   DailySalesSummary, 
   PaymentMethodSummary, 
   InvoiceTypeSummary, 
   MonthlySalesSummary, 
   InvoiceRecord, 
-  RefundRecord 
+  RefundRecord,
+  Database
 };
 
 export class ReportingService {
@@ -485,3 +488,4 @@ export class ReportingService {
     }
   }
 }
+
