@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, AlertTriangle } from "lucide-react";
 import { ContactLensRx } from "@/store/patientStore";
 import { useLanguageStore } from "@/store/languageStore";
+import { CustomSelect } from "./ui/custom-select";
 
 interface ContactLensFormProps {
   rxData: ContactLensRx;
@@ -22,24 +23,6 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   const [validationErrors, setValidationErrors] = useState({
     rightEye: { cylinderAxisError: false },
     leftEye: { cylinderAxisError: false }
-  });
-  
-  // Custom field states
-  const [customValues, setCustomValues] = useState({
-    rightEye: {
-      sphere: "",
-      cylinder: "",
-      axis: "",
-      bc: "",
-      dia: ""
-    },
-    leftEye: {
-      sphere: "",
-      cylinder: "",
-      axis: "",
-      bc: "",
-      dia: ""
-    }
   });
 
   const handleRightEyeChange = (field: keyof ContactLensRx["rightEye"], value: string) => {
@@ -76,28 +59,6 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     }
   };
   
-  // Custom field handlers
-  const handleCustomValueChange = (
-    eye: 'rightEye' | 'leftEye', 
-    field: keyof ContactLensRx["rightEye"], 
-    value: string
-  ) => {
-    if (readOnly) return;
-    
-    // Update custom value state
-    setCustomValues(prev => ({
-      ...prev,
-      [eye]: {
-        ...prev[eye],
-        [field]: value
-      }
-    }));
-    
-    // Update the actual rx data
-    const handleChange = eye === 'rightEye' ? handleRightEyeChange : handleLeftEyeChange;
-    handleChange(field, value);
-  };
-  
   const validateCylinderAxis = (eye: 'rightEye' | 'leftEye', cylinder: string, axis: string) => {
     const hasCylinder = cylinder !== "-" && cylinder !== "";
     const hasAxis = axis !== "-" && axis !== "";
@@ -117,81 +78,43 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   }, [rxData]);
 
   const generateSphereOptions = () => {
-    const options = [];
-    options.push(<option key="sph-none" value="-">-</option>);
+    const options = ["-"];
     
     for (let i = 4.00; i >= 0.25; i -= 0.25) {
       const value = i.toFixed(2);
-      options.push(
-        <option key={`sph-plus-${value}`} value={`+${value}`}>+{value}</option>
-      );
+      options.push(`+${value}`);
     }
     
-    options.push(<option key="sph-zero" value="0.00">0.00</option>);
+    options.push("0.00");
     
     for (let i = -0.25; i >= -9.00; i -= 0.25) {
       const value = i.toFixed(2);
-      options.push(
-        <option key={`sph-minus-${Math.abs(i)}`} value={value}>{value}</option>
-      );
+      options.push(value);
     }
-    
-    // Add Other option
-    options.push(<option key="sph-other" value="other">Other</option>);
     
     return options;
   };
 
   const generateCylinderOptions = () => {
-    const cylValues = ["-", "-0.75", "-1.25", "-1.75", "-2.25"];
-    const options = cylValues.map(value => (
-      <option key={`cyl-${value}`} value={value}>{value}</option>
-    ));
-    
-    // Add Other option
-    options.push(<option key="cyl-other" value="other">Other</option>);
-    
-    return options;
+    return ["-", "-0.75", "-1.25", "-1.75", "-2.25"];
   };
 
   const generateAxisOptions = () => {
-    const options = [];
-    options.push(<option key="axis-none" value="-">-</option>);
+    const options = ["-"];
     
     for (let i = 1; i <= 180; i += 1) {
-      options.push(
-        <option key={`axis-${i}`} value={i.toString()}>{i}°</option>
-      );
+      options.push(i.toString());
     }
-    
-    // Add Other option
-    options.push(<option key="axis-other" value="other">Other</option>);
     
     return options;
   };
 
   const generateBCOptions = () => {
-    const bcValues = ["-", "8.4", "8.5", "8.6", "8.7", "8.8"];
-    const options = bcValues.map(value => (
-      <option key={`bc-${value}`} value={value}>{value}</option>
-    ));
-    
-    // Add Other option
-    options.push(<option key="bc-other" value="other">Other</option>);
-    
-    return options;
+    return ["-", "8.4", "8.5", "8.6", "8.7", "8.8"];
   };
 
   const generateDiaOptions = () => {
-    const diaValues = ["-", "14.0", "14.2", "14.4", "14.5"];
-    const options = diaValues.map(value => (
-      <option key={`dia-${value}`} value={value}>{value}</option>
-    ));
-    
-    // Add Other option
-    options.push(<option key="dia-other" value="other">Other</option>);
-    
-    return options;
+    return ["-", "14.0", "14.2", "14.4", "14.5"];
   };
 
   const dirClass = language === 'ar' ? 'rtl' : 'ltr';
@@ -214,7 +137,7 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     eye: 'rightEye' | 'leftEye',
     field: keyof ContactLensRx['rightEye'],
     value: string,
-    options: React.ReactNode[],
+    options: string[],
     errorCondition = false,
     handleChange: (field: keyof ContactLensRx['rightEye' | 'leftEye'], value: string) => void,
     bgClass = 'bg-white',
@@ -229,51 +152,15 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       );
     }
     
-    // Check if the value is "other" to show input field
-    const isOther = value === "other";
-    const customValue = customValues[eye][field];
-    
     return (
       <div className="w-full">
-        <select 
-          className={`w-full p-1 rounded-md border ${
-            errorCondition ? 'border-red-500 bg-red-50' : `${borderClass} ${bgClass}`
-          } text-sm ${isOther ? 'mb-1' : ''}`}
-          value={isOther ? "other" : value}
-          onChange={(e) => {
-            const newValue = e.target.value;
-            if (newValue === "other") {
-              // Just set to "other", don't clear the custom value
-              handleChange(field, "other");
-            } else {
-              handleChange(field, newValue);
-              // Clear custom value when selecting a regular option
-              setCustomValues(prev => ({
-                ...prev,
-                [eye]: {
-                  ...prev[eye],
-                  [field]: ""
-                }
-              }));
-            }
-          }}
-          disabled={readOnly}
-        >
-          {options}
-        </select>
-        
-        {isOther && (
-          <input
-            type="text"
-            className={`w-full mt-1 p-1 border ${
-              errorCondition ? 'border-red-500 bg-red-50' : 'border-gray-300'
-            } rounded text-sm`}
-            placeholder={`Enter custom ${field}`}
-            value={customValue}
-            onChange={(e) => handleCustomValueChange(eye, field, e.target.value)}
-            autoFocus
-          />
-        )}
+        <CustomSelect
+          label=""
+          options={options}
+          value={value}
+          onChange={(newValue) => handleChange(field, newValue)}
+          className={errorCondition ? 'border-red-500' : ''}
+        />
       </div>
     );
   };
