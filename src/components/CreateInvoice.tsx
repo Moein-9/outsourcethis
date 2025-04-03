@@ -307,8 +307,8 @@ const CreateInvoiceContent: React.FC = () => {
                           <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full opacity-20"></div>
                           <div className="flex justify-between items-start">
                             <div>
-                              <p className="font-medium text-blue-700 flex items-center gap-1">
-                                <ScrollText className="w-3 h-3" /> {language === 'ar' ? 'فحص العين' : 'Eye Exam'}
+                              <p className="font-medium text-blue-700 flex items-center gap-1 text-lg">
+                                <ScrollText className="w-4 h-4" /> {language === 'ar' ? 'فحص العين' : 'Eye Exam'}
                               </p>
                               <p className="text-sm text-gray-600 mt-1">
                                 {language === 'ar' ? 'خدمة فحص العين' : 'Eye examination service'}
@@ -322,12 +322,15 @@ const CreateInvoiceContent: React.FC = () => {
                             <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-amber-100 rounded-bl-full opacity-20"></div>
                               <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium text-amber-700 flex items-center gap-1">
-                                    <Tag className="w-3 h-3" /> {t('frame')}
+                                <div className="w-full">
+                                  <p className="font-medium text-amber-700 flex items-center gap-1 text-lg">
+                                    <Tag className="w-4 h-4" /> {t('frame')}
                                   </p>
-                                  <p className="text-sm text-gray-600 mt-1">
+                                  <p className="text-base text-gray-600 mt-1 font-medium">
                                     {getValues("frameBrand")} {getValues("frameModel")}
+                                  </p>
+                                  <p className="text-sm text-gray-500 mt-0.5">
+                                    {getValues("frameColor")}
                                   </p>
                                 </div>
                               </div>
@@ -338,11 +341,11 @@ const CreateInvoiceContent: React.FC = () => {
                             <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full opacity-20"></div>
                               <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium text-blue-700 flex items-center gap-1">
-                                    <Tag className="w-3 h-3" /> {t('lensType')}
+                                <div className="w-full">
+                                  <p className="font-medium text-blue-700 flex items-center gap-1 text-lg">
+                                    <Eye className="w-4 h-4" /> {t('lensType')}
                                   </p>
-                                  <p className="text-sm text-gray-600 mt-1">
+                                  <p className="text-base text-gray-600 mt-1 font-medium">
                                     {getValues("lensType")}
                                   </p>
                                 </div>
@@ -354,13 +357,18 @@ const CreateInvoiceContent: React.FC = () => {
                             <div className="p-3 bg-white rounded-lg shadow-sm mb-2 relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 rounded-bl-full opacity-20"></div>
                               <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium text-purple-700 flex items-center gap-1">
-                                    <Paintbrush className="w-3 h-3" /> {t('coating')}
+                                <div className="w-full">
+                                  <p className="font-medium text-purple-700 flex items-center gap-1 text-lg">
+                                    <Paintbrush className="w-4 h-4" /> {t('coating')}
                                   </p>
-                                  <p className="text-sm text-gray-600 mt-1">
+                                  <p className="text-base text-gray-600 mt-1 font-medium">
                                     {getValues("coating")}
                                   </p>
+                                  {getValues("coatingColor") && (
+                                    <p className="text-sm text-gray-500 mt-0.5">
+                                      {language === 'ar' ? 'اللون: ' : 'Color: '}{getValues("coatingColor")}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -370,11 +378,11 @@ const CreateInvoiceContent: React.FC = () => {
                             <div className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-bl-full opacity-20"></div>
                               <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium text-green-700 flex items-center gap-1">
-                                    <Ruler className="w-3 h-3" /> {t('thickness') || "Thickness"}
+                                <div className="w-full">
+                                  <p className="font-medium text-green-700 flex items-center gap-1 text-lg">
+                                    <Ruler className="w-4 h-4" /> {t('thickness') || "Thickness"}
                                   </p>
-                                  <p className="text-sm text-gray-600 mt-1">
+                                  <p className="text-base text-gray-600 mt-1 font-medium">
                                     {getValues("thickness")}
                                   </p>
                                 </div>
@@ -388,12 +396,12 @@ const CreateInvoiceContent: React.FC = () => {
                             <div key={index} className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
                               <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-bl-full opacity-20"></div>
                               <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium text-green-700 flex items-center gap-1">
-                                    <Tag className="w-3 h-3" /> {lens.brand} {lens.type}
+                                <div className="w-full">
+                                  <p className="font-medium text-green-700 flex items-center gap-1 text-lg">
+                                    <Tag className="w-4 h-4" /> {lens.brand} {lens.type}
                                   </p>
                                   {lens.qty > 1 && (
-                                    <p className="text-xs text-gray-500 mt-0.5">
+                                    <p className="text-base text-gray-500 mt-0.5 font-medium">
                                       {t('quantity')}: {lens.qty}
                                     </p>
                                   )}
