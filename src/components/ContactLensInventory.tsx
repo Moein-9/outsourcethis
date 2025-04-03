@@ -238,7 +238,7 @@ export const ContactLensInventory: React.FC = () => {
     if (editingLens) {
       updateContactLens(editingLens.id, lensData);
       toast.success(language === 'ar'
-        ? `تم تحديث العدسة اللاصقة بنجاح: ${lensData.brand} ${lensData.type}`
+        ? `تم تحديث العدسة اللاصقة بن��اح: ${lensData.brand} ${lensData.type}`
         : `Successfully updated contact lens: ${lensData.brand} ${lensData.type}`);
     } else {
       const id = addContactLens(lensData);
