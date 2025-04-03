@@ -11,7 +11,8 @@ import {
   RefreshCcw, 
   BarChart3, 
   Settings,
-  HelpCircle
+  HelpCircle,
+  FileInvoice
 } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { MoenLogo } from "@/assets/logo";
@@ -78,6 +79,12 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
       icon: RefreshCcw,
       label: language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges',
       section: "refundManager",
+    },
+    {
+      icon: FileInvoice,
+      label: language === 'ar' ? 'فواتير الموردين' : 'Supplier Invoices',
+      section: "supplierInvoice",
+      action: () => navigate("/supplier-invoices"),
     },
     {
       icon: BarChart3,
@@ -172,6 +179,8 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
                   activeSection === "patientSearch" ? t('patientSearch') :
                   activeSection === "refundManager" ? 
                     (language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges') :
+                  activeSection === "supplierInvoice" ?
+                    (language === 'ar' ? 'فواتير الموردين' : 'Supplier Invoices') :
                   activeSection === "reports" ? 
                     (language === 'ar' ? 'التقارير' : 'Reports') :
                   t('dashboard')
