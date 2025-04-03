@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -11,6 +10,7 @@ export interface FrameItem {
   price: number;
   qty: number;
   createdAt: string;
+  isSunglasses?: boolean;
 }
 
 export interface LensType {
