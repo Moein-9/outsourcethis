@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
@@ -432,26 +431,10 @@ export const WorkOrderPrint: React.FC<WorkOrderPrintProps> = ({
                 </div>
               )}
               {coatingColorValue && (
-                <>
-                  <div className="grid grid-cols-3 gap-1">
-                    <div className="font-medium">{language === 'ar' ? "اللون | Color" : "Color | اللون"}:</div>
-                    <div className="col-span-2">{coatingColorValue}</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1 mt-1">
-                    <div className="font-medium text-xs">{language === 'ar' ? "عرض اللون | Preview" : "Preview | عرض اللون"}:</div>
-                    <div className="col-span-2 flex items-center">
-                      <div 
-                        className="w-4 h-4 rounded-full border border-gray-300 mr-1 color-preview"
-                        style={{ 
-                          backgroundColor: getColorStyle(coatingColorValue),
-                          WebkitPrintColorAdjust: 'exact',
-                          printColorAdjust: 'exact',
-                          colorAdjust: 'exact'
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                </>
+                <div className="grid grid-cols-3 gap-1">
+                  <div className="font-medium">{language === 'ar' ? "اللون | Color" : "Color | اللون"}:</div>
+                  <div className="col-span-2">{coatingColorValue}</div>
+                </div>
               )}
               {thicknessValue && (
                 <div className="grid grid-cols-3 gap-1">
