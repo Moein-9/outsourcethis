@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -25,7 +24,7 @@ export interface LensCoating {
   name: string;
   price: number;
   description?: string;
-  category: "distance-reading" | "progressive" | "bifocal";
+  category: "distance-reading" | "progressive" | "bifocal" | "sunglasses";
   isPhotochromic?: boolean;
   availableColors?: string[];
 }
@@ -206,6 +205,30 @@ export const useInventoryStore = create<InventoryState>()(
           category: "progressive",
           isPhotochromic: true,
           availableColors: ["Brown", "Gray", "Green"]
+        },
+        
+        // Sunglasses coatings
+        { 
+          id: "tinted-sun", 
+          name: "Tinted (ملون)", 
+          price: 0, 
+          description: "Standard tinted sunglasses coating", 
+          category: "sunglasses" 
+        },
+        { 
+          id: "polarized-sun", 
+          name: "Polarized (مستقطب)", 
+          price: 0, 
+          description: "Polarized coating for sunglasses", 
+          category: "sunglasses" 
+        },
+        { 
+          id: "mirrored-sun", 
+          name: "Mirrored (مرآة)", 
+          price: 0, 
+          description: "Mirrored coating for sunglasses", 
+          category: "sunglasses",
+          availableColors: ["Silver", "Blue", "Gold", "Red"] 
         }
       ],
       lensThicknesses: [
@@ -537,7 +560,6 @@ export const useInventoryStore = create<InventoryState>()(
         }
       },
       
-      // New function to reset lens pricing
       resetLensPricing: () => {
         // Create the new pricing combinations based on the provided pricing table
         const newPricingCombinations: LensPricingCombination[] = [
@@ -599,9 +621,13 @@ export const useInventoryStore = create<InventoryState>()(
           { id: "bif-basic", lensTypeId: "lens4", coatingId: "basic-bif", thicknessId: "bif-basic", price: 18 },
           { id: "bif-filter", lensTypeId: "lens4", coatingId: "filter-bif", thicknessId: "bif-basic", price: 28 },
           
-          // Sunglasses - using same pricing as single vision
-          { id: "sun-basic-156", lensTypeId: "lens5", coatingId: "basic-sv", thicknessId: "sv-156", price: 8 },
-          { id: "sun-basic-160", lensTypeId: "lens5", coatingId: "basic-sv", thicknessId: "sv-160", price: 18 },
+          // Sunglasses - using lens5 for sunglasses type
+          { id: "sun-tinted-156", lensTypeId: "lens5", coatingId: "tinted-sun", thicknessId: "sv-156", price: 15 },
+          { id: "sun-tinted-160", lensTypeId: "lens5", coatingId: "tinted-sun", thicknessId: "sv-160", price: 25 },
+          { id: "sun-polarized-156", lensTypeId: "lens5", coatingId: "polarized-sun", thicknessId: "sv-156", price: 30 },
+          { id: "sun-polarized-160", lensTypeId: "lens5", coatingId: "polarized-sun", thicknessId: "sv-160", price: 40 },
+          { id: "sun-mirrored-156", lensTypeId: "lens5", coatingId: "mirrored-sun", thicknessId: "sv-156", price: 35 },
+          { id: "sun-mirrored-160", lensTypeId: "lens5", coatingId: "mirrored-sun", thicknessId: "sv-160", price: 45 },
           
           // Photochromic options
           { id: "sv-photo-156", lensTypeId: "lens2", coatingId: "photochromic-sv", thicknessId: "sv-156", price: 30 },

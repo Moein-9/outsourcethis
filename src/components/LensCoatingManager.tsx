@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useInventoryStore, LensCoating } from "@/store/inventoryStore";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge"; // Add the Badge import
+import { Badge } from "@/components/ui/badge";
 import { Edit, Plus, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguageStore } from "@/store/languageStore";
@@ -19,22 +18,20 @@ export const LensCoatingManager: React.FC = () => {
   const { t, language } = useLanguageStore();
   const [activeTab, setActiveTab] = useState<string>("distance-reading");
   
-  // New coating form state
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newCoatingName, setNewCoatingName] = useState("");
   const [newCoatingPrice, setNewCoatingPrice] = useState<number | "">("");
   const [newCoatingDescription, setNewCoatingDescription] = useState("");
-  const [newCoatingCategory, setNewCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
+  const [newCoatingCategory, setNewCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal" | "sunglasses">("distance-reading");
   const [newIsPhotochromic, setNewIsPhotochromic] = useState(false);
   const [newAvailableColors, setNewAvailableColors] = useState<string[]>(["Brown", "Gray", "Green", "Blue"]);
   
-  // Edit coating form state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editCoatingId, setEditCoatingId] = useState("");
   const [editCoatingName, setEditCoatingName] = useState("");
   const [editCoatingPrice, setEditCoatingPrice] = useState<number | "">("");
   const [editCoatingDescription, setEditCoatingDescription] = useState("");
-  const [editCoatingCategory, setEditCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal">("distance-reading");
+  const [editCoatingCategory, setEditCoatingCategory] = useState<"distance-reading" | "progressive" | "bifocal" | "sunglasses">("distance-reading");
   const [editIsPhotochromic, setEditIsPhotochromic] = useState(false);
   const [editAvailableColors, setEditAvailableColors] = useState<string[]>([]);
   
@@ -51,7 +48,6 @@ export const LensCoatingManager: React.FC = () => {
       category: newCoatingCategory
     };
     
-    // Add photochromic properties if it's a photochromic coating
     if (newIsPhotochromic) {
       coatingData.isPhotochromic = true;
       coatingData.availableColors = [...newAvailableColors];
@@ -61,7 +57,6 @@ export const LensCoatingManager: React.FC = () => {
     
     toast.success(t("coatingAddedSuccess"));
     
-    // Reset form
     setNewCoatingName("");
     setNewCoatingPrice("");
     setNewCoatingDescription("");
@@ -82,7 +77,6 @@ export const LensCoatingManager: React.FC = () => {
       category: editCoatingCategory
     };
     
-    // Add photochromic properties if it's a photochromic coating
     if (editIsPhotochromic) {
       coatingData.isPhotochromic = true;
       coatingData.availableColors = [...editAvailableColors];
@@ -95,7 +89,6 @@ export const LensCoatingManager: React.FC = () => {
     
     toast.success(t("coatingUpdatedSuccess"));
     
-    // Reset form
     setIsEditDialogOpen(false);
   };
   
@@ -118,7 +111,8 @@ export const LensCoatingManager: React.FC = () => {
   const coatingCategories = [
     { value: "distance-reading", label: t("distanceReading") },
     { value: "progressive", label: t("progressive") },
-    { value: "bifocal", label: t("bifocal") }
+    { value: "bifocal", label: t("bifocal") },
+    { value: "sunglasses", label: t("sunglasses") }
   ];
   
   const filteredCoatings = lensCoatings.filter(coating => coating.category === activeTab);
@@ -220,10 +214,11 @@ export const LensCoatingManager: React.FC = () => {
       </div>
       
       <Tabs defaultValue="distance-reading" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 mb-4">
+        <TabsList className="grid grid-cols-4 mb-4">
           <TabsTrigger value="distance-reading">{t("distanceReading")}</TabsTrigger>
           <TabsTrigger value="progressive">{t("progressive")}</TabsTrigger>
           <TabsTrigger value="bifocal">{t("bifocal")}</TabsTrigger>
+          <TabsTrigger value="sunglasses">{t("sunglasses")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value={activeTab} className="mt-0">
@@ -277,7 +272,6 @@ export const LensCoatingManager: React.FC = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>

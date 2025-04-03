@@ -1,4 +1,3 @@
-
 // Define common types for the inventory store
 export interface Frame {
   id: string;
@@ -34,6 +33,9 @@ export interface LensCoating {
   name: string;
   price: number;
   description?: string;
+  category: "distance-reading" | "progressive" | "bifocal" | "sunglasses";
+  isPhotochromic?: boolean;
+  availableColors?: string[];
 }
 
 // WorkOrder type that is compatible with store/invoiceStore
