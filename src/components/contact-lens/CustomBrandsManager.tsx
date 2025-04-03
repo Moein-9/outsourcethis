@@ -21,6 +21,17 @@ export const CustomBrandsManager: React.FC<CustomBrandsManagerProps> = ({
   const { language } = useLanguageStore();
   const [newBrand, setNewBrand] = React.useState('');
 
+  // Check if "Bella" and "M-Bella" brands should be added when component mounts
+  React.useEffect(() => {
+    const requiredBrands = ["Bella", "M-Bella"];
+    
+    requiredBrands.forEach(brand => {
+      if (!savedBrands.includes(brand)) {
+        onSaveBrand(brand);
+      }
+    });
+  }, []);
+
   const handleAddBrand = () => {
     if (!newBrand.trim()) {
       toast.error(language === 'ar' ? 'يرجى إدخال اسم البراند' : 'Please enter a brand name');
@@ -42,6 +53,16 @@ export const CustomBrandsManager: React.FC<CustomBrandsManagerProps> = ({
   };
 
   const handleDeleteBrand = (brand: string) => {
+    // Prevent deletion of required brands
+    if (["Bella", "M-Bella"].includes(brand)) {
+      toast.error(
+        language === 'ar'
+          ? `لا يمكن حذف البراند "${brand}" لأنه براند أساسي`
+          : `Cannot delete the brand "${brand}" as it is a core brand`
+      );
+      return;
+    }
+    
     onDeleteBrand(brand);
     toast.success(
       language === 'ar' 
@@ -80,7 +101,9 @@ export const CustomBrandsManager: React.FC<CustomBrandsManagerProps> = ({
             <Badge
               key={brand}
               variant="secondary"
-              className="px-3 py-1.5 flex items-center gap-1.5 bg-muted/60"
+              className={`px-3 py-1.5 flex items-center gap-1.5 bg-muted/60 ${
+                ["Bella", "M-Bella"].includes(brand) ? "border-blue-300 bg-blue-50" : ""
+              }`}
             >
               {brand}
               <Button

@@ -21,6 +21,17 @@ export const CustomTypesManager: React.FC<CustomTypesManagerProps> = ({
   const { language } = useLanguageStore();
   const [newType, setNewType] = React.useState('');
 
+  // Check if "Daily" and "Monthly" types should be added when component mounts
+  React.useEffect(() => {
+    const requiredTypes = ["Daily", "Monthly"];
+    
+    requiredTypes.forEach(type => {
+      if (!savedTypes.includes(type)) {
+        onSaveType(type);
+      }
+    });
+  }, []);
+
   const handleAddType = () => {
     if (!newType.trim()) {
       toast.error(language === 'ar' ? 'يرجى إدخال نوع العدسة' : 'Please enter a lens type');
@@ -42,6 +53,16 @@ export const CustomTypesManager: React.FC<CustomTypesManagerProps> = ({
   };
 
   const handleDeleteType = (type: string) => {
+    // Prevent deletion of required types
+    if (["Daily", "Monthly"].includes(type)) {
+      toast.error(
+        language === 'ar'
+          ? `لا يمكن حذف النوع "${type}" لأنه نوع أساسي`
+          : `Cannot delete the type "${type}" as it is a core type`
+      );
+      return;
+    }
+    
     onDeleteType(type);
     toast.success(
       language === 'ar' 
@@ -80,7 +101,9 @@ export const CustomTypesManager: React.FC<CustomTypesManagerProps> = ({
             <Badge
               key={type}
               variant="secondary"
-              className="px-3 py-1.5 flex items-center gap-1.5 bg-muted/60"
+              className={`px-3 py-1.5 flex items-center gap-1.5 bg-muted/60 ${
+                ["Daily", "Monthly"].includes(type) ? "border-green-300 bg-green-50" : ""
+              }`}
             >
               {type}
               <Button

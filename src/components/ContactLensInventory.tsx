@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, ContactLensItem } from "@/store/inventoryStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -36,13 +35,111 @@ import { ContactLensForm } from "./contact-lens/ContactLensForm";
 import { CustomBrandsManager } from "./contact-lens/CustomBrandsManager";
 import { CustomTypesManager } from "./contact-lens/CustomTypesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Contact, Settings, Tag } from "lucide-react";
+import { Search, Plus, Contact, Settings, Tag, Database, UploadCloud } from "lucide-react";
+
+const bellaContactLenses = [
+  // Contour collection
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Contour Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Contour Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Contour Hazel" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Platinum Gray" },
+  
+  // Diamond collection
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Agate Brown" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Allure Blonde" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Almond Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Bluish Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Brown Shadow" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Citrine Crystal" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Glitter Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Shadow" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Hazel Beige" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Hazel Honey" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Husky Gray Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Jade Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lime Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Moon Stone" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mysterious" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Navy Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Nay" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Oak" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Ocean Blue" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Pine" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Rosewood" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Saturn" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silky Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silver Mist" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Viola Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Wild Honey" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Wood Leaf" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Wood Stone" },
+  
+  // Elite collection
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Amber Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cinnamon Brown" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cloudy Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Crystal N" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Emerald Green" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Beige" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Olive" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Green Olive" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Lavender Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Matt Olive" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Midnight Blue" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mint Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sandy Brown" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Sandy Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silky Gold" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Silky Gray" },
+  
+  // Glow collection
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Glow Radiant Hazelnut" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Gray Caramel" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Radiant Brown" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Radiant Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Radiant Hazelnut" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Vivid Blue" },
+  
+  // Highlight collection
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Circle Brown" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Circle Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Highlight Cool Gray" },
+  
+  // Natural collection
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Marengo" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Cool Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Gray" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Gray Blue" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Natural Green Yellow" },
+  
+  // One Day collection (daily)
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Almond Brown (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Ash Brown (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cedar (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Cove (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Earth (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Mars (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Moon (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Star (Daily Disposable)" },
+  { brand: "Bella", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Venus (Daily Disposable)" },
+  
+  // Snow White collection
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Snow White Black" },
+  { brand: "Bella", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 14, qty: 10, color: "Snow White Satin Gray" },
+];
+
+const mBellaContactLenses = bellaContactLenses.map(lens => ({
+  ...lens,
+  brand: "M-Bella"
+}));
+
+const allContactLenses = [...bellaContactLenses, ...mBellaContactLenses];
 
 export const ContactLensInventory: React.FC = () => {
   const { contactLenses, addContactLens, updateContactLens, deleteContactLens, searchContactLenses } = useInventoryStore();
   const { language } = useLanguageStore();
   
-  // State variables
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchContactLenses>>(contactLenses);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -51,7 +148,6 @@ export const ContactLensInventory: React.FC = () => {
   const [deletingLensId, setDeletingLensId] = useState<string | null>(null);
   const [activeManageTab, setActiveManageTab] = useState<"brands" | "types">("brands");
   
-  // User-saved custom values
   const [savedCustomBrands, setSavedCustomBrands] = useState<string[]>(() => {
     const saved = localStorage.getItem("customBrands");
     return saved ? JSON.parse(saved) : [];
@@ -62,7 +158,6 @@ export const ContactLensInventory: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
   
-  // Save custom values to localStorage when they change
   useEffect(() => {
     localStorage.setItem("customBrands", JSON.stringify(savedCustomBrands));
   }, [savedCustomBrands]);
@@ -71,15 +166,12 @@ export const ContactLensInventory: React.FC = () => {
     localStorage.setItem("customTypes", JSON.stringify(savedCustomTypes));
   }, [savedCustomTypes]);
   
-  // Filters
   const [filterBrand, setFilterBrand] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
   
-  // Extract unique values for filters
   const brands = [...new Set(contactLenses.map(lens => lens.brand))];
   const types = [...new Set(contactLenses.map(lens => lens.type))];
   
-  // Handle contact lens search
   const handleSearch = () => {
     let results = contactLenses;
     
@@ -104,7 +196,6 @@ export const ContactLensInventory: React.FC = () => {
     }
   };
   
-  // Reset filters
   const resetFilters = () => {
     setSearchTerm("");
     setFilterBrand("all");
@@ -112,16 +203,13 @@ export const ContactLensInventory: React.FC = () => {
     setSearchResults(contactLenses);
   };
   
-  // Handle form submission
   const handleFormSubmit = (lensData: Omit<ContactLensItem, "id">) => {
-    // Save custom brand if it's a new one
     if (lensData.brand && 
         !["Acuvue", "Air Optix", "Biofinty", "Bella", "FreshLook", "PureVision", "SofLens"].includes(lensData.brand) && 
         !savedCustomBrands.includes(lensData.brand)) {
       setSavedCustomBrands(prev => [...prev, lensData.brand]);
     }
     
-    // Save custom type if it's a new one
     if (lensData.type && 
         !["Daily", "Monthly", "Biweekly", "Yearly", "Color"].includes(lensData.type) && 
         !savedCustomTypes.includes(lensData.type)) {
@@ -144,18 +232,15 @@ export const ContactLensInventory: React.FC = () => {
     setSearchResults(contactLenses);
   };
   
-  // Handle edit lens
   const handleEditLens = (lens: ContactLensItem) => {
     setEditingLens(lens);
     setIsAddDialogOpen(true);
   };
   
-  // Handle delete lens
   const handleDeleteLens = (id: string) => {
     setDeletingLensId(id);
   };
   
-  // Confirm delete lens
   const confirmDeleteLens = () => {
     if (deletingLensId) {
       const lensToDelete = contactLenses.find(lens => lens.id === deletingLensId);
@@ -169,14 +254,11 @@ export const ContactLensInventory: React.FC = () => {
     }
   };
   
-  // Handle add/edit custom brand
   const handleAddCustomBrand = (brand: string) => {
     setSavedCustomBrands(prev => [...prev, brand]);
   };
   
-  // Handle delete custom brand
   const handleDeleteCustomBrand = (brand: string) => {
-    // Check if the brand is in use
     const brandInUse = contactLenses.some(lens => lens.brand === brand);
     if (brandInUse) {
       toast.error(
@@ -189,14 +271,11 @@ export const ContactLensInventory: React.FC = () => {
     setSavedCustomBrands(prev => prev.filter(b => b !== brand));
   };
   
-  // Handle add/edit custom type
   const handleAddCustomType = (type: string) => {
     setSavedCustomTypes(prev => [...prev, type]);
   };
   
-  // Handle delete custom type
   const handleDeleteCustomType = (type: string) => {
-    // Check if the type is in use
     const typeInUse = contactLenses.some(lens => lens.type === type);
     if (typeInUse) {
       toast.error(
@@ -209,23 +288,19 @@ export const ContactLensInventory: React.FC = () => {
     setSavedCustomTypes(prev => prev.filter(t => t !== type));
   };
   
-  // Close dialog and reset form
   const closeDialog = () => {
     setIsAddDialogOpen(false);
     setEditingLens(null);
   };
   
-  // Initialize search results
   useEffect(() => {
     setSearchResults(contactLenses);
   }, [contactLenses]);
   
-  // Apply filters when they change
   useEffect(() => {
     handleSearch();
   }, [filterBrand, filterType]);
   
-  // Group contact lenses by brand
   const groupedByBrand = React.useMemo(() => {
     const grouped: Record<string, ContactLensItem[]> = {};
     
@@ -239,8 +314,40 @@ export const ContactLensInventory: React.FC = () => {
     return grouped;
   }, [searchResults]);
   
-  // Text direction based on language
   const textDirection = language === 'ar' ? 'rtl' : 'ltr';
+  
+  const handleBulkImport = () => {
+    let importedCount = 0;
+    
+    allContactLenses.forEach(lens => {
+      const existingLens = contactLenses.find(
+        cl => cl.brand === lens.brand && 
+             cl.type === lens.type && 
+             cl.color === lens.color
+      );
+      
+      if (!existingLens) {
+        addContactLens(lens);
+        importedCount++;
+      }
+    });
+    
+    setSearchResults(contactLenses);
+    
+    if (importedCount > 0) {
+      toast.success(
+        language === 'ar'
+          ? `تم استيراد ${importedCount} عدسات لاصقة بنجاح`
+          : `Successfully imported ${importedCount} contact lenses`
+      );
+    } else {
+      toast.info(
+        language === 'ar'
+          ? `جميع العدسات اللاصقة موجودة بالفعل في المخزون`
+          : `All contact lenses are already in the inventory`
+      );
+    }
+  };
   
   return (
     <div className="space-y-6" dir={textDirection}>
@@ -302,6 +409,14 @@ export const ContactLensInventory: React.FC = () => {
           >
             <Settings className="h-4 w-4 mr-1" /> {language === 'ar' ? 'إدارة الخيارات' : 'Manage Options'}
           </Button>
+          
+          <Button
+            variant="outline"
+            className="shrink-0 border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
+            onClick={handleBulkImport}
+          >
+            <Database className="h-4 w-4 mr-1" /> {language === 'ar' ? 'استيراد بيانات العدسات' : 'Import Lenses'}
+          </Button>
         </div>
       </div>
       
@@ -343,8 +458,7 @@ export const ContactLensInventory: React.FC = () => {
           </Button>
         </div>
       )}
-
-      {/* Add/Edit Contact Lens Dialog */}
+      
       <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
         if (!open) closeDialog();
       }}>
@@ -375,7 +489,6 @@ export const ContactLensInventory: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Manage Brands and Types Dialog */}
       <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -428,8 +541,7 @@ export const ContactLensInventory: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Delete Confirmation Dialog */}
+      
       <AlertDialog open={!!deletingLensId} onOpenChange={(open) => !open && setDeletingLensId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
