@@ -76,8 +76,8 @@ export const MoenLogoBlack: React.FC<{
 // Updated store information with bilingual format and added footer properties
 export const storeInfo = {
   name: "Moen Optician",
-  address: "Al Arbid Gallery Mall | مجمع العربيد جاليري\nHabeeb Munawer Street, Al Farwaniyah, Kuwait\nشارع حبيب مناور، الفروانية، الكويت",
-  phone: "Tel | هاتف: 24748201",
+  address: "Al-Somait Plaza | مجمع الصميط بلازا\nHabeeb Munawer Street, Al Farwaniyah, Kuwait\nشارع حبيب مناور، الفروانية، الكويت",
+  phone: "Tel | هاتف: 24759016",
   footer1: "Thank you for your visit | شكراً لزيارتكم",
   footer2: "We appreciate your business | نقدر تعاملكم معنا"
 };
