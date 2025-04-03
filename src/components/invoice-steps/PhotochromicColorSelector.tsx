@@ -24,8 +24,30 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
 }) => {
   const { t, language } = useLanguageStore();
 
+  // Helper to extract the appropriate language part from bilingual color names
+  const extractColorName = (fullColorName: string): { name: string, color: string } => {
+    if (fullColorName.includes(' | ')) {
+      const [englishPart, arabicPart] = fullColorName.split(' | ');
+      const colorName = language === 'ar' ? arabicPart : englishPart;
+      return { 
+        name: colorName,
+        color: englishPart // Use English name for the color mapping
+      };
+    }
+    return { name: fullColorName, color: fullColorName };
+  };
+
   // Color mapping for visualization
   const getColorStyle = (colorName: string) => {
+    const baseColorName = extractColorName(colorName).color;
+    
+    // Extract the basic color without any prefix like "Snow White" or "Contour"
+    let simpleColorName = baseColorName;
+    if (baseColorName.includes(' ')) {
+      const words = baseColorName.split(' ');
+      simpleColorName = words[words.length - 1];
+    }
+    
     const colorMap: Record<string, string> = {
       "Brown": "#8B4513",
       "Gray": "#808080",
@@ -33,10 +55,23 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
       "Blue": "#0000CD",
       "Silver": "#C0C0C0",
       "Gold": "#FFD700",
-      "Red": "#FF0000"
+      "Red": "#FF0000",
+      "Black": "#000000",
+      "Hazel": "#8E7618",
+      "Beige": "#F5F5DC",
+      "Olive": "#808000",
+      "Stone": "#A9A9A9",
+      "Crystal": "#E0FFFF"
     };
     
-    return colorMap[colorName] || "transparent";
+    // Try to match part of the color name with our mapping
+    for (const [key, value] of Object.entries(colorMap)) {
+      if (simpleColorName.includes(key)) {
+        return value;
+      }
+    }
+    
+    return "transparent";
   };
 
   // Determine if the component should display
@@ -88,7 +123,9 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
                       className="min-w-6 h-6 rounded-full border shrink-0"
                       style={{ backgroundColor: getColorStyle(color) }}
                     ></div>
-                    <span className="text-base whitespace-normal break-words leading-tight">{t(color.toLowerCase()) || color}</span>
+                    <span className="text-base whitespace-normal break-words leading-tight">
+                      {extractColorName(color).name}
+                    </span>
                   </div>
                 </SelectItem>
               ))}
@@ -104,7 +141,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
               style={{ backgroundColor: getColorStyle(selectedColor) }}
             ></div>
             <span className="text-base font-medium break-words whitespace-normal leading-relaxed">
-              {t(selectedColor.toLowerCase()) || selectedColor}
+              {extractColorName(selectedColor).name}
             </span>
           </div>
         )}
