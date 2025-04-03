@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { LensCoating } from "@/store/inventoryStore";
 import { Label } from "@/components/ui/label";
@@ -39,7 +39,12 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
     return colorMap[colorName] || "transparent";
   };
 
-  if (!coating.availableColors || coating.availableColors.length === 0) {
+  // Determine if the component should display
+  const shouldRender = useMemo(() => {
+    return coating.availableColors && coating.availableColors.length > 0;
+  }, [coating.availableColors]);
+
+  if (!shouldRender) {
     return null;
   }
 

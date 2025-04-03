@@ -58,16 +58,20 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   const [rxData, setRxData] = useState<ContactLensRx | undefined>(initialRxData);
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   
-  const [filterBrand, setFilterBrand] = useState<string>("all");
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [filterBrand, setFilterBrand] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
+  const [filterColor, setFilterColor] = useState<string>("all");
 
+  // Extract unique values for filters
   const brands = [...new Set(contactLenses.map(lens => lens.brand))];
   const types = [...new Set(contactLenses.map(lens => lens.type))];
-
+  const colors = [...new Set(contactLenses.map(lens => lens.color || "Clear").filter(Boolean))];
+  
+  // Apply filters when any filter changes or search term changes
   useEffect(() => {
     handleFilterApply();
-  }, [filterBrand, filterType, search]);
+  }, [search, filterBrand, filterType, filterColor]);
 
   // Calculate total with proper quantities
   const totalPrice = selectedLenses.reduce((sum, lens) => {
@@ -76,21 +80,56 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   }, 0);
 
   const handleFilterApply = () => {
-    let filtered = search ? searchContactLenses(search) : contactLenses;
+    // Start with all contact lenses
+    let filtered = contactLenses;
     
+    // Apply search filter if search term exists
+    if (search) {
+      filtered = filtered.filter(lens => {
+        const searchLower = search.toLowerCase();
+        return (
+          lens.brand.toLowerCase().includes(searchLower) ||
+          lens.type.toLowerCase().includes(searchLower) ||
+          lens.bc.toLowerCase().includes(searchLower) ||
+          lens.diameter.toLowerCase().includes(searchLower) ||
+          (lens.color && lens.color.toLowerCase().includes(searchLower))
+        );
+      });
+    }
+    
+    // Apply brand filter
     if (filterBrand && filterBrand !== "all") {
       filtered = filtered.filter(lens => lens.brand === filterBrand);
     }
     
+    // Apply type filter
     if (filterType && filterType !== "all") {
       filtered = filtered.filter(lens => lens.type === filterType);
     }
     
+    // Apply color filter
+    if (filterColor && filterColor !== "all") {
+      filtered = filtered.filter(lens => {
+        if (filterColor === "Clear") {
+          return !lens.color || lens.color === "Clear";
+        }
+        return lens.color === filterColor;
+      });
+    }
+    
     setResults(filtered);
     
-    if (filtered.length === 0 && (search || filterBrand !== "all" || filterType !== "all")) {
+    if (filtered.length === 0 && (search || filterBrand !== "all" || filterType !== "all" || filterColor !== "all")) {
       toast(language === 'ar' ? "لم يتم العثور على عدسات مطابقة للبحث" : "No matching lenses found");
     }
+  };
+
+  const handleResetFilters = () => {
+    setSearch("");
+    setFilterBrand("all");
+    setFilterType("all");
+    setFilterColor("all");
+    setResults(contactLenses);
   };
 
   const handleSelectLens = (lens: ContactLensItem) => {
@@ -320,15 +359,28 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                     </Select>
                   </div>
                   
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-blue-700">
+                      {language === 'ar' ? 'اللون:' : 'Color:'}
+                    </Label>
+                    <Select value={filterColor} onValueChange={setFilterColor}>
+                      <SelectTrigger className="w-full bg-white border-blue-200">
+                        <SelectValue placeholder={language === 'ar' ? 'اختر اللون' : 'Select color'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{language === 'ar' ? 'الكل' : 'All'}</SelectItem>
+                        <SelectItem value="Clear">{language === 'ar' ? 'شفاف' : 'Clear'}</SelectItem>
+                        {colors.filter(color => color !== "Clear").map(color => (
+                          <SelectItem key={color} value={color}>{color}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => {
-                      setSearch("");
-                      setFilterBrand("all");
-                      setFilterType("all");
-                      setResults(contactLenses);
-                    }}
+                    onClick={handleResetFilters}
                     className="w-full mt-2 text-blue-700 border-blue-200 hover:bg-blue-50"
                   >
                     {language === 'ar' ? 'إعادة ضبط البحث' : 'Reset Search'}
@@ -452,10 +504,10 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                     </thead>
                     <tbody className="divide-y divide-blue-100">
                       {results.map((lens) => (
-                        <tr key={lens.id} className="hover:bg-blue-50/50 transition-colors">
+                        <tr key={`${lens.id}-${lens.color}`} className="hover:bg-blue-50/50 transition-colors">
                           <td className="py-2.5 px-3 text-sm">{lens.brand}</td>
                           <td className="py-2.5 px-3 text-sm">{lens.type}</td>
-                          <td className="py-2.5 px-3 text-sm">{lens.color || "-"}</td>
+                          <td className="py-2.5 px-3 text-sm">{lens.color || "Clear"}</td>
                           <td className="py-2.5 px-3 text-sm">{lens.bc}</td>
                           <td className="py-2.5 px-3 text-sm font-medium">{lens.price.toFixed(2)} {t('kwd')}</td>
                           <td className="py-2 px-3">
@@ -488,12 +540,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => {
-                      setSearch("");
-                      setFilterBrand("all");
-                      setFilterType("all");
-                      setResults(contactLenses);
-                    }}
+                    onClick={handleResetFilters}
                     className="border-blue-200 hover:bg-blue-50 text-blue-700"
                   >
                     {language === 'ar' ? 'عرض جميع العدسات' : 'Show All Lenses'}

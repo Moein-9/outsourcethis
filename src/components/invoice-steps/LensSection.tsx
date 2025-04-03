@@ -58,13 +58,9 @@ export const LensSection: React.FC<LensSectionProps> = ({
     }
   }, [selectedLensType, selectedCoating, selectedThickness]);
 
-  // First define all variables that might be needed for the condition
-  const hasAvailableColors = selectedCoating?.availableColors?.length > 0;
-  const isPhotochromic = selectedCoating?.isPhotochromic || false;
-  const isSunglasses = selectedCoating?.category === "sunglasses";
-  
-  // Determine if color selector should be shown (moved outside useMemo)
-  const shouldShowColorSelector = hasAvailableColors && (isPhotochromic || isSunglasses);
+  // Determine if color selector should be shown
+  const shouldShowColorSelector = selectedCoating?.availableColors?.length > 0 && 
+    (selectedCoating?.isPhotochromic || selectedCoating?.category === "sunglasses");
 
   return (
     <Card className="border shadow-sm relative overflow-visible">
@@ -91,11 +87,11 @@ export const LensSection: React.FC<LensSectionProps> = ({
         />
         
         {/* Unified color selector for both photochromic and sunglasses */}
-        {shouldShowColorSelector && (
+        {shouldShowColorSelector && selectedCoating && (
           <div className="mt-6">
             <PhotochromicColorSelector
               coating={selectedCoating}
-              selectedColor={selectedCoatingColor || ""}
+              selectedColor={selectedCoatingColor}
               onColorChange={onCoatingColorChange || (() => {})}
             />
           </div>

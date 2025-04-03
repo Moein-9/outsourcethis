@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -115,7 +116,7 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
     setSelectedCoating(coating);
     setValue('coating', coating?.name || '');
     
-    if (!coating?.isPhotochromic) {
+    if (!coating?.isPhotochromic && !coating?.availableColors?.length) {
       setCoatingColor("");
       setValue('coatingColor', "");
     }
