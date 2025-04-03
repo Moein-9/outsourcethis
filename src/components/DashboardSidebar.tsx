@@ -1,6 +1,6 @@
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Home, 
   Users, 
@@ -11,7 +11,8 @@ import {
   RefreshCcw, 
   BarChart3, 
   Settings,
-  HelpCircle
+  HelpCircle,
+  FileInvoice
 } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { MoenLogo } from "@/assets/logo";
@@ -40,8 +41,16 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
 }) => {
   const { t, language } = useLanguageStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const isRtl = language === 'ar';
   const [helpOpen, setHelpOpen] = useState(false);
+  
+  // Set active section based on route
+  useEffect(() => {
+    if (location.pathname === "/supplier-invoices" && activeSection !== "supplierInvoice") {
+      onNavigate("supplierInvoice");
+    }
+  }, [location.pathname, activeSection, onNavigate]);
   
   const menuItems = [
     {
@@ -78,6 +87,14 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
       icon: RefreshCcw,
       label: language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges',
       section: "refundManager",
+    },
+    {
+      icon: FileInvoice,
+      label: language === 'ar' ? 'فواتير الموردين' : 'Supplier Invoices',
+      section: "supplierInvoice",
+      action: () => {
+        onNavigate("supplierInvoice");
+      },
     },
     {
       icon: BarChart3,
@@ -172,6 +189,8 @@ export const DashboardSidebar = ({ activeSection, onNavigate, children }: {
                   activeSection === "patientSearch" ? t('patientSearch') :
                   activeSection === "refundManager" ? 
                     (language === 'ar' ? 'الاسترداد والاستبدال' : 'Refunds & Exchanges') :
+                  activeSection === "supplierInvoice" ?
+                    (language === 'ar' ? 'فواتير الموردين' : 'Supplier Invoices') :
                   activeSection === "reports" ? 
                     (language === 'ar' ? 'التقارير' : 'Reports') :
                   t('dashboard')

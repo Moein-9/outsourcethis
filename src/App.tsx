@@ -37,6 +37,7 @@ const App = () => {
             <Route path="/print-labels" element={<PrintLabelPage />} />
             <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
             <Route path="/lens-debug" element={<LensDebugger />} />
+            <Route path="/supplier-invoices" element={<Index />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
