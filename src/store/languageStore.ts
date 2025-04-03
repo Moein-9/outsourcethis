@@ -1,324 +1,804 @@
 import { create } from 'zustand';
 
-interface LanguageStore {
+type LanguageStore = {
   language: 'en' | 'ar';
   setLanguage: (language: 'en' | 'ar') => void;
   t: (key: string) => string;
-}
-
-const initialState = {
-  language: (localStorage.getItem('language') as 'en' | 'ar') || 'en',
 };
 
-export const useLanguageStore = create<LanguageStore>((set, get) => ({
-  language: initialState.language,
-  setLanguage: (language) => {
-    localStorage.setItem('language', language);
-    document.documentElement.setAttribute('lang', language);
-    set({ language });
-  },
-  t: (key: string) => {
-    const { language } = get();
-    const translations: Record<string, Record<string, string>> = {
-      dashboard: {
-        en: "Dashboard",
-        ar: "لوحة التحكم"
-      },
-      createClient: {
-        en: "Create Client",
-        ar: "إنشاء عميل"
-      },
-      createInvoice: {
-        en: "Create Invoice",
-        ar: "إنشاء فاتورة"
-      },
-      inventory: {
-        en: "Inventory",
-        ar: "المخزون"
-      },
-      reports: {
-        en: "Reports",
-        ar: "التقارير"
-      },
-      remainingPayments: {
-        en: "Remaining Payments",
-        ar: "المدفوعات المتبقية"
-      },
-      patientSearch: {
-        en: "Patient Search",
-        ar: "البحث عن مريض"
-      },
-      refundManager: {
-        en: "Refund Manager",
-        ar: "إدارة المرتجعات"
-      },
-      settings: {
-        en: "Settings",
-        ar: "الإعدادات"
-      },
-      logout: {
-        en: "Logout",
-        ar: "تسجيل الخروج"
-      },
-      invoiceTitle: {
-        en: "Create New Invoice",
-        ar: "إنشاء فاتورة جديدة"
-      },
-      clientSection: {
-        en: "Client",
-        ar: "العميل"
-      },
-      productSection: {
-        en: "Products",
-        ar: "المنتجات"
-      },
-      paymentSection: {
-        en: "Payment",
-        ar: "الدفع"
-      },
-      summarySection: {
-        en: "Summary",
-        ar: "ملخص"
-      },
-      next: {
-        en: "Next",
-        ar: "التالي"
-      },
-      previous: {
-        en: "Previous",
-        ar: "السابق"
-      },
-      clientName: {
-        en: "Client Name",
-        ar: "اسم العميل"
-      },
-      clientPhone: {
-        en: "Client Phone",
-        ar: "رقم هاتف العميل"
-      },
-      lensType: {
-        en: "Lens Type",
-        ar: "نوع العدسة"
-      },
-      coating: {
-        en: "Coating",
-        ar: "طلاء"
-      },
-      thickness: {
-        en: "Thickness",
-        ar: "سماكة"
-      },
-      frameBrand: {
-        en: "Frame Brand",
-        ar: "ماركة الإطار"
-      },
-      frameModel: {
-        en: "Frame Model",
-        ar: "موديل الإطار"
-      },
-      frameColor: {
-        en: "Frame Color",
-        ar: "لون الإطار"
-      },
-      discountSection: {
-        en: "Discount",
-        ar: "الخصم"
-      },
-      depositColon: {
-        en: "Deposit:",
-        ar: "إيداع:"
-      },
-      payInFull: {
-        en: "Pay in Full",
-        ar: "ادفع بالكامل"
-      },
-      cash: {
-        en: "Cash",
-        ar: "نقداً"
-      },
-      knet: {
-        en: "KNET",
-        ar: "كي نت"
-      },
-      visa: {
-        en: "Visa",
-        ar: "تأشيرة"
-      },
-      mastercard: {
-        en: "MasterCard",
-        ar: "ماستر كارد"
-      },
-      approvalNumber: {
-        en: "Approval Number",
-        ar: "رقم الموافقة"
-      },
-      totalInvoice: {
-        en: "Total",
-        ar: "المجموع"
-      },
-      deposit: {
-        en: "Deposit",
-        ar: "إيداع"
-      },
-      remaining: {
-        en: "Remaining",
-        ar: "المتبقي"
-      },
-      invoiceCreated: {
-        en: "Invoice Created!",
-        ar: "تم إنشاء الفاتورة!"
-      },
-      invoiceSuccessMessage: {
-        en: "Your invoice has been successfully created.",
-        ar: "تم إنشاء فاتورتك بنجاح."
-      },
-      invoiceNumber: {
-        en: "Invoice Number",
-        ar: "رقم الفاتورة"
-      },
-      workOrderNumber: {
-        en: "Work Order Number",
-        ar: "رقم أمر العمل"
-      },
-      orderType: {
-        en: "Order Type",
-        ar: "نوع الطلب"
-      },
-      clientNameColon: {
-        en: "Client Name",
-        ar: "اسم العميل"
-      },
-      date: {
-        en: "Date",
-        ar: "تاريخ"
-      },
-      totalInvoiceColon: {
-        en: "Total",
-        ar: "المجموع"
-      },
-      paymentStatus: {
-        en: "Payment Status",
-        ar: "حالة الدفع"
-      },
-      paidInFull: {
-        en: "Paid in Full",
-        ar: "مدفوع بالكامل"
-      },
-      partiallyPaid: {
-        en: "Partially Paid",
-        ar: "مدفوع جزئيا"
-      },
-      nextSteps: {
-        en: "Next Steps",
-        ar: "الخطوات التالية"
-      },
-      printWorkOrder: {
-        en: "Print Work Order",
-        ar: "طباعة أمر العمل"
-      },
-      printWorkOrderDescription: {
-        en: "Prepare the work order for the lab.",
-        ar: "جهز أمر العمل للمختبر."
-      },
-      printInvoice: {
-        en: "Print Invoice",
-        ar: "طباعة الفاتورة"
-      },
-      printInvoiceDescription: {
-        en: "Provide the client with a copy of the invoice.",
-        ar: "زود العميل بنسخة من الفاتورة."
-      },
-      kwd: {
-        en: "KWD",
-        ar: "د.ك"
-      },
-      anonymous: {
-        en: "Anonymous",
-        ar: "مجهول"
-      },
-      validationError: {
-        en: "Validation Error",
-        ar: "خطأ في التحقق"
-      },
-      paymentMethodRequired: {
-        en: "Please select a payment method.",
-        ar: "الرجاء تحديد طريقة الدفع."
-      },
-      success: {
-        en: "Success",
-        ar: "نجاح"
-      },
-      orderSavedSuccess: {
-        en: "Order saved successfully!",
-        ar: "تم حفظ الطلب بنجاح!"
-      },
-      glasses: {
-        en: "Glasses",
-        ar: "نظارات"
-      },
-      contactLenses: {
-        en: "Contact Lenses",
-        ar: "عدسات لاصقة"
-      },
-      quantity: {
-        en: "Quantity",
-        ar: "الكمية"
-      },
-      waitingForClientData: {
-        en: "Waiting for client data...",
-        ar: "في انتظار بيانات العميل..."
-      },
-      waitingForProductData: {
-        en: "Waiting for product data...",
-        ar: "في انتظار بيانات المنتج..."
-      },
-      waitingForPaymentData: {
-        en: "Waiting for payment data...",
-        ar: "في انتظار بيانات الدفع..."
-      },
-      subtotal: {
-        en: "Subtotal",
-        ar: "المجموع الفرعي"
-      },
-      discount: {
-        en: "Discount",
-        ar: "الخصم"
-      },
-      total: {
-        en: "Total",
-        ar: "المجموع"
-      },
-      lensProducts: {
-        en: "Lens Products",
-        ar: "منتجات العدسات"
-      },
-      totalLensCost: {
-        en: "Total Lens Cost",
-        ar: "إجمالي تكلفة العدسات"
-      },
-      frame: {
-        en: "Frame",
-        ar: "إطار"
-      },
-      goToClientSection: {
-        en: "Go to Client Section",
-        ar: "الذهاب إلى قسم العميل"
-      },
-      startBySelectingClient: {
-        en: "Start by selecting a client to create an invoice.",
-        ar: "ابدأ بتحديد عميل لإنشاء فاتورة."
-      },
-      close: {
-        en: "Close",
-        ar: "إغلاق"
-      },
-      print: {
-        en: "Print",
-        ar: "طباعة"
-      }
-    };
+// Translations for both languages
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    // General UI
+    welcome: 'Welcome to the Optical System',
+    dashboard: 'Dashboard',
+    createClient: 'Create Client',
+    createInvoice: 'Create Invoice',
+    inventory: 'Inventory',
+    remainingPayments: 'Remaining Payments',
+    patientSearch: 'Patient Search',
+    reportsPage: 'Reports',
+    systemDescription: 'Comprehensive system for managing optical store operations, patients, and sales.',
+    currentTime: 'Current Time',
+    languageCode: 'EN',
     
-    const lang = language || 'en';
-    return translations[key]?.[lang] || key;
+    // Create Client
+    clientInformation: 'Client Information',
+    personalInfo: 'Personal Information',
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    fullName: 'Full Name',
+    civilId: 'Civil ID',
+    phoneNumber: 'Phone Number',
+    dateOfBirth: 'Date of Birth',
+    age: 'Age',
+    gender: 'Gender',
+    male: 'Male',
+    female: 'Female',
+    address: 'Address',
+    email: 'Email',
+    notes: 'Notes',
+    saveClient: 'Save Client',
+    clientSaved: 'Client saved successfully',
+    enterFirstName: 'Enter first name',
+    enterLastName: 'Enter last name',
+    enterCivilId: 'Enter civil ID',
+    enterPhoneNumber: 'Enter phone number',
+    enterEmail: 'Enter email',
+    selectDateOfBirth: 'Select date of birth',
+    selectGender: 'Select gender',
+    enterAddress: 'Enter address',
+    enterNotes: 'Enter notes',
+    name: 'Name',
+    phone: 'Phone',
+    createClientTitle: 'Create New Client',
+    prescriptionGlasses: 'Glasses Prescription',
+    contactLensesTab: 'Contact Lenses',
+    glassesPrescription: 'Glasses Prescription',
+    prescriptionDate: 'Prescription Date',
+    choosePrescriptionDate: 'Choose a date',
+    contactLensPrescription: 'Contact Lens Prescription',
+    clientDidntShareDOB: 'Client did not share date of birth',
+    clientNotesPreferences: 'Client notes and preferences',
+    right: 'Right',
+    left: 'Left',
+    choose: 'Choose',
+    day: 'Day',
+    month: 'Month',
+    year: 'Year',
+    saveAndContinue: 'Save and Continue',
+    january: 'January',
+    february: 'February',
+    march: 'March',
+    april: 'April',
+    may: 'May',
+    june: 'June',
+    july: 'July',
+    august: 'August',
+    september: 'September',
+    october: 'October',
+    november: 'November',
+    december: 'December',
+    error: 'Error',
+    requiredField: 'Name is required',
+    success: 'Success',
+    successMessage: 'Client saved successfully',
+    
+    // Create Invoice
+    invoiceCreation: 'Invoice Creation',
+    clientDetails: 'Client Details',
+    searchClient: 'Search Client',
+    lensDetails: 'Lens Details',
+    lensType: 'Lens Type',
+    selectLens: 'Select Lens',
+    lensPrice: 'Lens Price',
+    frameDetails: 'Frame Details',
+    frameBrand: 'Frame Brand',
+    frameModel: 'Frame Model',
+    frameColor: 'Frame Color',
+    framePrice: 'Frame Price',
+    coatingDetails: 'Coating Details',
+    coatingType: 'Coating Type',
+    selectCoating: 'Select Coating',
+    coatingPrice: 'Coating Price',
+    prescription: 'Prescription',
+    rightEye: 'Right Eye',
+    leftEye: 'Left Eye',
+    sphere: 'Sphere',
+    cylinder: 'Cylinder',
+    axis: 'Axis',
+    addition: 'Addition',
+    pupillaryDistance: 'Pupillary Distance',
+    paymentDetails: 'Payment Details',
+    subtotal: 'Subtotal',
+    discount: 'Discount',
+    total: 'Total',
+    paymentMethod: 'Payment Method',
+    creditCard: 'Credit Card',
+    deposit: 'Deposit',
+    remaining: 'Remaining',
+    createInvoiceBtn: 'Create Invoice',
+    invoiceCreated: 'Invoice created successfully',
+    invoiceSuccessMessage: 'Your invoice has been successfully created and is ready for printing',
+    workOrderNumber: 'Work Order Number',
+    clientName: 'Client Name',
+    clientPhone: 'Client Phone',
+    date: 'Date',
+    totalAmount: 'Total Amount',
+    totalInvoice: 'Total Invoice',
+    paymentStatus: 'Payment Status',
+    paid: 'Paid',
+    paidInFull: 'Paid in Full',
+    partiallyPaid: 'Partially Paid',
+    nextSteps: 'Next Steps',
+    printWorkOrder: 'Print Work Order',
+    printWorkOrderDescription: 'Print the production work order for the lab',
+    printInvoice: 'Print Invoice',
+    printInvoiceDescription: 'Print the customer invoice receipt',
+    printCustomWorkOrder: 'Print Custom Work Order',
+    printCustomWorkOrderDescription: 'Print a specialized work order with custom format',
+    
+    // Tab sections in Create Invoice
+    clientSection: '1) Client Information',
+    productSection: 'Lenses and Frame',
+    paymentSection: 'Payment Method',
+    summarySection: 'Summary',
+    
+    // Inventory
+    frames: 'Frames',
+    lenses: 'Lenses',
+    contactLenses: 'Contact Lenses',
+    frameInventory: 'Frame Inventory',
+    frameManagement: 'Frame Management',
+    addFrame: 'Add Frame',
+    editFrame: 'Edit Frame',
+    deleteFrame: 'Delete Frame',
+    brand: 'Brand',
+    model: 'Model',
+    color: 'Color',
+    size: 'Size',
+    price: 'Price',
+    quantity: 'Quantity',
+    actions: 'Actions',
+    addNewFrame: 'Add New Frame',
+    updateFrame: 'Update Frame',
+    confirmDelete: 'Confirm Delete',
+    deleteFrameConfirm: 'Are you sure you want to delete this frame?',
+    cancel: 'Cancel',
+    save: 'Save',
+    delete: 'Delete',
+    
+    // Lens Types
+    lensInventory: 'Lens Inventory',
+    lensTypes: 'Lens Types',
+    lensCoatings: 'Lens Coatings',
+    lensThicknesses: 'Lens Thicknesses',
+    addLens: 'Add Lens',
+    editLens: 'Edit Lens',
+    deleteLens: 'Delete Lens',
+    lensName: 'Lens Name',
+    description: 'Description',
+    addNewLens: 'Add New Lens',
+    updateLens: 'Update Lens',
+    deleteLensConfirm: 'Are you sure you want to delete this lens?',
+    contactLensManagement: 'Contact Lens Management',
+    distanceReading: 'Distance/Reading',
+    distance: 'Distance',
+    reading: 'Reading',
+    progressive: 'Progressive',
+    bifocal: 'Bifocal',
+    sunglasses: 'Sunglasses',
+    
+    // Lens Combinations
+    lensPricingCombinations: 'Lens Pricing Combinations',
+    lensCombinations: 'Lens Combinations',
+    addNewCombination: 'Add New Lens Combination',
+    addCombination: 'Add Combination',
+    selectLensType: 'Select Lens Type',
+    selectThickness: 'Select Thickness',
+    combinationAdded: 'Lens combination added successfully',
+    combinationUpdated: 'Lens combination updated successfully',
+    combinationDeleted: 'Lens combination deleted successfully',
+    combinationExists: 'This lens combination already exists',
+    allFieldsRequired: 'All fields are required',
+    invalidPrice: 'Please enter a valid price',
+    priceRequired: 'Price is required',
+    searchCombinations: 'Search combinations',
+    noMatchingCombinations: 'No matching combinations found',
+    noCombinations: 'No lens combinations available',
+    errorAddingCombination: 'Error adding combination',
+    errorUpdatingCombination: 'Error updating combination',
+    errorDeletingCombination: 'Error deleting combination',
+    unknown: 'Unknown',
+    combinationPriceFound: "Combination Price Found",
+    usingCombinedPrice: "Using combined price",
+    combinedPrice: "Combined Price",
+    
+    // Remaining Payments
+    duePayments: 'Manage incomplete invoices and record remaining payments',
+    clientId: 'Client ID',
+    invoiceId: 'Invoice ID',
+    invoiceDate: 'Invoice Date',
+    amountDue: 'Amount Due',
+    status: 'Status',
+    payNow: 'Pay Now',
+    paymentComplete: 'Payment Complete',
+    partialPayment: 'Partial Payment',
+    makePayment: 'Make Payment',
+    paymentAmount: 'Payment Amount',
+    process: 'Process',
+    
+    // Patient Search
+    searchResults: 'Search Results',
+    noResults: 'No results found',
+    searchByName: 'Search by name',
+    searchByPhone: 'Search by phone',
+    search: 'Search',
+    viewDetails: 'View Details',
+    patientDetails: 'Patient Details',
+    invoiceHistory: 'Invoice History',
+    prescriptionHistory: 'Prescription History',
+    
+    // Common Actions
+    edit: 'Edit',
+    view: 'View',
+    print: 'Print',
+    close: 'Close',
+    yes: 'Yes',
+    no: 'No',
+    add: 'Add',
+    update: 'Update',
+    submit: 'Submit',
+    confirm: 'Confirm',
+    optional: 'Optional',
+    next: 'Next',
+    previous: 'Previous',
+    newInvoice: 'New Invoice',
+
+    // Units and Labels
+    kwd: 'KWD',
+    piece: 'Piece',
+    pieces: 'Pieces',
+    mm: 'mm',
+    cm: 'cm',
+    diopter: 'Diopter',
+    
+    // Create Invoice (Additional)
+    invoiceTitle: "Create Invoice",
+    noClientFile: "No client file",
+    phoneColon: "Phone Number:",
+    typeToSearch: "Type to search...",
+    patientID: "Patient ID",
+    hideRx: "Hide Prescription",
+    showRx: "Show Prescription",
+    eye: "Eye",
+    lensSection: "2) Prescription Lenses",
+    frameSection: "3) Frame",
+    searchTerm: "Search (Brand/Model/Color/Size):",
+    searchExample: "Example: RayBan...",
+    selectedFrame: "Selected Frame",
+    addFrameButton: "Add New Frame",
+    newFrameDetails: "New Frame Details",
+    saveFrame: "Save Frame",
+    discountSection: "4) Discount and Payment",
+    discountColon: "Discount (KWD):",
+    depositColon: "Deposit (KWD):",
+    payInFull: "Pay in Full",
+    approvalNumber: "Approval Number (Authorization No.):",
+    previewInvoice: "Preview Invoice",
+    saveAndPrint: "Save and Print",
+    invoiceSummary: "Invoice Summary",
+    glasses: "Glasses",
+    contacts: "Contact Lenses",
+    workOrder: "Work Order",
+    invoice: "Invoice",
+    phoneSearchError: "Please enter a phone number to search.",
+    noClientsFound: "No clients found with this number.",
+    searchTermError: "Please enter search terms.",
+    noFramesFound: "No frames found.",
+    frameDetailsError: "Please enter frame details.",
+    priceError: "Please enter a valid price.",
+    quantityError: "Please enter a valid quantity.",
+    frameAddedSuccess: "Frame added successfully.",
+    clientSelectionError: "Please select a client or enable the 'No client file' option.",
+    lensSelectionError: "Please select a lens type.",
+    frameSelectionError: "Please select a frame or enable 'Lenses only' option.",
+    contactLensSelectionError: "Please select at least one contact lens.",
+    paymentMethodError: "Please select a payment method.",
+    invoiceSavedSuccess: "Invoice saved successfully with number",
+    cash: "Cash",
+    knet: "KNET",
+    visa: "Visa",
+    mastercard: "MasterCard",
+    leftEyeAbbr: "OS (Left)",
+    rightEyeAbbr: "OD (Right)",
+    pdRight: "PD",
+    lensesOnly: "Lenses only",
+    frameTotal: "Frame Price:",
+    lensTotal: "Lens Price:",
+    coatingTotal: "Coating Price:",
+    contactLensesTotal: "Contact Lenses Total:",
+    lensCount: "contact lenses",
+    approvalNumberLabel: "Approval Number:",
+    paymentTotalLabel: "Total:",
+    paidLabel: "Paid:",
+    
+    // Waiting states for invoice summary
+    waitingForClientData: "Waiting for client data...",
+    waitingForProductData: "Waiting for product data...",
+    waitingForPaymentData: "Waiting for payment data...",
+    
+    remainingLabel: "Remaining:",
+    
+    // LensSelector Component
+    frameOnly: "Frame only (no prescription lenses)",
+    skipLens: "Skip Lens",
+    
+    // Additional translations for images shown
+    medicalLenses: "Medical Lenses",
+    
+    // RX Manager translations with improved spacing
+    rxAndCareInstructions: "Rx and Care Instructions",
+    printPrescription: "Print Prescription",
+    newRx: "New Rx",
+    currentRx: "Current Rx",
+    rxHistory: "Rx History",
+    noPreviousRx: "No Previous Prescriptions",
+    noPreviousRxDescription: "This patient doesn't have any previous prescription history yet.",
+    addNewRx: "Add New Prescription",
+    addNewRxFor: "Add new prescription for",
+    viewPrescription: "View Prescription",
+    selectLanguageForPrinting: "Select Language for Printing",
+    dataError: "Data Error",
+    fillAllRequiredFields: "Please fill all required fields",
+    
+    // Glasses care tips
+    glassesCareTips: "Glasses Care Tips",
+    tip1: "Clean your glasses regularly with a microfiber cloth.",
+    tip2: "Always store your glasses in a protective case.",
+    tip3: "Avoid placing your glasses lens-side down.",
+    tip4: "Schedule regular eye exams to ensure your prescription is accurate.",
+    thankYou: "Thank you for choosing Moen Optician. We look forward to serving you again!",
+    
+    // Newly added translations 
+    startBySelectingClient: "Start by selecting a client in Step 1",
+    goToClientSection: "Go to Client Section",
+    anonymous: "Anonymous",
+    
+    // Add new translation for axis validation error
+    axisValidationError: "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.",
+    
+    // Add the new notesPlaceholder translation
+    notesPlaceholder: "You can add any information about the customer here...",
+    
+    // Services
+    services: 'Services',
+    serviceManagement: 'Service Management',
+    newService: 'New Service',
+    serviceName: 'Service Name',
+    serviceDescription: 'Service Description',
+    addService: 'Add Service',
+    saveService: 'Save Service',
+    serviceAdded: 'Service added successfully',
+    editService: 'Edit Service',
+    updateService: 'Update Service',
+    serviceUpdated: 'Service updated successfully',
+    serviceDeleted: 'Service deleted successfully',
+    eyeExam: 'Eye Exam',
+    repair: 'Repair',
+    other: 'Other',
+    nameRequired: 'Name is required',
+    selectCategory: 'Select Category',
+    noServices: 'No services available',
+    noExamServiceFound: 'No eye exam service found. Please add one in the Services tab.',
+    
+    // Add new photochromic related translations
+    selectPhotochromicColor: "Select Photochromic Color",
+    selectColor: "Select Color",
+    brown: "Brown",
+    gray: "Gray",
+    green: "Green",
+    blue: "Blue",
+  },
+  ar: {
+    // General UI
+    welcome: 'مرحبًا بكم في نظام النظارات',
+    dashboard: 'لوحة التحكم',
+    createClient: 'إنشاء عميل',
+    createInvoice: 'إنشاء فاتورة',
+    inventory: 'المخزون',
+    remainingPayments: 'المتبقي للدفع',
+    patientSearch: 'بحث عن مريض',
+    reportsPage: 'التقارير',
+    systemDescription: 'نظام شامل لإدارة عمليات متجر النظارات والمرضى والمبيعات.',
+    currentTime: 'الوقت الحالي',
+    languageCode: 'عربي',
+    
+    // Create Client
+    clientInformation: 'معلومات العميل',
+    personalInfo: 'المعلومات الشخصية',
+    firstName: 'الاسم الأول',
+    lastName: 'اسم العائلة',
+    fullName: 'الاسم الكامل',
+    civilId: 'الرقم المدني',
+    phoneNumber: 'رقم الهاتف',
+    dateOfBirth: 'تاريخ الميلاد',
+    age: 'العمر',
+    gender: 'الجنس',
+    male: 'ذكر',
+    female: 'أنثى',
+    address: 'العنوان',
+    email: 'البريد الإلكتروني',
+    notes: 'ملاحظات',
+    saveClient: 'حفظ العميل',
+    clientSaved: 'تم حفظ العميل بنجاح',
+    enterFirstName: 'أدخل الاسم الأول',
+    enterLastName: 'أدخل اسم العائلة',
+    enterCivilId: 'أدخل الرقم المدني',
+    enterPhoneNumber: 'أدخل رقم الهاتف',
+    enterEmail: 'أدخل البريد الإلكتروني',
+    selectDateOfBirth: 'اختر تاريخ الميلاد',
+    selectGender: 'اختر الجنس',
+    enterAddress: 'أدخل العنوان',
+    enterNotes: 'أدخل ملاحظات',
+    name: 'الاسم',
+    phone: 'الهاتف',
+    createClientTitle: 'إنشاء عميل جديد',
+    prescriptionGlasses: 'وصفة النظارات',
+    contactLensesTab: 'العدسات اللاصقة',
+    glassesPrescription: 'وصفة النظارات',
+    prescriptionDate: 'تاريخ الوصفة',
+    choosePrescriptionDate: 'اختر تاريخ',
+    contactLensPrescription: 'وصفة العدسات اللاصقة',
+    clientDidntShareDOB: 'لم يشارك العميل تاريخ الميلاد',
+    clientNotesPreferences: 'ملاحظات وتفضيلات العميل',
+    right: 'يمين',
+    left: 'يسار',
+    choose: 'اختر',
+    day: 'يوم',
+    month: 'شهر',
+    year: 'سنة',
+    saveAndContinue: 'حفظ ومتابعة',
+    january: 'يناير',
+    february: 'فبراير',
+    march: 'مارس',
+    april: 'أبريل',
+    may: 'مايو',
+    june: 'يونيو',
+    july: 'يوليو',
+    august: 'أغسطس',
+    september: 'سبتمبر',
+    october: 'أكتوبر',
+    november: 'نوفمبر',
+    december: 'ديسمبر',
+    error: 'خطأ',
+    requiredField: 'الاسم مطلوب',
+    success: 'نجاح',
+    successMessage: 'تم حفظ العميل بنجاح',
+    
+    // Create Invoice
+    invoiceCreation: 'إنشاء فاتورة',
+    clientDetails: 'تفاصيل العميل',
+    searchClient: 'بحث عن عميل',
+    lensDetails: 'العدسات الطبية',
+    lensType: 'نوع العدسة',
+    selectLens: 'اختر العدسة',
+    lensPrice: 'سعر العدسة',
+    frameDetails: 'تفاصيل الإطار',
+    frameBrand: 'ماركة الإطار',
+    frameModel: 'موديل الإطار',
+    frameColor: 'لون الإطار',
+    framePrice: 'سعر الإطار',
+    coatingDetails: 'تفاصيل الطلاء',
+    coatingType: 'نوع الطلاء',
+    selectCoating: 'اختر الطلاء',
+    coatingPrice: 'سعر الطلاء',
+    prescription: 'الوصفة الطبية',
+    rightEye: 'العين اليمنى',
+    leftEye: 'العين اليسرى',
+    sphere: 'المجال',
+    cylinder: 'الاسطوانة',
+    axis: 'المحور',
+    addition: 'الإضافة',
+    pupillaryDistance: 'المسافة البؤبؤية',
+    paymentDetails: 'تفاصيل الدفع',
+    subtotal: 'المجموع الفرعي',
+    discount: 'الخصم',
+    total: 'المجموع',
+    paymentMethod: 'طريقة الدفع',
+    cash: 'نقداً',
+    creditCard: 'بطاقة ائتمان',
+    deposit: 'العربون',
+    remaining: 'المتبقي',
+    createInvoiceBtn: 'إنشاء الفاتورة',
+    invoiceCreated: 'تم إنشاء الفاتورة بنجاح',
+    invoiceSuccessMessage: 'تم إنشاء الفاتورة بنجاح وهي جاهزة للطباعة',
+    workOrderNumber: 'رقم أمر العمل',
+    clientName: 'اسم العميل',
+    clientPhone: 'هاتف العميل',
+    date: 'التاريخ',
+    totalAmount: 'المبلغ الإجمالي',
+    totalInvoice: 'إجمالي الفاتورة',
+    paymentStatus: 'حالة الدفع',
+    paid: 'مدفوع',
+    paidInFull: 'مدفوع بالكامل',
+    partiallyPaid: 'مدفوع جزئياً',
+    nextSteps: 'الخطوات التالية',
+    printWorkOrder: 'طباعة أمر العمل',
+    printWorkOrderDescription: 'طباعة أمر العمل للمختبر',
+    printInvoice: 'طباعة الفاتورة',
+    printInvoiceDescription: 'طباعة إيصال الفاتورة للعميل',
+    printCustomWorkOrder: 'طباعة أمر عمل مخصص',
+    printCustomWorkOrderDescription: 'طباعة أمر عمل متخصص بتنسيق مخصص',
+    
+    // Tab sections in Create Invoice
+    clientSection: '١) بيانات العميل',
+    productSection: 'العدسات والإطار',
+    paymentSection: 'طريقة الدفع',
+    summarySection: 'الملخص',
+    
+    // Inventory
+    frames: 'الإطارات',
+    lenses: 'العدسات',
+    contactLenses: 'العدسات اللاصقة',
+    frameInventory: 'مخزون الإطارات',
+    frameManagement: 'إدارة الإطارات',
+    addFrame: 'إضافة إطار',
+    editFrame: 'تعديل إطار',
+    deleteFrame: 'حذف إطار',
+    brand: 'الماركة',
+    model: 'الموديل',
+    color: 'اللون',
+    size: 'الحجم',
+    price: 'السعر',
+    quantity: 'الكمية',
+    actions: 'الإجراءات',
+    addNewFrame: 'إضافة إطار جديد',
+    updateFrame: 'تحديث الإطار',
+    confirmDelete: 'تأكيد الحذف',
+    deleteFrameConfirm: 'هل أنت متأكد من رغبتك في حذف هذا الإطار؟',
+    cancel: 'إلغاء',
+    save: 'حفظ',
+    delete: 'حذف',
+    
+    // Lens Types
+    lensInventory: 'مخزون العدسات',
+    lensTypes: 'أنواع العدسات',
+    lensCoatings: 'طلاءات العدسات',
+    lensThicknesses: 'سماكة العدسات',
+    addLens: 'إضافة عدسة',
+    editLens: 'تعديل عدسة',
+    deleteLens: 'حذف عدسة',
+    lensName: 'اسم العدسة',
+    description: 'الوصف',
+    addNewLens: 'إضافة عدسة جديدة',
+    updateLens: 'تحديث العدسة',
+    deleteLensConfirm: 'هل أنت متأكد من رغبتك في حذف هذه العدسة؟',
+    contactLensManagement: 'إدارة العدسات اللاصقة',
+    distanceReading: 'النظر البعيد/القراءة',
+    distance: 'النظر البعيد',
+    reading: 'القراءة',
+    progressive: 'متدرجة (Progressive)',
+    bifocal: 'ثنائية البؤرة (Bifocal)',
+    sunglasses: 'نظارات شمسية (Sunglasses)',
+    
+    // Lens Combinations
+    lensPricingCombinations: 'تركيبات أسعار العدسات',
+    lensCombinations: 'تركيبات العدسات',
+    addNewCombination: 'إضافة تركيبة عدسات جديدة',
+    addCombination: 'إضافة تركيبة',
+    selectLensType: 'اختر نوع العدسة',
+    selectThickness: 'اختر سماكة العدسة',
+    combinationAdded: 'تمت إضافة تركيبة العدسات بنجاح',
+    combinationUpdated: 'تم تحديث تركيبة العدسات بنجاح',
+    combinationDeleted: 'تم حذف تركيبة العدسات بنجاح',
+    combinationExists: 'تركيبة العدسات هذه موجودة بالفعل',
+    allFieldsRequired: 'جميع الحقول مطلوبة',
+    invalidPrice: 'الرجاء إدخال سعر صحيح',
+    priceRequired: 'السعر مطلوب',
+    searchCombinations: 'بحث عن تركيبات',
+    noMatchingCombinations: 'لم يتم العثور على تركيبات مطابقة',
+    noCombinations: 'لا توجد تركيبات عدسات متاحة',
+    errorAddingCombination: 'خطأ في إضافة التركيبة',
+    errorUpdatingCombination: 'خطأ في تحديث التركيبة',
+    errorDeletingCombination: 'خطأ في حذف التركيبة',
+    unknown: 'غير معروف',
+    combinationPriceFound: "تم العثور على سعر مجمع",
+    usingCombinedPrice: "استخدام السعر المجمع",
+    combinedPrice: "السعر المجمع",
+    
+    // Remaining Payments
+    duePayments: 'إدارة الفواتير غير المكتملة وتسجيل الدفعات المتبقية',
+    clientId: 'رقم العميل',
+    invoiceId: 'رقم الفاتورة',
+    invoiceDate: 'تاريخ الفاتورة',
+    amountDue: 'المبلغ المستحق',
+    status: 'الحالة',
+    payNow: 'ادفع الآن',
+    paymentComplete: 'تم الدفع بالكامل',
+    partialPayment: 'دفع جزئي',
+    makePayment: 'إجراء الدفع',
+    paymentAmount: 'مبلغ الدفع',
+    process: 'معالجة',
+    
+    // Patient Search
+    searchResults: 'نتائج البحث',
+    noResults: 'لا توجد نتائج',
+    searchByName: 'بحث بالاسم',
+    searchByPhone: 'بحث برقم الهاتف',
+    search: 'بحث',
+    viewDetails: 'عرض التفاصيل',
+    patientDetails: 'تفاصيل المريض',
+    invoiceHistory: 'تاريخ الفواتير',
+    prescriptionHistory: 'تاريخ الوصفات الطبية',
+    
+    // Common Actions
+    edit: 'تعديل',
+    view: 'عرض',
+    print: 'طباعة',
+    close: 'إغلاق',
+    yes: 'نعم',
+    no: 'لا',
+    add: 'إضافة',
+    update: 'تحديث',
+    submit: 'تقديم',
+    confirm: 'تأكيد',
+    optional: 'اختياري',
+    next: 'التالي',
+    previous: 'السابق',
+    newInvoice: 'فاتورة جديدة',
+
+    // Units and Labels
+    kwd: 'د.ك',
+    piece: 'قطعة',
+    pieces: 'قطع',
+    mm: 'ملم',
+    cm: 'سم',
+    diopter: 'ديوبتر',
+    
+    // Create Invoice (Additional)
+    invoiceTitle: "إنشاء فاتورة",
+    noClientFile: "لا يوجد ملف عميل",
+    phoneColon: "رقم الهاتف:",
+    typeToSearch: "اكتب للبحث...",
+    patientID: "رقم المريض",
+    hideRx: "إخفاء الوصفة",
+    showRx: "عرض الوصفة",
+    eye: "العين",
+    lensSection: "٢) العدسات الطبية",
+    frameSection: "٣) الإطار",
+    searchTerm: "بحث (Brand/Model/Color/Size):",
+    searchExample: "مثال: RayBan...",
+    selectedFrame: "الإطار المختار",
+    addFrameButton: "إضافة إطار جديد",
+    newFrameDetails: "بيانات الإطار الجديد",
+    saveFrame: "حفظ الإطار",
+    discountSection: "٤) الخصم والدفعة",
+    discountColon: "الخصم (د.ك):",
+    depositColon: "الدفعة (د.ك):",
+    payInFull: "دفع كامل",
+    approvalNumber: "رقم الموافقة (Authorization No.):",
+    previewInvoice: "معاينة الفاتورة",
+    saveAndPrint: "حفظ وطباعة",
+    invoiceSummary: "ملخص الفاتورة",
+    glasses: "نظارات",
+    contacts: "عدسات لاصقة",
+    workOrder: "أمر العمل",
+    invoice: "الفاتورة",
+    phoneSearchError: "الرجاء إدخال رقم الهاتف للبحث.",
+    noClientsFound: "لم يتم العثور على عملاء بهذا الرقم.",
+    searchTermError: "الرجاء إدخال كلمات البحث.",
+    noFramesFound: "لم يتم العثور على إطار.",
+    frameDetailsError: "الرجاء إدخال تفاصيل الإطار.",
+    priceError: "الرجاء إدخال سعر صحيح.",
+    quantityError: "الرجاء إدخال كمية صحيحة.",
+    frameAddedSuccess: "تم إضافة الإطار بنجاح.",
+    clientSelectionError: "الرجاء اختيار عميل أو تفعيل الخيار 'لا يوجد ملف عميل'.",
+    lensSelectionError: "الرجاء اختيار نوع العدسة.",
+    frameSelectionError: "الرجاء اختيار إطار أو تفعيل خيار 'عدسات فقط'.",
+    contactLensSelectionError: "الرجاء اختيار عدسة لاصقة واحدة على الأقل.",
+    paymentMethodError: "الرجاء اختيار طريقة الدفع.",
+    invoiceSavedSuccess: "تم حفظ الفاتورة برقم",
+    knet: "كي نت",
+    visa: "Visa",
+    mastercard: "MasterCard",
+    leftEyeAbbr: "OS (يسار)",
+    rightEyeAbbr: "OD (يمين)",
+    pdRight: "PD",
+    lensesOnly: "عدسات فقط",
+    frameTotal: "سعر الإطار:",
+    lensTotal: "سعر العدسة:",
+    coatingTotal: "سعر الطلاء:",
+    contactLensesTotal: "إجمالي العدسات اللاصقة:",
+    lensCount: "عدسة",
+    approvalNumberLabel: "رقم الموافقة:",
+    paymentTotalLabel: "المجموع:",
+    paidLabel: "المدفوع:",
+    
+    // Waiting states for invoice summary
+    waitingForClientData: "بانتظار بيانات العميل...",
+    waitingForProductData: "بانتظار بيانات المنتجات...",
+    waitingForPaymentData: "بانتظار بيانات الدفع...",
+    
+    remainingLabel: "المتبقي:",
+    
+    // LensSelector Component
+    frameOnly: "إطار فقط (بدون عدسات طبية)",
+    skipLens: "تخطي العدسة",
+    
+    // Additional translations for images shown
+    medicalLenses: "العدسات الطبية",
+    
+    // RX Manager translations with proper Arabic translations
+    rxAndCareInstructions: "تعليمات الوصفة والعناية",
+    printPrescription: "طباعة الوصفة",
+    newRx: "وصفة جديدة",
+    currentRx: "الوصفة الحالية",
+    rxHistory: "سجل الوصفات",
+    noPreviousRx: "لا توجد وصفات سابقة",
+    noPreviousRxDescription: "لا يملك هذا المريض أي سجل وصفات سابق حتى الآن",
+    addNewRx: "إضافة وصفة جديدة",
+    addNewRxFor: "إضافة وصفة جديدة لـ",
+    viewPrescription: "عرض الوصفة",
+    selectLanguageForPrinting: "اختر لغة الطباعة",
+    dataError: "خطأ في البيانات",
+    fillAllRequiredFields: "يرجى ملء جميع الحقول المطلوبة",
+    
+    // Glasses care tips in Arabic
+    glassesCareTips: "نصائح للعناية بالنظارات",
+    tip1: "نظف نظارتك بانتظام باستخدام قماش ناعم.",
+    tip2: "احتفظ دائماً بنظارتك داخل العلبة الواقية.",
+    tip3: "تجنب وضع النظارة بحيث تكون العدسات ملامسة للسطح.",
+    tip4: "احرص على فحص عينيك بانتظام للتأكد من صحة الوصفة.",
+    thankYou: "شكراً لاختياركم موين للبصريات، نتطلع لخدمتكم مرة أخرى!",
+    
+    // Newly added translations
+    startBySelectingClient: "ابدأ باختيار عميل في الخطوة الأولى",
+    goToClientSection: "اذهب إلى قسم العميل",
+    anonymous: "مجهول",
+    
+    // Add new translation for axis validation error in Arabic
+    axisValidationError: "قيم المحور (AXIS) التي أدخلتها غير صحيحة! إذا كانت قيمة الاسطوانة (CYL) موجودة، فيجب تحديد قيمة المحور.",
+    
+    // Add the new notesPlaceholder translation in Arabic
+    notesPlaceholder: "يمكنك إضافة أي معلومات عن العميل هنا...",
+    
+    // Services
+    services: 'الخدمات',
+    serviceManagement: 'إدارة الخدمات',
+    newService: 'خدمة جديدة',
+    serviceName: 'اسم الخدمة',
+    serviceDescription: 'وصف الخدمة',
+    addService: 'إضافة خدمة',
+    saveService: 'حفظ الخدمة',
+    serviceAdded: 'تمت إضافة الخدمة بنجاح',
+    editService: 'تعديل الخدمة',
+    updateService: 'تحديث الخدمة',
+    serviceUpdated: 'تم تحديث الخدمة بنجاح',
+    serviceDeleted: 'تم حذف الخدمة بنجاح',
+    eyeExam: 'فحص العين',
+    repair: 'إصلاح',
+    other: 'أخرى',
+    nameRequired: 'الاسم مطلوب',
+    selectCategory: 'اختر الفئة',
+    noServices: 'لا توجد خدمات متاحة',
+    noExamServiceFound: 'لم يتم العثور على خدمة فحص العين. يرجى إضافة واحدة في علامة التبويب الخدمات.',
+    
+    // Add new photochromic related translations
+    selectPhotochromicColor: "اختر لون الفوتوكروميك",
+    selectColor: "اختر اللون",
+    brown: "بني",
+    gray: "رمادي",
+    green: "أخضر",
+    blue: "أزرق",
   }
+};
+
+export const useLanguageStore = create<LanguageStore>((set) => ({
+  language: 'ar', // Default language
+  setLanguage: (language) => set({ language }),
+  t: (key) => {
+    const { language } = useLanguageStore.getState();
+    return translations[language][key] || key;
+  },
 }));
