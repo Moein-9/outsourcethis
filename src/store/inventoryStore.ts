@@ -24,7 +24,8 @@ export interface LensCoating {
   name: string;
   price: number;
   description?: string;
-  category: "distance-reading" | "progressive" | "bifocal";
+  category: string; // Changed to string type to support multiple categories
+  categories?: ("distance-reading" | "progressive" | "bifocal")[]; // New field to support multiple categories
   isPhotochromic?: boolean;
   availableColors?: string[];
 }
@@ -34,7 +35,8 @@ export interface LensThickness {
   name: string;
   price: number;
   description?: string;
-  category: "distance-reading" | "progressive" | "bifocal";
+  category: string; // Changed to string type to support multiple categories
+  categories?: ("distance-reading" | "progressive" | "bifocal")[]; // New field to support multiple categories
 }
 
 export interface ContactLensItem {
@@ -86,14 +88,14 @@ interface InventoryState {
   addLensCoating: (coating: Omit<LensCoating, "id">) => string;
   updateLensCoating: (id: string, coating: Partial<Omit<LensCoating, "id">>) => void;
   deleteLensCoating: (id: string) => void;
-  getLensCoatingsByCategory: (category: LensCoating['category']) => LensCoating[];
-  getAvailableCoatings: (lensTypeId: string, category: LensCoating['category']) => LensCoating[];
+  getLensCoatingsByCategory: (category: "distance-reading" | "progressive" | "bifocal") => LensCoating[];
+  getAvailableCoatings: (lensTypeId: string, category: "distance-reading" | "progressive" | "bifocal") => LensCoating[];
   
   addLensThickness: (thickness: Omit<LensThickness, "id">) => string;
   updateLensThickness: (id: string, thickness: Partial<Omit<LensThickness, "id">>) => void;
   deleteLensThickness: (id: string) => void;
-  getLensThicknessesByCategory: (category: LensThickness['category']) => LensThickness[];
-  getAvailableThicknesses: (lensTypeId: string, coatingId: string, category: LensThickness['category']) => LensThickness[];
+  getLensThicknessesByCategory: (category: "distance-reading" | "progressive" | "bifocal") => LensThickness[];
+  getAvailableThicknesses: (lensTypeId: string, coatingId: string, category: "distance-reading" | "progressive" | "bifocal") => LensThickness[];
   
   addContactLens: (lens: Omit<ContactLensItem, "id">) => string;
   updateContactLens: (id: string, lens: Partial<Omit<ContactLensItem, "id">>) => void;
@@ -126,87 +128,144 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "lens4", name: "عدسات ثنائية", type: "bifocal" },
         { id: "lens5", name: "عدسات شمسية", type: "sunglasses" }
       ],
+      // Consolidated lens coatings with categories field
       lensCoatings: [
-        { id: "coat1", name: "مضاد للانعكاس", price: 5, description: "Anti-Reflective Coating", category: "distance-reading" },
-        { id: "coat2", name: "حماية شاشة", price: 7, description: "Blue Light Protection", category: "distance-reading" },
-        { id: "coat3", name: "ضد الخدش", price: 8, description: "Scratch Resistant", category: "distance-reading" },
-        { id: "coat4", name: "مضاد للانعكاس للعدسات التقدمية", price: 10, description: "Anti-Reflective for Progressive", category: "progressive" },
-        { id: "coat5", name: "حماية شاشة للعدسات التقدمية", price: 12, description: "Blue Light Protection for Progressive", category: "progressive" },
-        { id: "coat6", name: "مضاد للانعكاس للعدسات الثنائية", price: 8, description: "Anti-Reflective for Bifocal", category: "bifocal" },
-        { id: "coat7", name: "حماية شاشة للعدسات الثنائية", price: 9, description: "Blue Light Protection for Bifocal", category: "bifocal" },
-        
-        // Standard coating items
-        { id: "coat8", name: "Basic (عادي)", price: 0, description: "Basic Coating", category: "distance-reading" },
-        { id: "coat9", name: "Filter (فلتر)", price: 0, description: "Filter Coating", category: "distance-reading" },
-        { id: "coat10", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating", category: "distance-reading" },
-        { id: "coat11", name: "Basic (عادي)", price: 0, description: "Basic Coating for Progressive", category: "progressive" },
-        { id: "coat12", name: "Filter (فلتر)", price: 0, description: "Filter Coating for Progressive", category: "progressive" },
-        { id: "coat13", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Progressive", category: "progressive" },
-        { id: "coat14", name: "Basic (عادي)", price: 0, description: "Basic Coating for Bifocal", category: "bifocal" },
-        { id: "coat15", name: "Filter (فلتر)", price: 0, description: "Filter Coating for Bifocal", category: "bifocal" },
-        { id: "coat16", name: "Super Filter (سوبر فلتر)", price: 0, description: "Super Filter Coating for Bifocal", category: "bifocal" },
-        
-        // Photochromic coating items with color options
+        { 
+          id: "coat1", 
+          name: "مضاد للانعكاس", 
+          price: 5, 
+          description: "Anti-Reflective Coating", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "coat2", 
+          name: "حماية شاشة", 
+          price: 7, 
+          description: "Blue Light Protection", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "coat3", 
+          name: "ضد الخدش", 
+          price: 8, 
+          description: "Scratch Resistant", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"] 
+        },
+        // Basic coating items (consolidated)
+        { 
+          id: "coat8", 
+          name: "Basic (عادي)", 
+          price: 0, 
+          description: "Basic Coating", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "coat9", 
+          name: "Filter (فلتر)", 
+          price: 0, 
+          description: "Filter Coating", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "coat10", 
+          name: "Super Filter (سوبر فلتر)", 
+          price: 0, 
+          description: "Super Filter Coating", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        // Photochromic coating (consolidated)
         { 
           id: "coat17", 
           name: "Photochromic (فوتوكروميك)", 
           price: 15, 
           description: "Photochromic lenses that darken in sunlight", 
-          category: "distance-reading", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"],
           isPhotochromic: true,
-          availableColors: ["Brown", "Gray", "Green"]
-        },
-        { 
-          id: "coat18", 
-          name: "Photochromic (فوتوكروميك)", 
-          price: 20, 
-          description: "Photochromic lenses for progressive that darken in sunlight", 
-          category: "progressive", 
-          isPhotochromic: true,
-          availableColors: ["Brown", "Gray", "Green"]
-        },
-        { 
-          id: "coat19", 
-          name: "Photochromic (فوتوكروميك)", 
-          price: 18, 
-          description: "Photochromic lenses for bifocal that darken in sunlight", 
-          category: "bifocal", 
-          isPhotochromic: true,
-          availableColors: ["Brown", "Gray", "Green"]
+          availableColors: ["Brown", "Gray", "Green", "Blue"]
         }
       ],
+      // Consolidated lens thicknesses with categories field
       lensThicknesses: [
-        { id: "thick1", name: "عادي", price: 0, description: "Standard Thickness", category: "distance-reading" },
-        { id: "thick2", name: "رقيق", price: 10, description: "Thin", category: "distance-reading" },
-        { id: "thick3", name: "رقيق جداً", price: 20, description: "Ultra Thin", category: "distance-reading" },
-        { id: "thick4", name: "عادي للعدسات التقدمية", price: 5, description: "Standard for Progressive", category: "progressive" },
-        { id: "thick5", name: "رقيق للعدسات التقدمية", price: 15, description: "Thin for Progressive", category: "progressive" },
-        { id: "thick6", name: "عادي للعدسات الثنائية", price: 3, description: "Standard for Bifocal", category: "bifocal" },
-        { id: "thick7", name: "رقيق للعدسات الثنائية", price: 12, description: "Thin for Bifocal", category: "bifocal" },
-        
-        // New thickness items for distance-reading
-        { id: "thick8", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness", category: "distance-reading" },
-        { id: "thick9", name: "Standard Thickness", price: 0, description: "Standard Thickness", category: "distance-reading" },
-        { id: "thick10", name: "Polycarbonate", price: 0, description: "Polycarbonate Material", category: "distance-reading" },
-        { id: "thick11", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens", category: "distance-reading" },
-        { id: "thick12", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens", category: "distance-reading" },
-        { id: "thick13", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens", category: "distance-reading" },
-        
-        // New thickness items for progressive
-        { id: "thick14", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness for Progressive", category: "progressive" },
-        { id: "thick15", name: "Standard Thickness", price: 0, description: "Standard Thickness for Progressive", category: "progressive" },
-        { id: "thick16", name: "Polycarbonate", price: 0, description: "Polycarbonate Material for Progressive", category: "progressive" },
-        { id: "thick17", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens for Progressive", category: "progressive" },
-        { id: "thick18", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens for Progressive", category: "progressive" },
-        { id: "thick19", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens for Progressive", category: "progressive" },
-        
-        // New thickness items for bifocal
-        { id: "thick20", name: "1.56 عادي (Standard)", price: 0, description: "Standard 1.56 Thickness for Bifocal", category: "bifocal" },
-        { id: "thick21", name: "Standard Thickness", price: 0, description: "Standard Thickness for Bifocal", category: "bifocal" },
-        { id: "thick22", name: "Polycarbonate", price: 0, description: "Polycarbonate Material for Bifocal", category: "bifocal" },
-        { id: "thick23", name: "1.6 Thin (رقيق)", price: 0, description: "1.6 Thin Lens for Bifocal", category: "bifocal" },
-        { id: "thick24", name: "1.67 Super Thin (رقيق جداً)", price: 0, description: "1.67 Super Thin Lens for Bifocal", category: "bifocal" },
-        { id: "thick25", name: "1.75 Ultra Thin (فائق الرقة)", price: 0, description: "1.75 Ultra Thin Lens for Bifocal", category: "bifocal" }
+        { 
+          id: "thick1", 
+          name: "عادي", 
+          price: 0, 
+          description: "Standard Thickness", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "thick2", 
+          name: "رقيق", 
+          price: 10, 
+          description: "Thin", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "thick3", 
+          name: "رقيق جداً", 
+          price: 20, 
+          description: "Ultra Thin", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        // Consolidated thickness items
+        { 
+          id: "thick8", 
+          name: "1.56 عادي (Standard)", 
+          price: 0, 
+          description: "Standard 1.56 Thickness", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "thick9", 
+          name: "Standard Thickness", 
+          price: 0, 
+          description: "Standard Thickness", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "thick10", 
+          name: "Polycarbonate", 
+          price: 0, 
+          description: "Polycarbonate Material", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "thick11", 
+          name: "1.6 Thin (رقيق)", 
+          price: 0, 
+          description: "1.6 Thin Lens", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "thick12", 
+          name: "1.67 Super Thin (رقيق جداً)", 
+          price: 0, 
+          description: "1.67 Super Thin Lens", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        },
+        { 
+          id: "thick13", 
+          name: "1.75 Ultra Thin (فائق الرقة)", 
+          price: 0, 
+          description: "1.75 Ultra Thin Lens", 
+          category: "all",
+          categories: ["distance-reading", "progressive", "bifocal"]
+        }
       ],
       contactLenses: [
         { id: "cl1", brand: "Acuvue", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 25, qty: 30 },
@@ -222,6 +281,7 @@ export const useInventoryStore = create<InventoryState>()(
           category: "exam" 
         }
       ],
+      // Keep pricing combinations the same since IDs are still valid
       lensPricingCombinations: [
         {
           id: "combo1",
@@ -247,8 +307,8 @@ export const useInventoryStore = create<InventoryState>()(
         {
           id: "combo4",
           lensTypeId: "lens3",
-          coatingId: "coat11",
-          thicknessId: "thick14",
+          coatingId: "coat8",
+          thicknessId: "thick8",
           price: 40
         },
         
@@ -286,30 +346,30 @@ export const useInventoryStore = create<InventoryState>()(
         {
           id: "combo9",
           lensTypeId: "lens3",
-          coatingId: "coat18",
-          thicknessId: "thick14",
+          coatingId: "coat17",
+          thicknessId: "thick8",
           price: 55
         },
         {
           id: "combo10",
           lensTypeId: "lens3",
-          coatingId: "coat18",
-          thicknessId: "thick17",
+          coatingId: "coat17",
+          thicknessId: "thick11",
           price: 65
         },
         // Bifocal combinations
         {
           id: "combo11",
           lensTypeId: "lens4",
-          coatingId: "coat19",
-          thicknessId: "thick20",
+          coatingId: "coat17",
+          thicknessId: "thick8",
           price: 45
         },
         {
           id: "combo12",
           lensTypeId: "lens4",
-          coatingId: "coat19",
-          thicknessId: "thick23",
+          coatingId: "coat17",
+          thicknessId: "thick11",
           price: 55
         }
       ],
@@ -402,10 +462,16 @@ export const useInventoryStore = create<InventoryState>()(
         }));
       },
       
+      // Updated to check categories array
       getLensCoatingsByCategory: (category) => {
-        return get().lensCoatings.filter(coating => coating.category === category);
+        return get().lensCoatings.filter(coating => 
+          coating.category === "all" || 
+          coating.category === category || 
+          (coating.categories && coating.categories.includes(category))
+        );
       },
       
+      // Updated to filter by categories
       getAvailableCoatings: (lensTypeId, category) => {
         const combinations = get().lensPricingCombinations;
         
@@ -418,7 +484,10 @@ export const useInventoryStore = create<InventoryState>()(
         
         // Get the actual coating objects for these IDs
         const availableCoatings = get().lensCoatings.filter(
-          coating => availableCoatingIds.includes(coating.id) && coating.category === category
+          coating => availableCoatingIds.includes(coating.id) && 
+          (coating.category === "all" || 
+           coating.category === category || 
+           (coating.categories && coating.categories.includes(category)))
         );
         
         return availableCoatings;
@@ -448,10 +517,16 @@ export const useInventoryStore = create<InventoryState>()(
         }));
       },
       
+      // Updated to check categories array
       getLensThicknessesByCategory: (category) => {
-        return get().lensThicknesses.filter(thickness => thickness.category === category);
+        return get().lensThicknesses.filter(thickness => 
+          thickness.category === "all" || 
+          thickness.category === category || 
+          (thickness.categories && thickness.categories.includes(category))
+        );
       },
       
+      // Updated to filter by categories
       getAvailableThicknesses: (lensTypeId, coatingId, category) => {
         const combinations = get().lensPricingCombinations;
         
@@ -464,7 +539,10 @@ export const useInventoryStore = create<InventoryState>()(
         
         // Get the actual thickness objects for these IDs
         const availableThicknesses = get().lensThicknesses.filter(
-          thickness => availableThicknessIds.includes(thickness.id) && thickness.category === category
+          thickness => availableThicknessIds.includes(thickness.id) && 
+          (thickness.category === "all" || 
+           thickness.category === category || 
+           (thickness.categories && thickness.categories.includes(category)))
         );
         
         return availableThicknesses;
