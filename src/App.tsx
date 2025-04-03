@@ -12,6 +12,7 @@ import { CustomWorkOrderReceipt } from "./components/CustomWorkOrderReceipt";
 import { LensDebugger } from "./components/LensDebugger";
 import { useInventoryStore } from "./store/inventoryStore";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient({
@@ -25,14 +26,25 @@ const queryClient = new QueryClient({
 
 const App = () => {
   // Make sure the sunglasses coating category is properly initialized
-  const { lensCoatings, cleanupSamplePhotochromicCoatings } = useInventoryStore();
+  const { lensCoatings, cleanupSamplePhotochromicCoatings, resetLensPricing } = useInventoryStore();
   
   useEffect(() => {
     // Clean up any sample photochromic coatings
     cleanupSamplePhotochromicCoatings();
     
+    // Reset lens pricing combinations if needed
+    const sunglassesCoatings = lensCoatings.filter(c => c.category === "sunglasses");
+    console.log("Sunglasses coatings on startup:", sunglassesCoatings);
+    
     // Log current coatings for debugging
     console.log("Current lens coatings:", lensCoatings);
+    
+    // Add a toast to help with debugging
+    if (process.env.NODE_ENV === 'development') {
+      setTimeout(() => {
+        toast.info("Debug: App initialized with " + lensCoatings.length + " lens coatings");
+      }, 1000);
+    }
   }, []);
   
   return (

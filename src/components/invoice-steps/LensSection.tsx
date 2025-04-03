@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { 
   LensType, 
@@ -45,11 +45,34 @@ export const LensSection: React.FC<LensSectionProps> = ({
 }) => {
   const { t } = useLanguageStore();
 
-  // Debug log to check selected coating
-  React.useEffect(() => {
+  // Debug logs to check the state of components
+  useEffect(() => {
+    if (selectedLensType) {
+      console.log("Selected lens type:", selectedLensType);
+    }
     if (selectedCoating) {
       console.log("Selected coating:", selectedCoating);
     }
+    if (selectedThickness) {
+      console.log("Selected thickness:", selectedThickness);
+    }
+  }, [selectedLensType, selectedCoating, selectedThickness]);
+
+  // Determine if color selector should be shown
+  const shouldShowColorSelector = React.useMemo(() => {
+    if (!selectedCoating) return false;
+    
+    // Show for photochromic coatings
+    if (selectedCoating.isPhotochromic && selectedCoating.availableColors?.length) {
+      return true;
+    }
+    
+    // Show for sunglasses coatings with available colors
+    if (selectedCoating.category === "sunglasses" && selectedCoating.availableColors?.length) {
+      return true;
+    }
+    
+    return false;
   }, [selectedCoating]);
 
   return (
@@ -74,7 +97,7 @@ export const LensSection: React.FC<LensSectionProps> = ({
       <CardContent className="p-4 overflow-visible">
         <LensSelector 
           onSelectLensType={onLensTypeSelect}
-          onSelectCoating={onCoatingSelect}
+          onSelectCoating={onSelectCoating}
           onSelectThickness={onSelectThickness}
           skipLens={skipFrame}
           onSkipLensChange={onSkipFrameChange}
@@ -85,19 +108,8 @@ export const LensSection: React.FC<LensSectionProps> = ({
           onCombinationPriceChange={onCombinationPriceChange}
         />
         
-        {/* Photochromic color selector when applicable */}
-        {selectedCoating?.isPhotochromic && (
-          <div className="mt-6">
-            <PhotochromicColorSelector
-              coating={selectedCoating}
-              selectedColor={selectedCoatingColor || ""}
-              onColorChange={onCoatingColorChange || (() => {})}
-            />
-          </div>
-        )}
-        
-        {/* Sunglasses color selector when applicable */}
-        {selectedCoating?.category === "sunglasses" && selectedCoating.availableColors && (
+        {/* Unified color selector for both photochromic and sunglasses */}
+        {shouldShowColorSelector && (
           <div className="mt-6">
             <PhotochromicColorSelector
               coating={selectedCoating}

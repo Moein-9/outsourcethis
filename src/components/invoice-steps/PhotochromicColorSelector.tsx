@@ -30,20 +30,28 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
       "Brown": "#8B4513",
       "Gray": "#808080",
       "Green": "#006400",
-      "Blue": "#0000CD"
+      "Blue": "#0000CD",
+      "Silver": "#C0C0C0",
+      "Gold": "#FFD700",
+      "Red": "#FF0000"
     };
     
     return colorMap[colorName] || "transparent";
   };
 
-  if (!coating.isPhotochromic || !coating.availableColors || coating.availableColors.length === 0) {
+  if (!coating.availableColors || coating.availableColors.length === 0) {
     return null;
   }
+
+  // Determine the title based on coating type
+  const titleKey = coating.isPhotochromic 
+    ? 'selectPhotochromicColor' 
+    : 'selectSunglassColor';
 
   return (
     <div className="w-full">
       <Label className="mb-3 block font-medium text-base">
-        {t('selectPhotochromicColor')}
+        {t(titleKey) || (coating.isPhotochromic ? "Select Photochromic Color" : "Select Sunglasses Color")}
       </Label>
       
       <div className="w-full bg-slate-50 rounded-lg p-4 border shadow-sm">
@@ -75,7 +83,7 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
                       className="min-w-6 h-6 rounded-full border shrink-0"
                       style={{ backgroundColor: getColorStyle(color) }}
                     ></div>
-                    <span className="text-base whitespace-normal break-words leading-tight">{t(color.toLowerCase())}</span>
+                    <span className="text-base whitespace-normal break-words leading-tight">{t(color.toLowerCase()) || color}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -90,7 +98,9 @@ export const PhotochromicColorSelector: React.FC<PhotochromicColorSelectorProps>
               className="w-8 h-8 rounded-full border-2 shrink-0 mt-0.5"
               style={{ backgroundColor: getColorStyle(selectedColor) }}
             ></div>
-            <span className="text-base font-medium break-words whitespace-normal leading-relaxed">{t(selectedColor.toLowerCase())}</span>
+            <span className="text-base font-medium break-words whitespace-normal leading-relaxed">
+              {t(selectedColor.toLowerCase()) || selectedColor}
+            </span>
           </div>
         )}
       </div>

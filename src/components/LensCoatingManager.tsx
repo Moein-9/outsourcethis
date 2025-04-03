@@ -36,8 +36,17 @@ export const LensCoatingManager: React.FC = () => {
   const [editIsPhotochromic, setEditIsPhotochromic] = useState(false);
   const [editAvailableColors, setEditAvailableColors] = useState<string[]>([]);
   
-  // Force update when active tab changes
-  const [, forceUpdate] = useState({});
+  // Use state to force re-renders
+  const [forceUpdate, setForceUpdate] = useState({});
+  
+  // Fetch lens coatings whenever the active tab changes or a coating is added/edited/deleted
+  const [filteredCoatings, setFilteredCoatings] = useState<LensCoating[]>([]);
+  
+  useEffect(() => {
+    const coatings = lensCoatings.filter(coating => coating.category === activeTab);
+    console.log("Filtered coatings for tab", activeTab, ":", coatings);
+    setFilteredCoatings(coatings);
+  }, [lensCoatings, activeTab, forceUpdate]);
   
   const handleAddCoating = () => {
     if (!newCoatingName || newCoatingPrice === "") {
@@ -52,8 +61,8 @@ export const LensCoatingManager: React.FC = () => {
       category: newCoatingCategory
     };
     
-    if (newIsPhotochromic) {
-      coatingData.isPhotochromic = true;
+    if (newIsPhotochromic || newCoatingCategory === "sunglasses") {
+      coatingData.isPhotochromic = newIsPhotochromic;
       coatingData.availableColors = [...newAvailableColors];
     }
     
@@ -64,7 +73,7 @@ export const LensCoatingManager: React.FC = () => {
       
       // Force re-render to show the new coating
       setTimeout(() => {
-        forceUpdate({});
+        setForceUpdate({});
       }, 100);
       
       setNewCoatingName("");
@@ -90,8 +99,8 @@ export const LensCoatingManager: React.FC = () => {
       category: editCoatingCategory
     };
     
-    if (editIsPhotochromic) {
-      coatingData.isPhotochromic = true;
+    if (editIsPhotochromic || editCoatingCategory === "sunglasses") {
+      coatingData.isPhotochromic = editIsPhotochromic;
       coatingData.availableColors = [...editAvailableColors];
     } else {
       coatingData.isPhotochromic = false;
@@ -104,7 +113,7 @@ export const LensCoatingManager: React.FC = () => {
     
     // Force re-render to show the updated coating
     setTimeout(() => {
-      forceUpdate({});
+      setForceUpdate({});
     }, 100);
     
     setIsEditDialogOpen(false);
@@ -116,7 +125,7 @@ export const LensCoatingManager: React.FC = () => {
     
     // Force re-render
     setTimeout(() => {
-      forceUpdate({});
+      setForceUpdate({});
     }, 100);
   };
   
@@ -138,16 +147,31 @@ export const LensCoatingManager: React.FC = () => {
     { value: "sunglasses", label: t("sunglasses") }
   ];
   
-  // Use memo to prevent unnecessary re-filtering
-  const filteredCoatings = React.useMemo(() => {
-    return lensCoatings.filter(coating => coating.category === activeTab);
-  }, [lensCoatings, activeTab]);
-  
-  // Debug logging to see what's happening with the coatings
+  // Debug logging
   useEffect(() => {
     console.log("All lens coatings:", lensCoatings);
     console.log("Filtered coatings for tab", activeTab, ":", filteredCoatings);
   }, [lensCoatings, filteredCoatings, activeTab]);
+
+  // Function to update colors
+  const handleColorChange = (isNew: boolean, colors: string[]) => {
+    if (isNew) {
+      setNewAvailableColors(colors);
+    } else {
+      setEditAvailableColors(colors);
+    }
+  };
+  
+  // Additional useEffect to handle special case for sunglasses category
+  useEffect(() => {
+    if (newCoatingCategory === "sunglasses" && !newAvailableColors.length) {
+      setNewAvailableColors(["Brown", "Gray", "Green", "Blue"]);
+    }
+    
+    if (editCoatingCategory === "sunglasses" && !editAvailableColors.length) {
+      setEditAvailableColors(["Brown", "Gray", "Green", "Blue"]);
+    }
+  }, [newCoatingCategory, editCoatingCategory]);
   
   return (
     <div className="space-y-4">
@@ -212,18 +236,21 @@ export const LensCoatingManager: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="isPhotochromic"
-                  checked={newIsPhotochromic}
-                  onChange={(e) => setNewIsPhotochromic(e.target.checked)}
-                  className="rounded border-gray-300"
-                />
-                <Label htmlFor="isPhotochromic">{t("isPhotochromic") || "Photochromic Coating"}</Label>
-              </div>
               
-              {newIsPhotochromic && (
+              {newCoatingCategory !== "sunglasses" && (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="isPhotochromic"
+                    checked={newIsPhotochromic}
+                    onChange={(e) => setNewIsPhotochromic(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="isPhotochromic">{t("isPhotochromic") || "Photochromic Coating"}</Label>
+                </div>
+              )}
+              
+              {(newIsPhotochromic || newCoatingCategory === "sunglasses") && (
                 <div className="grid gap-2">
                   <Label>{t("availableColors") || "Available Colors"}</Label>
                   <div className="flex flex-wrap gap-2">
@@ -271,7 +298,7 @@ export const LensCoatingManager: React.FC = () => {
                     {coating.description && (
                       <p className="text-sm text-muted-foreground mt-1">{coating.description}</p>
                     )}
-                    {coating.isPhotochromic && coating.availableColors && coating.availableColors.length > 0 && (
+                    {(coating.isPhotochromic || coating.category === "sunglasses") && coating.availableColors && coating.availableColors.length > 0 && (
                       <div className="mt-2">
                         <p className="text-xs font-medium text-gray-500">{t("availableColors") || "Available Colors"}:</p>
                         <div className="flex flex-wrap gap-1 mt-1">
@@ -354,18 +381,21 @@ export const LensCoatingManager: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="edit-isPhotochromic"
-                checked={editIsPhotochromic}
-                onChange={(e) => setEditIsPhotochromic(e.target.checked)}
-                className="rounded border-gray-300"
-              />
-              <Label htmlFor="edit-isPhotochromic">{t("isPhotochromic") || "Photochromic Coating"}</Label>
-            </div>
             
-            {editIsPhotochromic && (
+            {editCoatingCategory !== "sunglasses" && (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="edit-isPhotochromic"
+                  checked={editIsPhotochromic}
+                  onChange={(e) => setEditIsPhotochromic(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="edit-isPhotochromic">{t("isPhotochromic") || "Photochromic Coating"}</Label>
+              </div>
+            )}
+            
+            {(editIsPhotochromic || editCoatingCategory === "sunglasses") && (
               <div className="grid gap-2">
                 <Label>{t("availableColors") || "Available Colors"}</Label>
                 <div className="flex flex-wrap gap-2">

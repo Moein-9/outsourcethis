@@ -338,6 +338,35 @@ export const useInventoryStore = create<InventoryState>()(
           lensCoatings: [...state.lensCoatings, { ...coating, id }]
         }));
         
+        if (coating.category === "sunglasses") {
+          const store = get();
+          const sunglassesLensType = store.lensTypes.find(lt => lt.type === "sunglasses");
+          
+          if (sunglassesLensType) {
+            const basicThickness = store.lensThicknesses.find(t => t.id === "sv-156");
+            
+            if (basicThickness) {
+              const defaultPrice = coating.price || 25;
+              store.addLensPricingCombination({
+                lensTypeId: sunglassesLensType.id,
+                coatingId: id,
+                thicknessId: basicThickness.id,
+                price: defaultPrice
+              });
+              
+              const thinnerThickness = store.lensThicknesses.find(t => t.id === "sv-160");
+              if (thinnerThickness) {
+                store.addLensPricingCombination({
+                  lensTypeId: sunglassesLensType.id,
+                  coatingId: id,
+                  thicknessId: thinnerThickness.id,
+                  price: defaultPrice + 10
+                });
+              }
+            }
+          }
+        }
+        
         return id;
       },
       
@@ -361,15 +390,19 @@ export const useInventoryStore = create<InventoryState>()(
       
       getAvailableCoatings: (lensTypeId, category) => {
         const combinations = get().lensPricingCombinations;
+        const allCoatingsByCategory = get().lensCoatings.filter(c => c.category === category);
         
-        // Find all unique coating IDs that have a combination with this lens type
+        const lensType = get().lensTypes.find(lt => lt.id === lensTypeId);
+        if (lensType && lensType.type === "sunglasses" && category === "sunglasses") {
+          return allCoatingsByCategory;
+        }
+        
         const availableCoatingIds = [...new Set(
           combinations
             .filter(combo => combo.lensTypeId === lensTypeId)
             .map(combo => combo.coatingId)
         )];
         
-        // Get the actual coating objects for these IDs
         const availableCoatings = get().lensCoatings.filter(
           coating => availableCoatingIds.includes(coating.id) && coating.category === category
         );
@@ -408,14 +441,12 @@ export const useInventoryStore = create<InventoryState>()(
       getAvailableThicknesses: (lensTypeId, coatingId, category) => {
         const combinations = get().lensPricingCombinations;
         
-        // Find all unique thickness IDs that have a combination with this lens type and coating
         const availableThicknessIds = [...new Set(
           combinations
             .filter(combo => combo.lensTypeId === lensTypeId && combo.coatingId === coatingId)
             .map(combo => combo.thicknessId)
         )];
         
-        // Get the actual thickness objects for these IDs
         const availableThicknesses = get().lensThicknesses.filter(
           thickness => availableThicknessIds.includes(thickness.id) && thickness.category === category
         );
@@ -536,23 +567,19 @@ export const useInventoryStore = create<InventoryState>()(
       cleanupSamplePhotochromicCoatings: () => {
         const state = get();
         
-        // Find sample photochromic coatings
         const sampleCoatingIds = state.lensCoatings
           .filter(coating => coating.name === "Sample Photochromic" && coating.isPhotochromic)
           .map(coating => coating.id);
         
         if (sampleCoatingIds.length > 0) {
-          // Remove sample coating price combinations
           const updatedCombinations = state.lensPricingCombinations.filter(
             combo => !sampleCoatingIds.includes(combo.coatingId)
           );
           
-          // Remove sample coatings
           const updatedCoatings = state.lensCoatings.filter(
             coating => !sampleCoatingIds.includes(coating.id)
           );
           
-          // Update the state
           set({
             lensCoatings: updatedCoatings,
             lensPricingCombinations: updatedCombinations
@@ -561,67 +588,55 @@ export const useInventoryStore = create<InventoryState>()(
       },
       
       resetLensPricing: () => {
-        // Create the new pricing combinations based on the provided pricing table
         const newPricingCombinations: LensPricingCombination[] = [
-          // Single Vision - Basic Lenses
           { id: "sv-basic-156", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-156", price: 8 },
           { id: "sv-basic-160", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-160", price: 18 },
           { id: "sv-basic-167", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-167", price: 30 },
           { id: "sv-basic-174", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-174", price: 40 },
           
-          // Single Vision - Filter Lenses
           { id: "sv-filter-156", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-156", price: 13 },
           { id: "sv-filter-poly", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-poly", price: 18 },
           { id: "sv-filter-160", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-160", price: 20 },
           { id: "sv-filter-167", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-167", price: 38 },
           { id: "sv-filter-174", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-174", price: 40 },
           
-          // Single Vision - Super Filter Lenses
           { id: "sv-superfilter-156", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-156", price: 18 },
           { id: "sv-superfilter-poly", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-poly", price: 25 },
           { id: "sv-superfilter-160", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-160", price: 28 },
           { id: "sv-superfilter-167", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-167", price: 35 },
           { id: "sv-superfilter-174", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-174", price: 40 },
           
-          // Reading lenses - same as distance
-          // Reading - Basic Lenses
           { id: "read-basic-156", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-156", price: 8 },
           { id: "read-basic-160", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-160", price: 18 },
           { id: "read-basic-167", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-167", price: 30 },
           { id: "read-basic-174", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-174", price: 40 },
           
-          // Reading - Filter Lenses
           { id: "read-filter-156", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-156", price: 13 },
           { id: "read-filter-poly", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-poly", price: 18 },
           { id: "read-filter-160", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-160", price: 20 },
           { id: "read-filter-167", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-167", price: 38 },
           { id: "read-filter-174", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-174", price: 40 },
           
-          // Reading - Super Filter Lenses
           { id: "read-superfilter-156", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-156", price: 18 },
           { id: "read-superfilter-poly", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-poly", price: 25 },
           { id: "read-superfilter-160", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-160", price: 28 },
           { id: "read-superfilter-167", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-167", price: 35 },
           { id: "read-superfilter-174", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-174", price: 40 },
           
-          // Progressive - Basic Lenses
           { id: "prog-basic-156", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-156", price: 35 },
           { id: "prog-basic-160", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-160", price: 50 },
           { id: "prog-basic-167", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-167", price: 80 },
           { id: "prog-basic-174", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-174", price: 100 },
           
-          // Progressive - Filter Lenses
           { id: "prog-filter-156", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-156", price: 50 },
           { id: "prog-filter-poly", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-poly", price: 70 },
           { id: "prog-filter-160", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-160", price: 85 },
           { id: "prog-filter-167", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-167", price: 114 },
           { id: "prog-filter-174", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-174", price: 200 },
           
-          // Bifocal - Basic and Filter
           { id: "bif-basic", lensTypeId: "lens4", coatingId: "basic-bif", thicknessId: "bif-basic", price: 18 },
           { id: "bif-filter", lensTypeId: "lens4", coatingId: "filter-bif", thicknessId: "bif-basic", price: 28 },
           
-          // Sunglasses - using lens5 for sunglasses type
           { id: "sun-tinted-156", lensTypeId: "lens5", coatingId: "tinted-sun", thicknessId: "sv-156", price: 15 },
           { id: "sun-tinted-160", lensTypeId: "lens5", coatingId: "tinted-sun", thicknessId: "sv-160", price: 25 },
           { id: "sun-polarized-156", lensTypeId: "lens5", coatingId: "polarized-sun", thicknessId: "sv-156", price: 30 },
@@ -629,7 +644,6 @@ export const useInventoryStore = create<InventoryState>()(
           { id: "sun-mirrored-156", lensTypeId: "lens5", coatingId: "mirrored-sun", thicknessId: "sv-156", price: 35 },
           { id: "sun-mirrored-160", lensTypeId: "lens5", coatingId: "mirrored-sun", thicknessId: "sv-160", price: 45 },
           
-          // Photochromic options
           { id: "sv-photo-156", lensTypeId: "lens2", coatingId: "photochromic-sv", thicknessId: "sv-156", price: 30 },
           { id: "sv-photo-160", lensTypeId: "lens2", coatingId: "photochromic-sv", thicknessId: "sv-160", price: 40 },
           { id: "read-photo-156", lensTypeId: "lens1", coatingId: "photochromic-sv", thicknessId: "sv-156", price: 30 },
@@ -638,7 +652,6 @@ export const useInventoryStore = create<InventoryState>()(
           { id: "prog-photo-160", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-160", price: 90 },
         ];
         
-        // Update the store with the new pricing combinations
         set({
           lensPricingCombinations: newPricingCombinations
         });
