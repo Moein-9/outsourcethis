@@ -271,11 +271,10 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
         <div className="space-y-2 px-2">
           {isEyeExam ? (
             <div className="p-2 border-2 border-gray-300 rounded">
-              <div className="flex justify-between px-2 mb-1">
-                <div className="font-bold text-sm">{isRtl ? "فحص العين | Eye Exam" : "Eye Exam | فحص العين"}</div>
-                <span className="font-bold text-sm">KWD {service.price.toFixed(3)}</span>
+              <div className="text-base font-bold text-center">
+                {isRtl ? "فحص العين | Eye Exam" : "Eye Exam | فحص العين"}
               </div>
-              <div className="text-sm font-medium text-center">
+              <div className="text-base font-medium text-center">
                 {service.name || t("eyeExam")}
                 {service.description && <span> - {service.description}</span>}
               </div>
@@ -283,11 +282,8 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           ) : isContactLens && contactLensItems.length > 0 ? (
             contactLensItems.map((lens, idx) => (
               <div key={idx} className="p-2 border-2 border-gray-300 rounded">
-                <div className="flex justify-between px-2 mb-1">
-                  <div className="font-bold text-sm">{lens.brand} {lens.type}</div>
-                  <span className="font-bold text-sm">KWD {lens.price.toFixed(3)}</span>
-                </div>
-                <div className="text-xs font-medium text-center">
+                <div className="text-base font-bold text-center mb-1">{lens.brand} {lens.type}</div>
+                <div className="text-base font-medium text-center">
                   {lens.color && <span>{t("color")}: {lens.color} - </span>}
                   <span>{t("quantity")}: {lens.qty || 1}</span>
                 </div>
@@ -297,35 +293,32 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             <div className="space-y-2">
               {lens && (
                 <div className="p-2 border-2 border-gray-300 rounded">
-                  <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}</div>
-                    <span className="font-bold text-sm">KWD {lensP.toFixed(3)}</span>
+                  <div className="text-base font-bold text-center mb-1">
+                    {isRtl ? "العدسات | Lenses" : "Lenses | العدسات"}
                   </div>
-                  <div className="text-xs font-medium text-center">{lens}</div>
+                  <div className="text-base font-medium text-center">{lens}</div>
                 </div>
               )}
               
               {frameBrand && (
                 <div className="p-2 border-2 border-gray-300 rounded">
-                  <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "الإطار | Frame" : "Frame | الإطار"}</div>
-                    <span className="font-bold text-sm">KWD {frameP.toFixed(3)}</span>
+                  <div className="text-base font-bold text-center mb-1">
+                    {isRtl ? "الإطار | Frame" : "Frame | الإطار"}
                   </div>
-                  <div className="text-xs font-medium text-center">{frameBrand} {frameModel}</div>
+                  <div className="text-base font-medium text-center">{frameBrand} {frameModel}</div>
                 </div>
               )}
               
               {coat && (
                 <div className="p-2 border-2 border-gray-300 rounded">
-                  <div className="flex justify-between px-2 mb-1">
-                    <div className="font-bold text-sm">{isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}</div>
-                    <span className="font-bold text-sm">KWD {coatP.toFixed(3)}</span>
+                  <div className="text-base font-bold text-center mb-1">
+                    {isRtl ? "الطلاء | Coating" : "Coating | الطلاء"}
                   </div>
-                  <div className="text-xs font-medium text-center">{coat}</div>
+                  <div className="text-base font-medium text-center">{coat}</div>
                   
                   {coatColor && (
                     <div className="mt-1 flex flex-col">
-                      <div className="flex justify-between px-2 text-xs">
+                      <div className="flex justify-between px-2 text-sm">
                         <span>{isRtl ? "اللون | Color" : "Color | اللون"}:</span>
                         <span>
                           {typeof colorDisplayName === 'object'
@@ -335,7 +328,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                       </div>
                       
                       <div className="flex items-center justify-between mt-1 p-1 bg-gray-50 rounded border border-gray-200">
-                        <span className="text-xs">{isRtl ? "عينة | Sample" : "Sample | عينة"}</span>
+                        <span className="text-sm">{isRtl ? "عينة | Sample" : "Sample | عينة"}</span>
                         <div 
                           className="w-4 h-4 rounded-full border border-gray-300" 
                           style={{ 
@@ -353,22 +346,10 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           )}
         </div>
         
-        <div className="mt-3 border-2 border-gray-300 rounded p-2">
+        <div className="mt-4 border-2 border-gray-300 rounded p-3">
           <div className="flex justify-between px-2 font-bold">
-            <span className="text-sm">{isRtl ? "المجموع الفرعي | Subtotal" : "Subtotal | المجموع الفرعي"}:</span>
-            <span className="text-sm">KWD {subtotal.toFixed(3)}</span>
-          </div>
-          
-          {showDiscount && (
-            <div className="flex justify-between px-2 font-bold text-red-600 mt-1">
-              <span className="text-sm">{isRtl ? "الخصم | Discount" : "Discount | الخصم"}:</span>
-              <span className="text-sm">- KWD {disc.toFixed(3)}</span>
-            </div>
-          )}
-          
-          <div className="flex justify-between px-2 font-bold mt-1">
-            <span className="text-sm">{isRtl ? "المجموع | Total" : "Total | المجموع"}:</span>
-            <span className="text-sm">KWD {tot.toFixed(3)}</span>
+            <span className="text-lg">{isRtl ? "المجموع | Total" : "Total | المجموع"}:</span>
+            <span className="text-lg">KWD {tot.toFixed(3)}</span>
           </div>
         </div>
       </div>
@@ -382,12 +363,12 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           {invoice.payments?.map((payment, index) => (
             <div key={index} className="border-b border-gray-300 py-1 mb-1">
               <div className="flex justify-between mb-1">
-                <span className="font-bold text-sm">
+                <span className="font-bold text-base">
                   {format(new Date(payment.date), 'dd/MM/yyyy')}
                 </span>
-                <span className="font-bold text-sm">KWD {payment.amount.toFixed(3)}</span>
+                <span className="font-bold text-base">KWD {payment.amount.toFixed(3)}</span>
               </div>
-              <div className="text-xs font-medium flex items-center justify-center gap-1">
+              <div className="text-sm font-medium flex items-center justify-center gap-1">
                 <CreditCard className="w-4 h-4" />
                 <span>{getFormattedPaymentMethod(payment.method)}</span>
                 {payment.authNumber && <span> - {payment.authNumber}</span>}
@@ -396,12 +377,12 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           )) || (
             <div className="border-b border-gray-300 py-1 mb-1">
               <div className="flex justify-between mb-1">
-                <span className="font-bold text-sm">
+                <span className="font-bold text-base">
                   {format(new Date(invoice.createdAt), 'dd/MM/yyyy')}
                 </span>
-                <span className="font-bold text-sm">KWD {dep.toFixed(3)}</span>
+                <span className="font-bold text-base">KWD {dep.toFixed(3)}</span>
               </div>
-              <div className="text-xs font-medium flex items-center justify-center gap-1">
+              <div className="text-sm font-medium flex items-center justify-center gap-1">
                 <CreditCard className="w-4 h-4" />
                 <span>{getFormattedPaymentMethod(payMethod)}</span>
                 {auth && <span> - {auth}</span>}
@@ -411,13 +392,13 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
           
           {rem > 0 ? (
             <div className="flex justify-between font-bold mt-2 pt-1 px-1">
-              <span className="text-base">{isRtl ? "المتبقي | Remaining" : "Remaining | المتبقي"}:</span>
-              <span className="text-base">KWD {rem.toFixed(3)}</span>
+              <span className="text-lg">{isRtl ? "المتبقي | Remaining" : "Remaining | المتبقي"}:</span>
+              <span className="text-lg">KWD {rem.toFixed(3)}</span>
             </div>
           ) : (
             <div className="mt-2 flex items-center justify-center gap-1 font-bold">
-              <CheckCircle2 className="w-4 h-4" />
-              <span className="text-sm">{isRtl ? "تم الدفع بالكامل | PAID IN FULL" : "PAID IN FULL | تم الدفع بالكامل"}</span>
+              <CheckCircle2 className="w-5 h-5" />
+              <span className="text-base">{isRtl ? "تم الدفع بالكامل | PAID IN FULL" : "PAID IN FULL | تم الدفع بالكامل"}</span>
             </div>
           )}
         </div>
@@ -620,16 +601,16 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
             }
             
             .text-xs { font-size: 10px !important; }
-            .text-sm { font-size: 12px !important; }
-            .text-base { font-size: 14px !important; }
-            .text-lg { font-size: 16px !important; }
-            .text-xl { font-size: 18px !important; }
+            .text-sm { font-size: 13px !important; }
+            .text-base { font-size: 16px !important; }
+            .text-lg { font-size: 18px !important; }
+            .text-xl { font-size: 20px !important; }
             
-            .text-primary { font-size: 16px !important; font-weight: bold !important; }
+            .text-primary { font-size: 18px !important; font-weight: bold !important; }
             
             svg {
-              width: 14px !important;
-              height: 14px !important;
+              width: 16px !important;
+              height: 16px !important;
             }
             
             .ltr {
