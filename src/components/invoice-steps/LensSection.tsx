@@ -58,22 +58,13 @@ export const LensSection: React.FC<LensSectionProps> = ({
     }
   }, [selectedLensType, selectedCoating, selectedThickness]);
 
-  // Determine if color selector should be shown
-  const shouldShowColorSelector = React.useMemo(() => {
-    if (!selectedCoating) return false;
-    
-    // Show for photochromic coatings
-    if (selectedCoating.isPhotochromic && selectedCoating.availableColors?.length) {
-      return true;
-    }
-    
-    // Show for sunglasses coatings with available colors
-    if (selectedCoating.category === "sunglasses" && selectedCoating.availableColors?.length) {
-      return true;
-    }
-    
-    return false;
-  }, [selectedCoating]);
+  // First define all variables that might be needed for the condition
+  const hasAvailableColors = selectedCoating?.availableColors?.length > 0;
+  const isPhotochromic = selectedCoating?.isPhotochromic || false;
+  const isSunglasses = selectedCoating?.category === "sunglasses";
+  
+  // Determine if color selector should be shown (moved outside useMemo)
+  const shouldShowColorSelector = hasAvailableColors && (isPhotochromic || isSunglasses);
 
   return (
     <Card className="border shadow-sm relative overflow-visible">
@@ -90,8 +81,8 @@ export const LensSection: React.FC<LensSectionProps> = ({
       <CardContent className="p-4 overflow-visible">
         <LensSelector 
           onSelectLensType={onLensTypeSelect}
-          onSelectCoating={onCoatingSelect}
-          onSelectThickness={onThicknessSelect}
+          onSelectCoating={onSelectCoating}
+          onSelectThickness={onSelectThickness}
           skipLens={skipFrame}
           onSkipLensChange={onSkipFrameChange}
           initialLensType={selectedLensType}
