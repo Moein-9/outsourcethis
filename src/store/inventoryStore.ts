@@ -75,6 +75,7 @@ interface InventoryState {
   lensPricingCombinations: LensPricingCombination[];
   
   addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => string;
+  bulkAddFrames: (frames: Omit<FrameItem, "frameId" | "createdAt">[]) => string[];
   updateFrameQuantity: (frameId: string, newQty: number) => void;
   searchFrames: (query: string) => FrameItem[];
   getFrameById: (id: string) => FrameItem | undefined;
@@ -280,6 +281,24 @@ export const useInventoryStore = create<InventoryState>()(
         }));
         
         return frameId;
+      },
+      
+      bulkAddFrames: (frames) => {
+        const timestamp = Date.now();
+        const createdFrames: FrameItem[] = frames.map((frame, index) => {
+          const frameId = `FR${timestamp}-${index}`;
+          const createdAt = new Date().toISOString();
+          return { ...frame, frameId, createdAt };
+        });
+        
+        set((state) => ({
+          frames: [
+            ...state.frames,
+            ...createdFrames
+          ]
+        }));
+        
+        return createdFrames.map(frame => frame.frameId);
       },
       
       updateFrameQuantity: (frameId, newQty) => {
