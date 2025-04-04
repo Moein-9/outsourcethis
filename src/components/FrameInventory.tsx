@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
@@ -33,13 +34,12 @@ import {
   Save, 
   Tag, 
   QrCode,
-  Printer,
-  FileUp 
+  Printer 
 } from "lucide-react";
 import { FrameLabelTemplate, usePrintLabel } from "./FrameLabelTemplate";
 import { useLanguageStore } from "@/store/languageStore";
-import { ImportFramesDialog } from "./ImportFramesDialog";
 
+// Frame Item Component
 const FrameItemCard = ({ frame, index, onPrintLabel }: { 
   frame: FrameItem; 
   index: number;
@@ -47,6 +47,7 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
 }) => {
   const { t, language } = useLanguageStore();
   
+  // Generate consistent background color based on brand name
   const getBrandColor = (brand: string): string => {
     const colors = [
       'bg-blue-50 border-blue-200 text-blue-800',
@@ -126,7 +127,6 @@ export const FrameInventory: React.FC = () => {
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchFrames>>([]);
   const [isAddFrameDialogOpen, setIsAddFrameDialogOpen] = useState(false);
   const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   
   const [frameBrand, setFrameBrand] = useState("");
   const [frameModel, setFrameModel] = useState("");
@@ -135,6 +135,7 @@ export const FrameInventory: React.FC = () => {
   const [framePrice, setFramePrice] = useState("");
   const [frameQty, setFrameQty] = useState("1");
   
+  // Group frames by brand
   const groupedByBrand = React.useMemo(() => {
     const grouped: Record<string, FrameItem[]> = {};
     
@@ -145,6 +146,7 @@ export const FrameInventory: React.FC = () => {
       grouped[frame.brand].push(frame);
     });
     
+    // Sort brands by name
     return Object.fromEntries(
       Object.entries(grouped).sort(([brandA], [brandB]) => brandA.localeCompare(brandB))
     );
@@ -239,15 +241,6 @@ export const FrameInventory: React.FC = () => {
           >
             <Tag className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} /> 
             {isRtl ? "طباعة الملصقات" : "Print Labels"}
-          </Button>
-          
-          <Button
-            variant="outline"
-            onClick={() => setIsImportDialogOpen(true)}
-            className="shrink-0"
-          >
-            <FileUp className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} />
-            {isRtl ? "استيراد الإطارات" : "Import Frames"}
           </Button>
           
           <Dialog open={isAddFrameDialogOpen} onOpenChange={setIsAddFrameDialogOpen}>
@@ -418,11 +411,6 @@ export const FrameInventory: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <ImportFramesDialog 
-        open={isImportDialogOpen}
-        onOpenChange={setIsImportDialogOpen}
-      />
     </div>
   );
 };
