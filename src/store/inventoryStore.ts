@@ -1,6 +1,7 @@
+
 import { create } from 'zustand';
 
-interface InventoryState {
+export interface InventoryState {
   frames: Frame[];
   contactLenses: ContactLens[];
   lensTypes: LensType[];
@@ -8,48 +9,57 @@ interface InventoryState {
   lensThicknesses: LensThickness[];
   lensCombinations: LensCombination[];
   services: Service[];
-  repairServices: RepairService[];  // Added repair services
+  repairServices: RepairService[];
 
   // Frame methods
   getFrames: () => Frame[];
   addFrame: (frame: Frame) => void;
   updateFrame: (frame: Frame) => void;
   deleteFrame: (frameId: string) => void;
+  searchFrames: (query: string) => Frame[];
+  bulkImportFrames: (frames: Frame[]) => void;
 
   // Contact Lens methods
   getContactLenses: () => ContactLens[];
   addContactLens: (contactLens: ContactLens) => void;
   updateContactLens: (contactLens: ContactLens) => void;
   deleteContactLens: (contactLensId: string) => void;
+  searchContactLenses: (query: string) => ContactLens[];
 
   // Lens Type methods
   getLensTypes: () => LensType[];
   addLensType: (lensType: LensType) => void;
-  updateLensType: (lensType: LensType) => void;
+  updateLensType: (lensTypeId: string, lensType: Partial<Omit<LensType, "id">>) => void;
   deleteLensType: (lensTypeId: string) => void;
 
   // Lens Coating methods
   getLensCoatings: () => LensCoating[];
   addLensCoating: (lensCoating: LensCoating) => void;
-  updateLensCoating: (lensCoating: LensCoating) => void;
+  updateLensCoating: (lensCoatingId: string, lensCoating: Partial<Omit<LensCoating, "id">>) => void;
   deleteLensCoating: (lensCoatingId: string) => void;
+  getLensCoatingsByCategory: (category: string) => LensCoating[];
 
   // Lens Thickness methods
   getLensThicknesses: () => LensThickness[];
   addLensThickness: (lensThickness: LensThickness) => void;
-  updateLensThickness: (lensThickness: LensThickness) => void;
+  updateLensThickness: (lensThicknessId: string, lensThickness: Partial<Omit<LensThickness, "id">>) => void;
   deleteLensThickness: (lensThicknessId: string) => void;
+  getLensThicknessesByCategory: (category: string) => LensThickness[];
 
   // Lens Combination methods
   getLensCombinations: () => LensCombination[];
   addLensCombination: (lensCombination: LensCombination) => void;
-  updateLensCombination: (lensCombination: LensCombination) => void;
+  updateLensCombination: (lensCombinationId: string, lensCombination: Partial<Omit<LensCombination, "id">>) => void;
   deleteLensCombination: (lensCombinationId: string) => void;
+  getLensPricingByComponents: (lensType: string, coating: string, thickness: string) => number | null;
+  resetLensPricing: () => void;
+  getAvailableCoatings: (lensType: string) => LensCoating[];
+  getAvailableThicknesses: (lensType: string) => LensThickness[];
 
   // Service methods
   getServices: () => Service[];
   addService: (service: Service) => void;
-  updateService: (service: Service) => void;
+  updateService: (serviceId: string, service: Partial<Omit<Service, "id">>) => void;
   deleteService: (serviceId: string) => void;
   getServicesByCategory: (category: string) => Service[];
 
@@ -57,11 +67,14 @@ interface InventoryState {
   exportData: () => any;
   clearAllData: () => void;
 
-  // Added repair services methods
+  // Repair services methods
   getRepairServices: () => RepairService[];
   addRepairService: (service: RepairService) => void;
   updateRepairService: (service: RepairService) => void;
   deleteRepairService: (serviceId: string) => void;
+  
+  // Cleanup methods
+  cleanupSamplePhotochromicCoatings: () => void;
 }
 
 export interface Frame {
@@ -71,7 +84,10 @@ export interface Frame {
   color: string;
   size: string;
   price: number;
+  qty?: number;
+  frameId?: string;
   imageUrl?: string;
+  stock?: number;
 }
 
 export interface ContactLens {
@@ -81,6 +97,9 @@ export interface ContactLens {
   color: string;
   power: string;
   price: number;
+  bc?: string;
+  diameter?: string;
+  qty?: number;
   imageUrl?: string;
 }
 
@@ -88,6 +107,7 @@ export interface LensType {
   id: string;
   name: string;
   price: number;
+  type?: "distance" | "reading" | "progressive" | "bifocal" | "sunglasses";
 }
 
 export interface LensCoating {
@@ -96,12 +116,16 @@ export interface LensCoating {
   price: number;
   isPhotochromic?: boolean;
   availableColors?: string[];
+  description?: string;
+  category?: "distance-reading" | "progressive" | "bifocal" | "sunglasses";
 }
 
 export interface LensThickness {
   id: string;
   name: string;
   price: number;
+  description?: string;
+  category?: "distance-reading" | "progressive" | "bifocal" | "sunglasses";
 }
 
 export interface LensCombination {
@@ -128,6 +152,11 @@ export interface RepairService {
   description?: string;
 }
 
+// For compatibility with existing code
+export type FrameItem = Frame;
+export type ContactLensItem = ContactLens;
+export type ServiceItem = Service;
+
 const useInventoryStore = create<InventoryState>((set, get) => ({
   frames: [],
   contactLenses: [],
@@ -136,7 +165,7 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
   lensThicknesses: [],
   lensCombinations: [],
   services: [],
-  repairServices: [],  // Initialize repair services array
+  repairServices: [],
 
   // Frame methods implementation
   getFrames: () => get().frames,
@@ -153,6 +182,19 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
   deleteFrame: (frameId) => {
     set((state) => ({
       frames: state.frames.filter((f) => f.id !== frameId),
+    }));
+  },
+  searchFrames: (query) => {
+    const lowerQuery = query.toLowerCase();
+    return get().frames.filter(frame => 
+      frame.brand.toLowerCase().includes(lowerQuery) ||
+      frame.model.toLowerCase().includes(lowerQuery) ||
+      frame.color.toLowerCase().includes(lowerQuery)
+    );
+  },
+  bulkImportFrames: (frames) => {
+    set((state) => ({
+      frames: [...state.frames, ...frames],
     }));
   },
 
@@ -175,6 +217,14 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       contactLenses: state.contactLenses.filter((cl) => cl.id !== contactLensId),
     }));
   },
+  searchContactLenses: (query) => {
+    const lowerQuery = query.toLowerCase();
+    return get().contactLenses.filter(lens => 
+      lens.brand.toLowerCase().includes(lowerQuery) ||
+      lens.type.toLowerCase().includes(lowerQuery) ||
+      (lens.color && lens.color.toLowerCase().includes(lowerQuery))
+    );
+  },
 
   // Lens Type methods implementation
   getLensTypes: () => get().lensTypes,
@@ -183,10 +233,10 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       lensTypes: [...state.lensTypes, lensType],
     }));
   },
-  updateLensType: (lensType) => {
+  updateLensType: (lensTypeId, lensType) => {
     set((state) => ({
       lensTypes: state.lensTypes.map((lt) =>
-        lt.id === lensType.id ? lensType : lt
+        lt.id === lensTypeId ? { ...lt, ...lensType } : lt
       ),
     }));
   },
@@ -203,10 +253,10 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       lensCoatings: [...state.lensCoatings, lensCoating],
     }));
   },
-  updateLensCoating: (lensCoating) => {
+  updateLensCoating: (lensCoatingId, lensCoating) => {
     set((state) => ({
       lensCoatings: state.lensCoatings.map((lc) =>
-        lc.id === lensCoating.id ? lensCoating : lc
+        lc.id === lensCoatingId ? { ...lc, ...lensCoating } : lc
       ),
     }));
   },
@@ -214,6 +264,9 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
     set((state) => ({
       lensCoatings: state.lensCoatings.filter((lc) => lc.id !== lensCoatingId),
     }));
+  },
+  getLensCoatingsByCategory: (category) => {
+    return get().lensCoatings.filter(coating => coating.category === category);
   },
 
   // Lens Thickness methods implementation
@@ -223,10 +276,10 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       lensThicknesses: [...state.lensThicknesses, lensThickness],
     }));
   },
-  updateLensThickness: (lensThickness) => {
+  updateLensThickness: (lensThicknessId, lensThickness) => {
     set((state) => ({
       lensThicknesses: state.lensThicknesses.map((lt) =>
-        lt.id === lensThickness.id ? lensThickness : lt
+        lt.id === lensThicknessId ? { ...lt, ...lensThickness } : lt
       ),
     }));
   },
@@ -237,6 +290,9 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       ),
     }));
   },
+  getLensThicknessesByCategory: (category) => {
+    return get().lensThicknesses.filter(thickness => thickness.category === category);
+  },
 
   // Lens Combination methods implementation
   getLensCombinations: () => get().lensCombinations,
@@ -245,10 +301,10 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       lensCombinations: [...state.lensCombinations, lensCombination],
     }));
   },
-  updateLensCombination: (lensCombination) => {
+  updateLensCombination: (lensCombinationId, lensCombination) => {
     set((state) => ({
       lensCombinations: state.lensCombinations.map((lc) =>
-        lc.id === lensCombination.id ? lensCombination : lc
+        lc.id === lensCombinationId ? { ...lc, ...lensCombination } : lc
       ),
     }));
   },
@@ -259,6 +315,39 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       ),
     }));
   },
+  getLensPricingByComponents: (lensType, coating, thickness) => {
+    const combination = get().lensCombinations.find(
+      comb => comb.lensType === lensType && comb.coating === coating && comb.thickness === thickness
+    );
+    return combination ? combination.price : null;
+  },
+  resetLensPricing: () => {
+    set((state) => ({
+      lensCombinations: []
+    }));
+  },
+  getAvailableCoatings: (lensType) => {
+    // Find lensType's category
+    const lens = get().lensTypes.find(lt => lt.name === lensType);
+    if (!lens || !lens.type) return [];
+    
+    const category = lens.type === 'distance' || lens.type === 'reading' 
+      ? 'distance-reading' 
+      : lens.type;
+    
+    return get().lensCoatings.filter(coating => coating.category === category);
+  },
+  getAvailableThicknesses: (lensType) => {
+    // Find lensType's category
+    const lens = get().lensTypes.find(lt => lt.name === lensType);
+    if (!lens || !lens.type) return [];
+    
+    const category = lens.type === 'distance' || lens.type === 'reading' 
+      ? 'distance-reading' 
+      : lens.type;
+    
+    return get().lensThicknesses.filter(thickness => thickness.category === category);
+  },
 
   // Service methods implementation
   getServices: () => get().services,
@@ -267,9 +356,11 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       services: [...state.services, service],
     }));
   },
-  updateService: (service) => {
+  updateService: (serviceId, service) => {
     set((state) => ({
-      services: state.services.map((s) => (s.id === service.id ? service : s)),
+      services: state.services.map((s) => 
+        s.id === serviceId ? { ...s, ...service } : s
+      ),
     }));
   },
   deleteService: (serviceId) => {
@@ -290,7 +381,7 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       lensThicknesses: data.lensThicknesses || [],
       lensCombinations: data.lensCombinations || [],
       services: data.services || [],
-      repairServices: data.repairServices || []  // Initialize repair services
+      repairServices: data.repairServices || []
     });
   },
 
@@ -303,7 +394,7 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       lensThicknesses: get().lensThicknesses,
       lensCombinations: get().lensCombinations,
       services: get().services,
-      repairServices: get().repairServices  // Export repair services
+      repairServices: get().repairServices
     };
     return data;
   },
@@ -323,13 +414,11 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
 
   // Implement repair services methods
   getRepairServices: () => get().repairServices,
-
   addRepairService: (service) => {
     set((state) => ({
       repairServices: [...state.repairServices, service]
     }));
   },
-
   updateRepairService: (service) => {
     set((state) => ({
       repairServices: state.repairServices.map((s) =>
@@ -337,12 +426,16 @@ const useInventoryStore = create<InventoryState>((set, get) => ({
       )
     }));
   },
-
   deleteRepairService: (serviceId) => {
     set((state) => ({
       repairServices: state.repairServices.filter((s) => s.id !== serviceId)
     }));
   },
+  
+  // Cleanup methods implementation
+  cleanupSamplePhotochromicCoatings: () => {
+    console.log('Cleanup method called - no implementation needed at this time');
+  }
 }));
 
 export { useInventoryStore };

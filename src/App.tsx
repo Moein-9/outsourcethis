@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,7 +12,6 @@ import { LensDebugger } from "./components/LensDebugger";
 import { useInventoryStore } from "./store/inventoryStore";
 import { useEffect } from "react";
 
-// Create a new QueryClient instance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -23,16 +21,19 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => {
-  // Make sure the sunglasses coating category is properly initialized
-  const { cleanupSamplePhotochromicCoatings, resetLensPricing } = useInventoryStore();
-  
+function App() {
   useEffect(() => {
-    // Clean up any sample photochromic coatings
-    cleanupSamplePhotochromicCoatings();
+    const initializeInventory = async () => {
+      const store = useInventoryStore.getState();
+      if (store.cleanupSamplePhotochromicCoatings) {
+        store.cleanupSamplePhotochromicCoatings();
+      }
+      if (store.resetLensPricing) {
+        store.resetLensPricing();
+      }
+    };
     
-    // Reset lens pricing combinations if needed
-    // Note: Removed debug logs that were showing initialization messages
+    initializeInventory();
   }, []);
   
   return (
@@ -47,13 +48,12 @@ const App = () => {
             <Route path="/print-labels" element={<PrintLabelPage />} />
             <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
             <Route path="/lens-debug" element={<LensDebugger />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;

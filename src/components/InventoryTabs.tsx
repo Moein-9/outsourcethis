@@ -9,7 +9,8 @@ import { FrameInventory } from "@/components/FrameInventory";
 import { ContactLensInventory } from "@/components/ContactLensInventory";
 import { ServiceManager } from "@/components/ServiceManager";
 import { RepairServiceManager } from "@/components/RepairServiceManager";
-import { Glasses, Contact, Layers, Paintbrush, Ruler, Calculator, Wrench, Tool } from "lucide-react";
+import { Glasses, Contact, Layers, Paintbrush, Ruler, Calculator, Wrench } from "lucide-react";
+import { Tool } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 
 export const InventoryTabs: React.FC = () => {
