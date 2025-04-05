@@ -13,6 +13,7 @@ import { LensDebugger } from "./components/LensDebugger";
 import { useInventoryStore } from "./store/inventoryStore";
 import { useEffect } from "react";
 
+// Create a new QueryClient instance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -22,20 +23,16 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+const App = () => {
+  // Make sure the sunglasses coating category is properly initialized
+  const { cleanupSamplePhotochromicCoatings, resetLensPricing } = useInventoryStore();
+  
   useEffect(() => {
-    const initializeInventory = async () => {
-      const store = useInventoryStore.getState();
-      // Safely access methods that might not exist yet
-      if (typeof store.cleanupSamplePhotochromicCoatings === 'function') {
-        store.cleanupSamplePhotochromicCoatings();
-      }
-      if (typeof store.resetLensPricing === 'function') {
-        store.resetLensPricing();
-      }
-    };
+    // Clean up any sample photochromic coatings
+    cleanupSamplePhotochromicCoatings();
     
-    initializeInventory();
+    // Reset lens pricing combinations if needed
+    // Note: Removed debug logs that were showing initialization messages
   }, []);
   
   return (
@@ -50,12 +47,13 @@ function App() {
             <Route path="/print-labels" element={<PrintLabelPage />} />
             <Route path="/custom-work-order" element={<CustomWorkOrderReceipt workOrder={{}} />} />
             <Route path="/lens-debug" element={<LensDebugger />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );
-}
+};
 
 export default App;

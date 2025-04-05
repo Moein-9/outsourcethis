@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,9 +22,20 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { ContactLensRx } from "@/store/patientStore";
-import { useInventoryStore, ContactLensItem } from "@/store/inventoryStore";
+import { useInventoryStore } from "@/store/inventoryStore";
 import { useLanguageStore } from "@/store/languageStore";
-import { convertToContactLensItems } from "@/utils/typeConverters";
+
+export interface ContactLensItem {
+  id: string;
+  brand: string;
+  type: string;
+  bc: string; // Base curve
+  diameter: string;
+  power: string; // Keeping this in the data structure, but not displaying it
+  price: number;
+  qty: number;
+  color?: string;
+}
 
 export interface ContactLensSelection {
   items: ContactLensItem[];
@@ -41,7 +53,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
   const { language, t } = useLanguageStore();
   
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<ContactLensItem[]>(convertToContactLensItems(contactLenses));
+  const [results, setResults] = useState<ContactLensItem[]>(contactLenses);
   const [selectedLenses, setSelectedLenses] = useState<ContactLensItem[]>([]);
   const [rxData, setRxData] = useState<ContactLensRx | undefined>(initialRxData);
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
@@ -69,7 +81,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
 
   const handleFilterApply = () => {
     // Start with all contact lenses
-    let filtered = convertToContactLensItems(contactLenses);
+    let filtered = contactLenses;
     
     // Apply search filter if search term exists
     if (search) {
@@ -117,7 +129,7 @@ export const ContactLensSelector: React.FC<ContactLensSelectorProps> = ({ onSele
     setFilterBrand("all");
     setFilterType("all");
     setFilterColor("all");
-    setResults(convertToContactLensItems(contactLenses));
+    setResults(contactLenses);
   };
 
   const handleSelectLens = (lens: ContactLensItem) => {

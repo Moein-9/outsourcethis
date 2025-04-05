@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useCallback } from "react";
 
 // Make sure all fields used in the components are included in this interface
@@ -24,7 +25,7 @@ interface InvoiceFormData {
   lensPrice: number;
   coating: string;
   coatingPrice: number;
-  coatingColor: string;
+  coatingColor: string; // Ensure this is defined clearly
   thickness: string;
   thicknessPrice: number;
   rx: any; // prescription
@@ -101,7 +102,7 @@ const defaultFormState: InvoiceFormData = {
   lensPrice: 0,
   coating: "",
   coatingPrice: 0,
-  coatingColor: "",
+  coatingColor: "", // Initialize coating color
   thickness: "",
   thicknessPrice: 0,
   rx: null,

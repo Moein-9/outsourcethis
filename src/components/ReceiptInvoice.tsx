@@ -12,7 +12,7 @@ interface ReceiptInvoiceProps {
   
   patientName?: string;
   patientPhone?: string;
-  invoiceType?: "glasses" | "contacts" | "exam" | "repair";
+  invoiceType?: "glasses" | "contacts" | "exam";
   lensType?: string;
   lensPrice?: number;
   coating?: string;
@@ -37,9 +37,6 @@ interface ReceiptInvoiceProps {
   serviceId?: string;
   serviceDescription?: string;
   servicePrice?: number;
-  repairType?: string;
-  repairDescription?: string;
-  repairPrice?: number;
 }
 
 const getFormattedPaymentMethod = (method: string): string => {
@@ -96,10 +93,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   serviceName,
   serviceId,
   serviceDescription,
-  servicePrice,
-  repairType,
-  repairDescription,
-  repairPrice
+  servicePrice
 }) => {
   const { language, t } = useLanguageStore();
   const isRtl = language === 'ar';
@@ -127,7 +121,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   
   const isContactLens = invoiceType === "contacts" || invoice.invoiceType === "contacts" || contactLensItems.length > 0;
   const isEyeExam = invoiceType === "exam" || invoice.invoiceType === "exam";
-  const isRepair = invoiceType === "repair" || invoice.invoiceType === "repair";
   
   const service = {
     name: serviceName || invoice.serviceName || "",
@@ -136,12 +129,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
     price: servicePrice !== undefined ? servicePrice : invoice.servicePrice || 0
   };
   
-  const repair = {
-    type: repairType || invoice.repairType || "",
-    description: repairDescription || invoice.repairDescription || "",
-    price: repairPrice !== undefined ? repairPrice : invoice.repairPrice || 0
-  };
-
   const isRefunded = invoice.isRefunded;
   const refundAmount = invoice.refundAmount || 0;
   const refundDate = invoice.refundDate;
@@ -291,20 +278,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                 {service.name || t("eyeExam")}
                 {service.description && <span> - {service.description}</span>}
               </div>
-            </div>
-          ) : isRepair ? (
-            <div className="p-2 border-2 border-gray-300 rounded">
-              <div className="text-base font-bold text-center">
-                {isRtl ? "خدمة الإصلاح | Repair Service" : "Repair Service | خدمة الإصلاح"}
-              </div>
-              <div className="text-base font-medium text-center">
-                {repair.type || t("repairService")}
-              </div>
-              {repair.description && (
-                <div className="text-sm font-medium text-center mt-1 pt-1 border-t border-gray-200">
-                  {repair.description}
-                </div>
-              )}
             </div>
           ) : isContactLens && contactLensItems.length > 0 ? (
             contactLensItems.map((lens, idx) => (
