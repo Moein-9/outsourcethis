@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useState, useCallback } from "react";
 
 // Make sure all fields used in the components are included in this interface
 interface InvoiceFormData {
-  invoiceType: "glasses" | "contacts" | "exam" | "repair";
+  invoiceType: "glasses" | "contacts" | "exam";
   patientName: string;
   patientPhone: string;
   date: Date | null;
@@ -34,7 +33,7 @@ interface InvoiceFormData {
   contactLensItems: any[];
   contactLensRx: any;
   
-  // Service-specific (exam and repair)
+  // Exam-specific
   serviceName: string;
   serviceId: string;
   serviceDescription: string;
@@ -151,8 +150,6 @@ export const InvoiceFormProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const calculateSubtotal = useCallback(() => {
     if (formData.invoiceType === 'exam') {
       return formData.servicePrice || 0;
-    } else if (formData.invoiceType === 'repair') {
-      return formData.servicePrice || 0;
     } else if (formData.invoiceType === 'glasses') {
       let lensPrice = formData.lensCombinationPrice !== null 
         ? formData.lensCombinationPrice 
@@ -171,8 +168,6 @@ export const InvoiceFormProvider: React.FC<{ children: React.ReactNode }> = ({ c
   
   const calculateTotal = useCallback(() => {
     if (formData.invoiceType === 'exam') {
-      return formData.servicePrice - formData.discount;
-    } else if (formData.invoiceType === 'repair') {
       return formData.servicePrice - formData.discount;
     } else if (formData.invoiceType === 'glasses') {
       let lensPrice = formData.lensCombinationPrice !== null 
@@ -212,9 +207,6 @@ export const InvoiceFormProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
       } else if (formData.invoiceType === 'contacts' && (!formData.contactLensItems || formData.contactLensItems.length === 0)) {
         // For contacts, at least one item is required
-        return false;
-      } else if (formData.invoiceType === 'repair' && !formData.serviceName) {
-        // For repair, service name is required
         return false;
       }
       // For exam, we don't need to validate anything specific

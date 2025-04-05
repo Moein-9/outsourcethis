@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Glasses, Contact, Receipt, Wrench } from 'lucide-react';
+import { Glasses, Contact, Receipt } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 
 interface ProductDetailsDisplayProps {
@@ -18,11 +18,6 @@ interface ProductDetailsDisplayProps {
       price: number;
       quantity?: number;
     }>;
-    // Adding repair service properties
-    serviceName?: string;
-    serviceId?: string;
-    serviceDescription?: string;
-    servicePrice?: number;
   };
 }
 
@@ -33,17 +28,12 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
   
   const isGlasses = invoice.invoiceType === 'glasses';
   const isContactLens = invoice.invoiceType === 'contacts';
-  const isRepairService = invoice.invoiceType === 'repair';
   
   return (
     <div className={`bg-white border border-gray-200 rounded-md p-4 ${textAlign}`}>
       <h3 className="text-sm font-medium flex items-center gap-2 text-gray-700 mb-3">
-        {isGlasses ? <Glasses className="h-4 w-4" /> : 
-         isContactLens ? <Contact className="h-4 w-4" /> : 
-         isRepairService ? <Wrench className="h-4 w-4" /> : <Receipt className="h-4 w-4" />}
-        {isGlasses ? t('glassesDetails') : 
-         isContactLens ? t('contactLensDetails') : 
-         isRepairService ? t('repairServiceDetails') : t('productDetails')}
+        {isGlasses ? <Glasses className="h-4 w-4" /> : <Contact className="h-4 w-4" />}
+        {isGlasses ? t('glassesDetails') : t('contactLensDetails')}
       </h3>
       
       {isGlasses && (
@@ -120,33 +110,7 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
         </div>
       )}
       
-      {/* Repair Service Section */}
-      {isRepairService && (
-        <div className="space-y-2">
-          {invoice.serviceName && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-sm text-gray-500">{t('serviceType')}:</div>
-              <div className="text-sm font-medium">{invoice.serviceName}</div>
-            </div>
-          )}
-          
-          {invoice.serviceDescription && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-sm text-gray-500">{t('description')}:</div>
-              <div className="text-sm font-medium">{invoice.serviceDescription}</div>
-            </div>
-          )}
-          
-          {invoice.servicePrice !== undefined && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-sm text-gray-500">{t('price')}:</div>
-              <div className="text-sm font-medium">{invoice.servicePrice.toFixed(3)} KWD</div>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {!isGlasses && !isContactLens && !isRepairService && (
+      {!isGlasses && !isContactLens && (
         <div className="flex items-center justify-center py-4">
           <Receipt className="h-5 w-5 text-gray-400 mr-2" />
           <span className="text-gray-500">{t('noProductDetails')}</span>

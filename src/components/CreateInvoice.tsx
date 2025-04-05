@@ -7,7 +7,7 @@ import {
   FileText, Printer, Receipt, User, PackageCheck, CreditCard,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
   MessageCircleDashed, Loader, Check, Ruler, Paintbrush, ScrollText,
-  Eye, Layers, Glasses, Wrench
+  Eye, Layers, Glasses
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -92,11 +92,7 @@ const CreateInvoiceContent: React.FC = () => {
     paymentMethod: getValues("paymentMethod") || "Cash",
     isPaid: calculateRemaining() <= 0,
     authNumber: getValues("authNumber") || "",
-    contactLensItems: getValues("contactLensItems") || [],
-    serviceName: getValues("serviceName") || "",
-    serviceId: getValues("serviceId") || "",
-    serviceDescription: getValues("serviceDescription") || "",
-    servicePrice: getValues("servicePrice") || 0
+    contactLensItems: getValues("contactLensItems") || []
   };
 
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
