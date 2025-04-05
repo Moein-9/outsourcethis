@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInvoiceStore } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -7,7 +8,7 @@ import {
   FileText, Printer, Receipt, User, PackageCheck, CreditCard,
   PartyPopper, DollarSign, Info, ShoppingBag, Tag, Calculator,
   MessageCircleDashed, Loader, Check, Ruler, Paintbrush, ScrollText,
-  Eye, Layers, Glasses
+  Eye, Layers, Glasses, Wrench
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +24,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFo
 
 const CreateInvoiceContent: React.FC = () => {
   const { t, language } = useLanguageStore();
-  const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts" | "exam">("glasses");
+  const [invoiceType, setInvoiceType] = useState<"glasses" | "contacts" | "exam" | "repair">("glasses");
   const [invoicePrintOpen, setInvoicePrintOpen] = useState(false);
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("patient");
@@ -92,7 +93,10 @@ const CreateInvoiceContent: React.FC = () => {
     paymentMethod: getValues("paymentMethod") || "Cash",
     isPaid: calculateRemaining() <= 0,
     authNumber: getValues("authNumber") || "",
-    contactLensItems: getValues("contactLensItems") || []
+    contactLensItems: getValues("contactLensItems") || [],
+    repairType: getValues("repairType") || "",
+    repairDescription: getValues("repairDescription") || "",
+    repairPrice: getValues("repairPrice") || 0,
   };
 
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
@@ -106,7 +110,9 @@ const CreateInvoiceContent: React.FC = () => {
     ? (!!getValues("lensType") || (!getValues("skipFrame") && !!getValues("frameBrand")))
     : invoiceType === "contacts" 
       ? (getValues("contactLensItems")?.length > 0)
-      : true; // For exam type, product data is always available
+      : invoiceType === "repair"
+        ? !!getValues("repairType")
+        : true; // For exam type, product data is always available
 
   return (
     <div className="py-6 max-w-7xl mx-auto">
@@ -129,11 +135,15 @@ const CreateInvoiceContent: React.FC = () => {
                 <TabsTrigger value="products" className="flex items-center gap-2">
                   {invoiceType === "exam" ? (
                     <ScrollText className="w-4 h-4" />
+                  ) : invoiceType === "repair" ? (
+                    <Wrench className="w-4 h-4" />
                   ) : (
                     <PackageCheck className="w-4 h-4" />
                   )}
                   {invoiceType === "exam" 
-                    ? (language === 'ar' ? 'خدمة الفحص' : 'Exam Service') 
+                    ? (language === 'ar' ? 'خدمة الفحص' : 'Exam Service')
+                    : invoiceType === "repair"
+                    ? (language === 'ar' ? 'خدمة الإصلاح' : 'Repair Service')
                     : t('productSection')}
                 </TabsTrigger>
                 <TabsTrigger value="payment" className="flex items-center gap-2">
@@ -210,6 +220,12 @@ const CreateInvoiceContent: React.FC = () => {
                         className="flex items-center gap-2"
                       >
                         {t('previous')}
+                      </Button>
+                      <Button
+                        onClick={() => handleNextTab("payment")} 
+                        className="flex items-center gap-2"
+                      >
+                        {t('next')}
                       </Button>
                     </div>
                   </motion.div>
@@ -313,6 +329,22 @@ const CreateInvoiceContent: React.FC = () => {
                               <p className="text-sm text-gray-600 mt-1">
                                 {language === 'ar' ? 'خدمة فحص العين' : 'Eye examination service'}
                               </p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : invoiceType === "repair" ? (
+                        <div className="p-3 bg-white rounded-lg shadow-sm relative overflow-hidden">
+                          <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 rounded-bl-full opacity-20"></div>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium text-purple-700 flex items-center gap-1 text-lg">
+                                <Wrench className="w-4 h-4" /> {getValues("repairType") || (language === 'ar' ? 'إصلاح' : 'Repair')}
+                              </p>
+                              {getValues("repairDescription") && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {getValues("repairDescription")}
+                                </p>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -432,6 +464,26 @@ const CreateInvoiceContent: React.FC = () => {
                         <span className="text-sm text-gray-600">{t('subtotal')}</span>
                         <span className="font-medium">{(total + (getValues("discount") || 0)).toFixed(3)} KWD</span>
                       </div>
+                      
+                      {/* Repair service cost */}
+                      {invoiceType === "repair" && getValues("repairPrice") > 0 && (
+                        <div className="flex justify-between items-center py-1">
+                          <span className="text-sm text-gray-600 flex items-center gap-1">
+                            <Wrench className="w-3 h-3" /> {language === 'ar' ? 'خدمة الإصلاح' : 'Repair Service'}
+                          </span>
+                          <span className="font-medium text-purple-600">{getValues("repairPrice")?.toFixed(3)} KWD</span>
+                        </div>
+                      )}
+
+                      {/* Exam service cost */}
+                      {invoiceType === "exam" && getValues("servicePrice") > 0 && (
+                        <div className="flex justify-between items-center py-1">
+                          <span className="text-sm text-gray-600 flex items-center gap-1">
+                            <ScrollText className="w-3 h-3" /> {language === 'ar' ? 'خدمة الفحص' : 'Exam Service'}
+                          </span>
+                          <span className="font-medium text-blue-600">{getValues("servicePrice")?.toFixed(3)} KWD</span>
+                        </div>
+                      )}
                       
                       {/* Lens Type Cost */}
                       {getValues("lensType") && getValues("lensPrice") > 0 && (
