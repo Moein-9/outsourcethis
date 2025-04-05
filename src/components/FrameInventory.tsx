@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { FrameLabelTemplate, usePrintLabel } from "./FrameLabelTemplate";
 import { useLanguageStore } from "@/store/languageStore";
+import { ImportInventoryButton } from "./InventoryInitializer";
 
 interface ImportResult {
   added: number;
@@ -333,7 +334,7 @@ export const FrameInventory: React.FC = () => {
           </Button>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button 
             variant="outline" 
             onClick={() => setIsLabelDialogOpen(true)}
@@ -343,13 +344,15 @@ export const FrameInventory: React.FC = () => {
             {isRtl ? "طباعة الملصقات" : "Print Labels"}
           </Button>
 
+          <ImportInventoryButton />
+
           <Button
             variant="outline"
             onClick={() => setIsImportDialogOpen(true)}
             className="shrink-0 border-blue-200 text-blue-700 hover:bg-blue-50"
           >
             <Upload className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} />
-            {isRtl ? "استيراد الإطارات" : "Import Frames"}
+            {isRtl ? "استيراد الإطارات" : "Import CSV"}
           </Button>
           
           <Dialog open={isAddFrameDialogOpen} onOpenChange={setIsAddFrameDialogOpen}>

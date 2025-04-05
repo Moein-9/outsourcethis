@@ -1,259 +1,36 @@
 
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useInventoryStore } from "@/store/inventoryStore";
 import { toast } from 'sonner';
+import { allFrames, contactLensesToImport } from "@/data/frameData";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Upload, Loader2 } from "lucide-react";
+import { useLanguageStore } from "@/store/languageStore";
 
-// Frame data from the user's input
-const framesToImport = [
-  { brand: "RAYBAN", model: "RB3025-001", color: "RB3025", price: 35.0, size: "58-18-140", qty: 1 },
-  { brand: "Brand", model: "Y8831-6", color: "8831", price: 35.0, size: "51-15-137", qty: 1 },
-  { brand: "Brand", model: "CX2009-1-7", color: "2009", price: 35.0, size: "48-16-130", qty: 1 },
-  { brand: "Brand", model: "HS2106-6", color: "2106", price: 35.0, size: "48-18-145", qty: 1 },
-  { brand: "Brand", model: "BEN-315-2", color: "BEN-315", price: 35.0, size: "47-16-130", qty: 1 },
-  { brand: "Brand", model: "CX62009-1-7", color: "62009", price: 35.0, size: "48-16-130", qty: 1 },
-  { brand: "Brand", model: "Y8842-3", color: "8842", price: 35.0, size: "50-15-130", qty: 1 },
-  { brand: "Brand", model: "CX62010-1-4", color: "62010", price: 35.0, size: "47-18-130", qty: 1 },
-  { brand: "Brand", model: "CX62009-1-10", color: "62009", price: 35.0, size: "48-16-130", qty: 1 },
-  { brand: "Brand", model: "Y8845-4", color: "8845", price: 35.0, size: "49-15-137", qty: 1 },
-  { brand: "Brand", model: "BN001-47", color: "001", price: 35.0, size: "47-15-137", qty: 1 },
-  { brand: "Brand", model: "BN002-BLUE", color: "002", price: 35.0, size: "48-15-137", qty: 1 },
-  { brand: "Brand", model: "TR911-11", color: "911", price: 35.0, size: "44-15-137", qty: 1 },
-  { brand: "Brand", model: "BW-0901-3", color: "BW901", price: 35.0, size: "41-15-137", qty: 1 },
-  { brand: "Brand", model: "TF-3305-1", color: "3305", price: 35.0, size: "47-16-137", qty: 1 },
-  { brand: "Brand", model: "1303-9", color: "1303", price: 35.0, size: "50-14-000", qty: 1 },
-  { brand: "Brand", model: "TRC-13-5", color: "13", price: 38.0, size: "50-16-000", qty: 1 },
-  { brand: "Brand", model: "BEN-207-1", color: "207", price: 35.0, size: "43-19-125", qty: 1 },
-  { brand: "Brand", model: "BEN-204-9", color: "204", price: 35.0, size: "48-16-130", qty: 1 },
-  { brand: "Brand", model: "8695-1", color: "8695", price: 38.0, size: "45-21-130", qty: 1 },
-  { brand: "Brand", model: "TR2329-9", color: "2329", price: 35.0, size: "47-16-130", qty: 1 },
-  { brand: "Brand", model: "YL3-CLR/BLUE", color: "3", price: 35.0, size: "48-16-130", qty: 1 },
-  { brand: "Brand", model: "RS9014-07", color: "9014", price: 35.0, size: "48-20-145", qty: 1 },
-  { brand: "Brand", model: "HS2106-4", color: "2106", price: 35.0, size: "48-18-145", qty: 1 },
-  { brand: "Brand", model: "H510-RED", color: "510", price: 35.0, size: "49-18-145", qty: 1 },
-  { brand: "Brand", model: "BEN-203-3", color: "203", price: 35.0, size: "47-16-130", qty: 1 },
-  { brand: "Brand", model: "TR2308-5", color: "2308", price: 35.0, size: "47-16-120", qty: 1 },
-  { brand: "Brand", model: "BL9091-BRN", color: "204", price: 35.0, size: "49-16-130", qty: 1 },
-  { brand: "Brand", model: "TR3109-5", color: "3109", price: 35.0, size: "47-16-130", qty: 1 },
-  { brand: "Brand", model: "TR2311-9", color: "2311", price: 35.0, size: "44-16-130", qty: 1 },
-  { brand: "Brand", model: "CE001-01", color: "001", price: 35.0, size: "48-16-130", qty: 1 },
-  { brand: "Brand", model: "5366-4", color: "5366", price: 35.0, size: "47-16-130", qty: 1 },
-  { brand: "Brand", model: "BEN-1010-6", color: "1010", price: 35.0, size: "47-16-130", qty: 1 },
-  { brand: "Brand", model: "BT-2235-6", color: "2235", price: 35.0, size: "47-18-000", qty: 1 },
-  { brand: "Brand", model: "BT2235", color: "2235", price: 35.0, size: "47-18-000", qty: 1 },
-  { brand: "Brand", model: "BEN-316-BLK", color: "316", price: 35.0, size: "47-16-135", qty: 1 },
-  { brand: "Brand", model: "BS3010-BW", color: "3010", price: 35.0, size: "47-18-000", qty: 1 },
-  { brand: "Brand", model: "H815-6", color: "815", price: 35.0, size: "47-18-000", qty: 1 },
-  { brand: "Brand", model: "BS2332", color: "2332", price: 35.0, size: "42-15-000", qty: 1 },
-  { brand: "Brand", model: "B212", color: "B212", price: 35.0, size: "48-17-000", qty: 1 },
-  { brand: "Brand", model: "3007-1", color: "3007", price: 35.0, size: "13-18-000", qty: 1 },
-  { brand: "Brand", model: "BS-3029-8", color: "2235", price: 35.0, size: "47-18-000", qty: 1 },
-  { brand: "Brand", model: "BS-3029-6", color: "3029", price: 35.0, size: "47-16-000", qty: 1 },
-  { brand: "Brand", model: "TR90-22", color: "TR90", price: 35.0, size: "45-18-000", qty: 1 },
-  { brand: "Brand", model: "C1062-33", color: "1062", price: 35.0, size: "47-18-000", qty: 1 },
-  { brand: "Brand", model: "BS3014-1", color: "3014", price: 35.0, size: "46-16-000", qty: 1 },
-  { brand: "Brand", model: "C-H813-3", color: "813", price: 35.0, size: "45-17-000", qty: 1 },
-  { brand: "Brand", model: "H813-3", color: "813", price: 35.0, size: "45-17-000", qty: 1 },
-  { brand: "Brand", model: "221-2", color: "221", price: 35.0, size: "48-17-000", qty: 1 },
-  { brand: "Brand", model: "23-RED", color: "23", price: 35.0, size: "45-17-000", qty: 1 },
-  { brand: "Brand", model: "2106-7", color: "813", price: 35.0, size: "48-18-000", qty: 1 },
-  { brand: "Brand", model: "5159-1", color: "5129", price: 35.0, size: "44-19-000", qty: 1 },
-  { brand: "Brand", model: "5292-7", color: "5292", price: 35.0, size: "48-17-000", qty: 1 },
-  { brand: "Brand", model: "RB5067-3", color: "5067", price: 35.0, size: "49-16-000", qty: 1 },
-  { brand: "Brand", model: "310-8", color: "310", price: 35.0, size: "50-17-000", qty: 1 },
-  { brand: "Brand", model: "TR3119-3", color: "3119", price: 35.0, size: "49-16-000", qty: 1 },
-  { brand: "Brand", model: "BY3014--7", color: "3014", price: 35.0, size: "46-16-000", qty: 1 },
-  { brand: "Brand", model: "215-7", color: "215", price: 35.0, size: "45-17-000", qty: 1 },
-  { brand: "Brand", model: "H805-1", color: "805", price: 35.0, size: "45-17-000", qty: 1 },
-  { brand: "Brand", model: "BT4117-5", color: "813", price: 35.0, size: "45-17-000", qty: 1 },
-  { brand: "Brand", model: "202-1", color: "202", price: 35.0, size: "46-15-000", qty: 1 },
-  { brand: "Brand", model: "H803-5", color: "803", price: 35.0, size: "47-16-000", qty: 1 },
-  { brand: "Brand", model: "215-6", color: "215", price: 35.0, size: "48-16-000", qty: 1 },
-  { brand: "Brand", model: "2305--6", color: "2305", price: 35.0, size: "45-17-000", qty: 1 },
-  { brand: "Brand", model: "1107-BR", color: "1107", price: 35.0, size: "46-20-000", qty: 1 },
-  { brand: "Brand", model: "BY3010-BLK/YL", color: "3010", price: 35.0, size: "50-16-000", qty: 1 },
-  { brand: "Brand", model: "BEN-213-7", color: "213", price: 35.0, size: "50-16-000", qty: 1 },
-  { brand: "Brand", model: "H813-1", color: "813", price: 35.0, size: "45-17-000", qty: 1 },
-  { brand: "Brand", model: "ZC-03-BLK", color: "ZC-03", price: 35.0, size: "48-18-000", qty: 1 },
-  { brand: "Brand", model: "2211-4", color: "2211", price: 35.0, size: "46-18-000", qty: 1 },
-  { brand: "Brand", model: "2235-3", color: "2235", price: 35.0, size: "47-16-000", qty: 1 },
-  { brand: "Brand", model: "RB5019-8", color: "5019", price: 35.0, size: "49-16-000", qty: 1 },
-  { brand: "Brand", model: "MH015--13", color: "015", price: 35.0, size: "51-15-000", qty: 1 },
-  { brand: "Brand", model: "51632-5", color: "51632", price: 35.0, size: "50-16-000", qty: 1 },
-  { brand: "Brand", model: "BEN-207-2", color: "207", price: 35.0, size: "48-19-000", qty: 1 },
-  { brand: "Brand", model: "L3641-315", color: "3641", price: 35.0, size: "48-16-000", qty: 1 },
-  { brand: "Brand", model: "L3631-444", color: "213", price: 35.0, size: "46-17-000", qty: 1 },
-  { brand: "Brand", model: "352-26", color: "352", price: 35.0, size: "41-23-000", qty: 1 },
-  { brand: "Brand", model: "2231-6", color: "2231", price: 35.0, size: "47-18-000", qty: 1 },
-  { brand: "Brand", model: "BEN-309-1", color: "309", price: 35.0, size: "50-16-135", qty: 1 },
-  { brand: "Brand", model: "TF2238-1", color: "TF2238-1", price: 72.0, size: "54-19-145", qty: 1 },
-  { brand: "Brand", model: "P80166-2", color: "P80166-2", price: 35.0, size: "54-20-147", qty: 1 },
-  { brand: "Brand", model: "2731 WINE-PMO7", color: "2731 WINE", price: 35.0, size: "52-20-145", qty: 1 },
-  { brand: "Brand", model: "SR008-1", color: "SR008-1", price: 35.0, size: "56-15-140", qty: 1 },
-  { brand: "Brand", model: "JY066-1-2", color: "JY066-1-2", price: 35.0, size: "55-17-148", qty: 1 },
-  { brand: "Brand", model: "P8066-3", color: "P8066-3", price: 35.0, size: "54-20-147", qty: 1 },
-  { brand: "Brand", model: "RB 5377-F-BLACK", color: "2000", price: 72.0, size: "50-20-145", qty: 1 },
-  { brand: "Brand", model: "30027-1", color: "30027-1", price: 35.0, size: "54-18-145", qty: 1 },
-  { brand: "Brand", model: "P80166-4", color: "P80166-4", price: 35.0, size: "54-20-147", qty: 1 },
-  { brand: "BURRBURY", model: "BE2382-5", color: "2382", price: 75.0, size: "53-17-145", qty: 1 },
-  { brand: "BURRBURY", model: "BE2383-1", color: "2383", price: 75.0, size: "53-20-145", qty: 1 },
-  { brand: "Brand", model: "CA1203-1", color: "CA1203-1", price: 35.0, size: "54-19-145", qty: 1 },
-  { brand: "Brand", model: "528-1", color: "MARTIN", price: 35.0, size: "54-13-138", qty: 1 },
-  { brand: "Brand", model: "EL,MA309-14", color: "ELMA", price: 35.0, size: "45-18-000", qty: 1 },
-  { brand: "Brand", model: "ELMA309-14", color: "ELMA", price: 5.0, size: "00-00-000", qty: 1 },
-  { brand: "Brand", model: "ELMA309-14", color: "ELMA309-14", price: 35.0, size: "45-18-120", qty: 1 },
-  { brand: "Brand", model: "BY-3014-6", color: "BY-3014-6", price: 35.0, size: "46-16-130", qty: 1 },
-  { brand: "Brand", model: "1064-364-3", color: "1064", price: 35.0, size: "46-15-138", qty: 1 },
-  { brand: "Brand", model: "CHARM1062-1", color: "CHARM1062", price: 35.0, size: "46-17-138", qty: 1 },
-  { brand: "Brand", model: "311-C9-1", color: "311-C9-1", price: 35.0, size: "48-14-135", qty: 1 },
-  { brand: "Brand", model: "PU1O16-1", color: "PU1O16-1", price: 35.0, size: "50-16-143", qty: 1 },
-  { brand: "Brand", model: "ESTILO 7C-12", color: "ESTILO 7C", price: 35.0, size: "48-16-138", qty: 1 },
-  { brand: "Brand", model: "BOSC MH015-15", color: "BOSC MH015", price: 30.0, size: "51-16-138", qty: 1 },
-  { brand: "Brand", model: "1064-BLK/BL", color: "1064", price: 35.0, size: "46-15-138", qty: 1 },
-  { brand: "Brand", model: "BY-3011-5", color: "BY-3011", price: 35.0, size: "00-00-000", qty: 1 },
-  { brand: "Brand", model: "DI-2321-15", color: "DI-2321", price: 35.0, size: "47-16-125", qty: 1 },
-  { brand: "Brand", model: "6002-6", color: "6002", price: 35.0, size: "50-16-148", qty: 1 },
-  { brand: "Brand", model: "213", color: "213", price: 35.0, size: "50-16-000", qty: 1 },
-  { brand: "Brand", model: "L3612-BLK", color: "L3612", price: 40.0, size: "46-16-000", qty: 1 },
-  { brand: "Brand", model: "TR2304-9", color: "TR2304-9", price: 35.0, size: "44-19-130", qty: 1 },
-  { brand: "Brand", model: "BEN-213-10", color: "BEN-213-10", price: 35.0, size: "00-00-000", qty: 1 },
-  { brand: "Brand", model: "BT-4116-01G", color: "BT-4116", price: 35.0, size: "50-15-140", qty: 1 },
-  { brand: "Brand", model: "BEN-215-8", color: "BEN-215-8", price: 35.0, size: "48-16-135", qty: 1 },
-  { brand: "Brand", model: "DI-2309-5", color: "DI-2309-5", price: 35.0, size: "47-18-125", qty: 1 },
-  { brand: "Brand", model: "1062-3", color: "1062-3", price: 35.0, size: "46-17-138", qty: 1 },
-  { brand: "Brand", model: "???", color: "316", price: 35.0, size: "47-16-135", qty: 1 },
-  { brand: "Brand", model: "CX62016-1-5", color: "CX62016", price: 35.0, size: "46-15-130", qty: 1 },
-  { brand: "Brand", model: "1154-8", color: "1154-8", price: 35.0, size: "42-14-120", qty: 1 },
-  { brand: "Brand", model: "2206-5", color: "2206-5", price: 35.0, size: "48-18-135", qty: 1 },
-  { brand: "Brand", model: "BEN-203-1", color: "203", price: 35.0, size: "47-16-130", qty: 1 },
-  { brand: "Brand", model: "BEN-207-5", color: "BEN-207-5", price: 35.0, size: "43-19-125", qty: 1 },
-  { brand: "Brand", model: "6735-5", color: "6735-5", price: 35.0, size: "53-16-148", qty: 1 },
-  { brand: "Brand", model: "FR", color: "", price: 0.0, size: "00-00-000", qty: 1 },
-  { brand: "Brand", model: "CL40196U-6", color: "CL40196U-6", price: 35.0, size: "53-19-145", qty: 1 },
-  { brand: "PRADA", model: "PR08ZV-8", color: "PR08ZV-8", price: 55.0, size: "53-19-145", qty: 1 },
-  { brand: "Brand", model: "CK5986-625", color: "CK5986-625", price: 50.0, size: "52-16-140", qty: 1 },
-  { brand: "Brand", model: "5019-2652", color: "5019-2652", price: 35.0, size: "54-16-140", qty: 1 },
-  { brand: "Brand", model: "L2601ND-218", color: "L2601ND", price: 55.0, size: "50-20-145", qty: 1 },
-  { brand: "Brand", model: "TA251186-19", color: "TA251186", price: 35.0, size: "50-19-140", qty: 1 },
-  { brand: "Brand", model: "G70-10-2", color: "G70-10-2", price: 35.0, size: "50-20-145", qty: 1 },
-  { brand: "Brand", model: "MH009-17", color: "MH009-17", price: 35.0, size: "50-19-138", qty: 1 },
-  { brand: "Brand", model: "JY068-9", color: "JY068-9", price: 35.0, size: "54-17-148", qty: 1 },
-  { brand: "Brand", model: "31007-1", color: "31007-1", price: 35.0, size: "56-17-144", qty: 1 },
-  { brand: "Brand", model: "3037-5", color: "3037-5", price: 35.0, size: "50-17-140", qty: 1 },
-  { brand: "Brand", model: "GV7218-2", color: "GV7218-2", price: 75.0, size: "58-20-140", qty: 1 },
-  { brand: "VERSACE", model: "VE3375-1", color: "VE3375", price: 72.0, size: "53-20-145", qty: 1 },
-  { brand: "Brand", model: "CA1208-1", color: "CA1208-1", price: 38.0, size: "53-16-140", qty: 1 },
-  { brand: "Brand", model: "FPK006-1", color: "FPK006-1", price: 35.0, size: "52-17-145", qty: 1 },
-  { brand: "A", model: "8300-1", color: "8300-1", price: 35.0, size: "53-18-145", qty: 1 },
-  { brand: "GUCCI", model: "GG1083-3", color: "GG1083-3", price: 72.0, size: "53-19-145", qty: 1 },
-  { brand: "Brand", model: "30063-9", color: "30063-9", price: 38.0, size: "53-18-145", qty: 1 },
-  { brand: "Brand", model: "JY006-1-2", color: "JY066-1-2", price: 35.0, size: "55-17-148", qty: 1 },
-  { brand: "Brand", model: "1109-6", color: "1109", price: 35.0, size: "52-17-148", qty: 1 },
-  { brand: "Brand", model: "6655-1", color: "6655", price: 35.0, size: "55-19-148", qty: 1 },
-  { brand: "Brand", model: "9222-25", color: "9222", price: 55.0, size: "50-22-148", qty: 1 },
-  { brand: "Brand", model: "RS9014-7", color: "9014", price: 55.0, size: "48-20-148", qty: 1 },
-  { brand: "Brand", model: "CA1211-2", color: "1211", price: 35.0, size: "53-16-148", qty: 1 },
-  { brand: "FENDI", model: "FE0459-5", color: "FE459", price: 72.0, size: "52-20-145", qty: 1 },
-  { brand: "FENDI", model: "FE0461-1", color: "461", price: 75.0, size: "53-19-145", qty: 1 },
-  { brand: "NONAME", model: "CF-BRN/BLUE", color: "CF", price: 35.0, size: "52-20-145", qty: 1 },
-  { brand: "Brand", model: "337-24", color: "337", price: 35.0, size: "54-16-145", qty: 1 },
-  { brand: "NONAME", model: "0751-6", color: "751", price: 35.0, size: "51-17-145", qty: 1 },
-  { brand: "Brand", model: "TR1604-6", color: "1604", price: 35.0, size: "51-21-142", qty: 1 },
-  { brand: "PRADA", model: "PR17ZS-7", color: "17ZS", price: 72.0, size: "52-19-145", qty: 1 },
-  { brand: "RAYBAN", model: "600235-7", color: "600235", price: 35.0, size: "50-22-143", qty: 1 },
-  { brand: "TOM FORD", model: "TF981-7", color: "TF981", price: 75.0, size: "51-20-145", qty: 1 },
-  { brand: "NONAME", model: "CF-BLK", color: "CF", price: 35.0, size: "00-00-000", qty: 1 },
-  { brand: "Brand", model: "TONY VITE", color: "TONY", price: 35.0, size: "51-21-140", qty: 1 },
-  { brand: "NONAME", model: "PPK005-4", color: "PPK005", price: 35.0, size: "48-21-142", qty: 1 },
-  { brand: "Brand", model: "JY011-1", color: "JY011", price: 35.0, size: "51-19-148", qty: 1 },
-  { brand: "PRADA", model: "VPR 29QV-142", color: "VPR", price: 45.0, size: "53-16-000", qty: 1 },
-  { brand: "NONAME", model: "MH005-15", color: "MH005", price: 35.0, size: "52-17-138", qty: 1 },
-  { brand: "Brand", model: "2023-RED", color: "2023", price: 35.0, size: "43-19-000", qty: 1 },
-  { brand: "Brand", model: "BEN-309-17", color: "BEN-309", price: 35.0, size: "50-16-135", qty: 1 },
-  { brand: "SILHOUTTE", model: "M 1826-10", color: "M 1826", price: 35.0, size: "00-00-000", qty: 1 },
-  { brand: "NONAME", model: "6102-7", color: "6102", price: 35.0, size: "52-16-138", qty: 1 },
-  { brand: "Brand", model: "11009-BLK", color: "11009", price: 35.0, size: "52-18-140", qty: 1 },
-  { brand: "Brand", model: "TP006-6", color: "TP006", price: 35.0, size: "53-18-145", qty: 1 },
-  { brand: "AN", model: "96013-4", color: "96013-4", price: 35.0, size: "50-19-141", qty: 1 },
-  { brand: "AN", model: "BE4386", color: "96013-4", price: 35.0, size: "50-19-141", qty: 1 },
-  { brand: "BURRBURY", model: "BE4386-7", color: "BE4386-7", price: 72.0, size: "53-18-145", qty: 1 },
-  { brand: "BURRBURY", model: "BE2382", color: "BE4386-7", price: 72.0, size: "53-18-145", qty: 1 },
-  { brand: "BURRBURY", model: "BE2382-8", color: "BE2382-8", price: 72.0, size: "53-17-145", qty: 1 },
-  { brand: "BOSS", model: "BOSS 1319", color: "BOSS 1319", price: 75.0, size: "52-21-145", qty: 1 },
-  { brand: "Brand", model: "BOSS 1319", color: "1064", price: 35.0, size: "46-15-138", qty: 1 },
-  { brand: "Brand", model: "BOSS 1319-7", color: "1064", price: 35.0, size: "46-15-138", qty: 1 },
-  { brand: "Brand", model: "BOSS 1319-7", color: "002", price: 35.0, size: "48-15-137", qty: 1 },
-  { brand: "A", model: "6838-1", color: "8300-1", price: 35.0, size: "53-18-145", qty: 1 },
-  { brand: "Brand", model: "6838-1", color: "6838-1", price: 35.0, size: "53-17-146", qty: 1 },
-  { brand: "Brand", model: "30168-5", color: "30168-5", price: 35.0, size: "53-18-145", qty: 1 },
-  { brand: "AN", model: "TP007-4", color: "TP007-4", price: 35.0, size: "50-21-145", qty: 1 },
-  { brand: "AN", model: "TR80725-2", color: "TR80725-2", price: 35.0, size: "54-18-145", qty: 1 },
-  { brand: "AN", model: "30114-7", color: "30114-7", price: 35.0, size: "53-17-142", qty: 1 },
-  { brand: "Brand", model: "8263-4", color: "8263-4", price: 35.0, size: "52-20-140", qty: 1 },
-  { brand: "AN", model: "60016-8", color: "60016-8", price: 35.0, size: "54-15-145", qty: 1 },
-  { brand: "AN", model: "JY2020-2", color: "JY2020-2", price: 35.0, size: "51-18-145", qty: 1 },
-  { brand: "AN", model: "BE 2060-2", color: "BE 2060-2", price: 35.0, size: "51-20-145", qty: 1 },
-  { brand: "AN", model: "KC0787-3", color: "KC0787-3", price: 35.0, size: "54-17-140", qty: 1 },
-  { brand: "VL", model: "Z1708-6", color: "Z1708-6", price: 75.0, size: "53-19-145", qty: 1 },
-  { brand: "Brand", model: "CA1208-2", color: "CA1208", price: 35.0, size: "00-00-000", qty: 1 },
-  { brand: "RAYBAN", model: "RB 5377-F-2012", color: "RB-5377", price: 35.0, size: "50-20-145", qty: 1 },
-  { brand: "Brand", model: "TP006-2", color: "TP006", price: 35.0, size: "53-18-145", qty: 1 },
-  { brand: "Brand", model: "10108-1", color: "10108", price: 35.0, size: "51-17-140", qty: 1 },
-  { brand: "Brand", model: "DI2017-2", color: "DI2017", price: 35.0, size: "51-16-140", qty: 1 },
-  { brand: "Brand", model: "2023-MM", color: "2023", price: 35.0, size: "53-19-000", qty: 1 },
-  { brand: "Brand", model: "JY010-1", color: "JY010", price: 35.0, size: "50-20-147", qty: 1 },
-  { brand: "Brand", model: "JY012-RED", color: "JY012", price: 35.0, size: "53-19-147", qty: 1 },
-  { brand: "Brand", model: "82761-6", color: "82761", price: 35.0, size: "00-00-000", qty: 1 },
-  { brand: "Brand", model: "KT60007", color: "KT60007", price: 35.0, size: "52-17-143", qty: 1 },
-  { brand: "DOLCE GABBANA", model: "DG3174-2878", color: "DG3174-287", price: 75.0, size: "52-16-135", qty: 1 },
-  { brand: "AN", model: "A C 88170-3", color: "AC 88170-3", price: 35.0, size: "50-20-144", qty: 1 },
-  { brand: "AN", model: "BE 2257-3", color: "BE 2257-3", price: 75.0, size: "54-18-145", qty: 1 },
-  { brand: "AN", model: "LEON-VILE VU", color: "LEON  GRAY", price: 35.0, size: "47-23-140", qty: 1 },
-  { brand: "AN", model: "8203-PINK", color: "8203-PINK", price: 35.0, size: "52-18-143", qty: 1 },
-  { brand: "AN", model: "51191-5", color: "51191-5", price: 35.0, size: "57-17-150", qty: 1 },
-  { brand: "AN", model: "30114-2", color: "30114-2", price: 35.0, size: "53-17-142", qty: 1 },
-  { brand: "AN", model: "8199-BLACK", color: "8199-BLACK", price: 35.0, size: "52-18-143", qty: 1 },
-  { brand: "AN", model: "GV7218-6", color: "GV7218-6", price: 75.0, size: "56-20-140", qty: 1 },
-  { brand: "Brand", model: "FG1382-4", color: "FPG1382", price: 35.0, size: "54-16-140", qty: 1 },
-  { brand: "Brand", model: "CHARM-RED", color: "CHARM", price: 35.0, size: "00-00-000", qty: 1 },
-  { brand: "Brand", model: "827615", color: "82761", price: 35.0, size: "50-21-145", qty: 1 }
-];
-
-// Limited to 200 frames due to message size limitation
-const contactLensesToImport = [
-  { brand: "BELLA", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 15.0, color: "BELLADAILY", qty: 10 },
-  { brand: "BELLA", type: "Monthly", bc: "8.5", diameter: "14.2", power: "-2.00", price: 15.0, color: "BELLA MONTHLY", qty: 10 },
-  { brand: "DAHAB", type: "Daily", bc: "8.4", diameter: "14.2", power: "-2.00", price: 15.0, color: "DAHAB DAILY", qty: 10 },
-  { brand: "DAHAB", type: "Monthly", bc: "8.4", diameter: "14.2", power: "-2.00", price: 15.0, color: "DAHAB MONTHLY", qty: 10 },
-  { brand: "FRESHLOOK", type: "Daily", bc: "8.6", diameter: "14.2", power: "-2.00", price: 10.0, color: "FRESHLOOK DAILY", qty: 10 },
-  { brand: "FRESHLOOK", type: "Monthly", bc: "8.6", diameter: "14.2", power: "-2.00", price: 15.0, color: "FRESHLOOK MONTHLY", qty: 10 }
-];
-
-export const InventoryInitializer = () => {
-  const cleanupSamplePhotochromicCoatings = useInventoryStore(
-    (state) => state.cleanupSamplePhotochromicCoatings
-  );
+export const ImportInventoryButton = () => {
+  const [isImporting, setIsImporting] = useState(false);
+  const { t, language } = useLanguageStore();
+  const isRtl = language === 'ar';
   
-  const bulkImportFrames = useInventoryStore(
-    (state) => state.bulkImportFrames
-  );
+  const { frames, bulkImportFrames, addContactLens, contactLenses } = useInventoryStore();
   
-  const addContactLens = useInventoryStore(
-    (state) => state.addContactLens
-  );
-  
-  const contactLenses = useInventoryStore(
-    (state) => state.contactLenses
-  );
-
-  useEffect(() => {
-    // Clean up any existing sample photochromic coatings on component mount
-    cleanupSamplePhotochromicCoatings();
-    
-    // Import frames if the data is provided and store is empty
-    const importFrames = async () => {
-      // Only import if there are frames to import and the store has no frames
-      if (framesToImport.length > 0) {
-        const result = bulkImportFrames(framesToImport);
+  const importAllData = async () => {
+    setIsImporting(true);
+    try {
+      // Import frames
+      if (allFrames.length > 0) {
+        const result = bulkImportFrames(allFrames);
         
         if (result.added > 0) {
           toast.success(`Successfully imported ${result.added} frames`);
@@ -263,31 +40,94 @@ export const InventoryInitializer = () => {
           toast.info(`${result.duplicates} duplicate frames were skipped`);
         }
       }
-    };
-    
-    // Import contact lenses if needed
-    const importContactLenses = async () => {
+      
+      // Import contact lenses
       if (contactLenses.length <= 3 && contactLensesToImport.length > 0) {
-        contactLensesToImport.forEach(lens => {
-          addContactLens({
-            brand: lens.brand,
-            type: lens.type,
-            bc: lens.bc,
-            diameter: lens.diameter,
-            power: lens.power,
-            price: lens.price,
-            qty: lens.qty,
-            color: lens.color
-          });
-        });
+        let importedLenses = 0;
         
-        toast.success(`Successfully imported ${contactLensesToImport.length} contact lens types`);
+        for (const lens of contactLensesToImport) {
+          const isDuplicate = contactLenses.some(l => 
+            l.brand === lens.brand && 
+            l.type === lens.type && 
+            l.power === lens.power
+          );
+          
+          if (!isDuplicate) {
+            addContactLens(lens);
+            importedLenses++;
+          }
+        }
+        
+        if (importedLenses > 0) {
+          toast.success(`Successfully imported ${importedLenses} contact lens types`);
+        }
       }
-    };
-    
-    importFrames();
-    importContactLenses();
-  }, [cleanupSamplePhotochromicCoatings, bulkImportFrames, addContactLens, contactLenses.length]);
+    } catch (error) {
+      toast.error(`Error importing inventory: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
-  return null; // This component doesn't render anything
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button 
+          variant="outline" 
+          className={`gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 ${isImporting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={isImporting}
+        >
+          {isImporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Upload className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} />
+          )}
+          {isRtl ? "استيراد جميع الإطارات" : "Import All Frames"}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {isRtl ? "استيراد جميع الإطارات" : "Import All Frames"}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {isRtl 
+              ? "هل أنت متأكد من رغبتك في استيراد جميع الإطارات؟ سيتم إضافة حوالي 600 إطار إلى المخزون."
+              : "Are you sure you want to import all frames? This will add about 600 frames to your inventory."}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className={isRtl ? "flex-row-reverse" : ""}>
+          <AlertDialogCancel>
+            {isRtl ? "إلغاء" : "Cancel"}
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={importAllData} disabled={isImporting}>
+            {isImporting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                {isRtl ? "جاري الاستيراد..." : "Importing..."}
+              </>
+            ) : (
+              <>
+                {isRtl ? "استيراد الإطارات" : "Import Frames"}
+              </>
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
+
+// This component just ensures the photochromic samples are cleaned up
+export const InventoryInitializer = () => {
+  const cleanupSamplePhotochromicCoatings = useInventoryStore(
+    (state) => state.cleanupSamplePhotochromicCoatings
+  );
+  
+  useState(() => {
+    // Clean up any existing sample photochromic coatings on component mount
+    cleanupSamplePhotochromicCoatings();
+  });
+
+  return null; // This component doesn't render anything visible
 };
