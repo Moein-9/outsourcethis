@@ -9,51 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      contact_lenses: {
-        Row: {
-          bc: string
-          brand: string
-          color: string | null
-          created_at: string | null
-          diameter: string
-          id: string
-          lens_id: string
-          power: string
-          price: number
-          qty: number
-          type: string
-          updated_at: string | null
-        }
-        Insert: {
-          bc: string
-          brand: string
-          color?: string | null
-          created_at?: string | null
-          diameter: string
-          id?: string
-          lens_id: string
-          power: string
-          price: number
-          qty?: number
-          type: string
-          updated_at?: string | null
-        }
-        Update: {
-          bc?: string
-          brand?: string
-          color?: string | null
-          created_at?: string | null
-          diameter?: string
-          id?: string
-          lens_id?: string
-          power?: string
-          price?: number
-          qty?: number
-          type?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       daily_sales_summary: {
         Row: {
           contacts_sales_count: number
@@ -92,45 +47,6 @@ export type Database = {
           net_sales?: number
           total_refunds?: number
           total_sales?: number
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      frames: {
-        Row: {
-          brand: string
-          color: string
-          created_at: string | null
-          frame_id: string
-          id: string
-          model: string
-          price: number
-          qty: number
-          size: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          brand: string
-          color: string
-          created_at?: string | null
-          frame_id: string
-          id?: string
-          model: string
-          price: number
-          qty?: number
-          size?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          brand?: string
-          color?: string
-          created_at?: string | null
-          frame_id?: string
-          id?: string
-          model?: string
-          price?: number
-          qty?: number
-          size?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -226,141 +142,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      lens_coatings: {
-        Row: {
-          available_colors: string[] | null
-          category: string
-          coating_id: string
-          created_at: string | null
-          description: string | null
-          id: string
-          is_photochromic: boolean | null
-          name: string
-          price: number
-          updated_at: string | null
-        }
-        Insert: {
-          available_colors?: string[] | null
-          category: string
-          coating_id: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          is_photochromic?: boolean | null
-          name: string
-          price: number
-          updated_at?: string | null
-        }
-        Update: {
-          available_colors?: string[] | null
-          category?: string
-          coating_id?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          is_photochromic?: boolean | null
-          name?: string
-          price?: number
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      lens_pricing_combinations: {
-        Row: {
-          coating_id: string
-          combo_id: string
-          created_at: string | null
-          id: string
-          lens_type_id: string
-          price: number
-          thickness_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          coating_id: string
-          combo_id: string
-          created_at?: string | null
-          id?: string
-          lens_type_id: string
-          price: number
-          thickness_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          coating_id?: string
-          combo_id?: string
-          created_at?: string | null
-          id?: string
-          lens_type_id?: string
-          price?: number
-          thickness_id?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      lens_thicknesses: {
-        Row: {
-          category: string
-          created_at: string | null
-          description: string | null
-          id: string
-          name: string
-          price: number
-          thickness_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          category: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name: string
-          price: number
-          thickness_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          category?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name?: string
-          price?: number
-          thickness_id?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      lens_types: {
-        Row: {
-          created_at: string | null
-          id: string
-          lens_id: string
-          name: string
-          price: number | null
-          type: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          lens_id: string
-          name: string
-          price?: number | null
-          type: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          lens_id?: string
-          name?: string
-          price?: number | null
-          type?: string
-          updated_at?: string | null
-        }
-        Relationships: []
       }
       monthly_sales_summary: {
         Row: {
@@ -472,39 +253,6 @@ export type Database = {
           location_id?: string | null
           reason?: string | null
           refund_id?: string
-        }
-        Relationships: []
-      }
-      services: {
-        Row: {
-          category: string
-          created_at: string | null
-          description: string | null
-          id: string
-          name: string
-          price: number
-          service_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          category: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name: string
-          price: number
-          service_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          category?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name?: string
-          price?: number
-          service_id?: string
-          updated_at?: string | null
         }
         Relationships: []
       }
