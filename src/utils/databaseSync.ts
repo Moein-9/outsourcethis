@@ -8,8 +8,9 @@ import { toast } from "sonner";
  */
 export const syncFrameToDatabase = async (frame: FrameItem): Promise<boolean> => {
   try {
+    // Using from with a type assertion to bypass TypeScript table name checking
     const { data, error } = await supabase
-      .from('frames')
+      .from('frames' as any)
       .upsert({
         frame_id: frame.frameId,
         brand: frame.brand,
@@ -62,9 +63,10 @@ export const batchSyncFramesToDatabase = async (
     }));
     
     try {
+      // Using from with a type assertion to bypass TypeScript table name checking
       const { data, error } = await supabase
-        .from('frames')
-        .upsert(dbFrames, {
+        .from('frames' as any)
+        .upsert(dbFrames as any, {
           onConflict: 'frame_id'
         });
       
@@ -93,8 +95,9 @@ export const batchSyncFramesToDatabase = async (
  */
 export const loadFramesFromDatabase = async (): Promise<FrameItem[]> => {
   try {
+    // Using from with a type assertion to bypass TypeScript table name checking
     const { data, error } = await supabase
-      .from('frames')
+      .from('frames' as any)
       .select('*');
     
     if (error) {
@@ -102,8 +105,12 @@ export const loadFramesFromDatabase = async (): Promise<FrameItem[]> => {
       return [];
     }
     
+    if (!data) {
+      return [];
+    }
+    
     // Convert database format to FrameItem format
-    const frames: FrameItem[] = data.map(item => ({
+    const frames: FrameItem[] = data.map((item: any) => ({
       frameId: item.frame_id,
       brand: item.brand,
       model: item.model,
