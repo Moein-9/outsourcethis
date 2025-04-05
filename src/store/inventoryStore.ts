@@ -79,7 +79,11 @@ interface InventoryState {
   updateFrameQuantity: (frameId: string, newQty: number) => void;
   searchFrames: (query: string) => FrameItem[];
   getFrameById: (id: string) => FrameItem | undefined;
-  bulkImportFrames: (frames: Array<Omit<FrameItem, "frameId" | "createdAt">>) => { added: number; duplicates: number };
+  bulkImportFrames: (frames: Array<Omit<FrameItem, "frameId" | "createdAt">>) => { 
+    added: number; 
+    duplicates: number; 
+    newFrameIds: string[]; 
+  };
   
   addLensType: (lens: Omit<LensType, "id">) => string;
   updateLensType: (id: string, lens: Partial<Omit<LensType, "id">>) => void;
@@ -119,6 +123,11 @@ interface InventoryState {
   
   syncFramesFromDatabase: (dbFrames: FrameItem[]) => void;
   syncFramesToDatabase: (
+    onProgress?: (processed: number, total: number, success: number, failed: number) => void
+  ) => Promise<{success: number, failed: number, details?: string}>;
+  
+  syncSpecificFramesToDatabase: (
+    frameIds: string[],
     onProgress?: (processed: number, total: number, success: number, failed: number) => void
   ) => Promise<{success: number, failed: number, details?: string}>;
 }
@@ -207,7 +216,7 @@ export const useInventoryStore = create<InventoryState>()(
         },
         { 
           id: "photochromic-prog", 
-          name: "Photochromic (فوتوكرو��يك)", 
+          name: "Photochromic (فوتوكرو���يك)", 
           price: 0, 
           description: "Photochromic coating for progressive lenses", 
           category: "progressive",
@@ -299,6 +308,7 @@ export const useInventoryStore = create<InventoryState>()(
         const currentFrames = get().frames;
         const newFrames = [];
         let duplicateCount = 0;
+        const newFrameIds: string[] = [];
         
         // Track existing frames by a combination key for faster duplicate checking
         const existingFrameCombinations = new Map();
@@ -327,6 +337,9 @@ export const useInventoryStore = create<InventoryState>()(
             createdAt
           });
           
+          // Track the IDs of new frames
+          newFrameIds.push(frameId);
+          
           // Add to map to catch duplicates within the import batch too
           existingFrameCombinations.set(key, true);
         }
@@ -336,15 +349,12 @@ export const useInventoryStore = create<InventoryState>()(
           set((state) => ({
             frames: [...state.frames, ...newFrames]
           }));
-          
-          // Sync the new frames to the database in the background
-          batchSyncFramesToDatabase(newFrames)
-            .catch(err => console.error('Failed to sync imported frames:', err));
         }
         
         return {
           added: newFrames.length,
-          duplicates: duplicateCount
+          duplicates: duplicateCount,
+          newFrameIds: newFrameIds
         };
       },
       
@@ -811,6 +821,17 @@ export const useInventoryStore = create<InventoryState>()(
       ) => {
         const frames = get().frames;
         return await batchSyncFramesToDatabase(frames, onProgress);
+      },
+      
+      syncSpecificFramesToDatabase: async (frameIds, onProgress) => {
+        const allFrames = get().frames;
+        const framesToSync = allFrames.filter(frame => frameIds.includes(frame.frameId));
+        
+        if (framesToSync.length === 0) {
+          return { success: 0, failed: 0 };
+        }
+        
+        return await batchSyncFramesToDatabase(framesToSync, onProgress);
       }
     }),
     {

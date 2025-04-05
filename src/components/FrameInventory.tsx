@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { 
   Search, 
   Plus, 
@@ -37,7 +39,8 @@ import {
   Printer,
   Upload,
   AlertCircle,
-  Check
+  Check,
+  Database
 } from "lucide-react";
 import { FrameLabelTemplate, usePrintLabel } from "./FrameLabelTemplate";
 import { useLanguageStore } from "@/store/languageStore";
@@ -47,6 +50,7 @@ interface ImportResult {
   duplicates: number;
   errors: number;
   errorDetails: string[];
+  newFrameIds?: string[]; // Track IDs of newly imported frames
 }
 
 const FrameItemCard = ({ frame, index, onPrintLabel }: { 
@@ -127,7 +131,7 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
 };
 
 export const FrameInventory: React.FC = () => {
-  const { frames, addFrame, searchFrames, bulkImportFrames, syncFramesToDatabase } = useInventoryStore();
+  const { frames, addFrame, searchFrames, bulkImportFrames, syncFramesToDatabase, syncSpecificFramesToDatabase } = useInventoryStore();
   const { printSingleLabel } = usePrintLabel();
   const { t, language } = useLanguageStore();
   
@@ -145,6 +149,8 @@ export const FrameInventory: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState(0);
   const [syncTotal, setSyncTotal] = useState(0);
+  const [importedFrameIds, setImportedFrameIds] = useState<string[]>([]);
+  const [isSavingImport, setIsSavingImport] = useState(false);
   
   const [frameBrand, setFrameBrand] = useState("");
   const [frameModel, setFrameModel] = useState("");
@@ -227,6 +233,7 @@ export const FrameInventory: React.FC = () => {
     setIsImporting(true);
     setIsProcessingImport(false);
     setImportResult(null);
+    setImportedFrameIds([]);
     
     try {
       const lines = importData.trim().split("\n").filter(line => line.trim().length > 0);
@@ -332,13 +339,17 @@ export const FrameInventory: React.FC = () => {
         added: result.added,
         duplicates: result.duplicates,
         errors: errors.length,
-        errorDetails: errors
+        errorDetails: errors,
+        newFrameIds: result.newFrameIds
       });
+      
+      // Store imported frame IDs for later saving to database
+      setImportedFrameIds(result.newFrameIds || []);
       
       setSearchResults(frames);
       
       if (result.added > 0) {
-        toast.success(`${result.added} frames imported successfully`);
+        toast.success(`${result.added} frames imported successfully to local storage`);
       }
       
       if (result.duplicates > 0) {
@@ -381,6 +392,42 @@ export const FrameInventory: React.FC = () => {
     }
   };
   
+  // New function to save imported frames to database
+  const handleSaveImportedFrames = async () => {
+    if (importedFrameIds.length === 0) {
+      toast.info("No new frames to save to database");
+      return;
+    }
+    
+    setIsSavingImport(true);
+    setSyncProgress(0);
+    setSyncTotal(importedFrameIds.length);
+    
+    try {
+      const result = await syncSpecificFramesToDatabase(
+        importedFrameIds, 
+        (processed, total) => {
+          setSyncProgress(processed);
+          setSyncTotal(total);
+        }
+      );
+      
+      if (result.success > 0) {
+        toast.success(`${result.success} imported frames saved to database successfully`);
+        // Clear imported frame IDs after successful save
+        setImportedFrameIds([]);
+      }
+      
+      if (result.failed > 0) {
+        toast.error(`${result.failed} frames failed to save to database`);
+      }
+    } catch (error) {
+      toast.error(`Database save failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSavingImport(false);
+    }
+  };
+  
   useEffect(() => {
     setSearchResults(frames);
   }, [frames]);
@@ -408,6 +455,21 @@ export const FrameInventory: React.FC = () => {
         </div>
         
         <div className="flex gap-2">
+          {/* Show "Save to Database" button when there are imported frames */}
+          {importedFrameIds.length > 0 && (
+            <Button 
+              variant="outline" 
+              onClick={handleSaveImportedFrames}
+              disabled={isSavingImport}
+              className="shrink-0 border-purple-200 text-purple-700 hover:bg-purple-50 animate-pulse"
+            >
+              <Database className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'} ${isSavingImport ? 'animate-spin' : ''}`} />
+              {isSavingImport 
+                ? (isRtl ? `حفظ... ${syncProgress}/${syncTotal}` : `Saving... ${syncProgress}/${syncTotal}`) 
+                : (isRtl ? `حفظ ${importedFrameIds.length} إطارات جديدة` : `Save ${importedFrameIds.length} New Frames to Database`)}
+            </Button>
+          )}
+          
           <Button 
             variant="outline" 
             onClick={handleDatabaseSync}
@@ -546,6 +608,48 @@ export const FrameInventory: React.FC = () => {
         </div>
       </div>
       
+      {/* Progress indicator for imported frames waiting to be saved */}
+      {importedFrameIds.length > 0 && (
+        <Card className="bg-purple-50 border-purple-200">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-purple-600" />
+                <span className="font-medium text-purple-800">
+                  {isRtl 
+                    ? `${importedFrameIds.length} إطارات بانتظار الحفظ في قاعدة البيانات` 
+                    : `${importedFrameIds.length} frames pending database save`}
+                </span>
+              </div>
+              <Button
+                size="sm"
+                variant="default"
+                className="bg-purple-600 hover:bg-purple-700"
+                onClick={handleSaveImportedFrames}
+                disabled={isSavingImport}
+              >
+                {isSavingImport 
+                  ? (isRtl ? "جاري الحفظ..." : "Saving...") 
+                  : (isRtl ? "حفظ الآن" : "Save Now")}
+              </Button>
+            </div>
+            {isSavingImport && (
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs text-purple-600">
+                  <span>{isRtl ? "جاري الحفظ..." : "Saving to database..."}</span>
+                  <span>{syncProgress} / {syncTotal}</span>
+                </div>
+                <Progress 
+                  value={(syncProgress / syncTotal) * 100} 
+                  className="h-2 bg-purple-200"
+                  indicatorClassName="bg-purple-600"
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+      
       {Object.keys(groupedByBrand).length > 0 ? (
         <div className="space-y-4">
           {Object.entries(groupedByBrand).map(([brand, brandFrames]) => (
@@ -615,6 +719,12 @@ export const FrameInventory: React.FC = () => {
               {isRtl 
                 ? "أدخل بيانات الإطارات بتنسيق CSV: العلامة التجارية، الموديل، اللون، السعر، الحجم (اختياري)، الكمية (اختياري)" 
                 : "Enter frame data in CSV format: Brand, Model, Color, Price, Size (optional), Quantity (optional)"}
+              <div className="mt-2 text-xs text-amber-600 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {isRtl 
+                  ? "ملاحظة: سيتم حفظ الإطارات محلياً فقط. اضغط على زر 'حفظ في قاعدة البيانات' بعد الاستيراد للحفظ النهائي."
+                  : "Note: Frames will be stored locally only. Click 'Save to Database' after import for permanent storage."}
+              </div>
             </DialogDescription>
           </DialogHeader>
           
