@@ -10,6 +10,7 @@ import { PatientSearch } from "@/components/PatientSearch";
 import { RefundManager } from "@/components/RefundManager";
 import { useLocation } from "react-router-dom";
 import { useLanguageStore } from "@/store/languageStore";
+import { InventoryInitializer } from "@/components/InventoryInitializer";
 
 const Index = () => {
   const [activeSection, setActiveSection] = React.useState("dashboard");
@@ -63,6 +64,7 @@ const Index = () => {
       activeSection={activeSection}
       onNavigate={setActiveSection}
     >
+      <InventoryInitializer />
       {activeSection === "dashboard" && <Dashboard />}
       {activeSection === "createClient" && <CreateClient />}
       {activeSection === "createInvoice" && <CreateInvoice />}

@@ -127,7 +127,7 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
 };
 
 export const FrameInventory: React.FC = () => {
-  const { frames, addFrame, searchFrames, bulkImportFrames } = useInventoryStore();
+  const { frames, addFrame, searchFrames, bulkImportFrames, syncFramesToDatabase } = useInventoryStore();
   const { printSingleLabel } = usePrintLabel();
   const { t, language } = useLanguageStore();
   
@@ -142,6 +142,9 @@ export const FrameInventory: React.FC = () => {
   const [isProcessingImport, setIsProcessingImport] = useState(false);
   const [processedItems, setProcessedItems] = useState(0);
   const [totalItemsToProcess, setTotalItemsToProcess] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncProgress, setSyncProgress] = useState(0);
+  const [syncTotal, setSyncTotal] = useState(0);
   
   const [frameBrand, setFrameBrand] = useState("");
   const [frameModel, setFrameModel] = useState("");
@@ -353,6 +356,31 @@ export const FrameInventory: React.FC = () => {
     }
   };
   
+  const handleDatabaseSync = async () => {
+    setIsSyncing(true);
+    setSyncProgress(0);
+    setSyncTotal(frames.length);
+    
+    try {
+      const result = await syncFramesToDatabase((processed, total) => {
+        setSyncProgress(processed);
+        setSyncTotal(total);
+      });
+      
+      if (result.success > 0) {
+        toast.success(`${result.success} frames synced to database successfully`);
+      }
+      
+      if (result.failed > 0) {
+        toast.error(`${result.failed} frames failed to sync to database`);
+      }
+    } catch (error) {
+      toast.error(`Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+  
   useEffect(() => {
     setSearchResults(frames);
   }, [frames]);
@@ -380,6 +408,18 @@ export const FrameInventory: React.FC = () => {
         </div>
         
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleDatabaseSync}
+            disabled={isSyncing || frames.length === 0}
+            className={`shrink-0 border-green-200 text-green-700 hover:bg-green-50 ${isSyncing ? 'opacity-70' : ''}`}
+          >
+            <Save className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'} ${isSyncing ? 'animate-pulse' : ''}`} />
+            {isSyncing 
+              ? (isRtl ? `مزامنة... ${syncProgress}/${syncTotal}` : `Syncing... ${syncProgress}/${syncTotal}`) 
+              : (isRtl ? "مزامنة قاعدة البيانات" : "Sync to Database")}
+          </Button>
+          
           <Button 
             variant="outline" 
             onClick={() => setIsLabelDialogOpen(true)}

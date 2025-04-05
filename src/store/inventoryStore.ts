@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { syncFrameToDatabase, batchSyncFramesToDatabase } from "@/utils/databaseSync";
 
 export interface FrameItem {
   frameId: string;
@@ -115,6 +116,9 @@ interface InventoryState {
   
   cleanupSamplePhotochromicCoatings: () => void;
   resetLensPricing: () => void;
+  
+  syncFramesFromDatabase: (dbFrames: FrameItem[]) => void;
+  syncFramesToDatabase: (onProgress?: (processed: number, total: number) => void) => Promise<{success: number, failed: number}>;
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -273,12 +277,18 @@ export const useInventoryStore = create<InventoryState>()(
         const frameId = `FR${Date.now()}`;
         const createdAt = new Date().toISOString();
         
+        const newFrame = { ...frame, frameId, createdAt };
+        
         set((state) => ({
           frames: [
             ...state.frames,
-            { ...frame, frameId, createdAt }
+            newFrame
           ]
         }));
+
+        // Sync the new frame to the database
+        syncFrameToDatabase(newFrame)
+          .catch(err => console.error('Failed to sync new frame:', err));
         
         return frameId;
       },
@@ -319,11 +329,15 @@ export const useInventoryStore = create<InventoryState>()(
           existingFrameCombinations.set(key, true);
         }
         
-        // Add all the new frames at once
+        // Add all the new frames at once to local storage
         if (newFrames.length > 0) {
           set((state) => ({
             frames: [...state.frames, ...newFrames]
           }));
+          
+          // Sync the new frames to the database in the background
+          batchSyncFramesToDatabase(newFrames)
+            .catch(err => console.error('Failed to sync imported frames:', err));
         }
         
         return {
@@ -333,13 +347,25 @@ export const useInventoryStore = create<InventoryState>()(
       },
       
       updateFrameQuantity: (frameId, newQty) => {
-        set((state) => ({
-          frames: state.frames.map(frame => 
-            frame.frameId === frameId 
-              ? { ...frame, qty: newQty } 
-              : frame
-          )
-        }));
+        let updatedFrame: FrameItem | undefined;
+        
+        set((state) => {
+          const updated = state.frames.map(frame => {
+            if (frame.frameId === frameId) {
+              updatedFrame = { ...frame, qty: newQty };
+              return updatedFrame;
+            }
+            return frame;
+          });
+          
+          return { frames: updated };
+        });
+        
+        // Sync the updated frame to the database
+        if (updatedFrame) {
+          syncFrameToDatabase(updatedFrame)
+            .catch(err => console.error('Failed to sync updated frame:', err));
+        }
       },
       
       searchFrames: (query) => {
@@ -751,6 +777,36 @@ export const useInventoryStore = create<InventoryState>()(
         set({
           lensPricingCombinations: newPricingCombinations
         });
+      },
+      
+      syncFramesFromDatabase: (dbFrames) => {
+        set((state) => {
+          // Create a map of existing frames for easy lookup
+          const existingFrames = new Map();
+          state.frames.forEach(frame => {
+            existingFrames.set(frame.frameId, frame);
+          });
+          
+          // Merge database frames with local frames
+          const mergedFrames = [...state.frames];
+          
+          dbFrames.forEach(dbFrame => {
+            if (!existingFrames.has(dbFrame.frameId)) {
+              // Add new frames from database
+              mergedFrames.push(dbFrame);
+            } else {
+              // Update existing frames with database data if needed
+              // (You could implement more complex merging logic here if required)
+            }
+          });
+          
+          return { frames: mergedFrames };
+        });
+      },
+      
+      syncFramesToDatabase: async (onProgress) => {
+        const frames = get().frames;
+        return await batchSyncFramesToDatabase(frames, onProgress);
       }
     }),
     {
