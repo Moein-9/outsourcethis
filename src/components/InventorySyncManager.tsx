@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useInventoryStore } from "@/store/inventoryStore";
@@ -6,9 +7,9 @@ import { toast } from "sonner";
 import { resumeFailedSync } from "@/utils/databaseSync";
 
 export const InventorySyncManager: React.FC = () => {
-  const [syncing, setSyncing] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [syncStatus, setSyncStatus] = useState<{
+  const [syncing, setSyncing] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
+  const [syncStatus, setSyncStatus] = React.useState<{
     processed: number;
     total: number;
     success: number;
@@ -81,7 +82,7 @@ export const InventorySyncManager: React.FC = () => {
   
   return (
     <div className="border rounded-lg p-4 bg-card space-y-4">
-      <h3 className="font-semibold text-lg">Database Synchronization</h3>
+      <h3 className="font-semibold text-lg">Frames Database Synchronization</h3>
       
       {syncStatus && (
         <div className="space-y-2">
@@ -109,7 +110,7 @@ export const InventorySyncManager: React.FC = () => {
           disabled={syncing}
           className="bg-primary text-white"
         >
-          {syncing ? "Syncing..." : "Sync to Database"}
+          {syncing ? "Syncing..." : "Sync Frames to Database"}
         </Button>
         
         {syncStatus && syncStatus.failed > 0 && (

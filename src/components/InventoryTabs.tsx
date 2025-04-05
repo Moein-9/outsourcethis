@@ -9,15 +9,18 @@ import { LensThicknessManager } from "@/components/LensThicknessManager";
 import { LensCombinationManager } from "@/components/LensCombinationManager";
 import { ServiceManager } from "@/components/ServiceManager";
 import { Card, CardContent } from "@/components/ui/card";
-import { InventorySyncManager } from "@/components/InventorySyncManager";
+import { DatabaseSyncManager } from "@/components/DatabaseSyncManager";
+import { InventoryInitializer } from "@/components/InventoryInitializer";
 
 export const InventoryTabs = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Inventory Management</h1>
 
+      <InventoryInitializer />
+
       <div className="mb-6">
-        <InventorySyncManager />
+        <DatabaseSyncManager />
       </div>
 
       <Tabs defaultValue="frames">
