@@ -41,12 +41,17 @@ import {
 } from "lucide-react";
 import { FrameLabelTemplate, usePrintLabel } from "./FrameLabelTemplate";
 import { useLanguageStore } from "@/store/languageStore";
+import { FrameService } from "@/services/inventoryService";
 
 interface ImportResult {
   added: number;
   duplicates: number;
   errors: number;
   errorDetails: string[];
+}
+
+interface FrameInventoryProps {
+  overrideFrames?: FrameItem[];
 }
 
 const FrameItemCard = ({ frame, index, onPrintLabel }: { 
@@ -126,13 +131,15 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
   );
 };
 
-export const FrameInventory: React.FC = () => {
-  const { frames, addFrame, searchFrames, bulkImportFrames } = useInventoryStore();
+export const FrameInventory: React.FC<FrameInventoryProps> = ({ overrideFrames }) => {
+  const { frames: localFrames, addFrame, searchFrames, bulkImportFrames } = useInventoryStore();
   const { printSingleLabel } = usePrintLabel();
   const { t, language } = useLanguageStore();
   
+  const frames = overrideFrames || localFrames;
+  
   const [frameSearchTerm, setFrameSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<ReturnType<typeof searchFrames>>([]);
+  const [searchResults, setSearchResults] = useState<FrameItem[]>([]);
   const [isAddFrameDialogOpen, setIsAddFrameDialogOpen] = useState(false);
   const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
@@ -171,15 +178,30 @@ export const FrameInventory: React.FC = () => {
       return;
     }
     
-    const results = searchFrames(frameSearchTerm);
-    setSearchResults(results);
-    
-    if (results.length === 0) {
-      toast(t('noFramesMatchingSearch'));
+    if (overrideFrames) {
+      const results = frames.filter(frame => 
+        frame.brand.toLowerCase().includes(frameSearchTerm.toLowerCase()) || 
+        frame.model.toLowerCase().includes(frameSearchTerm.toLowerCase()) || 
+        frame.color.toLowerCase().includes(frameSearchTerm.toLowerCase()) || 
+        frame.size.toLowerCase().includes(frameSearchTerm.toLowerCase())
+      );
+      
+      setSearchResults(results);
+      
+      if (results.length === 0) {
+        toast(t('noFramesMatchingSearch'));
+      }
+    } else {
+      const results = searchFrames(frameSearchTerm);
+      setSearchResults(results);
+      
+      if (results.length === 0) {
+        toast(t('noFramesMatchingSearch'));
+      }
     }
   };
   
-  const handleAddFrame = () => {
+  const handleAddFrame = async () => {
     if (!frameBrand || !frameModel || !frameColor || !framePrice) {
       toast.error(t("pleaseEnterCompleteFrameDetails"));
       return;
@@ -198,29 +220,34 @@ export const FrameInventory: React.FC = () => {
       return;
     }
     
-    const frameId = addFrame({
-      brand: frameBrand,
-      model: frameModel,
-      color: frameColor,
-      size: frameSize,
-      price,
-      qty
-    });
-    
-    toast.success(t("frameAddedSuccessfully"));
-    
-    setFrameBrand("");
-    setFrameModel("");
-    setFrameColor("");
-    setFrameSize("");
-    setFramePrice("");
-    setFrameQty("1");
-    setIsAddFrameDialogOpen(false);
-    
-    setSearchResults(frames);
+    try {
+      const frameId = await FrameService.addFrame({
+        brand: frameBrand,
+        model: frameModel,
+        color: frameColor,
+        size: frameSize,
+        price,
+        qty
+      });
+      
+      toast.success(t("frameAddedSuccessfully"));
+      
+      setFrameBrand("");
+      setFrameModel("");
+      setFrameColor("");
+      setFrameSize("");
+      setFramePrice("");
+      setFrameQty("1");
+      setIsAddFrameDialogOpen(false);
+      
+      window.location.reload();
+    } catch (error) {
+      console.error("Error adding frame:", error);
+      toast.error(t("failedToAddFrame"));
+    }
   };
   
-  const handleImportFrames = () => {
+  const handleImportFrames = async () => {
     setIsImporting(true);
     setIsProcessingImport(false);
     setImportResult(null);
@@ -257,10 +284,10 @@ export const FrameInventory: React.FC = () => {
     }
   };
   
-  const processImportBatch = (
+  const processImportBatch = async (
     lines: string[],
     currentIndex: number,
-    parsedFrames: Array<Omit<FrameItem, "frameId" | "createdAt">>,
+    parsedFrames: Array<any>,
     errors: string[]
   ) => {
     const BATCH_SIZE = 100;
@@ -318,12 +345,12 @@ export const FrameInventory: React.FC = () => {
     }
   };
   
-  const finishImport = (
-    parsedFrames: Array<Omit<FrameItem, "frameId" | "createdAt">>,
+  const finishImport = async (
+    parsedFrames: Array<any>,
     errors: string[]
   ) => {
     try {
-      const result = bulkImportFrames(parsedFrames);
+      const result = await FrameService.bulkImportFrames(parsedFrames);
       
       setImportResult({
         added: result.added,
@@ -331,8 +358,6 @@ export const FrameInventory: React.FC = () => {
         errors: errors.length,
         errorDetails: errors
       });
-      
-      setSearchResults(frames);
       
       if (result.added > 0) {
         toast.success(`${result.added} frames imported successfully`);
@@ -344,6 +369,12 @@ export const FrameInventory: React.FC = () => {
       
       if (errors.length > 0) {
         toast.error(`${errors.length} errors occurred during import`);
+      }
+      
+      if (result.added > 0) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       }
     } catch (error) {
       toast.error(`Final import processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
