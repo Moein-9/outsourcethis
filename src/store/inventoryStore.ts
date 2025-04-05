@@ -1,16 +1,5 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import {
-  syncFrameToDatabase,
-  batchSyncFramesToDatabase,
-  syncLensTypesToDatabase,
-  syncLensCoatingsToDatabase,
-  syncLensThicknessesToDatabase,
-  syncLensPricingCombinationsToDatabase,
-  syncContactLensesToDatabase,
-  syncServicesToDatabase
-} from "@/utils/databaseSync";
 
 export interface FrameItem {
   frameId: string;
@@ -89,11 +78,7 @@ interface InventoryState {
   updateFrameQuantity: (frameId: string, newQty: number) => void;
   searchFrames: (query: string) => FrameItem[];
   getFrameById: (id: string) => FrameItem | undefined;
-  bulkImportFrames: (frames: Array<Omit<FrameItem, "frameId" | "createdAt">>) => { 
-    added: number; 
-    duplicates: number; 
-    newFrameIds: string[]; 
-  };
+  bulkImportFrames: (frames: Array<Omit<FrameItem, "frameId" | "createdAt">>) => { added: number; duplicates: number };
   
   addLensType: (lens: Omit<LensType, "id">) => string;
   updateLensType: (id: string, lens: Partial<Omit<LensType, "id">>) => void;
@@ -130,49 +115,6 @@ interface InventoryState {
   
   cleanupSamplePhotochromicCoatings: () => void;
   resetLensPricing: () => void;
-  
-  // Database sync functions for individual inventory types
-  syncFromDatabase: (
-    type: 'frames' | 'lensTypes' | 'lensCoatings' | 'lensThicknesses' | 'lensPricingCombinations' | 'contactLenses' | 'services',
-    data: any[]
-  ) => void;
-  
-  syncFramesToDatabase: (
-    onProgress?: (processed: number, total: number, success: number, failed: number) => void
-  ) => Promise<{success: number, failed: number, details?: string}>;
-  
-  syncLensTypesToDatabase: (
-    onProgress?: (processed: number, total: number, success: number, failed: number) => void
-  ) => Promise<{success: number, failed: number, details?: string}>;
-  
-  syncLensCoatingsToDatabase: (
-    onProgress?: (processed: number, total: number, success: number, failed: number) => void
-  ) => Promise<{success: number, failed: number, details?: string}>;
-  
-  syncLensThicknessesToDatabase: (
-    onProgress?: (processed: number, total: number, success: number, failed: number) => void
-  ) => Promise<{success: number, failed: number, details?: string}>;
-  
-  syncLensPricingCombinationsToDatabase: (
-    onProgress?: (processed: number, total: number, success: number, failed: number) => void
-  ) => Promise<{success: number, failed: number, details?: string}>;
-  
-  syncContactLensesToDatabase: (
-    onProgress?: (processed: number, total: number, success: number, failed: number) => void
-  ) => Promise<{success: number, failed: number, details?: string}>;
-  
-  syncServicesToDatabase: (
-    onProgress?: (processed: number, total: number, success: number, failed: number) => void
-  ) => Promise<{success: number, failed: number, details?: string}>;
-  
-  syncAllToDatabase: (
-    onProgress?: (processed: number, total: number, success: number, failed: number) => void
-  ) => Promise<{success: number, failed: number, details?: string}>;
-  
-  syncSpecificFramesToDatabase: (
-    frameIds: string[],
-    onProgress?: (processed: number, total: number, success: number, failed: number) => void
-  ) => Promise<{success: number, failed: number, details?: string}>;
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -259,7 +201,7 @@ export const useInventoryStore = create<InventoryState>()(
         },
         { 
           id: "photochromic-prog", 
-          name: "Photochromic (فوتوكرو���يك)", 
+          name: "Photochromic (فوتوكروميك)", 
           price: 0, 
           description: "Photochromic coating for progressive lenses", 
           category: "progressive",
@@ -331,18 +273,12 @@ export const useInventoryStore = create<InventoryState>()(
         const frameId = `FR${Date.now()}`;
         const createdAt = new Date().toISOString();
         
-        const newFrame = { ...frame, frameId, createdAt };
-        
         set((state) => ({
           frames: [
             ...state.frames,
-            newFrame
+            { ...frame, frameId, createdAt }
           ]
         }));
-
-        // Sync the new frame to the database
-        syncFrameToDatabase(newFrame)
-          .catch(err => console.error('Failed to sync new frame:', err));
         
         return frameId;
       },
@@ -351,7 +287,6 @@ export const useInventoryStore = create<InventoryState>()(
         const currentFrames = get().frames;
         const newFrames = [];
         let duplicateCount = 0;
-        const newFrameIds: string[] = [];
         
         // Track existing frames by a combination key for faster duplicate checking
         const existingFrameCombinations = new Map();
@@ -380,14 +315,11 @@ export const useInventoryStore = create<InventoryState>()(
             createdAt
           });
           
-          // Track the IDs of new frames
-          newFrameIds.push(frameId);
-          
           // Add to map to catch duplicates within the import batch too
           existingFrameCombinations.set(key, true);
         }
         
-        // Add all the new frames at once to local storage
+        // Add all the new frames at once
         if (newFrames.length > 0) {
           set((state) => ({
             frames: [...state.frames, ...newFrames]
@@ -396,31 +328,18 @@ export const useInventoryStore = create<InventoryState>()(
         
         return {
           added: newFrames.length,
-          duplicates: duplicateCount,
-          newFrameIds: newFrameIds
+          duplicates: duplicateCount
         };
       },
       
       updateFrameQuantity: (frameId, newQty) => {
-        let updatedFrame: FrameItem | undefined;
-        
-        set((state) => {
-          const updated = state.frames.map(frame => {
-            if (frame.frameId === frameId) {
-              updatedFrame = { ...frame, qty: newQty };
-              return updatedFrame;
-            }
-            return frame;
-          });
-          
-          return { frames: updated };
-        });
-        
-        // Sync the updated frame to the database
-        if (updatedFrame) {
-          syncFrameToDatabase(updatedFrame)
-            .catch(err => console.error('Failed to sync updated frame:', err));
-        }
+        set((state) => ({
+          frames: state.frames.map(frame => 
+            frame.frameId === frameId 
+              ? { ...frame, qty: newQty } 
+              : frame
+          )
+        }));
       },
       
       searchFrames: (query) => {
@@ -441,56 +360,33 @@ export const useInventoryStore = create<InventoryState>()(
       
       addLensType: (lens) => {
         const id = `lens${Date.now()}`;
-        const newLensType = { ...lens, id };
         
         set((state) => ({
-          lensTypes: [...state.lensTypes, newLensType]
+          lensTypes: [...state.lensTypes, { ...lens, id }]
         }));
-        
-        // Sync to database
-        syncLensTypesToDatabase([newLensType])
-          .catch(err => console.error('Failed to sync new lens type:', err));
         
         return id;
       },
       
       updateLensType: (id, lens) => {
-        let updatedLensType: LensType | undefined;
-        
-        set((state) => {
-          const updated = state.lensTypes.map(type => {
-            if (type.id === id) {
-              updatedLensType = { ...type, ...lens };
-              return updatedLensType;
-            }
-            return type;
-          });
-          
-          return { lensTypes: updated };
-        });
-        
-        // Sync to database
-        if (updatedLensType) {
-          syncLensTypesToDatabase([updatedLensType])
-            .catch(err => console.error('Failed to sync updated lens type:', err));
-        }
+        set((state) => ({
+          lensTypes: state.lensTypes.map(type => 
+            type.id === id ? { ...type, ...lens } : type
+          )
+        }));
       },
       
       deleteLensType: (id) => {
         set((state) => ({
           lensTypes: state.lensTypes.filter(type => type.id !== id)
         }));
-        
-        // Since we're using upsert for database sync, deleted items will not be removed from the database
-        // This is a limitation with the current sync approach
       },
       
       addLensCoating: (coating) => {
         const id = `coat${Date.now()}`;
-        const newCoating = { ...coating, id };
         
         set((state) => ({
-          lensCoatings: [...state.lensCoatings, newCoating]
+          lensCoatings: [...state.lensCoatings, { ...coating, id }]
         }));
         
         if (coating.category === "sunglasses") {
@@ -522,41 +418,21 @@ export const useInventoryStore = create<InventoryState>()(
           }
         }
         
-        // Sync to database
-        syncLensCoatingsToDatabase([newCoating])
-          .catch(err => console.error('Failed to sync new lens coating:', err));
-        
         return id;
       },
       
       updateLensCoating: (id, coating) => {
-        let updatedCoating: LensCoating | undefined;
-        
-        set((state) => {
-          const updated = state.lensCoatings.map(item => {
-            if (item.id === id) {
-              updatedCoating = { ...item, ...coating };
-              return updatedCoating;
-            }
-            return item;
-          });
-          
-          return { lensCoatings: updated };
-        });
-        
-        // Sync to database
-        if (updatedCoating) {
-          syncLensCoatingsToDatabase([updatedCoating])
-            .catch(err => console.error('Failed to sync updated lens coating:', err));
-        }
+        set((state) => ({
+          lensCoatings: state.lensCoatings.map(item => 
+            item.id === id ? { ...item, ...coating } : item
+          )
+        }));
       },
       
       deleteLensCoating: (id) => {
         set((state) => ({
           lensCoatings: state.lensCoatings.filter(item => item.id !== id)
         }));
-        
-        // Since we're using upsert for database sync, deleted items will not be removed from the database
       },
       
       getLensCoatingsByCategory: (category) => {
@@ -587,47 +463,26 @@ export const useInventoryStore = create<InventoryState>()(
       
       addLensThickness: (thickness) => {
         const id = `thick${Date.now()}`;
-        const newThickness = { ...thickness, id };
         
         set((state) => ({
-          lensThicknesses: [...state.lensThicknesses, newThickness]
+          lensThicknesses: [...state.lensThicknesses, { ...thickness, id }]
         }));
-        
-        // Sync to database
-        syncLensThicknessesToDatabase([newThickness])
-          .catch(err => console.error('Failed to sync new lens thickness:', err));
         
         return id;
       },
       
       updateLensThickness: (id, thickness) => {
-        let updatedThickness: LensThickness | undefined;
-        
-        set((state) => {
-          const updated = state.lensThicknesses.map(item => {
-            if (item.id === id) {
-              updatedThickness = { ...item, ...thickness };
-              return updatedThickness;
-            }
-            return item;
-          });
-          
-          return { lensThicknesses: updated };
-        });
-        
-        // Sync to database
-        if (updatedThickness) {
-          syncLensThicknessesToDatabase([updatedThickness])
-            .catch(err => console.error('Failed to sync updated lens thickness:', err));
-        }
+        set((state) => ({
+          lensThicknesses: state.lensThicknesses.map(item => 
+            item.id === id ? { ...item, ...thickness } : item
+          )
+        }));
       },
       
       deleteLensThickness: (id) => {
         set((state) => ({
           lensThicknesses: state.lensThicknesses.filter(item => item.id !== id)
         }));
-        
-        // Since we're using upsert for database sync, deleted items will not be removed from the database
       },
       
       getLensThicknessesByCategory: (category) => {
@@ -652,47 +507,26 @@ export const useInventoryStore = create<InventoryState>()(
       
       addContactLens: (lens) => {
         const id = `cl${Date.now()}`;
-        const newContactLens = { ...lens, id };
         
         set((state) => ({
-          contactLenses: [...state.contactLenses, newContactLens]
+          contactLenses: [...state.contactLenses, { ...lens, id }]
         }));
-        
-        // Sync to database
-        syncContactLensesToDatabase([newContactLens])
-          .catch(err => console.error('Failed to sync new contact lens:', err));
         
         return id;
       },
       
       updateContactLens: (id, lens) => {
-        let updatedContactLens: ContactLensItem | undefined;
-        
-        set((state) => {
-          const updated = state.contactLenses.map(item => {
-            if (item.id === id) {
-              updatedContactLens = { ...item, ...lens };
-              return updatedContactLens;
-            }
-            return item;
-          });
-          
-          return { contactLenses: updated };
-        });
-        
-        // Sync to database
-        if (updatedContactLens) {
-          syncContactLensesToDatabase([updatedContactLens])
-            .catch(err => console.error('Failed to sync updated contact lens:', err));
-        }
+        set((state) => ({
+          contactLenses: state.contactLenses.map(item => 
+            item.id === id ? { ...item, ...lens } : item
+          )
+        }));
       },
       
       deleteContactLens: (id) => {
         set((state) => ({
           contactLenses: state.contactLenses.filter(item => item.id !== id)
         }));
-        
-        // Since we're using upsert for database sync, deleted items will not be removed from the database
       },
       
       searchContactLenses: (query) => {
@@ -710,47 +544,26 @@ export const useInventoryStore = create<InventoryState>()(
       
       addService: (service) => {
         const id = `service${Date.now()}`;
-        const newService = { ...service, id };
         
         set((state) => ({
-          services: [...state.services, newService]
+          services: [...state.services, { ...service, id }]
         }));
-        
-        // Sync to database
-        syncServicesToDatabase([newService])
-          .catch(err => console.error('Failed to sync new service:', err));
         
         return id;
       },
       
       updateService: (id, service) => {
-        let updatedService: ServiceItem | undefined;
-        
-        set((state) => {
-          const updated = state.services.map(item => {
-            if (item.id === id) {
-              updatedService = { ...item, ...service };
-              return updatedService;
-            }
-            return item;
-          });
-          
-          return { services: updated };
-        });
-        
-        // Sync to database
-        if (updatedService) {
-          syncServicesToDatabase([updatedService])
-            .catch(err => console.error('Failed to sync updated service:', err));
-        }
+        set((state) => ({
+          services: state.services.map(item => 
+            item.id === id ? { ...item, ...service } : item
+          )
+        }));
       },
       
       deleteService: (id) => {
         set((state) => ({
           services: state.services.filter(item => item.id !== id)
         }));
-        
-        // Since we're using upsert for database sync, deleted items will not be removed from the database
       },
       
       getServiceById: (id) => {
@@ -763,47 +576,26 @@ export const useInventoryStore = create<InventoryState>()(
       
       addLensPricingCombination: (combination) => {
         const id = `combo${Date.now()}`;
-        const newCombination = { ...combination, id };
         
         set((state) => ({
-          lensPricingCombinations: [...state.lensPricingCombinations, newCombination]
+          lensPricingCombinations: [...state.lensPricingCombinations, { ...combination, id }]
         }));
-        
-        // Sync to database
-        syncLensPricingCombinationsToDatabase([newCombination])
-          .catch(err => console.error('Failed to sync new lens pricing combination:', err));
         
         return id;
       },
       
       updateLensPricingCombination: (id, combination) => {
-        let updatedCombination: LensPricingCombination | undefined;
-        
-        set((state) => {
-          const updated = state.lensPricingCombinations.map(item => {
-            if (item.id === id) {
-              updatedCombination = { ...item, ...combination };
-              return updatedCombination;
-            }
-            return item;
-          });
-          
-          return { lensPricingCombinations: updated };
-        });
-        
-        // Sync to database
-        if (updatedCombination) {
-          syncLensPricingCombinationsToDatabase([updatedCombination])
-            .catch(err => console.error('Failed to sync updated lens pricing combination:', err));
-        }
+        set((state) => ({
+          lensPricingCombinations: state.lensPricingCombinations.map(item => 
+            item.id === id ? { ...item, ...combination } : item
+          )
+        }));
       },
       
       deleteLensPricingCombination: (id) => {
         set((state) => ({
           lensPricingCombinations: state.lensPricingCombinations.filter(item => item.id !== id)
         }));
-        
-        // Since we're using upsert for database sync, deleted items will not be removed from the database
       },
       
       getLensPricingCombinations: () => {
@@ -959,173 +751,11 @@ export const useInventoryStore = create<InventoryState>()(
         set({
           lensPricingCombinations: newPricingCombinations
         });
-        
-        // Sync pricing combinations to database
-        syncLensPricingCombinationsToDatabase(newPricingCombinations)
-          .catch(err => console.error('Failed to sync lens pricing combinations on reset:', err));
-      },
-      
-      // Sync from database functions
-      syncFromDatabase: (type, data) => {
-        if (!data || data.length === 0) return;
-        
-        switch (type) {
-          case 'frames':
-            set({ frames: data as FrameItem[] });
-            break;
-          case 'lensTypes':
-            set({ lensTypes: data as LensType[] });
-            break;
-          case 'lensCoatings':
-            set({ lensCoatings: data as LensCoating[] });
-            break;
-          case 'lensThicknesses':
-            set({ lensThicknesses: data as LensThickness[] });
-            break;
-          case 'lensPricingCombinations':
-            set({ lensPricingCombinations: data as LensPricingCombination[] });
-            break;
-          case 'contactLenses':
-            set({ contactLenses: data as ContactLensItem[] });
-            break;
-          case 'services':
-            set({ services: data as ServiceItem[] });
-            break;
-        }
-      },
-      
-      // Sync to database functions
-      syncFramesToDatabase: async (onProgress) => {
-        const frames = get().frames;
-        return await batchSyncFramesToDatabase(frames, onProgress);
-      },
-      
-      syncLensTypesToDatabase: async (onProgress) => {
-        const lensTypes = get().lensTypes;
-        return await syncLensTypesToDatabase(lensTypes, onProgress);
-      },
-      
-      syncLensCoatingsToDatabase: async (onProgress) => {
-        const lensCoatings = get().lensCoatings;
-        return await syncLensCoatingsToDatabase(lensCoatings, onProgress);
-      },
-      
-      syncLensThicknessesToDatabase: async (onProgress) => {
-        const lensThicknesses = get().lensThicknesses;
-        return await syncLensThicknessesToDatabase(lensThicknesses, onProgress);
-      },
-      
-      syncLensPricingCombinationsToDatabase: async (onProgress) => {
-        const lensPricingCombinations = get().lensPricingCombinations;
-        return await syncLensPricingCombinationsToDatabase(lensPricingCombinations, onProgress);
-      },
-      
-      syncContactLensesToDatabase: async (onProgress) => {
-        const contactLenses = get().contactLenses;
-        return await syncContactLensesToDatabase(contactLenses, onProgress);
-      },
-      
-      syncServicesToDatabase: async (onProgress) => {
-        const services = get().services;
-        return await syncServicesToDatabase(services, onProgress);
-      },
-      
-      syncAllToDatabase: async (onProgress) => {
-        const store = get();
-        let processed = 0;
-        let success = 0;
-        let failed = 0;
-        
-        const totalItems = store.frames.length + store.lensTypes.length + 
-                          store.lensCoatings.length + store.lensThicknesses.length + 
-                          store.lensPricingCombinations.length + store.contactLenses.length + 
-                          store.services.length;
-        
-        // Helper function to update progress
-        const updateProgress = (successCount: number, failedCount: number) => {
-          processed += successCount + failedCount;
-          success += successCount;
-          failed += failedCount;
-          
-          if (onProgress) {
-            onProgress(processed, totalItems, success, failed);
-          }
-        };
-        
-        // Sync frames
-        const framesResult = await batchSyncFramesToDatabase(
-          store.frames, 
-          (p, t, s, f) => updateProgress(s, f)
-        );
-        
-        // Sync lens types
-        const lensTypesResult = await syncLensTypesToDatabase(
-          store.lensTypes,
-          (p, t, s, f) => updateProgress(s, f)
-        );
-        
-        // Sync lens coatings
-        const lensCoatingsResult = await syncLensCoatingsToDatabase(
-          store.lensCoatings,
-          (p, t, s, f) => updateProgress(s, f)
-        );
-        
-        // Sync lens thicknesses
-        const lensThicknessesResult = await syncLensThicknessesToDatabase(
-          store.lensThicknesses,
-          (p, t, s, f) => updateProgress(s, f)
-        );
-        
-        // Sync lens pricing combinations
-        const pricingCombinationsResult = await syncLensPricingCombinationsToDatabase(
-          store.lensPricingCombinations,
-          (p, t, s, f) => updateProgress(s, f)
-        );
-        
-        // Sync contact lenses
-        const contactLensesResult = await syncContactLensesToDatabase(
-          store.contactLenses,
-          (p, t, s, f) => updateProgress(s, f)
-        );
-        
-        // Sync services
-        const servicesResult = await syncServicesToDatabase(
-          store.services,
-          (p, t, s, f) => updateProgress(s, f)
-        );
-        
-        // Collect all details
-        const details = [
-          framesResult.details,
-          lensTypesResult.details,
-          lensCoatingsResult.details,
-          lensThicknessesResult.details,
-          pricingCombinationsResult.details,
-          contactLensesResult.details,
-          servicesResult.details,
-        ].filter(Boolean).join('\n');
-        
-        return {
-          success,
-          failed,
-          details: details.length > 0 ? details : undefined
-        };
-      },
-      
-      syncSpecificFramesToDatabase: async (frameIds, onProgress) => {
-        const allFrames = get().frames;
-        const framesToSync = allFrames.filter(frame => frameIds.includes(frame.frameId));
-        
-        if (framesToSync.length === 0) {
-          return { success: 0, failed: 0 };
-        }
-        
-        return await batchSyncFramesToDatabase(framesToSync, onProgress);
       }
     }),
     {
       name: 'inventory-store',
-      version: 4
+      version: 3
     }
   )
 );
