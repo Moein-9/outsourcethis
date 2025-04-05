@@ -11,6 +11,16 @@ import { Wrench, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
+// Define a proper type for the service
+interface RepairService {
+  id: string;
+  service_id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  category: string;
+}
+
 export const RepairSection: React.FC = () => {
   const { language } = useLanguageStore();
   const { setValue, getValues } = useInvoiceForm();
@@ -21,7 +31,7 @@ export const RepairSection: React.FC = () => {
   const isRtl = language === 'ar';
   const textAlignClass = isRtl ? 'text-right' : 'text-left';
 
-  // Fetch repair services from Supabase
+  // Fetch repair services from Supabase with proper typing
   const { data: repairServices, isLoading } = useQuery({
     queryKey: ['repairServices'],
     queryFn: async () => {
@@ -35,7 +45,7 @@ export const RepairSection: React.FC = () => {
         throw error;
       }
       
-      return data || [];
+      return (data || []) as RepairService[];
     }
   });
 

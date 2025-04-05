@@ -1,10 +1,24 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Database } from "@/types/supabase";
+
+// Define types for our inventory items based on Supabase tables
+export interface FrameItem {
+  frameId: string;
+  brand: string;
+  model: string;
+  color: string;
+  size: string;
+  price: number;
+  qty: number;
+  createdAt: string;
+}
 
 export const FrameService = {
   async fetchFrames() {
     try {
+      // Make sure to specify the correct type parameters for the query
       const { data, error } = await supabase
         .from('frames')
         .select('*');
@@ -34,7 +48,14 @@ export const FrameService = {
     }
   },
   
-  async addFrame(frame) {
+  async addFrame(frame: { 
+    brand: string;
+    model: string;
+    color: string;
+    size: string;
+    price: number;
+    qty: number;
+  }) {
     try {
       const frameId = `FR${Date.now()}`;
       
@@ -65,7 +86,7 @@ export const FrameService = {
     }
   },
   
-  async updateFrameQuantity(frameId, newQty) {
+  async updateFrameQuantity(frameId: string, newQty: number) {
     try {
       const { error } = await supabase
         .from('frames')
@@ -85,7 +106,14 @@ export const FrameService = {
     }
   },
   
-  async bulkImportFrames(frames) {
+  async bulkImportFrames(frames: Array<{
+    brand: string;
+    model: string;
+    color: string;
+    size: string;
+    price: number;
+    qty: number;
+  }>) {
     try {
       // First fetch existing frames to check for duplicates
       const { data: existingFrames, error: fetchError } = await supabase
@@ -343,7 +371,12 @@ export const ServiceItemService = {
     }
   },
   
-  async addService(service) {
+  async addService(service: {
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+  }) {
     try {
       const serviceId = `service${Date.now()}`;
       

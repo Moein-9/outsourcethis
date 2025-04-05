@@ -1,15 +1,22 @@
+
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FrameInventoryContextDecorator } from "./FrameInventoryContextDecorator";
 import { Contact } from "lucide-react";
-import { InventoryTabs } from "./InventoryTabs";
 
 export const Inventory = () => {
   const [selectedTab, setSelectedTab] = useState("frames");
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <InventoryTabs defaultValue={selectedTab} onValueChange={setSelectedTab}>
+      <Tabs defaultValue={selectedTab} onValueChange={setSelectedTab}>
+        <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsTrigger value="frames">Frames</TabsTrigger>
+          <TabsTrigger value="lenses">Lenses</TabsTrigger>
+          <TabsTrigger value="contacts">Contacts</TabsTrigger>
+          <TabsTrigger value="services">Services</TabsTrigger>
+        </TabsList>
+        
         <TabsContent value="frames">
           <FrameInventoryContextDecorator />
         </TabsContent>
@@ -35,7 +42,7 @@ export const Inventory = () => {
             <p className="text-gray-500">Service management coming soon</p>
           </div>
         </TabsContent>
-      </InventoryTabs>
+      </Tabs>
     </div>
   );
 };
