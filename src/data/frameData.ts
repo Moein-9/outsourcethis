@@ -182,16 +182,16 @@ export const allFrames = [
 ];
 
 export const contactLensesToImport = [
-  { brand: "Acuvue", type: "Daily", power: "-1.00", price: 25, qty: 10 },
-  { brand: "Acuvue", type: "Daily", power: "-1.50", price: 25, qty: 8 },
-  { brand: "Acuvue", type: "Daily", power: "-2.00", price: 25, qty: 12 },
-  { brand: "Acuvue", type: "Daily", power: "-2.50", price: 25, qty: 5 },
-  { brand: "Acuvue", type: "Daily", power: "-3.00", price: 25, qty: 7 },
-  { brand: "Acuvue", type: "Monthly", power: "-1.00", price: 35, qty: 4 },
-  { brand: "Acuvue", type: "Monthly", power: "-2.00", price: 35, qty: 6 },
-  { brand: "Acuvue", type: "Monthly", power: "-3.00", price: 35, qty: 3 },
-  { brand: "Bausch+Lomb", type: "Daily", power: "-1.00", price: 28, qty: 8 },
-  { brand: "Bausch+Lomb", type: "Daily", power: "-2.00", price: 28, qty: 9 },
-  { brand: "Bausch+Lomb", type: "Monthly", power: "-1.50", price: 38, qty: 5 },
-  { brand: "Bausch+Lomb", type: "Monthly", power: "-2.50", price: 38, qty: 4 }
+  { brand: "Acuvue", type: "Daily", power: "-1.00", bc: "8.5", diameter: "14.2", price: 25, qty: 10 },
+  { brand: "Acuvue", type: "Daily", power: "-1.50", bc: "8.5", diameter: "14.2", price: 25, qty: 8 },
+  { brand: "Acuvue", type: "Daily", power: "-2.00", bc: "8.5", diameter: "14.2", price: 25, qty: 12 },
+  { brand: "Acuvue", type: "Daily", power: "-2.50", bc: "8.5", diameter: "14.2", price: 25, qty: 5 },
+  { brand: "Acuvue", type: "Daily", power: "-3.00", bc: "8.5", diameter: "14.2", price: 25, qty: 7 },
+  { brand: "Acuvue", type: "Monthly", power: "-1.00", bc: "8.6", diameter: "14.0", price: 35, qty: 4 },
+  { brand: "Acuvue", type: "Monthly", power: "-2.00", bc: "8.6", diameter: "14.0", price: 35, qty: 6 },
+  { brand: "Acuvue", type: "Monthly", power: "-3.00", bc: "8.6", diameter: "14.0", price: 35, qty: 3 },
+  { brand: "Bausch+Lomb", type: "Daily", power: "-1.00", bc: "8.6", diameter: "14.1", price: 28, qty: 8 },
+  { brand: "Bausch+Lomb", type: "Daily", power: "-2.00", bc: "8.6", diameter: "14.1", price: 28, qty: 9 },
+  { brand: "Bausch+Lomb", type: "Monthly", power: "-1.50", bc: "8.7", diameter: "14.0", price: 38, qty: 5 },
+  { brand: "Bausch+Lomb", type: "Monthly", power: "-2.50", bc: "8.7", diameter: "14.0", price: 38, qty: 4 }
 ];
