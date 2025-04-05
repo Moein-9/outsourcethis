@@ -1,8 +1,7 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
-import { CheckCircle2, Receipt, CreditCard, Calendar, Phone, User, UserCircle2, RefreshCcw, Tools } from "lucide-react";
+import { CheckCircle2, Receipt, CreditCard, Calendar, Phone, User, UserCircle2, RefreshCcw, Wrench } from "lucide-react";
 import { ContactLensItem } from "./ContactLensSelector";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";

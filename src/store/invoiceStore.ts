@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -31,7 +30,7 @@ export interface Invoice {
   patientName: string;
   patientPhone: string;
   
-  invoiceType?: 'glasses' | 'contacts' | 'exam';
+  invoiceType?: 'glasses' | 'contacts' | 'exam' | 'repair';
   
   lensType: string;
   lensPrice: number;
@@ -83,36 +82,6 @@ export interface Invoice {
   refundReason?: string;
   refundMethod?: string;
   refundId?: string;
-  
-  // Archive related fields
-  isArchived?: boolean;
-  archivedAt?: string;
-  archiveReason?: string;
-}
-
-// Define WorkOrder interface
-export interface WorkOrder {
-  id: string;
-  patientId: string;
-  createdAt: string;
-  
-  lensType?: {
-    name: string;
-    price: number;
-  };
-  
-  contactLenses?: ContactLensItem[];
-  contactLensRx?: any;
-  isPickedUp?: boolean;
-  pickedUpAt?: string;
-  
-  // Edit tracking
-  lastEditedAt?: string;
-  editHistory?: EditHistory[];
-  
-  // Refund related fields
-  isRefunded?: boolean;
-  refundDate?: string;
   
   // Archive related fields
   isArchived?: boolean;

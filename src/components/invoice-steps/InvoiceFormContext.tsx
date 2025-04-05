@@ -34,7 +34,7 @@ interface InvoiceFormData {
   contactLensItems: any[];
   contactLensRx: any;
   
-  // Exam-specific
+  // Service-specific (exam and repair)
   serviceName: string;
   serviceId: string;
   serviceDescription: string;

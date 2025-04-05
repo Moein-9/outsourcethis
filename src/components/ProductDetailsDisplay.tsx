@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Glasses, Contact, Receipt, Tools } from 'lucide-react';
+import { Glasses, Contact, Receipt, Wrench } from 'lucide-react';
 import { useLanguageStore } from '@/store/languageStore';
 
 interface ProductDetailsDisplayProps {
@@ -40,7 +40,7 @@ export const ProductDetailsDisplay: React.FC<ProductDetailsDisplayProps> = ({ in
       <h3 className="text-sm font-medium flex items-center gap-2 text-gray-700 mb-3">
         {isGlasses ? <Glasses className="h-4 w-4" /> : 
          isContactLens ? <Contact className="h-4 w-4" /> : 
-         isRepairService ? <Tools className="h-4 w-4" /> : <Receipt className="h-4 w-4" />}
+         isRepairService ? <Wrench className="h-4 w-4" /> : <Receipt className="h-4 w-4" />}
         {isGlasses ? t('glassesDetails') : 
          isContactLens ? t('contactLensDetails') : 
          isRepairService ? t('repairServiceDetails') : t('productDetails')}
