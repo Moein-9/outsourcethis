@@ -118,7 +118,9 @@ interface InventoryState {
   resetLensPricing: () => void;
   
   syncFramesFromDatabase: (dbFrames: FrameItem[]) => void;
-  syncFramesToDatabase: (onProgress?: (processed: number, total: number) => void) => Promise<{success: number, failed: number}>;
+  syncFramesToDatabase: async (
+    onProgress?: (processed: number, total: number, success: number, failed: number) => void
+  ): Promise<{success: number, failed: number, details?: string}>;
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -804,7 +806,9 @@ export const useInventoryStore = create<InventoryState>()(
         });
       },
       
-      syncFramesToDatabase: async (onProgress) => {
+      syncFramesToDatabase: async (
+        onProgress?: (processed: number, total: number, success: number, failed: number) => void
+      ): Promise<{success: number, failed: number, details?: string}> => {
         const frames = get().frames;
         return await batchSyncFramesToDatabase(frames, onProgress);
       }

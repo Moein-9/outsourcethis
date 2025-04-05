@@ -28,6 +28,7 @@ export const InventoryInitializer = () => {
         if (dbFrames.length > 0) {
           syncFramesFromDatabase(dbFrames);
           console.log(`Loaded ${dbFrames.length} frames from the database`);
+          toast.success(`Loaded ${dbFrames.length} frames from database`);
         }
       } catch (error) {
         console.error('Failed to load frames from database:', error);
