@@ -288,21 +288,24 @@ export const useInventoryStore = create<InventoryState>()(
         const newFrames = [];
         let duplicateCount = 0;
         
+        // Track existing frames by a combination key for faster duplicate checking
+        const existingFrameCombinations = new Map();
+        currentFrames.forEach(frame => {
+          const key = `${frame.brand.toLowerCase()}|${frame.model.toLowerCase()}|${frame.color.toLowerCase()}|${frame.size.toLowerCase()}`;
+          existingFrameCombinations.set(key, true);
+        });
+        
         // Process each frame
         for (const frame of frames) {
-          // Check for duplicates (same brand, model, color, and size)
-          const isDuplicate = currentFrames.some(existingFrame => 
-            existingFrame.brand.toLowerCase() === frame.brand.toLowerCase() &&
-            existingFrame.model.toLowerCase() === frame.model.toLowerCase() &&
-            existingFrame.color.toLowerCase() === frame.color.toLowerCase() &&
-            existingFrame.size.toLowerCase() === frame.size.toLowerCase()
-          );
+          // Check for duplicates using the map (much faster for large datasets)
+          const key = `${frame.brand.toLowerCase()}|${frame.model.toLowerCase()}|${frame.color.toLowerCase()}|${frame.size.toLowerCase()}`;
           
-          if (isDuplicate) {
+          if (existingFrameCombinations.has(key)) {
             duplicateCount++;
             continue;
           }
           
+          // Generate unique ID with timestamp and random string
           const frameId = `FR${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
           const createdAt = new Date().toISOString();
           
@@ -311,6 +314,9 @@ export const useInventoryStore = create<InventoryState>()(
             frameId,
             createdAt
           });
+          
+          // Add to map to catch duplicates within the import batch too
+          existingFrameCombinations.set(key, true);
         }
         
         // Add all the new frames at once

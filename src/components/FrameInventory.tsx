@@ -139,6 +139,9 @@ export const FrameInventory: React.FC = () => {
   const [importData, setImportData] = useState("");
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [isProcessingImport, setIsProcessingImport] = useState(false);
+  const [processedItems, setProcessedItems] = useState(0);
+  const [totalItemsToProcess, setTotalItemsToProcess] = useState(0);
   
   const [frameBrand, setFrameBrand] = useState("");
   const [frameModel, setFrameModel] = useState("");
@@ -219,58 +222,107 @@ export const FrameInventory: React.FC = () => {
   
   const handleImportFrames = () => {
     setIsImporting(true);
+    setIsProcessingImport(false);
     setImportResult(null);
     
     try {
       const lines = importData.trim().split("\n").filter(line => line.trim().length > 0);
       
-      const parsedFrames = [];
-      const errors = [];
+      const filteredLines = lines.filter(line => 
+        !line.toLowerCase().includes("brand") && 
+        !line.toLowerCase().includes("model") && 
+        line.trim().length > 0
+      );
       
-      for (let i = 0; i < lines.length; i++) {
-        try {
-          const line = lines[i].trim();
-          if (line.toLowerCase().includes("brand") || line.toLowerCase().includes("model") || !line) {
-            continue;
-          }
-          
-          const parts = line.split(",").map(part => part.trim());
-          
-          if (parts.length < 4) {
-            errors.push(`Line ${i + 1}: Not enough data. Expected at least 4 values (brand, model, color, price).`);
-            continue;
-          }
-          
-          const brand = parts[0];
-          const model = parts[1];
-          const color = parts[2];
-          const price = parseFloat(parts[3].replace(/[^\d.-]/g, '')); 
-          const size = parts.length > 4 ? parts[4] : "";
-          const qty = parts.length > 5 ? parseInt(parts[5]) : 1;
-          
-          if (isNaN(price) || price <= 0) {
-            errors.push(`Line ${i + 1}: Invalid price value "${parts[3]}".`);
-            continue;
-          }
-          
-          if (isNaN(qty) || qty <= 0) {
-            errors.push(`Line ${i + 1}: Invalid quantity value "${parts[5] || 1}".`);
-            continue;
-          }
-          
-          parsedFrames.push({
-            brand,
-            model,
-            color,
-            size,
-            price,
-            qty
-          });
-        } catch (error) {
-          errors.push(`Line ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
+      setTotalItemsToProcess(filteredLines.length);
+      setProcessedItems(0);
+      
+      if (filteredLines.length === 0) {
+        toast.error(t("noValidDataToImport"));
+        setIsImporting(false);
+        return;
       }
       
+      setIsProcessingImport(true);
+      processImportBatch(filteredLines, 0, [], []);
+    } catch (error) {
+      toast.error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setImportResult({
+        added: 0,
+        duplicates: 0,
+        errors: 1,
+        errorDetails: [`General error: ${error instanceof Error ? error.message : 'Unknown error'}`]
+      });
+      setIsImporting(false);
+    }
+  };
+  
+  const processImportBatch = (
+    lines: string[],
+    currentIndex: number,
+    parsedFrames: Array<Omit<FrameItem, "frameId" | "createdAt">>,
+    errors: string[]
+  ) => {
+    const BATCH_SIZE = 100;
+    const end = Math.min(currentIndex + BATCH_SIZE, lines.length);
+    
+    for (let i = currentIndex; i < end; i++) {
+      try {
+        const line = lines[i].trim();
+        
+        const parts = line.split(",").map(part => part.trim());
+        
+        if (parts.length < 4) {
+          errors.push(`Line ${i + 1}: Not enough data. Expected at least 4 values (brand, model, color, price).`);
+          continue;
+        }
+        
+        const brand = parts[0];
+        const model = parts[1];
+        const color = parts[2];
+        const price = parseFloat(parts[3].replace(/[^\d.-]/g, '')); 
+        const size = parts.length > 4 ? parts[4] : "";
+        const qty = parts.length > 5 ? parseInt(parts[5]) : 1;
+        
+        if (isNaN(price) || price <= 0) {
+          errors.push(`Line ${i + 1}: Invalid price value "${parts[3]}".`);
+          continue;
+        }
+        
+        if (isNaN(qty) || qty <= 0) {
+          errors.push(`Line ${i + 1}: Invalid quantity value "${parts[5] || 1}".`);
+          continue;
+        }
+        
+        parsedFrames.push({
+          brand,
+          model,
+          color,
+          size,
+          price,
+          qty
+        });
+      } catch (error) {
+        errors.push(`Line ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+    
+    setProcessedItems(end);
+    
+    if (end < lines.length) {
+      setTimeout(() => {
+        processImportBatch(lines, end, parsedFrames, errors);
+      }, 0);
+    } else {
+      finishImport(parsedFrames, errors);
+    }
+  };
+  
+  const finishImport = (
+    parsedFrames: Array<Omit<FrameItem, "frameId" | "createdAt">>,
+    errors: string[]
+  ) => {
+    try {
       const result = bulkImportFrames(parsedFrames);
       
       setImportResult({
@@ -293,17 +345,11 @@ export const FrameInventory: React.FC = () => {
       if (errors.length > 0) {
         toast.error(`${errors.length} errors occurred during import`);
       }
-      
     } catch (error) {
-      toast.error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setImportResult({
-        added: 0,
-        duplicates: 0,
-        errors: 1,
-        errorDetails: [`General error: ${error instanceof Error ? error.message : 'Unknown error'}`]
-      });
+      toast.error(`Final import processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsImporting(false);
+      setIsProcessingImport(false);
     }
   };
   
@@ -544,6 +590,21 @@ export const FrameInventory: React.FC = () => {
               className="h-64 font-mono"
               disabled={isImporting}
             />
+
+            {isProcessingImport && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Processing frames...</span>
+                  <span>{processedItems} / {totalItemsToProcess}</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2.5">
+                  <div 
+                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                    style={{ width: `${Math.round((processedItems / totalItemsToProcess) * 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
 
             {importResult && (
               <div className="rounded-lg border p-4 space-y-3">
