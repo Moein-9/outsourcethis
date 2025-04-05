@@ -1,7 +1,8 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
+import { useInventoryStore } from "@/store/inventoryStore";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,12 +13,21 @@ import { Wrench, Check } from "lucide-react";
 export const RepairSection: React.FC = () => {
   const { language } = useLanguageStore();
   const { setValue, getValues } = useInvoiceForm();
+  const { getRepairServices } = useInventoryStore();
+  
   const [repairPrice, setRepairPrice] = useState<number>(getValues('repairPrice') || 0);
   const [repairDescription, setRepairDescription] = useState<string>(getValues('repairDescription') || '');
   const [repairType, setRepairType] = useState<string>(getValues('repairType') || '');
+  const [savedRepairServices, setSavedRepairServices] = useState<Array<{id: string, name: string, price: number, description?: string}>>([]);
 
   const isRtl = language === 'ar';
   const textAlignClass = isRtl ? 'text-right' : 'text-left';
+
+  useEffect(() => {
+    // Load repair services from inventory
+    const inventoryRepairServices = getRepairServices();
+    setSavedRepairServices(inventoryRepairServices);
+  }, [getRepairServices]);
 
   const handleRepairPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const price = parseFloat(e.target.value) || 0;
@@ -38,17 +48,28 @@ export const RepairSection: React.FC = () => {
     setValue('serviceDescription', e.target.value);
   };
 
+  // Common repairs list - now combines hardcoded options with saved services
   const commonRepairs = [
     { name: isRtl ? 'إصلاح الإطار' : 'Frame Repair', price: 5.000 },
     { name: isRtl ? 'استبدال المسامير' : 'Screw Replacement', price: 2.500 },
     { name: isRtl ? 'تعديل الإطار' : 'Frame Adjustment', price: 3.000 },
     { name: isRtl ? 'إصلاح العدسة' : 'Lens Repair', price: 10.000 },
-    { name: isRtl ? 'تنظيف متخصص' : 'Professional Cleaning', price: 5.000 }
+    { name: isRtl ? 'تنظيف متخصص' : 'Professional Cleaning', price: 5.000 },
+    ...savedRepairServices.map(service => ({
+      name: service.name,
+      price: service.price,
+      description: service.description
+    }))
   ];
 
-  const applyCommonRepair = (repair: { name: string, price: number }) => {
+  const applyCommonRepair = (repair: { name: string, price: number, description?: string }) => {
     setRepairType(repair.name);
     setRepairPrice(repair.price);
+    if (repair.description) {
+      setRepairDescription(repair.description);
+      setValue('repairDescription', repair.description);
+      setValue('serviceDescription', repair.description);
+    }
     setValue('repairType', repair.name);
     setValue('repairPrice', repair.price);
     setValue('serviceName', repair.name);
@@ -66,7 +87,7 @@ export const RepairSection: React.FC = () => {
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {commonRepairs.map((repair, index) => (
                 <Button 
                   key={index}
