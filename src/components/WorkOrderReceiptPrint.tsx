@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Invoice } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -9,7 +8,16 @@ import { QRCodeSVG } from "qrcode.react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { PrintService } from "@/utils/PrintService";
 import { toast } from "@/hooks/use-toast";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Wrench } from "lucide-react";
+
+interface ContactLensItem {
+  id: string;
+  brand: string;
+  type: string;
+  price: number;
+  color?: string;
+  qty?: number;
+}
 
 interface WorkOrderReceiptPrintProps {
   invoice: Invoice;
@@ -26,9 +34,10 @@ interface WorkOrderReceiptPrintProps {
     size: string;
     price: number;
   };
-  contactLenses?: any[];
+  contactLenses?: ContactLensItem[];
   contactLensRx?: any;
   isEyeExam?: boolean;
+  isRepair?: boolean;
 }
 
 export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
@@ -46,7 +55,6 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
     const { language } = useLanguageStore.getState();
     const isRtl = language === "ar";
     
-    // Split the address into lines for better display
     const addressLines = storeInfo.address.split('\n');
     const addressHtml = addressLines.map(line => `<p style="font-size: 9px; margin: 0;">${line}</p>`).join('');
     
@@ -491,6 +499,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   contactLenses,
   contactLensRx,
   isEyeExam,
+  isRepair,
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
@@ -522,7 +531,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
 
   const orderNumber = invoice.workOrderId || "";
   
-  // Split the address into lines for better display
   const addressLines = storeInfo.address.split('\n');
 
   return (
@@ -712,7 +720,34 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           )}
         </h2>
         
-        {frame && (
+        {isRepair ? (
+          <div style={{ marginBottom: "3px" }}>
+            <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0", display: "flex", alignItems: "center", gap: "4px" }}>
+              <Wrench style={{ width: "12px", height: "12px" }} />
+              {isRtl ? 'خدمة الإصلاح' : 'Repair Service'} {isRtl ? <span style={{ fontSize: "10px" }}>(Repair)</span> : <span style={{ fontSize: "10px" }}>(خدمة الإصلاح)</span>}
+            </h3>
+            <div style={{ marginLeft: "2px" }}>
+              {invoice.repairType && (
+                <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ fontWeight: "bold" }}>{isRtl ? "نوع الإصلاح" : "Repair Type"}:</span>
+                  <span>{invoice.repairType}</span>
+                </div>
+              )}
+              
+              {invoice.repairDescription && (
+                <div style={{ marginBottom: "1px" }}>
+                  <div style={{ fontWeight: "bold", marginBottom: "1px" }}>{isRtl ? "وصف الإصلاح" : "Repair Description"}:</div>
+                  <div style={{ marginLeft: "4px", fontSize: "9px" }}>{invoice.repairDescription}</div>
+                </div>
+              )}
+              
+              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
+                <span>{invoice.repairPrice?.toFixed(3) || '0.000'} KWD</span>
+              </div>
+            </div>
+          </div>
+        ) : (
           <div style={{ marginBottom: "3px" }}>
             <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
               {isRtl ? 'الإطار' : 'Frame'} {isRtl ? <span style={{ fontSize: "10px" }}>(Frame)</span> : <span style={{ fontSize: "10px" }}>(الإطار)</span>}
@@ -930,8 +965,8 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
         </div>
       </div>
       
-      <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", marginTop: "10px", textAlign: "center" }}>
-        <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "2px" }}>
+      <div style={{ borderTop: "1px dashed #000", paddingTop: "5px", margin-top: 10px, textAlign: "center" }}>
+        <div style={{ fontSize: "10px", fontWeight: "bold", margin-bottom: "2px" }}>
           {isRtl ? "شكراً لاختياركم نظارات المعين. يسعدنا خدمتكم دائماً!" : "Thank you for choosing Moein Optical. We're always delighted to serve you!"}
         </div>
         <div style={{ fontSize: "8px", margin: "2px 0" }}>
