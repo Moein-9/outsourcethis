@@ -8,9 +8,10 @@ import { toast } from "sonner";
 import { LensSection } from "./LensSection";
 import { FrameSection } from "./FrameSection";
 import { EyeExamSection } from "./EyeExamSection";
+import { RepairSection } from "./RepairSection";
 
 interface InvoiceStepProductsProps {
-  invoiceType: "glasses" | "contacts" | "exam";
+  invoiceType: "glasses" | "contacts" | "exam" | "repair";
 }
 
 export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoiceType }) => {
@@ -30,7 +31,19 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
       setValue('serviceDescription', eyeExamService.description || '');
       updateServicePrice(eyeExamService.price);
     }
-  }, [invoiceType, eyeExamService, setValue, updateServicePrice]);
+    
+    if (invoiceType === 'repair') {
+      // Initialize repair service with default values if none exist
+      if (!getValues('repairType')) {
+        setValue('repairType', '');
+        setValue('repairDescription', '');
+        setValue('repairPrice', 0);
+        setValue('serviceName', '');
+        setValue('serviceDescription', '');
+        updateServicePrice(0);
+      }
+    }
+  }, [invoiceType, eyeExamService, setValue, updateServicePrice, getValues]);
   
   const [skipFrame, setSkipFrame] = useState(getValues('skipFrame'));
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(null);
@@ -219,6 +232,10 @@ export const InvoiceStepProducts: React.FC<InvoiceStepProductsProps> = ({ invoic
 
   if (invoiceType === "exam") {
     return <EyeExamSection examService={eyeExamService} />;
+  }
+
+  if (invoiceType === "repair") {
+    return <RepairSection />;
   }
 
   return (
