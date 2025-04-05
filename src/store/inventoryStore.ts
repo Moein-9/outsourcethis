@@ -118,9 +118,9 @@ interface InventoryState {
   resetLensPricing: () => void;
   
   syncFramesFromDatabase: (dbFrames: FrameItem[]) => void;
-  syncFramesToDatabase: async (
+  syncFramesToDatabase: (
     onProgress?: (processed: number, total: number, success: number, failed: number) => void
-  ): Promise<{success: number, failed: number, details?: string}>;
+  ) => Promise<{success: number, failed: number, details?: string}>;
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -207,7 +207,7 @@ export const useInventoryStore = create<InventoryState>()(
         },
         { 
           id: "photochromic-prog", 
-          name: "Photochromic (فوتوكروميك)", 
+          name: "Photochromic (فوتوكرو��يك)", 
           price: 0, 
           description: "Photochromic coating for progressive lenses", 
           category: "progressive",
@@ -807,8 +807,8 @@ export const useInventoryStore = create<InventoryState>()(
       },
       
       syncFramesToDatabase: async (
-        onProgress?: (processed: number, total: number, success: number, failed: number) => void
-      ): Promise<{success: number, failed: number, details?: string}> => {
+        onProgress
+      ) => {
         const frames = get().frames;
         return await batchSyncFramesToDatabase(frames, onProgress);
       }
