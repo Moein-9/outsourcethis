@@ -9,16 +9,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { PrintService } from "@/utils/PrintService";
 import { toast } from "@/hooks/use-toast";
-import { CheckCircle2, Wrench } from "lucide-react";
-
-interface ContactLensItem {
-  id: string;
-  brand: string;
-  type: string;
-  price: number;
-  color?: string;
-  qty?: number;
-}
+import { CheckCircle2 } from "lucide-react";
 
 interface WorkOrderReceiptPrintProps {
   invoice: Invoice;
@@ -35,10 +26,9 @@ interface WorkOrderReceiptPrintProps {
     size: string;
     price: number;
   };
-  contactLenses?: ContactLensItem[];
+  contactLenses?: any[];
   contactLensRx?: any;
   isEyeExam?: boolean;
-  isRepair?: boolean;
 }
 
 export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
@@ -56,6 +46,7 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
     const { language } = useLanguageStore.getState();
     const isRtl = language === "ar";
     
+    // Split the address into lines for better display
     const addressLines = storeInfo.address.split('\n');
     const addressHtml = addressLines.map(line => `<p style="font-size: 9px; margin: 0;">${line}</p>`).join('');
     
@@ -232,36 +223,7 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
             )}
           </h2>
           
-          ${props.isRepair || props.invoice.invoiceType === 'repair' ? `
-          <div style="margin-bottom: 3px;">
-            <h3 style="font-size: 11px; font-weight: bold; margin: 2px 0; display: flex; align-items: center; gap: 4px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              ${isRtl ? 'خدمة الإصلاح' : 'Repair Service'} ${isRtl ? `<span style="font-size: 10px;">(Repair)</span>` : `<span style="font-size: 10px;">(خدمة الإصلاح)</span>`}
-            </h3>
-            <div style="margin-left: 2px;">
-              ${props.invoice.repairType ? `
-              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
-                <span style="font-weight: bold;">${isRtl ? "نوع الإصلاح" : "Repair Type"}:</span>
-                <span>${props.invoice.repairType}</span>
-              </div>
-              ` : ''}
-              
-              ${props.invoice.repairDescription ? `
-              <div style="margin-bottom: 1px;">
-                <div style="font-weight: bold; margin-bottom: 1px;">${isRtl ? "وصف الإصلاح" : "Repair Description"}:</div>
-                <div style="margin-left: 4px; font-size: 9px;">${props.invoice.repairDescription}</div>
-              </div>
-              ` : ''}
-              
-              <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
-                <span style="font-weight: bold;">${isRtl ? "السعر" : "Price"}:</span>
-                <span>${props.invoice.repairPrice?.toFixed(3) || '0.000'} KWD</span>
-              </div>
-            </div>
-          </div>
-          ` : `
+          ${props.frame ? `
           <div style="margin-bottom: 3px;">
             <h3 style="font-size: 11px; font-weight: bold; margin: 2px 0;">
               ${isRtl ? 'الإطار' : 'Frame'} ${isRtl ? `<span style="font-size: 10px;">(Frame)</span>` : `<span style="font-size: 10px;">(الإطار)</span>`}
@@ -269,25 +231,25 @@ export const printWorkOrderReceipt = (props: WorkOrderReceiptPrintProps) => {
             <div style="margin-left: 2px;">
               <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "الماركة/الموديل" : "Brand/Model"}:</span>
-                <span>${props.frame?.brand} ${props.frame?.model}</span>
+                <span>${props.frame.brand} ${props.frame.model}</span>
               </div>
               <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "اللون" : "Color"}:</span>
-                <span>${props.frame?.color}</span>
+                <span>${props.frame.color}</span>
               </div>
-              ${props.frame?.size ? `
+              ${props.frame.size ? `
               <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "الحجم" : "Size"}:</span>
-                <span>${props.frame?.size}</span>
+                <span>${props.frame.size}</span>
               </div>
               ` : ''}
               <div style="margin-bottom: 1px; display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;">${isRtl ? "السعر" : "Price"}:</span>
-                <span>${props.frame?.price.toFixed(3)} KWD</span>
+                <span>${props.frame.price.toFixed(3)} KWD</span>
               </div>
             </div>
           </div>
-          `}
+          ` : ''}
           
           ${props.lensType ? `
           <div style="margin-bottom: 3px;">
@@ -529,7 +491,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
   contactLenses,
   contactLensRx,
   isEyeExam,
-  isRepair,
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
@@ -561,6 +522,7 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
 
   const orderNumber = invoice.workOrderId || "";
   
+  // Split the address into lines for better display
   const addressLines = storeInfo.address.split('\n');
 
   return (
@@ -750,61 +712,32 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
           )}
         </h2>
         
-        {isRepair || invoice.invoiceType === 'repair' ? (
+        {frame && (
           <div style={{ marginBottom: "3px" }}>
-            <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0", display: "flex", alignItems: "center", gap: "4px" }}>
-              <Wrench style={{ width: "12px", height: "12px" }} />
-              {isRtl ? 'خدمة الإصلاح' : 'Repair Service'} {isRtl ? <span style={{ fontSize: "10px" }}>(Repair)</span> : <span style={{ fontSize: "10px" }}>(خدمة الإصلاح)</span>}
+            <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
+              {isRtl ? 'الإطار' : 'Frame'} {isRtl ? <span style={{ fontSize: "10px" }}>(Frame)</span> : <span style={{ fontSize: "10px" }}>(الإطار)</span>}
             </h3>
             <div style={{ marginLeft: "2px" }}>
-              {invoice.repairType && (
+              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontWeight: "bold" }}>{isRtl ? "الماركة/الموديل" : "Brand/Model"}:</span>
+                <span>{frame.brand} {frame.model}</span>
+              </div>
+              <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontWeight: "bold" }}>{isRtl ? "اللون" : "Color"}:</span>
+                <span>{frame.color}</span>
+              </div>
+              {frame.size && (
                 <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: "bold" }}>{isRtl ? "نوع الإصلاح" : "Repair Type"}:</span>
-                  <span>{invoice.repairType}</span>
+                  <span style={{ fontWeight: "bold" }}>{isRtl ? "الحجم" : "Size"}:</span>
+                  <span>{frame.size}</span>
                 </div>
               )}
-              
-              {invoice.repairDescription && (
-                <div style={{ marginBottom: "1px" }}>
-                  <div style={{ fontWeight: "bold", marginBottom: "1px" }}>{isRtl ? "وصف الإصلاح" : "Repair Description"}:</div>
-                  <div style={{ marginLeft: "4px", fontSize: "9px" }}>{invoice.repairDescription}</div>
-                </div>
-              )}
-              
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
-                <span>{invoice.repairPrice?.toFixed(3) || '0.000'} KWD</span>
+                <span>{frame.price.toFixed(3)} KWD</span>
               </div>
             </div>
           </div>
-        ) : (
-          frame && (
-            <div style={{ marginBottom: "3px" }}>
-              <h3 style={{ fontSize: "11px", fontWeight: "bold", margin: "2px 0" }}>
-                {isRtl ? 'الإطار' : 'Frame'} {isRtl ? <span style={{ fontSize: "10px" }}>(Frame)</span> : <span style={{ fontSize: "10px" }}>(الإطار)</span>}
-              </h3>
-              <div style={{ marginLeft: "2px" }}>
-                <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: "bold" }}>{isRtl ? "الماركة/الموديل" : "Brand/Model"}:</span>
-                  <span>{frame.brand} {frame.model}</span>
-                </div>
-                <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: "bold" }}>{isRtl ? "اللون" : "Color"}:</span>
-                  <span>{frame.color}</span>
-                </div>
-                {frame.size && (
-                  <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontWeight: "bold" }}>{isRtl ? "الحجم" : "Size"}:</span>
-                    <span>{frame.size}</span>
-                  </div>
-                )}
-                <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
-                  <span>{frame.price.toFixed(3)} KWD</span>
-                </div>
-              </div>
-            </div>
-          )
         )}
         
         {lensType && (
@@ -835,12 +768,6 @@ export const WorkOrderReceiptPrint: React.FC<WorkOrderReceiptPrintProps> = ({
                 <span style={{ fontWeight: "bold" }}>{isRtl ? "النوع" : "Type"}:</span>
                 <span>{coating}</span>
               </div>
-              {coatingColor && (
-                <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: "bold" }}>{isRtl ? "اللون" : "Color"}:</span>
-                  <span>{coatingColor}</span>
-                </div>
-              )}
               <div style={{ marginBottom: "1px", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "bold" }}>{isRtl ? "السعر" : "Price"}:</span>
                 <span>{invoice.coatingPrice.toFixed(3)} KWD</span>

@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ContactLensItem } from '@/components/ContactLensSelector';
@@ -30,7 +31,7 @@ export interface Invoice {
   patientName: string;
   patientPhone: string;
   
-  invoiceType?: 'glasses' | 'contacts' | 'exam' | 'repair';
+  invoiceType?: 'glasses' | 'contacts' | 'exam';
   
   lensType: string;
   lensPrice: number;
@@ -51,16 +52,11 @@ export interface Invoice {
   contactLensItems?: ContactLensItem[];
   contactLensRx?: any;
   
-  // Service information for eye exams and repairs
+  // Service information for eye exams
   serviceName?: string;
   serviceId?: string;
   serviceDescription?: string;
   servicePrice?: number;
-  
-  // Repair specific fields
-  repairType?: string;
-  repairDescription?: string;
-  repairPrice?: number;
   
   discount: number;
   deposit: number;

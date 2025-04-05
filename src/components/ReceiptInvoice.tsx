@@ -1,18 +1,10 @@
 import React from "react";
 import { format } from "date-fns";
 import { Invoice } from "@/store/invoiceStore";
-import { CheckCircle2, Receipt, CreditCard, Calendar, Phone, User, UserCircle2, RefreshCcw, Wrench } from "lucide-react";
+import { CheckCircle2, Receipt, CreditCard, Calendar, Phone, User, UserCircle2, RefreshCcw } from "lucide-react";
+import { ContactLensItem } from "./ContactLensSelector";
 import { MoenLogo, storeInfo } from "@/assets/logo";
 import { useLanguageStore } from "@/store/languageStore";
-
-interface ContactLensItem {
-  id: string;
-  brand: string;
-  type: string;
-  price: number;
-  color?: string;
-  qty?: number;
-}
 
 interface ReceiptInvoiceProps {
   invoice: Invoice;
@@ -20,7 +12,7 @@ interface ReceiptInvoiceProps {
   
   patientName?: string;
   patientPhone?: string;
-  invoiceType?: "glasses" | "contacts" | "exam" | "repair";
+  invoiceType?: "glasses" | "contacts" | "exam";
   lensType?: string;
   lensPrice?: number;
   coating?: string;
@@ -45,9 +37,6 @@ interface ReceiptInvoiceProps {
   serviceId?: string;
   serviceDescription?: string;
   servicePrice?: number;
-  repairType?: string;
-  repairDescription?: string;
-  repairPrice?: number;
 }
 
 const getFormattedPaymentMethod = (method: string): string => {
@@ -104,10 +93,7 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   serviceName,
   serviceId,
   serviceDescription,
-  servicePrice,
-  repairType,
-  repairDescription,
-  repairPrice
+  servicePrice
 }) => {
   const { language, t } = useLanguageStore();
   const isRtl = language === 'ar';
@@ -135,19 +121,12 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
   
   const isContactLens = invoiceType === "contacts" || invoice.invoiceType === "contacts" || contactLensItems.length > 0;
   const isEyeExam = invoiceType === "exam" || invoice.invoiceType === "exam";
-  const isRepair = invoiceType === "repair" || invoice.invoiceType === "repair";
   
   const service = {
     name: serviceName || invoice.serviceName || "",
     id: serviceId || invoice.serviceId || "",
     description: serviceDescription || invoice.serviceDescription || "",
     price: servicePrice !== undefined ? servicePrice : invoice.servicePrice || 0
-  };
-
-  const repair = {
-    type: repairType || invoice.repairType || "",
-    description: repairDescription || invoice.repairDescription || "",
-    price: repairPrice !== undefined ? repairPrice : invoice.repairPrice || 0
   };
   
   const isRefunded = invoice.isRefunded;
@@ -310,20 +289,6 @@ export const ReceiptInvoice: React.FC<ReceiptInvoiceProps> = ({
                 </div>
               </div>
             ))
-          ) : isRepair ? (
-            <div className="p-2 border-2 border-gray-300 rounded">
-              <div className="text-base font-bold text-center mb-1">
-                {isRtl ? "خدمة الإصلاح | Repair Service" : "Repair Service | خدمة الإصلاح"}
-              </div>
-              <div className="text-base font-medium text-center">
-                {repair.type || t("repair")}
-              </div>
-              {repair.description && (
-                <div className="text-sm font-medium text-center mt-1 italic">
-                  {repair.description}
-                </div>
-              )}
-            </div>
           ) : (
             <div className="space-y-2">
               {lens && (
