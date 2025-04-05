@@ -4,9 +4,10 @@ import { toast } from '@/hooks/use-toast';
 import { createRoot } from 'react-dom/client';
 import { CustomWorkOrderReceipt } from '@/components/CustomWorkOrderReceipt';
 import { ReceiptInvoice } from '@/components/ReceiptInvoice';
+import { Invoice, WorkOrder } from '@/store/invoiceStore';
 
 export class CustomPrintService {
-  static printWorkOrder(workOrder: any, invoice?: any, patient?: any) {
+  static printWorkOrder(workOrder: WorkOrder, invoice?: Invoice, patient?: any) {
     console.log("CustomPrintService: Printing work order", { workOrder, invoice, patient });
     
     try {
@@ -223,7 +224,7 @@ export class CustomPrintService {
     }
   }
   
-  static printInvoice(invoice: any) {
+  static printInvoice(invoice: Invoice) {
     console.log("CustomPrintService: Printing invoice", { invoice });
     
     try {
