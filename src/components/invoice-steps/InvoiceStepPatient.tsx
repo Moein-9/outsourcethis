@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -10,12 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ContactLensForm } from "@/components/ContactLensForm";
 import { 
-  User, Search, Glasses, Eye, EyeOff, ScrollText
+  User, Search, Glasses, Eye, EyeOff, ScrollText, Wrench
 } from "lucide-react";
 
 interface InvoiceStepPatientProps {
-  invoiceType: "glasses" | "contacts" | "exam";
-  onInvoiceTypeChange: (type: "glasses" | "contacts" | "exam") => void;
+  invoiceType: "glasses" | "contacts" | "exam" | "repair";
+  onInvoiceTypeChange: (type: "glasses" | "contacts" | "exam" | "repair") => void;
 }
 
 export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({ 
@@ -143,8 +144,8 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
       <Tabs 
         value={invoiceType} 
         onValueChange={(v) => {
-          onInvoiceTypeChange(v as "glasses" | "contacts" | "exam");
-          setValue('invoiceType', v as "glasses" | "contacts" | "exam");
+          onInvoiceTypeChange(v as "glasses" | "contacts" | "exam" | "repair");
+          setValue('invoiceType', v as "glasses" | "contacts" | "exam" | "repair");
           if (v === "contacts" && currentPatient && !currentPatient.contactLensRx) {
             setShowMissingRxWarning(true);
           } else {
@@ -174,6 +175,13 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
           >
             <ScrollText className="w-5 h-5" />
             {language === 'ar' ? 'فحص العين' : 'Eye Exam'}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="repair" 
+            className="flex items-center gap-2 px-5 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white"
+          >
+            <Wrench className="w-5 h-5" />
+            {language === 'ar' ? 'إصلاح' : 'Repair'}
           </TabsTrigger>
         </TabsList>
       </Tabs>
