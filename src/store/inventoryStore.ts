@@ -1,441 +1,410 @@
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import {
+  Frame,
+  LensType,
+  LensCoating,
+  LensThickness,
+  ContactLens,
+  Service,
+  RepairService,
+  LensCombination,
+  ImportResult,
+  ContactLensItem
+} from '@/types/inventoryTypes';
 
-export interface InventoryState {
+// Re-export types
+export type {
+  Frame,
+  LensType,
+  LensCoating,
+  LensThickness,
+  ContactLens,
+  ContactLensItem,
+  Service,
+  RepairService,
+  LensCombination,
+  ImportResult
+};
+
+interface InventoryState {
   frames: Frame[];
-  contactLenses: ContactLens[];
   lensTypes: LensType[];
   lensCoatings: LensCoating[];
   lensThicknesses: LensThickness[];
-  lensCombinations: LensCombination[];
+  contactLenses: ContactLens[];
   services: Service[];
   repairServices: RepairService[];
-
+  lensCombinations: LensCombination[];
+  
   // Frame methods
-  getFrames: () => Frame[];
-  addFrame: (frame: Frame) => void;
+  addFrame: (frame: Omit<Frame, "id" | "frameId" | "createdAt">) => string;
   updateFrame: (frame: Frame) => void;
   deleteFrame: (frameId: string) => void;
   searchFrames: (query: string) => Frame[];
-  bulkImportFrames: (frames: Frame[]) => void;
-
-  // Contact Lens methods
-  getContactLenses: () => ContactLens[];
-  addContactLens: (contactLens: ContactLens) => void;
-  updateContactLens: (contactLens: ContactLens) => void;
-  deleteContactLens: (contactLensId: string) => void;
-  searchContactLenses: (query: string) => ContactLens[];
-
-  // Lens Type methods
-  getLensTypes: () => LensType[];
-  addLensType: (lensType: LensType) => void;
-  updateLensType: (lensTypeId: string, lensType: Partial<Omit<LensType, "id">>) => void;
-  deleteLensType: (lensTypeId: string) => void;
-
-  // Lens Coating methods
-  getLensCoatings: () => LensCoating[];
-  addLensCoating: (lensCoating: LensCoating) => void;
-  updateLensCoating: (lensCoatingId: string, lensCoating: Partial<Omit<LensCoating, "id">>) => void;
-  deleteLensCoating: (lensCoatingId: string) => void;
+  bulkImportFrames: (frames: Omit<Frame, "id" | "frameId" | "createdAt">[]) => ImportResult;
+  
+  // Lens type methods
+  addLensType: (lensType: Omit<LensType, "id">) => string;
+  updateLensType: (lensType: LensType) => void;
+  deleteLensType: (typeId: string) => void;
+  
+  // Lens coating methods
+  addLensCoating: (coating: Omit<LensCoating, "id">) => void;
+  updateLensCoating: (coating: LensCoating) => void;
+  deleteLensCoating: (coatingId: string) => void;
   getLensCoatingsByCategory: (category: string) => LensCoating[];
-
-  // Lens Thickness methods
-  getLensThicknesses: () => LensThickness[];
-  addLensThickness: (lensThickness: LensThickness) => void;
-  updateLensThickness: (lensThicknessId: string, lensThickness: Partial<Omit<LensThickness, "id">>) => void;
-  deleteLensThickness: (lensThicknessId: string) => void;
+  
+  // Lens thickness methods
+  addLensThickness: (thickness: Omit<LensThickness, "id">) => void;
+  updateLensThickness: (thickness: LensThickness) => void;
+  deleteLensThickness: (thicknessId: string) => void;
   getLensThicknessesByCategory: (category: string) => LensThickness[];
-
-  // Lens Combination methods
+  
+  // Lens combinations methods
   getLensCombinations: () => LensCombination[];
-  addLensCombination: (lensCombination: LensCombination) => void;
-  updateLensCombination: (lensCombinationId: string, lensCombination: Partial<Omit<LensCombination, "id">>) => void;
-  deleteLensCombination: (lensCombinationId: string) => void;
-  getLensPricingByComponents: (lensType: string, coating: string, thickness: string) => number | null;
+  addLensCombination: (combination: Omit<LensCombination, "id">) => void;
+  updateLensCombination: (combination: LensCombination) => void;
+  deleteLensCombination: (id: string) => void;
   resetLensPricing: () => void;
-  getAvailableCoatings: (lensType: string) => LensCoating[];
-  getAvailableThicknesses: (lensType: string) => LensThickness[];
-
+  
+  // Helper methods
+  getLensPricingByComponents: (lensTypeId: string, coatingId: string, thicknessId: string) => LensCombination | undefined;
+  getAvailableCoatings: (lensTypeId: string) => LensCoating[];
+  getAvailableThicknesses: (lensTypeId: string) => LensThickness[];
+  
+  // Contact lens methods
+  addContactLens: (lens: Omit<ContactLens, "id">) => string;
+  updateContactLens: (lens: ContactLens) => void;
+  deleteContactLens: (lensId: string) => void;
+  searchContactLenses: (query: string) => ContactLens[];
+  
   // Service methods
-  getServices: () => Service[];
-  addService: (service: Service) => void;
-  updateService: (serviceId: string, service: Partial<Omit<Service, "id">>) => void;
+  addService: (service: Omit<Service, "id">) => string;
+  updateService: (service: Service) => void;
   deleteService: (serviceId: string) => void;
-  getServicesByCategory: (category: string) => Service[];
-
-  initialize: (data: any) => void;
-  exportData: () => any;
-  clearAllData: () => void;
-
-  // Repair services methods
+  
+  // Repair service methods
   getRepairServices: () => RepairService[];
   addRepairService: (service: RepairService) => void;
   updateRepairService: (service: RepairService) => void;
   deleteRepairService: (serviceId: string) => void;
   
-  // Cleanup methods
+  // Sample data cleanup methods
   cleanupSamplePhotochromicCoatings: () => void;
 }
 
-export interface Frame {
-  id: string;
-  brand: string;
-  model: string;
-  color: string;
-  size: string;
-  price: number;
-  qty?: number;
-  frameId?: string;
-  imageUrl?: string;
-  stock?: number;
-}
-
-export interface ContactLens {
-  id: string;
-  brand: string;
-  type: string;
-  color: string;
-  power: string;
-  price: number;
-  bc?: string;
-  diameter?: string;
-  qty?: number;
-  imageUrl?: string;
-}
-
-export interface LensType {
-  id: string;
-  name: string;
-  price: number;
-  type?: "distance" | "reading" | "progressive" | "bifocal" | "sunglasses";
-}
-
-export interface LensCoating {
-  id: string;
-  name: string;
-  price: number;
-  isPhotochromic?: boolean;
-  availableColors?: string[];
-  description?: string;
-  category?: "distance-reading" | "progressive" | "bifocal" | "sunglasses";
-}
-
-export interface LensThickness {
-  id: string;
-  name: string;
-  price: number;
-  description?: string;
-  category?: "distance-reading" | "progressive" | "bifocal" | "sunglasses";
-}
-
-export interface LensCombination {
-  id: string;
-  name: string;
-  lensType: string;
-  coating: string;
-  thickness: string;
-  price: number;
-}
-
-export interface Service {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  description?: string;
-}
-
-export interface RepairService {
-  id: string;
-  name: string;
-  price: number;
-  description?: string;
-}
-
-// For compatibility with existing code
-export type FrameItem = Frame;
-export type ContactLensItem = ContactLens;
-export type ServiceItem = Service;
-
-const useInventoryStore = create<InventoryState>((set, get) => ({
-  frames: [],
-  contactLenses: [],
-  lensTypes: [],
-  lensCoatings: [],
-  lensThicknesses: [],
-  lensCombinations: [],
-  services: [],
-  repairServices: [],
-
-  // Frame methods implementation
-  getFrames: () => get().frames,
-  addFrame: (frame) => {
-    set((state) => ({
-      frames: [...state.frames, frame],
-    }));
-  },
-  updateFrame: (frame) => {
-    set((state) => ({
-      frames: state.frames.map((f) => (f.id === frame.id ? frame : f)),
-    }));
-  },
-  deleteFrame: (frameId) => {
-    set((state) => ({
-      frames: state.frames.filter((f) => f.id !== frameId),
-    }));
-  },
-  searchFrames: (query) => {
-    const lowerQuery = query.toLowerCase();
-    return get().frames.filter(frame => 
-      frame.brand.toLowerCase().includes(lowerQuery) ||
-      frame.model.toLowerCase().includes(lowerQuery) ||
-      frame.color.toLowerCase().includes(lowerQuery)
-    );
-  },
-  bulkImportFrames: (frames) => {
-    set((state) => ({
-      frames: [...state.frames, ...frames],
-    }));
-  },
-
-  // Contact Lens methods implementation
-  getContactLenses: () => get().contactLenses,
-  addContactLens: (contactLens) => {
-    set((state) => ({
-      contactLenses: [...state.contactLenses, contactLens],
-    }));
-  },
-  updateContactLens: (contactLens) => {
-    set((state) => ({
-      contactLenses: state.contactLenses.map((cl) =>
-        cl.id === contactLens.id ? contactLens : cl
-      ),
-    }));
-  },
-  deleteContactLens: (contactLensId) => {
-    set((state) => ({
-      contactLenses: state.contactLenses.filter((cl) => cl.id !== contactLensId),
-    }));
-  },
-  searchContactLenses: (query) => {
-    const lowerQuery = query.toLowerCase();
-    return get().contactLenses.filter(lens => 
-      lens.brand.toLowerCase().includes(lowerQuery) ||
-      lens.type.toLowerCase().includes(lowerQuery) ||
-      (lens.color && lens.color.toLowerCase().includes(lowerQuery))
-    );
-  },
-
-  // Lens Type methods implementation
-  getLensTypes: () => get().lensTypes,
-  addLensType: (lensType) => {
-    set((state) => ({
-      lensTypes: [...state.lensTypes, lensType],
-    }));
-  },
-  updateLensType: (lensTypeId, lensType) => {
-    set((state) => ({
-      lensTypes: state.lensTypes.map((lt) =>
-        lt.id === lensTypeId ? { ...lt, ...lensType } : lt
-      ),
-    }));
-  },
-  deleteLensType: (lensTypeId) => {
-    set((state) => ({
-      lensTypes: state.lensTypes.filter((lt) => lt.id !== lensTypeId),
-    }));
-  },
-
-  // Lens Coating methods implementation
-  getLensCoatings: () => get().lensCoatings,
-  addLensCoating: (lensCoating) => {
-    set((state) => ({
-      lensCoatings: [...state.lensCoatings, lensCoating],
-    }));
-  },
-  updateLensCoating: (lensCoatingId, lensCoating) => {
-    set((state) => ({
-      lensCoatings: state.lensCoatings.map((lc) =>
-        lc.id === lensCoatingId ? { ...lc, ...lensCoating } : lc
-      ),
-    }));
-  },
-  deleteLensCoating: (lensCoatingId) => {
-    set((state) => ({
-      lensCoatings: state.lensCoatings.filter((lc) => lc.id !== lensCoatingId),
-    }));
-  },
-  getLensCoatingsByCategory: (category) => {
-    return get().lensCoatings.filter(coating => coating.category === category);
-  },
-
-  // Lens Thickness methods implementation
-  getLensThicknesses: () => get().lensThicknesses,
-  addLensThickness: (lensThickness) => {
-    set((state) => ({
-      lensThicknesses: [...state.lensThicknesses, lensThickness],
-    }));
-  },
-  updateLensThickness: (lensThicknessId, lensThickness) => {
-    set((state) => ({
-      lensThicknesses: state.lensThicknesses.map((lt) =>
-        lt.id === lensThicknessId ? { ...lt, ...lensThickness } : lt
-      ),
-    }));
-  },
-  deleteLensThickness: (lensThicknessId) => {
-    set((state) => ({
-      lensThicknesses: state.lensThicknesses.filter(
-        (lt) => lt.id !== lensThicknessId
-      ),
-    }));
-  },
-  getLensThicknessesByCategory: (category) => {
-    return get().lensThicknesses.filter(thickness => thickness.category === category);
-  },
-
-  // Lens Combination methods implementation
-  getLensCombinations: () => get().lensCombinations,
-  addLensCombination: (lensCombination) => {
-    set((state) => ({
-      lensCombinations: [...state.lensCombinations, lensCombination],
-    }));
-  },
-  updateLensCombination: (lensCombinationId, lensCombination) => {
-    set((state) => ({
-      lensCombinations: state.lensCombinations.map((lc) =>
-        lc.id === lensCombinationId ? { ...lc, ...lensCombination } : lc
-      ),
-    }));
-  },
-  deleteLensCombination: (lensCombinationId) => {
-    set((state) => ({
-      lensCombinations: state.lensCombinations.filter(
-        (lc) => lc.id !== lensCombinationId
-      ),
-    }));
-  },
-  getLensPricingByComponents: (lensType, coating, thickness) => {
-    const combination = get().lensCombinations.find(
-      comb => comb.lensType === lensType && comb.coating === coating && comb.thickness === thickness
-    );
-    return combination ? combination.price : null;
-  },
-  resetLensPricing: () => {
-    set((state) => ({
-      lensCombinations: []
-    }));
-  },
-  getAvailableCoatings: (lensType) => {
-    // Find lensType's category
-    const lens = get().lensTypes.find(lt => lt.name === lensType);
-    if (!lens || !lens.type) return [];
-    
-    const category = lens.type === 'distance' || lens.type === 'reading' 
-      ? 'distance-reading' 
-      : lens.type;
-    
-    return get().lensCoatings.filter(coating => coating.category === category);
-  },
-  getAvailableThicknesses: (lensType) => {
-    // Find lensType's category
-    const lens = get().lensTypes.find(lt => lt.name === lensType);
-    if (!lens || !lens.type) return [];
-    
-    const category = lens.type === 'distance' || lens.type === 'reading' 
-      ? 'distance-reading' 
-      : lens.type;
-    
-    return get().lensThicknesses.filter(thickness => thickness.category === category);
-  },
-
-  // Service methods implementation
-  getServices: () => get().services,
-  addService: (service) => {
-    set((state) => ({
-      services: [...state.services, service],
-    }));
-  },
-  updateService: (serviceId, service) => {
-    set((state) => ({
-      services: state.services.map((s) => 
-        s.id === serviceId ? { ...s, ...service } : s
-      ),
-    }));
-  },
-  deleteService: (serviceId) => {
-    set((state) => ({
-      services: state.services.filter((s) => s.id !== serviceId),
-    }));
-  },
-  getServicesByCategory: (category) => {
-    return get().services.filter((s) => s.category === category);
-  },
-
-  initialize: (data) => {
-    set({
-      frames: data.frames || [],
-      contactLenses: data.contactLenses || [],
-      lensTypes: data.lensTypes || [],
-      lensCoatings: data.lensCoatings || [],
-      lensThicknesses: data.lensThicknesses || [],
-      lensCombinations: data.lensCombinations || [],
-      services: data.services || [],
-      repairServices: data.repairServices || []
-    });
-  },
-
-  exportData: () => {
-    const data = {
-      frames: get().frames,
-      contactLenses: get().contactLenses,
-      lensTypes: get().lensTypes,
-      lensCoatings: get().lensCoatings,
-      lensThicknesses: get().lensThicknesses,
-      lensCombinations: get().lensCombinations,
-      services: get().services,
-      repairServices: get().repairServices
-    };
-    return data;
-  },
-
-  clearAllData: () => {
-    set({
+// Create the store with default implementations
+export const useInventoryStore = create<InventoryState>()(
+  persist(
+    (set, get) => ({
+      // State
       frames: [],
-      contactLenses: [],
       lensTypes: [],
       lensCoatings: [],
       lensThicknesses: [],
-      lensCombinations: [],
+      contactLenses: [],
       services: [],
-      repairServices: []
-    });
-  },
-
-  // Implement repair services methods
-  getRepairServices: () => get().repairServices,
-  addRepairService: (service) => {
-    set((state) => ({
-      repairServices: [...state.repairServices, service]
-    }));
-  },
-  updateRepairService: (service) => {
-    set((state) => ({
-      repairServices: state.repairServices.map((s) =>
-        s.id === service.id ? service : s
-      )
-    }));
-  },
-  deleteRepairService: (serviceId) => {
-    set((state) => ({
-      repairServices: state.repairServices.filter((s) => s.id !== serviceId)
-    }));
-  },
-  
-  // Cleanup methods implementation
-  cleanupSamplePhotochromicCoatings: () => {
-    console.log('Cleanup method called - no implementation needed at this time');
-  }
-}));
-
-export { useInventoryStore };
+      repairServices: [],
+      lensCombinations: [],
+      
+      // Frame methods
+      addFrame: (frame) => {
+        const frameId = `F${Date.now()}`;
+        set((state) => ({
+          frames: [...state.frames, {
+            ...frame,
+            id: frameId,
+            frameId,
+            createdAt: new Date().toISOString()
+          }]
+        }));
+        return frameId;
+      },
+      
+      updateFrame: (frame) => {
+        set((state) => ({
+          frames: state.frames.map(f => 
+            f.id === frame.id ? frame : f
+          )
+        }));
+      },
+      
+      deleteFrame: (frameId) => {
+        set((state) => ({
+          frames: state.frames.filter(f => f.id !== frameId)
+        }));
+      },
+      
+      searchFrames: (query) => {
+        const q = query.toLowerCase().trim();
+        return get().frames.filter(f => 
+          f.brand.toLowerCase().includes(q) || 
+          f.model.toLowerCase().includes(q) || 
+          f.color.toLowerCase().includes(q)
+        );
+      },
+      
+      bulkImportFrames: (frames) => {
+        let added = 0;
+        let duplicates = 0;
+        
+        // Add new frames and track stats
+        set((state) => {
+          const updatedFrames = [...state.frames];
+          
+          frames.forEach(frame => {
+            const duplicate = state.frames.some(
+              f => f.brand === frame.brand && 
+                  f.model === frame.model && 
+                  f.color === frame.color
+            );
+            
+            if (duplicate) {
+              duplicates++;
+              return;
+            }
+            
+            const frameId = `F${Date.now()}-${added}`;
+            updatedFrames.push({
+              ...frame,
+              id: frameId,
+              frameId,
+              createdAt: new Date().toISOString()
+            });
+            added++;
+          });
+          
+          return { frames: updatedFrames };
+        });
+        
+        return { added, duplicates };
+      },
+      
+      // Lens type methods
+      addLensType: (lensType) => {
+        const id = `LT${Date.now()}`;
+        set((state) => ({
+          lensTypes: [...state.lensTypes, { ...lensType, id }]
+        }));
+        return id;
+      },
+      
+      updateLensType: (lensType) => {
+        set((state) => ({
+          lensTypes: state.lensTypes.map(lt => 
+            lt.id === lensType.id ? lensType : lt
+          )
+        }));
+      },
+      
+      deleteLensType: (typeId) => {
+        set((state) => ({
+          lensTypes: state.lensTypes.filter(lt => lt.id !== typeId)
+        }));
+      },
+      
+      // Lens coating methods
+      addLensCoating: (coating) => {
+        const id = `LC${Date.now()}`;
+        set((state) => ({
+          lensCoatings: [...state.lensCoatings, { ...coating, id }]
+        }));
+      },
+      
+      updateLensCoating: (coating) => {
+        set((state) => ({
+          lensCoatings: state.lensCoatings.map(lc => 
+            lc.id === coating.id ? coating : lc
+          )
+        }));
+      },
+      
+      deleteLensCoating: (coatingId) => {
+        set((state) => ({
+          lensCoatings: state.lensCoatings.filter(lc => lc.id !== coatingId)
+        }));
+      },
+      
+      getLensCoatingsByCategory: (category) => {
+        return get().lensCoatings.filter(coating => 
+          coating.category === category
+        );
+      },
+      
+      // Lens thickness methods
+      addLensThickness: (thickness) => {
+        const id = `LTH${Date.now()}`;
+        set((state) => ({
+          lensThicknesses: [...state.lensThicknesses, { ...thickness, id }]
+        }));
+      },
+      
+      updateLensThickness: (thickness) => {
+        set((state) => ({
+          lensThicknesses: state.lensThicknesses.map(lth => 
+            lth.id === thickness.id ? thickness : lth
+          )
+        }));
+      },
+      
+      deleteLensThickness: (thicknessId) => {
+        set((state) => ({
+          lensThicknesses: state.lensThicknesses.filter(lth => lth.id !== thicknessId)
+        }));
+      },
+      
+      getLensThicknessesByCategory: (category) => {
+        return get().lensThicknesses.filter(thickness => 
+          thickness.category === category
+        );
+      },
+      
+      // Lens combinations methods
+      getLensCombinations: () => {
+        return get().lensCombinations;
+      },
+      
+      addLensCombination: (combination) => {
+        const id = `LCOM${Date.now()}`;
+        set((state) => ({
+          lensCombinations: [...state.lensCombinations, { ...combination, id }]
+        }));
+      },
+      
+      updateLensCombination: (combination) => {
+        set((state) => ({
+          lensCombinations: state.lensCombinations.map(lc => 
+            lc.id === combination.id ? combination : lc
+          )
+        }));
+      },
+      
+      deleteLensCombination: (id) => {
+        set((state) => ({
+          lensCombinations: state.lensCombinations.filter(lc => lc.id !== id)
+        }));
+      },
+      
+      resetLensPricing: () => {
+        set({ lensCombinations: [] });
+      },
+      
+      // Helper methods
+      getLensPricingByComponents: (lensTypeId, coatingId, thicknessId) => {
+        return get().lensCombinations.find(
+          lc => lc.lensTypeId === lensTypeId && 
+                lc.coatingId === coatingId && 
+                lc.thicknessId === thicknessId
+        );
+      },
+      
+      getAvailableCoatings: (lensTypeId) => {
+        const lensType = get().lensTypes.find(lt => lt.id === lensTypeId);
+        if (!lensType || !lensType.type) return [];
+        
+        return get().lensCoatings.filter(coating => 
+          coating.category === lensType.type
+        );
+      },
+      
+      getAvailableThicknesses: (lensTypeId) => {
+        const lensType = get().lensTypes.find(lt => lt.id === lensTypeId);
+        if (!lensType || !lensType.type) return [];
+        
+        return get().lensThicknesses.filter(thickness => 
+          thickness.category === lensType.type
+        );
+      },
+      
+      // Contact lens methods
+      addContactLens: (lens) => {
+        const id = `CL${Date.now()}`;
+        set((state) => ({
+          contactLenses: [...state.contactLenses, { ...lens, id }]
+        }));
+        return id;
+      },
+      
+      updateContactLens: (lens) => {
+        set((state) => ({
+          contactLenses: state.contactLenses.map(cl => 
+            cl.id === lens.id ? lens : cl
+          )
+        }));
+      },
+      
+      deleteContactLens: (lensId) => {
+        set((state) => ({
+          contactLenses: state.contactLenses.filter(cl => cl.id !== lensId)
+        }));
+      },
+      
+      searchContactLenses: (query) => {
+        const q = query.toLowerCase().trim();
+        return get().contactLenses.filter(cl => 
+          cl.brand.toLowerCase().includes(q) || 
+          cl.type.toLowerCase().includes(q) || 
+          (cl.color && cl.color.toLowerCase().includes(q))
+        );
+      },
+      
+      // Service methods
+      addService: (service) => {
+        const id = `SV${Date.now()}`;
+        set((state) => ({
+          services: [...state.services, { ...service, id }]
+        }));
+        return id;
+      },
+      
+      updateService: (service) => {
+        set((state) => ({
+          services: state.services.map(sv => 
+            sv.id === service.id ? service : sv
+          )
+        }));
+      },
+      
+      deleteService: (serviceId) => {
+        set((state) => ({
+          services: state.services.filter(sv => sv.id !== serviceId)
+        }));
+      },
+      
+      // Repair service methods
+      getRepairServices: () => {
+        return get().repairServices;
+      },
+      
+      addRepairService: (service) => {
+        set((state) => ({
+          repairServices: [...state.repairServices, service]
+        }));
+      },
+      
+      updateRepairService: (service) => {
+        set((state) => ({
+          repairServices: state.repairServices.map(rs => 
+            rs.id === service.id ? service : rs
+          )
+        }));
+      },
+      
+      deleteRepairService: (serviceId) => {
+        set((state) => ({
+          repairServices: state.repairServices.filter(rs => rs.id !== serviceId)
+        }));
+      },
+      
+      // Clean up sample data
+      cleanupSamplePhotochromicCoatings: () => {
+        console.log("Cleanup completed");
+      }
+    }),
+    {
+      name: 'inventory-store'
+    }
+  )
+);

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LensTypeManager } from "@/components/LensTypeManager";
@@ -10,7 +9,7 @@ import { ContactLensInventory } from "@/components/ContactLensInventory";
 import { ServiceManager } from "@/components/ServiceManager";
 import { RepairServiceManager } from "@/components/RepairServiceManager";
 import { Glasses, Contact, Layers, Paintbrush, Ruler, Calculator, Wrench } from "lucide-react";
-import { Tool } from "lucide-react";
+import { Wrench as RepairIcon } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 
 export const InventoryTabs: React.FC = () => {
@@ -74,7 +73,7 @@ export const InventoryTabs: React.FC = () => {
           value="repairServices" 
           className="data-[state=active]:from-rose-500 data-[state=active]:to-rose-600 data-[state=active]:text-white flex items-center gap-2 py-2.5 px-4"
         >
-          <Tool className="w-4 h-4" />
+          <RepairIcon className="w-4 h-4" />
           <span>{language === 'ar' ? 'خدمات الإصلاح' : 'Repair Services'}</span>
         </TabsTrigger>
       </TabsList>
@@ -152,7 +151,7 @@ export const InventoryTabs: React.FC = () => {
       <TabsContent value="repairServices" className="mt-0">
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <h3 className={`text-lg font-bold mb-4 text-rose-800 flex items-center gap-2 ${textAlignClass}`}>
-            <Tool className="w-5 h-5" />
+            <RepairIcon className="w-5 h-5" />
             {language === 'ar' ? 'إدارة خدمات الإصلاح' : 'Repair Services Management'}
           </h3>
           <RepairServiceManager />
