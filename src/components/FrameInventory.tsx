@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { useInventoryStore, FrameItem } from "@/store/inventoryStore";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -34,12 +34,21 @@ import {
   Save, 
   Tag, 
   QrCode,
-  Printer 
+  Printer,
+  Upload,
+  AlertCircle,
+  Check
 } from "lucide-react";
 import { FrameLabelTemplate, usePrintLabel } from "./FrameLabelTemplate";
 import { useLanguageStore } from "@/store/languageStore";
 
-// Frame Item Component
+interface ImportResult {
+  added: number;
+  duplicates: number;
+  errors: number;
+  errorDetails: string[];
+}
+
 const FrameItemCard = ({ frame, index, onPrintLabel }: { 
   frame: FrameItem; 
   index: number;
@@ -47,7 +56,6 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
 }) => {
   const { t, language } = useLanguageStore();
   
-  // Generate consistent background color based on brand name
   const getBrandColor = (brand: string): string => {
     const colors = [
       'bg-blue-50 border-blue-200 text-blue-800',
@@ -119,7 +127,7 @@ const FrameItemCard = ({ frame, index, onPrintLabel }: {
 };
 
 export const FrameInventory: React.FC = () => {
-  const { frames, addFrame, searchFrames } = useInventoryStore();
+  const { frames, addFrame, searchFrames, bulkImportFrames } = useInventoryStore();
   const { printSingleLabel } = usePrintLabel();
   const { t, language } = useLanguageStore();
   
@@ -127,6 +135,10 @@ export const FrameInventory: React.FC = () => {
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchFrames>>([]);
   const [isAddFrameDialogOpen, setIsAddFrameDialogOpen] = useState(false);
   const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importData, setImportData] = useState("");
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
   
   const [frameBrand, setFrameBrand] = useState("");
   const [frameModel, setFrameModel] = useState("");
@@ -135,7 +147,6 @@ export const FrameInventory: React.FC = () => {
   const [framePrice, setFramePrice] = useState("");
   const [frameQty, setFrameQty] = useState("1");
   
-  // Group frames by brand
   const groupedByBrand = React.useMemo(() => {
     const grouped: Record<string, FrameItem[]> = {};
     
@@ -146,7 +157,6 @@ export const FrameInventory: React.FC = () => {
       grouped[frame.brand].push(frame);
     });
     
-    // Sort brands by name
     return Object.fromEntries(
       Object.entries(grouped).sort(([brandA], [brandB]) => brandA.localeCompare(brandB))
     );
@@ -207,6 +217,96 @@ export const FrameInventory: React.FC = () => {
     setSearchResults(frames);
   };
   
+  const handleImportFrames = () => {
+    setIsImporting(true);
+    setImportResult(null);
+    
+    try {
+      const lines = importData.trim().split("\n").filter(line => line.trim().length > 0);
+      
+      const parsedFrames = [];
+      const errors = [];
+      
+      for (let i = 0; i < lines.length; i++) {
+        try {
+          const line = lines[i].trim();
+          if (line.toLowerCase().includes("brand") || line.toLowerCase().includes("model") || !line) {
+            continue;
+          }
+          
+          const parts = line.split(",").map(part => part.trim());
+          
+          if (parts.length < 4) {
+            errors.push(`Line ${i + 1}: Not enough data. Expected at least 4 values (brand, model, color, price).`);
+            continue;
+          }
+          
+          const brand = parts[0];
+          const model = parts[1];
+          const color = parts[2];
+          const price = parseFloat(parts[3].replace(/[^\d.-]/g, '')); 
+          const size = parts.length > 4 ? parts[4] : "";
+          const qty = parts.length > 5 ? parseInt(parts[5]) : 1;
+          
+          if (isNaN(price) || price <= 0) {
+            errors.push(`Line ${i + 1}: Invalid price value "${parts[3]}".`);
+            continue;
+          }
+          
+          if (isNaN(qty) || qty <= 0) {
+            errors.push(`Line ${i + 1}: Invalid quantity value "${parts[5] || 1}".`);
+            continue;
+          }
+          
+          parsedFrames.push({
+            brand,
+            model,
+            color,
+            size,
+            price,
+            qty
+          });
+        } catch (error) {
+          errors.push(`Line ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+      
+      const result = bulkImportFrames(parsedFrames);
+      
+      setImportResult({
+        added: result.added,
+        duplicates: result.duplicates,
+        errors: errors.length,
+        errorDetails: errors
+      });
+      
+      setSearchResults(frames);
+      
+      if (result.added > 0) {
+        toast.success(`${result.added} frames imported successfully`);
+      }
+      
+      if (result.duplicates > 0) {
+        toast.warning(`${result.duplicates} duplicate frames were detected and skipped`);
+      }
+      
+      if (errors.length > 0) {
+        toast.error(`${errors.length} errors occurred during import`);
+      }
+      
+    } catch (error) {
+      toast.error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setImportResult({
+        added: 0,
+        duplicates: 0,
+        errors: 1,
+        errorDetails: [`General error: ${error instanceof Error ? error.message : 'Unknown error'}`]
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+  
   useEffect(() => {
     setSearchResults(frames);
   }, [frames]);
@@ -241,6 +341,15 @@ export const FrameInventory: React.FC = () => {
           >
             <Tag className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} /> 
             {isRtl ? "طباعة الملصقات" : "Print Labels"}
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => setIsImportDialogOpen(true)}
+            className="shrink-0 border-blue-200 text-blue-700 hover:bg-blue-50"
+          >
+            <Upload className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} />
+            {isRtl ? "استيراد الإطارات" : "Import Frames"}
           </Button>
           
           <Dialog open={isAddFrameDialogOpen} onOpenChange={setIsAddFrameDialogOpen}>
@@ -407,6 +516,92 @@ export const FrameInventory: React.FC = () => {
           <DialogFooter className={isRtl ? "flex-row-reverse" : ""}>
             <Button variant="outline" onClick={() => setIsLabelDialogOpen(false)}>
               {isRtl ? "إغلاق" : "Close"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+        <DialogContent className={`max-w-2xl max-h-[90vh] ${dirClass}`}>
+          <DialogHeader>
+            <DialogTitle>{isRtl ? "استيراد الإطارات" : "Import Frames"}</DialogTitle>
+            <DialogDescription>
+              {isRtl 
+                ? "أدخل بيانات الإطارات بتنسيق CSV: العلامة التجارية، الموديل، اللون، السعر، الحجم (اختياري)، الكمية (اختياري)" 
+                : "Enter frame data in CSV format: Brand, Model, Color, Price, Size (optional), Quantity (optional)"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <Label htmlFor="importData">
+              {isRtl ? "بيانات الإطارات" : "Frame Data"}
+            </Label>
+            <Textarea
+              id="importData"
+              placeholder="Brand, Model, Color, Price, Size, Quantity"
+              value={importData}
+              onChange={(e) => setImportData(e.target.value)}
+              className="h-64 font-mono"
+              disabled={isImporting}
+            />
+
+            {importResult && (
+              <div className="rounded-lg border p-4 space-y-3">
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="flex flex-col items-center">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 flex items-center gap-1.5 p-1.5">
+                      <Check className="h-4 w-4" />
+                      <span className="font-mono">{importResult.added}</span>
+                    </Badge>
+                    <span className="text-xs mt-1 text-muted-foreground">{isRtl ? "تمت الإضافة" : "Added"}</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 flex items-center gap-1.5 p-1.5">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="font-mono">{importResult.duplicates}</span>
+                    </Badge>
+                    <span className="text-xs mt-1 text-muted-foreground">{isRtl ? "تكرار" : "Duplicates"}</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <Badge variant="outline" className="bg-red-50 text-red-700 flex items-center gap-1.5 p-1.5">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="font-mono">{importResult.errors}</span>
+                    </Badge>
+                    <span className="text-xs mt-1 text-muted-foreground">{isRtl ? "أخطاء" : "Errors"}</span>
+                  </div>
+                </div>
+
+                {importResult.errorDetails.length > 0 && (
+                  <div className="mt-2">
+                    <Label className="mb-1 block">
+                      {isRtl ? "تفاصيل الأخطاء" : "Error Details"}
+                    </Label>
+                    <div className="max-h-36 overflow-y-auto rounded border bg-muted/30 p-2 text-sm">
+                      {importResult.errorDetails.map((error, index) => (
+                        <div key={index} className="text-red-600 font-mono text-xs mb-1">
+                          {error}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className={isRtl ? "flex-row-reverse" : ""}>
+            <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
+              {isRtl ? "إلغاء" : "Cancel"}
+            </Button>
+            <Button 
+              onClick={handleImportFrames} 
+              disabled={isImporting || !importData.trim()}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              {isRtl 
+                ? (isImporting ? "جاري الاستيراد..." : "استيراد الإطارات") 
+                : (isImporting ? "Importing..." : "Import Frames")}
             </Button>
           </DialogFooter>
         </DialogContent>

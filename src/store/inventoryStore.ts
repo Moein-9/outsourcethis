@@ -78,6 +78,7 @@ interface InventoryState {
   updateFrameQuantity: (frameId: string, newQty: number) => void;
   searchFrames: (query: string) => FrameItem[];
   getFrameById: (id: string) => FrameItem | undefined;
+  bulkImportFrames: (frames: Array<Omit<FrameItem, "frameId" | "createdAt">>) => { added: number; duplicates: number };
   
   addLensType: (lens: Omit<LensType, "id">) => string;
   updateLensType: (id: string, lens: Partial<Omit<LensType, "id">>) => void;
@@ -280,6 +281,49 @@ export const useInventoryStore = create<InventoryState>()(
         }));
         
         return frameId;
+      },
+      
+      bulkImportFrames: (frames) => {
+        const currentFrames = get().frames;
+        const newFrames = [];
+        let duplicateCount = 0;
+        
+        // Process each frame
+        for (const frame of frames) {
+          // Check for duplicates (same brand, model, color, and size)
+          const isDuplicate = currentFrames.some(existingFrame => 
+            existingFrame.brand.toLowerCase() === frame.brand.toLowerCase() &&
+            existingFrame.model.toLowerCase() === frame.model.toLowerCase() &&
+            existingFrame.color.toLowerCase() === frame.color.toLowerCase() &&
+            existingFrame.size.toLowerCase() === frame.size.toLowerCase()
+          );
+          
+          if (isDuplicate) {
+            duplicateCount++;
+            continue;
+          }
+          
+          const frameId = `FR${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+          const createdAt = new Date().toISOString();
+          
+          newFrames.push({
+            ...frame,
+            frameId,
+            createdAt
+          });
+        }
+        
+        // Add all the new frames at once
+        if (newFrames.length > 0) {
+          set((state) => ({
+            frames: [...state.frames, ...newFrames]
+          }));
+        }
+        
+        return {
+          added: newFrames.length,
+          duplicates: duplicateCount
+        };
       },
       
       updateFrameQuantity: (frameId, newQty) => {
