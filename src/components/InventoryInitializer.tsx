@@ -92,8 +92,8 @@ export const ImportInventoryButton = () => {
           </AlertDialogTitle>
           <AlertDialogDescription>
             {isRtl 
-              ? "هل أنت متأكد من رغبتك في استيراد جميع الإطارات؟ سيتم إضافة حوالي 130 إطار إلى المخزون."
-              : "Are you sure you want to import all frames? This will add about 130 frames to your inventory."}
+              ? "هل أنت متأكد من رغبتك في استيراد جميع الإطارات؟ سيتم إضافة حوالي 600 إطار إلى المخزون."
+              : "Are you sure you want to import all frames? This will add about 600 frames to your inventory."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className={isRtl ? "flex-row-reverse" : ""}>

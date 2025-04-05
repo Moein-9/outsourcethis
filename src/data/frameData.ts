@@ -1,4 +1,3 @@
-
 // This file contains all the frame data for the inventory system
 // It's separated to keep the component files smaller
 
@@ -178,20 +177,4 @@ export const allFrames = [
   { brand: "BURRBURY", model: "BE2382-8", color: "BE2382-8", price: 72.0, size: "53-17-145", qty: 1 },
   { brand: "BOSS", model: "BOSS 1319", color: "BOSS 1319", price: 75.0, size: "52-21-145", qty: 1 },
   { brand: "Brand", model: "BOSS 1319", color: "1064", price: 35.0, size: "46-15-138", qty: 1 },
-  { brand: "Brand", model: "BOSS 1319-7", color: "1064", price: 35.0, size: "52-21-145", qty: 1 }
-];
-
-export const contactLensesToImport = [
-  { brand: "Acuvue", type: "Daily", power: "-1.00", bc: "8.5", diameter: "14.2", price: 25, qty: 10 },
-  { brand: "Acuvue", type: "Daily", power: "-1.50", bc: "8.5", diameter: "14.2", price: 25, qty: 8 },
-  { brand: "Acuvue", type: "Daily", power: "-2.00", bc: "8.5", diameter: "14.2", price: 25, qty: 12 },
-  { brand: "Acuvue", type: "Daily", power: "-2.50", bc: "8.5", diameter: "14.2", price: 25, qty: 5 },
-  { brand: "Acuvue", type: "Daily", power: "-3.00", bc: "8.5", diameter: "14.2", price: 25, qty: 7 },
-  { brand: "Acuvue", type: "Monthly", power: "-1.00", bc: "8.6", diameter: "14.0", price: 35, qty: 4 },
-  { brand: "Acuvue", type: "Monthly", power: "-2.00", bc: "8.6", diameter: "14.0", price: 35, qty: 6 },
-  { brand: "Acuvue", type: "Monthly", power: "-3.00", bc: "8.6", diameter: "14.0", price: 35, qty: 3 },
-  { brand: "Bausch+Lomb", type: "Daily", power: "-1.00", bc: "8.6", diameter: "14.1", price: 28, qty: 8 },
-  { brand: "Bausch+Lomb", type: "Daily", power: "-2.00", bc: "8.6", diameter: "14.1", price: 28, qty: 9 },
-  { brand: "Bausch+Lomb", type: "Monthly", power: "-1.50", bc: "8.7", diameter: "14.0", price: 38, qty: 5 },
-  { brand: "Bausch+Lomb", type: "Monthly", power: "-2.50", bc: "8.7", diameter: "14.0", price: 38, qty: 4 }
-];
+  { brand: "Brand", model: "BOSS 1319-7", color: "1064", price: 35.0, size:
