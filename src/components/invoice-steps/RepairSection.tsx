@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -8,18 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Wrench, Check } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-
-// Define a proper type for the service
-interface RepairService {
-  id: string;
-  service_id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  category: string;
-}
 
 export const RepairSection: React.FC = () => {
   const { language } = useLanguageStore();
@@ -30,24 +18,6 @@ export const RepairSection: React.FC = () => {
 
   const isRtl = language === 'ar';
   const textAlignClass = isRtl ? 'text-right' : 'text-left';
-
-  // Fetch repair services from Supabase with proper typing
-  const { data: repairServices, isLoading } = useQuery({
-    queryKey: ['repairServices'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('services')
-        .select('*')
-        .eq('category', 'repair');
-      
-      if (error) {
-        console.error("Error fetching repair services:", error);
-        throw error;
-      }
-      
-      return (data || []) as RepairService[];
-    }
-  });
 
   const handleRepairPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const price = parseFloat(e.target.value) || 0;
@@ -68,21 +38,13 @@ export const RepairSection: React.FC = () => {
     setValue('serviceDescription', e.target.value);
   };
 
-  // Use repair services from database if available, otherwise fallback to hardcoded ones
-  const commonRepairs = repairServices?.length 
-    ? repairServices.map(service => ({
-        name: isRtl && service.name.includes(' - ') 
-          ? service.name.split(' - ')[1]
-          : service.name,
-        price: service.price
-      }))
-    : [
-        { name: isRtl ? 'إصلاح الإطار' : 'Frame Repair', price: 5.000 },
-        { name: isRtl ? 'استبدال المسامير' : 'Screw Replacement', price: 2.500 },
-        { name: isRtl ? 'تعديل الإطار' : 'Frame Adjustment', price: 3.000 },
-        { name: isRtl ? 'إصلاح العدسة' : 'Lens Repair', price: 10.000 },
-        { name: isRtl ? 'تنظيف متخصص' : 'Professional Cleaning', price: 5.000 }
-      ];
+  const commonRepairs = [
+    { name: isRtl ? 'إصلاح الإطار' : 'Frame Repair', price: 5.000 },
+    { name: isRtl ? 'استبدال المسامير' : 'Screw Replacement', price: 2.500 },
+    { name: isRtl ? 'تعديل الإطار' : 'Frame Adjustment', price: 3.000 },
+    { name: isRtl ? 'إصلاح العدسة' : 'Lens Repair', price: 10.000 },
+    { name: isRtl ? 'تنظيف متخصص' : 'Professional Cleaning', price: 5.000 }
+  ];
 
   const applyCommonRepair = (repair: { name: string, price: number }) => {
     setRepairType(repair.name);
@@ -105,28 +67,22 @@ export const RepairSection: React.FC = () => {
         <CardContent className="p-6">
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              {isLoading ? (
-                <div className="col-span-5 text-center py-4">
-                  {isRtl ? "جاري تحميل خدمات الإصلاح..." : "Loading repair services..."}
-                </div>
-              ) : (
-                commonRepairs.map((repair, index) => (
-                  <Button 
-                    key={index}
-                    variant="outline" 
-                    className={`p-3 h-auto ${repairType === repair.name ? 'bg-purple-100 border-purple-500' : ''}`}
-                    onClick={() => applyCommonRepair(repair)}
-                  >
-                    <div className="flex flex-col items-center gap-1 text-center">
-                      <span className="font-medium text-sm">{repair.name}</span>
-                      <span className="text-purple-700 font-semibold">{repair.price.toFixed(3)} KWD</span>
-                      {repairType === repair.name && (
-                        <Check className="w-4 h-4 text-purple-600" />
-                      )}
-                    </div>
-                  </Button>
-                ))
-              )}
+              {commonRepairs.map((repair, index) => (
+                <Button 
+                  key={index}
+                  variant="outline" 
+                  className={`p-3 h-auto ${repairType === repair.name ? 'bg-purple-100 border-purple-500' : ''}`}
+                  onClick={() => applyCommonRepair(repair)}
+                >
+                  <div className="flex flex-col items-center gap-1 text-center">
+                    <span className="font-medium text-sm">{repair.name}</span>
+                    <span className="text-purple-700 font-semibold">{repair.price.toFixed(3)} KWD</span>
+                    {repairType === repair.name && (
+                      <Check className="w-4 h-4 text-purple-600" />
+                    )}
+                  </div>
+                </Button>
+              ))}
             </div>
 
             <div className="pt-4 border-t border-dashed border-purple-200">
