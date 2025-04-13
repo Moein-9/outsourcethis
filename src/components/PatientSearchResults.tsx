@@ -1,9 +1,7 @@
-
 import React from "react";
 import { format, parseISO, differenceInYears } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 import { useLanguageStore } from "@/store/languageStore";
-import { Patient } from "@/store/patientStore";
 import { Button } from "@/components/ui/button";
 import { 
   Table, 
@@ -21,7 +19,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Eye, UserSearch } from "lucide-react";
+import { Patient } from "@/integrations/supabase/schema";
 
+// Interface for patient data shown in search results with additional metadata
 interface PatientWithMeta extends Patient {
   lastVisit?: string;
   avatar?: string;
@@ -51,8 +51,12 @@ export const PatientSearchResults: React.FC<PatientSearchResultsProps> = ({
   
   const getPatientAge = (dateOfBirth?: string) => {
     if (!dateOfBirth) return isRtl ? "غير معروف" : "Unknown";
-    const age = differenceInYears(new Date(), new Date(dateOfBirth));
-    return age;
+    try {
+      const age = differenceInYears(new Date(), new Date(dateOfBirth));
+      return age.toString();
+    } catch (error) {
+      return isRtl ? "غير معروف" : "Unknown";
+    }
   };
   
   return (
@@ -82,12 +86,12 @@ export const PatientSearchResults: React.FC<PatientSearchResultsProps> = ({
               </TableHeader>
               <TableBody>
                 {searchResults.map((patient, index) => (
-                  <TableRow key={patient.patientId}>
+                  <TableRow key={patient.id}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell>{patient.name}</TableCell>
-                    <TableCell dir="ltr" className="text-right">{patient.phone}</TableCell>
-                    <TableCell>{formatDate(patient.dob)}</TableCell>
-                    <TableCell>{getPatientAge(patient.dob)}</TableCell>
+                    <TableCell>{patient.full_name}</TableCell>
+                    <TableCell dir="ltr" className="text-right">{patient.phone_number}</TableCell>
+                    <TableCell>{patient.date_of_birth ? formatDate(patient.date_of_birth) : (isRtl ? "تاريخ غير متوفر" : "Date not available")}</TableCell>
+                    <TableCell>{patient.date_of_birth ? getPatientAge(patient.date_of_birth) : (isRtl ? "غير معروف" : "Unknown")}</TableCell>
                     <TableCell>
                       {patient.lastVisit ? formatDate(patient.lastVisit) : (isRtl ? 'لا توجد زيارات' : 'No visits')}
                     </TableCell>

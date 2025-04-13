@@ -196,6 +196,7 @@ export async function searchPatients(query: string, limit = 20): Promise<Patient
   const searchTerm = `%${query.toLowerCase()}%`;
 
   try {
+    // Search patients by name or phone number using ilike for case-insensitive matching
     const { data, error } = await supabase
       .from('patients')
       .select('*')
@@ -311,4 +312,4 @@ export async function addContactLensPrescription(
     console.error('Unexpected error adding contact lens prescription:', error);
     return null;
   }
-} 
+}

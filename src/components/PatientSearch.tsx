@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { usePatientStore, Patient, RxData, ContactLensRx } from "@/store/patientStore";
 import { useInvoiceStore, Invoice, WorkOrder as InvoiceWorkOrder } from "@/store/invoiceStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { printRxReceipt } from "./RxReceiptPrint";
@@ -18,18 +17,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { PlusCircle, Eye } from "lucide-react";
+import { PlusCircle, Eye, Loader2 } from "lucide-react";
 import { AddRxDialog } from "./AddRxDialog";
 import { AddContactLensRxDialog } from "./AddContactLensRxDialog";
+import { Patient, ContactLensPrescription, GlassesPrescription } from "@/integrations/supabase/schema";
+import * as patientService from "@/services/patientService";
 
+// Interface for patient data shown in search results
 interface PatientWithMeta extends Patient {
-  dateOfBirth: string;
   lastVisit?: string;
   avatar?: string;
 }
 
 export const PatientSearch: React.FC = () => {
-  const { patients, searchPatients, updatePatientRx, updateContactLensRx } = usePatientStore();
   const { 
     invoices, 
     workOrders, 
@@ -44,6 +44,7 @@ export const PatientSearch: React.FC = () => {
   const [showResults, setShowResults] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<PatientWithMeta | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const [patientInvoices, setPatientInvoices] = useState<Invoice[]>([]);
   const [patientWorkOrders, setPatientWorkOrders] = useState<InvoiceWorkOrder[]>([]);
@@ -55,35 +56,57 @@ export const PatientSearch: React.FC = () => {
   const [isAddContactLensRxDialogOpen, setIsAddContactLensRxDialogOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   
+  // Patient data from Supabase
+  const [patientDetails, setPatientDetails] = useState<{
+    notes: any[];
+    glassesPrescriptions: GlassesPrescription[];
+    contactLensPrescriptions: ContactLensPrescription[];
+  } | null>(null);
+  
   const filterByVisitDate = (patients: PatientWithMeta[], dateFilter: string) => {
     if (dateFilter === "all_visits") return patients;
     
     return patients;
   };
   
-  const handleSearch = (searchTerm: string, visitDateFilter: string) => {
+  const handleSearch = async (searchTerm: string, visitDateFilter: string) => {
     if (!searchTerm.trim()) {
       toast.error(language === 'ar' ? "الرجاء إدخال مصطلح البحث" : "Please enter a search term");
       return;
     }
     
-    const results = searchPatients(searchTerm).map(patient => {
-      return {
-        ...patient,
-        dateOfBirth: patient.dob,
-        lastVisit: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
-        createdAt: patient.createdAt
-      } as PatientWithMeta;
-    });
+    setIsLoading(true);
     
-    let filteredResults = results;
-    filteredResults = filterByVisitDate(filteredResults, visitDateFilter);
-    
-    setSearchResults(filteredResults);
-    setShowResults(true);
-    
-    if (filteredResults.length === 0) {
-      toast.info(language === 'ar' ? "لم يتم العثور على نتائج مطابقة" : "No matching results found");
+    try {
+      const patients = await patientService.searchPatients(searchTerm);
+      
+      // Map patients properly to match the PatientWithMeta interface
+      const results = patients.map(patient => {
+        return {
+          ...patient,
+          id: patient.id,
+          full_name: patient.full_name,
+          phone_number: patient.phone_number,
+          date_of_birth: patient.date_of_birth,
+          // Add any derived fields needed for display
+          lastVisit: undefined // We'll get this from invoices if needed
+        };
+      });
+      
+      let filteredResults = results;
+      filteredResults = filterByVisitDate(filteredResults, visitDateFilter);
+      
+      setSearchResults(filteredResults);
+      setShowResults(true);
+      
+      if (filteredResults.length === 0) {
+        toast.info(language === 'ar' ? "لم يتم العثور على نتائج مطابقة" : "No matching results found");
+      }
+    } catch (error) {
+      console.error("Error searching patients:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء البحث" : "An error occurred while searching");
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -110,35 +133,121 @@ export const PatientSearch: React.FC = () => {
     setArchivedWorkOrders(archivedWOs);
   }, [getInvoicesByPatientId, getWorkOrdersByPatientId, getArchivedInvoicesByPatientId, getArchivedWorkOrdersByPatientId]);
   
-  const handlePatientSelect = (patient: PatientWithMeta) => {
+  const handlePatientSelect = async (patient: PatientWithMeta) => {
     setSelectedPatient(patient);
-    refreshPatientData(patient.patientId);
-    setIsProfileOpen(true);
+    setIsLoading(true);
+    
+    try {
+      // Fetch complete patient data including prescriptions and notes
+      const patientData = await patientService.getPatientById(patient.id);
+      
+      if (patientData) {
+        setPatientDetails({
+          notes: patientData.notes,
+          glassesPrescriptions: patientData.glassesPrescriptions,
+          contactLensPrescriptions: patientData.contactLensPrescriptions
+        });
+      }
+      
+      // Get invoice data (still using the local store for now)
+      refreshPatientData(patient.id);
+      setIsProfileOpen(true);
+    } catch (error) {
+      console.error("Error fetching patient details:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء تحميل بيانات العميل" : "Error loading patient details");
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleDirectPrint = (printLanguage?: 'en' | 'ar') => {
-    if (!selectedPatient) return;
+    if (!selectedPatient || !patientDetails) return;
     
     const langToPrint = printLanguage || useLanguageStore.getState().language;
     
+    // Get the most recent glasses prescription
+    const latestGlassesPrescription = patientDetails.glassesPrescriptions[0];
+    
+    if (!latestGlassesPrescription) {
+      toast.error(language === 'ar' ? "لا توجد وصفة طبية متاحة للطباعة" : "No prescription available to print");
+      return;
+    }
+    
+    // Adapt Supabase rx format to the format expected by printRxReceipt
+    const rxForPrinting = {
+      sphereOD: latestGlassesPrescription.od_sph || "-",
+      cylOD: latestGlassesPrescription.od_cyl || "-",
+      axisOD: latestGlassesPrescription.od_axis || "-",
+      addOD: latestGlassesPrescription.od_add || "-",
+      pdRight: latestGlassesPrescription.od_pd || "-",
+      sphereOS: latestGlassesPrescription.os_sph || "-",
+      cylOS: latestGlassesPrescription.os_cyl || "-",
+      axisOS: latestGlassesPrescription.os_axis || "-",
+      addOS: latestGlassesPrescription.os_add || "-",
+      pdLeft: latestGlassesPrescription.os_pd || "-",
+    };
+    
     printRxReceipt({
-      patientName: selectedPatient.name,
-      patientPhone: selectedPatient.phone,
-      rx: selectedPatient.rx,
+      patientName: selectedPatient.full_name,
+      patientPhone: selectedPatient.phone_number,
+      rx: rxForPrinting,
       forcedLanguage: langToPrint
     });
   };
 
   const handleContactLensPrint = (printLanguage?: 'en' | 'ar') => {
-    if (!selectedPatient || !selectedPatient.contactLensRx) return;
+    if (!selectedPatient || !patientDetails) return;
     
     const langToPrint = printLanguage || useLanguageStore.getState().language;
     
+    // Get the most recent contact lens prescription
+    const latestContactLensPrescription = patientDetails.contactLensPrescriptions[0];
+    
+    if (!latestContactLensPrescription) {
+      toast.error(language === 'ar' ? "لا توجد وصفة عدسات لاصقة متاحة للطباعة" : "No contact lens prescription available to print");
+      return;
+    }
+
+    // Get the most recent glasses prescription for the base rx
+    const latestGlassesPrescription = patientDetails.glassesPrescriptions[0];
+    
+    // Adapt Supabase rx format to the format expected by printRxReceipt
+    const rxForPrinting = latestGlassesPrescription ? {
+      sphereOD: latestGlassesPrescription.od_sph || "-",
+      cylOD: latestGlassesPrescription.od_cyl || "-",
+      axisOD: latestGlassesPrescription.od_axis || "-",
+      addOD: latestGlassesPrescription.od_add || "-",
+      pdRight: latestGlassesPrescription.od_pd || "-",
+      sphereOS: latestGlassesPrescription.os_sph || "-",
+      cylOS: latestGlassesPrescription.os_cyl || "-",
+      axisOS: latestGlassesPrescription.os_axis || "-",
+      addOS: latestGlassesPrescription.os_add || "-",
+      pdLeft: latestGlassesPrescription.os_pd || "-",
+    } : undefined;
+    
+    // Adapt contact lens data
+    const contactLensRxForPrinting = {
+      rightEye: {
+        sphere: latestContactLensPrescription.od_sphere || "-",
+        cylinder: latestContactLensPrescription.od_cylinder || "-",
+        axis: latestContactLensPrescription.od_axis || "-",
+        bc: latestContactLensPrescription.od_base_curve || "-",
+        dia: latestContactLensPrescription.od_diameter || "14.2"
+      },
+      leftEye: {
+        sphere: latestContactLensPrescription.os_sphere || "-",
+        cylinder: latestContactLensPrescription.os_cylinder || "-",
+        axis: latestContactLensPrescription.os_axis || "-",
+        bc: latestContactLensPrescription.os_base_curve || "-",
+        dia: latestContactLensPrescription.os_diameter || "14.2"
+      }
+    };
+    
     printRxReceipt({
-      patientName: selectedPatient.name,
-      patientPhone: selectedPatient.phone,
-      rx: selectedPatient.rx,
-      contactLensRx: selectedPatient.contactLensRx,
+      patientName: selectedPatient.full_name,
+      patientPhone: selectedPatient.phone_number,
+      rx: rxForPrinting,
+      contactLensRx: contactLensRxForPrinting,
       printContactLens: true,
       forcedLanguage: langToPrint
     });
@@ -149,52 +258,105 @@ export const PatientSearch: React.FC = () => {
     handleDirectPrint(selectedLanguage);
   };
   
-  const handleSaveRx = (rxData: RxData) => {
+  const handleSaveRx = async (rxData: any) => {
     if (!selectedPatient) return;
     
-    updatePatientRx(selectedPatient.patientId, rxData);
+    setIsLoading(true);
     
-    setSelectedPatient(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        rx: rxData,
-        rxHistory: [
-          ...(prev.rxHistory || []),
-          { ...prev.rx, createdAt: new Date().toISOString() }
-        ]
+    try {
+      // Convert to the format expected by Supabase
+      const prescriptionData = {
+        patient_id: selectedPatient.id,
+        prescription_date: new Date().toISOString().split('T')[0],
+        od_sph: rxData.sphereOD,
+        od_cyl: rxData.cylOD,
+        od_axis: rxData.axisOD,
+        od_add: rxData.addOD,
+        od_pd: rxData.pdRight,
+        os_sph: rxData.sphereOS,
+        os_cyl: rxData.cylOS,
+        os_axis: rxData.axisOS,
+        os_add: rxData.addOS,
+        os_pd: rxData.pdLeft
       };
-    });
-    
-    toast.success(language === 'ar' ? "تم إضافة الوصفة الطبية بنجاح" : "Prescription added successfully");
+      
+      const result = await patientService.addGlassesPrescription(prescriptionData);
+      
+      if (result) {
+        // Reload patient data to show the new prescription
+        const patientData = await patientService.getPatientById(selectedPatient.id);
+        
+        if (patientData) {
+          setPatientDetails({
+            notes: patientData.notes,
+            glassesPrescriptions: patientData.glassesPrescriptions,
+            contactLensPrescriptions: patientData.contactLensPrescriptions
+          });
+        }
+        
+        toast.success(language === 'ar' ? "تم إضافة الوصفة الطبية بنجاح" : "Prescription added successfully");
+      } else {
+        toast.error(language === 'ar' ? "فشل في إضافة الوصفة الطبية" : "Failed to add prescription");
+      }
+    } catch (error) {
+      console.error("Error saving prescription:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء حفظ الوصفة الطبية" : "Error saving prescription");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSaveContactLensRx = (rxData: ContactLensRx) => {
+  const handleSaveContactLensRx = async (rxData: any) => {
     if (!selectedPatient) return;
     
-    updateContactLensRx(selectedPatient.patientId, rxData);
+    setIsLoading(true);
     
-    setSelectedPatient(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        contactLensRx: rxData,
-        contactLensRxHistory: [
-          ...(prev.contactLensRxHistory || []),
-          { ...(prev.contactLensRx || {
-            rightEye: { sphere: "", cylinder: "", axis: "", bc: "", dia: "" },
-            leftEye: { sphere: "", cylinder: "", axis: "", bc: "", dia: "" }
-          }), createdAt: new Date().toISOString() }
-        ]
+    try {
+      // Convert to the format expected by Supabase
+      const prescriptionData = {
+        patient_id: selectedPatient.id,
+        prescription_date: new Date().toISOString().split('T')[0],
+        od_sphere: rxData.rightEye.sphere,
+        od_cylinder: rxData.rightEye.cylinder,
+        od_axis: rxData.rightEye.axis,
+        od_base_curve: rxData.rightEye.bc,
+        od_diameter: rxData.rightEye.dia,
+        os_sphere: rxData.leftEye.sphere,
+        os_cylinder: rxData.leftEye.cylinder,
+        os_axis: rxData.leftEye.axis,
+        os_base_curve: rxData.leftEye.bc,
+        os_diameter: rxData.leftEye.dia
       };
-    });
-    
-    toast.success(language === 'ar' ? "تم إضافة وصفة العدسات اللاصقة بنجاح" : "Contact lens prescription added successfully");
+      
+      const result = await patientService.addContactLensPrescription(prescriptionData);
+      
+      if (result) {
+        // Reload patient data to show the new prescription
+        const patientData = await patientService.getPatientById(selectedPatient.id);
+        
+        if (patientData) {
+          setPatientDetails({
+            notes: patientData.notes,
+            glassesPrescriptions: patientData.glassesPrescriptions,
+            contactLensPrescriptions: patientData.contactLensPrescriptions
+          });
+        }
+        
+        toast.success(language === 'ar' ? "تم إضافة وصفة العدسات اللاصقة بنجاح" : "Contact lens prescription added successfully");
+      } else {
+        toast.error(language === 'ar' ? "فشل في إضافة وصفة العدسات اللاصقة" : "Failed to add contact lens prescription");
+      }
+    } catch (error) {
+      console.error("Error saving contact lens prescription:", error);
+      toast.error(language === 'ar' ? "حدث خطأ أثناء حفظ وصفة العدسات اللاصقة" : "Error saving contact lens prescription");
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   useEffect(() => {
     if (refreshTrigger > 0 && selectedPatient) {
-      refreshPatientData(selectedPatient.patientId);
+      refreshPatientData(selectedPatient.id);
     }
   }, [refreshTrigger, selectedPatient, refreshPatientData]);
   
@@ -205,7 +367,13 @@ export const PatientSearch: React.FC = () => {
         onClear={clearSearch} 
       />
       
-      {showResults && (
+      {isLoading && (
+        <div className="flex justify-center p-8">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      )}
+      
+      {showResults && !isLoading && (
         <PatientSearchResults 
           searchResults={searchResults} 
           onSelectPatient={handlePatientSelect} 
@@ -214,7 +382,7 @@ export const PatientSearch: React.FC = () => {
       
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
         <DialogContent className="max-w-[95vw] lg:max-w-[90vw] max-h-[90vh] overflow-y-auto p-4 lg:p-6">
-          {selectedPatient && (
+          {selectedPatient && patientDetails && (
             <>
               <DialogHeader>
                 <DialogTitle className="text-xl">{language === 'ar' ? "ملف العميل" : "Client Profile"}</DialogTitle>
@@ -226,7 +394,82 @@ export const PatientSearch: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 py-4">
                 <div className="md:col-span-1">
                   <PatientProfileInfo 
-                    patient={selectedPatient} 
+                    patient={{
+                      patientId: selectedPatient.id,
+                      name: selectedPatient.full_name,
+                      phone: selectedPatient.phone_number,
+                      dob: selectedPatient.date_of_birth ? new Date(selectedPatient.date_of_birth).toISOString() : '',
+                      notes: '',
+                      patientNotes: patientDetails.notes.map(note => ({
+                        id: note.id,
+                        text: note.note_text,
+                        createdAt: note.created_at
+                      })),
+                      rx: patientDetails.glassesPrescriptions.length > 0 ? {
+                        sphereOD: patientDetails.glassesPrescriptions[0].od_sph || '',
+                        cylOD: patientDetails.glassesPrescriptions[0].od_cyl || '',
+                        axisOD: patientDetails.glassesPrescriptions[0].od_axis || '',
+                        addOD: patientDetails.glassesPrescriptions[0].od_add || '',
+                        pdRight: patientDetails.glassesPrescriptions[0].od_pd || '',
+                        sphereOS: patientDetails.glassesPrescriptions[0].os_sph || '',
+                        cylOS: patientDetails.glassesPrescriptions[0].os_cyl || '',
+                        axisOS: patientDetails.glassesPrescriptions[0].os_axis || '',
+                        addOS: patientDetails.glassesPrescriptions[0].os_add || '',
+                        pdLeft: patientDetails.glassesPrescriptions[0].os_pd || '',
+                        createdAt: patientDetails.glassesPrescriptions[0].created_at
+                      } : {
+                        sphereOD: '', cylOD: '', axisOD: '', addOD: '', pdRight: '',
+                        sphereOS: '', cylOS: '', axisOS: '', addOS: '', pdLeft: ''
+                      },
+                      rxHistory: patientDetails.glassesPrescriptions.map(rx => ({
+                        sphereOD: rx.od_sph || '',
+                        cylOD: rx.od_cyl || '',
+                        axisOD: rx.od_axis || '',
+                        addOD: rx.od_add || '',
+                        pdRight: rx.od_pd || '',
+                        sphereOS: rx.os_sph || '',
+                        cylOS: rx.os_cyl || '',
+                        axisOS: rx.os_axis || '',
+                        addOS: rx.os_add || '',
+                        pdLeft: rx.os_pd || '',
+                        createdAt: rx.created_at
+                      })),
+                      contactLensRx: patientDetails.contactLensPrescriptions.length > 0 ? {
+                        rightEye: {
+                          sphere: patientDetails.contactLensPrescriptions[0].od_sphere || '',
+                          cylinder: patientDetails.contactLensPrescriptions[0].od_cylinder || '',
+                          axis: patientDetails.contactLensPrescriptions[0].od_axis || '',
+                          bc: patientDetails.contactLensPrescriptions[0].od_base_curve || '',
+                          dia: patientDetails.contactLensPrescriptions[0].od_diameter || ''
+                        },
+                        leftEye: {
+                          sphere: patientDetails.contactLensPrescriptions[0].os_sphere || '',
+                          cylinder: patientDetails.contactLensPrescriptions[0].os_cylinder || '',
+                          axis: patientDetails.contactLensPrescriptions[0].os_axis || '',
+                          bc: patientDetails.contactLensPrescriptions[0].os_base_curve || '',
+                          dia: patientDetails.contactLensPrescriptions[0].os_diameter || ''
+                        },
+                        createdAt: patientDetails.contactLensPrescriptions[0].created_at
+                      } : undefined,
+                      contactLensRxHistory: patientDetails.contactLensPrescriptions.map(rx => ({
+                        rightEye: {
+                          sphere: rx.od_sphere || '',
+                          cylinder: rx.od_cylinder || '',
+                          axis: rx.od_axis || '',
+                          bc: rx.od_base_curve || '',
+                          dia: rx.od_diameter || ''
+                        },
+                        leftEye: {
+                          sphere: rx.os_sphere || '',
+                          cylinder: rx.os_cylinder || '',
+                          axis: rx.os_axis || '',
+                          bc: rx.os_base_curve || '',
+                          dia: rx.os_diameter || ''
+                        },
+                        createdAt: rx.created_at
+                      })),
+                      createdAt: selectedPatient.created_at
+                    }} 
                     invoices={patientInvoices}
                     onPrintPrescription={() => setIsLanguageDialogOpen(true)}
                   />
@@ -258,10 +501,66 @@ export const PatientSearch: React.FC = () => {
                   </div>
                   
                   <PatientPrescriptionDisplay 
-                    rx={selectedPatient.rx}
-                    rxHistory={selectedPatient.rxHistory}
-                    contactLensRx={selectedPatient.contactLensRx}
-                    contactLensRxHistory={selectedPatient.contactLensRxHistory}
+                    rx={patientDetails.glassesPrescriptions.length > 0 ? {
+                      sphereOD: patientDetails.glassesPrescriptions[0].od_sph || '',
+                      cylOD: patientDetails.glassesPrescriptions[0].od_cyl || '',
+                      axisOD: patientDetails.glassesPrescriptions[0].od_axis || '',
+                      addOD: patientDetails.glassesPrescriptions[0].od_add || '',
+                      pdRight: patientDetails.glassesPrescriptions[0].od_pd || '',
+                      sphereOS: patientDetails.glassesPrescriptions[0].os_sph || '',
+                      cylOS: patientDetails.glassesPrescriptions[0].os_cyl || '',
+                      axisOS: patientDetails.glassesPrescriptions[0].os_axis || '',
+                      addOS: patientDetails.glassesPrescriptions[0].os_add || '',
+                      pdLeft: patientDetails.glassesPrescriptions[0].os_pd || '',
+                      createdAt: patientDetails.glassesPrescriptions[0].created_at
+                    } : undefined}
+                    rxHistory={patientDetails.glassesPrescriptions.map(rx => ({
+                      sphereOD: rx.od_sph || '',
+                      cylOD: rx.od_cyl || '',
+                      axisOD: rx.od_axis || '',
+                      addOD: rx.od_add || '',
+                      pdRight: rx.od_pd || '',
+                      sphereOS: rx.os_sph || '',
+                      cylOS: rx.os_cyl || '',
+                      axisOS: rx.os_axis || '',
+                      addOS: rx.os_add || '',
+                      pdLeft: rx.os_pd || '',
+                      createdAt: rx.created_at
+                    }))}
+                    contactLensRx={patientDetails.contactLensPrescriptions.length > 0 ? {
+                      rightEye: {
+                        sphere: patientDetails.contactLensPrescriptions[0].od_sphere || '',
+                        cylinder: patientDetails.contactLensPrescriptions[0].od_cylinder || '',
+                        axis: patientDetails.contactLensPrescriptions[0].od_axis || '',
+                        bc: patientDetails.contactLensPrescriptions[0].od_base_curve || '',
+                        dia: patientDetails.contactLensPrescriptions[0].od_diameter || ''
+                      },
+                      leftEye: {
+                        sphere: patientDetails.contactLensPrescriptions[0].os_sphere || '',
+                        cylinder: patientDetails.contactLensPrescriptions[0].os_cylinder || '',
+                        axis: patientDetails.contactLensPrescriptions[0].os_axis || '',
+                        bc: patientDetails.contactLensPrescriptions[0].os_base_curve || '',
+                        dia: patientDetails.contactLensPrescriptions[0].os_diameter || ''
+                      },
+                      createdAt: patientDetails.contactLensPrescriptions[0].created_at
+                    } : undefined}
+                    contactLensRxHistory={patientDetails.contactLensPrescriptions.map(rx => ({
+                      rightEye: {
+                        sphere: rx.od_sphere || '',
+                        cylinder: rx.od_cylinder || '',
+                        axis: rx.od_axis || '',
+                        bc: rx.od_base_curve || '',
+                        dia: rx.od_diameter || ''
+                      },
+                      leftEye: {
+                        sphere: rx.os_sphere || '',
+                        cylinder: rx.os_cylinder || '',
+                        axis: rx.os_axis || '',
+                        bc: rx.os_base_curve || '',
+                        dia: rx.os_diameter || ''
+                      },
+                      createdAt: rx.created_at
+                    }))}
                     onPrintPrescription={() => setIsLanguageDialogOpen(true)}
                     onPrintContactLensPrescription={handleContactLensPrint}
                   />
@@ -270,15 +569,25 @@ export const PatientSearch: React.FC = () => {
                     key={`transactions-${refreshTrigger}`}
                     workOrders={patientWorkOrders}
                     invoices={patientInvoices}
-                    patient={selectedPatient}
+                    patient={{
+                      patientId: selectedPatient.id,
+                      name: selectedPatient.full_name,
+                      phone: selectedPatient.phone_number
+                    }}
                   />
                 </div>
               </div>
               
               <div className="mt-6">
-                <PatientNotes patientId={selectedPatient.patientId} />
+                <PatientNotes patientId={selectedPatient.id} />
               </div>
             </>
+          )}
+          
+          {isLoading && (
+            <div className="flex justify-center p-12">
+              <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            </div>
           )}
         </DialogContent>
       </Dialog>
@@ -304,20 +613,46 @@ export const PatientSearch: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {selectedPatient && (
+      {selectedPatient && patientDetails && (
         <>
           <AddRxDialog 
             isOpen={isAddRxDialogOpen}
             onClose={() => setIsAddRxDialogOpen(false)}
             onSave={handleSaveRx}
-            initialRx={selectedPatient.rx}
+            initialRx={patientDetails.glassesPrescriptions.length > 0 ? {
+              sphereOD: patientDetails.glassesPrescriptions[0].od_sph || '',
+              cylOD: patientDetails.glassesPrescriptions[0].od_cyl || '',
+              axisOD: patientDetails.glassesPrescriptions[0].od_axis || '',
+              addOD: patientDetails.glassesPrescriptions[0].od_add || '',
+              pdRight: patientDetails.glassesPrescriptions[0].od_pd || '',
+              sphereOS: patientDetails.glassesPrescriptions[0].os_sph || '',
+              cylOS: patientDetails.glassesPrescriptions[0].os_cyl || '',
+              axisOS: patientDetails.glassesPrescriptions[0].os_axis || '',
+              addOS: patientDetails.glassesPrescriptions[0].os_add || '',
+              pdLeft: patientDetails.glassesPrescriptions[0].os_pd || ''
+            } : undefined}
           />
           
           <AddContactLensRxDialog 
             isOpen={isAddContactLensRxDialogOpen}
             onClose={() => setIsAddContactLensRxDialogOpen(false)}
             onSave={handleSaveContactLensRx}
-            initialRx={selectedPatient.contactLensRx}
+            initialRx={patientDetails.contactLensPrescriptions.length > 0 ? {
+              rightEye: {
+                sphere: patientDetails.contactLensPrescriptions[0].od_sphere || '',
+                cylinder: patientDetails.contactLensPrescriptions[0].od_cylinder || '',
+                axis: patientDetails.contactLensPrescriptions[0].od_axis || '',
+                bc: patientDetails.contactLensPrescriptions[0].od_base_curve || '',
+                dia: patientDetails.contactLensPrescriptions[0].od_diameter || ''
+              },
+              leftEye: {
+                sphere: patientDetails.contactLensPrescriptions[0].os_sphere || '',
+                cylinder: patientDetails.contactLensPrescriptions[0].os_cylinder || '',
+                axis: patientDetails.contactLensPrescriptions[0].os_axis || '',
+                bc: patientDetails.contactLensPrescriptions[0].os_base_curve || '',
+                dia: patientDetails.contactLensPrescriptions[0].os_diameter || ''
+              }
+            } : undefined}
           />
         </>
       )}
