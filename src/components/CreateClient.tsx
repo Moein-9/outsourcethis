@@ -5,15 +5,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, MessageSquare, AlertTriangle } from "lucide-react";
+import {
+  CalendarIcon,
+  MessageSquare,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactLensForm } from "@/components/ContactLensForm";
 import { useLanguageStore } from "@/store/languageStore";
 import { Textarea } from "@/components/ui/textarea";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -21,15 +30,18 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { printRxReceipt } from "@/components/RxReceiptPrint";
+import { createPatient } from "@/services/patientService";
 
 export const CreateClient: React.FC = () => {
   const addPatient = usePatientStore((state) => state.addPatient);
   const { t, language } = useLanguageStore();
-  
-  const [activeTab, setActiveTab] = useState<"glasses" | "contactLenses">("glasses");
+
+  const [activeTab, setActiveTab] = useState<"glasses" | "contactLenses">(
+    "glasses"
+  );
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [noDob, setNoDob] = useState(false);
@@ -38,7 +50,7 @@ export const CreateClient: React.FC = () => {
   const [dobYear, setDobYear] = useState("");
   const [rxDate, setRxDate] = useState<Date | undefined>(new Date());
   const [notes, setNotes] = useState("");
-  
+
   const [sphOD, setSphOD] = useState("");
   const [cylOD, setCylOD] = useState("");
   const [axisOD, setAxisOD] = useState("");
@@ -49,46 +61,54 @@ export const CreateClient: React.FC = () => {
   const [addOS, setAddOS] = useState("");
   const [pdRight, setPdRight] = useState("");
   const [pdLeft, setPdLeft] = useState("");
-  
+
   const [contactLensRx, setContactLensRx] = useState<ContactLensRx>({
     rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" },
-    leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" }
+    leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" },
   });
-  
+
   const [validationErrors, setValidationErrors] = useState({
     rightEye: { cylinderAxisError: false },
-    leftEye: { cylinderAxisError: false }
+    leftEye: { cylinderAxisError: false },
   });
-  
+
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [savedPatient, setSavedPatient] = useState<any>(null);
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
-  const [printPrescriptionType, setPrintPrescriptionType] = useState<"glasses" | "contactLenses">("glasses");
-  
-  const dirClass = language === 'ar' ? 'rtl' : 'ltr';
-  const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
+  const [printPrescriptionType, setPrintPrescriptionType] = useState<
+    "glasses" | "contactLenses"
+  >("glasses");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const hasValidationErrors = validationErrors.rightEye.cylinderAxisError || 
-                              validationErrors.leftEye.cylinderAxisError;
-  
+  const dirClass = language === "ar" ? "rtl" : "ltr";
+  const textAlignClass = language === "ar" ? "text-right" : "text-left";
+
+  const hasValidationErrors =
+    validationErrors.rightEye.cylinderAxisError ||
+    validationErrors.leftEye.cylinderAxisError;
+
   useEffect(() => {
-    validateCylinderAxis('rightEye', cylOD, axisOD);
-    validateCylinderAxis('leftEye', cylOS, axisOS);
+    validateCylinderAxis("rightEye", cylOD, axisOD);
+    validateCylinderAxis("leftEye", cylOS, axisOS);
   }, [cylOD, axisOD, cylOS, axisOS]);
-  
-  const validateCylinderAxis = (eye: 'rightEye' | 'leftEye', cylinder: string, axis: string) => {
+
+  const validateCylinderAxis = (
+    eye: "rightEye" | "leftEye",
+    cylinder: string,
+    axis: string
+  ) => {
     const hasCylinder = cylinder !== "";
     const hasAxis = axis !== "";
-    
-    setValidationErrors(prev => ({
+
+    setValidationErrors((prev) => ({
       ...prev,
       [eye]: {
         ...prev[eye],
-        cylinderAxisError: hasCylinder && !hasAxis
-      }
+        cylinderAxisError: hasCylinder && !hasAxis,
+      },
     }));
   };
-  
+
   const generateSphOptions = () => {
     const options = [];
     for (let i = 10; i >= -10; i -= 0.25) {
@@ -101,7 +121,7 @@ export const CreateClient: React.FC = () => {
     }
     return options;
   };
-  
+
   const generateCylOptions = () => {
     const options = [];
     for (let i = 0; i >= -6; i -= 0.25) {
@@ -114,7 +134,7 @@ export const CreateClient: React.FC = () => {
     }
     return options;
   };
-  
+
   const generateAxisOptions = () => {
     const options = [];
     for (let i = 0; i <= 180; i += 1) {
@@ -126,7 +146,7 @@ export const CreateClient: React.FC = () => {
     }
     return options;
   };
-  
+
   const generateAddOptions = () => {
     const options = [];
     for (let i = 0; i <= 3; i += 0.25) {
@@ -139,7 +159,7 @@ export const CreateClient: React.FC = () => {
     }
     return options;
   };
-  
+
   const generatePdOptions = () => {
     const options = [];
     for (let i = 20; i <= 50; i += 1) {
@@ -151,7 +171,7 @@ export const CreateClient: React.FC = () => {
     }
     return options;
   };
-  
+
   const generateDayOptions = () => {
     const options = [];
     for (let i = 1; i <= 31; i++) {
@@ -163,7 +183,7 @@ export const CreateClient: React.FC = () => {
     }
     return options;
   };
-  
+
   const generateMonthOptions = () => {
     const months = [
       { value: 1, text: t("january") },
@@ -177,16 +197,16 @@ export const CreateClient: React.FC = () => {
       { value: 9, text: t("september") },
       { value: 10, text: t("october") },
       { value: 11, text: t("november") },
-      { value: 12, text: t("december") }
+      { value: 12, text: t("december") },
     ];
-    
-    return months.map(month => (
+
+    return months.map((month) => (
       <option key={`month-${month.value}`} value={month.value}>
         {month.text}
       </option>
     ));
   };
-  
+
   const generateYearOptions = () => {
     const options = [];
     const currentYear = new Date().getFullYear();
@@ -199,73 +219,168 @@ export const CreateClient: React.FC = () => {
     }
     return options;
   };
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       toast.error(t("requiredField"), {
-        description: t("error")
+        description: t("error"),
       });
       return;
     }
-    
-    if (activeTab === "glasses" && hasValidationErrors) {
-      toast.error(t("axisValidationError") || "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.", {
-        description: t("error")
-      });
-      return;
-    }
-    
-    let dob = "";
-    if (!noDob && dobDay && dobMonth && dobYear) {
-      dob = `${dobDay}/${dobMonth}/${dobYear}`;
-    }
-    
-    const glassesRx = {
-      sphereOD: sphOD || "-",
-      cylOD: cylOD || "-",
-      axisOD: axisOD || "-",
-      addOD: addOD || "-",
-      sphereOS: sphOS || "-",
-      cylOS: cylOS || "-",
-      axisOS: axisOS || "-",
-      addOS: addOS || "-",
-      pdRight: pdRight || "-",
-      pdLeft: pdLeft || "-",
-      createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
-    };
 
-    const contactLensRxData = {
-      ...contactLensRx,
-      createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString()
-    };
-    
-    const patientData = {
-      name,
-      phone,
-      dob,
-      notes: notes.trim(),
-      patientNotes: [],
-      rx: glassesRx,
-      contactLensRx: contactLensRxData
-    };
-    
-    const newPatientId = addPatient(patientData);
-    setSavedPatient({
-      ...patientData,
-      patientId: newPatientId
-    });
-    
-    setPrintPrescriptionType(activeTab);
-    
-    toast.success(t("successMessage"), {
-      description: t("success")
-    });
-    
-    setShowPrintDialog(true);
-    
-    resetForm();
+    if (activeTab === "glasses" && hasValidationErrors) {
+      toast.error(
+        t("axisValidationError") ||
+          "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required.",
+        {
+          description: t("error"),
+        }
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      let dateOfBirth = null;
+      if (!noDob && dobDay && dobMonth && dobYear) {
+        dateOfBirth = `${dobYear}-${dobMonth.padStart(
+          2,
+          "0"
+        )}-${dobDay.padStart(2, "0")}`;
+      }
+
+      const prescriptionDate = rxDate
+        ? format(rxDate, "yyyy-MM-dd")
+        : format(new Date(), "yyyy-MM-dd");
+
+      const patientData = {
+        full_name: name,
+        phone_number: phone,
+        date_of_birth: dateOfBirth,
+        skip_dob: noDob,
+      };
+
+      // Always create glasses prescription data regardless of active tab
+      // Note: patient_id will be added by the service after patient creation
+      const glassesRx = {
+        prescription_date: prescriptionDate,
+        od_sph: sphOD || null,
+        od_cyl: cylOD || null,
+        od_axis: axisOD || null,
+        od_add: addOD || null,
+        od_pd: pdRight || null,
+        os_sph: sphOS || null,
+        os_cyl: cylOS || null,
+        os_axis: axisOS || null,
+        os_add: addOS || null,
+        os_pd: pdLeft || null,
+      };
+
+      // Always create contact lens prescription data regardless of active tab
+      // Note: patient_id will be added by the service after patient creation
+      const contactLensData = {
+        prescription_date: prescriptionDate,
+        od_sphere:
+          contactLensRx.rightEye.sphere !== "-"
+            ? contactLensRx.rightEye.sphere
+            : null,
+        od_cylinder:
+          contactLensRx.rightEye.cylinder !== "-"
+            ? contactLensRx.rightEye.cylinder
+            : null,
+        od_axis:
+          contactLensRx.rightEye.axis !== "-"
+            ? contactLensRx.rightEye.axis
+            : null,
+        od_base_curve:
+          contactLensRx.rightEye.bc !== "-" ? contactLensRx.rightEye.bc : null,
+        od_diameter:
+          contactLensRx.rightEye.dia !== "-"
+            ? contactLensRx.rightEye.dia
+            : null,
+        os_sphere:
+          contactLensRx.leftEye.sphere !== "-"
+            ? contactLensRx.leftEye.sphere
+            : null,
+        os_cylinder:
+          contactLensRx.leftEye.cylinder !== "-"
+            ? contactLensRx.leftEye.cylinder
+            : null,
+        os_axis:
+          contactLensRx.leftEye.axis !== "-"
+            ? contactLensRx.leftEye.axis
+            : null,
+        os_base_curve:
+          contactLensRx.leftEye.bc !== "-" ? contactLensRx.leftEye.bc : null,
+        os_diameter:
+          contactLensRx.leftEye.dia !== "-" ? contactLensRx.leftEye.dia : null,
+      };
+
+      const patientId = await createPatient(
+        patientData,
+        notes.trim(),
+        glassesRx,
+        contactLensData
+      );
+
+      if (!patientId) {
+        throw new Error("Failed to create patient");
+      }
+
+      const legacyGlassesRx = {
+        sphereOD: sphOD || "-",
+        cylOD: cylOD || "-",
+        axisOD: axisOD || "-",
+        addOD: addOD || "-",
+        sphereOS: sphOS || "-",
+        cylOS: cylOS || "-",
+        axisOS: axisOS || "-",
+        addOS: addOS || "-",
+        pdRight: pdRight || "-",
+        pdLeft: pdLeft || "-",
+        createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString(),
+      };
+
+      const legacyContactLensRxData = {
+        ...contactLensRx,
+        createdAt: rxDate ? rxDate.toISOString() : new Date().toISOString(),
+      };
+
+      const legacyPatientData = {
+        name,
+        phone,
+        dob: dateOfBirth || "",
+        notes: notes.trim(),
+        patientNotes: [],
+        rx: legacyGlassesRx,
+        contactLensRx: legacyContactLensRxData,
+      };
+
+      const legacyPatientId = addPatient(legacyPatientData);
+      setSavedPatient({
+        ...legacyPatientData,
+        patientId: legacyPatientId,
+      });
+
+      setPrintPrescriptionType(activeTab);
+
+      toast.success(t("successMessage"), {
+        description: t("success"),
+      });
+
+      setShowPrintDialog(true);
+      resetForm();
+    } catch (error) {
+      console.error("Error saving patient:", error);
+      toast.error(t("errorSaving") || "Error saving patient data", {
+        description: t("error"),
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -289,11 +404,11 @@ export const CreateClient: React.FC = () => {
     setNotes("");
     setContactLensRx({
       rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" },
-      leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" }
+      leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "-" },
     });
     setValidationErrors({
       rightEye: { cylinderAxisError: false },
-      leftEye: { cylinderAxisError: false }
+      leftEye: { cylinderAxisError: false },
     });
   };
 
@@ -310,13 +425,13 @@ export const CreateClient: React.FC = () => {
     }
   };
 
-  const printRxWithLanguage = (printLanguage: 'en' | 'ar') => {
+  const printRxWithLanguage = (printLanguage: "en" | "ar") => {
     if (savedPatient) {
       printRxReceipt({
         patientName: savedPatient.name,
         patientPhone: savedPatient.phone,
         rx: savedPatient.rx,
-        forcedLanguage: printLanguage
+        forcedLanguage: printLanguage,
       });
     }
     setShowLanguageDialog(false);
@@ -324,33 +439,45 @@ export const CreateClient: React.FC = () => {
 
   return (
     <div className={`space-y-6 ${dirClass}`}>
-      <h2 className={`text-2xl font-bold mb-4 ${textAlignClass}`}>{t("createClientTitle")}</h2>
-      
-      <Tabs defaultValue="glasses" value={activeTab} onValueChange={(value) => setActiveTab(value as "glasses" | "contactLenses")}>
+      <h2 className={`text-2xl font-bold mb-4 ${textAlignClass}`}>
+        {t("createClientTitle")}
+      </h2>
+
+      <Tabs
+        defaultValue="glasses"
+        value={activeTab}
+        onValueChange={(value) =>
+          setActiveTab(value as "glasses" | "contactLenses")
+        }
+      >
         <TabsList className="mb-6 w-full md:w-auto bg-slate-100 border-slate-200 p-1 shadow-md">
-          <TabsTrigger 
-            value="glasses" 
+          <TabsTrigger
+            value="glasses"
             className="px-8 py-3 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             {t("prescriptionGlasses")}
           </TabsTrigger>
-          <TabsTrigger 
-            value="contactLenses" 
+          <TabsTrigger
+            value="contactLenses"
             className="px-8 py-3 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             {t("contactLensesTab")}
           </TabsTrigger>
         </TabsList>
-      
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-card rounded-md p-4 border">
-            <div className={`text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary ${textAlignClass}`}>
+            <div
+              className={`text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary ${textAlignClass}`}
+            >
               {t("personalInfo")}
             </div>
-            
+
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name" className={textAlignClass}>{t("name")}</Label>
+                <Label htmlFor="name" className={textAlignClass}>
+                  {t("name")}
+                </Label>
                 <Input
                   id="name"
                   value={name}
@@ -359,9 +486,11 @@ export const CreateClient: React.FC = () => {
                   className={textAlignClass}
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="phone" className={textAlignClass}>{t("phone")}</Label>
+                <Label htmlFor="phone" className={textAlignClass}>
+                  {t("phone")}
+                </Label>
                 <Input
                   id="phone"
                   value={phone}
@@ -370,9 +499,11 @@ export const CreateClient: React.FC = () => {
                   className={textAlignClass}
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="dob" className={textAlignClass}>{t("dateOfBirth")}</Label>
+                <Label htmlFor="dob" className={textAlignClass}>
+                  {t("dateOfBirth")}
+                </Label>
                 <div className="grid grid-cols-3 gap-2">
                   <select
                     id="dobDay"
@@ -381,7 +512,9 @@ export const CreateClient: React.FC = () => {
                     onChange={(e) => setDobDay(e.target.value)}
                     disabled={noDob}
                   >
-                    <option value="" disabled>{t("day")}</option>
+                    <option value="" disabled>
+                      {t("day")}
+                    </option>
                     {generateDayOptions()}
                   </select>
                   <select
@@ -391,7 +524,9 @@ export const CreateClient: React.FC = () => {
                     onChange={(e) => setDobMonth(e.target.value)}
                     disabled={noDob}
                   >
-                    <option value="" disabled>{t("month")}</option>
+                    <option value="" disabled>
+                      {t("month")}
+                    </option>
                     {generateMonthOptions()}
                   </select>
                   <select
@@ -401,29 +536,37 @@ export const CreateClient: React.FC = () => {
                     onChange={(e) => setDobYear(e.target.value)}
                     disabled={noDob}
                   >
-                    <option value="" disabled>{t("year")}</option>
+                    <option value="" disabled>
+                      {t("year")}
+                    </option>
                     {generateYearOptions()}
                   </select>
                 </div>
-                
-                <div className={`flex items-center space-x-2 ${language === 'ar' ? 'space-x-reverse' : ''} mt-2`}>
-                  <Checkbox 
-                    id="noDobCheck" 
-                    checked={noDob} 
-                    onCheckedChange={(checked) => setNoDob(checked === true)} 
+
+                <div
+                  className={`flex items-center space-x-2 ${
+                    language === "ar" ? "space-x-reverse" : ""
+                  } mt-2`}
+                >
+                  <Checkbox
+                    id="noDobCheck"
+                    checked={noDob}
+                    onCheckedChange={(checked) => setNoDob(checked === true)}
                   />
-                  <Label 
-                    htmlFor="noDobCheck" 
-                    className={`font-normal text-sm ${language === 'ar' ? 'mr-2' : 'ml-2'}`}
+                  <Label
+                    htmlFor="noDobCheck"
+                    className={`font-normal text-sm ${
+                      language === "ar" ? "mr-2" : "ml-2"
+                    }`}
                   >
                     {t("clientDidntShareDOB")}
                   </Label>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <Label 
-                  htmlFor="notes" 
+                <Label
+                  htmlFor="notes"
                   className={`flex items-center gap-1 ${textAlignClass}`}
                 >
                   <MessageSquare className="h-4 w-4" />
@@ -433,32 +576,42 @@ export const CreateClient: React.FC = () => {
                   id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder={t("notesPlaceholder") || "Add notes about this client..."}
+                  placeholder={
+                    t("notesPlaceholder") || "Add notes about this client..."
+                  }
                   className={textAlignClass}
                   dir="auto"
                 />
               </div>
             </div>
           </div>
-          
+
           <div>
             <TabsContent value="glasses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
-                <div className={`text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary ${textAlignClass}`}>
+                <div
+                  className={`text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary ${textAlignClass}`}
+                >
                   {t("glassesPrescription")}
                 </div>
-                
+
                 <div className="mb-4">
-                  <Label htmlFor="rxDate" className={textAlignClass}>{t("prescriptionDate")}</Label>
+                  <Label htmlFor="rxDate" className={textAlignClass}>
+                    {t("prescriptionDate")}
+                  </Label>
                   <div className="mt-1">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant={"outline"}
-                          className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
+                          className={`w-full justify-start text-right ${
+                            !rxDate ? "text-muted-foreground" : ""
+                          }`}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {rxDate ? format(rxDate, "PPP") : t("choosePrescriptionDate")}
+                          {rxDate
+                            ? format(rxDate, "PPP")
+                            : t("choosePrescriptionDate")}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -472,29 +625,43 @@ export const CreateClient: React.FC = () => {
                     </Popover>
                   </div>
                 </div>
-                
+
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
                       <tr>
                         <th className="text-center border border-border bg-muted p-2"></th>
-                        <th className="text-center border border-border bg-muted p-2">SPH</th>
-                        <th className="text-center border border-border bg-muted p-2">CYL</th>
-                        <th className="text-center border border-border bg-muted p-2">AXIS</th>
-                        <th className="text-center border border-border bg-muted p-2">ADD</th>
-                        <th className="text-center border border-border bg-muted p-2">PD</th>
+                        <th className="text-center border border-border bg-muted p-2">
+                          SPH
+                        </th>
+                        <th className="text-center border border-border bg-muted p-2">
+                          CYL
+                        </th>
+                        <th className="text-center border border-border bg-muted p-2">
+                          AXIS
+                        </th>
+                        <th className="text-center border border-border bg-muted p-2">
+                          ADD
+                        </th>
+                        <th className="text-center border border-border bg-muted p-2">
+                          PD
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <th className="text-center border border-border bg-muted p-2">{t("rightEye")} (OD)</th>
+                        <th className="text-center border border-border bg-muted p-2">
+                          {t("rightEye")} (OD)
+                        </th>
                         <td className="border border-border p-1">
                           <select
                             className="w-full p-1 rounded-md border-input bg-background"
                             value={sphOD}
                             onChange={(e) => setSphOD(e.target.value)}
                           >
-                            <option value="" disabled>{t("choose")}</option>
+                            <option value="" disabled>
+                              {t("choose")}
+                            </option>
                             {generateSphOptions()}
                           </select>
                         </td>
@@ -504,17 +671,25 @@ export const CreateClient: React.FC = () => {
                             value={cylOD}
                             onChange={(e) => setCylOD(e.target.value)}
                           >
-                            <option value="" disabled>{t("choose")}</option>
+                            <option value="" disabled>
+                              {t("choose")}
+                            </option>
                             {generateCylOptions()}
                           </select>
                         </td>
                         <td className="border border-border p-1">
                           <select
-                            className={`w-full p-1 rounded-md ${validationErrors.rightEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-input bg-background'}`}
+                            className={`w-full p-1 rounded-md ${
+                              validationErrors.rightEye.cylinderAxisError
+                                ? "border-red-500 bg-red-50"
+                                : "border-input bg-background"
+                            }`}
                             value={axisOD}
                             onChange={(e) => setAxisOD(e.target.value)}
                           >
-                            <option value="" disabled>{t("choose")}</option>
+                            <option value="" disabled>
+                              {t("choose")}
+                            </option>
                             {generateAxisOptions()}
                           </select>
                         </td>
@@ -524,7 +699,9 @@ export const CreateClient: React.FC = () => {
                             value={addOD}
                             onChange={(e) => setAddOD(e.target.value)}
                           >
-                            <option value="" disabled>{t("choose")}</option>
+                            <option value="" disabled>
+                              {t("choose")}
+                            </option>
                             {generateAddOptions()}
                           </select>
                         </td>
@@ -534,20 +711,26 @@ export const CreateClient: React.FC = () => {
                             value={pdRight}
                             onChange={(e) => setPdRight(e.target.value)}
                           >
-                            <option value="" disabled>{t("choose")}</option>
+                            <option value="" disabled>
+                              {t("choose")}
+                            </option>
                             {generatePdOptions()}
                           </select>
                         </td>
                       </tr>
                       <tr>
-                        <th className="text-center border border-border bg-muted p-2">{t("leftEye")} (OS)</th>
+                        <th className="text-center border border-border bg-muted p-2">
+                          {t("leftEye")} (OS)
+                        </th>
                         <td className="border border-border p-1">
                           <select
                             className="w-full p-1 rounded-md border-input bg-background"
                             value={sphOS}
                             onChange={(e) => setSphOS(e.target.value)}
                           >
-                            <option value="" disabled>{t("choose")}</option>
+                            <option value="" disabled>
+                              {t("choose")}
+                            </option>
                             {generateSphOptions()}
                           </select>
                         </td>
@@ -557,17 +740,25 @@ export const CreateClient: React.FC = () => {
                             value={cylOS}
                             onChange={(e) => setCylOS(e.target.value)}
                           >
-                            <option value="" disabled>{t("choose")}</option>
+                            <option value="" disabled>
+                              {t("choose")}
+                            </option>
                             {generateCylOptions()}
                           </select>
                         </td>
                         <td className="border border-border p-1">
                           <select
-                            className={`w-full p-1 rounded-md ${validationErrors.leftEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-input bg-background'}`}
+                            className={`w-full p-1 rounded-md ${
+                              validationErrors.leftEye.cylinderAxisError
+                                ? "border-red-500 bg-red-50"
+                                : "border-input bg-background"
+                            }`}
                             value={axisOS}
                             onChange={(e) => setAxisOS(e.target.value)}
                           >
-                            <option value="" disabled>{t("choose")}</option>
+                            <option value="" disabled>
+                              {t("choose")}
+                            </option>
                             {generateAxisOptions()}
                           </select>
                         </td>
@@ -577,7 +768,9 @@ export const CreateClient: React.FC = () => {
                             value={addOS}
                             onChange={(e) => setAddOS(e.target.value)}
                           >
-                            <option value="" disabled>{t("choose")}</option>
+                            <option value="" disabled>
+                              {t("choose")}
+                            </option>
                             {generateAddOptions()}
                           </select>
                         </td>
@@ -587,7 +780,9 @@ export const CreateClient: React.FC = () => {
                             value={pdLeft}
                             onChange={(e) => setPdLeft(e.target.value)}
                           >
-                            <option value="" disabled>{t("choose")}</option>
+                            <option value="" disabled>
+                              {t("choose")}
+                            </option>
                             {generatePdOptions()}
                           </select>
                         </td>
@@ -595,35 +790,44 @@ export const CreateClient: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
-                
+
                 {hasValidationErrors && (
                   <div className="p-3 mt-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
                     <p className="text-red-700 text-sm">
-                      {t("axisValidationError") || "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required."}
+                      {t("axisValidationError") ||
+                        "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required."}
                     </p>
                   </div>
                 )}
               </div>
             </TabsContent>
-            
+
             <TabsContent value="contactLenses" className="mt-0 p-0">
               <div className="bg-card rounded-md p-4 border">
-                <div className={`text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary ${textAlignClass}`}>
+                <div
+                  className={`text-lg font-semibold text-primary pb-2 mb-4 border-b border-primary ${textAlignClass}`}
+                >
                   {t("contactLensPrescription")}
                 </div>
-                
+
                 <div className="mb-4">
-                  <Label htmlFor="contactRxDate" className={textAlignClass}>{t("prescriptionDate")}</Label>
+                  <Label htmlFor="contactRxDate" className={textAlignClass}>
+                    {t("prescriptionDate")}
+                  </Label>
                   <div className="mt-1">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant={"outline"}
-                          className={`w-full justify-start text-right ${!rxDate ? "text-muted-foreground" : ""}`}
+                          className={`w-full justify-start text-right ${
+                            !rxDate ? "text-muted-foreground" : ""
+                          }`}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {rxDate ? format(rxDate, "PPP") : t("choosePrescriptionDate")}
+                          {rxDate
+                            ? format(rxDate, "PPP")
+                            : t("choosePrescriptionDate")}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -637,9 +841,9 @@ export const CreateClient: React.FC = () => {
                     </Popover>
                   </div>
                 </div>
-                
-                <ContactLensForm 
-                  rxData={contactLensRx} 
+
+                <ContactLensForm
+                  rxData={contactLensRx}
                   onChange={setContactLensRx}
                 />
               </div>
@@ -647,67 +851,83 @@ export const CreateClient: React.FC = () => {
           </div>
         </div>
       </Tabs>
-      
-      <Button 
-        className="mt-6" 
+
+      <Button
+        className="mt-6"
         onClick={handleSubmit}
-        disabled={activeTab === "glasses" && hasValidationErrors}
+        disabled={
+          isSubmitting || (activeTab === "glasses" && hasValidationErrors)
+        }
       >
-        {t("saveAndContinue")}
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {t("saving")}
+          </>
+        ) : (
+          t("saveAndContinue")
+        )}
       </Button>
 
       <AlertDialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
         <AlertDialogContent className={dirClass}>
           <AlertDialogHeader>
             <AlertDialogTitle className={textAlignClass}>
-              {language === 'ar' ? 'طباعة الوصفة الطبية' : 'Print Prescription'}
+              {language === "ar" ? "طباعة الوصفة الطبية" : "Print Prescription"}
             </AlertDialogTitle>
             <AlertDialogDescription className={textAlignClass}>
-              {language === 'ar' 
-                ? 'هل تريد طباعة الوصفة الطبية الآن؟'
-                : 'Do you want to print the RX now?'}
+              {language === "ar"
+                ? "هل تريد طباعة الوصفة الطبية الآن؟"
+                : "Do you want to print the RX now?"}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className={`${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+          <AlertDialogFooter
+            className={`${language === "ar" ? "flex-row-reverse" : ""}`}
+          >
             <AlertDialogCancel>
-              {language === 'ar' ? 'لا' : 'No'}
+              {language === "ar" ? "لا" : "No"}
             </AlertDialogCancel>
             <AlertDialogAction onClick={handlePrintRx}>
-              {language === 'ar' ? 'نعم، اطبع الآن' : 'Yes, Print Now'}
+              {language === "ar" ? "نعم، اطبع الآن" : "Yes, Print Now"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
+      <AlertDialog
+        open={showLanguageDialog}
+        onOpenChange={setShowLanguageDialog}
+      >
         <AlertDialogContent className={dirClass}>
           <AlertDialogHeader>
             <AlertDialogTitle className={textAlignClass}>
-              {language === 'ar' ? 'اختر لغة الطباعة' : 'Select Print Language'}
+              {language === "ar" ? "اختر لغة الطباعة" : "Select Print Language"}
             </AlertDialogTitle>
             <AlertDialogDescription className={textAlignClass}>
-              {language === 'ar' 
-                ? 'اختر اللغة التي ترغب في طباعة الوصفة الطبية بها'
-                : 'Choose the language you want to print the prescription in'}
+              {language === "ar"
+                ? "اختر اللغة التي ترغب في طباعة الوصفة الطبية بها"
+                : "Choose the language you want to print the prescription in"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-center gap-4 py-4">
-            <Button 
+            <Button
               className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => printRxWithLanguage('en')}
+              onClick={() => printRxWithLanguage("en")}
             >
               English
             </Button>
-            <Button 
+            <Button
               className="bg-green-600 hover:bg-green-700"
-              onClick={() => printRxWithLanguage('ar')}
+              onClick={() => printRxWithLanguage("ar")}
             >
               العربية
             </Button>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel className={language === 'ar' ? 'mr-auto' : 'ml-auto'}>
-              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            <AlertDialogCancel
+              className={language === "ar" ? "mr-auto" : "ml-auto"}
+            >
+              {language === "ar" ? "إلغاء" : "Cancel"}
             </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
