@@ -33,49 +33,42 @@ export async function createPatient(
   try {
     console.log('Creating patient with data:', JSON.stringify(patientData));
     
-    // Insert patient data
-    const { data: patient, error: patientError } = await supabase
+    // Insert patient data without selecting (split the operation)
+    const { error: insertError } = await supabase
       .from('patients')
-      .insert(patientData)
-      .select('id')
-      .single();
+      .insert(patientData);
 
-    if (patientError) {
-      console.error('Error creating patient:', patientError);
+    if (insertError) {
+      console.error('Error creating patient:', insertError);
       return null;
     }
-
-    // Check if patient data is null
-    if (!patient) {
-      console.error('Patient data is null after insertion. This may indicate an issue with the return value.');
-      
-      // Try to get the patient by querying with unique identifiers
-      const { data: queryResult, error: queryError } = await supabase
-        .from('patients')
-        .select('id')
-        .eq('full_name', patientData.full_name)
-        .eq('phone_number', patientData.phone_number)
-        .order('created_at', { ascending: false })
-        .limit(1);
-      
-      if (queryError) {
-        console.error('Error finding patient after insert:', queryError);
-        return null;
-      }
-      
-      if (!queryResult || queryResult.length === 0) {
-        console.error('Could not find patient after insert. Insert may have failed.');
-        return null;
-      }
-      
-      console.log('Found patient after querying:', queryResult);
-      // Extract ID from the first item in the array
-      var patientId = queryResult[0].id;
-      console.log('Using patient ID:', patientId);
-    } else {
-      console.log('Patient created successfully:', patient);
-      var patientId = patient.id;
+    
+    console.log('Patient inserted successfully, now finding the patient ID');
+    
+    // Always query for the patient after insert
+    // This is a more reliable approach than insert-and-select
+    const { data: queryResult, error: queryError } = await supabase
+      .from('patients')
+      .select('id')
+      .eq('full_name', patientData.full_name)
+      .eq('phone_number', patientData.phone_number)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    
+    if (queryError) {
+      console.error('Error finding patient after insert:', queryError);
+      return null;
     }
+    
+    if (!queryResult || queryResult.length === 0) {
+      console.error('Could not find patient after insert. Insert may have failed.');
+      return null;
+    }
+    
+    console.log('Found patient after querying:', queryResult);
+    // Extract ID from the first item in the array
+    const patientId = queryResult[0].id;
+    console.log('Using patient ID:', patientId);
 
     // If there's an initial note, insert it
     if (initialNote && initialNote.trim() !== '' && patientId) {
