@@ -16,6 +16,10 @@ export type ContactLensPrescription = Database['public']['Tables']['contact_lens
 export type ContactLensPrescriptionInsert = Database['public']['Tables']['contact_lens_prescriptions']['Insert'];
 export type ContactLensPrescriptionUpdate = Database['public']['Tables']['contact_lens_prescriptions']['Update'];
 
+export type Frame = Database['public']['Tables']['frames']['Row'];
+export type FrameInsert = Database['public']['Tables']['frames']['Insert'];
+export type FrameUpdate = Database['public']['Tables']['frames']['Update'];
+
 // Helper function to convert database date to a JavaScript Date object
 export function parseDbDate(dateStr: string | null): Date | null {
   if (!dateStr) return null;

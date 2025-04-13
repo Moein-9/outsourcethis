@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import * as frameService from '@/services/frameService';
 
 export interface FrameItem {
   frameId: string;
@@ -67,6 +68,7 @@ export interface LensPricingCombination {
 
 interface InventoryState {
   frames: FrameItem[];
+  isLoadingFrames: boolean;
   lensTypes: LensType[];
   lensCoatings: LensCoating[];
   lensThicknesses: LensThickness[];
@@ -74,11 +76,13 @@ interface InventoryState {
   services: ServiceItem[];
   lensPricingCombinations: LensPricingCombination[];
   
-  addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => string;
-  updateFrameQuantity: (frameId: string, newQty: number) => void;
-  searchFrames: (query: string) => FrameItem[];
-  getFrameById: (id: string) => FrameItem | undefined;
-  bulkImportFrames: (frames: Array<Omit<FrameItem, "frameId" | "createdAt">>) => { added: number; duplicates: number };
+  fetchFrames: () => Promise<void>;
+  addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => Promise<string | null>;
+  updateFrameQuantity: (frameId: string, newQty: number) => Promise<boolean>;
+  searchFrames: (query: string) => Promise<FrameItem[]>;
+  getFrameById: (id: string) => Promise<FrameItem | null>;
+  bulkImportFrames: (frames: Array<Omit<FrameItem, "frameId" | "createdAt">>) => Promise<{ added: number; duplicates: number; errors: number }>;
+  updateFrame: (frameId: string, updates: Partial<Omit<FrameItem, "frameId" | "createdAt">>) => Promise<boolean>;
   
   addLensType: (lens: Omit<LensType, "id">) => string;
   updateLensType: (id: string, lens: Partial<Omit<LensType, "id">>) => void;
@@ -121,6 +125,7 @@ export const useInventoryStore = create<InventoryState>()(
   persist(
     (set, get) => ({
       frames: [],
+      isLoadingFrames: false,
       lensTypes: [
         { id: "lens1", name: "نظارات طبية للقراءة", type: "reading" },
         { id: "lens2", name: "نظارات للنظر البعيد", type: "distance" },
@@ -269,93 +274,87 @@ export const useInventoryStore = create<InventoryState>()(
         // Initial empty array - will be populated with updated pricing
       ],
       
-      addFrame: (frame) => {
-        const frameId = `FR${Date.now()}`;
-        const createdAt = new Date().toISOString();
+      fetchFrames: async () => {
+        set({ isLoadingFrames: true });
+        try {
+          const frames = await frameService.getAllFrames();
+          set({ frames, isLoadingFrames: false });
+        } catch (error) {
+          console.error("Error fetching frames:", error);
+          set({ isLoadingFrames: false });
+        }
+      },
+      
+      addFrame: async (frame) => {
+        const frameId = await frameService.addFrame(frame);
         
-        set((state) => ({
-          frames: [
-            ...state.frames,
-            { ...frame, frameId, createdAt }
-          ]
-        }));
+        if (frameId) {
+          // Add to local state if successfully added to Supabase
+          const newFrame: FrameItem = {
+            ...frame,
+            frameId,
+            createdAt: new Date().toISOString()
+          };
+          
+          set((state) => ({
+            frames: [...state.frames, newFrame]
+          }));
+        }
         
         return frameId;
       },
       
-      bulkImportFrames: (frames) => {
-        const currentFrames = get().frames;
-        const newFrames = [];
-        let duplicateCount = 0;
+      bulkImportFrames: async (frames) => {
+        const result = await frameService.bulkImportFrames(frames);
         
-        // Track existing frames by a combination key for faster duplicate checking
-        const existingFrameCombinations = new Map();
-        currentFrames.forEach(frame => {
-          const key = `${frame.brand.toLowerCase()}|${frame.model.toLowerCase()}|${frame.color.toLowerCase()}|${frame.size.toLowerCase()}`;
-          existingFrameCombinations.set(key, true);
-        });
+        // Refresh the frames list after import
+        await get().fetchFrames();
         
-        // Process each frame
-        for (const frame of frames) {
-          // Check for duplicates using the map (much faster for large datasets)
-          const key = `${frame.brand.toLowerCase()}|${frame.model.toLowerCase()}|${frame.color.toLowerCase()}|${frame.size.toLowerCase()}`;
-          
-          if (existingFrameCombinations.has(key)) {
-            duplicateCount++;
-            continue;
-          }
-          
-          // Generate unique ID with timestamp and random string
-          const frameId = `FR${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-          const createdAt = new Date().toISOString();
-          
-          newFrames.push({
-            ...frame,
-            frameId,
-            createdAt
-          });
-          
-          // Add to map to catch duplicates within the import batch too
-          existingFrameCombinations.set(key, true);
-        }
+        return result;
+      },
+      
+      updateFrameQuantity: async (frameId, newQty) => {
+        const success = await frameService.updateFrameQuantity(frameId, newQty);
         
-        // Add all the new frames at once
-        if (newFrames.length > 0) {
+        if (success) {
           set((state) => ({
-            frames: [...state.frames, ...newFrames]
+            frames: state.frames.map(frame => 
+              frame.frameId === frameId 
+                ? { ...frame, qty: newQty } 
+                : frame
+            )
           }));
         }
         
-        return {
-          added: newFrames.length,
-          duplicates: duplicateCount
-        };
+        return success;
       },
       
-      updateFrameQuantity: (frameId, newQty) => {
-        set((state) => ({
-          frames: state.frames.map(frame => 
-            frame.frameId === frameId 
-              ? { ...frame, qty: newQty } 
-              : frame
-          )
-        }));
-      },
-      
-      searchFrames: (query) => {
-        if (!query) return get().frames;
+      searchFrames: async (query) => {
+        // If empty query, return all loaded frames
+        if (!query.trim()) return get().frames;
         
-        const q = query.toLowerCase();
-        return get().frames.filter(frame => 
-          frame.brand.toLowerCase().includes(q) || 
-          frame.model.toLowerCase().includes(q) || 
-          frame.color.toLowerCase().includes(q) || 
-          frame.size.toLowerCase().includes(q)
-        );
+        // Get results from Supabase
+        return await frameService.searchFrames(query);
       },
       
-      getFrameById: (id) => {
-        return get().frames.find(frame => frame.frameId === id);
+      getFrameById: async (id) => {
+        return await frameService.getFrameById(id);
+      },
+      
+      updateFrame: async (frameId, updates) => {
+        const success = await frameService.updateFrame(frameId, updates);
+        
+        if (success) {
+          set((state) => ({
+            frames: state.frames.map(frame => 
+              frame.frameId === frameId 
+                ? { ...frame, ...updates } 
+                : frame
+            )
+          }));
+        }
+        
+        return success;
       },
       
       addLensType: (lens) => {
@@ -755,7 +754,18 @@ export const useInventoryStore = create<InventoryState>()(
     }),
     {
       name: 'inventory-store',
-      version: 3
+      version: 3,
+      partialize: (state) => {
+        // Don't persist the frames - they'll be loaded from Supabase
+        const { frames, isLoadingFrames, ...rest } = state;
+        return rest;
+      }
     }
   )
 );
+
+// Add an initializer function to load frames when the app starts
+export const initInventoryStore = async () => {
+  const { fetchFrames } = useInventoryStore.getState();
+  await fetchFrames();
+};

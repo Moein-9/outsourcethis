@@ -442,6 +442,39 @@ export type Database = {
         }
         Relationships: []
       }
+      frames: {
+        Row: {
+          frameId: string
+          brand: string
+          model: string
+          color: string
+          size: string
+          price: number
+          qty: number
+          createdAt: string
+        }
+        Insert: {
+          frameId?: string
+          brand: string
+          model: string
+          color: string
+          size: string
+          price: number
+          qty: number
+          createdAt?: string
+        }
+        Update: {
+          frameId?: string
+          brand?: string
+          model?: string
+          color?: string
+          size?: string
+          price?: number
+          qty?: number
+          createdAt?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
