@@ -1,4 +1,3 @@
-
 import React from "react";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { Input } from "@/components/ui/input";
@@ -6,14 +5,39 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Save, X } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
-import { ContactLensItem } from "@/store/inventoryStore";
+import { ContactLensItem } from "@/components/ContactLensInventory";
 
 // Common values for dropdowns
-const COMMON_BC_VALUES = ["8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "9.0"];
+const COMMON_BC_VALUES = [
+  "8.3",
+  "8.4",
+  "8.5",
+  "8.6",
+  "8.7",
+  "8.8",
+  "8.9",
+  "9.0",
+];
 const COMMON_DIAMETER_VALUES = ["13.8", "14.0", "14.2", "14.5", "14.8"];
-const COMMON_BRANDS = ["Acuvue", "Air Optix", "Biofinty", "Bella", "FreshLook", "PureVision", "SofLens"];
+const COMMON_BRANDS = [
+  "Acuvue",
+  "Air Optix",
+  "Biofinty",
+  "Bella",
+  "FreshLook",
+  "PureVision",
+  "SofLens",
+];
 const COMMON_TYPES = ["Daily", "Monthly", "Biweekly", "Yearly", "Color"];
-const COMMON_COLORS = ["Clear", "Blue", "Green", "Brown", "Hazel", "Gray", "Honey"];
+const COMMON_COLORS = [
+  "Clear",
+  "Blue",
+  "Green",
+  "Brown",
+  "Hazel",
+  "Gray",
+  "Honey",
+];
 
 interface ContactLensFormProps {
   onSubmit: (data: Omit<ContactLensItem, "id">) => void;
@@ -33,18 +57,26 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
   isEditing = false,
 }) => {
   const { language, t } = useLanguageStore();
-  
+
   const [brand, setBrand] = React.useState(initialValues.brand || "");
   const [type, setType] = React.useState(initialValues.type || "");
   const [bc, setBc] = React.useState(initialValues.bc || "");
   const [diameter, setDiameter] = React.useState(initialValues.diameter || "");
   const [color, setColor] = React.useState(initialValues.color || "");
-  const [price, setPrice] = React.useState(initialValues.price?.toString() || "");
+  const [price, setPrice] = React.useState(
+    initialValues.price?.toString() || ""
+  );
   const [qty, setQty] = React.useState(initialValues.qty?.toString() || "1");
-  
+
   // Combine standard values with saved custom values
-  const allBrands = [...COMMON_BRANDS, ...savedCustomBrands.filter(b => !COMMON_BRANDS.includes(b))];
-  const allTypes = [...COMMON_TYPES, ...savedCustomTypes.filter(t => !COMMON_TYPES.includes(t))];
+  const allBrands = [
+    ...COMMON_BRANDS,
+    ...savedCustomBrands.filter((b) => !COMMON_BRANDS.includes(b)),
+  ];
+  const allTypes = [
+    ...COMMON_TYPES,
+    ...savedCustomTypes.filter((t) => !COMMON_TYPES.includes(t)),
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,14 +85,14 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
     if (!brand || !type || !bc || !diameter || !price) {
       return; // Form validation will show errors
     }
-    
+
     const parsedPrice = parseFloat(price);
     const parsedQty = parseInt(qty);
-    
+
     if (isNaN(parsedPrice) || parsedPrice <= 0) {
       return; // Invalid price
     }
-    
+
     if (isNaN(parsedQty) || parsedQty <= 0) {
       return; // Invalid quantity
     }
@@ -82,24 +114,28 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
           <CustomSelect
-            label={language === 'ar' ? 'الماركة' : 'Brand'}
+            label={language === "ar" ? "الماركة" : "Brand"}
             options={allBrands}
             value={brand}
             onChange={setBrand}
-            placeholder={language === 'ar' ? 'اختر الماركة' : 'Select brand'}
-            customValuePlaceholder={language === 'ar' ? 'أدخل اسم الماركة' : 'Enter brand name'}
+            placeholder={language === "ar" ? "اختر الماركة" : "Select brand"}
+            customValuePlaceholder={
+              language === "ar" ? "أدخل اسم الماركة" : "Enter brand name"
+            }
             className="mb-0"
           />
         </div>
-        
+
         <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg">
           <CustomSelect
-            label={language === 'ar' ? 'النوع' : 'Type'}
+            label={language === "ar" ? "النوع" : "Type"}
             options={allTypes}
             value={type}
             onChange={setType}
-            placeholder={language === 'ar' ? 'اختر النوع' : 'Select type'}
-            customValuePlaceholder={language === 'ar' ? 'أدخل النوع' : 'Enter type'}
+            placeholder={language === "ar" ? "اختر النوع" : "Select type"}
+            customValuePlaceholder={
+              language === "ar" ? "أدخل النوع" : "Enter type"
+            }
             className="mb-0"
           />
         </div>
@@ -112,20 +148,22 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
             options={COMMON_BC_VALUES}
             value={bc}
             onChange={setBc}
-            placeholder={language === 'ar' ? 'اختر BC' : 'Select BC'}
-            customValuePlaceholder={language === 'ar' ? 'أدخل BC' : 'Enter BC'}
+            placeholder={language === "ar" ? "اختر BC" : "Select BC"}
+            customValuePlaceholder={language === "ar" ? "أدخل BC" : "Enter BC"}
             className="mb-0"
           />
         </div>
-        
+
         <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-lg">
           <CustomSelect
-            label={language === 'ar' ? 'القطر' : 'Diameter'}
+            label={language === "ar" ? "القطر" : "Diameter"}
             options={COMMON_DIAMETER_VALUES}
             value={diameter}
             onChange={setDiameter}
-            placeholder={language === 'ar' ? 'اختر القطر' : 'Select diameter'}
-            customValuePlaceholder={language === 'ar' ? 'أدخل القطر' : 'Enter diameter'}
+            placeholder={language === "ar" ? "اختر القطر" : "Select diameter"}
+            customValuePlaceholder={
+              language === "ar" ? "أدخل القطر" : "Enter diameter"
+            }
             className="mb-0"
           />
         </div>
@@ -134,20 +172,22 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-r from-pink-50 to-pink-100 p-4 rounded-lg">
           <CustomSelect
-            label={language === 'ar' ? 'اللون (اختياري)' : 'Color (Optional)'}
+            label={language === "ar" ? "اللون (اختياري)" : "Color (Optional)"}
             options={["none", ...COMMON_COLORS]}
             value={color || "none"}
             onChange={(val) => setColor(val === "none" ? "" : val)}
-            placeholder={language === 'ar' ? 'اختر اللون' : 'Select color'}
-            customValuePlaceholder={language === 'ar' ? 'أدخل اللون' : 'Enter color'}
+            placeholder={language === "ar" ? "اختر اللون" : "Select color"}
+            customValuePlaceholder={
+              language === "ar" ? "أدخل اللون" : "Enter color"
+            }
             className="mb-0"
           />
         </div>
-        
+
         <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 rounded-lg">
           <div className="space-y-2">
             <Label htmlFor="price" className="text-emerald-800 font-medium">
-              {language === 'ar' ? 'السعر (KWD)' : 'Price (KWD)'}
+              {language === "ar" ? "السعر (KWD)" : "Price (KWD)"}
             </Label>
             <Input
               id="price"
@@ -162,11 +202,11 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
             />
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg">
           <div className="space-y-2">
             <Label htmlFor="qty" className="text-indigo-800 font-medium">
-              {language === 'ar' ? 'الكمية' : 'Quantity'}
+              {language === "ar" ? "الكمية" : "Quantity"}
             </Label>
             <Input
               id="qty"
@@ -184,15 +224,27 @@ export const ContactLensForm: React.FC<ContactLensFormProps> = ({
       </div>
 
       <div className="flex justify-end space-x-2 pt-3">
-        <Button type="button" variant="outline" onClick={onCancel} className="border-gray-300">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          className="border-gray-300"
+        >
           <X className="h-4 w-4 mr-1" />
-          {language === 'ar' ? 'إلغاء' : 'Cancel'}
+          {language === "ar" ? "إلغاء" : "Cancel"}
         </Button>
-        <Button type="submit" className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800">
+        <Button
+          type="submit"
+          className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
+        >
           <Save className="h-4 w-4 mr-1" />
-          {isEditing 
-            ? (language === 'ar' ? 'تحديث' : 'Update') 
-            : (language === 'ar' ? 'حفظ العدسة' : 'Save Lens')}
+          {isEditing
+            ? language === "ar"
+              ? "تحديث"
+              : "Update"
+            : language === "ar"
+            ? "حفظ العدسة"
+            : "Save Lens"}
         </Button>
       </div>
     </form>

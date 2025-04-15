@@ -475,6 +475,48 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_lenses: {
+        Row: {
+          contact_lens_id: string
+          brand: string
+          type: string
+          bc: string
+          diameter: string
+          power: string
+          price: number
+          qty: number
+          color: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          contact_lens_id?: string
+          brand: string
+          type: string
+          bc: string
+          diameter: string
+          power: string
+          price: number
+          qty: number
+          color?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_lens_id?: string
+          brand?: string
+          type?: string
+          bc?: string
+          diameter?: string
+          power?: string
+          price?: number
+          qty?: number
+          color?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           id: string

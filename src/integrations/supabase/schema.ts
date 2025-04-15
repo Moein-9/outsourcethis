@@ -20,6 +20,10 @@ export type Frame = Database['public']['Tables']['frames']['Row'];
 export type FrameInsert = Database['public']['Tables']['frames']['Insert'];
 export type FrameUpdate = Database['public']['Tables']['frames']['Update'];
 
+export type ContactLens = Database['public']['Tables']['contact_lenses']['Row'];
+export type ContactLensInsert = Database['public']['Tables']['contact_lenses']['Insert'];
+export type ContactLensUpdate = Database['public']['Tables']['contact_lenses']['Update'];
+
 // Lens-related types
 export interface LensType {
   lens_id: string;
