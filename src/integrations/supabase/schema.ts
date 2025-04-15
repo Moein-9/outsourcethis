@@ -20,6 +20,43 @@ export type Frame = Database['public']['Tables']['frames']['Row'];
 export type FrameInsert = Database['public']['Tables']['frames']['Insert'];
 export type FrameUpdate = Database['public']['Tables']['frames']['Update'];
 
+// Lens-related types
+export interface LensType {
+  lens_id: string;
+  name: string;
+  type: string;
+  created_at?: string;
+}
+
+export interface LensCoating {
+  coating_id: string;
+  name: string;
+  price: number;
+  description?: string | null;
+  category: string;
+  is_photochromic: boolean;
+  available_colors?: string[] | null;
+  created_at?: string;
+}
+
+export interface LensThickness {
+  thickness_id: string;
+  name: string;
+  price: number;
+  description?: string | null;
+  category: string;
+  created_at?: string;
+}
+
+export interface LensPricingCombination {
+  combination_id: string;
+  lens_type_id: string;
+  coating_id: string;
+  thickness_id: string;
+  price: number;
+  created_at?: string;
+}
+
 // Helper function to convert database date to a JavaScript Date object
 export function parseDbDate(dateStr: string | null): Date | null {
   if (!dateStr) return null;
@@ -36,4 +73,4 @@ export function formatDisplayDate(date: Date | null): string {
 export function formatDbDate(date: Date | null): string | null {
   if (!date) return null;
   return date.toISOString();
-} 
+}
