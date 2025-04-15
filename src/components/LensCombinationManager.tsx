@@ -560,7 +560,7 @@ export const LensCombinationManager: React.FC = () => {
                 <SelectContent className="bg-white z-[200]">
                   {Object.entries(groupedCoatings).map(
                     ([category, coatings]) => (
-                      <React.Fragment key={category}>
+                      <div key={category} className="contents">
                         <SelectGroup>
                           <SelectLabel
                             className={`${getCategoryColor(
@@ -601,7 +601,7 @@ export const LensCombinationManager: React.FC = () => {
                           Object.keys(groupedCoatings).length - 1 && (
                           <SelectSeparator className="my-2" />
                         )}
-                      </React.Fragment>
+                      </div>
                     )
                   )}
                 </SelectContent>
@@ -623,7 +623,7 @@ export const LensCombinationManager: React.FC = () => {
                 <SelectContent className="bg-white z-[200]">
                   {Object.entries(groupedThicknesses).map(
                     ([category, thicknesses]) => (
-                      <React.Fragment key={category}>
+                      <div key={category} className="contents">
                         <SelectGroup>
                           <SelectLabel
                             className={`${getCategoryColor(
@@ -664,7 +664,7 @@ export const LensCombinationManager: React.FC = () => {
                           Object.keys(groupedThicknesses).length - 1 && (
                           <SelectSeparator className="my-2" />
                         )}
-                      </React.Fragment>
+                      </div>
                     )
                   )}
                 </SelectContent>

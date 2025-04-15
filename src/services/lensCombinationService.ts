@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Fetch all lens types from Supabase
 export async function fetchLensTypes(): Promise<LensType[]> {
+  // @ts-ignore - Table exists at runtime but not in TypeScript definitions
   const { data, error } = await supabase
     .from('lens_types')
     .select('*')
@@ -24,6 +25,7 @@ export async function fetchLensTypes(): Promise<LensType[]> {
 
 // Fetch all lens coatings from Supabase
 export async function fetchLensCoatings(): Promise<LensCoating[]> {
+  // @ts-ignore - Table exists at runtime but not in TypeScript definitions
   const { data, error } = await supabase
     .from('lens_coatings')
     .select('*')
@@ -48,6 +50,7 @@ export async function fetchLensCoatings(): Promise<LensCoating[]> {
 
 // Fetch all lens thicknesses from Supabase
 export async function fetchLensThicknesses(): Promise<LensThickness[]> {
+  // @ts-ignore - Table exists at runtime but not in TypeScript definitions
   const { data, error } = await supabase
     .from('lens_thicknesses')
     .select('*')
@@ -70,6 +73,7 @@ export async function fetchLensThicknesses(): Promise<LensThickness[]> {
 
 // Fetch all lens pricing combinations from Supabase
 export async function fetchLensPricingCombinations(): Promise<LensPricingCombination[]> {
+  // @ts-ignore - Table exists at runtime but not in TypeScript definitions
   const { data, error } = await supabase
     .from('lens_pricing_combinations')
     .select('*');
@@ -93,6 +97,7 @@ export async function fetchLensPricingCombinations(): Promise<LensPricingCombina
 export async function addLensPricingCombination(combination: Omit<LensPricingCombination, 'combination_id' | 'created_at'>): Promise<string> {
   const combinationId = `LPC${Date.now()}`;
   
+  // @ts-ignore - Table exists at runtime but not in TypeScript definitions
   const { data, error } = await supabase
     .from('lens_pricing_combinations')
     .insert({
@@ -110,6 +115,13 @@ export async function addLensPricingCombination(combination: Omit<LensPricingCom
     throw new Error(`Failed to add lens pricing combination: ${error.message}`);
   }
   
+  // Check if data is null before accessing combination_id
+  if (!data) {
+    console.error('Data is null after adding lens pricing combination');
+    // Return the generated ID since the record was likely created but not returned
+    return combinationId;
+  }
+  
   return data.combination_id;
 }
 
@@ -118,6 +130,7 @@ export async function updateLensPricingCombination(
   combinationId: string,
   updates: Partial<Omit<LensPricingCombination, 'combination_id' | 'created_at'>>
 ): Promise<void> {
+  // @ts-ignore - Table exists at runtime but not in TypeScript definitions
   const { error } = await supabase
     .from('lens_pricing_combinations')
     .update(updates)
@@ -131,6 +144,7 @@ export async function updateLensPricingCombination(
 
 // Delete a lens pricing combination from Supabase
 export async function deleteLensPricingCombination(combinationId: string): Promise<void> {
+  // @ts-ignore - Table exists at runtime but not in TypeScript definitions
   const { error } = await supabase
     .from('lens_pricing_combinations')
     .delete()
@@ -148,6 +162,7 @@ export async function checkCombinationExists(
   coatingId: string,
   thicknessId: string
 ): Promise<boolean> {
+  // @ts-ignore - Table exists at runtime but not in TypeScript definitions
   const { data, error } = await supabase
     .from('lens_pricing_combinations')
     .select('combination_id')
@@ -167,6 +182,7 @@ export async function checkCombinationExists(
 // Reset lens pricing combinations to default values
 export async function resetLensPricingCombinations(): Promise<void> {
   // First, delete all existing combinations
+  // @ts-ignore - Table exists at runtime but not in TypeScript definitions
   const { error: deleteError } = await supabase
     .from('lens_pricing_combinations')
     .delete()
