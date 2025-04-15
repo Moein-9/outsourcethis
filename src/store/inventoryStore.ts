@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import * as frameService from '@/services/frameService';
+import * as serviceService from '@/services/serviceService';
+import { Service } from '@/services/serviceService';
 
 export interface FrameItem {
   frameId: string;
@@ -75,6 +77,7 @@ interface InventoryState {
   contactLenses: ContactLensItem[];
   services: ServiceItem[];
   lensPricingCombinations: LensPricingCombination[];
+  isLoadingServices: boolean;
   
   fetchFrames: () => Promise<void>;
   addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => Promise<string | null>;
@@ -105,11 +108,11 @@ interface InventoryState {
   deleteContactLens: (id: string) => void;
   searchContactLenses: (query: string) => ContactLensItem[];
   
-  addService: (service: Omit<ServiceItem, "id">) => string;
-  updateService: (id: string, service: Partial<Omit<ServiceItem, "id">>) => void;
-  deleteService: (id: string) => void;
-  getServiceById: (id: string) => ServiceItem | undefined;
-  getServicesByCategory: (category: ServiceItem['category']) => ServiceItem[];
+  addService: (service: Omit<ServiceItem, "id">) => Promise<string>;
+  updateService: (id: string, service: Partial<Omit<ServiceItem, "id">>) => Promise<boolean>;
+  deleteService: (id: string) => Promise<boolean>;
+  getServiceById: (id: string) => Promise<ServiceItem | null>;
+  getServicesByCategory: (category: ServiceItem['category']) => Promise<ServiceItem[]>;
   
   addLensPricingCombination: (combination: Omit<LensPricingCombination, "id">) => string;
   updateLensPricingCombination: (id: string, combination: Partial<Omit<LensPricingCombination, "id">>) => void;
@@ -119,6 +122,8 @@ interface InventoryState {
   
   cleanupSamplePhotochromicCoatings: () => void;
   resetLensPricing: () => void;
+  
+  fetchServices: () => Promise<void>;
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -261,15 +266,8 @@ export const useInventoryStore = create<InventoryState>()(
         { id: "cl2", brand: "Biofinty", type: "Monthly", bc: "8.6", diameter: "14.0", power: "-3.00", price: 20, qty: 12 },
         { id: "cl3", brand: "Air Optix", type: "Monthly", bc: "8.4", diameter: "14.2", power: "+1.50", price: 22, qty: 8 }
       ],
-      services: [
-        { 
-          id: "service1", 
-          name: "Eye Exam", 
-          description: "Standard eye examination service to evaluate eye health and vision.", 
-          price: 3, 
-          category: "exam" 
-        }
-      ],
+      services: [],
+      isLoadingServices: false,
       lensPricingCombinations: [
         // Initial empty array - will be populated with updated pricing
       ],
@@ -541,36 +539,112 @@ export const useInventoryStore = create<InventoryState>()(
         );
       },
       
-      addService: (service) => {
-        const id = `service${Date.now()}`;
-        
-        set((state) => ({
-          services: [...state.services, { ...service, id }]
-        }));
-        
-        return id;
+      addService: async (service) => {
+        try {
+          const serviceId = await serviceService.addService({
+            name: service.name,
+            description: service.description || null,
+            price: service.price,
+            category: service.category
+          });
+          
+          // Add to local state after successful Supabase add
+          const newService: ServiceItem = {
+            ...service,
+            id: serviceId
+          };
+          
+          set((state) => ({
+            services: [...state.services, newService]
+          }));
+          
+          return serviceId;
+        } catch (error) {
+          console.error("Error adding service:", error);
+          throw error;
+        }
       },
       
-      updateService: (id, service) => {
-        set((state) => ({
-          services: state.services.map(item => 
-            item.id === id ? { ...item, ...service } : item
-          )
-        }));
+      updateService: async (id, updates) => {
+        try {
+          // Create a properly typed updates object
+          const serviceUpdates: Partial<Omit<Service, 'id' | 'created_at' | 'updated_at'>> = {
+            ...(updates.name !== undefined && { name: updates.name }),
+            ...(updates.description !== undefined && { description: updates.description || null }),
+            ...(updates.price !== undefined && { price: updates.price }),
+            ...(updates.category !== undefined && { category: updates.category })
+          };
+          
+          const success = await serviceService.updateService(id, serviceUpdates);
+          
+          if (success) {
+            set((state) => ({
+              services: state.services.map(item => 
+                item.id === id ? { ...item, ...updates } : item
+              )
+            }));
+          }
+          
+          return success;
+        } catch (error) {
+          console.error(`Error updating service with ID ${id}:`, error);
+          throw error;
+        }
       },
       
-      deleteService: (id) => {
-        set((state) => ({
-          services: state.services.filter(item => item.id !== id)
-        }));
+      deleteService: async (id) => {
+        try {
+          const success = await serviceService.deleteService(id);
+          
+          if (success) {
+            set((state) => ({
+              services: state.services.filter(item => item.id !== id)
+            }));
+          }
+          
+          return success;
+        } catch (error) {
+          console.error(`Error deleting service with ID ${id}:`, error);
+          throw error;
+        }
       },
       
-      getServiceById: (id) => {
-        return get().services.find(service => service.id === id);
+      getServiceById: async (id) => {
+        try {
+          const service = await serviceService.getServiceById(id);
+          
+          if (!service) {
+            return null;
+          }
+          
+          return {
+            id: service.id,
+            name: service.name,
+            description: service.description || "",
+            price: service.price,
+            category: service.category
+          };
+        } catch (error) {
+          console.error(`Error getting service with ID ${id}:`, error);
+          throw error;
+        }
       },
       
-      getServicesByCategory: (category) => {
-        return get().services.filter(service => service.category === category);
+      getServicesByCategory: async (category) => {
+        try {
+          const services = await serviceService.getServicesByCategory(category);
+          
+          return services.map(service => ({
+            id: service.id,
+            name: service.name,
+            description: service.description || "",
+            price: service.price,
+            category: service.category
+          }));
+        } catch (error) {
+          console.error(`Error getting services with category ${category}:`, error);
+          throw error;
+        }
       },
       
       addLensPricingCombination: (combination) => {
@@ -750,22 +824,45 @@ export const useInventoryStore = create<InventoryState>()(
         set({
           lensPricingCombinations: newPricingCombinations
         });
-      }
+      },
+      
+      fetchServices: async () => {
+        set({ isLoadingServices: true });
+        try {
+          const services = await serviceService.getAllServices();
+          set({ 
+            services: services.map(service => ({
+              id: service.id,
+              name: service.name,
+              description: service.description || "",
+              price: service.price,
+              category: service.category
+            })), 
+            isLoadingServices: false 
+          });
+        } catch (error) {
+          console.error("Error fetching services:", error);
+          set({ isLoadingServices: false });
+        }
+      },
     }),
     {
       name: 'inventory-store',
       version: 3,
       partialize: (state) => {
-        // Don't persist the frames - they'll be loaded from Supabase
-        const { frames, isLoadingFrames, ...rest } = state;
+        // Don't persist the frames or services - they'll be loaded from Supabase
+        const { frames, isLoadingFrames, services, isLoadingServices, ...rest } = state;
         return rest;
       }
     }
   )
 );
 
-// Add an initializer function to load frames when the app starts
+// Add an initializer function to load data when the app starts
 export const initInventoryStore = async () => {
-  const { fetchFrames } = useInventoryStore.getState();
-  await fetchFrames();
+  const { fetchFrames, fetchServices } = useInventoryStore.getState();
+  await Promise.all([
+    fetchFrames(),
+    fetchServices()
+  ]);
 };
