@@ -1,5 +1,5 @@
-import { supabase } from './client';
-import { LensType, LensCoating, LensThickness, LensPricingCombination } from './schema';
+import { supabase } from '../integrations/supabase/client';
+import { LensType, LensCoating, LensThickness, LensPricingCombination } from '../integrations/supabase/schema';
 import { v4 as uuidv4 } from 'uuid';
 
 // Fetch all lens types from Supabase
