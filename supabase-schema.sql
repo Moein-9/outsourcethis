@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS public.contact_lenses (
 
 -- Create invoices table to store all invoice data
 CREATE TABLE IF NOT EXISTS public.invoices (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id text PRIMARY KEY,
   invoice_id TEXT UNIQUE NOT NULL,
   work_order_id TEXT,
   patient_id UUID REFERENCES public.patients(id),
