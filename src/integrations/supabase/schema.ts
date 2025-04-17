@@ -1,20 +1,62 @@
 import { Database } from './types';
 
-export type Patient = Database['public']['Tables']['patients']['Row'];
+// Type aliases for better readability
+export type LensType = {
+  lens_id: string;
+  name: string;
+  type: string;
+  created_at?: string;
+};
+
+export type LensCoating = {
+  coating_id: string;
+  name: string;
+  price: number;
+  description?: string;
+  category: string;
+  is_photochromic: boolean;
+  available_colors?: string[];
+  created_at?: string;
+};
+
+export type LensThickness = {
+  thickness_id: string;
+  name: string;
+  price: number;
+  description?: string;
+  category: string;
+  created_at?: string;
+};
+
+export type LensPricingCombination = {
+  combination_id: string;
+  lens_type_id: string;
+  coating_id: string;
+  thickness_id: string;
+  price: number;
+  created_at?: string;
+};
+
+// Extending database tables
+export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
+export type InsertTables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
+export type UpdateTables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
+
+// Database types
+export type Patient = Tables<'patients'>;
+export type PatientNote = Tables<'patient_notes'>;
+export type GlassesPrescription = Tables<'glasses_prescriptions'>;
+export type ContactLensPrescription = Tables<'contact_lens_prescriptions'>;
+export type InvoiceRecord = Tables<'invoice_records'>;
+export type RefundRecord = Tables<'refund_records'>;
+export type DailySalesSummary = Tables<'daily_sales_summary'>;
+export type MonthlySalesSummary = Tables<'monthly_sales_summary'>;
+export type PaymentMethodsSummary = Tables<'payment_methods_summary'>;
+export type InvoiceTypesSummary = Tables<'invoice_types_summary'>;
+export type Service = Tables<'services'>;
+
 export type PatientInsert = Database['public']['Tables']['patients']['Insert'];
 export type PatientUpdate = Database['public']['Tables']['patients']['Update'];
-
-export type PatientNote = Database['public']['Tables']['patient_notes']['Row'];
-export type PatientNoteInsert = Database['public']['Tables']['patient_notes']['Insert'];
-export type PatientNoteUpdate = Database['public']['Tables']['patient_notes']['Update'];
-
-export type GlassesPrescription = Database['public']['Tables']['glasses_prescriptions']['Row'];
-export type GlassesPrescriptionInsert = Database['public']['Tables']['glasses_prescriptions']['Insert'];
-export type GlassesPrescriptionUpdate = Database['public']['Tables']['glasses_prescriptions']['Update'];
-
-export type ContactLensPrescription = Database['public']['Tables']['contact_lens_prescriptions']['Row'];
-export type ContactLensPrescriptionInsert = Database['public']['Tables']['contact_lens_prescriptions']['Insert'];
-export type ContactLensPrescriptionUpdate = Database['public']['Tables']['contact_lens_prescriptions']['Update'];
 
 export type Frame = Database['public']['Tables']['frames']['Row'];
 export type FrameInsert = Database['public']['Tables']['frames']['Insert'];
@@ -23,43 +65,6 @@ export type FrameUpdate = Database['public']['Tables']['frames']['Update'];
 export type ContactLens = Database['public']['Tables']['contact_lenses']['Row'];
 export type ContactLensInsert = Database['public']['Tables']['contact_lenses']['Insert'];
 export type ContactLensUpdate = Database['public']['Tables']['contact_lenses']['Update'];
-
-// Lens-related types
-export interface LensType {
-  lens_id: string;
-  name: string;
-  type: string;
-  created_at?: string;
-}
-
-export interface LensCoating {
-  coating_id: string;
-  name: string;
-  price: number;
-  description?: string | null;
-  category: string;
-  is_photochromic: boolean;
-  available_colors?: string[] | null;
-  created_at?: string;
-}
-
-export interface LensThickness {
-  thickness_id: string;
-  name: string;
-  price: number;
-  description?: string | null;
-  category: string;
-  created_at?: string;
-}
-
-export interface LensPricingCombination {
-  combination_id: string;
-  lens_type_id: string;
-  coating_id: string;
-  thickness_id: string;
-  price: number;
-  created_at?: string;
-}
 
 // Helper function to convert database date to a JavaScript Date object
 export function parseDbDate(dateStr: string | null): Date | null {

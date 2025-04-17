@@ -50,6 +50,8 @@ interface LensSelectorProps {
     pdLeft?: string;
   };
   onCombinationPriceChange?: (price: number | null) => void;
+  lensPricingCombinations?: PricingCombination[];
+  isLoading?: boolean;
 }
 
 interface PricingCombination {
@@ -74,6 +76,8 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   initialThickness = null,
   rx,
   onCombinationPriceChange,
+  lensPricingCombinations: externalCombinations = [],
+  isLoading: externalLoading = false,
 }) => {
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
@@ -81,7 +85,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const [lensTypes, setLensTypes] = useState<LensType[]>([]);
   const [lensCoatings, setLensCoatings] = useState<LensCoating[]>([]);
   const [lensThicknesses, setLensThicknesses] = useState<LensThickness[]>([]);
-  const [pricingCombinations, setPricingCombinations] = useState<PricingCombination[]>([]);
+  const [pricingCombinations, setPricingCombinations] = useState<
+    PricingCombination[]
+  >([]);
   const [loadingLensTypes, setLoadingLensTypes] = useState(false);
   const [loadingCoatings, setLoadingCoatings] = useState(false);
   const [loadingThicknesses, setLoadingThicknesses] = useState(false);
@@ -99,79 +105,66 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     "distance-reading" | "progressive" | "bifocal"
   >("distance-reading");
 
-  // Initial load - fetch all valid lens combinations to populate the selection options
+  // Use external pricing combinations if provided
   useEffect(() => {
-    const fetchAllCombinations = async () => {
-      setLoadingCombinations(true);
-      try {
-        // Using raw query to work around type issues
-        const { data, error } = await supabase
-          .rpc('get_lens_combinations')
-          .select();
+    if (externalCombinations && externalCombinations.length > 0) {
+      setPricingCombinations(externalCombinations);
 
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          // Cast data to the expected type since we know the structure
-          const combinations = data as unknown as PricingCombination[];
-          setPricingCombinations(combinations);
-
-          // Extract unique lens types from combinations
-          const uniqueLensTypes = new Map();
-          combinations.forEach((item) => {
-            const lens = item.lens_types;
-            if (lens && !uniqueLensTypes.has(lens.lens_id)) {
-              uniqueLensTypes.set(lens.lens_id, {
-                id: lens.lens_id,
-                name: lens.name,
-                type: lens.type,
-              });
-            }
+      // Extract unique lens types from combinations
+      const uniqueLensTypes = new Map();
+      externalCombinations.forEach((item) => {
+        const lens = item.lens_types;
+        if (lens && !uniqueLensTypes.has(lens.lens_id)) {
+          uniqueLensTypes.set(lens.lens_id, {
+            id: lens.lens_id,
+            name: lens.name,
+            type: lens.type,
           });
-          
-          setLensTypes(Array.from(uniqueLensTypes.values()));
         }
-      } catch (err) {
-        console.error("Error fetching lens combinations:", err);
-        toast.error(t("errorFetchingLensCombinations") || "Error fetching lens options");
-        
-        // Fall back to fetching lens types directly if combinations fail
-        fetchLensTypesDirectly();
-      } finally {
-        setLoadingCombinations(false);
+      });
+
+      if (uniqueLensTypes.size > 0) {
+        setLensTypes(Array.from(uniqueLensTypes.values()));
       }
-    };
+    }
+  }, [externalCombinations]);
 
-    const fetchLensTypesDirectly = async () => {
-      setLoadingLensTypes(true);
-      try {
-        const { data, error } = await supabase.from("lens_types").select("*");
+  // Now used only when we don't have external combinations
+  useEffect(() => {
+    // Skip internal fetching if we're using external data
+    if (!externalCombinations || externalCombinations.length === 0) {
+      const fetchLensTypesDirectly = async () => {
+        setLoadingLensTypes(true);
+        try {
+          // @ts-ignore - Tables exist at runtime but not in TypeScript definitions
+          const { data, error } = await supabase.from("lens_types").select("*");
 
-        if (error) {
-          throw error;
+          if (error) {
+            throw error;
+          }
+
+          if (data) {
+            const formattedLensTypes: LensType[] = data.map((item: any) => ({
+              id: item.lens_id,
+              name: item.name,
+              type: item.type as LensType["type"],
+            }));
+
+            setLensTypes(formattedLensTypes);
+          }
+        } catch (err) {
+          console.error("Error fetching lens types:", err);
+          toast.error(
+            t("errorFetchingLensTypes") || "Error fetching lens types"
+          );
+        } finally {
+          setLoadingLensTypes(false);
         }
+      };
 
-        if (data) {
-          const formattedLensTypes: LensType[] = data.map((item: any) => ({
-            id: item.lens_id,
-            name: item.name,
-            type: item.type as LensType["type"],
-          }));
-
-          setLensTypes(formattedLensTypes);
-        }
-      } catch (err) {
-        console.error("Error fetching lens types:", err);
-        toast.error(t("errorFetchingLensTypes") || "Error fetching lens types");
-      } finally {
-        setLoadingLensTypes(false);
-      }
-    };
-
-    fetchAllCombinations();
-  }, [t]);
+      fetchLensTypesDirectly();
+    }
+  }, [t, externalCombinations]);
 
   const hasAddValues = React.useMemo(() => {
     if (!rx) return false;
@@ -280,15 +273,15 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   useEffect(() => {
     if (selectedLensType && pricingCombinations.length > 0) {
       setLoadingCoatings(true);
-      
+
       // Filter combinations to get available coatings for the selected lens type
       const availableCombinations = pricingCombinations.filter(
-        combo => combo.lens_type_id === selectedLensType.id
+        (combo) => combo.lens_type_id === selectedLensType.id
       );
-      
+
       // Extract unique coatings from the filtered combinations
       const uniqueCoatings = new Map();
-      availableCombinations.forEach(combo => {
+      availableCombinations.forEach((combo) => {
         const coating = combo.lens_coatings;
         if (coating && !uniqueCoatings.has(coating.coating_id)) {
           uniqueCoatings.set(coating.coating_id, {
@@ -302,7 +295,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
           });
         }
       });
-      
+
       setLensCoatings(Array.from(uniqueCoatings.values()));
       setLoadingCoatings(false);
     } else if (selectedLensType) {
@@ -321,15 +314,17 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
           }
 
           if (data) {
-            const formattedCoatings: LensCoating[] = data.map((coating: any) => ({
-              id: coating.coating_id,
-              name: coating.name,
-              price: coating.price,
-              description: coating.description,
-              category: coating.category,
-              isPhotochromic: coating.is_photochromic,
-              availableColors: coating.available_colors,
-            }));
+            const formattedCoatings: LensCoating[] = data.map(
+              (coating: any) => ({
+                id: coating.coating_id,
+                name: coating.name,
+                price: coating.price,
+                description: coating.description,
+                category: coating.category,
+                isPhotochromic: coating.is_photochromic,
+                availableColors: coating.available_colors,
+              })
+            );
 
             setLensCoatings(formattedCoatings);
           }
@@ -351,17 +346,17 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   useEffect(() => {
     if (selectedLensType && selectedCoating && pricingCombinations.length > 0) {
       setLoadingThicknesses(true);
-      
+
       // Filter combinations to get available thicknesses for the selected lens type and coating
       const availableCombinations = pricingCombinations.filter(
-        combo => 
-          combo.lens_type_id === selectedLensType.id && 
+        (combo) =>
+          combo.lens_type_id === selectedLensType.id &&
           combo.coating_id === selectedCoating.id
       );
-      
+
       // Extract unique thicknesses from the filtered combinations
       const uniqueThicknesses = new Map();
-      availableCombinations.forEach(combo => {
+      availableCombinations.forEach((combo) => {
         const thickness = combo.lens_thicknesses;
         if (thickness && !uniqueThicknesses.has(thickness.thickness_id)) {
           uniqueThicknesses.set(thickness.thickness_id, {
@@ -373,7 +368,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
           });
         }
       });
-      
+
       setLensThicknesses(Array.from(uniqueThicknesses.values()));
       setLoadingThicknesses(false);
     } else if (selectedLensType && selectedCoating) {
@@ -391,19 +386,23 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
           }
 
           if (data) {
-            const formattedThicknesses: LensThickness[] = data.map((thickness: any) => ({
-              id: thickness.thickness_id,
-              name: thickness.name,
-              price: thickness.price,
-              description: thickness.description,
-              category: thickness.category,
-            }));
+            const formattedThicknesses: LensThickness[] = data.map(
+              (thickness: any) => ({
+                id: thickness.thickness_id,
+                name: thickness.name,
+                price: thickness.price,
+                description: thickness.description,
+                category: thickness.category,
+              })
+            );
 
             setLensThicknesses(formattedThicknesses);
           }
         } catch (err) {
           console.error("Error fetching lens thicknesses:", err);
-          toast.error(t("errorFetchingThicknesses") || "Error fetching thicknesses");
+          toast.error(
+            t("errorFetchingThicknesses") || "Error fetching thicknesses"
+          );
         } finally {
           setLoadingThicknesses(false);
         }
@@ -425,26 +424,28 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     ) {
       // Find the matching combination in our cached data
       const matchingCombination = pricingCombinations.find(
-        combo => 
-          combo.lens_type_id === selectedLensType.id && 
+        (combo) =>
+          combo.lens_type_id === selectedLensType.id &&
           combo.coating_id === selectedCoating.id &&
           combo.thickness_id === selectedThickness.id
       );
-      
+
       if (matchingCombination) {
         onCombinationPriceChange(matchingCombination.price);
       } else {
         // If not found in cache, use an alternative method to calculate price
         // This could be a fallback sum of individual component prices
-        const totalPrice = (
-          (selectedLensType ? 0 : 0) + 
-          (selectedCoating ? selectedCoating.price : 0) + 
-          (selectedThickness ? selectedThickness.price : 0)
-        );
+        const totalPrice =
+          (selectedLensType ? 0 : 0) +
+          (selectedCoating ? selectedCoating.price : 0) +
+          (selectedThickness ? selectedThickness.price : 0);
         onCombinationPriceChange(totalPrice);
-        
+
         // Inform the user that we're using an estimate
-        toast.info(t("usingEstimatedPrice") || "Using estimated price for this combination");
+        toast.info(
+          t("usingEstimatedPrice") ||
+            "Using estimated price for this combination"
+        );
       }
     } else if (onCombinationPriceChange) {
       onCombinationPriceChange(null);
@@ -455,38 +456,115 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     selectedThickness,
     onCombinationPriceChange,
     pricingCombinations,
-    t
+    t,
   ]);
 
+  // Handle lens type selection
   const handleLensTypeSelect = (lens: LensType) => {
     setSelectedLensType(lens);
-    onSelectLensType(lens);
-
-    const newCategory = getCategory(lens);
-    setActiveCategory(newCategory);
-
     setSelectedCoating(null);
     setSelectedThickness(null);
+    onSelectLensType(lens);
     onSelectCoating(null);
     onSelectThickness(null);
+    setActiveCategory(getCategory(lens));
 
-    if (onCombinationPriceChange) {
-      onCombinationPriceChange(null);
+    // Filter available coatings based on the selected lens type
+    if (externalCombinations && externalCombinations.length > 0) {
+      // Use external combinations to find available coatings
+      const availableCoatings = new Map();
+
+      externalCombinations
+        .filter((combo) => combo.lens_type_id === lens.id)
+        .forEach((combo) => {
+          const coating = combo.lens_coatings;
+          if (coating && !availableCoatings.has(coating.coating_id)) {
+            availableCoatings.set(coating.coating_id, {
+              id: coating.coating_id,
+              name: coating.name,
+              price: coating.price,
+              description: coating.description,
+              category: coating.category,
+              isPhotochromic: coating.is_photochromic,
+              availableColors: coating.available_colors,
+            });
+          }
+        });
+
+      setLensCoatings(Array.from(availableCoatings.values()));
+    } else {
+      // Fallback to direct API call if no external combinations
+      fetchCoatingsForLensType(lens.id);
     }
   };
 
+  // Handle coating selection
   const handleCoatingSelect = (coating: LensCoating) => {
     setSelectedCoating(coating);
-    onSelectCoating(coating);
-
-    // Reset thickness when coating changes as available thicknesses might change
     setSelectedThickness(null);
+    onSelectCoating(coating);
     onSelectThickness(null);
+
+    // Filter available thicknesses based on lens type and coating
+    if (
+      selectedLensType &&
+      externalCombinations &&
+      externalCombinations.length > 0
+    ) {
+      // Use external combinations to find available thicknesses
+      const availableThicknesses = new Map();
+
+      externalCombinations
+        .filter(
+          (combo) =>
+            combo.lens_type_id === selectedLensType.id &&
+            combo.coating_id === coating.id
+        )
+        .forEach((combo) => {
+          const thickness = combo.lens_thicknesses;
+          if (thickness && !availableThicknesses.has(thickness.thickness_id)) {
+            availableThicknesses.set(thickness.thickness_id, {
+              id: thickness.thickness_id,
+              name: thickness.name,
+              price: thickness.price,
+              description: thickness.description,
+              category: thickness.category,
+            });
+          }
+        });
+
+      setLensThicknesses(Array.from(availableThicknesses.values()));
+    } else if (selectedLensType) {
+      // Fallback to direct API call if no external combinations
+      fetchThicknessesForLensAndCoating(selectedLensType.id, coating.id);
+    }
   };
 
+  // Handle thickness selection
   const handleThicknessSelect = (thickness: LensThickness) => {
     setSelectedThickness(thickness);
     onSelectThickness(thickness);
+
+    // Find the price for this combination
+    if (selectedLensType && selectedCoating) {
+      const matchingCombination = pricingCombinations.find(
+        (combo) =>
+          combo.lens_type_id === selectedLensType.id &&
+          combo.coating_id === selectedCoating.id &&
+          combo.thickness_id === thickness.id
+      );
+
+      if (matchingCombination && onCombinationPriceChange) {
+        onCombinationPriceChange(matchingCombination.price);
+      } else if (onCombinationPriceChange) {
+        // If no matching combination, calculate default price by adding individual prices
+        const defaultPrice =
+          (selectedLensType.price || 0) +
+          selectedCoating.price +
+          thickness.price;
+        onCombinationPriceChange(defaultPrice);
+      }
+    }
   };
 
   const handleSkipLensChange = (checked: boolean) => {
@@ -511,13 +589,161 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const dirClass = language === "ar" ? "rtl" : "ltr";
 
   // Calculate available options based on current selections
-  const availableCoatings = selectedLensType 
-    ? lensCoatings 
-    : [];
+  const availableCoatings = selectedLensType ? lensCoatings : [];
 
-  const availableThicknesses = selectedLensType && selectedCoating 
-    ? lensThicknesses 
-    : [];
+  const availableThicknesses =
+    selectedLensType && selectedCoating ? lensThicknesses : [];
+
+  // Helper function to fetch coatings for a specific lens type
+  const fetchCoatingsForLensType = async (lensTypeId: string) => {
+    setLoadingCoatings(true);
+    try {
+      // Try to get coatings from pricing combinations if available
+      if (pricingCombinations.length > 0) {
+        const availableCoatings = new Map();
+
+        pricingCombinations
+          .filter((combo) => combo.lens_type_id === lensTypeId)
+          .forEach((combo) => {
+            const coating = combo.lens_coatings;
+            if (coating && !availableCoatings.has(coating.coating_id)) {
+              availableCoatings.set(coating.coating_id, {
+                id: coating.coating_id,
+                name: coating.name,
+                price: coating.price,
+                description: coating.description,
+                category: coating.category,
+                isPhotochromic: coating.is_photochromic,
+                availableColors: coating.available_colors,
+              });
+            }
+          });
+
+        if (availableCoatings.size > 0) {
+          setLensCoatings(Array.from(availableCoatings.values()));
+          setLoadingCoatings(false);
+          return;
+        }
+      }
+
+      // Fall back to direct API call if no coatings found
+      // @ts-ignore - Tables exist at runtime but not in TypeScript definitions
+      const { data, error } = await supabase.from("lens_coatings").select("*");
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        const formattedCoatings: LensCoating[] = data
+          .filter((item: any) => {
+            const category = getCategory({
+              id: lensTypeId,
+              name: "",
+              type: "distance",
+            });
+            return item.category === category || item.category === "all";
+          })
+          .map((item: any) => ({
+            id: item.coating_id,
+            name: item.name,
+            price: item.price,
+            description: item.description,
+            category: item.category,
+            isPhotochromic: item.is_photochromic,
+            availableColors: item.available_colors,
+          }));
+
+        setLensCoatings(formattedCoatings);
+      }
+    } catch (err) {
+      console.error("Error fetching coatings:", err);
+      toast.error(t("errorFetchingCoatings") || "Error fetching lens coatings");
+    } finally {
+      setLoadingCoatings(false);
+    }
+  };
+
+  // Helper function to fetch thicknesses for a specific lens and coating
+  const fetchThicknessesForLensAndCoating = async (
+    lensTypeId: string,
+    coatingId: string
+  ) => {
+    setLoadingThicknesses(true);
+    try {
+      // Try to get thicknesses from pricing combinations if available
+      if (pricingCombinations.length > 0) {
+        const availableThicknesses = new Map();
+
+        pricingCombinations
+          .filter(
+            (combo) =>
+              combo.lens_type_id === lensTypeId &&
+              combo.coating_id === coatingId
+          )
+          .forEach((combo) => {
+            const thickness = combo.lens_thicknesses;
+            if (
+              thickness &&
+              !availableThicknesses.has(thickness.thickness_id)
+            ) {
+              availableThicknesses.set(thickness.thickness_id, {
+                id: thickness.thickness_id,
+                name: thickness.name,
+                price: thickness.price,
+                description: thickness.description,
+                category: thickness.category,
+              });
+            }
+          });
+
+        if (availableThicknesses.size > 0) {
+          setLensThicknesses(Array.from(availableThicknesses.values()));
+          setLoadingThicknesses(false);
+          return;
+        }
+      }
+
+      // Fall back to direct API call if no thicknesses found
+      // @ts-ignore - Tables exist at runtime but not in TypeScript definitions
+      const { data, error } = await supabase
+        .from("lens_thicknesses")
+        .select("*");
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        const category = getCategory({
+          id: lensTypeId,
+          name: "",
+          type: "distance",
+        });
+
+        const formattedThicknesses: LensThickness[] = data
+          .filter((item: any) => {
+            return item.category === category || item.category === "all";
+          })
+          .map((item: any) => ({
+            id: item.thickness_id,
+            name: item.name,
+            price: item.price,
+            description: item.description,
+            category: item.category,
+          }));
+
+        setLensThicknesses(formattedThicknesses);
+      }
+    } catch (err) {
+      console.error("Error fetching thicknesses:", err);
+      toast.error(
+        t("errorFetchingThicknesses") || "Error fetching lens thicknesses"
+      );
+    } finally {
+      setLoadingThicknesses(false);
+    }
+  };
 
   if (skipLens) {
     return (
@@ -558,7 +784,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
       {loadingCombinations ? (
         <div className="flex justify-center items-center py-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-          <p className="text-muted-foreground">{t("loadingLensOptions") || "Loading lens options..."}</p>
+          <p className="text-muted-foreground">
+            {t("loadingLensOptions") || "Loading lens options..."}
+          </p>
         </div>
       ) : (
         <>
@@ -635,7 +863,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                       <Button
                         key={coating.id}
                         variant={
-                          selectedCoating?.id === coating.id ? "default" : "outline"
+                          selectedCoating?.id === coating.id
+                            ? "default"
+                            : "outline"
                         }
                         className={`
                           h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
@@ -645,7 +875,9 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
                               : "hover:bg-orange-50"
                           }
                           ${
-                            coating.isPhotochromic ? "border-blue-300 border-2" : ""
+                            coating.isPhotochromic
+                              ? "border-blue-300 border-2"
+                              : ""
                           }
                         `}
                         onClick={() => handleCoatingSelect(coating)}
