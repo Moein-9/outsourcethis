@@ -1,11 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
-import { 
-  LensType, 
-  LensCoating, 
-  LensThickness 
-} from "@/store/inventoryStore";
+import { LensType, LensCoating, LensThickness } from "@/store/inventoryStore";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LensSelector } from "@/components/LensSelector";
@@ -22,7 +17,7 @@ interface LensSectionProps {
   onThicknessSelect: (thickness: LensThickness | null) => void;
   onSkipFrameChange: (skip: boolean) => void;
   onCombinationPriceChange: (price: number | null) => void;
-  onCoatingColorChange?: (color: string) => void; 
+  onCoatingColorChange?: (color: string) => void;
   selectedCoatingColor?: string;
   combinedLensPrice: number | null;
   rx: any;
@@ -41,7 +36,7 @@ export const LensSection: React.FC<LensSectionProps> = ({
   onCoatingColorChange,
   selectedCoatingColor = "",
   combinedLensPrice,
-  rx
+  rx,
 }) => {
   const { t } = useLanguageStore();
 
@@ -59,8 +54,10 @@ export const LensSection: React.FC<LensSectionProps> = ({
   }, [selectedLensType, selectedCoating, selectedThickness]);
 
   // Determine if color selector should be shown
-  const shouldShowColorSelector = selectedCoating?.availableColors?.length > 0 && 
-    (selectedCoating?.isPhotochromic || selectedCoating?.category === "sunglasses");
+  const shouldShowColorSelector =
+    selectedCoating?.availableColors?.length > 0 &&
+    (selectedCoating?.isPhotochromic ||
+      selectedCoating?.category === "sunglasses");
 
   return (
     <Card className="border shadow-sm relative overflow-visible">
@@ -68,12 +65,12 @@ export const LensSection: React.FC<LensSectionProps> = ({
         <CardTitle className={`text-base flex justify-between items-center`}>
           <span className="flex items-center gap-2 text-violet-800">
             <Eye className="w-4 h-4 text-violet-600" />
-            {t('lensSection')}
+            {t("lensSection")}
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 overflow-visible">
-        <LensSelector 
+        <LensSelector
           onSelectLensType={onLensTypeSelect}
           onSelectCoating={onCoatingSelect}
           onSelectThickness={onThicknessSelect}
@@ -85,7 +82,7 @@ export const LensSection: React.FC<LensSectionProps> = ({
           rx={rx}
           onCombinationPriceChange={onCombinationPriceChange}
         />
-        
+
         {/* Unified color selector for both photochromic and sunglasses */}
         {shouldShowColorSelector && selectedCoating && (
           <div className="mt-6">
