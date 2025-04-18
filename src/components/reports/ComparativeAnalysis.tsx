@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { format, subDays, startOfMonth, endOfMonth, parseISO, isWithinInterval, differenceInDays } from "date-fns";
-import { useInvoiceStore, Invoice, Refund } from "@/store/invoiceStore";
+import {
+  format,
+  subDays,
+  startOfMonth,
+  endOfMonth,
+  parseISO,
+  isWithinInterval,
+  differenceInDays,
+} from "date-fns";
 import { useLanguageStore } from "@/store/languageStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,48 +20,106 @@ import {
 } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { DateRange } from "react-day-picker";
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip as RechartsTooltip, 
-  Legend, 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
   ResponsiveContainer,
   BarChart,
   Bar,
-  Cell
+  Cell,
 } from "recharts";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  BarChart3, 
-  LineChart as LineChartIcon, 
-  MapPin, 
-  Store, 
-  Phone, 
-  RefreshCcw, 
-  CreditCard, 
-  Receipt, 
+import {
+  BarChart3,
+  LineChart as LineChartIcon,
+  MapPin,
+  Store,
+  Phone,
+  RefreshCcw,
+  CreditCard,
+  Receipt,
   Calendar,
-  Info
+  Info,
+  Loader2,
 } from "lucide-react";
 import { PrintService } from "@/utils/PrintService";
 import { PrintReportButton } from "./PrintReportButton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { supabase } from "@/integrations/supabase/client";
+
+// Define interface based on Supabase schema
+interface Invoice {
+  id: string;
+  invoice_id: string;
+  work_order_id?: string;
+  patient_id?: string;
+  patient_name: string;
+  patient_phone?: string;
+
+  invoice_type: "glasses" | "contacts" | "exam" | "repair";
+
+  lens_type?: string;
+  lens_price?: number;
+  coating?: string;
+  coating_price?: number;
+  coating_color?: string;
+  thickness?: string;
+  thickness_price?: number;
+
+  frame_brand?: string;
+  frame_model?: string;
+  frame_color?: string;
+  frame_size?: string;
+  frame_price?: number;
+
+  contact_lens_items?: any;
+  contact_lens_rx?: any;
+
+  service_name?: string;
+  service_price?: number;
+
+  discount: number;
+  deposit: number;
+  total: number;
+  remaining: number;
+
+  payment_method: string;
+  auth_number?: string;
+  is_paid: boolean;
+  is_refunded?: boolean;
+  refund_amount?: number;
+  refund_date?: string;
+  refund_method?: string;
+  refund_reason?: string;
+  refund_id?: string;
+  staff_notes?: string;
+
+  created_at: string;
+  payments?: any;
+}
 
 const STORE_INFO = {
   name: {
     en: "Moein Optical",
-    ar: "نظارات المعين"
+    ar: "نظارات المعين",
   },
   logo: "/lovable-uploads/826ece02-80b8-482d-a2be-8292f3460297.png",
   address: {
     en: "123 Vision Street, Kuwait City",
-    ar: "١٢٣ شارع الرؤية، مدينة الكويت"
+    ar: "١٢٣ شارع الرؤية، مدينة الكويت",
   },
-  phone: "+965 1234 5678"
+  phone: "+965 1234 5678",
 };
 
 const CHART_COLORS = {
@@ -62,31 +127,30 @@ const CHART_COLORS = {
   refunds: "#ef4444",
   lens: "#8B5CF6",
   frame: "#F97316",
-  coating: "#0EA5E9"
+  coating: "#0EA5E9",
 };
 
 interface ComparativeAnalysisProps {
   className?: string;
 }
 
-const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) => {
-  const invoiceStore = useInvoiceStore();
+const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({
+  className,
+}) => {
   const { language } = useLanguageStore();
-  const isRtl = language === 'ar';
-  
-  const invoices: Invoice[] = useMemo(() => {
-    return invoiceStore?.invoices || [];
-  }, [invoiceStore?.invoices]);
-  
-  const refunds: Refund[] = useMemo(() => {
-    return invoiceStore?.refunds || [];
-  }, [invoiceStore?.refunds]);
-  
+  const isRtl = language === "ar";
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [refundedInvoices, setRefundedInvoices] = useState<Invoice[]>([]);
+
   const [date, setDate] = useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
     to: new Date(),
   });
-  const [selectedTimeRange, setSelectedTimeRange] = useState<"week" | "month" | "custom">("week");
+  const [selectedTimeRange, setSelectedTimeRange] = useState<
+    "week" | "month" | "custom"
+  >("week");
   const [salesData, setSalesData] = useState<any[]>([]);
   const [productSalesData, setProductSalesData] = useState<any[]>([]);
   const [totalSales, setTotalSales] = useState(0);
@@ -96,30 +160,83 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
   const [transactionCount, setTransactionCount] = useState(0);
   const [refundCount, setRefundCount] = useState(0);
   const [selectedBarIndex, setSelectedBarIndex] = useState(-1);
-  
+
   const translations = {
-    comparativeAnalysis: language === 'ar' ? "التحليل المقارن | Comparative Analysis" : "Comparative Analysis | التحليل المقارن",
-    timeRange: language === 'ar' ? "المدى الزمني | Time Range" : "Time Range | المدى الزمني",
-    lastWeek: language === 'ar' ? "الأسبوع الماضي | Last Week" : "Last Week | الأسبوع الماضي",
-    lastMonth: language === 'ar' ? "الشهر الماضي | Last Month" : "Last Month | الشهر الماضي",
-    customRange: language === 'ar' ? "مدى مخصص | Custom Range" : "Custom Range | مدى مخصص",
-    selectRange: language === 'ar' ? "اختر مدى | Select Range" : "Select Range | اختر مدى",
-    totalSales: language === 'ar' ? "إجمالي المبيعات | Total Sales" : "Total Sales | إجمالي المبيعات",
-    averageDailySales: language === 'ar' ? "متوسط المبيعات اليومية | Average Daily Sales" : "Average Daily Sales | متوسط المبيعات اليومية",
-    transactionCount: language === 'ar' ? "عدد المعاملات | Transaction Count" : "Transaction Count | عدد المعاملات",
-    salesTrend: language === 'ar' ? "اتجاه المبيعات | Sales Trend" : "Sales Trend | اتجاه المبي��ات",
-    productSales: language === 'ar' ? "مبيعات المنتجات | Product Sales" : "Product Sales | مبيعات المنتجات",
-    lensSales: language === 'ar' ? "مبيعات العدسات | Lens Sales" : "Lens Sales | مبيعات العدسات",
-    frameSales: language === 'ar' ? "مبيعات الإطارات | Frame Sales" : "Frame Sales | مبيعات الإطارات",
-    coatingSales: language === 'ar' ? "مبيعات الطلاءات | Coating Sales" : "Coating Sales | مبيعات الطلاءات",
-    currency: language === 'ar' ? "د.ك | KWD" : "KWD | د.ك",
-    printReport: language === 'ar' ? "طباعة التقرير | Print Report" : "Print Report | طباعة التقرير",
-    noDataAvailable: language === 'ar' ? "لا توجد بيانات متاحة | No data available" : "No data available | لا توجد بيانات متاحة",
-    totalRefunds: language === 'ar' ? "إجمالي المستردات | Total Refunds" : "Total Refunds | إجمالي المستردات",
-    refundCount: language === 'ar' ? "عدد المستردات | Refund Count" : "Refund Count | عدد المستردات",
-    netRevenue: language === 'ar' ? "صافي الإيرادات | Net Revenue" : "Net Revenue | صافي الإيرادات",
+    comparativeAnalysis:
+      language === "ar"
+        ? "التحليل المقارن | Comparative Analysis"
+        : "Comparative Analysis | التحليل المقارن",
+    timeRange:
+      language === "ar"
+        ? "المدى الزمني | Time Range"
+        : "Time Range | المدى الزمني",
+    lastWeek:
+      language === "ar"
+        ? "الأسبوع الماضي | Last Week"
+        : "Last Week | الأسبوع الماضي",
+    lastMonth:
+      language === "ar"
+        ? "الشهر الماضي | Last Month"
+        : "Last Month | الشهر الماضي",
+    customRange:
+      language === "ar" ? "مدى مخصص | Custom Range" : "Custom Range | مدى مخصص",
+    selectRange:
+      language === "ar" ? "اختر مدى | Select Range" : "Select Range | اختر مدى",
+    totalSales:
+      language === "ar"
+        ? "إجمالي المبيعات | Total Sales"
+        : "Total Sales | إجمالي المبيعات",
+    averageDailySales:
+      language === "ar"
+        ? "متوسط المبيعات اليومية | Average Daily Sales"
+        : "Average Daily Sales | متوسط المبيعات اليومية",
+    transactionCount:
+      language === "ar"
+        ? "عدد المعاملات | Transaction Count"
+        : "Transaction Count | عدد المعاملات",
+    salesTrend:
+      language === "ar"
+        ? "اتجاه المبيعات | Sales Trend"
+        : "Sales Trend | اتجاه المبيعات",
+    productSales:
+      language === "ar"
+        ? "مبيعات المنتجات | Product Sales"
+        : "Product Sales | مبيعات المنتجات",
+    lensSales:
+      language === "ar"
+        ? "مبيعات العدسات | Lens Sales"
+        : "Lens Sales | مبيعات العدسات",
+    frameSales:
+      language === "ar"
+        ? "مبيعات الإطارات | Frame Sales"
+        : "Frame Sales | مبيعات الإطارات",
+    coatingSales:
+      language === "ar"
+        ? "مبيعات الطلاءات | Coating Sales"
+        : "Coating Sales | مبيعات الطلاءات",
+    currency: language === "ar" ? "د.ك | KWD" : "KWD | د.ك",
+    printReport:
+      language === "ar"
+        ? "طباعة التقرير | Print Report"
+        : "Print Report | طباعة التقرير",
+    noDataAvailable:
+      language === "ar"
+        ? "لا توجد بيانات متاحة | No data available"
+        : "No data available | لا توجد بيانات متاحة",
+    totalRefunds:
+      language === "ar"
+        ? "إجمالي المستردات | Total Refunds"
+        : "Total Refunds | إجمالي المستردات",
+    refundCount:
+      language === "ar"
+        ? "عدد المستردات | Refund Count"
+        : "Refund Count | عدد المستردات",
+    netRevenue:
+      language === "ar"
+        ? "صافي الإيرادات | Net Revenue"
+        : "Net Revenue | صافي الإيرادات",
   };
-  
+
   useEffect(() => {
     if (selectedTimeRange === "week") {
       const endDate = new Date();
@@ -132,158 +249,298 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
       setDate({ from: startDate, to: endDate });
     }
   }, [selectedTimeRange]);
-  
+
+  // Fetch data from Supabase when component mounts
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        setIsLoading(true);
+        // Using a type assertion for the Supabase client
+        const { data, error } = await (supabase as any)
+          .from("invoices")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Error fetching invoices:", error);
+          toast.error("Failed to fetch invoice data");
+          return;
+        }
+
+        // Parse JSON fields
+        const parsedInvoices = (data || []).map((invoice: any) => ({
+          ...invoice,
+          contact_lens_items:
+            typeof invoice.contact_lens_items === "string"
+              ? JSON.parse(invoice.contact_lens_items)
+              : invoice.contact_lens_items,
+          payments:
+            typeof invoice.payments === "string"
+              ? JSON.parse(invoice.payments)
+              : invoice.payments || [],
+        }));
+
+        // Separate regular invoices and refunded invoices
+        const nonRefunded = parsedInvoices.filter(
+          (invoice: any) => !invoice.is_refunded
+        );
+        const refunded = parsedInvoices.filter(
+          (invoice: any) => invoice.is_refunded
+        );
+
+        setInvoices(nonRefunded);
+        setRefundedInvoices(refunded);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast.error("Failed to load report data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInvoices();
+  }, []);
+
   useEffect(() => {
     if (!date?.from || !date?.to) return;
-    
+
     const startDate = date.from;
     const endDate = date.to;
-    
-    const filteredInvoices = invoices.filter(invoice => {
-      const invoiceDate = parseISO(invoice.createdAt);
+
+    const filteredInvoices = invoices.filter((invoice) => {
+      const invoiceDate = parseISO(invoice.created_at);
       return isWithinInterval(invoiceDate, { start: startDate, end: endDate });
     });
-    
-    const filteredRefunds = refunds.filter(refund => {
-      const refundDate = parseISO(refund.date);
+
+    const filteredRefunds = refundedInvoices.filter((refund) => {
+      const refundDate = parseISO(refund.refund_date || "");
       return isWithinInterval(refundDate, { start: startDate, end: endDate });
     });
-    
-    const dailySales: { [key: string]: { sales: number, refunds: number } } = {};
+
+    const dailySales: { [key: string]: { sales: number; refunds: number } } =
+      {};
     let total = 0;
     let refundTotal = 0;
-    
+
     const dateRange = Math.abs(differenceInDays(startDate, endDate)) + 1;
     for (let i = 0; i < dateRange; i++) {
       const currentDate = new Date(startDate);
       currentDate.setDate(startDate.getDate() + i);
-      const dateKey = format(currentDate, 'yyyy-MM-dd');
+      const dateKey = format(currentDate, "yyyy-MM-dd");
       dailySales[dateKey] = { sales: 0, refunds: 0 };
     }
-    
-    filteredInvoices.forEach(invoice => {
-      const dateKey = format(parseISO(invoice.createdAt), 'yyyy-MM-dd');
-      dailySales[dateKey].sales = (dailySales[dateKey]?.sales || 0) + invoice.total;
+
+    filteredInvoices.forEach((invoice) => {
+      const dateKey = format(parseISO(invoice.created_at), "yyyy-MM-dd");
+      dailySales[dateKey].sales =
+        (dailySales[dateKey]?.sales || 0) + invoice.total;
       total += invoice.total;
     });
-    
-    filteredRefunds.forEach(refund => {
-      const dateKey = format(parseISO(refund.date), 'yyyy-MM-dd');
-      dailySales[dateKey].refunds = (dailySales[dateKey]?.refunds || 0) + refund.amount;
-      refundTotal += refund.amount;
+
+    filteredRefunds.forEach((refund) => {
+      const dateKey = format(parseISO(refund.refund_date || ""), "yyyy-MM-dd");
+      dailySales[dateKey].refunds =
+        (dailySales[dateKey]?.refunds || 0) + (refund.refund_amount || 0);
+      refundTotal += refund.refund_amount || 0;
     });
-    
+
     const chartData = Object.entries(dailySales)
       .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
       .map(([date, data]) => ({
         date,
-        displayDate: format(new Date(date), 'MMM dd'),
+        displayDate: format(new Date(date), "MMM dd"),
         sales: data.sales,
         refunds: data.refunds,
-        net: data.sales - data.refunds
+        net: data.sales - data.refunds,
       }));
-    
+
     setSalesData(chartData);
-    
-    const lensSales = filteredInvoices.reduce((sum, invoice) => sum + invoice.lensPrice, 0);
-    const frameSales = filteredInvoices.reduce((sum, invoice) => sum + invoice.framePrice, 0);
-    const coatingSales = filteredInvoices.reduce((sum, invoice) => sum + invoice.coatingPrice, 0);
-    
+
+    const lensSales = filteredInvoices.reduce(
+      (sum, invoice) => sum + (invoice.lens_price || 0),
+      0
+    );
+    const frameSales = filteredInvoices.reduce(
+      (sum, invoice) => sum + (invoice.frame_price || 0),
+      0
+    );
+    const coatingSales = filteredInvoices.reduce(
+      (sum, invoice) => sum + (invoice.coating_price || 0),
+      0
+    );
+
     setProductSalesData([
-      { name: language === 'ar' ? 'العدسات' : 'Lenses', sales: lensSales, color: CHART_COLORS.lens },
-      { name: language === 'ar' ? 'الإطارات' : 'Frames', sales: frameSales, color: CHART_COLORS.frame },
-      { name: language === 'ar' ? 'الطلاءات' : 'Coatings', sales: coatingSales, color: CHART_COLORS.coating },
+      {
+        name: language === "ar" ? "العدسات" : "Lenses",
+        sales: lensSales,
+        color: CHART_COLORS.lens,
+      },
+      {
+        name: language === "ar" ? "الإطارات" : "Frames",
+        sales: frameSales,
+        color: CHART_COLORS.frame,
+      },
+      {
+        name: language === "ar" ? "الطلاءات" : "Coatings",
+        sales: coatingSales,
+        color: CHART_COLORS.coating,
+      },
     ]);
-    
+
     setTotalSales(total);
     setTotalRefunds(refundTotal);
     setNetRevenue(total - refundTotal);
     setTransactionCount(filteredInvoices.length);
     setRefundCount(filteredRefunds.length);
-    
-    const numberOfDays = Math.max(1, Math.ceil(
-      (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
-    ));
+
+    const numberOfDays = Math.max(
+      1,
+      Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24))
+    );
     setAverageDailySales((total - refundTotal) / numberOfDays);
-  }, [date, invoices, refunds, language]);
-  
+  }, [date, invoices, refundedInvoices, language]);
+
   const handleTimeRangeChange = (value: "week" | "month" | "custom") => {
     setSelectedTimeRange(value);
   };
-  
+
   const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
     if (newDateRange) {
       setDate(newDateRange);
       setSelectedTimeRange("custom");
     }
   };
-  
+
   const handlePrintReport = () => {
     const { language } = useLanguageStore();
-    
-    const timeRangeText = language === 'ar' ? 'الفترة الزمنية | Time Period' : 'Time Period | الفترة الزمنية';
-    const dateRange = language === 'ar' ? 'نطاق التاريخ | Date Range' : 'Date Range | نطاق التاريخ';
-    const pageTitle = language === 'ar' ? 'تقرير التحليل المقارن | Comparative Analysis Report' : 'Comparative Analysis Report | تقرير التحليل المقارن';
-    
+
+    const timeRangeText =
+      language === "ar"
+        ? "الفترة الزمنية | Time Period"
+        : "Time Period | الفترة الزمنية";
+    const dateRange =
+      language === "ar"
+        ? "نطاق التاريخ | Date Range"
+        : "Date Range | نطاق التاريخ";
+    const pageTitle =
+      language === "ar"
+        ? "تقرير التحليل المقارن | Comparative Analysis Report"
+        : "Comparative Analysis Report | تقرير التحليل المقارن";
+
     const storeInfo = `
       <div class="store-header">
         <div class="store-logo">
-          <img src="${STORE_INFO.logo}" alt="${STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}" />
+          <img src="${STORE_INFO.logo}" alt="${
+      STORE_INFO.name[language === "ar" ? "ar" : "en"]
+    }" />
         </div>
         <div class="store-info">
-          <p class="store-name"><strong>${STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}</strong></p>
-          <p class="store-address">${STORE_INFO.address[language === 'ar' ? 'ar' : 'en']}</p>
+          <p class="store-name"><strong>${
+            STORE_INFO.name[language === "ar" ? "ar" : "en"]
+          }</strong></p>
+          <p class="store-address">${
+            STORE_INFO.address[language === "ar" ? "ar" : "en"]
+          }</p>
           <p class="store-phone">${STORE_INFO.phone}</p>
         </div>
       </div>
     `;
-    
-    const dateRangeDisplay = date?.from && date?.to ? 
-      `${format(date.from, 'MM/dd/yyyy')} - ${format(date.to, 'MM/dd/yyyy')}` : 
-      language === 'ar' ? 'غير محدد | Not specified' : 'Not specified | غير محدد';
-    
+
+    const dateRangeDisplay =
+      date?.from && date?.to
+        ? `${format(date.from, "MM/dd/yyyy")} - ${format(
+            date.to,
+            "MM/dd/yyyy"
+          )}`
+        : language === "ar"
+        ? "غير محدد | Not specified"
+        : "Not specified | غير محدد";
+
     const productAnalysis = `
       <div class="summary-item-row">
-        <span class="summary-item-title">${language === 'ar' ? 'مبيعات العدسات | Lens Sales' : 'Lens Sales | مبيعات العدسات'}:</span>
-        <span class="summary-item-value">${productSalesData.find(item => 
-          item.name === translations.lensSales)?.sales.toFixed(2) || '0.00'} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
+        <span class="summary-item-title">${
+          language === "ar"
+            ? "مبيعات العدسات | Lens Sales"
+            : "Lens Sales | مبيعات العدسات"
+        }:</span>
+        <span class="summary-item-value">${
+          productSalesData
+            .find((item) => item.name === translations.lensSales)
+            ?.sales.toFixed(2) || "0.00"
+        } ${language === "ar" ? "د.ك | KWD" : "KWD | د.ك"}</span>
       </div>
       <div class="summary-item-row">
-        <span class="summary-item-title">${language === 'ar' ? 'مبيعات الإطارات | Frame Sales' : 'Frame Sales | مبيعات الإطارات'}:</span>
-        <span class="summary-item-value">${productSalesData.find(item => 
-          item.name === translations.frameSales)?.sales.toFixed(2) || '0.00'} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
+        <span class="summary-item-title">${
+          language === "ar"
+            ? "مبيعات الإطارات | Frame Sales"
+            : "Frame Sales | مبيعات الإطارات"
+        }:</span>
+        <span class="summary-item-value">${
+          productSalesData
+            .find((item) => item.name === translations.frameSales)
+            ?.sales.toFixed(2) || "0.00"
+        } ${language === "ar" ? "د.ك | KWD" : "KWD | د.ك"}</span>
       </div>
       <div class="summary-item-row">
-        <span class="summary-item-title">${language === 'ar' ? 'مبيعات الطلاءات | Coating Sales' : 'Coating Sales | مبيعات الطلاءات'}:</span>
-        <span class="summary-item-value">${productSalesData.find(item => 
-          item.name === translations.coatingSales)?.sales.toFixed(2) || '0.00'} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
+        <span class="summary-item-title">${
+          language === "ar"
+            ? "مبيعات الطلاءات | Coating Sales"
+            : "Coating Sales | مبيعات الطلاءات"
+        }:</span>
+        <span class="summary-item-value">${
+          productSalesData
+            .find((item) => item.name === translations.coatingSales)
+            ?.sales.toFixed(2) || "0.00"
+        } ${language === "ar" ? "د.ك | KWD" : "KWD | د.ك"}</span>
       </div>
     `;
-    
+
     const refundAnalysis = `
-      <div class="section-title">${language === 'ar' ? 'معلومات المستردات | Refund Information' : 'Refund Information | معلومات المستردات'}</div>
+      <div class="section-title">${
+        language === "ar"
+          ? "معلومات المستردات | Refund Information"
+          : "Refund Information | معلومات المستردات"
+      }</div>
       <div class="summary-item">
         <div class="summary-item-row">
-          <span class="summary-item-title">${language === 'ar' ? 'إجمالي المستردات | Total Refunds' : 'Total Refunds | إجمالي المستردات'}:</span>
-          <span class="summary-item-value">${totalRefunds.toFixed(2)} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
+          <span class="summary-item-title">${
+            language === "ar"
+              ? "إجمالي المستردات | Total Refunds"
+              : "Total Refunds | إجمالي المستردات"
+          }:</span>
+          <span class="summary-item-value">${totalRefunds.toFixed(2)} ${
+      language === "ar" ? "د.ك | KWD" : "KWD | د.ك"
+    }</span>
         </div>
         <div class="summary-item-row">
-          <span class="summary-item-title">${language === 'ar' ? 'عدد المستردات | Refund Count' : 'Refund Count | عدد المستردات'}:</span>
+          <span class="summary-item-title">${
+            language === "ar"
+              ? "عدد المستردات | Refund Count"
+              : "Refund Count | عدد المستردات"
+          }:</span>
           <span class="summary-item-value">${refundCount}</span>
         </div>
       </div>
     `;
-    
+
     const reportContent = `
       ${storeInfo}
       
       <div class="report-header">
         <div class="report-title">${pageTitle}</div>
-        <div class="report-date">${language === 'ar' ? 'تاريخ الطباعة | Print Date' : 'Print Date | تاريخ الطباعة'}: ${format(new Date(), 'MM/dd/yyyy')}</div>
+        <div class="report-date">${
+          language === "ar"
+            ? "تاريخ الطباعة | Print Date"
+            : "Print Date | تاريخ الطباعة"
+        }: ${format(new Date(), "MM/dd/yyyy")}</div>
       </div>
       
       <div class="summary-section">
-        <div class="section-title">${language === 'ar' ? 'معلومات التقرير | Report Information' : 'Report Information | معلومات التقرير'}</div>
+        <div class="section-title">${
+          language === "ar"
+            ? "معلومات التقرير | Report Information"
+            : "Report Information | معلومات التقرير"
+        }</div>
         <div class="summary-item">
           <div class="summary-item-row">
             <span class="summary-item-title">${timeRangeText}:</span>
@@ -295,22 +552,48 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
       <div class="divider"></div>
       
       <div class="summary-section">
-        <div class="section-title">${language === 'ar' ? 'ملخص المبيعات | Sales Summary' : 'Sales Summary | ملخص المبيعات'}</div>
+        <div class="section-title">${
+          language === "ar"
+            ? "ملخص المبيعات | Sales Summary"
+            : "Sales Summary | ملخص المبيعات"
+        }</div>
         <div class="summary-item">
           <div class="summary-item-row">
-            <span class="summary-item-title">${language === 'ar' ? 'إجمالي المبيعات | Total Sales' : 'Total Sales | إجمالي المبيعات'}:</span>
-            <span class="summary-item-value">${totalSales.toFixed(2)} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
+            <span class="summary-item-title">${
+              language === "ar"
+                ? "إجمالي المبيعات | Total Sales"
+                : "Total Sales | إجمالي المبيعات"
+            }:</span>
+            <span class="summary-item-value">${totalSales.toFixed(2)} ${
+      language === "ar" ? "د.ك | KWD" : "KWD | د.ك"
+    }</span>
           </div>
-          <div class="summary-item-row highlight-row">
-            <span class="summary-item-title">${language === 'ar' ? 'صافي الإيرادات | Net Revenue' : 'Net Revenue | صافي الإيرادات'}:</span>
-            <span class="summary-item-value">${netRevenue.toFixed(2)} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
+          <div className="summary-item-row highlight-row">
+            <span class="summary-item-title">${
+              language === "ar"
+                ? "صافي الإيرادات | Net Revenue"
+                : "Net Revenue | صافي الإيرادات"
+            }:</span>
+            <span class="summary-item-value">${netRevenue.toFixed(2)} ${
+      language === "ar" ? "د.ك | KWD" : "KWD | د.ك"
+    }</span>
           </div>
           <div class="summary-item-row">
-            <span class="summary-item-title">${language === 'ar' ? 'متوسط ​​المبيعات اليومي | Average Daily Sales' : 'Average Daily Sales | متوسط ​​المبيعات اليومي'}:</span>
-            <span class="summary-item-value">${averageDailySales.toFixed(2)} ${language === 'ar' ? 'د.ك | KWD' : 'KWD | د.ك'}</span>
+            <span class="summary-item-title">${
+              language === "ar"
+                ? "متوسط ​​المبيعات اليومي | Average Daily Sales"
+                : "Average Daily Sales | متوسط ​​المبيعات اليومي"
+            }:</span>
+            <span class="summary-item-value">${averageDailySales.toFixed(2)} ${
+      language === "ar" ? "د.ك | KWD" : "KWD | د.ك"
+    }</span>
           </div>
           <div class="summary-item-row">
-            <span class="summary-item-title">${language === 'ar' ? 'عدد المعاملات | Transaction Count' : 'Transaction Count | عدد المعاملات'}:</span>
+            <span class="summary-item-title">${
+              language === "ar"
+                ? "عدد المعاملات | Transaction Count"
+                : "Transaction Count | عدد المعاملات"
+            }:</span>
             <span class="summary-item-value">${transactionCount}</span>
           </div>
         </div>
@@ -325,19 +608,25 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
       <div class="divider"></div>
       
       <div class="summary-section">
-        <div class="section-title">${language === 'ar' ? 'تحليل المنتج | Product Analysis' : 'Product Analysis | تحليل المنتج'}</div>
+        <div class="section-title">${
+          language === "ar"
+            ? "تحليل المنتج | Product Analysis"
+            : "Product Analysis | تحليل المنتج"
+        }</div>
         <div class="summary-item">
           ${productAnalysis}
         </div>
       </div>
       
       <div class="footer">
-        <p>${language === 'ar' 
-          ? `© ${new Date().getFullYear()} نظارات المعين - جميع الحقوق محفوظة | Moein Optical - All rights reserved`
-          : `© ${new Date().getFullYear()} Moein Optical - All rights reserved | نظارات المعين - جميع الحقوق محفوظة`}</p>
+        <p>${
+          language === "ar"
+            ? `© ${new Date().getFullYear()} نظارات المعين - جميع الحقوق محفوظة | Moein Optical - All rights reserved`
+            : `© ${new Date().getFullYear()} Moein Optical - All rights reserved | نظارات المعين - جميع الحقوق محفوظة`
+        }</p>
       </div>
     `;
-    
+
     const printCss = `
       <style>
         @page {
@@ -483,30 +772,34 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
         }
       </style>
     `;
-    
+
     PrintService.printReport(reportContent + printCss, pageTitle, () => {
-      toast.success(language === 'ar' ? 'تم إرسال التقرير للطباعة' : 'Report sent to printer');
+      toast.success(
+        language === "ar"
+          ? "تم إرسال التقرير للطباعة"
+          : "Report sent to printer"
+      );
     });
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(language === 'ar' ? 'ar-KW' : 'en-KW', { 
-      style: 'currency', 
-      currency: 'KWD',
-      maximumFractionDigits: 2 
+    return new Intl.NumberFormat(language === "ar" ? "ar-KW" : "en-KW", {
+      style: "currency",
+      currency: "KWD",
+      maximumFractionDigits: 2,
     }).format(value);
   };
-  
+
   const handleBarClick = (data: any, index: number) => {
     setSelectedBarIndex(index === selectedBarIndex ? -1 : index);
   };
-  
+
   const hasData = salesData.length > 0;
-  
+
   return (
-    <div 
-      className={`space-y-4 ${className}`} 
-      style={{ direction: isRtl ? 'rtl' : 'ltr' }}
+    <div
+      className={`space-y-4 ${className}`}
+      style={{ direction: isRtl ? "rtl" : "ltr" }}
     >
       <Card>
         <CardHeader className="pb-3">
@@ -517,25 +810,32 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
             </span>
             <div className="hidden sm:flex items-center text-sm text-muted-foreground gap-1">
               <Store className="h-4 w-4" />
-              <span>{STORE_INFO.name[language === 'ar' ? 'ar' : 'en']}</span>
+              <span>{STORE_INFO.name[language === "ar" ? "ar" : "en"]}</span>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="pb-3">
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <div className="w-full sm:w-auto">
-              <Select value={selectedTimeRange} onValueChange={handleTimeRangeChange}>
+              <Select
+                value={selectedTimeRange}
+                onValueChange={handleTimeRangeChange}
+              >
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder={translations.timeRange} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="week">{translations.lastWeek}</SelectItem>
-                  <SelectItem value="month">{translations.lastMonth}</SelectItem>
-                  <SelectItem value="custom">{translations.customRange}</SelectItem>
+                  <SelectItem value="month">
+                    {translations.lastMonth}
+                  </SelectItem>
+                  <SelectItem value="custom">
+                    {translations.customRange}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="w-full sm:w-auto">
               <DatePicker
                 date={date}
@@ -544,240 +844,280 @@ const ComparativeAnalysis: React.FC<ComparativeAnalysisProps> = ({ className }) 
                 className="w-full sm:w-auto"
               />
             </div>
-            
+
             <div className="w-full sm:w-auto sm:ml-auto">
-              <PrintReportButton 
-                onPrint={handlePrintReport} 
+              <PrintReportButton
+                onPrint={handlePrintReport}
                 className="w-full sm:w-auto"
               />
             </div>
           </div>
         </CardContent>
       </Card>
-      
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="h-5 w-5" />
-            {translations.totalSales}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="p-4 border rounded-lg bg-white shadow-sm">
-              <p className="text-sm font-semibold mb-1">{translations.totalSales}</p>
-              <p className="text-3xl font-bold">
-                {formatCurrency(totalSales)}
-              </p>
-            </div>
-            <div className="p-4 border rounded-lg bg-white shadow-sm">
-              <p className="text-sm font-semibold mb-1">{translations.averageDailySales}</p>
-              <p className="text-3xl font-bold">
-                {formatCurrency(averageDailySales)}
-              </p>
-            </div>
-            <div className="p-4 border rounded-lg bg-white shadow-sm">
-              <p className="text-sm font-semibold mb-1">{translations.transactionCount}</p>
-              <p className="text-3xl font-bold">{transactionCount}</p>
-            </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-10 w-10 animate-spin text-primary mb-2" />
+            <p className="text-muted-foreground">
+              {language === "ar" ? "جاري تحميل البيانات..." : "Loading data..."}
+            </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 border rounded-lg bg-white shadow-sm border-red-200">
-              <div className="flex items-center gap-1 text-sm font-semibold mb-1 text-red-600">
-                <RefreshCcw className="h-4 w-4" />
-                <p>{translations.totalRefunds}</p>
+        </div>
+      ) : (
+        <>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <Receipt className="h-5 w-5" />
+                {translations.totalSales}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="p-4 border rounded-lg bg-white shadow-sm">
+                  <p className="text-sm font-semibold mb-1">
+                    {translations.totalSales}
+                  </p>
+                  <p className="text-3xl font-bold">
+                    {formatCurrency(totalSales)}
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg bg-white shadow-sm">
+                  <p className="text-sm font-semibold mb-1">
+                    {translations.averageDailySales}
+                  </p>
+                  <p className="text-3xl font-bold">
+                    {formatCurrency(averageDailySales)}
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg bg-white shadow-sm">
+                  <p className="text-sm font-semibold mb-1">
+                    {translations.transactionCount}
+                  </p>
+                  <p className="text-3xl font-bold">{transactionCount}</p>
+                </div>
               </div>
-              <p className="text-3xl font-bold text-red-600">
-                -{formatCurrency(totalRefunds)}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">{translations.refundCount}: {refundCount}</p>
-            </div>
-            <div className="md:col-span-2 p-4 border rounded-lg bg-white shadow-sm border-green-200">
-              <div className="flex items-center gap-1 text-sm font-semibold mb-1 text-green-600">
-                <Receipt className="h-4 w-4" />
-                <p>{translations.netRevenue}</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 border rounded-lg bg-white shadow-sm border-red-200">
+                  <div className="flex items-center gap-1 text-sm font-semibold mb-1 text-red-600">
+                    <RefreshCcw className="h-4 w-4" />
+                    <p>{translations.totalRefunds}</p>
+                  </div>
+                  <p className="text-3xl font-bold text-red-600">
+                    -{formatCurrency(totalRefunds)}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {translations.refundCount}: {refundCount}
+                  </p>
+                </div>
+                <div className="md:col-span-2 p-4 border rounded-lg bg-white shadow-sm border-green-200">
+                  <div className="flex items-center gap-1 text-sm font-semibold mb-1 text-green-600">
+                    <Receipt className="h-4 w-4" />
+                    <p>{translations.netRevenue}</p>
+                  </div>
+                  <p className="text-3xl font-bold text-green-600">
+                    {formatCurrency(netRevenue)}
+                  </p>
+                </div>
               </div>
-              <p className="text-3xl font-bold text-green-600">
-                {formatCurrency(netRevenue)}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <LineChartIcon className="h-5 w-5" />
-                {translations.salesTrend}
-              </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Info className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{language === 'ar' 
-                      ? 'انقر على النقاط لعرض التفاصيل' 
-                      : 'Click on dots to see details'}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {hasData ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart 
-                  data={salesData}
-                  margin={{ top: 20, right: 30, left: 0, bottom: 30 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="displayDate" 
-                    angle={-45} 
-                    textAnchor="end" 
-                    height={60}
-                    tickMargin={15}
-                    interval={0}
-                    reversed={isRtl}
-                  />
-                  <YAxis />
-                  <RechartsTooltip 
-                    formatter={(value: number) => formatCurrency(value)}
-                    labelFormatter={(label) => format(new Date(salesData.find(item => item.displayDate === label)?.date || new Date()), 'PPP')}
-                  />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="sales" 
-                    name={language === 'ar' ? 'المبيعات' : 'Sales'}
-                    stroke={CHART_COLORS.sales}
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 8, onClick: (e: any) => console.log('clicked', e) }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="refunds" 
-                    name={language === 'ar' ? 'المستردات' : 'Refunds'}
-                    stroke={CHART_COLORS.refunds} 
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="net" 
-                    name={language === 'ar' ? 'صافي' : 'Net'}
-                    stroke="#6366f1" 
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[300px]">
-                <p className="text-center text-muted-foreground">
-                  {translations.noDataAvailable}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                {translations.productSales}
-              </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Info className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{language === 'ar' 
-                      ? 'انقر على الأعمدة لعرض التفاصيل' 
-                      : 'Click on bars to see details'}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {productSalesData.length > 0 && productSalesData.some(item => item.sales > 0) ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart 
-                  data={productSalesData} 
-                  margin={{ top: 20, right: 30, left: 0, bottom: 30 }}
-                  layout={isRtl ? "vertical" : "horizontal"}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  {isRtl ? (
-                    <>
-                      <YAxis 
-                        dataKey="name" 
-                        type="category" 
-                        axisLine={false}
-                        tickLine={false}
-                        width={80}
-                      />
-                      <XAxis 
-                        type="number"
-                        domain={[0, 'dataMax']}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <XAxis 
-                        dataKey="name" 
-                        axisLine={false}
-                        tickLine={false}
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <LineChartIcon className="h-5 w-5" />
+                    {translations.salesTrend}
+                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Info className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          {language === "ar"
+                            ? "انقر على النقاط لعرض التفاصيل"
+                            : "Click on dots to see details"}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {hasData ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart
+                      data={salesData}
+                      margin={{ top: 20, right: 30, left: 0, bottom: 30 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis
+                        dataKey="displayDate"
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                        tickMargin={15}
                         interval={0}
+                        reversed={isRtl}
                       />
                       <YAxis />
-                    </>
-                  )}
-                  <RechartsTooltip 
-                    formatter={(value: number) => formatCurrency(value)}
-                  />
-                  <Bar 
-                    dataKey="sales" 
-                    name={language === 'ar' ? 'المبيعات' : 'Sales'}
-                    radius={[4, 4, 0, 0]}
-                    onClick={handleBarClick}
-                  >
-                    {productSalesData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={entry.color}
-                        stroke={entry.color}
-                        opacity={selectedBarIndex === -1 || selectedBarIndex === index ? 1 : 0.5}
-                        strokeWidth={selectedBarIndex === index ? 2 : 0}
+                      <RechartsTooltip
+                        formatter={(value: number) => formatCurrency(value)}
+                        labelFormatter={(label) =>
+                          format(
+                            new Date(
+                              salesData.find(
+                                (item) => item.displayDate === label
+                              )?.date || new Date()
+                            ),
+                            "PPP"
+                          )
+                        }
                       />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[300px]">
-                <p className="text-center text-muted-foreground">
-                  {translations.noDataAvailable}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="sales"
+                        name={language === "ar" ? "المبيعات" : "Sales"}
+                        stroke={CHART_COLORS.sales}
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                        activeDot={{
+                          r: 8,
+                          onClick: (e: any) => console.log("clicked", e),
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="refunds"
+                        name={language === "ar" ? "المستردات" : "Refunds"}
+                        stroke={CHART_COLORS.refunds}
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="net"
+                        name={language === "ar" ? "صافي" : "Net"}
+                        stroke="#6366f1"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-[300px]">
+                    <p className="text-center text-muted-foreground">
+                      {translations.noDataAvailable}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    {translations.productSales}
+                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Info className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          {language === "ar"
+                            ? "انقر على الأعمدة لعرض التفاصيل"
+                            : "Click on bars to see details"}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {productSalesData.length > 0 &&
+                productSalesData.some((item) => item.sales > 0) ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                      data={productSalesData}
+                      margin={{ top: 20, right: 30, left: 0, bottom: 30 }}
+                      layout={isRtl ? "vertical" : "horizontal"}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      {isRtl ? (
+                        <>
+                          <YAxis
+                            dataKey="name"
+                            type="category"
+                            axisLine={false}
+                            tickLine={false}
+                            width={80}
+                          />
+                          <XAxis type="number" domain={[0, "dataMax"]} />
+                        </>
+                      ) : (
+                        <>
+                          <XAxis
+                            dataKey="name"
+                            axisLine={false}
+                            tickLine={false}
+                            interval={0}
+                          />
+                          <YAxis />
+                        </>
+                      )}
+                      <RechartsTooltip
+                        formatter={(value: number) => formatCurrency(value)}
+                      />
+                      <Bar
+                        dataKey="sales"
+                        name={language === "ar" ? "المبيعات" : "Sales"}
+                        radius={[4, 4, 0, 0]}
+                        onClick={handleBarClick}
+                      >
+                        {productSalesData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry.color}
+                            stroke={entry.color}
+                            opacity={
+                              selectedBarIndex === -1 ||
+                              selectedBarIndex === index
+                                ? 1
+                                : 0.5
+                            }
+                            strokeWidth={selectedBarIndex === index ? 2 : 0}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-[300px]">
+                    <p className="text-center text-muted-foreground">
+                      {translations.noDataAvailable}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   );
 };
