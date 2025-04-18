@@ -329,4 +329,157 @@ export const getWorkOrderById = async (workOrderId: string) => {
     console.error('Error fetching work order:', error);
     return null;
   }
+};
+
+/**
+ * Get all unpaid invoices
+ */
+export const getUnpaidInvoices = async () => {
+  try {
+    // @ts-ignore: We know invoices exists in Supabase but TypeScript doesn't
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('is_paid', false)
+      .order('created_at', { ascending: false });
+      
+    if (error) throw error;
+    
+    // Parse JSON strings into objects
+    return data.map(invoice => ({
+      ...invoice,
+      contact_lens_items: invoice.contact_lens_items ? JSON.parse(invoice.contact_lens_items) : undefined,
+      contact_lens_rx: invoice.contact_lens_rx ? JSON.parse(invoice.contact_lens_rx) : undefined,
+      payments: invoice.payments ? JSON.parse(invoice.payments) : []
+    }));
+  } catch (error) {
+    console.error('Error fetching unpaid invoices:', error);
+    toast.error('Failed to fetch unpaid invoices');
+    return [];
+  }
+};
+
+/**
+ * Add a payment to an invoice
+ */
+export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: number, method: string, authNumber?: string }) => {
+  try {
+    // First get the current invoice
+    // @ts-ignore: We know invoices exists in Supabase but TypeScript doesn't
+    const { data: invoice, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('invoice_id', invoiceId)
+      .single();
+      
+    if (fetchError) {
+      console.error('Error fetching invoice:', fetchError);
+      throw fetchError;
+    }
+    if (!invoice) {
+      console.error('Invoice not found');
+      throw new Error('Invoice not found');
+    }
+    
+    // Create payment object with date
+    const newPayment = {
+      ...payment,
+      date: new Date().toISOString()
+    };
+    
+    // Parse existing payments or create empty array
+    let currentPayments = [];
+    try {
+      if (invoice.payments) {
+        currentPayments = typeof invoice.payments === 'string' 
+          ? JSON.parse(invoice.payments) 
+          : (Array.isArray(invoice.payments) ? invoice.payments : []);
+      }
+    } catch (e) {
+      console.error('Error parsing payments:', e);
+      // If parsing fails, just use an empty array
+      currentPayments = [];
+    }
+    
+    const updatedPayments = [...currentPayments, newPayment];
+    
+    // Calculate new deposit and remaining amounts
+    const currentDeposit = Number(invoice.deposit) || 0;
+    const currentTotal = Number(invoice.total) || 0;
+    const newDeposit = currentDeposit + payment.amount;
+    const newRemaining = Math.max(0, currentTotal - newDeposit);
+    const isPaid = newRemaining <= 0;
+    
+    console.log('Updating invoice payment:', {
+      invoiceId,
+      currentDeposit,
+      newDeposit,
+      currentTotal,
+      newRemaining,
+      isPaid,
+      paymentsCount: updatedPayments.length
+    });
+    
+    // Update the invoice
+    // @ts-ignore: We know invoices exists in Supabase but TypeScript doesn't
+    const { error: updateError } = await supabase
+      .from('invoices')
+      .update({
+        payments: JSON.stringify(updatedPayments),
+        deposit: newDeposit,
+        remaining: newRemaining,
+        is_paid: isPaid
+      })
+      .eq('invoice_id', invoiceId);
+      
+    if (updateError) {
+      console.error('Error updating invoice:', updateError);
+      throw updateError;
+    }
+    
+    // If this is associated with a work order, update its paid status too
+    if (invoice.work_order_id) {
+      // @ts-ignore: We know work_orders exists in Supabase but TypeScript doesn't
+      const { error: workOrderError } = await supabase
+        .from('work_orders')
+        .update({
+          is_paid: isPaid
+        })
+        .eq('work_order_id', invoice.work_order_id);
+        
+      if (workOrderError) {
+        console.error('Error updating work order:', workOrderError);
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error adding payment to invoice:', error);
+    toast.error('Failed to add payment to invoice');
+    return false;
+  }
+};
+
+/**
+ * Update invoice payment status
+ */
+export const updateInvoicePaymentStatus = async (invoiceId: string, isPaid: boolean) => {
+  try {
+    // @ts-ignore: We know invoices exists in Supabase but TypeScript doesn't
+    const { error } = await supabase
+      .from('invoices')
+      .update({
+        is_paid: isPaid,
+        remaining: isPaid ? 0 : undefined
+      })
+      .eq('invoice_id', invoiceId);
+      
+    if (error) throw error;
+    
+    return true;
+  } catch (error) {
+    console.error('Error updating invoice payment status:', error);
+    toast.error('Failed to update invoice payment status');
+    return false;
+  }
 }; 

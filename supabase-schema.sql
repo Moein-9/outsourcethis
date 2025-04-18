@@ -211,6 +211,7 @@ CREATE TABLE IF NOT EXISTS public.invoices (
   deposit NUMERIC(10, 3) DEFAULT 0,
   total NUMERIC(10, 3) NOT NULL,
   remaining NUMERIC(10, 3),
+  payments JSONB DEFAULT '[]'::jsonb,
   
   payment_method TEXT NOT NULL,
   auth_number TEXT,
