@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { RxData } from "@/store/patientStore";
@@ -13,12 +12,15 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Save, Glasses, Eye, AlertTriangle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface AddRxDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (rxData: RxData) => void;
   initialRx?: RxData;
+  patientId: string;
 }
 
 export const AddRxDialog: React.FC<AddRxDialogProps> = ({
@@ -26,9 +28,11 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
   onClose,
   onSave,
   initialRx,
+  patientId,
 }) => {
   const { language, t } = useLanguageStore();
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [rxData, setRxData] = useState<RxData>(
     initialRx || {
       sphereOD: "",
@@ -46,27 +50,31 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
 
   const [validationErrors, setValidationErrors] = useState({
     rightEye: { cylinderAxisError: false },
-    leftEye: { cylinderAxisError: false }
+    leftEye: { cylinderAxisError: false },
   });
 
   // Validate cylinder/axis relationship on component mount and when rxData changes
   useEffect(() => {
-    validateCylinderAxis('rightEye', rxData.cylOD, rxData.axisOD);
-    validateCylinderAxis('leftEye', rxData.cylOS, rxData.axisOS);
+    validateCylinderAxis("rightEye", rxData.cylOD, rxData.axisOD);
+    validateCylinderAxis("leftEye", rxData.cylOS, rxData.axisOS);
   }, [rxData]);
 
   // Validate that if cylinder has a value, axis must also have a value
-  const validateCylinderAxis = (eye: 'rightEye' | 'leftEye', cylinder: string, axis: string) => {
+  const validateCylinderAxis = (
+    eye: "rightEye" | "leftEye",
+    cylinder: string,
+    axis: string
+  ) => {
     // If cylinder has a non-empty value, axis must also have a non-empty value
     const hasCylinder = cylinder !== "";
     const hasAxis = axis !== "";
-    
-    setValidationErrors(prev => ({
+
+    setValidationErrors((prev) => ({
       ...prev,
       [eye]: {
         ...prev[eye],
-        cylinderAxisError: hasCylinder && !hasAxis
-      }
+        cylinderAxisError: hasCylinder && !hasAxis,
+      },
     }));
   };
 
@@ -77,24 +85,84 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
     }));
 
     // Validate cylinder/axis relationship on change
-    if (field === 'cylOD' || field === 'axisOD') {
-      validateCylinderAxis('rightEye', field === 'cylOD' ? value : rxData.cylOD, field === 'axisOD' ? value : rxData.axisOD);
-    } else if (field === 'cylOS' || field === 'axisOS') {
-      validateCylinderAxis('leftEye', field === 'cylOS' ? value : rxData.cylOS, field === 'axisOS' ? value : rxData.axisOS);
+    if (field === "cylOD" || field === "axisOD") {
+      validateCylinderAxis(
+        "rightEye",
+        field === "cylOD" ? value : rxData.cylOD,
+        field === "axisOD" ? value : rxData.axisOD
+      );
+    } else if (field === "cylOS" || field === "axisOS") {
+      validateCylinderAxis(
+        "leftEye",
+        field === "cylOS" ? value : rxData.cylOS,
+        field === "axisOS" ? value : rxData.axisOS
+      );
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Check for validation errors before saving
-    if (validationErrors.rightEye.cylinderAxisError || validationErrors.leftEye.cylinderAxisError) {
+    if (
+      validationErrors.rightEye.cylinderAxisError ||
+      validationErrors.leftEye.cylinderAxisError
+    ) {
       return; // Prevent saving if there are validation errors
     }
-    
-    onSave({
-      ...rxData,
-      createdAt: new Date().toISOString()
-    });
-    onClose();
+
+    try {
+      setIsSubmitting(true);
+
+      // Save to Supabase
+      const prescriptionData = {
+        patient_id: patientId,
+        prescription_date: new Date().toISOString().split("T")[0],
+        od_sph: rxData.sphereOD || null,
+        od_cyl: rxData.cylOD || null,
+        od_axis: rxData.axisOD || null,
+        od_add: rxData.addOD || null,
+        od_pd: rxData.pdRight || null,
+        os_sph: rxData.sphereOS || null,
+        os_cyl: rxData.cylOS || null,
+        os_axis: rxData.axisOS || null,
+        os_add: rxData.addOS || null,
+        os_pd: rxData.pdLeft || null,
+      };
+
+      const { data, error } = await supabase
+        .from("glasses_prescriptions")
+        .insert(prescriptionData)
+        .select();
+
+      if (error) {
+        console.error("Error saving prescription:", error);
+        toast.error(
+          language === "ar"
+            ? "حدث خطأ أثناء حفظ الوصفة"
+            : "Error saving prescription"
+        );
+        return;
+      }
+
+      // Still call the original onSave function for backward compatibility
+      onSave({
+        ...rxData,
+        createdAt: new Date().toISOString(),
+      });
+
+      toast.success(
+        language === "ar"
+          ? "تم حفظ الوصفة بنجاح"
+          : "Prescription saved successfully"
+      );
+      onClose();
+    } catch (error) {
+      console.error("Error in save process:", error);
+      toast.error(
+        language === "ar" ? "حدث خطأ غير متوقع" : "An unexpected error occurred"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Generate values for dropdowns
@@ -146,8 +214,9 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
   const pdValues = generatePdValues();
 
   // Check if there are any validation errors
-  const hasValidationErrors = validationErrors.rightEye.cylinderAxisError || 
-                              validationErrors.leftEye.cylinderAxisError;
+  const hasValidationErrors =
+    validationErrors.rightEye.cylinderAxisError ||
+    validationErrors.leftEye.cylinderAxisError;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -184,18 +253,24 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                   <tr className="border-b border-indigo-100 bg-indigo-50/50">
                     <td className="p-2 font-medium text-indigo-800 flex items-center gap-1.5">
                       <Eye className="h-3.5 w-3.5 text-indigo-600" />
-                      {language === "ar" ? "العين اليمنى (OD)" : "Right Eye (OD)"}
+                      {language === "ar"
+                        ? "العين اليمنى (OD)"
+                        : "Right Eye (OD)"}
                     </td>
                     <td className="p-2">
                       <select
                         className="w-full h-8 text-xs rounded border border-indigo-200 bg-white px-2 ltr"
                         value={rxData.sphereOD}
-                        onChange={(e) => handleChange("sphereOD", e.target.value)}
+                        onChange={(e) =>
+                          handleChange("sphereOD", e.target.value)
+                        }
                         dir="ltr"
                       >
                         <option value="">-</option>
                         {sphValues.map((val) => (
-                          <option key={`sph-od-${val}`} value={val}>{val}</option>
+                          <option key={`sph-od-${val}`} value={val}>
+                            {val}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -208,20 +283,28 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                       >
                         <option value="">-</option>
                         {cylValues.map((val) => (
-                          <option key={`cyl-od-${val}`} value={val}>{val}</option>
+                          <option key={`cyl-od-${val}`} value={val}>
+                            {val}
+                          </option>
                         ))}
                       </select>
                     </td>
                     <td className="p-2">
                       <select
-                        className={`w-full h-8 text-xs rounded border ${validationErrors.rightEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-indigo-200 bg-white'} px-2 ltr`}
+                        className={`w-full h-8 text-xs rounded border ${
+                          validationErrors.rightEye.cylinderAxisError
+                            ? "border-red-500 bg-red-50"
+                            : "border-indigo-200 bg-white"
+                        } px-2 ltr`}
                         value={rxData.axisOD}
                         onChange={(e) => handleChange("axisOD", e.target.value)}
                         dir="ltr"
                       >
                         <option value="">-</option>
                         {axisValues.map((val) => (
-                          <option key={`axis-od-${val}`} value={val}>{val}</option>
+                          <option key={`axis-od-${val}`} value={val}>
+                            {val}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -234,7 +317,9 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                       >
                         <option value="">-</option>
                         {addValues.map((val) => (
-                          <option key={`add-od-${val}`} value={val}>{val}</option>
+                          <option key={`add-od-${val}`} value={val}>
+                            {val}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -242,33 +327,43 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                       <select
                         className="w-full h-8 text-xs rounded border border-indigo-200 bg-white px-2 ltr"
                         value={rxData.pdRight}
-                        onChange={(e) => handleChange("pdRight", e.target.value)}
+                        onChange={(e) =>
+                          handleChange("pdRight", e.target.value)
+                        }
                         dir="ltr"
                       >
                         <option value="">-</option>
                         {pdValues.map((val) => (
-                          <option key={`pd-right-${val}`} value={val}>{val}</option>
+                          <option key={`pd-right-${val}`} value={val}>
+                            {val}
+                          </option>
                         ))}
                       </select>
                     </td>
                   </tr>
-                  
+
                   {/* Left Eye (OS) Row */}
                   <tr className="bg-purple-50/50">
                     <td className="p-2 font-medium text-purple-800 flex items-center gap-1.5">
                       <Eye className="h-3.5 w-3.5 text-purple-600" />
-                      {language === "ar" ? "العين اليسرى (OS)" : "Left Eye (OS)"}
+                      {language === "ar"
+                        ? "العين اليسرى (OS)"
+                        : "Left Eye (OS)"}
                     </td>
                     <td className="p-2">
                       <select
                         className="w-full h-8 text-xs rounded border border-purple-200 bg-white px-2 ltr"
                         value={rxData.sphereOS}
-                        onChange={(e) => handleChange("sphereOS", e.target.value)}
+                        onChange={(e) =>
+                          handleChange("sphereOS", e.target.value)
+                        }
                         dir="ltr"
                       >
                         <option value="">-</option>
                         {sphValues.map((val) => (
-                          <option key={`sph-os-${val}`} value={val}>{val}</option>
+                          <option key={`sph-os-${val}`} value={val}>
+                            {val}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -281,20 +376,28 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                       >
                         <option value="">-</option>
                         {cylValues.map((val) => (
-                          <option key={`cyl-os-${val}`} value={val}>{val}</option>
+                          <option key={`cyl-os-${val}`} value={val}>
+                            {val}
+                          </option>
                         ))}
                       </select>
                     </td>
                     <td className="p-2">
                       <select
-                        className={`w-full h-8 text-xs rounded border ${validationErrors.leftEye.cylinderAxisError ? 'border-red-500 bg-red-50' : 'border-purple-200 bg-white'} px-2 ltr`}
+                        className={`w-full h-8 text-xs rounded border ${
+                          validationErrors.leftEye.cylinderAxisError
+                            ? "border-red-500 bg-red-50"
+                            : "border-purple-200 bg-white"
+                        } px-2 ltr`}
                         value={rxData.axisOS}
                         onChange={(e) => handleChange("axisOS", e.target.value)}
                         dir="ltr"
                       >
                         <option value="">-</option>
                         {axisValues.map((val) => (
-                          <option key={`axis-os-${val}`} value={val}>{val}</option>
+                          <option key={`axis-os-${val}`} value={val}>
+                            {val}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -307,7 +410,9 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                       >
                         <option value="">-</option>
                         {addValues.map((val) => (
-                          <option key={`add-os-${val}`} value={val}>{val}</option>
+                          <option key={`add-os-${val}`} value={val}>
+                            {val}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -320,7 +425,9 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                       >
                         <option value="">-</option>
                         {pdValues.map((val) => (
-                          <option key={`pd-left-${val}`} value={val}>{val}</option>
+                          <option key={`pd-left-${val}`} value={val}>
+                            {val}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -328,34 +435,45 @@ export const AddRxDialog: React.FC<AddRxDialogProps> = ({
                 </tbody>
               </table>
             </div>
-            
+
             {/* Validation error message */}
             {hasValidationErrors && (
               <div className="p-3 mt-2 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
                 <p className="text-red-700 text-sm">
-                  {t("axisValidationError") || "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required."}
+                  {t("axisValidationError") ||
+                    "The AXIS values you've inserted are not correct! If CYL value is provided, AXIS value is required."}
                 </p>
               </div>
             )}
           </div>
         </div>
-        
+
         <DialogFooter className="bg-gray-50 p-4 border-t flex justify-end gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={onClose}
             className="rounded-md border-gray-300 hover:bg-gray-100 transition-all"
           >
             {language === "ar" ? "إلغاء" : "Cancel"}
           </Button>
-          <Button 
+          <Button
             onClick={handleSave}
-            disabled={hasValidationErrors}
-            className={`rounded-md ${hasValidationErrors ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'} text-white transition-all`}
+            disabled={hasValidationErrors || isSubmitting}
+            className={`rounded-md ${
+              hasValidationErrors || isSubmitting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-indigo-600 hover:bg-indigo-700"
+            } text-white transition-all`}
           >
             <Save className="h-4 w-4 mr-2" />
-            {language === "ar" ? "حفظ الوصفة" : "Save Prescription"}
+            {isSubmitting
+              ? language === "ar"
+                ? "جاري الحفظ..."
+                : "Saving..."
+              : language === "ar"
+              ? "حفظ الوصفة"
+              : "Save Prescription"}
           </Button>
         </DialogFooter>
       </DialogContent>

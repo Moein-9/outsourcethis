@@ -893,6 +893,7 @@ export const PatientSearch: React.FC = () => {
             isOpen={isAddRxDialogOpen}
             onClose={() => setIsAddRxDialogOpen(false)}
             onSave={handleSaveRx}
+            patientId={selectedPatient.id}
             initialRx={
               patientDetails.glassesPrescriptions.length > 0
                 ? {
@@ -919,6 +920,7 @@ export const PatientSearch: React.FC = () => {
             isOpen={isAddContactLensRxDialogOpen}
             onClose={() => setIsAddContactLensRxDialogOpen(false)}
             onSave={handleSaveContactLensRx}
+            patientId={selectedPatient.id}
             initialRx={
               patientDetails.contactLensPrescriptions.length > 0
                 ? {
@@ -954,7 +956,7 @@ export const PatientSearch: React.FC = () => {
                           .os_base_curve || "",
                       dia:
                         patientDetails.contactLensPrescriptions[0]
-                          .os_diameter || "",
+                          .od_diameter || "",
                     },
                   }
                 : undefined
