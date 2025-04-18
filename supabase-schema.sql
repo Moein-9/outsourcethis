@@ -228,6 +228,7 @@ CREATE TABLE IF NOT EXISTS public.invoices (
   refund_reason TEXT,
   refund_method TEXT,
   refund_id TEXT,
+  staff_notes TEXT,
   
   -- Archive related fields
   is_archived BOOLEAN DEFAULT FALSE,
