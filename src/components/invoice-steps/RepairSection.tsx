@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
@@ -12,54 +11,64 @@ import { Wrench, Check } from "lucide-react";
 export const RepairSection: React.FC = () => {
   const { language } = useLanguageStore();
   const { setValue, getValues } = useInvoiceForm();
-  const [repairPrice, setRepairPrice] = useState<number>(getValues('repairPrice') || 0);
-  const [repairDescription, setRepairDescription] = useState<string>(getValues('repairDescription') || '');
-  const [repairType, setRepairType] = useState<string>(getValues('repairType') || '');
+  const [repairPrice, setRepairPrice] = useState<number>(
+    getValues("repairPrice") || 0
+  );
+  const [repairDescription, setRepairDescription] = useState<string>(
+    getValues("repairDescription") || ""
+  );
+  const [repairType, setRepairType] = useState<string>(
+    getValues("repairType") || ""
+  );
 
-  const isRtl = language === 'ar';
-  const textAlignClass = isRtl ? 'text-right' : 'text-left';
+  const isRtl = language === "ar";
+  const textAlignClass = isRtl ? "text-right" : "text-left";
 
   const handleRepairPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const price = parseFloat(e.target.value) || 0;
     setRepairPrice(price);
-    setValue('repairPrice', price);
-    setValue('servicePrice', price);
+    setValue("repairPrice", price);
+    setValue("servicePrice", price);
   };
 
   const handleRepairTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRepairType(e.target.value);
-    setValue('repairType', e.target.value);
-    setValue('serviceName', e.target.value);
+    setValue("repairType", e.target.value);
+    setValue("serviceName", e.target.value);
   };
 
-  const handleRepairDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleRepairDescriptionChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setRepairDescription(e.target.value);
-    setValue('repairDescription', e.target.value);
-    setValue('serviceDescription', e.target.value);
+    setValue("repairDescription", e.target.value);
+    setValue("serviceDescription", e.target.value);
   };
 
   const commonRepairs = [
-    { name: isRtl ? 'إصلاح الإطار' : 'Frame Repair', price: 5.000 },
-    { name: isRtl ? 'استبدال المسامير' : 'Screw Replacement', price: 2.500 },
-    { name: isRtl ? 'تعديل الإطار' : 'Frame Adjustment', price: 3.000 },
-    { name: isRtl ? 'إصلاح العدسة' : 'Lens Repair', price: 10.000 },
-    { name: isRtl ? 'تنظيف متخصص' : 'Professional Cleaning', price: 5.000 }
+    { name: isRtl ? "إصلاح الإطار" : "Frame Repair", price: 5.0 },
+    { name: isRtl ? "استبدال المسامير" : "Screw Replacement", price: 2.5 },
+    { name: isRtl ? "تعديل الإطار" : "Frame Adjustment", price: 3.0 },
+    { name: isRtl ? "إصلاح العدسة" : "Lens Repair", price: 10.0 },
+    { name: isRtl ? "تنظيف متخصص" : "Professional Cleaning", price: 5.0 },
   ];
 
-  const applyCommonRepair = (repair: { name: string, price: number }) => {
+  const applyCommonRepair = (repair: { name: string; price: number }) => {
     setRepairType(repair.name);
     setRepairPrice(repair.price);
-    setValue('repairType', repair.name);
-    setValue('repairPrice', repair.price);
-    setValue('serviceName', repair.name);
-    setValue('servicePrice', repair.price);
+    setValue("repairType", repair.name);
+    setValue("repairPrice", repair.price);
+    setValue("serviceName", repair.name);
+    setValue("servicePrice", repair.price);
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
       <Card className="border-2 border-purple-200">
         <CardHeader className="bg-purple-50">
-          <CardTitle className={`text-lg flex items-center gap-2 ${textAlignClass}`}>
+          <CardTitle
+            className={`text-lg flex items-center gap-2 ${textAlignClass}`}
+          >
             <Wrench className="w-5 h-5 text-purple-600" />
             {isRtl ? "خدمة الإصلاح" : "Repair Service"}
           </CardTitle>
@@ -68,15 +77,21 @@ export const RepairSection: React.FC = () => {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {commonRepairs.map((repair, index) => (
-                <Button 
+                <Button
                   key={index}
-                  variant="outline" 
-                  className={`p-3 h-auto ${repairType === repair.name ? 'bg-purple-100 border-purple-500' : ''}`}
+                  variant="outline"
+                  className={`p-3 h-auto ${
+                    repairType === repair.name
+                      ? "bg-purple-100 border-purple-500"
+                      : ""
+                  }`}
                   onClick={() => applyCommonRepair(repair)}
                 >
                   <div className="flex flex-col items-center gap-1 text-center">
                     <span className="font-medium text-sm">{repair.name}</span>
-                    <span className="text-purple-700 font-semibold">{repair.price.toFixed(3)} KWD</span>
+                    <span className="text-purple-700 font-semibold">
+                      {repair.price.toFixed(3)} KWD
+                    </span>
                     {repairType === repair.name && (
                       <Check className="w-4 h-4 text-purple-600" />
                     )}
@@ -102,7 +117,9 @@ export const RepairSection: React.FC = () => {
                 {isRtl ? "وصف الإصلاح" : "Repair Description"}
               </Label>
               <Textarea
-                placeholder={isRtl ? "أدخل تفاصيل الإصلاح" : "Enter repair details"}
+                placeholder={
+                  isRtl ? "أدخل تفاصيل الإصلاح" : "Enter repair details"
+                }
                 value={repairDescription}
                 onChange={handleRepairDescriptionChange}
                 rows={3}
@@ -118,7 +135,7 @@ export const RepairSection: React.FC = () => {
                 type="number"
                 step="0.001"
                 min="0"
-                value={repairPrice || ''}
+                value={repairPrice || ""}
                 onChange={handleRepairPriceChange}
                 className={textAlignClass}
               />
