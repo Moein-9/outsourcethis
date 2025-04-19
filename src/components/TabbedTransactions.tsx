@@ -457,35 +457,50 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
     const reason =
       language === "ar" ? "تم الأرشفة من قبل المستخدم" : "Archived by user";
 
+    // Handle case where workOrder might be a fallback object
+    const isWorkOrderValid = workOrder && workOrder.id;
+    const hasInvoiceId =
+      workOrder && (workOrder.invoiceId || workOrder.invoice_id);
+
+    console.log("Archiving with workOrder:", workOrder);
+    console.log(
+      "isWorkOrderValid:",
+      isWorkOrderValid,
+      "hasInvoiceId:",
+      hasInvoiceId
+    );
+
     // Update Supabase directly with database changes
     (async () => {
       try {
         // @ts-ignore: Suppressing all TypeScript errors for Supabase operations in this function
-        // Mark work order as archived
-        const { error: workOrderError } = await supabase
-          .from("work_orders")
-          .update({
-            is_archived: true,
-            archived_at: archivedAt,
-            archive_reason: reason,
-          })
-          .eq("id", workOrder.id);
 
-        if (workOrderError) {
-          throw new Error(
-            `Failed to archive work order: ${workOrderError.message}`
-          );
+        let successfulArchive = false;
+        let invoiceIdToArchive = null;
+
+        // First, determine the invoice ID if available
+        if (hasInvoiceId) {
+          // Use the invoice ID directly from the workOrder object
+          invoiceIdToArchive = workOrder.invoiceId || workOrder.invoice_id;
+        } else if (isWorkOrderValid) {
+          // Try to get the invoice ID from the database
+          const { data: workOrderData } = await supabase
+            .from("work_orders")
+            .select("invoice_id")
+            .eq("id", workOrder.id)
+            .single();
+
+          if (workOrderData?.invoice_id) {
+            invoiceIdToArchive = workOrderData.invoice_id;
+          }
         }
 
-        // Get the related invoice if any
-        const { data: workOrderData } = await supabase
-          .from("work_orders")
-          .select("invoice_id")
-          .eq("id", workOrder.id)
-          .single();
+        console.log("Determined invoiceIdToArchive:", invoiceIdToArchive);
 
-        // If there's a related invoice, archive it too
-        if (workOrderData?.invoice_id) {
+        // First archive the invoice if we found an ID
+        if (invoiceIdToArchive) {
+          console.log("Archiving invoice with ID:", invoiceIdToArchive);
+
           const { error: invoiceError } = await supabase
             .from("invoices")
             .update({
@@ -493,12 +508,50 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
               archived_at: archivedAt,
               archive_reason: reason,
             })
-            .eq("invoice_id", workOrderData.invoice_id);
+            .eq("invoice_id", invoiceIdToArchive);
 
           if (invoiceError) {
-            console.error("Error archiving related invoice:", invoiceError);
-            // Don't throw here to allow work order update to be considered successful
+            console.error("Error archiving invoice:", invoiceError);
+            // Continue to try to archive the work order even if invoice update fails
+          } else {
+            console.log("Successfully archived invoice");
+            successfulArchive = true;
           }
+        }
+
+        // If we have a valid work order, try to archive it too
+        if (isWorkOrderValid) {
+          console.log("Archiving work order with ID:", workOrder.id);
+
+          // Mark work order as archived
+          const { error: workOrderError } = await supabase
+            .from("work_orders")
+            .update({
+              is_archived: true,
+              archived_at: archivedAt,
+              archive_reason: reason,
+            })
+            .eq("id", workOrder.id);
+
+          if (workOrderError) {
+            console.error("Error archiving work order:", workOrderError);
+            // Only throw if we also failed to archive the invoice
+            if (!successfulArchive) {
+              throw new Error(
+                `Failed to archive work order: ${workOrderError.message}`
+              );
+            }
+          } else {
+            console.log("Successfully archived work order");
+            successfulArchive = true;
+          }
+        }
+
+        // If nothing was archived, report error
+        if (!successfulArchive) {
+          throw new Error(
+            "Could not archive: No valid work order or invoice ID"
+          );
         }
 
         // Clear the progress toast and show success
@@ -664,19 +717,64 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                     </div>
                   )}
                   <div className="flex space-x-2 mt-3 justify-end">
-                    {invoice.workOrderId &&
-                      onDeleteWorkOrder &&
-                      relatedWorkOrder && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-9 text-xs bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800 hover:border-red-300"
-                          onClick={() => handleArchiveOrder(relatedWorkOrder)}
-                        >
-                          <Archive className="h-3.5 w-3.5 mr-1" />
-                          {language === "ar" ? "أرشفة" : "Archive"}
-                        </Button>
-                      )}
+                    {invoice.workOrderId && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:text-gray-800 hover:border-gray-300"
+                        onClick={() => {
+                          // Find the related work order to delete
+                          console.log(
+                            "Trying to archive, workOrderId:",
+                            invoice.workOrderId
+                          );
+                          console.log("Available workOrders:", workOrders);
+                          const relatedWorkOrder = workOrders.find(
+                            (wo) => wo.id === invoice.workOrderId
+                          );
+                          console.log(
+                            "Found relatedWorkOrder:",
+                            relatedWorkOrder
+                          );
+
+                          if (relatedWorkOrder && onDeleteWorkOrder) {
+                            handleArchiveOrder(relatedWorkOrder);
+                          } else {
+                            console.log(
+                              "Creating fallback workOrder object for archiving"
+                            );
+                            // Create a minimal workOrder object if one isn't found
+                            const fallbackWorkOrder = {
+                              id: invoice.workOrderId,
+                              workOrderId: invoice.workOrderId,
+                              invoiceId: invoice.invoiceId,
+                              ...invoice, // Add invoice properties as fallback
+                            };
+
+                            // Show a warning toast
+                            toast.warning(
+                              language === "ar"
+                                ? "لم يتم العثور على طلب العمل المرتبط. محاولة الأرشفة مباشرة..."
+                                : "Related work order not found. Attempting direct archive..."
+                            );
+
+                            // Try to archive using the minimal info
+                            if (onDeleteWorkOrder) {
+                              handleArchiveOrder(fallbackWorkOrder);
+                            } else {
+                              toast.error(
+                                language === "ar"
+                                  ? "تعذر الأرشفة: وظيفة الأرشفة غير متوفرة"
+                                  : "Could not archive: onDeleteWorkOrder function not available"
+                              );
+                            }
+                          }
+                        }}
+                      >
+                        <Archive className="h-3.5 w-3.5 mr-1" />
+                        {language === "ar" ? "أرشفة" : "Archive"}
+                      </Button>
+                    )}
 
                     <PrintOptionsDialog
                       workOrder={invoice}
@@ -688,7 +786,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-9 text-xs bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100 hover:text-cyan-800 hover:border-cyan-300"
+                        className="h-8 text-xs bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100 hover:text-cyan-800 hover:border-cyan-300"
                       >
                         <Receipt className="h-3.5 w-3.5 mr-1" />
                         {language === "ar" ? "طباعة" : "Print"}
@@ -698,7 +796,7 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-9 text-xs bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800 hover:border-emerald-300"
+                      className="h-8 text-xs bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800 hover:border-emerald-300"
                       onClick={() =>
                         handleMarkAsPickedUp(invoice.invoiceId, true)
                       }
@@ -862,11 +960,50 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                         className="h-8 text-xs bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:text-gray-800 hover:border-gray-300"
                         onClick={() => {
                           // Find the related work order to delete
+                          console.log(
+                            "Trying to archive, workOrderId:",
+                            invoice.workOrderId
+                          );
+                          console.log("Available workOrders:", workOrders);
                           const relatedWorkOrder = workOrders.find(
                             (wo) => wo.id === invoice.workOrderId
                           );
+                          console.log(
+                            "Found relatedWorkOrder:",
+                            relatedWorkOrder
+                          );
+
                           if (relatedWorkOrder && onDeleteWorkOrder) {
                             handleArchiveOrder(relatedWorkOrder);
+                          } else {
+                            console.log(
+                              "Creating fallback workOrder object for archiving"
+                            );
+                            // Create a minimal workOrder object if one isn't found
+                            const fallbackWorkOrder = {
+                              id: invoice.workOrderId,
+                              workOrderId: invoice.workOrderId,
+                              invoiceId: invoice.invoiceId,
+                              ...invoice, // Add invoice properties as fallback
+                            };
+
+                            // Show a warning toast
+                            toast.warning(
+                              language === "ar"
+                                ? "لم يتم العثور على طلب العمل المرتبط. محاولة الأرشفة مباشرة..."
+                                : "Related work order not found. Attempting direct archive..."
+                            );
+
+                            // Try to archive using the minimal info
+                            if (onDeleteWorkOrder) {
+                              handleArchiveOrder(fallbackWorkOrder);
+                            } else {
+                              toast.error(
+                                language === "ar"
+                                  ? "تعذر الأرشفة: وظيفة الأرشفة غير متوفرة"
+                                  : "Could not archive: onDeleteWorkOrder function not available"
+                              );
+                            }
                           }
                         }}
                       >
@@ -1040,11 +1177,50 @@ export const TabbedTransactions: React.FC<TabbedTransactionsProps> = ({
                         className="h-8 text-xs bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:text-gray-800 hover:border-gray-300"
                         onClick={() => {
                           // Find the related work order to delete
+                          console.log(
+                            "Trying to archive, workOrderId:",
+                            invoice.workOrderId
+                          );
+                          console.log("Available workOrders:", workOrders);
                           const relatedWorkOrder = workOrders.find(
                             (wo) => wo.id === invoice.workOrderId
                           );
+                          console.log(
+                            "Found relatedWorkOrder:",
+                            relatedWorkOrder
+                          );
+
                           if (relatedWorkOrder && onDeleteWorkOrder) {
                             handleArchiveOrder(relatedWorkOrder);
+                          } else {
+                            console.log(
+                              "Creating fallback workOrder object for archiving"
+                            );
+                            // Create a minimal workOrder object if one isn't found
+                            const fallbackWorkOrder = {
+                              id: invoice.workOrderId,
+                              workOrderId: invoice.workOrderId,
+                              invoiceId: invoice.invoiceId,
+                              ...invoice, // Add invoice properties as fallback
+                            };
+
+                            // Show a warning toast
+                            toast.warning(
+                              language === "ar"
+                                ? "لم يتم العثور على طلب العمل المرتبط. محاولة الأرشفة مباشرة..."
+                                : "Related work order not found. Attempting direct archive..."
+                            );
+
+                            // Try to archive using the minimal info
+                            if (onDeleteWorkOrder) {
+                              handleArchiveOrder(fallbackWorkOrder);
+                            } else {
+                              toast.error(
+                                language === "ar"
+                                  ? "تعذر الأرشفة: وظيفة الأرشفة غير متوفرة"
+                                  : "Could not archive: onDeleteWorkOrder function not available"
+                              );
+                            }
                           }
                         }}
                       >
