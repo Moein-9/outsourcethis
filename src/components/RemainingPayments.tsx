@@ -71,6 +71,7 @@ import {
   getUnpaidInvoices,
   getInvoiceById,
   addPaymentToInvoice,
+  addMultiplePaymentsToInvoice,
 } from "@/services/invoiceService";
 
 // Define Invoice interface locally to avoid store dependency
@@ -359,21 +360,29 @@ export const RemainingPayments: React.FC = () => {
         entries: paymentEntries,
       });
 
-      // Process each payment entry
-      let success = false;
-      for (const entry of paymentEntries) {
-        if (entry.amount > 0) {
-          console.log("Adding payment entry:", entry);
-          success = await addPaymentToInvoice(invoiceId, {
-            amount: entry.amount,
-            method: entry.method,
-            authNumber: entry.authNumber,
-          });
+      // Filter out payment entries with amount <= 0 and prepare them for submission
+      const validPaymentEntries = paymentEntries.filter(
+        (entry) => entry.amount > 0
+      );
 
-          if (!success) {
-            throw new Error("Failed to add payment");
-          }
-        }
+      if (validPaymentEntries.length === 0) {
+        toast.error(
+          language === "ar"
+            ? "يرجى إدخال مبلغ الدفع"
+            : "Please enter a payment amount"
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Submit all payment entries at once
+      const success = await addMultiplePaymentsToInvoice(
+        invoiceId,
+        validPaymentEntries
+      );
+
+      if (!success) {
+        throw new Error("Failed to add payments");
       }
 
       toast.success(

@@ -447,6 +447,7 @@ export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: 
       currentPayments = [];
     }
     
+    // Add the new payment to the array of existing payments
     const updatedPayments = [...currentPayments, newPayment];
     
     // Calculate new deposit and remaining amounts
@@ -455,8 +456,13 @@ export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: 
     // @ts-ignore: Supabase field typing is incomplete
     const currentTotal = Number(invoice.total) || 0;
     const newDeposit = currentDeposit + payment.amount;
+    
+    // Calculate the new remaining amount - ensure it can't go below zero
     const newRemaining = Math.max(0, currentTotal - newDeposit);
-    const isPaid = newRemaining <= 0;
+    
+    // Only set isPaid to true if the remaining amount is EXACTLY 0
+    // This ensures partial payments don't mark the invoice as paid
+    const isPaid = newRemaining === 0;
     
     console.log('Updating invoice payment:', {
       invoiceId,
@@ -486,8 +492,9 @@ export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: 
     }
     
     // If this is associated with a work order, update its paid status too
+    // ONLY if the invoice is fully paid
     // @ts-ignore: Supabase field typing is incomplete
-    if (invoice.work_order_id) {
+    if (invoice.work_order_id && isPaid) {
       // @ts-ignore: Supabase TypeScript definitions are incomplete
       const { error: workOrderError } = await supabase
         .from('work_orders')
@@ -530,6 +537,102 @@ export const updateInvoicePaymentStatus = async (invoiceId: string, isPaid: bool
   } catch (error) {
     console.error('Error updating invoice payment status:', error);
     toast.error('Failed to update invoice payment status');
+    return false;
+  }
+};
+
+/**
+ * Add multiple payments to an invoice at once
+ */
+export const addMultiplePaymentsToInvoice = async (
+  invoiceId: string, 
+  payments: Array<{ amount: number, method: string, authNumber?: string }>
+) => {
+  try {
+    // Skip if no payments
+    if (!payments.length) {
+      return false;
+    }
+
+    // First get the current invoice
+    // @ts-ignore: Supabase TypeScript definitions are incomplete
+    const { data: invoice, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('invoice_id', invoiceId)
+      .single();
+      
+    if (fetchError) {
+      console.error('Error fetching invoice:', fetchError);
+      throw fetchError;
+    }
+    if (!invoice) {
+      console.error('Invoice not found');
+      throw new Error('Invoice not found');
+    }
+    
+    // Parse existing payments or create empty array
+    let currentPayments = [];
+    try {
+      // @ts-ignore: Supabase field typing is incomplete
+      if (invoice.payments) {
+        // @ts-ignore: Supabase field typing is incomplete
+        currentPayments = typeof invoice.payments === 'string' 
+          // @ts-ignore: Supabase field typing is incomplete
+          ? JSON.parse(invoice.payments) 
+          // @ts-ignore: Supabase field typing is incomplete
+          : (Array.isArray(invoice.payments) ? invoice.payments : []);
+      }
+    } catch (e) {
+      console.error('Error parsing payments:', e);
+      // If parsing fails, just use an empty array
+      currentPayments = [];
+    }
+    
+    // Create new payment objects with dates
+    const newPayments = payments.map(payment => ({
+      ...payment,
+      date: new Date().toISOString()
+    }));
+    
+    // Calculate total payment amount
+    const totalPaymentAmount = newPayments.reduce((sum, p) => sum + p.amount, 0);
+    
+    // Add all new payments to the array of existing payments
+    const updatedPayments = [...currentPayments, ...newPayments];
+    
+    // Calculate new deposit amount
+    // @ts-ignore: Supabase field typing is incomplete
+    const currentDeposit = Number(invoice.deposit) || 0;
+    const newDeposit = currentDeposit + totalPaymentAmount;
+    
+    console.log('Updating invoice with multiple payments:', {
+      invoiceId,
+      currentDeposit,
+      newDeposit,
+      totalPaymentAmount,
+      paymentsCount: updatedPayments.length
+    });
+    
+    // Only update deposit and payments - Supabase trigger will handle the remaining calculation
+    // @ts-ignore: Supabase TypeScript definitions are incomplete
+    const { error: updateError } = await supabase
+      .from('invoices')
+      .update({
+        deposit: newDeposit,
+        payments: JSON.stringify(updatedPayments)
+      })
+      .eq('invoice_id', invoiceId);
+      
+    if (updateError) {
+      console.error('Error updating invoice deposit and payments:', updateError);
+      throw updateError;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error adding multiple payments to invoice:', error);
+    toast.error('Failed to add payments to invoice');
     return false;
   }
 }; 
