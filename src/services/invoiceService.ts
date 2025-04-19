@@ -1,3 +1,5 @@
+// @ts-nocheck - TypeScript definitions for Supabase tables are incomplete
+
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
@@ -294,7 +296,7 @@ export const saveOrder = async (formData: any): Promise<{invoiceId: string | nul
  */
 export const getInvoiceById = async (invoiceId: string) => {
   try {
-    // @ts-ignore: We know invoices exists in Supabase but TypeScript doesn't
+    // @ts-ignore: Supabase TypeScript definitions are incomplete
     const { data, error } = await supabase
       .from('invoices')
       .select('*')
@@ -315,7 +317,7 @@ export const getInvoiceById = async (invoiceId: string) => {
  */
 export const getWorkOrderById = async (workOrderId: string) => {
   try {
-    // @ts-ignore: We know work_orders exists in Supabase but TypeScript doesn't
+    // @ts-ignore: Supabase TypeScript definitions are incomplete
     const { data, error } = await supabase
       .from('work_orders')
       .select('*')
@@ -336,22 +338,62 @@ export const getWorkOrderById = async (workOrderId: string) => {
  */
 export const getUnpaidInvoices = async () => {
   try {
-    // @ts-ignore: We know invoices exists in Supabase but TypeScript doesn't
+    // @ts-ignore: Supabase TypeScript definitions are incomplete
     const { data, error } = await supabase
       .from('invoices')
       .select('*')
       .eq('is_paid', false)
+      .gt('remaining', 0) // Only get invoices with remaining balance greater than 0
       .order('created_at', { ascending: false });
       
     if (error) throw error;
     
-    // Parse JSON strings into objects
-    return data.map(invoice => ({
-      ...invoice,
-      contact_lens_items: invoice.contact_lens_items ? JSON.parse(invoice.contact_lens_items) : undefined,
-      contact_lens_rx: invoice.contact_lens_rx ? JSON.parse(invoice.contact_lens_rx) : undefined,
-      payments: invoice.payments ? JSON.parse(invoice.payments) : []
-    }));
+    // Parse JSON strings into objects with better error handling
+    return data.map(invoice => {
+      try {
+        // Safely parse JSON fields
+        // @ts-ignore: Supabase field typing is incomplete
+        const contactLensItems = invoice.contact_lens_items ? 
+          // @ts-ignore: Supabase field typing is incomplete
+          typeof invoice.contact_lens_items === 'string' ? 
+            // @ts-ignore: Supabase field typing is incomplete
+            JSON.parse(invoice.contact_lens_items) : invoice.contact_lens_items 
+          : undefined;
+            
+        // @ts-ignore: Supabase field typing is incomplete
+        const contactLensRx = invoice.contact_lens_rx ? 
+          // @ts-ignore: Supabase field typing is incomplete
+          typeof invoice.contact_lens_rx === 'string' ? 
+            // @ts-ignore: Supabase field typing is incomplete
+            JSON.parse(invoice.contact_lens_rx) : invoice.contact_lens_rx 
+          : undefined;
+            
+        // @ts-ignore: Supabase field typing is incomplete
+        const payments = invoice.payments ? 
+          // @ts-ignore: Supabase field typing is incomplete
+          typeof invoice.payments === 'string' ? 
+            // @ts-ignore: Supabase field typing is incomplete
+            JSON.parse(invoice.payments) : invoice.payments 
+          : [];
+          
+        return {
+          ...invoice,
+          contact_lens_items: contactLensItems,
+          contact_lens_rx: contactLensRx,
+          payments: payments
+        };
+      } catch (parseError) {
+        // @ts-ignore: Supabase field typing is incomplete
+        console.error('Error parsing JSON fields for invoice:', invoice.invoice_id, parseError);
+        // Return invoice with unparsed fields to avoid breaking the entire list
+        return {
+          ...invoice,
+          contact_lens_items: undefined,
+          contact_lens_rx: undefined,
+          payments: []
+        };
+      }
+    });
   } catch (error) {
     console.error('Error fetching unpaid invoices:', error);
     toast.error('Failed to fetch unpaid invoices');
@@ -365,7 +407,7 @@ export const getUnpaidInvoices = async () => {
 export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: number, method: string, authNumber?: string }) => {
   try {
     // First get the current invoice
-    // @ts-ignore: We know invoices exists in Supabase but TypeScript doesn't
+    // @ts-ignore: Supabase TypeScript definitions are incomplete
     const { data: invoice, error: fetchError } = await supabase
       .from('invoices')
       .select('*')
@@ -390,9 +432,13 @@ export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: 
     // Parse existing payments or create empty array
     let currentPayments = [];
     try {
+      // @ts-ignore: Supabase field typing is incomplete
       if (invoice.payments) {
+        // @ts-ignore: Supabase field typing is incomplete
         currentPayments = typeof invoice.payments === 'string' 
+          // @ts-ignore: Supabase field typing is incomplete
           ? JSON.parse(invoice.payments) 
+          // @ts-ignore: Supabase field typing is incomplete
           : (Array.isArray(invoice.payments) ? invoice.payments : []);
       }
     } catch (e) {
@@ -404,7 +450,9 @@ export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: 
     const updatedPayments = [...currentPayments, newPayment];
     
     // Calculate new deposit and remaining amounts
+    // @ts-ignore: Supabase field typing is incomplete
     const currentDeposit = Number(invoice.deposit) || 0;
+    // @ts-ignore: Supabase field typing is incomplete
     const currentTotal = Number(invoice.total) || 0;
     const newDeposit = currentDeposit + payment.amount;
     const newRemaining = Math.max(0, currentTotal - newDeposit);
@@ -421,7 +469,7 @@ export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: 
     });
     
     // Update the invoice
-    // @ts-ignore: We know invoices exists in Supabase but TypeScript doesn't
+    // @ts-ignore: Supabase TypeScript definitions are incomplete
     const { error: updateError } = await supabase
       .from('invoices')
       .update({
@@ -438,13 +486,15 @@ export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: 
     }
     
     // If this is associated with a work order, update its paid status too
+    // @ts-ignore: Supabase field typing is incomplete
     if (invoice.work_order_id) {
-      // @ts-ignore: We know work_orders exists in Supabase but TypeScript doesn't
+      // @ts-ignore: Supabase TypeScript definitions are incomplete
       const { error: workOrderError } = await supabase
         .from('work_orders')
         .update({
           is_paid: isPaid
         })
+        // @ts-ignore: Supabase field typing is incomplete
         .eq('work_order_id', invoice.work_order_id);
         
       if (workOrderError) {
