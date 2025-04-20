@@ -74,6 +74,7 @@ export const LensCombinationManager: React.FC = () => {
   const [editPrice, setEditPrice] = useState<string>("");
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isAddingCombination, setIsAddingCombination] = useState(false);
   const [isUpdatingCombination, setIsUpdatingCombination] = useState(false);
   const [isDeletingCombination, setIsDeletingCombination] = useState(false);
@@ -94,8 +95,20 @@ export const LensCombinationManager: React.FC = () => {
     }
   }, [searchTerm, pricingCombinations]);
 
+  useEffect(() => {
+    // Check if all required data is loaded
+    if (
+      lensTypes.length > 0 &&
+      lensCoatings.length > 0 &&
+      lensThicknesses.length > 0
+    ) {
+      setIsDataLoaded(true);
+    }
+  }, [lensTypes, lensCoatings, lensThicknesses]);
+
   const loadAllData = async () => {
     setIsLoading(true);
+    setIsDataLoaded(false);
     try {
       // Load all the required data in parallel
       const [types, coatings, thicknesses, combinations] = await Promise.all([
@@ -441,6 +454,16 @@ export const LensCombinationManager: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
         <p className="text-lg">{t("loadingData")}</p>
+      </div>
+    );
+  }
+
+  // Make sure we have data before rendering the UI
+  if (!isDataLoaded) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
+        <p className="text-lg">{t("preparingData") || "Preparing data..."}</p>
       </div>
     );
   }

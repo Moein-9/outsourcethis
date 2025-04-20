@@ -82,17 +82,27 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   const { t, language } = useLanguageStore();
   const isRtl = language === "ar";
 
+  // State from the inventory store
+  const {
+    lensTypes: storeLensTypes,
+    lensCoatings: storeLensCoatings,
+    lensThicknesses: storeLensThicknesses,
+    lensPricingCombinations: storePricingCombinations,
+    isLoadingLensTypes,
+    isLoadingLensCoatings,
+    isLoadingLensThicknesses,
+    isLoadingLensPricingCombinations,
+  } = useInventoryStore();
+
+  // Local state for component data
   const [lensTypes, setLensTypes] = useState<LensType[]>([]);
   const [lensCoatings, setLensCoatings] = useState<LensCoating[]>([]);
   const [lensThicknesses, setLensThicknesses] = useState<LensThickness[]>([]);
   const [pricingCombinations, setPricingCombinations] = useState<
     PricingCombination[]
   >([]);
-  const [loadingLensTypes, setLoadingLensTypes] = useState(false);
-  const [loadingCoatings, setLoadingCoatings] = useState(false);
-  const [loadingThicknesses, setLoadingThicknesses] = useState(false);
-  const [loadingCombinations, setLoadingCombinations] = useState(false);
 
+  // Selection state
   const [selectedLensType, setSelectedLensType] = useState<LensType | null>(
     initialLensType
   );
@@ -105,7 +115,15 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     "distance-reading" | "progressive" | "bifocal"
   >("distance-reading");
 
-  // Use external pricing combinations if provided
+  // Loading states
+  const isLoadingAnyData =
+    externalLoading ||
+    isLoadingLensTypes ||
+    isLoadingLensCoatings ||
+    isLoadingLensThicknesses ||
+    isLoadingLensPricingCombinations;
+
+  // Use external pricing combinations if provided, otherwise use store data
   useEffect(() => {
     if (externalCombinations && externalCombinations.length > 0) {
       setPricingCombinations(externalCombinations);
@@ -126,45 +144,38 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
       if (uniqueLensTypes.size > 0) {
         setLensTypes(Array.from(uniqueLensTypes.values()));
       }
-    }
-  }, [externalCombinations]);
+    } else {
+      // Use store data
+      if (storePricingCombinations.length > 0) {
+        // Convert store combinations to PricingCombination format
+        const formattedCombinations = storePricingCombinations.map((combo) => ({
+          combination_id: combo.id,
+          lens_type_id: combo.lensTypeId,
+          coating_id: combo.coatingId,
+          thickness_id: combo.thicknessId,
+          price: combo.price,
+        }));
+        setPricingCombinations(formattedCombinations);
+      }
 
-  // Now used only when we don't have external combinations
+      if (storeLensTypes.length > 0) {
+        setLensTypes(storeLensTypes);
+      }
+    }
+  }, [externalCombinations, storePricingCombinations, storeLensTypes]);
+
+  // Update local lensCoatings and lensThicknesses from store data when not using external combinations
   useEffect(() => {
-    // Skip internal fetching if we're using external data
     if (!externalCombinations || externalCombinations.length === 0) {
-      const fetchLensTypesDirectly = async () => {
-        setLoadingLensTypes(true);
-        try {
-          // @ts-ignore - Tables exist at runtime but not in TypeScript definitions
-          const { data, error } = await supabase.from("lens_types").select("*");
+      if (storeLensCoatings.length > 0) {
+        setLensCoatings(storeLensCoatings);
+      }
 
-          if (error) {
-            throw error;
-          }
-
-          if (data) {
-            const formattedLensTypes: LensType[] = data.map((item: any) => ({
-              id: item.lens_id,
-              name: item.name,
-              type: item.type as LensType["type"],
-            }));
-
-            setLensTypes(formattedLensTypes);
-          }
-        } catch (err) {
-          console.error("Error fetching lens types:", err);
-          toast.error(
-            t("errorFetchingLensTypes") || "Error fetching lens types"
-          );
-        } finally {
-          setLoadingLensTypes(false);
-        }
-      };
-
-      fetchLensTypesDirectly();
+      if (storeLensThicknesses.length > 0) {
+        setLensThicknesses(storeLensThicknesses);
+      }
     }
-  }, [t, externalCombinations]);
+  }, [externalCombinations, storeLensCoatings, storeLensThicknesses]);
 
   const hasAddValues = React.useMemo(() => {
     if (!rx) return false;
@@ -272,81 +283,51 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   // Update available coatings when lens type changes
   useEffect(() => {
     if (selectedLensType && pricingCombinations.length > 0) {
-      setLoadingCoatings(true);
-
       // Filter combinations to get available coatings for the selected lens type
       const availableCombinations = pricingCombinations.filter(
         (combo) => combo.lens_type_id === selectedLensType.id
       );
 
-      // Extract unique coatings from the filtered combinations
-      const uniqueCoatings = new Map();
-      availableCombinations.forEach((combo) => {
-        const coating = combo.lens_coatings;
-        if (coating && !uniqueCoatings.has(coating.coating_id)) {
-          uniqueCoatings.set(coating.coating_id, {
-            id: coating.coating_id,
-            name: coating.name,
-            price: coating.price,
-            description: coating.description,
-            category: coating.category,
-            isPhotochromic: coating.is_photochromic,
-            availableColors: coating.available_colors,
-          });
-        }
-      });
-
-      setLensCoatings(Array.from(uniqueCoatings.values()));
-      setLoadingCoatings(false);
-    } else if (selectedLensType) {
-      // If we don't have pricing combinations but have a lens type selected,
-      // fetch coatings directly from lens_coatings table
-      const fetchCoatingsDirectly = async () => {
-        setLoadingCoatings(true);
-        try {
-          const { data, error } = await supabase
-            .from("lens_coatings")
-            .select("*")
-            .eq("category", getCategory(selectedLensType));
-
-          if (error) {
-            throw error;
+      if (externalCombinations && externalCombinations.length > 0) {
+        // Extract unique coatings from the filtered combinations
+        const uniqueCoatings = new Map();
+        availableCombinations.forEach((combo) => {
+          const coating = combo.lens_coatings;
+          if (coating && !uniqueCoatings.has(coating.coating_id)) {
+            uniqueCoatings.set(coating.coating_id, {
+              id: coating.coating_id,
+              name: coating.name,
+              price: coating.price,
+              description: coating.description,
+              category: coating.category,
+              isPhotochromic: coating.is_photochromic,
+              availableColors: coating.available_colors,
+            });
           }
+        });
 
-          if (data) {
-            const formattedCoatings: LensCoating[] = data.map(
-              (coating: any) => ({
-                id: coating.coating_id,
-                name: coating.name,
-                price: coating.price,
-                description: coating.description,
-                category: coating.category,
-                isPhotochromic: coating.is_photochromic,
-                availableColors: coating.available_colors,
-              })
-            );
-
-            setLensCoatings(formattedCoatings);
-          }
-        } catch (err) {
-          console.error("Error fetching lens coatings:", err);
-          toast.error(t("errorFetchingCoatings") || "Error fetching coatings");
-        } finally {
-          setLoadingCoatings(false);
-        }
-      };
-
-      fetchCoatingsDirectly();
+        setLensCoatings(Array.from(uniqueCoatings.values()));
+      } else {
+        // Use store coatings filtered by category
+        const category = getCategory(selectedLensType);
+        const filteredCoatings = storeLensCoatings.filter(
+          (coating) => coating.category === category
+        );
+        setLensCoatings(filteredCoatings);
+      }
     } else {
       setLensCoatings([]);
     }
-  }, [selectedLensType, pricingCombinations, t]);
+  }, [
+    selectedLensType,
+    pricingCombinations,
+    externalCombinations,
+    storeLensCoatings,
+  ]);
 
   // Update available thicknesses when coating changes
   useEffect(() => {
     if (selectedLensType && selectedCoating && pricingCombinations.length > 0) {
-      setLoadingThicknesses(true);
-
       // Filter combinations to get available thicknesses for the selected lens type and coating
       const availableCombinations = pricingCombinations.filter(
         (combo) =>
@@ -354,65 +335,41 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
           combo.coating_id === selectedCoating.id
       );
 
-      // Extract unique thicknesses from the filtered combinations
-      const uniqueThicknesses = new Map();
-      availableCombinations.forEach((combo) => {
-        const thickness = combo.lens_thicknesses;
-        if (thickness && !uniqueThicknesses.has(thickness.thickness_id)) {
-          uniqueThicknesses.set(thickness.thickness_id, {
-            id: thickness.thickness_id,
-            name: thickness.name,
-            price: thickness.price,
-            description: thickness.description,
-            category: thickness.category,
-          });
-        }
-      });
-
-      setLensThicknesses(Array.from(uniqueThicknesses.values()));
-      setLoadingThicknesses(false);
-    } else if (selectedLensType && selectedCoating) {
-      // If we don't have pricing combinations, fetch thicknesses directly from lens_thicknesses table
-      const fetchThicknessesDirectly = async () => {
-        setLoadingThicknesses(true);
-        try {
-          const { data, error } = await supabase
-            .from("lens_thicknesses")
-            .select("*")
-            .eq("category", getCategory(selectedLensType));
-
-          if (error) {
-            throw error;
+      if (externalCombinations && externalCombinations.length > 0) {
+        // Extract unique thicknesses from the filtered combinations
+        const uniqueThicknesses = new Map();
+        availableCombinations.forEach((combo) => {
+          const thickness = combo.lens_thicknesses;
+          if (thickness && !uniqueThicknesses.has(thickness.thickness_id)) {
+            uniqueThicknesses.set(thickness.thickness_id, {
+              id: thickness.thickness_id,
+              name: thickness.name,
+              price: thickness.price,
+              description: thickness.description,
+              category: thickness.category,
+            });
           }
+        });
 
-          if (data) {
-            const formattedThicknesses: LensThickness[] = data.map(
-              (thickness: any) => ({
-                id: thickness.thickness_id,
-                name: thickness.name,
-                price: thickness.price,
-                description: thickness.description,
-                category: thickness.category,
-              })
-            );
-
-            setLensThicknesses(formattedThicknesses);
-          }
-        } catch (err) {
-          console.error("Error fetching lens thicknesses:", err);
-          toast.error(
-            t("errorFetchingThicknesses") || "Error fetching thicknesses"
-          );
-        } finally {
-          setLoadingThicknesses(false);
-        }
-      };
-
-      fetchThicknessesDirectly();
+        setLensThicknesses(Array.from(uniqueThicknesses.values()));
+      } else {
+        // Use store thicknesses filtered by category
+        const category = getCategory(selectedLensType);
+        const filteredThicknesses = storeLensThicknesses.filter(
+          (thickness) => thickness.category === category
+        );
+        setLensThicknesses(filteredThicknesses);
+      }
     } else {
       setLensThicknesses([]);
     }
-  }, [selectedLensType, selectedCoating, pricingCombinations, t]);
+  }, [
+    selectedLensType,
+    selectedCoating,
+    pricingCombinations,
+    externalCombinations,
+    storeLensThicknesses,
+  ]);
 
   // Get the final combination price when all three components are selected
   useEffect(() => {
@@ -436,7 +393,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
         // If not found in cache, use an alternative method to calculate price
         // This could be a fallback sum of individual component prices
         const totalPrice =
-          (selectedLensType ? 0 : 0) +
+          (selectedLensType.price || 0) +
           (selectedCoating ? selectedCoating.price : 0) +
           (selectedThickness ? selectedThickness.price : 0);
         onCombinationPriceChange(totalPrice);
@@ -468,34 +425,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     onSelectCoating(null);
     onSelectThickness(null);
     setActiveCategory(getCategory(lens));
-
-    // Filter available coatings based on the selected lens type
-    if (externalCombinations && externalCombinations.length > 0) {
-      // Use external combinations to find available coatings
-      const availableCoatings = new Map();
-
-      externalCombinations
-        .filter((combo) => combo.lens_type_id === lens.id)
-        .forEach((combo) => {
-          const coating = combo.lens_coatings;
-          if (coating && !availableCoatings.has(coating.coating_id)) {
-            availableCoatings.set(coating.coating_id, {
-              id: coating.coating_id,
-              name: coating.name,
-              price: coating.price,
-              description: coating.description,
-              category: coating.category,
-              isPhotochromic: coating.is_photochromic,
-              availableColors: coating.available_colors,
-            });
-          }
-        });
-
-      setLensCoatings(Array.from(availableCoatings.values()));
-    } else {
-      // Fallback to direct API call if no external combinations
-      fetchCoatingsForLensType(lens.id);
-    }
   };
 
   // Handle coating selection
@@ -504,40 +433,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     setSelectedThickness(null);
     onSelectCoating(coating);
     onSelectThickness(null);
-
-    // Filter available thicknesses based on lens type and coating
-    if (
-      selectedLensType &&
-      externalCombinations &&
-      externalCombinations.length > 0
-    ) {
-      // Use external combinations to find available thicknesses
-      const availableThicknesses = new Map();
-
-      externalCombinations
-        .filter(
-          (combo) =>
-            combo.lens_type_id === selectedLensType.id &&
-            combo.coating_id === coating.id
-        )
-        .forEach((combo) => {
-          const thickness = combo.lens_thicknesses;
-          if (thickness && !availableThicknesses.has(thickness.thickness_id)) {
-            availableThicknesses.set(thickness.thickness_id, {
-              id: thickness.thickness_id,
-              name: thickness.name,
-              price: thickness.price,
-              description: thickness.description,
-              category: thickness.category,
-            });
-          }
-        });
-
-      setLensThicknesses(Array.from(availableThicknesses.values()));
-    } else if (selectedLensType) {
-      // Fallback to direct API call if no external combinations
-      fetchThicknessesForLensAndCoating(selectedLensType.id, coating.id);
-    }
   };
 
   // Handle thickness selection
@@ -588,162 +483,21 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
 
   const dirClass = language === "ar" ? "rtl" : "ltr";
 
-  // Calculate available options based on current selections
-  const availableCoatings = selectedLensType ? lensCoatings : [];
+  // Check if data is fully loaded for each component
+  const isLensDataLoaded =
+    !isLoadingLensTypes &&
+    storeLensTypes.length > 0 &&
+    !isLoadingLensCoatings &&
+    storeLensCoatings.length > 0 &&
+    !isLoadingLensThicknesses &&
+    storeLensThicknesses.length > 0 &&
+    !isLoadingLensPricingCombinations &&
+    storePricingCombinations.length > 0;
 
-  const availableThicknesses =
-    selectedLensType && selectedCoating ? lensThicknesses : [];
+  const isExternalDataLoaded =
+    externalCombinations && externalCombinations.length > 0 && !externalLoading;
 
-  // Helper function to fetch coatings for a specific lens type
-  const fetchCoatingsForLensType = async (lensTypeId: string) => {
-    setLoadingCoatings(true);
-    try {
-      // Try to get coatings from pricing combinations if available
-      if (pricingCombinations.length > 0) {
-        const availableCoatings = new Map();
-
-        pricingCombinations
-          .filter((combo) => combo.lens_type_id === lensTypeId)
-          .forEach((combo) => {
-            const coating = combo.lens_coatings;
-            if (coating && !availableCoatings.has(coating.coating_id)) {
-              availableCoatings.set(coating.coating_id, {
-                id: coating.coating_id,
-                name: coating.name,
-                price: coating.price,
-                description: coating.description,
-                category: coating.category,
-                isPhotochromic: coating.is_photochromic,
-                availableColors: coating.available_colors,
-              });
-            }
-          });
-
-        if (availableCoatings.size > 0) {
-          setLensCoatings(Array.from(availableCoatings.values()));
-          setLoadingCoatings(false);
-          return;
-        }
-      }
-
-      // Fall back to direct API call if no coatings found
-      // @ts-ignore - Tables exist at runtime but not in TypeScript definitions
-      const { data, error } = await supabase.from("lens_coatings").select("*");
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        const formattedCoatings: LensCoating[] = data
-          .filter((item: any) => {
-            const category = getCategory({
-              id: lensTypeId,
-              name: "",
-              type: "distance",
-            });
-            return item.category === category || item.category === "all";
-          })
-          .map((item: any) => ({
-            id: item.coating_id,
-            name: item.name,
-            price: item.price,
-            description: item.description,
-            category: item.category,
-            isPhotochromic: item.is_photochromic,
-            availableColors: item.available_colors,
-          }));
-
-        setLensCoatings(formattedCoatings);
-      }
-    } catch (err) {
-      console.error("Error fetching coatings:", err);
-      toast.error(t("errorFetchingCoatings") || "Error fetching lens coatings");
-    } finally {
-      setLoadingCoatings(false);
-    }
-  };
-
-  // Helper function to fetch thicknesses for a specific lens and coating
-  const fetchThicknessesForLensAndCoating = async (
-    lensTypeId: string,
-    coatingId: string
-  ) => {
-    setLoadingThicknesses(true);
-    try {
-      // Try to get thicknesses from pricing combinations if available
-      if (pricingCombinations.length > 0) {
-        const availableThicknesses = new Map();
-
-        pricingCombinations
-          .filter(
-            (combo) =>
-              combo.lens_type_id === lensTypeId &&
-              combo.coating_id === coatingId
-          )
-          .forEach((combo) => {
-            const thickness = combo.lens_thicknesses;
-            if (
-              thickness &&
-              !availableThicknesses.has(thickness.thickness_id)
-            ) {
-              availableThicknesses.set(thickness.thickness_id, {
-                id: thickness.thickness_id,
-                name: thickness.name,
-                price: thickness.price,
-                description: thickness.description,
-                category: thickness.category,
-              });
-            }
-          });
-
-        if (availableThicknesses.size > 0) {
-          setLensThicknesses(Array.from(availableThicknesses.values()));
-          setLoadingThicknesses(false);
-          return;
-        }
-      }
-
-      // Fall back to direct API call if no thicknesses found
-      // @ts-ignore - Tables exist at runtime but not in TypeScript definitions
-      const { data, error } = await supabase
-        .from("lens_thicknesses")
-        .select("*");
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        const category = getCategory({
-          id: lensTypeId,
-          name: "",
-          type: "distance",
-        });
-
-        const formattedThicknesses: LensThickness[] = data
-          .filter((item: any) => {
-            return item.category === category || item.category === "all";
-          })
-          .map((item: any) => ({
-            id: item.thickness_id,
-            name: item.name,
-            price: item.price,
-            description: item.description,
-            category: item.category,
-          }));
-
-        setLensThicknesses(formattedThicknesses);
-      }
-    } catch (err) {
-      console.error("Error fetching thicknesses:", err);
-      toast.error(
-        t("errorFetchingThicknesses") || "Error fetching lens thicknesses"
-      );
-    } finally {
-      setLoadingThicknesses(false);
-    }
-  };
+  const isDataLoaded = isExternalDataLoaded || isLensDataLoaded;
 
   if (skipLens) {
     return (
@@ -758,6 +512,18 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
         >
           {t("addLens")}
         </Button>
+      </div>
+    );
+  }
+
+  // Show single global loading state when data is not yet loaded
+  if (isLoadingAnyData || !isDataLoaded) {
+    return (
+      <div className="flex flex-col justify-center items-center py-8 space-y-3">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">
+          {t("loadingLensOptions") || "Loading lens options..."}
+        </p>
       </div>
     );
   }
@@ -781,259 +547,250 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
         </Label>
       </div>
 
-      {loadingCombinations ? (
-        <div className="flex justify-center items-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-          <p className="text-muted-foreground">
-            {t("loadingLensOptions") || "Loading lens options..."}
-          </p>
-        </div>
-      ) : (
-        <>
-          <Card>
-            <CardContent className="p-4 pb-0">
-              <div className="mb-3 flex items-center">
-                <div className="bg-violet-100 p-1.5 rounded-md">
-                  <PanelTop className="w-4 h-4 text-violet-600" />
-                </div>
-                <h3 className="font-semibold text-violet-800 ml-2">
-                  1. {t("selectLensType")}
-                </h3>
-              </div>
+      <Card>
+        <CardContent className="p-4 pb-0">
+          <div className="mb-3 flex items-center">
+            <div className="bg-violet-100 p-1.5 rounded-md">
+              <PanelTop className="w-4 h-4 text-violet-600" />
+            </div>
+            <h3 className="font-semibold text-violet-800 ml-2">
+              1. {t("selectLensType")}
+            </h3>
+          </div>
 
-              {loadingLensTypes ? (
-                <div className="flex justify-center items-center py-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
-                  {filteredLensTypes.map((lens) => (
-                    <Button
-                      key={lens.id}
-                      variant={
-                        selectedLensType?.id === lens.id ? "default" : "outline"
+          {isLoadingLensTypes ? (
+            <div className="flex justify-center items-center py-4">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+              {filteredLensTypes.length > 0 ? (
+                filteredLensTypes.map((lens) => (
+                  <Button
+                    key={lens.id}
+                    variant={
+                      selectedLensType?.id === lens.id ? "default" : "outline"
+                    }
+                    className={`
+                      h-auto py-2 px-3 justify-start text-left flex-col items-start gap-1
+                      ${
+                        selectedLensType?.id === lens.id
+                          ? "bg-violet-600 hover:bg-violet-700 text-white"
+                          : "hover:bg-violet-50"
                       }
-                      className={`
-                        h-auto py-2 px-3 justify-start text-left flex-col items-start gap-1
-                        ${
-                          selectedLensType?.id === lens.id
-                            ? "bg-violet-600 hover:bg-violet-700 text-white"
-                            : "hover:bg-violet-50"
-                        }
-                      `}
-                      onClick={() => handleLensTypeSelect(lens)}
+                    `}
+                    onClick={() => handleLensTypeSelect(lens)}
+                  >
+                    <span className="font-medium">{lens.name}</span>
+                    <span className="text-xs opacity-80">{lens.type}</span>
+                    {selectedLensType?.id === lens.id && (
+                      <Badge
+                        variant="secondary"
+                        className="bg-white/20 text-white mt-1"
+                      >
+                        <Check className="w-3 h-3 mr-1" />
+                        {t("selected")}
+                      </Badge>
+                    )}
+                  </Button>
+                ))
+              ) : (
+                <div className="col-span-3 text-center py-3 text-muted-foreground">
+                  {t("noLensTypesAvailable") || "No lens types available"}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4 pb-0">
+          <div className="mb-3 flex items-center">
+            <div className="bg-orange-100 p-1.5 rounded-md">
+              <PanelTop className="w-4 h-4 text-orange-600" />
+            </div>
+            <h3 className="font-semibold text-orange-800 ml-2">
+              2. {t("selectCoating")}
+            </h3>
+          </div>
+
+          {selectedLensType ? (
+            isLoadingLensCoatings ? (
+              <div className="flex justify-center items-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
+              </div>
+            ) : lensCoatings.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+                {lensCoatings.map((coating) => (
+                  <Button
+                    key={coating.id}
+                    variant={
+                      selectedCoating?.id === coating.id ? "default" : "outline"
+                    }
+                    className={`
+                      h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
+                      ${
+                        selectedCoating?.id === coating.id
+                          ? "bg-orange-600 hover:bg-orange-700 text-white"
+                          : "hover:bg-orange-50"
+                      }
+                      ${
+                        coating.isPhotochromic ? "border-blue-300 border-2" : ""
+                      }
+                    `}
+                    onClick={() => handleCoatingSelect(coating)}
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium">{coating.name}</span>
+                      <span className="text-xs opacity-80">
+                        {coating.description}
+                      </span>
+                      {coating.isPhotochromic && (
+                        <span className="text-xs mt-1 font-medium text-blue-600 dark:text-blue-400">
+                          {t("photochromic")}
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      className={`w-full flex ${
+                        selectedCoating?.id === coating.id
+                          ? "justify-between"
+                          : "justify-end"
+                      } items-center`}
                     >
-                      <span className="font-medium">{lens.name}</span>
-                      <span className="text-xs opacity-80">{lens.type}</span>
-                      {selectedLensType?.id === lens.id && (
+                      {selectedCoating?.id === coating.id && (
                         <Badge
                           variant="secondary"
-                          className="bg-white/20 text-white mt-1"
+                          className="bg-white/20 text-white"
                         >
                           <Check className="w-3 h-3 mr-1" />
                           {t("selected")}
                         </Badge>
                       )}
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4 pb-0">
-              <div className="mb-3 flex items-center">
-                <div className="bg-orange-100 p-1.5 rounded-md">
-                  <PanelTop className="w-4 h-4 text-orange-600" />
-                </div>
-                <h3 className="font-semibold text-orange-800 ml-2">
-                  2. {t("selectCoating")}
-                </h3>
+                    </div>
+                  </Button>
+                ))}
               </div>
+            ) : (
+              <div className="text-center py-4 bg-orange-50/50 rounded-lg mb-3">
+                <AlertCircle className="mx-auto h-8 w-8 text-orange-400 mb-2" />
+                <p className="text-orange-800 font-medium">
+                  {t("noCoatingsAvailable") ||
+                    "No coating options available for this lens type."}
+                </p>
+                <p className="text-sm text-orange-600 mt-1">
+                  {t("selectDifferentLens") ||
+                    "Please select a different lens type."}
+                </p>
+              </div>
+            )
+          ) : (
+            <div className="text-center py-3 text-muted-foreground">
+              {t("selectLensTypeFirst")}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-              {selectedLensType ? (
-                loadingCoatings ? (
-                  <div className="flex justify-center items-center py-4">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
-                  </div>
-                ) : availableCoatings.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
-                    {availableCoatings.map((coating) => (
-                      <Button
-                        key={coating.id}
-                        variant={
-                          selectedCoating?.id === coating.id
-                            ? "default"
-                            : "outline"
-                        }
-                        className={`
-                          h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
-                          ${
-                            selectedCoating?.id === coating.id
-                              ? "bg-orange-600 hover:bg-orange-700 text-white"
-                              : "hover:bg-orange-50"
-                          }
-                          ${
-                            coating.isPhotochromic
-                              ? "border-blue-300 border-2"
-                              : ""
-                          }
-                        `}
-                        onClick={() => handleCoatingSelect(coating)}
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium">{coating.name}</span>
-                          <span className="text-xs opacity-80">
-                            {coating.description}
-                          </span>
-                          {coating.isPhotochromic && (
-                            <span className="text-xs mt-1 font-medium text-blue-600 dark:text-blue-400">
-                              {t("photochromic")}
-                            </span>
-                          )}
-                        </div>
-                        <div
-                          className={`w-full flex ${
-                            selectedCoating?.id === coating.id
-                              ? "justify-between"
-                              : "justify-end"
-                          } items-center`}
+      <Card>
+        <CardContent className="p-4 pb-0">
+          <div className="mb-3 flex items-center">
+            <div className="bg-emerald-100 p-1.5 rounded-md">
+              <PanelTop className="w-4 h-4 text-emerald-600" />
+            </div>
+            <h3 className="font-semibold text-emerald-800 ml-2">
+              3. {t("selectThickness") || "Select Thickness"}
+            </h3>
+          </div>
+
+          {selectedLensType && selectedCoating ? (
+            isLoadingLensThicknesses ? (
+              <div className="flex justify-center items-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
+              </div>
+            ) : lensThicknesses.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+                {lensThicknesses.map((thickness) => (
+                  <Button
+                    key={thickness.id}
+                    variant={
+                      selectedThickness?.id === thickness.id
+                        ? "default"
+                        : "outline"
+                    }
+                    className={`
+                      h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
+                      ${
+                        selectedThickness?.id === thickness.id
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                          : "hover:bg-emerald-50"
+                      }
+                    `}
+                    onClick={() => handleThicknessSelect(thickness)}
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium">{thickness.name}</span>
+                      <span className="text-xs opacity-80">
+                        {thickness.description}
+                      </span>
+                    </div>
+                    <div
+                      className={`w-full flex ${
+                        selectedThickness?.id === thickness.id
+                          ? "justify-between"
+                          : "justify-end"
+                      } items-center`}
+                    >
+                      {selectedThickness?.id === thickness.id && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-white/20 text-white"
                         >
-                          {selectedCoating?.id === coating.id && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-white/20 text-white"
-                            >
-                              <Check className="w-3 h-3 mr-1" />
-                              {t("selected")}
-                            </Badge>
-                          )}
-                        </div>
-                      </Button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4 bg-orange-50/50 rounded-lg mb-3">
-                    <AlertCircle className="mx-auto h-8 w-8 text-orange-400 mb-2" />
-                    <p className="text-orange-800 font-medium">
-                      {t("noCoatingsAvailable") ||
-                        "No coating options available for this lens type."}
-                    </p>
-                    <p className="text-sm text-orange-600 mt-1">
-                      {t("selectDifferentLens") ||
-                        "Please select a different lens type."}
-                    </p>
-                  </div>
-                )
-              ) : (
-                <div className="text-center py-3 text-muted-foreground">
-                  {t("selectLensTypeFirst")}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4 pb-0">
-              <div className="mb-3 flex items-center">
-                <div className="bg-emerald-100 p-1.5 rounded-md">
-                  <PanelTop className="w-4 h-4 text-emerald-600" />
-                </div>
-                <h3 className="font-semibold text-emerald-800 ml-2">
-                  3. {t("selectThickness") || "Select Thickness"}
-                </h3>
-              </div>
-
-              {selectedLensType && selectedCoating ? (
-                loadingThicknesses ? (
-                  <div className="flex justify-center items-center py-4">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
-                  </div>
-                ) : availableThicknesses.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
-                    {availableThicknesses.map((thickness) => (
-                      <Button
-                        key={thickness.id}
+                          <Check className="w-3 h-3 mr-1" />
+                          {t("selected")}
+                        </Badge>
+                      )}
+                      <Badge
                         variant={
                           selectedThickness?.id === thickness.id
-                            ? "default"
-                            : "outline"
+                            ? "outline"
+                            : "secondary"
                         }
-                        className={`
-                          h-auto py-2 px-3 justify-between text-left gap-2 flex-col items-start
-                          ${
-                            selectedThickness?.id === thickness.id
-                              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                              : "hover:bg-emerald-50"
-                          }
-                        `}
-                        onClick={() => handleThicknessSelect(thickness)}
+                        className={
+                          selectedThickness?.id === thickness.id
+                            ? "border-white/30 text-white"
+                            : ""
+                        }
                       >
-                        <div className="flex flex-col">
-                          <span className="font-medium">{thickness.name}</span>
-                          <span className="text-xs opacity-80">
-                            {thickness.description}
-                          </span>
-                        </div>
-                        <div
-                          className={`w-full flex ${
-                            selectedThickness?.id === thickness.id
-                              ? "justify-between"
-                              : "justify-end"
-                          } items-center`}
-                        >
-                          {selectedThickness?.id === thickness.id && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-white/20 text-white"
-                            >
-                              <Check className="w-3 h-3 mr-1" />
-                              {t("selected")}
-                            </Badge>
-                          )}
-                          <Badge
-                            variant={
-                              selectedThickness?.id === thickness.id
-                                ? "outline"
-                                : "secondary"
-                            }
-                            className={
-                              selectedThickness?.id === thickness.id
-                                ? "border-white/30 text-white"
-                                : ""
-                            }
-                          >
-                            {thickness.price.toFixed(2)} {t("kwd")}
-                          </Badge>
-                        </div>
-                      </Button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4 bg-emerald-50/50 rounded-lg mb-3">
-                    <AlertCircle className="mx-auto h-8 w-8 text-emerald-400 mb-2" />
-                    <p className="text-emerald-800 font-medium">
-                      {t("noThicknessAvailable") ||
-                        "No thickness options available for this combination."}
-                    </p>
-                    <p className="text-sm text-emerald-600 mt-1">
-                      {t("selectDifferentCoating") ||
-                        "Please select a different coating."}
-                    </p>
-                  </div>
-                )
-              ) : (
-                <div className="text-center py-3 text-muted-foreground">
-                  {selectedLensType
-                    ? t("selectCoatingFirst") || "Select a coating first"
-                    : t("selectLensTypeFirst")}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </>
-      )}
+                        {thickness.price.toFixed(2)} {t("kwd")}
+                      </Badge>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 bg-emerald-50/50 rounded-lg mb-3">
+                <AlertCircle className="mx-auto h-8 w-8 text-emerald-400 mb-2" />
+                <p className="text-emerald-800 font-medium">
+                  {t("noThicknessAvailable") ||
+                    "No thickness options available for this combination."}
+                </p>
+                <p className="text-sm text-emerald-600 mt-1">
+                  {t("selectDifferentCoating") ||
+                    "Please select a different coating."}
+                </p>
+              </div>
+            )
+          ) : (
+            <div className="text-center py-3 text-muted-foreground">
+              {selectedLensType
+                ? t("selectCoatingFirst") || "Select a coating first"
+                : t("selectLensTypeFirst")}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
