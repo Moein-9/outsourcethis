@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import {
   LensType,
@@ -115,13 +115,58 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     "distance-reading" | "progressive" | "bifocal"
   >("distance-reading");
 
-  // Loading states
-  const isLoadingAnyData =
-    externalLoading ||
-    isLoadingLensTypes ||
-    isLoadingLensCoatings ||
-    isLoadingLensThicknesses ||
-    isLoadingLensPricingCombinations;
+  // Move these computations to useMemo to prevent recalculations on every render
+  const isLoadingAnyData = useMemo(
+    () =>
+      externalLoading ||
+      isLoadingLensTypes ||
+      isLoadingLensCoatings ||
+      isLoadingLensThicknesses ||
+      isLoadingLensPricingCombinations,
+    [
+      externalLoading,
+      isLoadingLensTypes,
+      isLoadingLensCoatings,
+      isLoadingLensThicknesses,
+      isLoadingLensPricingCombinations,
+    ]
+  );
+
+  // Replace the conditional rendering check with useMemo
+  const isLensDataLoaded = useMemo(
+    () =>
+      !isLoadingLensTypes &&
+      storeLensTypes.length > 0 &&
+      !isLoadingLensCoatings &&
+      storeLensCoatings.length > 0 &&
+      !isLoadingLensThicknesses &&
+      storeLensThicknesses.length > 0 &&
+      !isLoadingLensPricingCombinations &&
+      storePricingCombinations.length > 0,
+    [
+      isLoadingLensTypes,
+      storeLensTypes.length,
+      isLoadingLensCoatings,
+      storeLensCoatings.length,
+      isLoadingLensThicknesses,
+      storeLensThicknesses.length,
+      isLoadingLensPricingCombinations,
+      storePricingCombinations.length,
+    ]
+  );
+
+  const isExternalDataLoaded = useMemo(
+    () =>
+      externalCombinations &&
+      externalCombinations.length > 0 &&
+      !externalLoading,
+    [externalCombinations, externalLoading]
+  );
+
+  const isDataLoaded = useMemo(
+    () => isExternalDataLoaded || isLensDataLoaded,
+    [isExternalDataLoaded, isLensDataLoaded]
+  );
 
   // Use external pricing combinations if provided, otherwise use store data
   useEffect(() => {
@@ -177,7 +222,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   }, [externalCombinations, storeLensCoatings, storeLensThicknesses]);
 
-  const hasAddValues = React.useMemo(() => {
+  const hasAddValues = useMemo(() => {
     if (!rx) return false;
 
     const isValidAddValue = (value?: string) => {
@@ -201,7 +246,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     return isValidAddValue(rx.addOD) || isValidAddValue(rx.addOS);
   }, [rx]);
 
-  const filteredLensTypes = React.useMemo(() => {
+  const filteredLensTypes = useMemo(() => {
     if (hasAddValues) {
       return lensTypes;
     } else {
@@ -211,23 +256,27 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     }
   }, [lensTypes, hasAddValues]);
 
-  const getCategory = (
-    lensType: LensType | null
-  ): "distance-reading" | "progressive" | "bifocal" => {
-    if (!lensType) return "distance-reading";
+  const getCategory = useMemo(
+    () =>
+      (
+        lensType: LensType | null
+      ): "distance-reading" | "progressive" | "bifocal" => {
+        if (!lensType) return "distance-reading";
 
-    switch (lensType.type) {
-      case "progressive":
-        return "progressive";
-      case "bifocal":
-        return "bifocal";
-      case "distance":
-      case "reading":
-      case "sunglasses":
-      default:
-        return "distance-reading";
-    }
-  };
+        switch (lensType.type) {
+          case "progressive":
+            return "progressive";
+          case "bifocal":
+            return "bifocal";
+          case "distance":
+          case "reading":
+          case "sunglasses":
+          default:
+            return "distance-reading";
+        }
+      },
+    []
+  );
 
   useEffect(() => {
     if (initialLensType) {
@@ -255,6 +304,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     initialThickness,
     hasAddValues,
     onSelectLensType,
+    getCategory,
   ]);
 
   useEffect(() => {
@@ -323,6 +373,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     pricingCombinations,
     externalCombinations,
     storeLensCoatings,
+    getCategory,
   ]);
 
   // Update available thicknesses when coating changes
@@ -369,6 +420,7 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
     pricingCombinations,
     externalCombinations,
     storeLensThicknesses,
+    getCategory,
   ]);
 
   // Get the final combination price when all three components are selected
@@ -482,22 +534,6 @@ export const LensSelector: React.FC<LensSelectorProps> = ({
   };
 
   const dirClass = language === "ar" ? "rtl" : "ltr";
-
-  // Check if data is fully loaded for each component
-  const isLensDataLoaded =
-    !isLoadingLensTypes &&
-    storeLensTypes.length > 0 &&
-    !isLoadingLensCoatings &&
-    storeLensCoatings.length > 0 &&
-    !isLoadingLensThicknesses &&
-    storeLensThicknesses.length > 0 &&
-    !isLoadingLensPricingCombinations &&
-    storePricingCombinations.length > 0;
-
-  const isExternalDataLoaded =
-    externalCombinations && externalCombinations.length > 0 && !externalLoading;
-
-  const isDataLoaded = isExternalDataLoaded || isLensDataLoaded;
 
   if (skipLens) {
     return (
