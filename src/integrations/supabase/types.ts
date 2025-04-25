@@ -51,6 +51,192 @@ export type Database = {
         }
         Relationships: []
       }
+      patients: {
+        Row: {
+          id: string
+          full_name: string
+          phone_number: string
+          date_of_birth: string | null
+          skip_dob: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          full_name: string
+          phone_number: string
+          date_of_birth?: string | null
+          skip_dob?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          full_name?: string
+          phone_number?: string
+          date_of_birth?: string | null
+          skip_dob?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      patient_notes: {
+        Row: {
+          id: string
+          patient_id: string
+          note_text: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          patient_id: string
+          note_text: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          patient_id?: string
+          note_text?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_notes_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      glasses_prescriptions: {
+        Row: {
+          id: string
+          patient_id: string
+          prescription_date: string
+          od_sph: string | null
+          od_cyl: string | null
+          od_axis: string | null
+          od_add: string | null
+          od_pd: string | null
+          os_sph: string | null
+          os_cyl: string | null
+          os_axis: string | null
+          os_add: string | null
+          os_pd: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          patient_id: string
+          prescription_date: string
+          od_sph?: string | null
+          od_cyl?: string | null
+          od_axis?: string | null
+          od_add?: string | null
+          od_pd?: string | null
+          os_sph?: string | null
+          os_cyl?: string | null
+          os_axis?: string | null
+          os_add?: string | null
+          os_pd?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          patient_id?: string
+          prescription_date?: string
+          od_sph?: string | null
+          od_cyl?: string | null
+          od_axis?: string | null
+          od_add?: string | null
+          od_pd?: string | null
+          os_sph?: string | null
+          os_cyl?: string | null
+          os_axis?: string | null
+          os_add?: string | null
+          os_pd?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glasses_prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      contact_lens_prescriptions: {
+        Row: {
+          id: string
+          patient_id: string
+          prescription_date: string
+          od_sphere: string | null
+          od_cylinder: string | null
+          od_axis: string | null
+          od_base_curve: string | null
+          od_diameter: string | null
+          os_sphere: string | null
+          os_cylinder: string | null
+          os_axis: string | null
+          os_base_curve: string | null
+          os_diameter: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          patient_id: string
+          prescription_date: string
+          od_sphere?: string | null
+          od_cylinder?: string | null
+          od_axis?: string | null
+          od_base_curve?: string | null
+          od_diameter?: string | null
+          os_sphere?: string | null
+          os_cylinder?: string | null
+          os_axis?: string | null
+          os_base_curve?: string | null
+          os_diameter?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          patient_id?: string
+          prescription_date?: string
+          od_sphere?: string | null
+          od_cylinder?: string | null
+          od_axis?: string | null
+          od_base_curve?: string | null
+          od_diameter?: string | null
+          os_sphere?: string | null
+          os_cylinder?: string | null
+          os_axis?: string | null
+          os_base_curve?: string | null
+          os_diameter?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_lens_prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       invoice_records: {
         Row: {
           created_at: string | null
@@ -253,6 +439,111 @@ export type Database = {
           location_id?: string | null
           reason?: string | null
           refund_id?: string
+        }
+        Relationships: []
+      }
+      frames: {
+        Row: {
+          frameId: string
+          brand: string
+          model: string
+          color: string
+          size: string
+          price: number
+          qty: number
+          createdAt: string
+        }
+        Insert: {
+          frameId?: string
+          brand: string
+          model: string
+          color: string
+          size: string
+          price: number
+          qty: number
+          createdAt?: string
+        }
+        Update: {
+          frameId?: string
+          brand?: string
+          model?: string
+          color?: string
+          size?: string
+          price?: number
+          qty?: number
+          createdAt?: string
+        }
+        Relationships: []
+      }
+      contact_lenses: {
+        Row: {
+          contact_lens_id: string
+          brand: string
+          type: string
+          bc: string
+          diameter: string
+          power: string
+          price: number
+          qty: number
+          color: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          contact_lens_id?: string
+          brand: string
+          type: string
+          bc: string
+          diameter: string
+          power: string
+          price: number
+          qty: number
+          color?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_lens_id?: string
+          brand?: string
+          type?: string
+          bc?: string
+          diameter?: string
+          power?: string
+          price?: number
+          qty?: number
+          color?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          price: number
+          category: "exam" | "repair" | "other"
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          price: number
+          category: "exam" | "repair" | "other"
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          price?: number
+          category?: "exam" | "repair" | "other"
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

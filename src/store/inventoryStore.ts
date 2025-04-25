@@ -1,5 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import * as frameService from '@/services/frameService';
+import * as serviceService from '@/services/serviceService';
+import * as lensService from '@/services/lensService';
+import { Service } from '@/services/serviceService';
 
 export interface FrameItem {
   frameId: string;
@@ -67,29 +71,40 @@ export interface LensPricingCombination {
 
 interface InventoryState {
   frames: FrameItem[];
+  isLoadingFrames: boolean;
   lensTypes: LensType[];
+  isLoadingLensTypes: boolean;
   lensCoatings: LensCoating[];
+  isLoadingLensCoatings: boolean;
   lensThicknesses: LensThickness[];
+  isLoadingLensThicknesses: boolean;
   contactLenses: ContactLensItem[];
   services: ServiceItem[];
   lensPricingCombinations: LensPricingCombination[];
+  isLoadingLensPricingCombinations: boolean;
+  isLoadingServices: boolean;
   
-  addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => string;
-  updateFrameQuantity: (frameId: string, newQty: number) => void;
-  searchFrames: (query: string) => FrameItem[];
-  getFrameById: (id: string) => FrameItem | undefined;
-  bulkImportFrames: (frames: Array<Omit<FrameItem, "frameId" | "createdAt">>) => { added: number; duplicates: number };
+  fetchFrames: () => Promise<void>;
+  addFrame: (frame: Omit<FrameItem, "frameId" | "createdAt">) => Promise<string | null>;
+  updateFrameQuantity: (frameId: string, newQty: number) => Promise<boolean>;
+  searchFrames: (query: string) => Promise<FrameItem[]>;
+  getFrameById: (id: string) => Promise<FrameItem | null>;
+  bulkImportFrames: (frames: Array<Omit<FrameItem, "frameId" | "createdAt">>) => Promise<{ added: number; duplicates: number; errors: number }>;
+  updateFrame: (frameId: string, updates: Partial<Omit<FrameItem, "frameId" | "createdAt">>) => Promise<boolean>;
   
+  fetchLensTypes: () => Promise<void>;
   addLensType: (lens: Omit<LensType, "id">) => string;
   updateLensType: (id: string, lens: Partial<Omit<LensType, "id">>) => void;
   deleteLensType: (id: string) => void;
   
+  fetchLensCoatings: () => Promise<void>;
   addLensCoating: (coating: Omit<LensCoating, "id">) => string;
   updateLensCoating: (id: string, coating: Partial<Omit<LensCoating, "id">>) => void;
   deleteLensCoating: (id: string) => void;
   getLensCoatingsByCategory: (category: LensCoating['category']) => LensCoating[];
   getAvailableCoatings: (lensTypeId: string, category: LensCoating['category']) => LensCoating[];
   
+  fetchLensThicknesses: () => Promise<void>;
   addLensThickness: (thickness: Omit<LensThickness, "id">) => string;
   updateLensThickness: (id: string, thickness: Partial<Omit<LensThickness, "id">>) => void;
   deleteLensThickness: (id: string) => void;
@@ -101,12 +116,13 @@ interface InventoryState {
   deleteContactLens: (id: string) => void;
   searchContactLenses: (query: string) => ContactLensItem[];
   
-  addService: (service: Omit<ServiceItem, "id">) => string;
-  updateService: (id: string, service: Partial<Omit<ServiceItem, "id">>) => void;
-  deleteService: (id: string) => void;
-  getServiceById: (id: string) => ServiceItem | undefined;
-  getServicesByCategory: (category: ServiceItem['category']) => ServiceItem[];
+  addService: (service: Omit<ServiceItem, "id">) => Promise<string>;
+  updateService: (id: string, service: Partial<Omit<ServiceItem, "id">>) => Promise<boolean>;
+  deleteService: (id: string) => Promise<boolean>;
+  getServiceById: (id: string) => Promise<ServiceItem | null>;
+  getServicesByCategory: (category: ServiceItem['category']) => Promise<ServiceItem[]>;
   
+  fetchLensPricingCombinations: () => Promise<void>;
   addLensPricingCombination: (combination: Omit<LensPricingCombination, "id">) => string;
   updateLensPricingCombination: (id: string, combination: Partial<Omit<LensPricingCombination, "id">>) => void;
   deleteLensPricingCombination: (id: string) => void;
@@ -115,247 +131,119 @@ interface InventoryState {
   
   cleanupSamplePhotochromicCoatings: () => void;
   resetLensPricing: () => void;
+  
+  fetchServices: () => Promise<void>;
 }
 
 export const useInventoryStore = create<InventoryState>()(
   persist(
     (set, get) => ({
       frames: [],
-      lensTypes: [
-        { id: "lens1", name: "نظارات طبية للقراءة", type: "reading" },
-        { id: "lens2", name: "نظارات للنظر البعيد", type: "distance" },
-        { id: "lens3", name: "عدسات تقدمية", type: "progressive" },
-        { id: "lens4", name: "عدسات ثنائية", type: "bifocal" },
-        { id: "lens5", name: "عدسات شمسية", type: "sunglasses" },
-        { id: "lens6", name: "عدسات تقدمية PRO", type: "progressive" }
-      ],
-      lensCoatings: [
-        // Basic lens coatings for Single Vision
-        { 
-          id: "basic-sv", 
-          name: "Basic (عادي)", 
-          price: 0, 
-          description: "Basic coating for single vision lenses", 
-          category: "distance-reading" 
-        },
-        // Filter lens coatings for Single Vision
-        { 
-          id: "filter-sv", 
-          name: "Filter (فلتر)", 
-          price: 0, 
-          description: "Filter coating for single vision lenses", 
-          category: "distance-reading" 
-        },
-        // Super Filter lens coatings for Single Vision
-        { 
-          id: "super-filter-sv", 
-          name: "Super Filter (سوبر فلتر)", 
-          price: 0, 
-          description: "Super filter coating for single vision lenses", 
-          category: "distance-reading" 
-        },
-        
-        // Basic lens coatings for Progressive
-        { 
-          id: "basic-prog", 
-          name: "Basic (عادي)", 
-          price: 0, 
-          description: "Basic coating for progressive lenses", 
-          category: "progressive" 
-        },
-        // Filter lens coatings for Progressive
-        { 
-          id: "filter-prog", 
-          name: "Filter (فلتر)", 
-          price: 0, 
-          description: "Filter coating for progressive lenses", 
-          category: "progressive" 
-        },
-        
-        // Basic lens coatings for Bifocal
-        { 
-          id: "basic-bif", 
-          name: "Basic (عادي)", 
-          price: 0, 
-          description: "Basic coating for bifocal lenses", 
-          category: "bifocal" 
-        },
-        // Filter lens coatings for Bifocal
-        { 
-          id: "filter-bif", 
-          name: "Filter (فلتر)", 
-          price: 0, 
-          description: "Filter coating for bifocal lenses", 
-          category: "bifocal" 
-        },
-        
-        // Photochromic lens coatings
-        { 
-          id: "photochromic-sv", 
-          name: "Photochromic (فوتوكروميك)", 
-          price: 0, 
-          description: "Photochromic coating for single vision lenses", 
-          category: "distance-reading",
-          isPhotochromic: true,
-          availableColors: ["Brown", "Gray", "Green"]
-        },
-        { 
-          id: "photochromic-prog", 
-          name: "Photochromic (فوتوكروميك)", 
-          price: 0, 
-          description: "Photochromic coating for progressive lenses", 
-          category: "progressive",
-          isPhotochromic: true,
-          availableColors: ["Brown", "Gray", "Green"]
-        },
-        
-        // Sunglasses coatings
-        { 
-          id: "tinted-sun", 
-          name: "Tinted (ملون)", 
-          price: 0, 
-          description: "Standard tinted sunglasses coating", 
-          category: "sunglasses" 
-        },
-        { 
-          id: "polarized-sun", 
-          name: "Polarized (مستقطب)", 
-          price: 0, 
-          description: "Polarized coating for sunglasses", 
-          category: "sunglasses" 
-        },
-        { 
-          id: "mirrored-sun", 
-          name: "Mirrored (مرآة)", 
-          price: 0, 
-          description: "Mirrored coating for sunglasses", 
-          category: "sunglasses",
-          availableColors: ["Silver", "Blue", "Gold", "Red"] 
-        }
-      ],
-      lensThicknesses: [
-        // Single Vision thicknesses
-        { id: "sv-156", name: "1.56", price: 0, description: "Standard thickness (1.56)", category: "distance-reading" },
-        { id: "sv-160", name: "1.60", price: 0, description: "Thin lens (1.60)", category: "distance-reading" },
-        { id: "sv-167", name: "1.67", price: 0, description: "Super thin lens (1.67)", category: "distance-reading" },
-        { id: "sv-174", name: "1.74", price: 0, description: "Ultra thin lens (1.74)", category: "distance-reading" },
-        { id: "sv-poly", name: "Polycarbonate", price: 0, description: "Polycarbonate material", category: "distance-reading" },
-        
-        // Progressive thicknesses
-        { id: "prog-156", name: "1.56", price: 0, description: "Standard thickness for progressive (1.56)", category: "progressive" },
-        { id: "prog-160", name: "1.60", price: 0, description: "Thin lens for progressive (1.60)", category: "progressive" },
-        { id: "prog-167", name: "1.67", price: 0, description: "Super thin lens for progressive (1.67)", category: "progressive" },
-        { id: "prog-174", name: "1.74", price: 0, description: "Ultra thin lens for progressive (1.74)", category: "progressive" },
-        { id: "prog-poly", name: "Polycarbonate", price: 0, description: "Polycarbonate material for progressive", category: "progressive" },
-        
-        // Bifocal thicknesses
-        { id: "bif-basic", name: "Basic", price: 0, description: "Standard thickness for bifocal", category: "bifocal" },
-      ],
-      contactLenses: [
-        { id: "cl1", brand: "Acuvue", type: "Daily", bc: "8.5", diameter: "14.2", power: "-2.00", price: 25, qty: 30 },
-        { id: "cl2", brand: "Biofinty", type: "Monthly", bc: "8.6", diameter: "14.0", power: "-3.00", price: 20, qty: 12 },
-        { id: "cl3", brand: "Air Optix", type: "Monthly", bc: "8.4", diameter: "14.2", power: "+1.50", price: 22, qty: 8 }
-      ],
-      services: [
-        { 
-          id: "service1", 
-          name: "Eye Exam", 
-          description: "Standard eye examination service to evaluate eye health and vision.", 
-          price: 3, 
-          category: "exam" 
-        }
-      ],
-      lensPricingCombinations: [
-        // Initial empty array - will be populated with updated pricing
-      ],
+      isLoadingFrames: false,
+      lensTypes: [],
+      isLoadingLensTypes: false,
+      lensCoatings: [],
+      isLoadingLensCoatings: false,
+      lensThicknesses: [],
+      isLoadingLensThicknesses: false,
+      contactLenses: [],
+      services: [],
+      isLoadingServices: false,
+      lensPricingCombinations: [],
+      isLoadingLensPricingCombinations: false,
       
-      addFrame: (frame) => {
-        const frameId = `FR${Date.now()}`;
-        const createdAt = new Date().toISOString();
+      fetchFrames: async () => {
+        set({ isLoadingFrames: true });
+        try {
+          const frames = await frameService.getAllFrames();
+          set({ frames, isLoadingFrames: false });
+        } catch (error) {
+          console.error("Error fetching frames:", error);
+          set({ isLoadingFrames: false });
+        }
+      },
+      
+      addFrame: async (frame) => {
+        const frameId = await frameService.addFrame(frame);
         
-        set((state) => ({
-          frames: [
-            ...state.frames,
-            { ...frame, frameId, createdAt }
-          ]
-        }));
+        if (frameId) {
+          // Add to local state if successfully added to Supabase
+          const newFrame: FrameItem = {
+            ...frame,
+            frameId,
+            createdAt: new Date().toISOString()
+          };
+          
+          set((state) => ({
+            frames: [...state.frames, newFrame]
+          }));
+        }
         
         return frameId;
       },
       
-      bulkImportFrames: (frames) => {
-        const currentFrames = get().frames;
-        const newFrames = [];
-        let duplicateCount = 0;
+      bulkImportFrames: async (frames) => {
+        const result = await frameService.bulkImportFrames(frames);
         
-        // Track existing frames by a combination key for faster duplicate checking
-        const existingFrameCombinations = new Map();
-        currentFrames.forEach(frame => {
-          const key = `${frame.brand.toLowerCase()}|${frame.model.toLowerCase()}|${frame.color.toLowerCase()}|${frame.size.toLowerCase()}`;
-          existingFrameCombinations.set(key, true);
-        });
+        // Refresh the frames list after import
+        await get().fetchFrames();
         
-        // Process each frame
-        for (const frame of frames) {
-          // Check for duplicates using the map (much faster for large datasets)
-          const key = `${frame.brand.toLowerCase()}|${frame.model.toLowerCase()}|${frame.color.toLowerCase()}|${frame.size.toLowerCase()}`;
-          
-          if (existingFrameCombinations.has(key)) {
-            duplicateCount++;
-            continue;
-          }
-          
-          // Generate unique ID with timestamp and random string
-          const frameId = `FR${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-          const createdAt = new Date().toISOString();
-          
-          newFrames.push({
-            ...frame,
-            frameId,
-            createdAt
-          });
-          
-          // Add to map to catch duplicates within the import batch too
-          existingFrameCombinations.set(key, true);
-        }
+        return result;
+      },
+      
+      updateFrameQuantity: async (frameId, newQty) => {
+        const success = await frameService.updateFrameQuantity(frameId, newQty);
         
-        // Add all the new frames at once
-        if (newFrames.length > 0) {
+        if (success) {
           set((state) => ({
-            frames: [...state.frames, ...newFrames]
+            frames: state.frames.map(frame => 
+              frame.frameId === frameId 
+                ? { ...frame, qty: newQty } 
+                : frame
+            )
           }));
         }
         
-        return {
-          added: newFrames.length,
-          duplicates: duplicateCount
-        };
+        return success;
       },
       
-      updateFrameQuantity: (frameId, newQty) => {
-        set((state) => ({
-          frames: state.frames.map(frame => 
-            frame.frameId === frameId 
-              ? { ...frame, qty: newQty } 
-              : frame
-          )
-        }));
-      },
-      
-      searchFrames: (query) => {
-        if (!query) return get().frames;
+      searchFrames: async (query) => {
+        // If empty query, return all loaded frames
+        if (!query.trim()) return get().frames;
         
-        const q = query.toLowerCase();
-        return get().frames.filter(frame => 
-          frame.brand.toLowerCase().includes(q) || 
-          frame.model.toLowerCase().includes(q) || 
-          frame.color.toLowerCase().includes(q) || 
-          frame.size.toLowerCase().includes(q)
-        );
+        // Get results from Supabase
+        return await frameService.searchFrames(query);
       },
       
-      getFrameById: (id) => {
-        return get().frames.find(frame => frame.frameId === id);
+      getFrameById: async (id) => {
+        return await frameService.getFrameById(id);
+      },
+      
+      updateFrame: async (frameId, updates) => {
+        const success = await frameService.updateFrame(frameId, updates);
+        
+        if (success) {
+          set((state) => ({
+            frames: state.frames.map(frame => 
+              frame.frameId === frameId 
+                ? { ...frame, ...updates } 
+                : frame
+            )
+          }));
+        }
+        
+        return success;
+      },
+      
+      fetchLensTypes: async () => {
+        set({ isLoadingLensTypes: true });
+        try {
+          const lensTypes = await lensService.getAllLensTypes();
+          set({ lensTypes, isLoadingLensTypes: false });
+        } catch (error) {
+          console.error("Error fetching lens types:", error);
+          set({ isLoadingLensTypes: false });
+        }
       },
       
       addLensType: (lens) => {
@@ -382,41 +270,23 @@ export const useInventoryStore = create<InventoryState>()(
         }));
       },
       
+      fetchLensCoatings: async () => {
+        set({ isLoadingLensCoatings: true });
+        try {
+          const lensCoatings = await lensService.getAllLensCoatings();
+          set({ lensCoatings, isLoadingLensCoatings: false });
+        } catch (error) {
+          console.error("Error fetching lens coatings:", error);
+          set({ isLoadingLensCoatings: false });
+        }
+      },
+      
       addLensCoating: (coating) => {
         const id = `coat${Date.now()}`;
         
         set((state) => ({
           lensCoatings: [...state.lensCoatings, { ...coating, id }]
         }));
-        
-        if (coating.category === "sunglasses") {
-          const store = get();
-          const sunglassesLensType = store.lensTypes.find(lt => lt.type === "sunglasses");
-          
-          if (sunglassesLensType) {
-            const basicThickness = store.lensThicknesses.find(t => t.id === "sv-156");
-            
-            if (basicThickness) {
-              const defaultPrice = coating.price || 25;
-              store.addLensPricingCombination({
-                lensTypeId: sunglassesLensType.id,
-                coatingId: id,
-                thicknessId: basicThickness.id,
-                price: defaultPrice
-              });
-              
-              const thinnerThickness = store.lensThicknesses.find(t => t.id === "sv-160");
-              if (thinnerThickness) {
-                store.addLensPricingCombination({
-                  lensTypeId: sunglassesLensType.id,
-                  coatingId: id,
-                  thicknessId: thinnerThickness.id,
-                  price: defaultPrice + 10
-                });
-              }
-            }
-          }
-        }
         
         return id;
       },
@@ -458,7 +328,18 @@ export const useInventoryStore = create<InventoryState>()(
           coating => availableCoatingIds.includes(coating.id) && coating.category === category
         );
         
-        return availableCoatings;
+        return availableCoatings.length > 0 ? availableCoatings : allCoatingsByCategory;
+      },
+      
+      fetchLensThicknesses: async () => {
+        set({ isLoadingLensThicknesses: true });
+        try {
+          const lensThicknesses = await lensService.getAllLensThicknesses();
+          set({ lensThicknesses, isLoadingLensThicknesses: false });
+        } catch (error) {
+          console.error("Error fetching lens thicknesses:", error);
+          set({ isLoadingLensThicknesses: false });
+        }
       },
       
       addLensThickness: (thickness) => {
@@ -491,6 +372,7 @@ export const useInventoryStore = create<InventoryState>()(
       
       getAvailableThicknesses: (lensTypeId, coatingId, category) => {
         const combinations = get().lensPricingCombinations;
+        const allThicknessesByCategory = get().lensThicknesses.filter(t => t.category === category);
         
         const availableThicknessIds = [...new Set(
           combinations
@@ -502,7 +384,7 @@ export const useInventoryStore = create<InventoryState>()(
           thickness => availableThicknessIds.includes(thickness.id) && thickness.category === category
         );
         
-        return availableThicknesses;
+        return availableThicknesses.length > 0 ? availableThicknesses : allThicknessesByCategory;
       },
       
       addContactLens: (lens) => {
@@ -542,36 +424,123 @@ export const useInventoryStore = create<InventoryState>()(
         );
       },
       
-      addService: (service) => {
-        const id = `service${Date.now()}`;
-        
-        set((state) => ({
-          services: [...state.services, { ...service, id }]
-        }));
-        
-        return id;
+      addService: async (service) => {
+        try {
+          const serviceId = await serviceService.addService({
+            name: service.name,
+            description: service.description || null,
+            price: service.price,
+            category: service.category
+          });
+          
+          // Add to local state after successful Supabase add
+          const newService: ServiceItem = {
+            ...service,
+            id: serviceId
+          };
+          
+          set((state) => ({
+            services: [...state.services, newService]
+          }));
+          
+          return serviceId;
+        } catch (error) {
+          console.error("Error adding service:", error);
+          throw error;
+        }
       },
       
-      updateService: (id, service) => {
-        set((state) => ({
-          services: state.services.map(item => 
-            item.id === id ? { ...item, ...service } : item
-          )
-        }));
+      updateService: async (id, updates) => {
+        try {
+          // Create a properly typed updates object
+          const serviceUpdates: Partial<Omit<Service, 'id' | 'created_at' | 'updated_at'>> = {
+            ...(updates.name !== undefined && { name: updates.name }),
+            ...(updates.description !== undefined && { description: updates.description || null }),
+            ...(updates.price !== undefined && { price: updates.price }),
+            ...(updates.category !== undefined && { category: updates.category })
+          };
+          
+          const success = await serviceService.updateService(id, serviceUpdates);
+          
+          if (success) {
+            set((state) => ({
+              services: state.services.map(item => 
+                item.id === id ? { ...item, ...updates } : item
+              )
+            }));
+          }
+          
+          return success;
+        } catch (error) {
+          console.error(`Error updating service with ID ${id}:`, error);
+          throw error;
+        }
       },
       
-      deleteService: (id) => {
-        set((state) => ({
-          services: state.services.filter(item => item.id !== id)
-        }));
+      deleteService: async (id) => {
+        try {
+          const success = await serviceService.deleteService(id);
+          
+          if (success) {
+            set((state) => ({
+              services: state.services.filter(item => item.id !== id)
+            }));
+          }
+          
+          return success;
+        } catch (error) {
+          console.error(`Error deleting service with ID ${id}:`, error);
+          throw error;
+        }
       },
       
-      getServiceById: (id) => {
-        return get().services.find(service => service.id === id);
+      getServiceById: async (id) => {
+        try {
+          const service = await serviceService.getServiceById(id);
+          
+          if (!service) {
+            return null;
+          }
+          
+          return {
+            id: service.id,
+            name: service.name,
+            description: service.description || "",
+            price: service.price,
+            category: service.category
+          };
+        } catch (error) {
+          console.error(`Error getting service with ID ${id}:`, error);
+          throw error;
+        }
       },
       
-      getServicesByCategory: (category) => {
-        return get().services.filter(service => service.category === category);
+      getServicesByCategory: async (category) => {
+        try {
+          const services = await serviceService.getServicesByCategory(category);
+          
+          return services.map(service => ({
+            id: service.id,
+            name: service.name,
+            description: service.description || "",
+            price: service.price,
+            category: service.category
+          }));
+        } catch (error) {
+          console.error(`Error getting services with category ${category}:`, error);
+          throw error;
+        }
+      },
+      
+      fetchLensPricingCombinations: async () => {
+        set({ isLoadingLensPricingCombinations: true });
+        try {
+          const combinations = await lensService.getAllLensPricingCombinations();
+          set({ lensPricingCombinations: combinations, isLoadingLensPricingCombinations: false });
+        } catch (error) {
+          console.error("Error fetching lens pricing combinations:", error);
+          set({ isLoadingLensPricingCombinations: false });
+        }
       },
       
       addLensPricingCombination: (combination) => {
@@ -640,122 +609,74 @@ export const useInventoryStore = create<InventoryState>()(
       },
       
       resetLensPricing: () => {
-        const newPricingCombinations: LensPricingCombination[] = [
-          // Single Vision - Basic Lenses
-          { id: "sv-basic-156", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-156", price: 8 },
-          { id: "sv-basic-160", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-160", price: 18 },
-          { id: "sv-basic-167", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-167", price: 30 },
-          { id: "sv-basic-174", lensTypeId: "lens2", coatingId: "basic-sv", thicknessId: "sv-174", price: 40 },
-          
-          // Single Vision - Filter Lenses
-          { id: "sv-filter-156", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-156", price: 13 },
-          { id: "sv-filter-poly", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-poly", price: 18 },
-          { id: "sv-filter-160", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-160", price: 20 },
-          { id: "sv-filter-167", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-167", price: 38 },
-          { id: "sv-filter-174", lensTypeId: "lens2", coatingId: "filter-sv", thicknessId: "sv-174", price: 43 },
-          
-          // Single Vision - Super Filter
-          { id: "sv-superfilter-156", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-156", price: 18 },
-          { id: "sv-superfilter-poly", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-poly", price: 25 },
-          { id: "sv-superfilter-160", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-160", price: 28 },
-          { id: "sv-superfilter-167", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-167", price: 35 },
-          { id: "sv-superfilter-174", lensTypeId: "lens2", coatingId: "super-filter-sv", thicknessId: "sv-174", price: 40 },
-          
-          // Reading - Basic Lenses
-          { id: "read-basic-156", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-156", price: 8 },
-          { id: "read-basic-160", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-160", price: 18 },
-          { id: "read-basic-167", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-167", price: 30 },
-          { id: "read-basic-174", lensTypeId: "lens1", coatingId: "basic-sv", thicknessId: "sv-174", price: 40 },
-          
-          // Reading - Filter Lenses
-          { id: "read-filter-156", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-156", price: 13 },
-          { id: "read-filter-poly", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-poly", price: 18 },
-          { id: "read-filter-160", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-160", price: 20 },
-          { id: "read-filter-167", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-167", price: 38 },
-          { id: "read-filter-174", lensTypeId: "lens1", coatingId: "filter-sv", thicknessId: "sv-174", price: 43 },
-          
-          // Reading - Super Filter
-          { id: "read-superfilter-156", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-156", price: 18 },
-          { id: "read-superfilter-poly", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-poly", price: 25 },
-          { id: "read-superfilter-160", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-160", price: 28 },
-          { id: "read-superfilter-167", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-167", price: 35 },
-          { id: "read-superfilter-174", lensTypeId: "lens1", coatingId: "super-filter-sv", thicknessId: "sv-174", price: 40 },
-          
-          // Progressive - Basic
-          { id: "prog-basic-156", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-156", price: 35 },
-          { id: "prog-basic-160", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-160", price: 50 },
-          { id: "prog-basic-167", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-167", price: 80 },
-          { id: "prog-basic-174", lensTypeId: "lens3", coatingId: "basic-prog", thicknessId: "prog-174", price: 100 },
-          
-          // Progressive - Filter
-          { id: "prog-filter-156", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-156", price: 50 },
-          { id: "prog-filter-poly", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-poly", price: 70 },
-          { id: "prog-filter-160", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-160", price: 85 },
-          { id: "prog-filter-167", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-167", price: 114 },
-          { id: "prog-filter-174", lensTypeId: "lens3", coatingId: "filter-prog", thicknessId: "prog-174", price: 200 },
-          
-          // PRO Progressive - Basic
-          { id: "prog-pro-basic-156", lensTypeId: "lens6", coatingId: "basic-prog", thicknessId: "prog-156", price: 55 },
-          { id: "prog-pro-basic-poly", lensTypeId: "lens6", coatingId: "basic-prog", thicknessId: "prog-poly", price: 85 },
-          { id: "prog-pro-basic-160", lensTypeId: "lens6", coatingId: "basic-prog", thicknessId: "prog-160", price: 100 },
-          { id: "prog-pro-basic-167", lensTypeId: "lens6", coatingId: "basic-prog", thicknessId: "prog-167", price: 140 },
-          { id: "prog-pro-basic-174", lensTypeId: "lens6", coatingId: "basic-prog", thicknessId: "prog-174", price: 180 },
-          
-          // PRO Progressive - Filter
-          { id: "prog-pro-filter-156", lensTypeId: "lens6", coatingId: "filter-prog", thicknessId: "prog-156", price: 55 },
-          { id: "prog-pro-filter-poly", lensTypeId: "lens6", coatingId: "filter-prog", thicknessId: "prog-poly", price: 85 },
-          { id: "prog-pro-filter-160", lensTypeId: "lens6", coatingId: "filter-prog", thicknessId: "prog-160", price: 100 },
-          { id: "prog-pro-filter-167", lensTypeId: "lens6", coatingId: "filter-prog", thicknessId: "prog-167", price: 140 },
-          { id: "prog-pro-filter-174", lensTypeId: "lens6", coatingId: "filter-prog", thicknessId: "prog-174", price: 180 },
-          
-          // Bifocal
-          { id: "bif-basic", lensTypeId: "lens4", coatingId: "basic-bif", thicknessId: "bif-basic", price: 18 },
-          { id: "bif-filter", lensTypeId: "lens4", coatingId: "filter-bif", thicknessId: "bif-basic", price: 28 },
-          
-          // Sunglasses
-          { id: "sun-tinted-156", lensTypeId: "lens5", coatingId: "tinted-sun", thicknessId: "sv-156", price: 15 },
-          { id: "sun-tinted-160", lensTypeId: "lens5", coatingId: "tinted-sun", thicknessId: "sv-160", price: 25 },
-          { id: "sun-polarized-156", lensTypeId: "lens5", coatingId: "polarized-sun", thicknessId: "sv-156", price: 30 },
-          { id: "sun-polarized-160", lensTypeId: "lens5", coatingId: "polarized-sun", thicknessId: "sv-160", price: 40 },
-          { id: "sun-mirrored-156", lensTypeId: "lens5", coatingId: "mirrored-sun", thicknessId: "sv-156", price: 35 },
-          { id: "sun-mirrored-160", lensTypeId: "lens5", coatingId: "mirrored-sun", thicknessId: "sv-160", price: 45 },
-          
-          // Photochromic - Single Vision (Distance & Reading)
-          { id: "sv-photo-156", lensTypeId: "lens2", coatingId: "photochromic-sv", thicknessId: "sv-156", price: 18 },
-          { id: "sv-photo-poly", lensTypeId: "lens2", coatingId: "photochromic-sv", thicknessId: "sv-poly", price: 30 },
-          { id: "sv-photo-160", lensTypeId: "lens2", coatingId: "photochromic-sv", thicknessId: "sv-160", price: 40 },
-          { id: "sv-photo-167", lensTypeId: "lens2", coatingId: "photochromic-sv", thicknessId: "sv-167", price: 60 },
-          { id: "sv-photo-174", lensTypeId: "lens2", coatingId: "photochromic-sv", thicknessId: "sv-174", price: 90 },
-          
-          { id: "read-photo-156", lensTypeId: "lens1", coatingId: "photochromic-sv", thicknessId: "sv-156", price: 18 },
-          { id: "read-photo-poly", lensTypeId: "lens1", coatingId: "photochromic-sv", thicknessId: "sv-poly", price: 30 },
-          { id: "read-photo-160", lensTypeId: "lens1", coatingId: "photochromic-sv", thicknessId: "sv-160", price: 40 },
-          { id: "read-photo-167", lensTypeId: "lens1", coatingId: "photochromic-sv", thicknessId: "sv-167", price: 60 },
-          { id: "read-photo-174", lensTypeId: "lens1", coatingId: "photochromic-sv", thicknessId: "sv-174", price: 90 },
-          
-          // Progressive Photochromic
-          { id: "prog-photo-156", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-156", price: 60 },
-          { id: "prog-photo-poly", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-poly", price: 90 },
-          { id: "prog-photo-160", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-160", price: 90 },
-          { id: "prog-photo-167", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-167", price: 130 },
-          { id: "prog-photo-174", lensTypeId: "lens3", coatingId: "photochromic-prog", thicknessId: "prog-174", price: 180 },
-          
-          // PRO Progressive Photochromic
-          { id: "prog-pro-photo-156", lensTypeId: "lens6", coatingId: "photochromic-prog", thicknessId: "prog-156", price: 130 },
-          { id: "prog-pro-photo-poly", lensTypeId: "lens6", coatingId: "photochromic-prog", thicknessId: "prog-poly", price: 180 },
-          { id: "prog-pro-photo-160", lensTypeId: "lens6", coatingId: "photochromic-prog", thicknessId: "prog-160", price: 180 },
-          { id: "prog-pro-photo-167", lensTypeId: "lens6", coatingId: "photochromic-prog", thicknessId: "prog-167", price: 220 },
-          { id: "prog-pro-photo-174", lensTypeId: "lens6", coatingId: "photochromic-prog", thicknessId: "prog-174", price: 270 },
-        ];
-        
-        set({
-          lensPricingCombinations: newPricingCombinations
-        });
-      }
+        // Now this will fetch fresh pricing data from the database
+        get().fetchLensPricingCombinations();
+      },
+      
+      fetchServices: async () => {
+        set({ isLoadingServices: true });
+        try {
+          const services = await serviceService.getAllServices();
+          set({ 
+            services: services.map(service => ({
+              id: service.id,
+              name: service.name,
+              description: service.description || "",
+              price: service.price,
+              category: service.category
+            })), 
+            isLoadingServices: false 
+          });
+        } catch (error) {
+          console.error("Error fetching services:", error);
+          set({ isLoadingServices: false });
+        }
+      },
     }),
     {
       name: 'inventory-store',
-      version: 3
+      version: 3,
+      partialize: (state) => {
+        // Don't persist loading states or data that will be loaded from Supabase
+        const {
+          frames, 
+          isLoadingFrames, 
+          services, 
+          isLoadingServices,
+          lensTypes,
+          isLoadingLensTypes,
+          lensCoatings,
+          isLoadingLensCoatings,
+          lensThicknesses,
+          isLoadingLensThicknesses,
+          lensPricingCombinations,
+          isLoadingLensPricingCombinations,
+          ...rest
+        } = state;
+        return rest;
+      }
     }
   )
 );
+
+// Add an initializer function to load data when the app starts
+export const initInventoryStore = async () => {
+  const {
+    fetchFrames,
+    fetchServices,
+    fetchLensTypes,
+    fetchLensCoatings,
+    fetchLensThicknesses,
+    fetchLensPricingCombinations
+  } = useInventoryStore.getState();
+
+  // Load all required data in parallel
+  await Promise.all([
+    fetchFrames(),
+    fetchServices(),
+    fetchLensTypes(),
+    fetchLensCoatings(),
+    fetchLensThicknesses(),
+    fetchLensPricingCombinations()
+  ]);
+};

@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { useLanguageStore } from "@/store/languageStore";
 import { useInvoiceForm } from "./InvoiceFormContext";
-import { usePatientStore } from "@/store/patientStore";
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -13,6 +11,8 @@ import { ContactLensForm } from "@/components/ContactLensForm";
 import { 
   User, Search, Glasses, Eye, EyeOff, ScrollText, Wrench
 } from "lucide-react";
+import * as patientService from "@/services/patientService";
+import { Patient } from "@/integrations/supabase/schema";
 
 interface InvoiceStepPatientProps {
   invoiceType: "glasses" | "contacts" | "exam" | "repair";
@@ -24,7 +24,6 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
   onInvoiceTypeChange 
 }) => {
   const { t, language } = useLanguageStore();
-  const searchPatients = usePatientStore((state) => state.searchPatients);
   const {
     getValues,
     setValue,
@@ -40,13 +39,14 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
   const [manualName, setManualName] = useState(getValues('patientName'));
   const [manualPhone, setManualPhone] = useState(getValues('patientPhone'));
   const [showMissingRxWarning, setShowMissingRxWarning] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     cylinderAxisError: false
   });
   
   const textAlignClass = language === 'ar' ? 'text-right' : 'text-left';
   
-  const handlePatientSearch = () => {
+  const handlePatientSearch = async () => {
     if (!patientSearch.trim()) {
       toast({
         title: t('error'),
@@ -56,35 +56,141 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
       return;
     }
     
-    const results = searchPatients(patientSearch);
-    setPatientSearchResults(results);
+    setIsSearching(true);
     
-    if (results.length === 0) {
+    try {
+      const results = await patientService.searchPatients(patientSearch);
+      setPatientSearchResults(results);
+      
+      if (results.length === 0) {
+        toast({
+          description: t('noClientsFound'),
+        });
+      }
+    } catch (error) {
+      console.error("Error searching patients:", error);
       toast({
-        description: t('noClientsFound'),
+        title: t('error'),
+        description: t('searchError'),
+        variant: "destructive"
       });
+    } finally {
+      setIsSearching(false);
     }
   };
   
-  const selectPatient = (patient: ReturnType<typeof searchPatients>[0]) => {
-    setCurrentPatient(patient);
-    setPatientSearchResults([]);
-    setRxVisible(true);
+  const selectPatient = async (patient: Patient) => {
+    setIsSearching(true);
     
-    setValue('patientId', patient.patientId);
-    setValue('patientName', patient.name);
-    setValue('patientPhone', patient.phone);
-    setValue('rx', patient.rx);
-    
-    if (patient.contactLensRx) {
-      setValue('contactLensRx', patient.contactLensRx);
-      setShowMissingRxWarning(false);
-    } else {
-      setValue('contactLensRx', {
-        rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
-        leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
+    try {
+      // Fetch complete patient data including prescriptions
+      const patientData = await patientService.getPatientById(patient.id);
+      
+      if (!patientData) {
+        toast({
+          title: t('error'),
+          description: t('errorLoadingPatient'),
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setCurrentPatient({
+        patientId: patient.id,
+        name: patient.full_name,
+        phone: patient.phone_number,
+        // Format the prescriptions for the invoice form
+        rx: patientData.glassesPrescriptions.length > 0 ? {
+          sphereOD: patientData.glassesPrescriptions[0].od_sph || '',
+          cylOD: patientData.glassesPrescriptions[0].od_cyl || '',
+          axisOD: patientData.glassesPrescriptions[0].od_axis || '',
+          addOD: patientData.glassesPrescriptions[0].od_add || '',
+          pdRight: patientData.glassesPrescriptions[0].od_pd || '',
+          sphereOS: patientData.glassesPrescriptions[0].os_sph || '',
+          cylOS: patientData.glassesPrescriptions[0].os_cyl || '',
+          axisOS: patientData.glassesPrescriptions[0].os_axis || '',
+          addOS: patientData.glassesPrescriptions[0].os_add || '',
+          pdLeft: patientData.glassesPrescriptions[0].os_pd || ''
+        } : undefined,
+        contactLensRx: patientData.contactLensPrescriptions.length > 0 ? {
+          rightEye: {
+            sphere: patientData.contactLensPrescriptions[0].od_sphere || '',
+            cylinder: patientData.contactLensPrescriptions[0].od_cylinder || '',
+            axis: patientData.contactLensPrescriptions[0].od_axis || '',
+            bc: patientData.contactLensPrescriptions[0].od_base_curve || '',
+            dia: patientData.contactLensPrescriptions[0].od_diameter || '14.2'
+          },
+          leftEye: {
+            sphere: patientData.contactLensPrescriptions[0].os_sphere || '',
+            cylinder: patientData.contactLensPrescriptions[0].os_cylinder || '',
+            axis: patientData.contactLensPrescriptions[0].os_axis || '',
+            bc: patientData.contactLensPrescriptions[0].os_base_curve || '',
+            dia: patientData.contactLensPrescriptions[0].os_diameter || '14.2'
+          }
+        } : undefined
       });
-      setShowMissingRxWarning(invoiceType === "contacts");
+      
+      setPatientSearchResults([]);
+      setRxVisible(true);
+      
+      setValue('patientId', patient.id);
+      setValue('patientName', patient.full_name);
+      setValue('patientPhone', patient.phone_number);
+      
+      // Set RX values if available
+      if (patientData.glassesPrescriptions.length > 0) {
+        const latestRx = patientData.glassesPrescriptions[0];
+        setValue('rx', {
+          sphereOD: latestRx.od_sph || '',
+          cylOD: latestRx.od_cyl || '',
+          axisOD: latestRx.od_axis || '',
+          addOD: latestRx.od_add || '',
+          pdRight: latestRx.od_pd || '',
+          sphereOS: latestRx.os_sph || '',
+          cylOS: latestRx.os_cyl || '',
+          axisOS: latestRx.os_axis || '',
+          addOS: latestRx.os_add || '',
+          pdLeft: latestRx.os_pd || ''
+        });
+      }
+      
+      // Set contact lens RX values if available
+      if (patientData.contactLensPrescriptions.length > 0) {
+        const latestContactLensRx = patientData.contactLensPrescriptions[0];
+        setValue('contactLensRx', {
+          rightEye: {
+            sphere: latestContactLensRx.od_sphere || '',
+            cylinder: latestContactLensRx.od_cylinder || '',
+            axis: latestContactLensRx.od_axis || '',
+            bc: latestContactLensRx.od_base_curve || '',
+            dia: latestContactLensRx.od_diameter || '14.2'
+          },
+          leftEye: {
+            sphere: latestContactLensRx.os_sphere || '',
+            cylinder: latestContactLensRx.os_cylinder || '',
+            axis: latestContactLensRx.os_axis || '',
+            bc: latestContactLensRx.os_base_curve || '',
+            dia: latestContactLensRx.os_diameter || '14.2'
+          }
+        });
+        setShowMissingRxWarning(false);
+      } else {
+        setValue('contactLensRx', {
+          rightEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" },
+          leftEye: { sphere: "-", cylinder: "-", axis: "-", bc: "-", dia: "14.2" }
+        });
+        setShowMissingRxWarning(invoiceType === "contacts");
+      }
+      
+    } catch (error) {
+      console.error("Error selecting patient:", error);
+      toast({
+        title: t('error'),
+        description: t('errorLoadingPatient'),
+        variant: "destructive"
+      });
+    } finally {
+      setIsSearching(false);
     }
   };
   
@@ -220,9 +326,19 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                     placeholder={t('typeToSearch')}
                     className={`flex-1 ${textAlignClass}`}
                   />
-                  <Button onClick={handlePatientSearch} className="gap-1">
-                    <Search className="w-4 h-4" />
-                    {t('search')}
+                  <Button 
+                    onClick={handlePatientSearch} 
+                    className="gap-1"
+                    disabled={isSearching}
+                  >
+                    {isSearching ? (
+                      <span className="animate-pulse">...</span>
+                    ) : (
+                      <>
+                        <Search className="w-4 h-4" />
+                        {t('search')}
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -231,12 +347,12 @@ export const InvoiceStepPatient: React.FC<InvoiceStepPatientProps> = ({
                 <div className="border rounded-md divide-y max-h-[200px] overflow-y-auto">
                   {patientSearchResults.map((patient) => (
                     <div 
-                      key={patient.patientId}
+                      key={patient.id}
                       className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
                       onClick={() => selectPatient(patient)}
                     >
-                      <div className={`font-medium ${textAlignClass}`}>{patient.name}</div>
-                      <div className={`text-sm text-muted-foreground ${textAlignClass}`}>{patient.phone}</div>
+                      <div className={`font-medium ${textAlignClass}`}>{patient.full_name}</div>
+                      <div className={`text-sm text-muted-foreground ${textAlignClass}`}>{patient.phone_number}</div>
                     </div>
                   ))}
                 </div>

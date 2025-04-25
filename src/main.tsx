@@ -1,22 +1,15 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
+import { initInventoryStore } from "@/store/inventoryStore";
 
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import * as React from 'react'
+// Initialize the frames data from Supabase
+initInventoryStore().catch((error) =>
+  console.error("Error initializing inventory:", error)
+);
 
-// Ensure React is properly imported and available globally
-window.React = React;
-
-// Ensure the app is properly mounted
-const root = document.getElementById("root");
-if (!root) {
-  const rootDiv = document.createElement("div");
-  rootDiv.id = "root";
-  document.body.appendChild(rootDiv);
-}
-
-// Create root and render app
-createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
