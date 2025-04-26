@@ -1221,7 +1221,7 @@ export const RemainingPayments: React.FC = () => {
                             <span>
                               {language === "ar"
                                 ? "إجمالي المدفوع:"
-                                : "Total Payment:"}
+                                : "Total Payment :"}
                             </span>
                             <span>
                               {calculateTotalPayment().toFixed(2)} {t("kwd")}
