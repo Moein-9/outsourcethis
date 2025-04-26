@@ -73,6 +73,7 @@ import {
   addPaymentToInvoice,
   addMultiplePaymentsToInvoice,
 } from "@/services/invoiceService";
+import { supabase } from "@/integrations/supabase/client";
 
 // Define Invoice interface locally to avoid store dependency
 interface Invoice {
@@ -148,60 +149,86 @@ export const RemainingPayments: React.FC = () => {
   const loadUnpaidInvoices = async () => {
     setIsLoading(true);
     try {
+      console.log("-----------------------------");
+      console.log("LOADING UNPAID INVOICES FROM DATABASE");
       const rawData = await getUnpaidInvoices();
       console.log("Raw unpaid invoices from Supabase:", rawData);
 
       // Convert the data to our local Invoice interface
       // @ts-ignore: Supabase TypeScript definitions are incomplete, we know the actual structure
-      const convertedInvoices = rawData.map((item) => {
-        return {
-          id: item.id || "",
-          invoice_id: item.invoice_id || "",
-          work_order_id: item.work_order_id,
-          patient_id: item.patient_id,
-          patient_name: item.patient_name || "",
-          patient_phone: item.patient_phone,
+      const convertedInvoices = rawData
+        .map((item) => {
+          // Ensure numeric values are properly converted
+          const total = Number(item.total) || 0;
+          const deposit = Number(item.deposit) || 0;
+          const remaining = Number(item.remaining) || 0;
 
-          invoice_type: item.invoice_type || "glasses",
+          // Double-check that remaining value makes sense
+          // This helps prevent incorrect data from being displayed
+          const calculatedRemaining = Math.max(0, total - deposit);
 
-          lens_type: item.lens_type,
-          lens_price: Number(item.lens_price) || 0,
-          coating: item.coating,
-          coating_price: Number(item.coating_price) || 0,
-          coating_color: item.coating_color,
-          thickness: item.thickness,
-          thickness_price: Number(item.thickness_price) || 0,
+          // If there's a discrepancy, use the calculated value
+          const finalRemaining =
+            Math.abs(remaining - calculatedRemaining) < 0.01
+              ? remaining
+              : calculatedRemaining;
 
-          frame_brand: item.frame_brand,
-          frame_model: item.frame_model,
-          frame_color: item.frame_color,
-          frame_size: item.frame_size,
-          frame_price: Number(item.frame_price) || 0,
+          // Determine if the invoice is actually paid
+          const isPaid = finalRemaining === 0 || Boolean(item.is_paid);
 
-          contact_lens_items: item.contact_lens_items,
-          contact_lens_rx: item.contact_lens_rx,
+          return {
+            id: item.id || "",
+            invoice_id: item.invoice_id || "",
+            work_order_id: item.work_order_id,
+            patient_id: item.patient_id,
+            patient_name: item.patient_name || "",
+            patient_phone: item.patient_phone,
 
-          service_name: item.service_name,
-          service_price: Number(item.service_price) || 0,
+            invoice_type: item.invoice_type || "glasses",
 
-          discount: Number(item.discount) || 0,
-          deposit: Number(item.deposit) || 0,
-          total: Number(item.total) || 0,
-          remaining: Number(item.remaining) || 0,
+            lens_type: item.lens_type,
+            lens_price: Number(item.lens_price) || 0,
+            coating: item.coating,
+            coating_price: Number(item.coating_price) || 0,
+            coating_color: item.coating_color,
+            thickness: item.thickness,
+            thickness_price: Number(item.thickness_price) || 0,
 
-          payment_method: item.payment_method || "",
-          auth_number: item.auth_number,
-          is_paid: Boolean(item.is_paid),
-          is_refunded: Boolean(item.is_refunded),
-          refund_amount: Number(item.refund_amount) || 0,
-          refund_date: item.refund_date,
-          refund_method: item.refund_method,
-          refund_reason: item.refund_reason,
+            frame_brand: item.frame_brand,
+            frame_model: item.frame_model,
+            frame_color: item.frame_color,
+            frame_size: item.frame_size,
+            frame_price: Number(item.frame_price) || 0,
 
-          created_at: item.created_at || new Date().toISOString(),
-          payments: item.payments || [],
-        } as Invoice;
-      });
+            contact_lens_items: item.contact_lens_items,
+            contact_lens_rx: item.contact_lens_rx,
+
+            service_name: item.service_name,
+            service_price: Number(item.service_price) || 0,
+
+            discount: Number(item.discount) || 0,
+            deposit: deposit,
+            total: total,
+            remaining: finalRemaining,
+
+            payment_method: item.payment_method || "",
+            auth_number: item.auth_number,
+            is_paid: isPaid,
+            is_refunded: Boolean(item.is_refunded),
+            refund_amount: Number(item.refund_amount) || 0,
+            refund_date: item.refund_date,
+            refund_method: item.refund_method,
+            refund_reason: item.refund_reason,
+
+            created_at: item.created_at || new Date().toISOString(),
+            payments: item.payments || [],
+          } as Invoice;
+        })
+        // Filter again to make sure only invoices with remaining > 0 and not marked as paid are shown
+        .filter((inv) => inv.remaining > 0 && !inv.is_paid);
+
+      console.log("Processed invoices after filtering:", convertedInvoices);
+      console.log("-----------------------------");
 
       setInvoices(convertedInvoices);
     } catch (error) {
@@ -292,6 +319,7 @@ export const RemainingPayments: React.FC = () => {
   };
 
   const addPaymentEntry = () => {
+    // Re-enable multiple payment entries
     setPaymentEntries([
       ...paymentEntries,
       { method: language === "ar" ? "نقداً" : "Cash", amount: 0 },
@@ -299,6 +327,7 @@ export const RemainingPayments: React.FC = () => {
   };
 
   const removePaymentEntry = (index: number) => {
+    // Re-enable removing payment entries
     if (paymentEntries.length > 1) {
       const newEntries = [...paymentEntries];
       newEntries.splice(index, 1);
@@ -351,16 +380,7 @@ export const RemainingPayments: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      console.log("Processing payment for invoice:", {
-        invoiceId,
-        total: invoice.total,
-        deposit: invoice.deposit,
-        remaining: invoice.remaining,
-        paymentAmount: totalPayment,
-        entries: paymentEntries,
-      });
-
-      // Filter out payment entries with amount <= 0 and prepare them for submission
+      // Get valid payment entries
       const validPaymentEntries = paymentEntries.filter(
         (entry) => entry.amount > 0
       );
@@ -375,14 +395,47 @@ export const RemainingPayments: React.FC = () => {
         return;
       }
 
-      // Submit all payment entries at once
-      const success = await addMultiplePaymentsToInvoice(
+      // Log invoice before payment
+      console.log("BEFORE PAYMENT - Invoice state:", {
         invoiceId,
-        validPaymentEntries
-      );
+        total: invoice.total,
+        deposit: invoice.deposit,
+        remaining: invoice.remaining,
+        is_paid: invoice.is_paid,
+      });
 
-      if (!success) {
-        throw new Error("Failed to add payments");
+      // Process each payment entry directly using the SQL function
+      let allSuccessful = true;
+      const results = [];
+
+      // Instead of using API calls, use our SQL function directly
+      for (const entry of validPaymentEntries) {
+        console.log("Processing payment entry:", entry);
+
+        try {
+          // Call our dedicated SQL function to add the payment
+          const { data, error } = await supabase.rpc("add_payment_to_invoice", {
+            p_invoice_id: invoiceId,
+            p_payment_amount: entry.amount,
+            p_payment_method: entry.method,
+            p_auth_number: entry.authNumber || null,
+          });
+
+          if (error) {
+            console.error("Error processing payment via SQL function:", error);
+            allSuccessful = false;
+          } else {
+            console.log("SQL payment processing result:", data);
+            results.push(data);
+          }
+        } catch (err) {
+          console.error("Exception processing payment:", err);
+          allSuccessful = false;
+        }
+      }
+
+      if (!allSuccessful) {
+        throw new Error("Failed to process one or more payments");
       }
 
       toast.success(
@@ -391,29 +444,25 @@ export const RemainingPayments: React.FC = () => {
           : "Payment recorded successfully"
       );
 
-      // Refresh the list of unpaid invoices
-      await loadUnpaidInvoices();
-
-      // Get updated invoice for printing
+      // Verify the update by fetching the invoice again
       const updatedInvoiceData = await getInvoiceById(invoiceId);
       if (updatedInvoiceData) {
-        console.log("Updated invoice after payment:", updatedInvoiceData);
+        console.log("AFTER PAYMENT - Updated invoice:", {
+          invoice_id: updatedInvoiceData.invoice_id,
+          deposit: updatedInvoiceData.deposit,
+          total: updatedInvoiceData.total,
+          remaining: updatedInvoiceData.remaining,
+          is_paid: updatedInvoiceData.is_paid,
+        });
 
-        // @ts-ignore: Supabase TypeScript definitions are incomplete
         const updatedInvoice = {
+          ...updatedInvoiceData,
           id: updatedInvoiceData.id || "",
           invoice_id: updatedInvoiceData.invoice_id || invoiceId,
-          patient_name: updatedInvoiceData.patient_name || "",
-          invoice_type: updatedInvoiceData.invoice_type || "glasses",
-          discount: Number(updatedInvoiceData.discount) || 0,
           deposit: Number(updatedInvoiceData.deposit) || 0,
           total: Number(updatedInvoiceData.total) || 0,
           remaining: Number(updatedInvoiceData.remaining) || 0,
-          payment_method: updatedInvoiceData.payment_method || "",
           is_paid: Boolean(updatedInvoiceData.is_paid),
-          created_at: updatedInvoiceData.created_at || new Date().toISOString(),
-          // Copy all other fields
-          ...updatedInvoiceData,
         } as Invoice;
 
         setInvoiceDataForPrint(updatedInvoice);
@@ -423,10 +472,14 @@ export const RemainingPayments: React.FC = () => {
         }
       }
 
+      // Reset payment entries and close dialog
       setPaymentEntries([
         { method: language === "ar" ? "نقداً" : "Cash", amount: 0 },
       ]);
       setSelectedInvoice(null);
+
+      // Refresh the list of unpaid invoices
+      await loadUnpaidInvoices();
     } catch (error) {
       console.error("Error submitting payment:", error);
       toast.error(
@@ -817,6 +870,7 @@ export const RemainingPayments: React.FC = () => {
                         className="flex-1 text-xs bg-amber-500 hover:bg-amber-600"
                         onClick={() => {
                           setSelectedInvoice(invoice.invoice_id);
+                          // Initialize with just one payment entry with the remaining amount
                           setPaymentEntries([
                             {
                               method: language === "ar" ? "نقداً" : "Cash",

@@ -83,6 +83,12 @@ export const createInvoice = async (invoiceData: Omit<InvoiceData, 'id'>): Promi
   try {
     const id = uuidv4();
     
+    // Calculate remaining amount explicitly
+    const total = Number(invoiceData.total) || 0;
+    const deposit = Number(invoiceData.deposit) || 0;
+    const remaining = Math.max(0, total - deposit);
+    const isPaid = remaining === 0;
+    
     // Convert JSON data to strings as needed
     const dataToInsert = {
       id,
@@ -114,12 +120,12 @@ export const createInvoice = async (invoiceData: Omit<InvoiceData, 'id'>): Promi
       repair_description: invoiceData.repair_description,
       repair_price: invoiceData.repair_price,
       discount: invoiceData.discount,
-      deposit: invoiceData.deposit,
-      total: invoiceData.total,
-      remaining: invoiceData.remaining,
+      deposit: deposit,
+      total: total,
+      remaining: remaining,
       payment_method: invoiceData.payment_method,
       auth_number: invoiceData.auth_number,
-      is_paid: invoiceData.is_paid
+      is_paid: isPaid
     };
 
     // Using TypeScript assertion to handle type mismatch
@@ -194,6 +200,12 @@ export const saveOrder = async (formData: any): Promise<{invoiceId: string | nul
     const invoiceId = `IN${Date.now()}`;
     const workOrderId = formData.invoiceType !== 'exam' ? `WO${Date.now()}` : undefined;
     
+    // Calculate payment values explicitly since we don't rely on triggers anymore
+    const total = Number(formData.total) || 0;
+    const deposit = Number(formData.deposit) || 0;
+    const remaining = Math.max(0, total - deposit);
+    const isPaid = remaining === 0;
+    
     // Convert form data to database structure
     const invoiceData: Omit<InvoiceData, 'id'> = {
       invoice_id: invoiceId,
@@ -239,13 +251,13 @@ export const saveOrder = async (formData: any): Promise<{invoiceId: string | nul
       
       // Payment information
       discount: formData.discount || 0,
-      deposit: formData.deposit || 0,
-      total: formData.total,
-      remaining: Math.max(0, formData.total - (formData.deposit || 0)),
+      deposit: deposit,
+      total: total,
+      remaining: remaining,
       
       payment_method: formData.paymentMethod,
       auth_number: formData.authNumber,
-      is_paid: (formData.deposit || 0) >= formData.total
+      is_paid: isPaid
     };
     
     // Create invoice first
@@ -260,7 +272,7 @@ export const saveOrder = async (formData: any): Promise<{invoiceId: string | nul
         invoice_id: invoiceId,
         
         is_contact_lens: formData.invoiceType === 'contacts',
-        is_paid: (formData.deposit || 0) >= formData.total,
+        is_paid: isPaid,
         
         lens_type: formData.invoiceType === 'glasses' ? JSON.stringify({
           name: formData.lensType,
@@ -296,6 +308,8 @@ export const saveOrder = async (formData: any): Promise<{invoiceId: string | nul
  */
 export const getInvoiceById = async (invoiceId: string) => {
   try {
+    console.log(`Fetching invoice by ID: ${invoiceId}`);
+    
     // @ts-ignore: Supabase TypeScript definitions are incomplete
     const { data, error } = await supabase
       .from('invoices')
@@ -303,7 +317,17 @@ export const getInvoiceById = async (invoiceId: string) => {
       .eq('invoice_id', invoiceId)
       .single();
       
-    if (error) throw error;
+    if (error) {
+      console.error(`Error fetching invoice ${invoiceId}:`, error);
+      throw error;
+    }
+    
+    console.log(`Retrieved invoice ${invoiceId}:`, {
+      deposit: data.deposit,
+      total: data.total,
+      remaining: data.remaining,
+      is_paid: data.is_paid
+    });
     
     return data;
   } catch (error) {
@@ -338,6 +362,8 @@ export const getWorkOrderById = async (workOrderId: string) => {
  */
 export const getUnpaidInvoices = async () => {
   try {
+    console.log("Fetching unpaid invoices from Supabase");
+    
     // @ts-ignore: Supabase TypeScript definitions are incomplete
     const { data, error } = await supabase
       .from('invoices')
@@ -346,7 +372,12 @@ export const getUnpaidInvoices = async () => {
       .gt('remaining', 0) // Only get invoices with remaining balance greater than 0
       .order('created_at', { ascending: false });
       
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase error fetching unpaid invoices:", error);
+      throw error;
+    }
+    
+    console.log(`Found ${data?.length || 0} unpaid invoices`);
     
     // Parse JSON strings into objects with better error handling
     return data.map(invoice => {
@@ -474,7 +505,8 @@ export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: 
       paymentsCount: updatedPayments.length
     });
     
-    // Update the invoice
+    // Update the invoice - manually calculating all required fields
+    // since we've dropped the trigger function
     // @ts-ignore: Supabase TypeScript definitions are incomplete
     const { error: updateError } = await supabase
       .from('invoices')
@@ -482,7 +514,8 @@ export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: 
         payments: JSON.stringify(updatedPayments),
         deposit: newDeposit,
         remaining: newRemaining,
-        is_paid: isPaid
+        is_paid: isPaid,
+        updated_at: new Date().toISOString()
       })
       .eq('invoice_id', invoiceId);
       
@@ -499,7 +532,8 @@ export const addPaymentToInvoice = async (invoiceId: string, payment: { amount: 
       const { error: workOrderError } = await supabase
         .from('work_orders')
         .update({
-          is_paid: isPaid
+          is_paid: isPaid,
+          updated_at: new Date().toISOString()
         })
         // @ts-ignore: Supabase field typing is incomplete
         .eq('work_order_id', invoice.work_order_id);
@@ -604,29 +638,59 @@ export const addMultiplePaymentsToInvoice = async (
     // Calculate new deposit amount
     // @ts-ignore: Supabase field typing is incomplete
     const currentDeposit = Number(invoice.deposit) || 0;
+    // @ts-ignore: Supabase field typing is incomplete
+    const currentTotal = Number(invoice.total) || 0;
     const newDeposit = currentDeposit + totalPaymentAmount;
+    
+    // Calculate remaining amount - explicitly handle it since we dropped the trigger
+    const newRemaining = Math.max(0, currentTotal - newDeposit);
+    const isPaid = newRemaining === 0;
     
     console.log('Updating invoice with multiple payments:', {
       invoiceId,
       currentDeposit,
       newDeposit,
       totalPaymentAmount,
+      currentTotal,
+      newRemaining,
+      isPaid,
       paymentsCount: updatedPayments.length
     });
     
-    // Only update deposit and payments - Supabase trigger will handle the remaining calculation
+    // Update invoice with manually calculated values - no reliance on database triggers
     // @ts-ignore: Supabase TypeScript definitions are incomplete
     const { error: updateError } = await supabase
       .from('invoices')
       .update({
         deposit: newDeposit,
-        payments: JSON.stringify(updatedPayments)
+        remaining: newRemaining,
+        is_paid: isPaid,
+        payments: JSON.stringify(updatedPayments),
+        updated_at: new Date().toISOString()
       })
       .eq('invoice_id', invoiceId);
       
     if (updateError) {
       console.error('Error updating invoice deposit and payments:', updateError);
       throw updateError;
+    }
+    
+    // Update work order if needed
+    // @ts-ignore: Supabase field typing is incomplete
+    if (isPaid && invoice.work_order_id) {
+      // @ts-ignore: Supabase TypeScript definitions are incomplete
+      const { error: workOrderError } = await supabase
+        .from('work_orders')
+        .update({
+          is_paid: true,
+          updated_at: new Date().toISOString()
+        })
+        // @ts-ignore: Supabase field typing is incomplete
+        .eq('work_order_id', invoice.work_order_id);
+        
+      if (workOrderError) {
+        console.error('Error updating work order payment status:', workOrderError);
+      }
     }
     
     return true;
