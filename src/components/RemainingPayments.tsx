@@ -135,6 +135,7 @@ export const RemainingPayments: React.FC = () => {
     useState<Invoice | null>(null);
   const [showReceipt, setShowReceipt] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastPaidInvoice, setLastPaidInvoice] = useState<Invoice | null>(null);
   const navigate = useNavigate();
 
   const [paymentEntries, setPaymentEntries] = useState<
@@ -357,6 +358,10 @@ export const RemainingPayments: React.FC = () => {
       return;
     }
 
+    // Store the current invoice data before processing payment
+    // This ensures we have the full data including patient name
+    const originalInvoice = { ...invoice };
+
     const totalPayment = calculateTotalPayment();
     if (totalPayment <= 0) {
       toast.error(
@@ -451,17 +456,91 @@ export const RemainingPayments: React.FC = () => {
             is_paid: updatedInvoiceData.is_paid,
           });
 
+          // Ensure date fields are valid
+          const safeCreatedAt = updatedInvoiceData.created_at
+            ? new Date(updatedInvoiceData.created_at).toISOString()
+            : new Date().toISOString();
+
+          // Construct updated invoice with complete data
+          // Merge the original invoice data with updated values
           const updatedInvoice = {
-            ...updatedInvoiceData,
-            id: updatedInvoiceData.id || "",
+            ...originalInvoice, // Keep all the original data first
+            ...updatedInvoiceData, // Then override with new data
+            id: updatedInvoiceData.id || originalInvoice.id || "",
             invoice_id: updatedInvoiceData.invoice_id || invoiceId,
-            deposit: Number(updatedInvoiceData.deposit) || 0,
-            total: Number(updatedInvoiceData.total) || 0,
+            patient_name:
+              updatedInvoiceData.patient_name ||
+              originalInvoice.patient_name ||
+              "",
+            patient_phone:
+              updatedInvoiceData.patient_phone || originalInvoice.patient_phone,
+            deposit:
+              Number(updatedInvoiceData.deposit) ||
+              Number(originalInvoice.deposit) ||
+              0,
+            total:
+              Number(updatedInvoiceData.total) ||
+              Number(originalInvoice.total) ||
+              0,
             remaining: Number(updatedInvoiceData.remaining) || 0,
             is_paid: Boolean(updatedInvoiceData.is_paid),
+            created_at: safeCreatedAt,
+            // Preserve original invoice data that might not be in the updated data
+            invoice_type:
+              updatedInvoiceData.invoice_type ||
+              originalInvoice.invoice_type ||
+              "glasses",
+            lens_type:
+              updatedInvoiceData.lens_type || originalInvoice.lens_type,
+            lens_price:
+              Number(updatedInvoiceData.lens_price) ||
+              Number(originalInvoice.lens_price) ||
+              0,
+            coating: updatedInvoiceData.coating || originalInvoice.coating,
+            coating_price:
+              Number(updatedInvoiceData.coating_price) ||
+              Number(originalInvoice.coating_price) ||
+              0,
+            coating_color:
+              updatedInvoiceData.coating_color || originalInvoice.coating_color,
+            thickness:
+              updatedInvoiceData.thickness || originalInvoice.thickness,
+            thickness_price:
+              Number(updatedInvoiceData.thickness_price) ||
+              Number(originalInvoice.thickness_price) ||
+              0,
+            frame_brand:
+              updatedInvoiceData.frame_brand || originalInvoice.frame_brand,
+            frame_model:
+              updatedInvoiceData.frame_model || originalInvoice.frame_model,
+            frame_color:
+              updatedInvoiceData.frame_color || originalInvoice.frame_color,
+            frame_size:
+              updatedInvoiceData.frame_size || originalInvoice.frame_size,
+            frame_price:
+              Number(updatedInvoiceData.frame_price) ||
+              Number(originalInvoice.frame_price) ||
+              0,
+            // Ensure payments have valid dates and combine existing payments with new ones
+            payments: [
+              ...(originalInvoice.payments || []),
+              // Add the new payment(s)
+              ...paymentEntries
+                .filter((entry) => entry.amount > 0)
+                .map((entry) => ({
+                  method: entry.method,
+                  amount: entry.amount,
+                  date: new Date().toISOString(),
+                  auth_number: entry.authNumber,
+                })),
+            ],
           } as Invoice;
 
+          console.log("Complete updated invoice for receipt:", updatedInvoice);
+
+          // Save the updated invoice for printing, even if it's fully paid
           setInvoiceDataForPrint(updatedInvoice);
+          setLastPaidInvoice(updatedInvoice);
 
           // Close the payment dialog and open the receipt view
           setSelectedInvoice(null);
@@ -492,8 +571,19 @@ export const RemainingPayments: React.FC = () => {
   };
 
   const handlePrintReceipt = (invoiceId: string) => {
+    // First check if we're trying to print the last paid invoice
+    if (lastPaidInvoice && lastPaidInvoice.invoice_id === invoiceId) {
+      // Use the lastPaidInvoice data directly
+      console.log("Printing last paid invoice:", lastPaidInvoice);
+      const adaptedInvoice = adaptInvoiceForPrint(lastPaidInvoice);
+      CustomPrintService.printInvoice(adaptedInvoice);
+      return;
+    }
+
+    // Otherwise, try to find in the regular invoices list
     const currentInvoice = invoices.find((inv) => inv.invoice_id === invoiceId);
     if (!currentInvoice) {
+      console.error(`Invoice not found for printing: ${invoiceId}`);
       toast.error(
         language === "ar" ? "لم يتم العثور على الفاتورة" : "Invoice not found"
       );
@@ -513,6 +603,21 @@ export const RemainingPayments: React.FC = () => {
    * Convert our local Invoice interface to the format expected by ReceiptInvoice component
    */
   const adaptInvoiceForPrint = (invoice: Invoice): any => {
+    // Ensure all dates are valid
+    const ensureValidDate = (dateStr: string | undefined) => {
+      if (!dateStr) return new Date().toISOString();
+      try {
+        // Test if the date is valid
+        const testDate = new Date(dateStr);
+        if (isNaN(testDate.getTime())) {
+          return new Date().toISOString();
+        }
+        return dateStr;
+      } catch (e) {
+        return new Date().toISOString();
+      }
+    };
+
     return {
       // Map fields to expected format
       invoiceId: invoice.invoice_id,
@@ -552,12 +657,16 @@ export const RemainingPayments: React.FC = () => {
       isPaid: invoice.is_paid,
       isRefunded: invoice.is_refunded,
       refundAmount: invoice.refund_amount,
-      refundDate: invoice.refund_date,
+      refundDate: ensureValidDate(invoice.refund_date),
       refundMethod: invoice.refund_method,
       refundReason: invoice.refund_reason,
 
-      createdAt: invoice.created_at,
-      payments: invoice.payments,
+      createdAt: ensureValidDate(invoice.created_at),
+      payments:
+        invoice.payments?.map((payment) => ({
+          ...payment,
+          date: ensureValidDate(payment.date),
+        })) || [],
     };
   };
 
@@ -620,7 +729,7 @@ export const RemainingPayments: React.FC = () => {
             {language === "ar" ? "جارٍ التحميل..." : "Loading..."}
           </span>
         </div>
-      ) : filteredInvoices.length === 0 ? (
+      ) : filteredInvoices.length === 0 && !lastPaidInvoice ? (
         <Card className="border-dashed border-2 border-muted">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <CheckCircle2 className="h-12 w-12 text-muted mb-4" />
@@ -1155,6 +1264,72 @@ export const RemainingPayments: React.FC = () => {
               </CardContent>
             </Card>
           ))}
+
+          {/* Show the last paid invoice if available and not in the filtered list */}
+          {lastPaidInvoice &&
+            !filteredInvoices.some(
+              (inv) => inv.invoice_id === lastPaidInvoice.invoice_id
+            ) && (
+              <Dialog
+                open={showReceipt === lastPaidInvoice.invoice_id}
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setShowReceipt(null);
+                    // Don't clear lastPaidInvoice when closing dialog
+                    // to allow printing afterward
+                  }
+                }}
+              >
+                {/* We need a hidden trigger to keep the dialog structure valid */}
+                <DialogTrigger className="hidden" />
+                <DialogContent className="max-w-sm">
+                  <DialogHeader>
+                    <DialogTitle>
+                      <div className="flex flex-col items-center text-green-600 mb-2">
+                        <CheckCircle2 className="h-6 w-6 mb-1" />
+                        {language === "ar"
+                          ? "تم تسجيل الدفع بنجاح"
+                          : "Payment Successfully Recorded"}
+                      </div>
+                      {language === "ar" ? "فاتورة" : "Invoice"}{" "}
+                      {lastPaidInvoice.invoice_id}
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  <div
+                    className="max-h-[70vh] overflow-y-auto py-4"
+                    id={`print-receipt-${lastPaidInvoice.invoice_id}`}
+                  >
+                    <ReceiptInvoice
+                      invoice={adaptInvoiceForPrint(lastPaidInvoice)}
+                      isPrintable={false}
+                    />
+                  </div>
+
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowReceipt(null);
+                        // Don't clear lastPaidInvoice when closing dialog
+                      }}
+                    >
+                      {language === "ar" ? "إغلاق" : "Close"}
+                    </Button>
+                    <PrintReportButton
+                      onPrint={() => {
+                        setShowReceipt(null);
+                        handlePrintReceipt(lastPaidInvoice.invoice_id);
+                        // Only clear lastPaidInvoice after successful printing
+                      }}
+                      label={
+                        language === "ar" ? "طباعة الفاتورة" : "Print Invoice"
+                      }
+                    />
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
         </div>
       )}
     </div>
