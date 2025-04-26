@@ -1014,7 +1014,7 @@ export const RemainingPayments: React.FC = () => {
                         <DialogDescription>
                           {language === "ar"
                             ? "تسجيل دفعة للفاتورة"
-                            : "Record payment for invoice"}{" "}
+                            : "Record payment for invoice."}{" "}
                           {invoice.invoice_id}
                         </DialogDescription>
                       </DialogHeader>
@@ -1221,7 +1221,7 @@ export const RemainingPayments: React.FC = () => {
                             <span>
                               {language === "ar"
                                 ? "إجمالي المدفوع:"
-                                : "Total Payment:"}
+                                : "Total Payment :"}
                             </span>
                             <span>
                               {calculateTotalPayment().toFixed(2)} {t("kwd")}
