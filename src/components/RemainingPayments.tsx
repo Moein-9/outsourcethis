@@ -781,8 +781,11 @@ export const RemainingPayments: React.FC = () => {
                             )}
                           </span>
                           <span className="font-medium">
-                            {payment.amount.toFixed(2)} {t("kwd")} (
-                            {payment.method})
+                            {payment.amount !== undefined &&
+                            payment.amount !== null
+                              ? payment.amount.toFixed(2)
+                              : "0.00"}{" "}
+                            {t("kwd")} ({payment.method})
                           </span>
                         </div>
                       ))}
@@ -941,7 +944,11 @@ export const RemainingPayments: React.FC = () => {
                                   : "Remaining After Payment:"}
                               </span>
                               <span className="text-blue-700 text-lg">
-                                {remainingAfterPayment.toFixed(2)} {t("kwd")}
+                                {remainingAfterPayment !== null &&
+                                remainingAfterPayment !== undefined
+                                  ? remainingAfterPayment.toFixed(2)
+                                  : "0.00"}{" "}
+                                {t("kwd")}
                               </span>
                             </div>
                           )}
