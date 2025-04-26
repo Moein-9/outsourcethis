@@ -434,52 +434,52 @@ export const RemainingPayments: React.FC = () => {
         }
       }
 
-      if (!allSuccessful) {
-        throw new Error("Failed to process one or more payments");
-      }
+      if (allSuccessful) {
+        toast.success(
+          language === "ar"
+            ? "تم تسجيل الدفع بنجاح"
+            : "Payment recorded successfully"
+        );
 
-      toast.success(
-        language === "ar"
-          ? "تم تسجيل الدفع بنجاح"
-          : "Payment recorded successfully"
-      );
+        // Verify the update by fetching the invoice again
+        const updatedInvoiceData = await getInvoiceById(invoiceId);
+        if (updatedInvoiceData) {
+          console.log("AFTER PAYMENT - Updated invoice:", {
+            invoice_id: updatedInvoiceData.invoice_id,
+            deposit: updatedInvoiceData.deposit,
+            total: updatedInvoiceData.total,
+            remaining: updatedInvoiceData.remaining,
+            is_paid: updatedInvoiceData.is_paid,
+          });
 
-      // Verify the update by fetching the invoice again
-      const updatedInvoiceData = await getInvoiceById(invoiceId);
-      if (updatedInvoiceData) {
-        console.log("AFTER PAYMENT - Updated invoice:", {
-          invoice_id: updatedInvoiceData.invoice_id,
-          deposit: updatedInvoiceData.deposit,
-          total: updatedInvoiceData.total,
-          remaining: updatedInvoiceData.remaining,
-          is_paid: updatedInvoiceData.is_paid,
-        });
+          const updatedInvoice = {
+            ...updatedInvoiceData,
+            id: updatedInvoiceData.id || "",
+            invoice_id: updatedInvoiceData.invoice_id || invoiceId,
+            deposit: Number(updatedInvoiceData.deposit) || 0,
+            total: Number(updatedInvoiceData.total) || 0,
+            remaining: Number(updatedInvoiceData.remaining) || 0,
+            is_paid: Boolean(updatedInvoiceData.is_paid),
+          } as Invoice;
 
-        const updatedInvoice = {
-          ...updatedInvoiceData,
-          id: updatedInvoiceData.id || "",
-          invoice_id: updatedInvoiceData.invoice_id || invoiceId,
-          deposit: Number(updatedInvoiceData.deposit) || 0,
-          total: Number(updatedInvoiceData.total) || 0,
-          remaining: Number(updatedInvoiceData.remaining) || 0,
-          is_paid: Boolean(updatedInvoiceData.is_paid),
-        } as Invoice;
+          setInvoiceDataForPrint(updatedInvoice);
 
-        setInvoiceDataForPrint(updatedInvoice);
-
-        if (updatedInvoice.is_paid) {
+          // Always set the invoiceForPrint regardless of payment status
+          // to show the print dialog
           setInvoiceForPrint(invoiceId);
         }
+
+        // Reset payment entries and close dialog
+        setPaymentEntries([
+          { method: language === "ar" ? "نقداً" : "Cash", amount: 0 },
+        ]);
+        setSelectedInvoice(null);
+
+        // Refresh the list of unpaid invoices
+        await loadUnpaidInvoices();
+      } else {
+        throw new Error("Failed to process one or more payments");
       }
-
-      // Reset payment entries and close dialog
-      setPaymentEntries([
-        { method: language === "ar" ? "نقداً" : "Cash", amount: 0 },
-      ]);
-      setSelectedInvoice(null);
-
-      // Refresh the list of unpaid invoices
-      await loadUnpaidInvoices();
     } catch (error) {
       console.error("Error submitting payment:", error);
       toast.error(
