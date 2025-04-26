@@ -131,7 +131,6 @@ export const RemainingPayments: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
-  const [invoiceForPrint, setInvoiceForPrint] = useState<string | null>(null);
   const [invoiceDataForPrint, setInvoiceDataForPrint] =
     useState<Invoice | null>(null);
   const [showReceipt, setShowReceipt] = useState<string | null>(null);
@@ -464,16 +463,16 @@ export const RemainingPayments: React.FC = () => {
 
           setInvoiceDataForPrint(updatedInvoice);
 
-          // Always set the invoiceForPrint regardless of payment status
-          // to show the print dialog
-          setInvoiceForPrint(invoiceId);
+          // Close the payment dialog and open the receipt view
+          setSelectedInvoice(null);
+          // Show the receipt modal after payment
+          setShowReceipt(invoiceId);
         }
 
-        // Reset payment entries and close dialog
+        // Reset payment entries
         setPaymentEntries([
           { method: language === "ar" ? "نقداً" : "Cash", amount: 0 },
         ]);
-        setSelectedInvoice(null);
 
         // Refresh the list of unpaid invoices
         await loadUnpaidInvoices();
@@ -812,6 +811,14 @@ export const RemainingPayments: React.FC = () => {
                     <DialogContent className="max-w-sm">
                       <DialogHeader>
                         <DialogTitle>
+                          {showReceipt && selectedInvoice !== showReceipt ? (
+                            <div className="flex flex-col items-center text-green-600 mb-2">
+                              <CheckCircle2 className="h-6 w-6 mb-1" />
+                              {language === "ar"
+                                ? "تم تسجيل الدفع بنجاح"
+                                : "Payment Successfully Recorded"}
+                            </div>
+                          ) : null}
                           {language === "ar" ? "فاتورة" : "Invoice"}{" "}
                           {invoice.invoice_id}
                         </DialogTitle>
@@ -1149,50 +1156,6 @@ export const RemainingPayments: React.FC = () => {
             </Card>
           ))}
         </div>
-      )}
-
-      {invoiceForPrint && (
-        <Dialog
-          open={Boolean(invoiceForPrint)}
-          onOpenChange={(open) => !open && setInvoiceForPrint(null)}
-        >
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-center text-green-600">
-                <CheckCircle2 className="h-8 w-8 mx-auto mb-2" />
-                {language === "ar"
-                  ? "تم تسجيل الدفع بنجاح"
-                  : "Payment Successfully Recorded"}
-              </DialogTitle>
-              <DialogDescription className="text-center">
-                {language === "ar"
-                  ? "تم إكمال الدفع بنجاح! هل ترغب في طباعة الفاتورة النهائية؟"
-                  : "Payment completed successfully! Would you like to print the final invoice?"}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-center space-x-4 space-x-reverse pt-4">
-              <Button
-                variant="outline"
-                className="gap-2"
-                onClick={() => {
-                  setInvoiceForPrint(null);
-                  setInvoiceDataForPrint(null);
-                }}
-              >
-                <span>{language === "ar" ? "إغلاق" : "Close"}</span>
-              </Button>
-              <PrintReportButton
-                className="bg-blue-600 hover:bg-blue-700"
-                onPrint={() => {
-                  const invoiceId = invoiceForPrint;
-                  setInvoiceForPrint(null);
-                  handlePrintReceipt(invoiceId);
-                }}
-                label={language === "ar" ? "طباعة الفاتورة" : "Print Invoice"}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
       )}
     </div>
   );
